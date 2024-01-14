@@ -35,7 +35,7 @@ export default {
   Cancel:"الغاء",
   addTherapeutic :"    البرامج العلاجية",
   listaddTherapeutic :"   قائمه البرامج العلاجية",
-  Therapeutic :"اضافة البرامج   العلاجية",
+  Therapeutic :" البرامج   العلاجية",
   from: "من",
   to: "الي",
   inputs:"المدخلات",
