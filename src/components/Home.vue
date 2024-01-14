@@ -193,13 +193,13 @@ onMounted(async () => {
           <v-list-group>
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props">
-                <v-list-item-title class="mb-2" style="padding: 10px">
+                <v-list-item-title class="mb-2">
                   {{ $t("Therapeutic") }}
                 </v-list-item-title>
               </v-list-item>
             </template>
            
-            <v-list-item prepend-icon="" :title="$t('addTherapeutic')" value="Categories"
+            <v-list-item  :title="$t('addTherapeutic')" value="Categories"
               :to="{ name: 'AllTherapeutic' }"></v-list-item>
 
 
