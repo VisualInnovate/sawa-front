@@ -6,6 +6,9 @@
       <!-- ... existing code ... -->
 
       <div class="name-input">
+        <div class="card flex justify-content-center">
+           <InputText id="input-1" type="text" v-model="formData.title"  :placeholder='$t("room")' />
+        </div> 
         <label for="title"> {{ $t("room") }} </label>
         <v-text-field v-model="formData.title" hide-details></v-text-field>
 
@@ -21,25 +24,24 @@
             {{ treatType.title }}
           </option>
         </select>
-        <label for="doctors"> {{ $t("roomdoctor") }} </label>
-        <select v-model="formData.user_id" class="custom-select">
-          <option v-for="(doctor, index) in doctors" :kay="index" :value="doctor.id">
-            {{ doctor.title }}
-          </option>
-        </select>
+        
+        <div class="card flex justify-content-center">
+           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full md:w-14rem" />
+        </div>
+        <div class="card flex justify-content-center">
+           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_type_id" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full md:w-14rem" />
+        </div>
+        
 
-        <label for="roomType"> {{ $t("typeroom") }} </label>
-        <select v-model="formData.room_type_id" class="custom-select">
-          <option value="1">{{ $t("typeroom1") }}</option>
-          <option value="2">{{ $t("typeroom2") }}</option>
-        </select>
+       
 
         <div class="input-container">
           <label for="roomType" class="input-label">{{ $t("typeroom") }}</label>
           <input type="number" id="roomType" v-model="formData.capacity" class="number-input" />
         </div>
+      
       </div>
-      <v-btn type="submit" class="mt-2 seed" style="width: 606px;">
+      <v-btn type="submit" class="mt-2 seed m-auto" style="width: 606px;">
         {{ $t("submit") }}
       </v-btn>
     </v-form>
@@ -50,18 +52,22 @@
 
 <script>
 import axios from "axios";
+import Dropdown from 'primevue/dropdown';
+
+import InputText from 'primevue/inputtext';
 
 export default {
+  components:{Dropdown,InputText},
   data() {
     return {
       // ... existing data properties ...
-
-
+      selectedCity: null,
+           
       selectedValue: "",
       sessionTypes: [],
       treatmentTypes: [],
       doctors: [],
-      roomType: "",
+      roomType: [  ],
       formData: {
         title: "",
         capacity: "",
@@ -73,8 +79,21 @@ export default {
       }
     };
   },
+  computed: {
+    locale() {
+      return this.$i18n.locale;
+    },
+  },
   methods: {
     // ... existing methods ...
+    arr (){
+      return this.roomType =[
+            { name:this.$t('typeroom1') , value:'1' },
+                { name:this.$t('typeroom2') , value:'2' },
+              
+               
+            ]
+    },
 
     getAllDoctor() {
       axios
@@ -147,8 +166,10 @@ export default {
 .name-input {
   width: 100%;
   position: relative;
-  background-color: #f8f8f8;
+  background-color: #e7e7e7;
   padding: 1cm;
+  margin: auto;
+  border-radius: 10px;
 }
 
 .name-input {
@@ -172,7 +193,23 @@ export default {
   border-bottom: 1px solid #333;
   /* Border style and color */
 }
+#input-1{
+  text-align: center !important;
+  background-color:#E4E4E4 !important;
+}
+#pv_id_1{
+  border: none;
+  text-align: center;
+  background-color:#E4E4E4 !important;
+  border-bottom: 2px solid black;
+  border-radius: 0 ;
+ font-size: 20px;
+ padding-top: 3%;
+}
+#pv_id_1:focus {
+  border: none !important;
 
+}
 .seed {
   background-color: #135c65;
   display: block;
