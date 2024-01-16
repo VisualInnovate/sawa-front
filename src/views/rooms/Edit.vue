@@ -1,52 +1,45 @@
 <template>
     <div>
+      <!-- ... existing code ... -->
+      <div>
+        
+      </div>
+  
+      <v-form @submit.prevent="createRoom">
         <!-- ... existing code ... -->
-
-        <v-form @submit.prevent="updateData()">
-            <!-- ... existing code ... -->
-
-            <div class="name-input">
-                <label for="title"> {{ $t("room") }} </label>
-                <v-text-field v-model="formData.title" hide-details></v-text-field>
-
-                <label for="selectedValue"> {{ $t("typesessaion") }}</label>
-                <select v-model="session" class="custom-select">
-                    <option v-for="(option, index) in sessionTypes" :key="index" :value="option.value">
-                        {{ option.title }}
-                    </option>
-                </select>
-                <label> {{ $t("Typetreatment") }} </label>
-                <select v-model="formData.treatment_id" class="custom-select">
-                    <option v-for="(option, index) in treatmentTypes " :key="index" :value="option.value">
-                        {{ option.title }}
-                    </option>
-                </select>
-                <label for="doctors"> {{ $t("roomdoctor") }} </label>
-              <select v-model="formData.user_id" class="custom-select">
-                        <option v-for="(option, index) in doctors " :key="index" :value="option.value">
-                            {{ option.title }}
-                        </option>
-                    </select>
-
-                <label for="roomType"> {{ $t("typeroom") }} </label>
-                <select v-model="formData.room_type_id" class="custom-select">
-                    <option value="1">{{ $t("typeroom1") }}</option>
-                    <option value="2">{{ $t("typeroom2") }}</option>
-                </select>
-
-                <div class="input-container">
-                    <label for="roomType" class="input-label">{{ $t("typeroom") }}</label>
-                    <input type="number" id="roomType" v-model="formData.capacity" class="number-input" />
-                </div>
-            </div>
-            <v-btn type="submit" class="mt-2 seed" style="width: 606px;">
-                {{ $t("submit") }}
-            </v-btn>
-        </v-form>
-
-        <!-- ... existing code ... -->
+  
+        <div class="name-input">
+        
+          <div class="py-4">      
+            <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; "  :placeholder='$t("numberroom")'  class="w-full "  type="number" v-model="formData.title"  />
+          </div>
+         
+  
+          <div class="card py-4 flex justify-content-center">
+             <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.session"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full md:w-14rem" />
+          </div>
+          <div class="card py-4 flex justify-content-center">
+             <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_id" option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full md:w-14rem" />
+          </div>
+          <div class="card py-4 flex justify-content-center">
+             <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id" option-value="id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full md:w-14rem" />
+          </div>
+          <div class="card py-4 flex justify-content-center">
+             <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_type_id" option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full md:w-14rem" />
+          </div> 
+          <div class="py-4">      
+            <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " class="w-full "  type="number" v-model="formData.capacity"  />
+          </div>
+        
+        </div>
+        <v-btn type="submit" class="mt-5  seed m-auto" style="width: 606px;">
+          {{ $t("submit") }}
+        </v-btn>
+      </v-form>
+  
+      <!-- ... existing code ... -->
     </div>
-</template>
+  </template>
   
 <script>
 import axios from "axios";

@@ -1,47 +1,38 @@
 <template>
   <div>
     <!-- ... existing code ... -->
+    <div>
+      <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="roompage()">{{ $t("room") }}</p>
+    </div>
 
     <v-form @submit.prevent="createRoom">
       <!-- ... existing code ... -->
 
       <div class="name-input">
-        <div class="card flex justify-content-center">
-           <InputText id="input-1" type="text" v-model="formData.title"  :placeholder='$t("room")' />
-        </div> 
-        <label for="title"> {{ $t("room") }} </label>
-        <v-text-field v-model="formData.title" hide-details></v-text-field>
-
-        <label for="selectedValue"> {{ $t("typesessaion") }}</label>
-        <select v-model="session" class="custom-select">
-          <option v-for="(option, index) in sessionTypes" :key="index.value" :value="option.value">
-            {{ option.title }}
-          </option>
-        </select>
-        <label for="doctors"> {{ $t("Typetreatment") }} </label>
-        <select v-model="formData.treatment_id" class="custom-select">
-          <option v-for="(treatType, index) in treatmentTypes" :kay="index" :value="treatType.id">
-            {{ treatType.title }}
-          </option>
-        </select>
-        
-        <div class="card flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full md:w-14rem" />
+      
+        <div class="py-4">      
+          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; "  :placeholder='$t("numberroom")'  class="w-full "  type="number" v-model="formData.title"  />
         </div>
-        <div class="card flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_type_id" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full md:w-14rem" />
-        </div>
-        
-
        
 
-        <div class="input-container">
-          <label for="roomType" class="input-label">{{ $t("typeroom") }}</label>
-          <input type="number" id="roomType" v-model="formData.capacity" class="number-input" />
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.session"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full md:w-14rem" />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_id" option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full md:w-14rem" />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id" option-value="id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full md:w-14rem" />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_type_id" option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full md:w-14rem" />
+        </div> 
+        <div class="py-4">      
+          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " class="w-full "  type="number" v-model="formData.capacity"  />
         </div>
       
       </div>
-      <v-btn type="submit" class="mt-2 seed m-auto" style="width: 606px;">
+      <v-btn type="submit" class="mt-5  seed m-auto" style="width: 606px;">
         {{ $t("submit") }}
       </v-btn>
     </v-form>
@@ -70,7 +61,7 @@ export default {
       roomType: [  ],
       formData: {
         title: "",
-        capacity: "",
+        capacity: 15,
         room_type_id: "",
         session: "",
         user_id: "",
@@ -88,12 +79,13 @@ export default {
     // ... existing methods ...
     arr (){
       return this.roomType =[
-            { name:this.$t('typeroom1') , value:'1' },
-                { name:this.$t('typeroom2') , value:'2' },
+            { name:this.$t('typeroom1') , value:1 },
+                { name:this.$t('typeroom2') , value:2 },
               
                
             ]
     },
+
 
     getAllDoctor() {
       axios
@@ -127,6 +119,9 @@ export default {
         .catch((error) => {
           console.error("Error retrieving Appointment Types:", error);
         });
+    },
+    roompage(){
+      this.$router.push({ name: 'Rooms' });
     },
     createRoom() {
       const DataSend = {
@@ -173,15 +168,10 @@ export default {
 }
 
 .name-input {
+  margin-top: 2%;
   width: 606px;
 }
 
-.name-input input {
-  width: 606px;
-  border: none;
-  border-bottom: 1px solid #135c65;
-  /* Border color for bottom line */
-}
 
 .name-input label {
   display: block;
@@ -200,7 +190,7 @@ export default {
 #pv_id_1{
   border: none;
   text-align: center;
-  background-color:#E4E4E4 !important;
+  background-color:#E7E7E7 !important;
   border-bottom: 2px solid black;
   border-radius: 0 ;
  font-size: 20px;
@@ -214,7 +204,7 @@ export default {
   background-color: #135c65;
   display: block;
   color: white;
-
+  
   width: 606px;
   width: 500px;
   /* Set the width to 606px */
@@ -249,6 +239,16 @@ export default {
 .number-input {
   width: 500px;
 }
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 /* Add any other custom styles here */
 </style>

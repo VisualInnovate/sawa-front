@@ -12,6 +12,7 @@ export default {
   min_age: "Minimum age",
   parents: "Parents",
   evaluations: "programs",
+  capacity:"Capacity",
   Adminstration: "Adminstration",
   evaluations_details: "Evaluations",
   child_name: "Child Name",
