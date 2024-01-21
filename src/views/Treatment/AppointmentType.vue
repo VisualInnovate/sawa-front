@@ -29,7 +29,7 @@
           <v-btn @click="update" class="submit-button" elevation="2">
             {{ $t("submit") }}
           </v-btn>
-          <v-btn @click="closeForm" class="" elevation="2">
+          <v-btn @click="showModal = false" class="" elevation="2">
             {{ $t("Cancel") }}
           </v-btn>
         </v-card-actions>
