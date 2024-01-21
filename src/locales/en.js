@@ -65,7 +65,7 @@ export default {
 Appointment_type:"Appointment type",
 AppointmentAc:"Appointment type list",
 add_Appointment:"Add an appointment",
-
+merge:"Merge",
 
   sign_in: "Sing in",
   You_can_now_create_your_own_account_with_us_to_follow_up_your_requests_directly:

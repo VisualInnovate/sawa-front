@@ -23,7 +23,7 @@ Appointment_type:"نوع الموعد",
 AppointmentAc:"قائمه نوع الموعد ",
 add_Appointment:"اضافة موعد",
 
-
+merge:"دمج",
 
 
 

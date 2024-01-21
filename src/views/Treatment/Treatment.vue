@@ -1,6 +1,8 @@
 <template>
   <div>
-
+    <div>
+      <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="Therapeutic()">{{ $t("addTherapeutic") }}</p>
+    </div>
     <div v-if="loading" class="loader"></div>
     <!-- Your existing content goes here -->
   </div>
@@ -20,198 +22,41 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-form ref="myForm" @submit.prevent="seedData">
+      <v-form class="py-[2%]" ref="myForm" @submit.prevent="seedData">
         <!-- ... existing code ... -->
         <div class="name-input">
-          <label for="title"> {{ $t("ProgramName") }} </label>
-          <v-text-field v-model="formData.title" name="title" hide-details></v-text-field>
-          <div v-if="appLang === 'ar'">
-
-            <div v-if="errors.price" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.title[0]['ar'] }}</span>
-            </div>
-          </div>
-          <div v-else-if="appLang === 'en'">
-
-            <div v-if="errors.price" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.title[0]['en'] }}</span>
-            </div>
-          </div>
-
-
-
-          <label for="title"> {{ $t("price") }} </label>
-          <v-text-field v-model="formData.price" hide-details></v-text-field>
-
-          <div v-if="appLang === 'ar'">
-
-            <div v-if="errors.price" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.price[0]['ar'] }}</span>
-            </div>
-          </div>
-          <div v-else-if="appLang === 'en'">
-
-            <div v-if="errors.price" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.price[0]['en'] }}</span>
-            </div>
-          </div>
-
-
-          <label for="selectedValue"> {{ $t("typesessaion") }}</label>
-          <div class="select-container">
-
-            <select v-model="formData.session_type_id" class="custom-select">
-              <option v-for="(session, index) in sessionTypes" :kay="index" :value="session.id">
-
-                {{ session.title }}
-              </option>
-            </select>
-            <div v-if="appLang === 'ar'">
-
-              <div v-if="errors.session_type_id" class="error-message">
-                <i class="error-icon fas fa-exclamation-circle"></i>
-                <span>{{ errors.session_type_id[0]['ar'] }}</span>
-              </div>
-            </div>
-            <div v-else-if="appLang === 'en'">
-
-              <div v-if="errors.price" class="error-message">
-                <i class="error-icon fas fa-exclamation-circle"></i>
-                <span>{{ errors.session_type_id[0]['en'] }}</span>
-              </div>
-            </div>
-          </div>
-
-          <label for="doctors"> {{ $t("ProgramType") }} </label>
-          <select id="selectOption" v-model="formData.program_type_id" class="custom-select" @change="handleChange">
-            <option v-for="(Program, index) in programtypes" :key="index" :value="Program.id">
-              {{ Program.title }}
-            </option>
-          </select>
-          <div v-if="appLang === 'ar'">
-
-            <div v-if="errors.program_type_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.program_type_id[0]['ar'] }}</span>
-            </div>
-          </div>
-          <div v-else-if="appLang === 'en'">
-
-            <div v-if="errors.program_type_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.program_type_id[0]['en'] }}</span>
-            </div>
-          </div>
-          <label for="doctors"> {{ $t("SystemProgram") }} </label>
-          <select v-model="formData.program_system_id" class="custom-select">
-            <option v-for="(system, index) in programsystems" :kay="index" :value="system.id">
-              {{ system.title }}
-            </option>
-
-          </select>
-          <div v-if="appLang === 'ar'">
-
-            <div v-if="errors.program_system_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.program_system_id[0]['ar'] }}</span>
-            </div>
-          </div>
-          <div v-else-if="appLang === 'en'">
-
-            <div v-if="errors.program_system_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.program_system_id[0]['en'] }}</span>
-            </div>
-          </div>
-          <label for="doctors"> {{ $t("AppointmentType") }} </label>
-          <select v-model="formData.appointment_type_id" class="custom-select">
-            <option v-for="(appointmentType, index) in appointmentTypes" :kay="index" :value="appointmentType.id">
-              {{ appointmentType.title }}
-            </option>
-          </select>
-          <div v-if="appLang === 'ar'">
-
-            <div v-if="errors.appointment_type_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.appointment_type_id[0]['ar'] }}</span>
-            </div>
-          </div>
-          <div v-else-if="appLang === 'en'">
-
-            <div v-if="errors.appointment_type_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.appointment_type_id[0]['en'] }}</span>
-            </div>
-          </div>
-          <label for="doctors"> {{ $t("Typetreatment") }} </label>
-          <select v-model="formData.treatment_type_id" class="custom-select">
-            <option v-for="(treatType, index) in treatmentTypes" :kay="index" :value="treatType.id">
-              {{ treatType.title }}
-
-            </option>
-
-          </select>
-          <div v-if="appLang === 'ar'">
-
-            <div v-if="errors.treatment_type_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.treatment_type_id[0]['ar'] }}</span>
-            </div>
-          </div>
-          <div v-else-if="appLang === 'en'">
-
-            <div v-if="errors.treatment_type_id" class="error-message">
-              <i class="error-icon fas fa-exclamation-circle"></i>
-              <span>{{ errors.treatment_type_id[0]['en'] }}</span>
-            </div>
-          </div>
-          <label for="doctors"> {{ $t("roomdoctor") }} </label>
-          <select v-model="formData.user_id" class="custom-select">
-            <option v-for="(doctor, index) in doctors" :kay="index" :value="doctor.id">
-              {{ doctor.title }}
-            </option>
-          </select>
-            <div v-if="appLang === 'ar'">
-
-              <div v-if="errors.user_id" class="error-message">
-                <i class="error-icon fas fa-exclamation-circle"></i>
-                <span>{{ errors.user_id[0]['ar'] }}</span>
-              </div>
-            </div>
-            <div v-else-if="appLang === 'en'">
-
-              <div v-if="errors.user_id" class="error-message">
-                <i class="error-icon fas fa-exclamation-circle"></i>
-                <span>{{ errors.user_id[0]['en'] }}</span>
-              </div>
-            </div>
-          <label for="doctors"> {{ $t("room") }} </label>
-          <select v-model="formData.room_id" class="custom-select">
-            <option v-for="(room, index) in rooms" :kay="index" :value="room.id">
-              {{ room.title }}
-            </option>
-          </select>
-            <div v-if="appLang === 'ar'">
-
-                <div v-if="errors.room_id" class="error-message">
-                  <i class="error-icon fas fa-exclamation-circle"></i>
-                  <span>{{ errors.room_id[0]['ar'] }}</span>
-                </div>
-              </div>
-              <div v-else-if="appLang === 'en'">
-
-                <div v-if="errors.room_id" class="error-message">
-                  <i class="error-icon fas fa-exclamation-circle"></i>
-                  <span>{{ errors.room_id[0]['en'] }}</span>
-                </div>
-              </div>
+          <div class="py-4">      
+          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.title"  :placeholder='$t("ProgramName")'  class="w-full "  type="text"   />
         </div>
-
-        <v-btn type="submit" class="mt-2 seed" style="width: 606px; padding: 10px">
+        <div class="py-4">      
+          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.price"  :placeholder='$t("price")'  class="w-full "  type="number"   />
+        </div>   
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.session_type_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.program_type_id"  option-value="id" :options="programtypes" optionLabel="title" :placeholder='$t("ProgramType")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.program_system_id"  option-value="id" :options="programsystems" optionLabel="title" :placeholder='$t("SystemProgram")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.appointment_type_id"  option-value="id" :options="appointmentTypes" optionLabel="title" :placeholder='$t("AppointmentType")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_type_id"  option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+      
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id"  option-value="id" :options="doctors" optionLabel="title" :placeholder='$t("roomdoctor")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+        <div class="card py-4 flex justify-content-center">
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_id"  option-value="id" :options="rooms" optionLabel="title" :placeholder='$t("room")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+        </div>
+      
+        </div>
+          <div style="height: 5px ; background-color: rgb(94, 80, 80);width: 5%; margin: auto; border-radius: 10%;" class="my-2"></div>
+        <v-btn type="submit" class="mt-2 seed" >
           {{ $t("submit") }}
         </v-btn>
       </v-form>
@@ -223,9 +68,11 @@
 
 <script>
 import axios from "axios";
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
 export default {
 
-  components: {},
+  components: {Dropdown,InputText},
   data() {
     return {
       // ... existing data properties ...
@@ -266,6 +113,9 @@ export default {
 
   methods: {
     // ... existing methods ...
+    Therapeutic (){
+      this.$router.push({ name: 'AllTherapeutic' });
+    },
     getAllDoctor() {
       axios
         .get("api/all/doctors")
@@ -414,20 +264,31 @@ export default {
 <style scoped>
 /* Add custom styles for the name input field */
 .name-input {
+  height: 70vh;
+  margin: auto !important;
+   overflow-y: scroll;
   width: 100%;
   position: relative;
-  background-color: #f8f8f8;
+  background-color: #e7e7e7;
   padding: 10px;
-  margin: 25px;
+  margin-bottom: 15px !important;
   border-radius: 10px;
 }
+.name-input::-webkit-scrollbar {
+  display: none;
+}
 
+/* Hide scrollbar for IE, Edge and Firefox */
+.name-input {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
 .name-input {
   width: 606px;
 }
 
 .name-input input {
-  width: 606px;
+ 
   border: none;
   padding: 10px;
   margin: 25px;
@@ -447,13 +308,34 @@ export default {
   /* Border style and color */
 }
 
+#input-1{
+  text-align: center !important;
+  background-color:#E4E4E4 !important;
+}
+#pv_id_1{
+  border: none;
+  text-align: center;
+  background-color:#E7E7E7 !important;
+  border-bottom: 2px solid black;
+  border-radius: 0 ;
+ font-size: 20px;
+ padding-top: 3%;
+}
+#pv_id_1:focus {
+  border: none !important;
+
+}
+
 .seed {
+  width: 600px;
+
+  margin: auto !important;
   background-color: #135c65;
   display: block;
   color: white;
+ 
 
-  width: 606px;
-  width: 500px;
+ 
   /* Set the width to 606px */
 }
 
@@ -473,51 +355,7 @@ export default {
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.custom-select:hover {
-  border-color: #666;
-}
 
-.custom-select:focus {
-  outline: none;
-  border-color: #135c65;
-  box-shadow: 0 0 8px rgba(19, 92, 101, 0.5);
-}
-
-#selectOption {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 606px;
-  /* Adjust the width as needed */
-  cursor: pointer;
-  appearance: none;
-  background: url('data:image/svg+xml;utf8,<svg fill="%23444" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z" /><path d="M0 0h24v24H0z" fill="none"/></svg>') no-repeat right 10px center/15px auto;
-}
-
-#selectOption:focus {
-  outline: none;
-  border-color: #135c65;
-  box-shadow: 0 0 8px rgba(19, 92, 101, 0.5);
-}
-
-#selectOption option {
-  text-align: center;
-  font-size: 20px;
-  color: #0b0c0c;
-}
-
-#selectOption option:last-child {
-  text-align: center;
-  font-size: 20px;
-  color: #0b0c0c;
-}
-
-#selectOption option:hover {
-  text-align: center;
-  font-size: 20px;
-  color: #0b0c0c;
-}
 
 .loader {
   border: 5px solid #f3f3f3;
