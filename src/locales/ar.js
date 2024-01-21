@@ -18,6 +18,14 @@ export default {
   addRoom:"اضافة قاعة",
   roomnumber:"قاعة رقم",
   RoomAc:"قائمة قاعات العلاج الاكاديمية",
+///////
+Appointment_type:"نوع الموعد",
+AppointmentAc:"قائمه نوع الموعد ",
+add_Appointment:"اضافة موعد",
+
+
+
+
 
   child_name: "اسم الطفل",
   evaluation_title: "اسم التقييم الفرعي",

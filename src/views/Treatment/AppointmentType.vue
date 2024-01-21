@@ -18,10 +18,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="showModal" class="form-adds" max-width="600">
+      <v-card class="form-all" style="border-radius: 15px; ">
+        <v-card-title>
+          <h2 class="mb-1">{{ $t("AppointmentType") }}</h2>
+        </v-card-title>
+        <InputText class="w-[90%] m-auto" type="text" v-model="formData.title" :placeholder='$t("title")' />
+      
+        <v-card-actions>
+          <v-btn @click="update" class="submit-button" elevation="2">
+            {{ $t("submit") }}
+          </v-btn>
+          <v-btn @click="closeForm" class="" elevation="2">
+            {{ $t("Cancel") }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3 shadow mb-4 p-4">
       <div class="paragraph text-2xl">
-        <h2>{{ $t("roomnumber") }}</h2>
-        <p>{{ $t("RoomAc") }}</p>
+        <h2>{{ $t("Appointment_type") }}</h2>
+        <p>{{ $t("AppointmentAc") }}</p>
       </div>
     <div class="relative ">
        <i class="pi pi-search absolute top-[20%] right-[5%] font-bold cursor-pointer"  @click="performSearch()"/>
@@ -40,7 +57,7 @@
 
        </div>
 
-          <p class="m-auto cursor-pointer text-xl w-full">{{ $t("addRoom") }}</p>
+          <p class="m-auto cursor-pointer text-xl w-full">{{ $t("add_Appointment") }}</p>
     
       </div>
     </div>
@@ -93,7 +110,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       items: [],
-
+      appointmen_id:'',
 
       searchQuery: "",
       rooms: [],
@@ -169,9 +186,23 @@ export default {
         console.log(this.sessionTypes);
       });
     },
+    update(){
+      axios.put(`api/appointmenttypes/${this.appointmen_id}`,this.formData).then(() => {
+        this.getAllRoom()
+      this.showModal=false
+        
+      });
+      
+
+    }, 
     editItem(itemId) {
       // Assuming you have a route named 'EditRoom' that takes an 'id' parameter
-      this.$router.push({ name: 'EditRoom', params: { id: itemId } });
+      this.showModal= true,
+      this.appointmen_id=itemId
+      axios.get(`api/appointmenttypes/${itemId}`).then((response) => {
+        this.formData.title=response.data.program_type.title
+        
+      });
     },
     handlePageChange(page) {
       this.currentPage = page;

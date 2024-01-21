@@ -61,6 +61,12 @@ export default {
   selectgender: "select a gender",
   sign_out: "sign out",
   Save_changes: "Save changes",
+///////////////
+Appointment_type:"Appointment type",
+AppointmentAc:"Appointment type list",
+add_Appointment:"Add an appointment",
+
+
   sign_in: "Sing in",
   You_can_now_create_your_own_account_with_us_to_follow_up_your_requests_directly:
     "You can now create your own account with us to follow up your requests directly",
