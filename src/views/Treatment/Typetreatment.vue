@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <Treat></Treat>
     <!-- Header Section -->
     <v-dialog v-model="isEditing"   class="form-adds" max-width="600">
 
@@ -91,11 +92,11 @@
 <script>
 import axios from "axios";
 import Swal from 'sweetalert2';
-
+import Treat from '../frontend/components/Treat.vue'
 import Pagination from '../../components/Pagination.vue'
 export default {
   components: {
-    Pagination
+    Pagination,Treat
   },
   data() {
 

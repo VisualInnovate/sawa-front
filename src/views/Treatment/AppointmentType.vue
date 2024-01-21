@@ -1,15 +1,13 @@
 <template>
-  <div class="container">
+  <div class=" lg:w-[80%] m-auto">
     <!-- Header Section -->
     <v-dialog v-model="showDialog" class="form-adds" max-width="600">
       <v-card class="form-all" style="border-radius: 15px; ">
         <v-card-title>
           <h2 class="mb-1">{{ $t("AppointmentType") }}</h2>
         </v-card-title>
-        <v-card-text>
-          <v-text-field v-model="formData.title" :label="$t('title')" outlined required></v-text-field>
-          <!-- Add other form fields as needed -->
-        </v-card-text>
+        <InputText class="w-[90%] m-auto" type="text" v-model="formData.title" :placeholder='$t("title")' />
+      
         <v-card-actions>
           <v-btn @click="saveItem" class="submit-button" elevation="2">
             {{ $t("submit") }}
@@ -20,62 +18,73 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <div class="header">
-
-      <div class="paragraph">
-        <h2>{{ $t("AppointmentType") }}</h2>
-        <p>{{ $t("listAppointmentType") }}</p>
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3 shadow mb-4 p-4">
+      <div class="paragraph text-2xl">
+        <h2>{{ $t("roomnumber") }}</h2>
+        <p>{{ $t("RoomAc") }}</p>
       </div>
-      <div class="search-section">
-        <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
-        <v-icon color="success" size="40" @click="performSearch()" class="icon-border">mdi-magnify</v-icon>
-      </div>
+    <div class="relative ">
+       <i class="pi pi-search absolute top-[20%] right-[5%] font-bold cursor-pointer"  @click="performSearch()"/>
+       <InputText style="text-align: center;" class="lg:w-full" v-model="searchQuery" placeholder="Search" />
+    </div>
+     
 
-      <div class="add-data">
-        <v-col cols="12" sm="6" md="4" class="create-user-link" @click="openForm">
-          <v-icon color="success" size="40" class="icon-border">mdi-plus</v-icon>
-          <p>{{ $t("addtype") }}</p>
-        </v-col>
+      <div  @click="openForm()" class=" m-auto ">
+   
+         
+       <div style=" margin: auto; border: 2px solid #135C65; " class="py-2 rounded-full w-[50%] h-[50%]">
+  
+<svg style="margin: auto;" xmlns="http://www.w3.org/2000/svg" width="23.391" height="26.316" viewBox="0 0 23.391 26.316">
+  <path id="plus" d="M17.495,19.12V29.354a1.388,1.388,0,0,1-1.3,1.462,1.388,1.388,0,0,1-1.3-1.462V19.12H5.8a1.472,1.472,0,0,1,0-2.924h9.1V5.962A1.388,1.388,0,0,1,16.2,4.5a1.388,1.388,0,0,1,1.3,1.462V16.2h9.1a1.472,1.472,0,0,1,0,2.924Z" transform="translate(-4.5 -4.5)" fill="#148a98" fill-rule="evenodd"/>
+</svg>
+
+       </div>
+
+          <p class="m-auto cursor-pointer text-xl w-full">{{ $t("addRoom") }}</p>
+    
       </div>
     </div>
-    <div class="content" v-for="(treatment, index) in roomssearchQuery" :key="index">
-      <div class="first-div">
-        <i class="fas fa-user"></i> <!-- This is the Font Awesome user icon -->
-        <h5>{{ $t("nameAppointmentType") }} :{{ treatment.title }}</h5>
+    <div   v-for="room in roomssearchQuery" class=" flex justify-between  hover:bg-[#dbebf5] rounded-md py-8 my-2 bg-[#F8F8F8]">
 
-      </div>
+       
+<div class="m-auto flex w-[50%]">
 
-
-      <div class="third-div">
-        <!-- Content for the third div -->
-        <v-icon small color="primary" class="mx-3" @click="openForm(treatment.id)">mdi-pencil</v-icon>
-        <v-icon small color="error mx-3" @click.prevent="deleteItem(treatment.id)">mdi-delete</v-icon>
-      </div>
-
+  <div class="px-3 ">
+   
+   
+     <p class="text-lg font-bold">{{ room.title }}</p> 
+   
+    <div>
+      <p class="font-bold text-[#135C65]">{{ room.treatment_type?.title }}</p>
     </div>
-    <v-container>
-      <!-- Your data display section -->
+  </div>
+</div>
 
-      <!-- Pagination Controls -->
-      <v-row justify="center">
-        <v-pagination v-model="page" length="5" color="blue"></v-pagination>
-      </v-row>
-    </v-container>
-
-
-    <!-- Rest of your component -->
-
+<div class="m-auto ">
+  <v-icon small color="error" @click="deleteItem(room.id)"
+              >mdi-delete</v-icon
+            >
+            <v-icon
+              small
+              color="primary"
+              class="mr-2"
+              @click="editItem(room.id)"
+              >mdi-pencil</v-icon
+    >
+</div>
+</div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import Swal from 'sweetalert2';
-
+import 'primeicons/primeicons.css'
+import InputText from 'primevue/inputtext';
 import Pagination from '../../components/Pagination.vue'
 export default {
   components: {
-    Pagination
+    Pagination,InputText
   },
   data() {
 

@@ -16,7 +16,7 @@
        
 
         <div class="card py-4 flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.session"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full md:w-14rem" />
+           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.session"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
         </div>
         <div class="card py-4 flex justify-content-center">
            <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_id" option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full md:w-14rem" />
@@ -79,9 +79,9 @@ export default {
     // ... existing methods ...
     arr (){
       return this.roomType =[
-            { name:this.$t('typeroom1') , value:1 },
+            
                 { name:this.$t('typeroom2') , value:2 },
-              
+                { name:this.$t('typeroom1') , value:1 },
                
             ]
     },
@@ -128,7 +128,7 @@ export default {
         title: this.formData.title,
         user_id: this.formData.user_id,
         capacity: this.formData.capacity,
-        session: this.formData.session,
+        sessation_id: this.formData.session,
         room_type_id: this.formData.room_type_id,
         treatment_id: this.formData.treatment_id,
 
@@ -173,16 +173,7 @@ export default {
 }
 
 
-.name-input label {
-  display: block;
-  /* Ensures the label takes the full width of the container */
-  text-align: center;
-  font-size: 20px;
-  color: #0b0c0c;
-  /* Text color for label */
-  border-bottom: 1px solid #333;
-  /* Border style and color */
-}
+
 #input-1{
   text-align: center !important;
   background-color:#E4E4E4 !important;
@@ -200,6 +191,15 @@ export default {
   border: none !important;
 
 }
+.p-dropdown .p-placeholder {
+  color: red !important; /* Set the desired color */
+}
+ span{
+  color: red !important;
+}
+.p-dropdown-label .p-inputtext .p-placeholder{
+  color: red !important;
+}
 .seed {
   background-color: #135c65;
   display: block;
@@ -210,31 +210,6 @@ export default {
   /* Set the width to 606px */
 }
 
-.custom-select {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #f8f8f8;
-  color: #333;
-  appearance: none;
-  /* Remove default arrow in some browsers */
-  -webkit-appearance: none;
-  /* Remove default arrow in Chrome and Safari */
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.custom-select:hover {
-  border-color: #666;
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #135c65;
-  box-shadow: 0 0 8px rgba(19, 92, 101, 0.5);
-}
 
 .number-input {
   width: 500px;
