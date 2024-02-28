@@ -238,7 +238,6 @@ export default {
               <td>{{ Math.round(item.columns.late_percentage) }} %</td>
               <td>{{ formateDate(item.columns.result_created_at) }}</td>
             </tr>
-
           </template>
           <template #bottom>
 

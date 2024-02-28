@@ -245,7 +245,7 @@ const routes = [
     component: () => import("@/components/ResetPassword.vue"),
   },
   {
-    path: "/print-child-result/:child_id/:sideProfile_id/:evaluation_id",
+    path: "/print-child-result/:child_id/:sideProfile_id/:evaluation_id/:start/:end",
     name: "printChildResult",
     component: () => import("@/views/children/ChildResultPrint.vue"),
   },

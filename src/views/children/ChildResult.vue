@@ -19,6 +19,8 @@ export default {
       growAge: [],
       diffAge: [],
       date1: '',
+      from:null,
+      to:null,
       date2: '',
       myCahrt: '',
       selectX: null,
@@ -126,7 +128,9 @@ export default {
         params: {
           child_id: this.$route.params.child_id,
           sideProfile_id: this.$route.params.sideProfile_id,
-          evaluation_id: this.$route.params.evaluation_id
+          evaluation_id: this.$route.params.evaluation_id,
+          start: this.from,
+          end: this.to
         }
       })
       // window.open(route.href,"_blank")
@@ -424,6 +428,8 @@ export default {
         <v-btn style="color: rgb(255, 255, 255);" text="print" color="#ACAE84" height="45" class="mb-5 mt-5" @click="print">
           {{$t('print')}}
         </v-btn>
+        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="from"   placeholder="from" dateFormat="dd/mm/yy" />
+        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="to"   placeholder="to" dateFormat="dd/mm/yy" />
         <v-data-table
             :headers="header"
             :items="result"

@@ -18,6 +18,10 @@ export default {
 
       },
     ],
+
+
+
+// <p></p>
     title: "",
     answers: [],
     alert_text: '',
@@ -54,10 +58,13 @@ export default {
 
 
     },
+
+
+
     async submit() {
       this.load=true
       setTimeout(() => {
-     this.load=False
+     this.load=false
     }, 3000);
       const {valid} = await this.$refs.form.validate()
       if (!valid)
