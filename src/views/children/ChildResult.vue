@@ -450,8 +450,9 @@ export default {
           {{$t('print')}}
         </v-btn>
        
-        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="from" @update:model-value="filter"   placeholder="to" dateFormat="dd/mm/yy" />
-        <Calendar   style="padding: 0px 8px 0px 8px;"  v-model="to" @update:model-value="filter"  placeholder="from" dateFormat="dd/mm/yy" />
+        <Calendar   style="padding: 0px 8px 0px 8px;"  v-model="to" @update:model-value="filter"  :placeholder='$t("from")' dateFormat="dd/mm/yy" />
+        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="from" @update:model-value="filter"   :placeholder='$t("to")' dateFormat="dd/mm/yy" />
+
         <v-data-table
             :headers="header"
             :items="result"
