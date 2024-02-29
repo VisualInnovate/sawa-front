@@ -250,6 +250,11 @@ const routes = [
     component: () => import("@/views/children/ChildResultPrint.vue"),
   },
   {
+    path: "/print-child-result/:child_id/:sideProfile_id/:evaluation_id",
+    name: "printChildResultfilter",
+    component: () => import("@/views/children/ChildResultPrintflter.vue"),
+  },
+  {
     path: "/ResultPrint/:child_id/:sideProfile_id",
     name: "ResultPrint",
     component: () => import("../views/children/ResultPrint.vue"),

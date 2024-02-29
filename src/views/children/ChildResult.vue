@@ -124,7 +124,10 @@ export default {
       // setTimeout(()=>{
       //   document.getElementById('print').style.display="none";
       // }, 1000)
-      this.$router.push({name: 'printChildResult',
+      console.log(this.from,this.to)
+        if(this.from !=''  && this.to !=''){
+          console.log("find")
+          this.$router.push({name: 'printChildResult',
         params: {
           child_id: this.$route.params.child_id,
           sideProfile_id: this.$route.params.sideProfile_id,
@@ -133,6 +136,18 @@ export default {
           end: this.to
         }
       })
+        }else{
+          this.$router.push({name: 'printChildResultfilter',
+        params: {
+          child_id: this.$route.params.child_id,
+          sideProfile_id: this.$route.params.sideProfile_id,
+          evaluation_id: this.$route.params.evaluation_id,
+         
+        }
+      })
+        }
+
+     
       // window.open(route.href,"_blank")
     },
 
@@ -148,8 +163,9 @@ export default {
     },
     filter() {
      this.from= moment(this.from).format('YYYY-MM-DD')
+     this.to= moment(this.to).format('YYYY-MM-DD')
       axios.post(`/api/filter/resultr/${this.$route.params.child_id}/${this.$route.params.sideProfile_id}/${this.$route.params.evaluation_id}`, {
-        startdate:2023-11-21 ,
+        startdate: this.from,
         enddate: this.to
       }).then(res => {
         this.result = res.data.evaluation_results
@@ -433,8 +449,9 @@ export default {
         <v-btn style="color: rgb(255, 255, 255);" text="print" color="#ACAE84" height="45" class="mb-5 mt-5" @click="print">
           {{$t('print')}}
         </v-btn>
-        <Calendar   style="padding: 0px 8px 0px 8px;"  v-model="from" @update:model-value="filter"  placeholder="from" dateFormat="dd/mm/yy" />
-        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="to" @update:model-value="filter"   placeholder="to" dateFormat="dd/mm/yy" />
+       
+        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="from" @update:model-value="filter"   placeholder="to" dateFormat="dd/mm/yy" />
+        <Calendar   style="padding: 0px 8px 0px 8px;"  v-model="to" @update:model-value="filter"  placeholder="from" dateFormat="dd/mm/yy" />
         <v-data-table
             :headers="header"
             :items="result"
