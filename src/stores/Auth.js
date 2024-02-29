@@ -72,10 +72,12 @@ export const useAuthStore = defineStore("Auth", {
         this.loading = false;
       }
     },
-    async handleLogout() {
-      await axios.post("/api/logout");
+     handleLogout() {
       this.resetAuthStore();
       this.router.push({ name: "Login" });
+       axios.post("/api/logout");
+      
+    
     },
     async forgotPassword(data) {
       try {

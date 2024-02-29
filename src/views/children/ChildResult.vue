@@ -19,8 +19,8 @@ export default {
       growAge: [],
       diffAge: [],
       date1: '',
-      from:null,
-      to:null,
+      from:'',
+      to:'',
       date2: '',
       myCahrt: '',
       selectX: null,
@@ -41,8 +41,8 @@ export default {
   methods: {
     getResults() {
       axios.post(`/api/evaluations/${this.$route.params.child_id}/${this.$route.params.sideProfile_id}/${this.$route.params.evaluation_id}/result`, {
-        'date1': this.date1,
-        'date2': this.date2
+        'date1': this.from,
+        'date2': this.to
       }).then(res => {
         this.result = res.data.resultEvaluation
         this.loading = false
@@ -135,6 +135,10 @@ export default {
       })
       // window.open(route.href,"_blank")
     },
+
+    serch(){
+       
+    },
     getSideprofile(){
       axios.get(`api/side-profiles/${this.$route.params.sideProfile_id}`).then(res => {
         this.side_profileName = res.data.sideProfile.title
@@ -143,9 +147,9 @@ export default {
       })
     },
     filter() {
-      axios.post(`/api/evaluations/${this.$route.params.child_id}/${this.$route.params.sideProfile_id}/${this.$route.params.evaluation_id}/result`, {
-        'date1': this.date1,
-        'date2': this.date2
+      axios.post(`/api/filter/resultr/${this.$route.params.child_id}/${this.$route.params.sideProfile_id}/${this.$route.params.evaluation_id}`, {
+        'date1': this.from,
+        'date2': this.to
       }).then(res => {
         this.result = res.data.resultEvaluation
         console.log(this.result)
@@ -428,8 +432,8 @@ export default {
         <v-btn style="color: rgb(255, 255, 255);" text="print" color="#ACAE84" height="45" class="mb-5 mt-5" @click="print">
           {{$t('print')}}
         </v-btn>
-        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="from"   placeholder="from" dateFormat="dd/mm/yy" />
-        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="to"   placeholder="to" dateFormat="dd/mm/yy" />
+        <Calendar   style="padding: 0px 8px 0px 8px;"  v-model="from" @update:model-value="filter"  placeholder="from" dateFormat="dd/mm/yy" />
+        <Calendar  style="padding: 0px 8px 0px 8px;"  v-model="to" @update:model-value="filter"   placeholder="to" dateFormat="dd/mm/yy" />
         <v-data-table
             :headers="header"
             :items="result"
