@@ -147,11 +147,12 @@ export default {
       })
     },
     filter() {
+     this.from= moment(this.from).format('YYYY-MM-DD')
       axios.post(`/api/filter/resultr/${this.$route.params.child_id}/${this.$route.params.sideProfile_id}/${this.$route.params.evaluation_id}`, {
-        'date1': this.from,
-        'date2': this.to
+        startdate:2023-11-21 ,
+        enddate: this.to
       }).then(res => {
-        this.result = res.data.resultEvaluation
+        this.result = res.data.evaluation_results
         console.log(this.result)
         this.created_at = []
         this.latePercenteges = []
