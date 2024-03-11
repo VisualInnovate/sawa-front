@@ -243,7 +243,12 @@ merge:"Merge",
   addTherapeutic:"Add Treatment",
   numberroom: "Number Room",
   fingerPrint:"Mangemant System ",
-
+  number_sessaion:"Number of individual sessions ",
+  remove_item:"Do you want to remove the selected item",
+  single_sesation:"Individual sessions",
+  multi_sesation:"Group sessions",
+  Group_individual_sessions:"Group and individual sessions",
+  gruop_sessaion:"Number of group sessions",
   doctord:" responsible specialist",
   pound:"SR",
   parent: {

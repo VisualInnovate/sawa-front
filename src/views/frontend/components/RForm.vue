@@ -325,7 +325,7 @@ export default {
       this.child.birth_date = moment(this.child.birth_date).format(
         "YYYY-MM-DD"
       );
-      this.child.gender=this.child.gender.value
+   
       console.log(this.child.gender)
       axios
         .post("/api/parent/child/create", this.child)

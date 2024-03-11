@@ -1,0 +1,44 @@
+#navbar{
+   
+
+  }
+  Button{
+    transform: scale(.9) !important;
+  }
+  .p-button .p-button-icon-left {
+    margin-left: 8px !important;
+    /* visibility: hidden !important; */
+  }
+td{
+  text-align: justify !important;
+}
+.v-list-group--prepend{
+  background-color: white  !important ;
+  color: black !important;
+  border-radius: 5px !important;
+}
+.v-list-group--prepend::-webkit-scrollbar {
+  display: none !important;
+
+}
+.v-navigation-drawer__content::-webkit-scrollbar {
+  display: none !important;
+}
+.fc.fc-theme-standard .fc-toolbar .fc-button-group .fc-button:first-child , .fc.fc-theme-standard .fc-toolbar .fc-button-group .fc-button:last-child{
+  border-radius: 5px !important;
+}
+.v-list-group__items .v-list-item{
+  background-color: rgb(236, 234, 229);
+}
+.create{
+  background-color: #135C65 !important;
+}
+.p-inputnumber-input{
+  background-color: #f7f5f5 !important;
+}
+.p-datatable .p-sortable-column .p-sortable-column-icon{
+  margin-right: 5px !important;
+}
+.delete{
+  background-color: rgb(255, 77, 77) !important;
+}

@@ -22,43 +22,61 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-form class="py-[2%]" ref="myForm" @submit.prevent="seedData">
+      <v-form class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
         <!-- ... existing code ... -->
-        <div class="name-input">
-          <div class="py-4">      
-          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.title"  :placeholder='$t("ProgramName")'  class="w-full "  type="text"   />
-        </div>
-        <div class="py-4">      
-          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.price"  :placeholder='$t("price")'  class="w-full "  type="number"   />
-        </div>   
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.session_type_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.program_type_id"  option-value="id" :options="programtypes" optionLabel="title" :placeholder='$t("ProgramType")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.program_system_id"  option-value="id" :options="programsystems" optionLabel="title" :placeholder='$t("SystemProgram")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.appointment_type_id"  option-value="id" :options="appointmentTypes" optionLabel="title" :placeholder='$t("AppointmentType")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_type_id"  option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
+          
+              <div class="flex flex-column gap-2">
+                <label for="username">{{ $t('ProgramName') }}</label>
+              <InputText required class="bg-[#f7f5f5]" v-model="treatments.name" :placeholder='$t("ProgramName")' />
+              <small id="username-help"></small>
+              </div>
+                
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('price') }}</label>
+                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.price" :placeholder='$t("price")' />
+                  <small id="username-help"></small>
+              </div>
+          
+    
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('typesessaion') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.sessions_type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typesessaion")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <small id="username-help"></small>
+              </div>
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('Typetreatment') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.treatment_id"  option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <small id="username-help"></small>
+              </div>
+               
+       
+    
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('ProgramType') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.program_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("ProgramType")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <small id="username-help"></small>
+              </div> 
+              <div  v-if="treatments.sessions_type == 1 || treatments.sessions_type == 3" class="flex flex-column gap-2">
+                  <label for="username">{{ $t('number_sessaion') }}</label>
+                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.individual_sessions" :placeholder='$t("number_sessaion")' />
+                  <small id="username-help"></small>
+              </div>
+              
+             
+       
+       
+              <div v-if="treatments.sessions_type == 2 || treatments.sessions_type == 3" class="flex flex-column gap-2">
+                  <label for="username">{{ $t('gruop_sessaion') }}</label>
+                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.collective_sessions" :placeholder='$t("number_sessaion")' />
+                  <small id="username-help"></small>
+              </div>
+              <div class="flex flex-column gap-2 w-full">
+                <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
+                <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                <small id="username-help"></small>
+              </div>
+       
       
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id"  option-value="id" :options="doctors" optionLabel="title" :placeholder='$t("roomdoctor")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_id"  option-value="id" :options="rooms" optionLabel="title" :placeholder='$t("room")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
-        </div>
-      
-        </div>
-          <div style="height: 5px ; background-color: rgb(94, 80, 80);width: 5%; margin: auto; border-radius: 10%;" class="my-2"></div>
-        <v-btn type="submit" class="mt-2 seed" >
-          {{ $t("submit") }}
-        </v-btn>
       </v-form>
 
       <!-- ... existing code ... -->
@@ -68,41 +86,15 @@
 
 <script>
 import axios from "axios";
-import Dropdown from 'primevue/dropdown';
-import InputText from 'primevue/inputtext';
+import InputNumber from "primevue/inputnumber";
+
+
 export default {
 
-  components: {Dropdown,InputText},
+
   data() {
     return {
-      // ... existing data properties ...
-      isSuccessModalOpen: false,
-      appLang: localStorage.getItem('appLang'), // Get the language from local storage
-      title: "",
-      selectedValue: "",
-      doctors: [],
-      loading: false,
-      programtypes: [],
-      programsystems: [],
-      treatmentTypes: [],
-      assessment: [],
-      appointmentTypes: [],
-      sessionTypes: [],
-
-      rooms: [],
-      roomType: "",
-      formData: {
-        title: "",
-        program_type_id: "",
-        program_system_id: "",
-        treatment_type_id: "",
-        appointment_type_id: "",
-        session_type_id: "",
-        assessment_type_id: "",
-        user_id: "",
-        room_id: "",
-        price: "",
-      },
+      treatments:{},
       errors: {},
       isSubmitting: false,
 
@@ -116,75 +108,17 @@ export default {
     Therapeutic (){
       this.$router.push({ name: 'AllTherapeutic' });
     },
-    getAllDoctor() {
-      axios
-        .get("api/all/doctors")
-        .then((response) => {
-          this.doctors = response.data.doctors;
-          console.log(this.doctors);
-        })
-        .catch((error) => {
-          console.error("Error retrieving doctors:", error);
-        })
-        .finally(() => {
-          this.loading = false;
-        });;
+    arr (){
+      return this.roomType =[
+            
+                { name:this.$t('single_sesation') , value:1 },
+                { name:this.$t('multi_sesation') , value:2 },
+                { name:this.$t('Group_individual_sessions') , value:3 },
+               
+            ]
     },
-    getProgramType() {
-      axios
-        .get("api/programtypes")
-        .then((response) => {
-          this.programtypes = response.data.programtype;
-          console.log(this.programtypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving program types:", error);
-        });
-    },
-    getProgramSystem() {
-      axios
-        .get("api/program-system")
-        .then((response) => {
-          this.programsystems = response.data.programsystems;
-          console.log(this.programsystem);
-        })
-        .catch((error) => {
-          console.error("Error retrieving doctors:", error);
-        });
-    },
-    getTypesesstion() {
-      axios
-        .get("api/session-types")
-        .then((response) => {
-          this.sessionTypes = response.data.sessionTypes;
-          console.log(this.sessionTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving doctors:", error);
-        });
-    },
-    getAssessment() {
-      axios
-        .get("api/assessment-types")
-        .then((response) => {
-          this.assessment = response.data.assessment;
-          console.log(this.assessment);
-        })
-        .catch((error) => {
-          console.error("Error retrieving assessment:", error);
-        });
-    },
-    getAppointmentTypes() {
-      axios
-        .get("api/appointmenttypes")
-        .then((response) => {
-          this.appointmentTypes = response.data.appointmentTypes;
-          console.log(this.appointmentTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving Appointment Types:", error);
-        });
-    },
+   
+
     getTreatmentTypes() {
       axios
         .get("api/treatment-types")
@@ -197,51 +131,10 @@ export default {
         });
     },
 
-    seedData() {
-      this.errors = {}; // Clear previous errors
-      this.isSubmitting = true;
-      const appLang = localStorage.getItem('appLang');
-
-      // Now, `appLang` contains the language value, and you can use it as needed.
-      console.log(appLang);
-      // Perform any necessary validation before seeding
-      const dataToSeed = {
-        title: this.formData.title,
-        price: this.formData.price,
-        program_type_id: this.formData.program_type_id,
-        program_system_id: this.formData.program_system_id,
-        treatment_type_id: this.formData.treatment_type_id,
-        appointment_type_id: this.formData.appointment_type_id,
-        session_type_id: this.formData.session_type_id,
-        user_id: this.formData.user_id,
-        room_id: this.formData.room_id,
-      };
-
-      // Make an API request to seed the data
-
-      axios
-        .post("/api/treatments", dataToSeed)
-        .then((res) => {
-          console.log("Data seeded successfully:", res.data);
-          this.$router.push({ name: 'AllTherapeutic' });
-          // Optionally, you can update your component state or perform other actions here
-        })
-        .catch((error) => {
-          if (error.response.status === 422) {
-            this.errors = error.response.data.errors;
-          }
-          console.error("Error seeding data:", error);
-          // Optionally, show an error message or perform other error-handling actions
-        })
-        .finally(() => {
-          this.isSubmitting = false;
-        });
-    },
-
-    getParents() {
-      axios.get("/api/getrome_data").then((res) => {
-        this.rooms = res.data.rooms;
-        console.log(res.data.parents);
+  
+    createtreatment() {
+      axios.post("/api/treatments",this.treatments).then((res) => {
+       
       });
     },
     closeSuccessModal() {
@@ -249,14 +142,7 @@ export default {
     },
   },
   mounted() {
-    this.getAppointmentTypes();
-    this.getProgramType();
-    this.getProgramSystem();
-    this.getAssessment();
-    this.getParents();
-    this.getAllDoctor();
-    this.getTreatmentTypes();
-    this.getTypesesstion();
+   
   },
 };
 </script>
@@ -277,7 +163,9 @@ export default {
 .name-input::-webkit-scrollbar {
   display: none;
 }
-
+#pv_id_1{
+  text-align: center;
+}
 /* Hide scrollbar for IE, Edge and Firefox */
 .name-input {
   -ms-overflow-style: none;  /* IE and Edge */
@@ -287,44 +175,7 @@ export default {
   width: 606px;
 }
 
-.name-input input {
- 
-  border: none;
-  padding: 10px;
-  margin: 25px;
-  background-color: #f8f8f8;
-  border-bottom: 1px solid #135c65;
-  /* Border color for bottom line */
-}
 
-.name-input label {
-  display: block;
-  /* Ensures the label takes the full width of the container */
-  text-align: center;
-  font-size: 20px;
-  color: #0b0c0c;
-  /* Text color for label */
-  border-bottom: 1px solid #333;
-  /* Border style and color */
-}
-
-#input-1{
-  text-align: center !important;
-  background-color:#E4E4E4 !important;
-}
-#pv_id_1{
-  border: none;
-  text-align: center;
-  background-color:#E7E7E7 !important;
-  border-bottom: 2px solid black;
-  border-radius: 0 ;
- font-size: 20px;
- padding-top: 3%;
-}
-#pv_id_1:focus {
-  border: none !important;
-
-}
 
 .seed {
   width: 600px;
