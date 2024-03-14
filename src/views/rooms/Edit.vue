@@ -1,223 +1,200 @@
 <template>
   <div>
-    <!-- ... existing code ... -->
     <div>
-      <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="roompage()">{{ $t("room") }}</p>
+      <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="Therapeutic()">{{ $t("room") }}</p>
     </div>
-
-    <v-form @submit.prevent="createRoom">
-      <!-- ... existing code ... -->
-
-      <div class="name-input shadow-md">
-      
-        <div class="py-4">      
-          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; "  :placeholder='$t("numberroom")'  class="w-full "  type="number" v-model="formData.title"  />
-        </div>
-       
-
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.sessation_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full md:w-14rem" />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_id" option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full md:w-14rem" />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id" option-value="id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full md:w-14rem" />
-        </div>
-        <div class="card py-4 flex justify-content-center">
-           <Dropdown id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_type_id" option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full md:w-14rem" />
-        </div> 
-        <div class="py-4">      
-          <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " class="w-full "  type="number" v-model="formData.capacity"  />
-        </div>
-      
-      </div>
-      <v-btn @click="updateData()"  class="mt-5  seed m-auto" style="width: 606px;">
-        {{ $t("submit") }}
-      </v-btn>
-    </v-form>
-
-    <!-- ... existing code ... -->
+    <div v-if="loading" class="loader"></div>
+    <!-- Your existing content goes here -->
   </div>
+  <v-card>
+    <div>
+      <!-- ... existing code ... -->
+      <v-dialog v-model="isSuccessModalOpen" max-width="400px">
+        <v-card>
+          <v-card-title>{{ $t("Success!") }}</v-card-title>
+          <v-card-text>
+            {{ $t("Data seeded successfully!") }}
+          </v-card-text>
+          <v-card-actions>
+            <v-btn @click="closeSuccessModal" color="success">
+              {{ $t("OK") }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-form class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <!-- ... existing code ... -->
+          
+              <div class="flex flex-column gap-2">
+                <label for="username">{{ $t('roomnumber') }}</label>
+              <InputText required class="bg-[#f7f5f5]" v-model="rooms.name" :placeholder='$t("roomnumber")' />
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+              </div>
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('roomdoctor') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.admin_id"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
+              </div> 
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('typeroom') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
+              </div>
+                
+              <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('roomsnumber') }}</label>
+                  <InputNumber required class="bg-[#f7f5f5]" v-model="rooms.capacity" :placeholder='$t("roomsnumber")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.capacity">{{ error.capacity[0] }}</div>
+              </div>
+              <!-- <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('roomstable') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.session_type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("roomstable")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.session_type">{{ error.session_type[0] }}</div>
+              </div> -->
+              <div class="flex flex-column gap-2 w-full">
+                <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
+                <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                <small id="username-help"></small>
+              </div>
+             
+              
+
+      
+      </v-form>
+      <Toast/>
+      <!-- ... existing code ... -->
+    </div>
+  </v-card>
 </template>
 
 <script>
 import axios from "axios";
-import Dropdown from 'primevue/dropdown';
-
-import InputText from 'primevue/inputtext';
+import InputNumber from "primevue/inputnumber";
+import {useToast} from 'primevue/usetoast'
 
 export default {
-  components:{Dropdown,InputText},
+
+
   data() {
     return {
-      // ... existing data properties ...
-      selectedCity: null,
-           
-      selectedValue: "",
-      sessionTypes: [],
-      treatmentTypes: [],
-      doctors: [],
-      roomType: [  ],
-      formData: {
-        title: "",
-        capacity: 15,
-        room_type_id: "",
-        sessation_id: "",
-        user_id: "",
-        treatment_id: ""
-
-      }
+      rooms:{},
+      error: {},
+      isSubmitting: false,
+      programe_type:{},
+      toast:useToast()
+      // Add other validation rules for the title field
     };
+
   },
-  computed: {
-    locale() {
-      return this.$i18n.locale;
-    },
-  },
+
   methods: {
     // ... existing methods ...
+    Therapeutic (){
+      this.$router.push({ name: 'Rooms' });
+    },
     arr (){
       return this.roomType =[
-            { name:this.$t('typeroom1') , value:1 },
-                { name:this.$t('typeroom2') , value:2 },
-              
+            
+                { name:this.$t('typeroom2') , value:0 },
+                { name:this.$t('typeroom1') , value:1},
+                { name:this.$t('typeroom3') , value:2},
+               
                
             ]
     },
+    programetype (){
+      return this.roomType =[
+            
+                { name:this.$t('diurnal') , value:0 },
+                { name:this.$t('Clinics') , value:1 },
+                { name:this.$t('house') , value:2 },
+               
+            ]
+    },
+    getoneroom(){
+      axios.get(`api/room/${this.$route.params.id}`).then((res) => {
+            console.log(res.data.ProgramTreatmentCount)
+            this.rooms.name=res.data.data.name
+            this.rooms.capacity=res.data.data.capacity
+            this.rooms.type=res.data.data.type
+            this.rooms.admin_id=res.data.data.admin_id
+            
 
+
+            })
+        
+    },
 
     getAllDoctor() {
       axios
-        .get("api/all/doctors")
+        .get("api/doctors")
         .then((response) => {
           this.doctors = response.data.doctors;
-          console.log(this.doctors);
+          this.getoneroom()
         })
         .catch((error) => {
           console.error("Error retrieving doctors:", error);
         });
     },
-    getTypesesstion() {
-      axios
-        .get("api/session-types")
-        .then((response) => {
-          this.sessionTypes = response.data.sessionTypes;
-          console.log(this.sessionTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving doctors:", error);
-        });
-    },
-    getTreatmentTypes() {
-      axios
-        .get("api/treatment-types")
-        .then((response) => {
-          this.treatmentTypes = response.data.treatmentTypes;
-          console.log(this.treatmentTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving Appointment Types:", error);
-        });
-    },
-    roompage(){
-      this.$router.push({ name: 'Rooms' });
-    },
-   
-    updateData() {
-            axios
-                .post(`/api/update/room/${this.$route.params.id}`, this.formData)
-                .then((response) => {
-                    // Handle successful response
-                    console.log("Data updated:", response.data);
-                    this.isSuccessModalOpen = true;
-                    this.$router.push({ name: 'Rooms' });
+  
+    createtreatment() {
+      axios.put(`/api/room/${this.$route.params.id}`,this.rooms).then((res) => {
+        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
 
-                    // Redirect to the 'all-treatments' route after successful seeding
-
-                    // Optionally, you can update your component state or perform other actions here
-                    // You might want to redirect the user or give a success message
-                })
-                .catch((error) => {
-                    // Handle error
-                    console.error("Error updating data:", error);
-                    // You might want to show an error message to the user
-                });
-        },
-    getoneRoom(id) {
-            axios.get(`api/get/room/${id}`)
-                .then((res) => {
-                  this.formData.capacity=res.data.rooms.capacity
-                  this.formData.user_id=res.data.rooms.user.id
-                  this.formData.room_type_id=res.data.rooms.room_type_id
-                  this.formData.treatment_id=res.data.rooms.treatment_id
-                  this.formData.title=res.data.rooms.title
-                  this.formData.sessation_id=res.data.rooms.typesesation.id
-                })
-        },
-
+      }).catch((el)=>{
+        console.log(el.response.data.errors.name)
+     this.error = el.response.data.errors
+    })
+    },
+  
   },
   mounted() {
-    this.getTypesesstion();
-    this.getAllDoctor();
-    this.getTreatmentTypes();
-    this.getoneRoom(this.$route.params.id);
+   this.getAllDoctor()
+   
   },
-  // ... existing code ...
 };
 </script>
 
 <style scoped>
 /* Add custom styles for the name input field */
 .name-input {
+  height: 70vh;
+  margin: auto !important;
+   overflow-y: scroll;
   width: 100%;
   position: relative;
   background-color: #e7e7e7;
-  padding: 1cm;
-  margin: auto;
+  padding: 10px;
+  margin-bottom: 15px !important;
   border-radius: 10px;
 }
-
+.name-input::-webkit-scrollbar {
+  display: none;
+}
+#pv_id_1{
+  text-align: center;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
 .name-input {
-  margin-top: 2%;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.name-input {
   width: 606px;
 }
 
 
-.name-input label {
-  display: block;
-  /* Ensures the label takes the full width of the container */
-  text-align: center;
-  font-size: 20px;
-  color: #0b0c0c;
-  /* Text color for label */
-  border-bottom: 1px solid #333;
-  /* Border style and color */
-}
-#input-1{
-  text-align: center !important;
-  background-color:#E4E4E4 !important;
-}
-#pv_id_1{
-  border: none;
-  text-align: center;
-  background-color:#E7E7E7 !important;
-  border-bottom: 2px solid black;
-  border-radius: 0 ;
- font-size: 20px;
- padding-top: 3%;
-}
-#pv_id_1:focus {
-  border: none !important;
 
-}
 .seed {
+  width: 600px;
+
+  margin: auto !important;
   background-color: #135c65;
   display: block;
   color: white;
-  
-  width: 606px;
-  width: 500px;
+ 
+
+ 
   /* Set the width to 606px */
 }
 
@@ -237,29 +214,67 @@ export default {
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.custom-select:hover {
-  border-color: #666;
+
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  margin: 20px auto;
+  /* Adjust margin as needed */
 }
 
-.custom-select:focus {
-  outline: none;
-  border-color: #135c65;
-  box-shadow: 0 0 8px rgba(19, 92, 101, 0.5);
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.number-input {
-  width: 500px;
-}
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.error-message {
+  display: flex;
+  align-items: center;
+  color: #ff0000;
+  /* Red color for errors */
+  margin-top: 5px;
+  font-size: 0.9em;
 }
 
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
+.error-icon {
+  margin-right: 5px;
+  /* Add styles for your error icon */
 }
+
+@media (max-width: 768px) {
+
+  .name-input,
+  .custom-select,
+  .error-message {
+    width: 100%;
+    /* Full width on smaller screens */
+    margin-bottom: 15px;
+  }
+
+  .v-btn {
+    width: 100%;
+    /* Full width button */
+    padding: 12px;
+    /* Larger touch target */
+  }
+
+  .error-message {
+    font-size: 0.8em;
+    /* Adjust font size */
+  }
+}
+
+/* Add additional CSS for animation or other styling as needed */
+
 /* Add any other custom styles here */
 </style>
