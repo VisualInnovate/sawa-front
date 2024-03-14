@@ -144,7 +144,7 @@ export default {
       console.log(event);
 
       axios
-        .delete(`/api/calender/${this.event_id}/delete`, {})
+        .delete(`/api/calender/${this.event_id}/delete`)
         .then((res) => {});
       this.update();
       setTimeout(() => {
@@ -196,7 +196,7 @@ export default {
       }, 700);
     },
     update() {
-      axios.get("/api/calender").then((res) => {
+      axios.post("/api/calender").then((res) => {
         console.log(res);
         this.opts.events = res.data.calender;
       });

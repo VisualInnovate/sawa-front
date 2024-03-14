@@ -1,4 +1,5 @@
 export default {
+  export:"تصديرها",
   close: "إغلاق",
   roles: "الأدوار",
   permissions: "الصلاحيات",
@@ -274,4 +275,10 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
     phone: "رقم الجوال",
     image: "الصوره",
   },
+
+
+  student_programe:"برنامج الطالب",
+  diurnal:"(صفوف) نهاري ",
+  house:"دمج",
+  Clinics:"(مسائي) عيادات"
 };

@@ -235,6 +235,20 @@ onMounted(async () => {
               :to="{ name: 'settings' }"></v-list-item>
           </v-list-group>
 
+         <!-- student_programe -->
+          <!-- <v-list-group value="student_programe">
+            <template #activator="{ props }">
+              <v-list-item v-bind="props" :title="$t('student_programe')"></v-list-item>
+            </template>
+            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('Pages')" value="Pages"
+              :to="{ name: 'pages' }"></v-list-item>
+            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('Settings')" value="Settings"
+              :to="{ name: 'settings' }"></v-list-item>
+          </v-list-group> -->
+
+
+
+
           <!-- edits -->
           <v-list-group value="">
             <template #activator="{ props }">
@@ -246,18 +260,18 @@ onMounted(async () => {
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item prepend-icon="mdi-cogs" value="Settings" :to="{ name: 'SystemProgram' }" class="mb-2">
+            <v-list-item prepend-icon="mdi-cogs" value="Settings" :to="{ name: 'SystemProgram' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("SystemProgram") }}
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item prepend-icon="mdi-clock-time-two" value="Settings" :to="{ name: 'SessionType' }" class="mb-2">
+            <v-list-item prepend-icon="mdi-clock-time-two" value="Settings" :to="{ name: 'SessionType' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("SessionType") }}
               </v-list-item-title>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-flask-outline" value="Settings" :to="{ name: 'TypeTreatment' }" class="mb-2">
+            <v-list-item prepend-icon="mdi-flask-outline" value="Settings" :to="{ name: 'TypeTreatment' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("Typetreatment") }}
               </v-list-item-title>

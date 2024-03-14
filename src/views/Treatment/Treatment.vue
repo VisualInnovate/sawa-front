@@ -28,35 +28,29 @@
               <div class="flex flex-column gap-2">
                 <label for="username">{{ $t('ProgramName') }}</label>
               <InputText required class="bg-[#f7f5f5]" v-model="treatments.name" :placeholder='$t("ProgramName")' />
-              <small id="username-help"></small>
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
               </div>
                 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('price') }}</label>
                   <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.price" :placeholder='$t("price")' />
-                  <small id="username-help"></small>
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.price">{{ error.price[0] }}</div>
               </div>
           
     
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('typesessaion') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.sessions_type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typesessaion")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                  <small id="username-help"></small>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.session_type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typesessaion")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.session_type">{{ error.session_type[0] }}</div>
               </div>
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('Typetreatment') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.treatment_id"  option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                  <small id="username-help"></small>
-              </div>
-               
-       
+            
     
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('ProgramType') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.program_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("ProgramType")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                  <small id="username-help"></small>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.program_type"  option-value="value" :options="programetype()" optionLabel="name" :placeholder='$t("ProgramType")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.program_type">{{ error.program_type[0] }}</div>
               </div> 
-              <div  v-if="treatments.sessions_type == 1 || treatments.sessions_type == 3" class="flex flex-column gap-2">
+              <div  v-if="treatments.session_type == 0 || treatments.session_type == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('number_sessaion') }}</label>
                   <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.individual_sessions" :placeholder='$t("number_sessaion")' />
                   <small id="username-help"></small>
@@ -65,9 +59,9 @@
              
        
        
-              <div v-if="treatments.sessions_type == 2 || treatments.sessions_type == 3" class="flex flex-column gap-2">
+              <div v-if="treatments.session_type == 1 || treatments.session_type == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('gruop_sessaion') }}</label>
-                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.collective_sessions" :placeholder='$t("number_sessaion")' />
+                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.collective_sessions" :placeholder='$t("gruop_sessaion")' />
                   <small id="username-help"></small>
               </div>
               <div class="flex flex-column gap-2 w-full">
@@ -75,7 +69,8 @@
                 <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
                 <small id="username-help"></small>
               </div>
-       
+              
+
       
       </v-form>
 
@@ -95,8 +90,9 @@ export default {
   data() {
     return {
       treatments:{},
-      errors: {},
+      error: {},
       isSubmitting: false,
+      programe_type:{}
 
       // Add other validation rules for the title field
     };
@@ -111,13 +107,21 @@ export default {
     arr (){
       return this.roomType =[
             
-                { name:this.$t('single_sesation') , value:1 },
-                { name:this.$t('multi_sesation') , value:2 },
-                { name:this.$t('Group_individual_sessions') , value:3 },
+                { name:this.$t('single_sesation') , value:0 },
+                { name:this.$t('multi_sesation') , value:1},
+                { name:this.$t('Group_individual_sessions') , value:2 },
                
             ]
     },
-   
+    programetype (){
+      return this.roomType =[
+            
+                { name:this.$t('diurnal') , value:0 },
+                { name:this.$t('Clinics') , value:1 },
+                { name:this.$t('house') , value:2 },
+               
+            ]
+    },
 
     getTreatmentTypes() {
       axios
@@ -131,18 +135,34 @@ export default {
         });
     },
 
+    getprograme(){
+      axios
+        .get("api/treatmentcounts")
+        .then((response) => {
+          // this.treatmentTypes = response.data.treatmentTypes;
+          console.log(this.treatmentTypes);
+        })
+        .catch((error) => {
+          console.error("Error retrieving Appointment Types:", error);
+        });
+
+    },
+
   
     createtreatment() {
-      axios.post("/api/treatments",this.treatments).then((res) => {
+      axios.post("/api/program",this.treatments).then((res) => {
        
-      });
+      }).catch((el)=>{
+        console.log(el.response.data.errors.name)
+     this.error = el.response.data.errors
+    })
     },
     closeSuccessModal() {
       this.isSuccessModalOpen = false;
     },
   },
   mounted() {
-   
+   this.getprograme()
   },
 };
 </script>

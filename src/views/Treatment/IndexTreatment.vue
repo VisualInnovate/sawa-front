@@ -7,31 +7,20 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
-const products = ref(null)
+
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
 const users = ref(null)
 const productDialog = ref(false)
 const deleteDialog = ref(false)
-const deleteProductsDialog = ref(false)
-const product = ref({})
+const confir_id=ref('')
 const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
-const submitted = ref(false)
-const rate = ref({
-    tourist_rating:Number,
-    reviewable_id:'',
-    type:1
-})
-const statuses = ref([
-  {label: 'INSTOCK', value: 'instock'},
-  {label: 'LOWSTOCK', value: 'lowstock'},
-  {label: 'OUTOFSTOCK', value: 'outofstock'},
-])
 
-// const productService = new ProductService();
+
+
 
 onBeforeMount(() => {
   initFilters()
@@ -40,9 +29,9 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/treatments").then((res)=>{
+  axios.get("/api/program").then((res)=>{
     loading.value= false
-    users.value= res.data.treatments
+    users.value= res.data.data
     console.log(users.value)
 
   });
@@ -57,35 +46,26 @@ onMounted(() => {
 fetchData()
 
 })
-const formatCurrency = (value) => {
-  return value.toLocaleString('gb-US', {style: 'currency', currency: 'USD'})
+const edit=(id)=>{
+  router.push({name:'therapeutic-update',params:{'id':id} })
 }
+
 
 const openNew = () => {
   router.push({name:'Therapeutic'})
 }
 
-
-const hideDialog = () => {
-  productDialog.value = false
-  submitted.value = false
-}
-
-
-
-
-
 const confirmDelete = (id) => {
   console.log(id)
   deleteDialog.value = true
-  error.value = ref('')
-  rate.value.reviewable_id=id
+  confir_id.value=id
+ 
 
 }
 
 const deleteAction = () => {
   axios
-    .delete(`/api/users/${user.value.id}/delete`)
+    .delete(`/api/program/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -96,52 +76,11 @@ const deleteAction = () => {
 
 }
 
-const findIndexById = (id) => {
-  let index = -1
-  for (let i = 0; i < products.value.length; i++) {
-    if (products.value[i].id === id) {
-      index = i
-      break
-    }
-  }
-  return index
-}
-const rateValue = () => {
-
-
-axios.post(`/api/rating/create-admin`,rate.value).then((res) => {
-
-  fetchData()
-  toast.add({ severity: 'success', summary: 'Successful', detail: 'rate send', life: 3000 })
-  deleteDialog.value= !(deleteDialog.value)
-
-}).catch((el)=>{
-  error.value = el.response.data.errors
-})
-}
-
-const createId = () => {
-  let id = ''
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < 5; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return id
-}
 
 const exportCSV = () => {
   dt.value.exportCSV()
 }
 
-const confirmDeleteSelected = () => {
-  deleteProductsDialog.value = true
-}
-const deleteSelectedProducts = () => {
-  products.value = products.value.filter((val) => !selectedProducts.value.includes(val))
-  deleteProductsDialog.value = false
-  selectedProducts.value = null
-  toast.add({severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000})
-}
 
 const initFilters = () => {
   filters.value = {
@@ -157,7 +96,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button label="New" icon="pi pi-plus" class="p-button-success mr-2" @click="openNew">{{ $t('addProgramType') }}</Button>
+            <Button :label='$t("addProgramType")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -177,7 +116,7 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button label="Export" icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
+            <Button label="Export" icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
@@ -216,30 +155,46 @@ const initFilters = () => {
 
         
          
-           <Column field="phone" :header='$t("name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="name" :header='$t("name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.title }}
+              {{ slotProps.data.name }}
             </template>
            </Column>
 
-           <Column field="phone" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="price" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.title }}
+              {{ slotProps.data.price }}
             </template>
            </Column>
-           <Column field="phone" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="collective_sessions" :header='$t("gruop_sessaion")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.title }}
+              {{ slotProps.data.collective_sessions }}
             </template>
            </Column>
-       
+           <Column field="individual_sessions" :header='$t("number_sessaion")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.individual_sessions }}
+            </template>
+           </Column>
+           <Column field="program_type" :header='$t("ProgramType")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              <p v-if="slotProps.data.program_type == 0">{{ $t('diurnal') }}</p>
+              <p v-if="slotProps.data.program_type == 1">{{ $t('Clinics')  }}</p>
+              <p v-if="slotProps.data.program_type == 2">{{  $t('house') }}</p>
+           
+            </template>
+           </Column>
 
 
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div >
-               
+                <Button
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+                @click="edit(slotProps.data.id)"
+              />
                 <Button
                 icon="pi pi-trash"
                 class="delete mt-2"

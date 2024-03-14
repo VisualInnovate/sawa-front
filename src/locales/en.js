@@ -1,4 +1,5 @@
 export default {
+  export:"export",
   close: "Close",
   roles: "Roles",
   Nationality_choose: "Choose the nationality name",
@@ -258,4 +259,9 @@ merge:"Merge",
     phone: "Phone",
     image: "Image",
   },
+
+  student_programe:"Student programe",
+  diurnal:"diurnal",
+  house:"Duplication",
+  Clinics:"Clinics"
 };

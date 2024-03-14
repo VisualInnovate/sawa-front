@@ -101,6 +101,7 @@ app.use(print);
 app.use(VueHtmlToPaper);
 app.use(VueCarousel);
 app.use(DialogService)
+app.use(ToastService)
 app.component('DataTable', DataTable);
 app.component('Toast', Toast)
 app.use(ToastService)
@@ -116,6 +117,9 @@ app.component('InputNumber', InputNumber)
 app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
 app.component('DynamicDialog', DynamicDialog)
+app.component('Toast', Toast)
+
+
 let k= document.getElementsByClassName("switcher")
 console.log(k)
 if( i18n.global.locale.value == 'ar')
