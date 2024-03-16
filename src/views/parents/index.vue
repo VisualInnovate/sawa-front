@@ -181,12 +181,12 @@ const confirmDelete = (id) => {
   deleteDialog.value = true
   error.value = ref('')
   rate.value.reviewable_id=id
-
+  user.value.id=id
 }
 
 const deleteAction = () => {
   axios
-    .delete(`/api/users/${user.value.id}/delete`)
+    .delete(`/api/admin-parents/delete/${user.value.id}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false

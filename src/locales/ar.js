@@ -13,7 +13,7 @@ export default {
   header_title: "أسم القسم",
   header_type: "نوع القسم",
   min_age: "اصغر عمر",
-  evaluations: "البرامج و التقيمات",
+  evaluations: " التقيمات",
   Adminstration: "الادارة",
   evaluations_details: "البرامج",
   addRoom:"اضافة قاعة",

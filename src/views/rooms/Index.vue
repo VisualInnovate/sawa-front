@@ -116,7 +116,7 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button label="Export" icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
