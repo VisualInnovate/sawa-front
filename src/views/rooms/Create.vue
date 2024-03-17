@@ -79,6 +79,7 @@ export default {
     return {
       rooms:{},
       error: {},
+      doctors:{},
       isSubmitting: false,
       programe_type:{},
       toast:useToast()

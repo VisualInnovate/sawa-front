@@ -201,8 +201,9 @@ onMounted(async () => {
            
             <v-list-item  :title="$t('addTherapeutic')" value="Categories"
               :to="{ name: 'AllTherapeutic' }"></v-list-item>
-
-
+<!-- 
+              <v-list-item  :title="$t('skills')" value="Categories"
+              :to="{ name: 'skills' }"></v-list-item> -->
             
           </v-list-group>
           

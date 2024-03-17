@@ -19,6 +19,12 @@ const therapeutic = [
         component: () => import("../views/Treatment/update.vue")
        
       },
+
+      {
+        path: '/skills', // Define the path for your Therapeutic route
+        name: 'skills',
+        component: () => import("../views/skills/index.vue")
+      },
 ];
 
 export default {

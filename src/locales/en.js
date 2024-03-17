@@ -267,5 +267,6 @@ merge:"Merge",
   Clinics:"Clinics",
   roomnumber:"room name",
   roomsnumber:"room numbers",
-  roomstable:"room system"
+  roomstable:"room system",
+  skills:"Skills"
 };

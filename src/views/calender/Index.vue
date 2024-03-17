@@ -5,18 +5,12 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import axios from "axios";
-import Dialog from "primevue/dialog";
-import Button from "primevue/button";
 import { ref } from "vue";
-
-import 'primeicons/primeicons.css';
-
 import moment from "moment";
 import arLocale from "@fullcalendar/core/locales/ar";
-// import enLocale from "@fullcalendar/core/locales";
 import Calendar from "primevue/calendar";
 import InputText from "primevue/inputtext";
-import { tr } from "date-fns/locale";
+
 import { useAppLangStore } from "../../stores/AppLangStore";
 
 export default {

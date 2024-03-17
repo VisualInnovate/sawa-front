@@ -283,5 +283,6 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   house:"دمج",
   Clinics:"(مسائي) عيادات",
   roomsnumber:"عدد القاعات",
-  roomstable:"جدول القاعة"
+  roomstable:"جدول القاعة",
+  skills:"المهارات",
 };
