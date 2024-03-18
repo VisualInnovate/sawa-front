@@ -1,5 +1,5 @@
 export default {
-  export:"تصديرها",
+  export:"تصدير",
   close: "إغلاق",
   roles: "الأدوار",
   permissions: "الصلاحيات",
@@ -285,4 +285,8 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   roomsnumber:"عدد القاعات",
   roomstable:"جدول القاعة",
   skills:"المهارات",
+  skill_name:"اسم المهارة",
+  skill_add:"اضافة مهارة",
+  permissions:"الأذونات",
+  user_add:"اضافة مستخدم "
 };

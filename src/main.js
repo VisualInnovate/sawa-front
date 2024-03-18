@@ -49,8 +49,9 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import Dialog from 'primevue/dialog'
 import DialogService from 'primevue/dialogservice'
 import DynamicDialog from 'primevue/dynamicdialog'
-
-
+import MultiSelect from 'primevue/multiselect'
+import FileUpload from 'primevue/fileupload'
+import Password from 'primevue/password';
 
 
 
@@ -118,7 +119,18 @@ app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
 app.component('DynamicDialog', DynamicDialog)
 app.component('Toast', Toast)
+app.component('MultiSelect', MultiSelect)
+app.component('FileUpload', FileUpload)
+app.component('Password ', Password )
+app.directive('can', (el, binding, vnode) =>{
+  // console.log(JSON.parse(localStorage.getItem('permissions')))
+  if (! JSON.parse(localStorage.getItem('userPermissions'))
+      .includes(binding.value)) {
+      // console.log(vnode)
+      el.style.display = "none";
+  }
 
+})
 
 let k= document.getElementsByClassName("switcher")
 console.log(k)

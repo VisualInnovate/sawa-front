@@ -33,7 +33,7 @@
                 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('price') }}</label>
-                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.price" :placeholder='$t("price")' />
+                  <InputNumber inputId="minmaxfraction" :minFractionDigits="2" :maxFractionDigits="5" required class="bg-[#f7f5f5]" v-model="treatments.price" :placeholder='$t("price")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.price">{{ error.price[0] }}</div>
               </div>
           
@@ -52,7 +52,7 @@
               </div> 
               <div  v-if="treatments.session_type == 0 || treatments.session_type == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('number_sessaion') }}</label>
-                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.individual_sessions" :placeholder='$t("number_sessaion")' />
+                  <InputNumber required class="  bg-[#f7f5f5]" v-model="treatments.individual_sessions" :placeholder='$t("number_sessaion")' />
                   <small id="username-help"></small>
               </div>
               
@@ -73,7 +73,7 @@
 
       
       </v-form>
-
+<toast></toast>
       <!-- ... existing code ... -->
     </div>
   </v-card>
@@ -83,7 +83,7 @@
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
 
-
+  import {useToast} from 'primevue/usetoast'
 export default {
 
 
@@ -92,7 +92,8 @@ export default {
       treatments:{},
       error: {},
       isSubmitting: false,
-      programe_type:{}
+      programe_type:{},
+      toast:useToast()
 
       // Add other validation rules for the title field
     };
@@ -151,7 +152,7 @@ export default {
   
     createtreatment() {
       axios.post("/api/program",this.treatments).then((res) => {
-       
+        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
       }).catch((el)=>{
         console.log(el.response.data.errors.name)
      this.error = el.response.data.errors

@@ -25,6 +25,7 @@ const therapeutic = [
         name: 'skills',
         component: () => import("../views/skills/index.vue")
       },
+
 ];
 
 export default {

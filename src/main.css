@@ -1,6 +1,7 @@
 #navbar{
-   
-
+  /* background-image: url('./views/frontend/image/112.png') !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important; */
   }
   Button{
     transform: scale(.9) !important;
@@ -11,6 +12,8 @@
   }
 td{
   text-align: justify !important;
+  /* padding-top: 1px !important;
+  padding-bottom: 1px !important; */
 }
 .v-list-group--prepend{
   background-color: white  !important ;
@@ -28,7 +31,7 @@ td{
   border-radius: 5px !important;
 }
 .v-list-group__items .v-list-item{
-  background-color: rgb(236, 234, 229);
+  /* background-color: rgb(236, 234, 229); */
 }
 .create{
   background-color: #135C65 !important;
@@ -44,4 +47,14 @@ td{
 }
 .export{
   background-color: rgb(106, 106, 231) !important;
+}
+.p-inputtext:enabled{
+  background-color: #f7f5f5 !important;
+;
+}
+.grid{
+  overflow-x: scroll !important;
+}
+.p-multiselect .p-multiselect-label.p-placeholder{
+  text-align: center !important;
 }

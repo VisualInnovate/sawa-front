@@ -205,6 +205,7 @@ const routes = [
       ...Object.values(siteRoutes),
       ...Object.values(rooms),
       ...Object.values(rolesRoutes),
+      ...Object.values(permissionsRoutes),
       ...Object.values(usersRoutes),
       ...Object.values(childrenRoutes),
       ...Object.values(QuestionHeadersRoutes),
@@ -267,23 +268,23 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  let user_permissions = JSON.parse(localStorage.getItem("userPermissions"));
-  if (to.meta.hasOwnProperty("permissions")) {
-    if (
-      to.meta.permissions.some((to_permission) =>
-        user_permissions.includes(to_permission)
-      )
-    ) {
-      next();
-    } else {
-      next({
-        name: "unauthorized",
-      });
-    }
-  } else {
-    next();
-  }
-});
+// router.beforeEach((to, from, next) => {
+//   let user_permissions = JSON.parse(localStorage.getItem("userPermissions"));
+//   if (to.meta.hasOwnProperty("permissions")) {
+//     if (
+//       to.meta.permissions.some((to_permission) =>
+//         user_permissions.includes(to_permission)
+//       )
+//     ) {
+//       next();
+//     } else {
+//       next({
+//         name: "unauthorized",
+//       });
+//     }
+//   } else {
+//     next();
+//   }
+// });
 
 export default router;

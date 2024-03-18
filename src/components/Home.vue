@@ -161,9 +161,15 @@ onMounted(async () => {
               value="permissions"
               :to="{ name: 'Permissions' }"
             ></v-list-item> -->
+            
+            <v-list-item  :title="$t('permissions')" value="permissions"
+              :to="{ name: 'permissions' }"></v-list-item>
+
+            <!-- <v-list-item  :title="$t('permissions')" value="roles"
+              :to="{ name: 'permissions' }"></v-list-item> -->
             <v-list-item  :title="$t('roles')" value="roles"
               :to="{ name: 'Roles' }"></v-list-item>
-            <v-list-item prepend-icon="mdi-shield-account" :title="$t('manage_user_roles')" value="roles-users"
+            <v-list-item  :title="$t('manage_user_roles')" value="roles-users"
               :to="{ name: 'RolesUsers' }"></v-list-item>
           </v-list-group>
 
@@ -201,9 +207,8 @@ onMounted(async () => {
            
             <v-list-item  :title="$t('addTherapeutic')" value="Categories"
               :to="{ name: 'AllTherapeutic' }"></v-list-item>
-<!-- 
-              <v-list-item  :title="$t('skills')" value="Categories"
-              :to="{ name: 'skills' }"></v-list-item> -->
+
+             
             
           </v-list-group>
           
@@ -221,18 +226,18 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('consulting')"></v-list-item>
             </template>
-            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('calender')" value="calender"
+            <v-list-item  :title="$t('calender')" value="calender"
               :to="{ name: 'Calender' }"></v-list-item>
-            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('bookings')" value="bookings"
+            <v-list-item  :title="$t('bookings')" value="bookings"
               :to="{ name: 'ShowBooking' }"></v-list-item>
           </v-list-group>
           <v-list-group prepend-icon="mdi-wrench"  value="Settings">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('Settings')"></v-list-item>
             </template>
-            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('Pages')" value="Pages"
+            <v-list-item :title="$t('Pages')" value="Pages"
               :to="{ name: 'pages' }"></v-list-item>
-            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('Settings')" value="Settings"
+            <v-list-item  :title="$t('Settings')" value="Settings"
               :to="{ name: 'settings' }"></v-list-item>
           </v-list-group>
 
@@ -255,29 +260,34 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('inputs')"></v-list-item>
             </template>
+            <v-list-item  :title="$t('skills')" value="skills"
+              :to="{ name: 'skills' }"></v-list-item>
+
+
+               
             <v-list-item  value="Pages" :to="{ name: 'ProgramType' }"
               class="mb-2 py-2"><v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("ProgramType") }}
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item prepend-icon="mdi-cogs" value="Settings" :to="{ name: 'SystemProgram' }" class="">
+            <v-list-item :to="{ name: 'SystemProgram' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("SystemProgram") }}
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item prepend-icon="mdi-clock-time-two" value="Settings" :to="{ name: 'SessionType' }" class="">
+            <v-list-item  value="Settings" :to="{ name: 'SessionType' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("SessionType") }}
               </v-list-item-title>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-flask-outline" value="Settings" :to="{ name: 'TypeTreatment' }" class="">
+            <v-list-item  value="Settings" :to="{ name: 'TypeTreatment' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("Typetreatment") }}
               </v-list-item-title>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-calendar-check" value="Settings" :to="{ name: 'AppointmentType' }"
+            <v-list-item  value="Settings" :to="{ name: 'AppointmentType' }"
               class="mb-2">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("AppointmentType") }}

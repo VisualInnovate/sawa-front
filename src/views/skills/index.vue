@@ -18,9 +18,9 @@ const confir_id=ref('')
 const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
-
-
-
+const createdialog=ref(false)
+const skill=ref({})
+const updatedialog=ref(false)
 
 onBeforeMount(() => {
   initFilters()
@@ -29,7 +29,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/room").then((res)=>{
+  axios.get("/api/skills").then((res)=>{
     loading.value= false
     users.value= res.data.data
     console.log(users.value)
@@ -47,12 +47,36 @@ fetchData()
 
 })
 const edit=(id)=>{
-  router.push({name:'EditRoom',params:{'id':id} })
+    axios.get(`/api/skills/${id}`).then((res)=>{
+    loading.value= false
+    skill.value= res.data.data
+    console.log(users.value)
+
+  });
+    confir_id.value=id
+    updatedialog.value=!(updatedialog.value)
 }
 
 
+///// update
+
+const editeskills=()=>{
+    axios
+    .put(`/api/skills/${confir_id.value}`,skill.value)
+    .then((res) => {
+      console.log(res.data)
+      fetchData()
+      updatedialog.value=!(updatedialog.value)
+      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      skill.value = ref({})
+    })
+    .catch((el)=>{
+      error.value = el.response.data.errors
+    })
+}
+
 const openNew = () => {
-  router.push({name:'CreateRoom'})
+    createdialog.value=!(createdialog.value)
 }
 
 const confirmDelete = (id) => {
@@ -63,9 +87,23 @@ const confirmDelete = (id) => {
 
 }
 
+const createskill=()=>{
+    axios
+    .post('/api/skills',skill.value)
+    .then((res) => {
+      console.log(res.data)
+      fetchData()
+      createdialog.value=!(createdialog.value)
+      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      skill.value = ref({})
+    })
+    .catch((el)=>{
+      error.value = el.response.data.errors
+    })
+}
 const deleteAction = () => {
   axios
-    .delete(`/api/room/${confir_id.value}`)
+    .delete(`/api/skills/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -96,7 +134,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button :label='$t("addRoom")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button :label='$t("skill_add")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -140,7 +178,7 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("room") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("skills") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
@@ -155,31 +193,14 @@ const initFilters = () => {
 
         
          
-           <Column field="name" :header='$t("roomnumber")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="name" :header='$t("skill_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.name }}
             </template>
            </Column>
 
-           <Column field="admin.name" :header='$t("roomdoctor")' :sortable="true" header-style="width:14%; min-width:14rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.admin.name }}
-            </template>
-           </Column>
-           <Column field="type" :header='$t("typeroom")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              <p v-if="slotProps.data.type == 0">{{ $t("typeroom2") }}</p>
-              <p v-if="slotProps.data.type == 1"> {{ $t("typeroom1") }}</p>
-              <p v-if="slotProps.data.type == 2"> {{ $t("typeroom3") }}</p>
-             
-            </template>
-           </Column>
-           <Column field="capacity" :header='$t("roomsnumber")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.capacity }}
-            </template>
-           </Column>
-         
+      
+          
 
 
         
@@ -215,6 +236,26 @@ const initFilters = () => {
             <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
             <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
           </template>
+        </Dialog>
+        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="skill.name" :placeholder='$t("skill_name")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+            </div>
+           <div class="w-full text-center">
+            <Button @click="createskill" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+           </div>
+        </Dialog>
+        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center"  v-model="skill.name" :placeholder='$t("skill_name")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+            </div>
+           <div class="w-full text-center">
+            <Button @click="editeskills" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+           </div>
         </Dialog>
       </div>
       </va-card>

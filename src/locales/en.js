@@ -206,6 +206,7 @@ merge:"Merge",
   prev: "prev",
   next: "next",
   today: "today",
+  typesessaion:"Session type",
   addtypesessaion: "Add New Sessation ",
   addtype: "Add Treatment Type ",
   nameaddtypelist: "Name Treatmnet type",
@@ -268,5 +269,9 @@ merge:"Merge",
   roomnumber:"room name",
   roomsnumber:"room numbers",
   roomstable:"room system",
-  skills:"Skills"
+  skills:"Skills",
+  skill_name:"Skill Name",
+  skill_add:"create skill",
+  permissions:"Permissions",
+  user_add:"Create User"
 };
