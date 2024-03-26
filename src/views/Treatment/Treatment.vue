@@ -151,6 +151,15 @@ export default {
 
   
     createtreatment() {
+      if(this.treatments.individual_sessions && this.treatments.collective_sessions){
+        this.treatments.sessions_number=this.treatments.collective_sessions + this.treatments.individual_sessions
+      }
+      if(this.treatments.collective_sessions == null){
+        this.treatments.sessions_number=this.treatments.individual_sessions
+      }
+      if(this.treatments.individual_sessions == null){
+        this.treatments.sessions_number=this.treatments.collective_sessions
+      }
       axios.post("/api/program",this.treatments).then((res) => {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
       }).catch((el)=>{

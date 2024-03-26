@@ -273,5 +273,13 @@ merge:"Merge",
   skill_name:"Skill Name",
   skill_add:"create skill",
   permissions:"Permissions",
-  user_add:"Create User"
+  user_add:"Create User",
+  Add_appointment:"Add an appointment",
+  ///
+  student_programe:"Student programe",
+  add_sp:"add student programe",
+  Sn:"Number of sessions",
+  treatementname:"Treatment Name",
+  area:"Area",
+  area_name:"Area name"
 };

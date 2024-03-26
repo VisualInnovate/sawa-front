@@ -58,3 +58,17 @@ td{
 .p-multiselect .p-multiselect-label.p-placeholder{
   text-align: center !important;
 }
+.grid::-webkit-scrollbar {
+  display: none !important;
+}
+/* .fc-daygrid-block-event .fc-event-time, .fc-daygrid-block-event .fc-event-title{
+  background-color: #135C65!important;
+  color: white !important;
+  border: 0 !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+.fc-h-event .fc-event-main-frame{
+  background-color: white !important;
+  border: 0 !important;
+} */

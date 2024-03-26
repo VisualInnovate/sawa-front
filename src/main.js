@@ -52,7 +52,7 @@ import DynamicDialog from 'primevue/dynamicdialog'
 import MultiSelect from 'primevue/multiselect'
 import FileUpload from 'primevue/fileupload'
 import Password from 'primevue/password';
-
+import Calendar from 'primevue/calendar'
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,6 +113,7 @@ app.component('v-otp-input', VOtpInput,'font-awesome-icon', FontAwesomeIcon)
 app.component('Column', Column)
 app.component('ColumnGroup', ColumnGroup)
 app.component('Dropdown', Dropdown)
+app.component('Calendar', Calendar)
 app.mount("#app");
 app.component('InputNumber', InputNumber)
 app.component('ConfirmDialog', ConfirmDialog)

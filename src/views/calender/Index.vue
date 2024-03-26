@@ -9,17 +9,17 @@ import { ref } from "vue";
 import moment from "moment";
 import arLocale from "@fullcalendar/core/locales/ar";
 import Calendar from "primevue/calendar";
-import InputText from "primevue/inputtext";
+
 
 import { useAppLangStore } from "../../stores/AppLangStore";
 
 export default {
   components: {
     FullCalendar,
-    Dialog,
-    Button,
+    
+   
     Calendar,
-    InputText,
+    
   },
   data() {
     return {

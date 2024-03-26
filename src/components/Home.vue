@@ -194,6 +194,8 @@ onMounted(async () => {
               :to="{ name: 'Headers' }"></v-list-item>
             <v-list-item  :title="$t('side_profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
+
+           
           </v-list-group>
           <!-- edit Last -->
           <v-list-group prepend-icon="mdi-doctor">
@@ -203,11 +205,14 @@ onMounted(async () => {
                   {{ $t("Therapeutic") }}
                 </v-list-item-title>
               </v-list-item>
+
+             
             </template>
            
             <v-list-item  :title="$t('addTherapeutic')" value="Categories"
               :to="{ name: 'AllTherapeutic' }"></v-list-item>
-
+              <v-list-item  :title="$t('student_programe')" value="student-programe"
+              :to="{ name: 'student-programe' }"></v-list-item>
              
             
           </v-list-group>
@@ -260,39 +265,41 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('inputs')"></v-list-item>
             </template>
+            
             <v-list-item  :title="$t('skills')" value="skills"
               :to="{ name: 'skills' }"></v-list-item>
 
-
-               
+              <v-list-item  :title="$t('area')" value="skills"
+              :to="{ name: 'area' }"></v-list-item>
+<!--                
             <v-list-item  value="Pages" :to="{ name: 'ProgramType' }"
               class="mb-2 py-2"><v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("ProgramType") }}
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item> -->
 
-            <v-list-item :to="{ name: 'SystemProgram' }" class="">
+            <!-- <v-list-item :to="{ name: 'SystemProgram' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("SystemProgram") }}
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item> -->
 
-            <v-list-item  value="Settings" :to="{ name: 'SessionType' }" class="">
+            <!-- <v-list-item  value="Settings" :to="{ name: 'SessionType' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("SessionType") }}
               </v-list-item-title>
-            </v-list-item>
-            <v-list-item  value="Settings" :to="{ name: 'TypeTreatment' }" class="">
+            </v-list-item> -->
+            <v-list-item  value="Settings" :to="{ name: 'treatments-type' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("Typetreatment") }}
               </v-list-item-title>
             </v-list-item>
-            <v-list-item  value="Settings" :to="{ name: 'AppointmentType' }"
+            <!-- <v-list-item  value="Settings" :to="{ name: 'AppointmentType' }"
               class="mb-2">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("AppointmentType") }}
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item> -->
             
           </v-list-group>
           

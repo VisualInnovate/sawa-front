@@ -154,7 +154,7 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button v-can="'permissions list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
@@ -175,6 +175,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
+          v-can="'permissions list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">

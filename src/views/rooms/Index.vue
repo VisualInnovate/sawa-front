@@ -96,7 +96,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button :label='$t("addRoom")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button  v-can="'room create'" :label='$t("addRoom")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -137,6 +137,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
+          v-can="'room show'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
@@ -187,11 +188,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
+                v-can="'room edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
+                v-can="'room delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"
