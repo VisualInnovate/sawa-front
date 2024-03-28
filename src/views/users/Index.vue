@@ -172,7 +172,7 @@ const initFilters = () => {
 </script>
 
 <template>
-  <div  class="grid">
+  <div  class="grid" style="overflow-x: scroll !important;">
     <div class="col-12">
       <va-card class="card">
         <Toolbar class="mb-4 shadow-md">
@@ -399,4 +399,8 @@ const initFilters = () => {
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style >
+
+
+
+</style>

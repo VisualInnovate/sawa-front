@@ -281,5 +281,6 @@ merge:"Merge",
   Sn:"Number of sessions",
   treatementname:"Treatment Name",
   area:"Area",
-  area_name:"Area name"
+  area_name:"Area name",
+  regin:"large area"
 };

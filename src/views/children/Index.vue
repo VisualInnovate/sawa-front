@@ -1,139 +1,233 @@
-<script>
-import axios from 'axios'
-import {th} from "vuetify/locale";
-import ConfirmPopup from 'primevue/confirmpopup';
-import moment from 'moment';
+<script setup>
+import {FilterMatchMode} from 'primevue/api'
+import {ref, onMounted, onBeforeMount} from 'vue'
+// import ProductService from '@/service/ProductService';
+import {useToast} from 'primevue/usetoast'
+import axios from "axios";
+import {useRouter} from "vue-router";
+const toast = useToast()
+const router = useRouter()
 
-export default {
-  components:{ConfirmPopup},
-
-  data () {
-    return {
-      search: '',
-      headers: [
-
-      ],
-      children: [],
-      alert_text: null,
-      loading:true
-
-    }
-  },computed:{
-    header(){
-        return this.headers=[ { key: 'id', title: this.$t('index') },
-        { key: 'name', title: this.$t('child_name') },
-        { key: 'birth_date', title: this.$t('birth_date') },
-        { key: 'actions', title: this.$t('actions') },
-      ]
-    }
-  },
-  methods:{
-     getChildren(){
-      axios.get("/api/child").then(res =>{
-        this.children=res.data.children
-        console.log(res.data.children)
-      // }
-        this.loading=false
-        
-
-      })
-    },
-    fomate(date){
-      return moment(date).format('DD-MM-yy ')
-
-    },
-    editItem(id){
-      this.$router.push({ name: 'EditChildren' , params: {id: id} })
-    }
-    ,deleteItem(id){
-      console.log(id)
-      axios.delete(`/api/child/${id}/delete`).then(res =>{
-        if(res.data.status == 200)
-        {
-          this.alert_text="children deleted successfully "
-          this.children=res.data.children
-        }
-
-      })
-    },
-    showItem(id){
-      this.$router.push({ name: 'ShowChildren' , params: {id: id} })
-    },
-    create(){
-      this.$router.push({ name: 'CreateChildren' })
-    }
-  },
- async mounted() {
-    if(this.$route.params.alert)
-    {
-      this.alert_text="done "
-
-     }
+const loading = ref(true)
+const user = ref({})
+const error = ref('')
+const users = ref(null)
+const productDialog = ref(false)
+const deleteDialog = ref(false)
+const confir_id=ref('')
+const selectedProducts = ref(null)
+const dt = ref(null)
+const filters = ref({})
 
 
-   this.getChildren()
-    
-  },
+
+
+onBeforeMount(() => {
+  initFilters()
+})
+
+ const fetchData= ()=>{
+
+
+  axios.get("/api/child").then((res)=>{
+    loading.value= false
+    users.value= res.data.children
+    console.log(users.value)
+
+  });
+
+
+}
+
+
+
+onMounted(() => {
+  // productService.getProducts().then((data) => (products.value = data));
+fetchData()
+
+})
+const edit=(id)=>{
+  router.push({name:'EditChildren',params:{'id':id} })
+}
+const showItem=(id)=>{
+  router.push({name:'ShowChildren',params:{'id':id} })
+}
+
+const openNew = () => {
+  router.push({name:'CreateChildren'})
+}
+
+const confirmDelete = (id) => {
+  console.log(id)
+  deleteDialog.value = true
+  confir_id.value=id
  
-  
+
+}
+
+const deleteAction = () => {
+  axios
+    .delete(`/api/child/${confir_id.value}/delete`)
+    .then((res) => {
+      console.log(res.data)
+      deleteDialog.value=false
+      fetchData()
+      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+    })
+    .catch(() => {})
+
+}
+
+
+const exportCSV = () => {
+  dt.value.exportCSV()
+}
+
+
+const initFilters = () => {
+  filters.value = {
+    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+  }
 }
 </script>
 
 <template>
-  <div>
-    <v-alert
-      type="success"
-      variant="tonal"
-      border="start"
-      elevation="2"
-      closable
-      :close-label="$t('close')"
-      :text="alert_text"
-      v-if="alert_text!= null"
-      class="mb-8"
-  >
+  <div class="grid">
+    <div class="col-12">
+      <va-card class="card">
+        <Toolbar class="mb-4 shadow-md">
+          <template #start>
+            <div class="my-2">
+            <Button   :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+<!--              <Button-->
+<!--                label="Delete"-->
+<!--                icon="pi pi-trash"-->
+<!--                class="p-button-danger"-->
+<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
+<!--                @click="confirmDeleteSelected"-->
+<!--              />-->
+            </div>
+          </template>
 
-  </v-alert>
-  
-  <v-btn   text="Create" color="green" height="45"  class="mb-5 mt-5"   @click="create">
-    {{$t('create_button')}}
-  </v-btn>
+          <template #end>
+<!--            <FileUpload-->
+<!--              mode="basic"-->
+<!--              accept="image/*"-->
+<!--              :max-file-size="1000000"-->
+<!--              label="Import"-->
+<!--              choose-label="Import"-->
+<!--              class="mr-2 inline-block"-->
+<!--            />-->
+            <Button :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+          </template>
+        </Toolbar>
 
-  <v-card>
-    <v-card-title >
-      {{$t('children')}}
-      <v-spacer></v-spacer>
+        <Toast/>
 
-      <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="Search"
-          single-line
-          hide-details
-      ></v-text-field>
-    </v-card-title>
-    <v-data-table
-        :headers="header"
-        :items="children"
-        :search="search"
-    >
-      <template #top>
-        <v-progress-linear v-if="loading" slot="progress" style="color:#135c65" indeterminate></v-progress-linear>
-      </template>
-      <template #item="{ item }">
-        <tr>
-          <td>{{ item.columns.id }}</td>
-          <td>{{ item.columns.name }}</td>
-          <td> {{ fomate(item.columns.birth_date)}}</td>
-          <td>
-            <v-icon  small color="primary" class="mr-2" @click="showItem(item.columns.id)">mdi-eye</v-icon>
-            <v-icon small color="primary" class="mr-2" @click="editItem(item.columns.id)">mdi-pencil</v-icon>
-            <v-icon small color="error" @click="deleteItem(item.columns.id)">mdi-delete</v-icon>
-            <!-- <Button @click="confirm2($event)" icon="pi pi-times" label="Delete" outlined severity="danger"></Button> -->
-          </td>
-        </tr>
-      </template>
-    </v-data-table>
-  </v-card>
+
+      <div style="" class="shadow-xl ">
+        <DataTable
+          ref="dt"
+          v-model:selection="selectedProducts"
+          :value="users"
+          :loading="loading"
+          data-key="id"
+          :paginator="true"
+          :rows="10"
+          :filters="filters"
+          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          :rows-per-page-options="[5, 10, 25]"
+          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
+          responsive-layout="scroll"
+        
+        >
+          <template #header>
+            <div class="flex w-full  justify-between align-items-center">
+              <h5 class="m-0 my-auto">{{ $t("children") }}</h5>
+             <div>
+              <span class="block mt-2 md:mt-0 p-input-icon-left">
+                <i class="pi pi-search"/>
+                <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
+              </span>
+              </div>
+            </div>
+          </template>
+
+          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
+         
+
+        
+         
+           <Column field="id" :header='$t("index")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.id }}
+            </template>
+           </Column>
+           <Column field="name" :header='$t("child_name")' :sortable="true" header-style="width:17%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.name }}
+            </template>
+           </Column>
+          
+           <Column field="birth_date" :header='$t("birth_date")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.birth_date }}
+            </template>
+           </Column>
+
+
+        
+          <Column header-style="min-width:10rem;">
+            <template #body="slotProps">
+              <div >
+                <Button
+             
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+                @click="edit(slotProps.data.id)"
+              />
+              <Button
+               
+                icon="pi pi-eye"
+                class="details mt-2"
+                @click="showItem(slotProps.data.id)"
+              />
+                <Button
+               
+                icon="pi pi-trash"
+                class="delete mt-2"
+                @click="confirmDelete(slotProps.data.id)"
+              />
+              <Button
+              
+                icon="pi pi-user"
+                class="show mt-2"
+             
+              />
+              </div>
+            </template>
+          </Column>
+
+
+
+        </DataTable>
+        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
+            <span v-if="user"
+            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
+            >?</span
+            >
+          </div>
+          <template #footer>
+            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
+            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+          </template>
+        </Dialog>
+      </div>
+      </va-card>
+    </div>
   </div>
 </template>
+
+<style scoped lang="scss"></style>

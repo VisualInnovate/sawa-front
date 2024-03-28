@@ -35,22 +35,22 @@
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_id"  option-value="id" filter :options="child" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_id"  @update:model-value=" getAllDoctor"   option-value="id" filter :options="child" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.student_id">{{ error.student_id[0] }}</div>
                 </div> 
-                <!-- <div class="flex flex-column gap-2">
+                <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('roomdoctor') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.roomdoctor"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
-                </div>  -->
+                </div> 
 
                
                   
-                <!-- <div class="flex flex-column gap-2 invisible">
+                <div class="flex flex-column gap-2 invisible">
                     <label for="username">{{ $t('Sn') }}</label>
                     <InputNumber required class="bg-[#f7f5f5]" v-model="student.capacity" :placeholder='$t("Sn")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.capacity">{{ error.capacity[0] }}</div>
-                </div> -->
+                </div>
 
                 <div v-if="student.program_id && maxcapsity>0 && setiontype != 1 " class="flex flex-column gap-2">
                     <label for="username">{{ $t('Typetreatment') }}-</label>
@@ -61,8 +61,9 @@
                 <div v-if="student.program_id && maxcapsity>0 && setiontype != 1 " class="flex flex-column gap-2">
                     <label for="username">{{ $t('Sn') }} ({{ maxcapsity }})</label>
                     <div class="flex">
-                        <InputNumber :max="maxcapsity" required class="bg-[#f7f5f5] w-[90%]" v-model="student.sessions_number" :placeholder='$t("Sn")' />
+                        <InputNumber :max="maxcapsity" :min="1" required class="bg-[#f7f5f5] w-[90%]" v-model="student.sessions_number" :placeholder='$t("Sn")' />
                         <Button   @click="addarray"  class="create m-auto s " icon="pi pi-plus" ></Button>
+                        <Button   @click="deletearray"  class="delete m-auto s " icon="pi pi-minus" ></Button>
                     </div>
 
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.details">{{ error.details[0] }}</div>
@@ -359,6 +360,9 @@
                  
               ]
       },
+      deletearray(){
+        this.capasity.length=this.capasity.length -1
+      },
 
       addarray(){
         axios.get(`/api/treatment/${this.student.Type}`).then((res) => {
@@ -433,11 +437,12 @@
           });
 
       },
-      
+
    
       getAllDoctor() {
+        
         axios
-          .get("api/doctors")
+          .get(`api/student-program/auto_assign/${this.student.student_id}`)
           .then((response) => {
             this.doctors = response.data.doctors;
             console.log(this.doctors);
@@ -585,7 +590,7 @@
       console.log(localStorage.appLang);
      
       console.log(this.opts);
-     this.getAllDoctor()
+
     },
     watch: {
       "langStore.appLang"(newLang) {

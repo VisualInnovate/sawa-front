@@ -5,14 +5,15 @@ import { ref, watch, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/Auth";
 import UserProfileMenu from "./UserProfileMenu.vue";
 import { useTheme } from "vuetify";
+const router = useRouter()
 import sawaLogo from "../assets/img/sawa_logo.svg";
-
+import {useRouter} from "vue-router";
 const theme = useTheme();
 const drawer = ref(true);
 const group = ref(null);
 const authStore = useAuthStore();
 const appLangStore = useAppLangStore();
-
+const routename=ref('')
 // methods
 // const onClick = () => {
 //     theme.value = theme.value === "light" ? "dark" : "light";
@@ -33,6 +34,8 @@ watch(group, (newGroupValue) => {
   drawer.value = false;
 });
 onMounted(async () => {
+  routename.value=router.currentRoute._rawValue.fullPath
+  console.log(router.currentRoute._rawValue.fullPath)
   await authStore.getUser();
 });
 </script>
@@ -169,8 +172,7 @@ onMounted(async () => {
               :to="{ name: 'permissions' }"></v-list-item> -->
             <v-list-item  :title="$t('roles')" value="roles"
               :to="{ name: 'Roles' }"></v-list-item>
-            <v-list-item  :title="$t('manage_user_roles')" value="roles-users"
-              :to="{ name: 'RolesUsers' }"></v-list-item>
+           
           </v-list-group>
 
           <v-list-group prepend-icon="mdi-human-male-boy" value="Children">
@@ -269,8 +271,9 @@ onMounted(async () => {
             <v-list-item  :title="$t('skills')" value="skills"
               :to="{ name: 'skills' }"></v-list-item>
 
-              <v-list-item  :title="$t('area')" value="skills"
-              :to="{ name: 'area' }"></v-list-item>
+
+              <v-list-item  :title="$t('area')" value="area"
+              :to="{ name: 'regin' }"></v-list-item>
 <!--                
             <v-list-item  value="Pages" :to="{ name: 'ProgramType' }"
               class="mb-2 py-2"><v-list-item-title class="mb-2" style="padding: 10px">
@@ -305,14 +308,14 @@ onMounted(async () => {
           
         </v-list>
 
-            <v-list-group style="text-align: center !important; width: 100% !important;" value="Settings">
+            <!-- <v-list-group style="text-align: center !important; width: 100% !important;" value="Settings">
               <template #activator="{ props }">
                 <div class="flex justify-between w-full px-4">
                   <a  href="https://attendance.new.sawa.academy/" target=”_blank” >{{ $t('fingerPrint') }}</a>
                   <p><svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 210 256" enable-background="new 0 0 210 256" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M174.55,144.5L174.55,144.5c-1.4-4-5-6.5-9.2-6.5H159V23c0-11.708-9.292-21-21-21H25C12.57,2,2,12.57,2,25v183 c0,11.9,10.95,22,22.75,22l114.213,0c1.207,0,2.27,0.984,2.18,2.188c-0.095,1.266-1.153,1.812-2.393,1.812h-45.5L128,254h80 L174.55,144.5z M82.05,220.2c-3.199,0-5.599-2.399-5.6-5.598c-0.001-3.045,2.557-5.602,5.602-5.602 c3.199,0.001,5.598,2.401,5.598,5.6C87.55,217.8,85.25,220.2,82.05,220.2z M144,138h-19.65c-5.3,0-9.8,4.7-9.8,10l0,0 c0,5.3,4.5,10,9.8,10h19.8v42H18V31h126V138z M122.309,87.625v31.221c0,4.652-4.445,9.097-9.097,9.097H85.92 c-5.686,0-10.286-0.724-15.61-2.584c-1.654-0.569-6.513-2.584-6.513-2.584v-36.39l21.451-25.225l1.964-11.217h3.877 c4.342,0,7.34,3.463,7.34,7.753v2.429c0,5.531-0.31,11.113-0.982,16.592l-0.207,1.809h15.972 C117.864,78.527,122.309,82.972,122.309,87.625z M39.089,126.65h19.487V82.456H39.089V126.65z"></path> </g></svg></p>
                 </div>
               </template>
-            </v-list-group>
+            </v-list-group> -->
         
       </v-navigation-drawer>
 
@@ -321,6 +324,51 @@ onMounted(async () => {
         <v-container>
           <RouterView />
         </v-container>
+<!-- CONTAINS of home page -->
+
+      <!--  <div v-if="router.currentRoute._rawValue.fullPath == '/sawa-admin'" class="grid   grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 px-1 ">
+        <div class="px-3 ">
+                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
+                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
+                  <div class="text-white">
+                    <p class="font-semibold text-3xl">237</p>
+                    <p>{{ $t("users") }}</p>
+                  </div>
+                </div>
+        </div>
+        <div class="px-3 ">
+                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
+                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
+                  <div class="text-white">
+                    <p class="font-semibold text-3xl">237</p>
+                    <p>{{ $t("users") }}</p>
+                  </div>
+                </div>
+        </div>
+        <div class="px-3 ">
+                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
+                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
+                  <div class="text-white">
+                    <p class="font-semibold text-3xl">237</p>
+                    <p>{{ $t("users") }}</p>
+                  </div>
+                </div>
+        </div>
+        <div class="px-3 ">
+                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
+                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
+                  <div class="text-white">
+                    <p class="font-semibold text-3xl">237</p>
+                    <p>{{ $t("users") }}</p>
+                  </div>
+                </div>
+        </div>
+       </div> -->
+
+        
+       
+   
+
       </v-main>
       <!-- footer -->
       <v-footer app id="footer" class="justify-center" border>
@@ -329,3 +377,13 @@ onMounted(async () => {
     </v-app>
   </v-locale-provider>
 </template>
+<style>
+.element:hover {
+
+
+
+  animation: bounce; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 1s; /* don't forget to set a duration! */
+}
+
+</style>

@@ -7,7 +7,13 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
-const permissions=ref({})
+const permissions=ref([
+{ name: ' ', code: ' ' },
+])
+const areass=ref([
+{ name: ' ', code: ' ' },
+])
+
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -19,10 +25,8 @@ const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const createdialog=ref(false)
-const role=ref({
-  name:'',
-  permissions:[]
-})
+const areas=ref([])
+const region_name=ref('')
 const updatedialog=ref(false)
 
 onBeforeMount(() => {
@@ -32,15 +36,18 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.post("/api/roles").then((res)=>{
+  axios.get("/api/region").then((res)=>{
     
-    users.value= res.data.roles.data
+    users.value= res.data.data
     console.log(users.value)
 
   });
-  axios.post("/api/permissions").then((res)=>{
-    
-    permissions.value= res.data.permissions
+  axios.post("/api/region/Allregion").then((res)=>{
+    permissions.value= res.data.regions.map(event => ({
+              name:event
+             
+            }));
+
     loading.value= false
 
   });
@@ -55,27 +62,57 @@ fetchData()
 
 })
 const edit=(id)=>{
-    axios.get(`/api/roles/${id}`).then((res)=>{
+  region_name.value=''
+  areas.value=[]
+    axios.get(`/api/region/getareabyregion/${id}`).then((res)=>{
     loading.value= false
-    role.value.name= res.data.role.name
-    for (let i = 0; i < res.data.role.permissions.length; i++) {
-      res.data.role.permissions[i].id
-      role.value.permissions.push(res.data.role.permissions[i].id)
+    axios.post(`/api/region/getareabyregion`,{
+    region_name:res.data.data.region_name
+  }).then((res)=>{
+    
+    areass.value= res.data.areas.map(event => ({
+              name:event
+             
+            }));
+
+  });
+    region_name.value= res.data.data.region_name
+    for (let i = 0; i < res.data.data.areas.length; i++) {
+      console.log(res.data.data.areas[0])
+    
+      areas.value.push(res.data.data.areas[i].area_name)
 }
    
 
   });
-  console.log(role.value.permissions)
+   console.log( areas.value)
     confir_id.value=id
     updatedialog.value=!(updatedialog.value)
 }
 
 
+const getoneregin=(e)=>{
+  console.log(e)
+  axios.post(`/api/region/getareabyregion`,{
+    region_name:e
+  }).then((res)=>{
+    
+    areass.value= res.data.areas.map(event => ({
+              name:event
+             
+            }));
+
+  });
+}
+
 ///// update
 
 const editeroles=()=>{
     axios
-    .put(`/api/roles/${confir_id.value}/edit`,role.value)
+    .post(`/api/region/update/region/${confir_id.value}`,{
+      region_name:region_name.value,
+      areas:areas.value
+    })
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -89,6 +126,9 @@ const editeroles=()=>{
 }
 
 const openNew = () => {
+  areass.value=[]
+  region_name.value=''
+  areas.value=[]
     createdialog.value=!(createdialog.value)
 }
 
@@ -102,13 +142,17 @@ const confirmDelete = (id) => {
 
 const createrole=()=>{
     axios
-    .post('/api/roles/create',role.value)
+    .post('/api/region/create-region-with-areas',{
+      region_name:region_name.value,
+      areas:areas.value
+
+    })
     .then((res) => {
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: 'Successful', detail: ' Successful', life: 3000})
-      skill.value = ref({})
+      role.value = ref({})
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -117,7 +161,7 @@ const createrole=()=>{
 
 const deleteAction = () => {
   axios
-    .delete(`/api/roles/${confir_id.value}/delete`)
+    .delete(`/api/region/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -148,7 +192,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button v-can="'roles create'" :label='$t("roles")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'roles create'" :label='$t("area")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -193,7 +237,7 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("roles") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("area") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
@@ -258,15 +302,17 @@ const initFilters = () => {
             <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
           </template>
         </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '550px' }" :header='$t("roles")' :modal="true">
+        <Dialog v-model:visible="createdialog" :style="{ width: '550px' }" :header='$t("area")' :modal="true">
           <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center"  v-model="role.name" :placeholder='$t("name")' />
+                  <Dropdown v-model="region_name" editable :options="permissions" @update:model-value="getoneregin"  optionLabel="name"  :placeholder='$t("name")' option-value="name"
+                  class="bg-[#f7f5f5] text-center"/>
+
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
             <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('permissions') }}</label>
-                  <MultiSelect v-model="role.permissions" filter option-value="id" :options="permissions" optionLabel="name" :placeholder='$t("permissions")'
+                  <label class="w-full text-right" for="username">{{ $t('area_name') }}</label>
+                  <MultiSelect v-model="areas" filter option-value="name" :options="areass" optionLabel="name" :placeholder='$t("area_name")'
               class="w-full md:w-20rem" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
@@ -274,17 +320,19 @@ const initFilters = () => {
             <Button @click="createrole" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '550px' }" :header='$t("roles")' :modal="true">
-          <div class="flex flex-column gap-2">
+        <Dialog v-model:visible="updatedialog" :style="{ width: '550px' }" :header='$t("area")' :modal="true">
+          <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center"  v-model="role.name" :placeholder='$t("name")' />
+                  <Dropdown v-model="region_name" editable :options="permissions" @update:model-value="getoneregin"  optionLabel="name"  :placeholder='$t("name")' option-value="name"
+                  class="bg-[#f7f5f5] text-center"/>
+
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('permissions') }}</label>
-                  <MultiSelect v-model="role.permissions" filter option-value="id" :options="permissions" optionLabel="name" :placeholder='$t("permissions")'
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('area_name') }}</label>
+                  <MultiSelect v-model="areas" filter option-value="name" :options="areass" optionLabel="name" :placeholder='$t("area_name")'
               class="w-full md:w-20rem" />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
            <div class="w-full text-center">
             <Button @click="editeroles" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 

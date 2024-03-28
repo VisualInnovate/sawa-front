@@ -2,6 +2,7 @@
 import axios from "axios";
 import InputText from "primevue/inputtext";
 import moment from "moment";
+import {useToast} from 'primevue/usetoast'
 import Calendar from "primevue/calendar";
 import { max } from "date-fns";
 export default {
@@ -9,7 +10,7 @@ export default {
   data: () => ({
     minDate: new Date(1640426400000),
     maxDate: new Date(),
-
+    toast:useToast(),
     NameRules: [
       (value) => {
         if (value?.length >= 3) return true;
@@ -37,10 +38,7 @@ export default {
       console.log(this.child.birth_date);
 
       axios.post(`/api/child/create`, this.child).then((res) => {
-        if (res.data.status == 200) {
-          this.child = [];
-          this.alert_text = "children added successfully ";
-        }
+            this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
       });
     },
   },
@@ -59,31 +57,17 @@ export default {
     </v-btn>
 
     <v-sheet max-width="1200" class="mx-auto">
-      <v-alert
-        type="success"
-        variant="tonal"
-        border="start"
-        elevation="2"
-        closable
-        :close-label="$t('close')"
-        :text="alert_text"
-        v-if="alert_text != null"
-        class="mb-8"
-      >
-      </v-alert>
-      <v-form fast-fail @submit.prevent>
-        <v-text-field
-          v-model="child.name"
-          :label="$t('child_name')"
-          :rules="NameRules"
-        ></v-text-field>
-        <!-- <div style="width: 100%;" class="card flex  justify-content-center">
-        <InputText  style="width: 100%; padding: 10px; opacity: 70%;" type="date" :rules="NameRules"  v-model=" child.birth_date" />
-    </div> -->
-        <!-- <input type="text" sty placeholder="MM/DD/YY"
-                    onfocus="(this.type='date')"> -->
-        <div class="card flex justify-content-center">
-          <Calendar
+     
+    
+      <v-form class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-1 shadow-lg" fast-fail @submit.prevent>
+        <div class="flex flex-column gap-2 py-2">
+                <label for="username">{{ $t('child_name') }}</label>
+              <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' />
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+         </div>
+         <div class="flex flex-column gap-2 py-2">
+                <label for="username">{{ $t('birth_date') }}</label>
+                <Calendar
             style="width: 100%"
             showButtonBar
             v-model.number="child.birth_date"
@@ -92,17 +76,14 @@ export default {
             :maxDate="maxDate"
 
           />
-        </div>
-
-        <!-- <v-text-field
-          v-model="child.birth_date"
-          :label="$t('birth_date')"
-          type="date"
-      ></v-text-field> -->
-        <v-btn type="submit" @click="submit" block class="mt-2">{{
-          $t("submit")
-        }}</v-btn>
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+         </div>
+     
+      <div class="card text-center py-3">
+        <Button type="submit" @click="submit" :label='$t("submit")' class="create w-[90%] lg:w-[50%]"/>
+    </div>   
       </v-form>
+      <Toast/>
     </v-sheet>
   </div>
 </template>

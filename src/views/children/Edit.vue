@@ -2,10 +2,12 @@
 import axios from "axios";
 import InputText from 'primevue/inputtext';
 import Calendar from "primevue/calendar";
+import {useToast} from 'primevue/usetoast'
 export default {
   components:{InputText,Calendar},
   data: () => ({
     maxDate: new Date(),
+    toast:useToast(),
     NameRules: [
       value => {
         if (value?.length >= 3) return true
@@ -24,16 +26,15 @@ export default {
         this.$router.go(-1)
       },
     submit(){
+   
       axios.post(`/api/child/${this.$route.params.id }/update`,this.child).then(res =>{
-        if(res.data.status == 200)
-        {
-          this.alert_text="children updated successfully "
-          this.child=res.data.child
-        }
+        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
 
-        console.log(res.data.children)
+      }).catch((el)=>{
+      
+       
 
-      })
+    })
     },
     getChild(){
       axios.get(`/api/child/${this.$route.params.id}`).then(res =>{
@@ -71,34 +72,30 @@ export default {
       </v-alert>
   
       <v-form fast-fail @submit.prevent>
-        <v-text-field
-            v-model="child.name"
-            :label="$t('child_name')"
-            :rules="NameRules"
-        ></v-text-field>
-        <div class="card flex justify-content-center">
-          <Calendar
+        <div class="flex flex-column gap-2 py-2">
+                <label for="username">{{ $t('child_name') }}</label>
+              <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' />
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+         </div>
+         <div class="flex flex-column gap-2 py-2">
+                <label for="username">{{ $t('birth_date') }}</label>
+                <Calendar
             style="width: 100%"
             showButtonBar
-            v-model="child.birth_date" 
+            v-model.number="child.birth_date"
             showIcon
             placeholder="dd/mm/yy"
             :maxDate="maxDate"
-            :rules="NameRules"
 
           />
-        </div>
-      
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+         </div>
      
-  
-        <!-- <v-text-field
-            v-model="child.birth_date"
-            :label="$t('birth_date')"
-           type="date"
-        ></v-text-field> -->
-  
-        <v-btn type="submit" @click="submit" block class="mt-2">{{$t('submit')}}</v-btn>
+      <div class="card text-center py-3">
+        <Button type="submit" @click="submit" :label='$t("submit")' class="create w-[90%] lg:w-[50%]"/>
+    </div>  
       </v-form>
+      <Toast/>
     </v-sheet>
  </div>
 </template>
