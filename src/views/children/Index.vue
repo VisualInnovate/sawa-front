@@ -28,7 +28,7 @@ onBeforeMount(() => {
 
  const fetchData= ()=>{
 
-
+ console.log(router.currentRoute._rawValue.fullPath)
   axios.get("/api/child").then((res)=>{
     loading.value= false
     users.value= res.data.children
@@ -42,10 +42,15 @@ onBeforeMount(() => {
 
 
 onMounted(() => {
+  
   // productService.getProducts().then((data) => (products.value = data));
 fetchData()
 
+    
 })
+const handleButtonClick=(event)=>{
+  console.log('Button clicked:', event);
+}
 const edit=(id)=>{
   router.push({name:'EditChildren',params:{'id':id} })
 }
@@ -92,7 +97,7 @@ const initFilters = () => {
 </script>
 
 <template>
-  <div class="grid">
+  <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
     <div class="col-12">
       <va-card class="card">
         <Toolbar class="mb-4 shadow-md">

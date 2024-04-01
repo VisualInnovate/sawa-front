@@ -8,14 +8,16 @@ import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
 const usersdata=ref({
-  name:'',
-  email:'',
-  title:'',
-  password:'',
-  file:'',
-  role:''
+ 
 })
+
 const roles=ref([])
+const skills=ref([])
+const type=ref([
+    { name: 'doctor', id: '0' },
+    { name: 'user', id: '1' },
+
+])
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -49,7 +51,11 @@ onBeforeMount(() => {
     console.log(users.value)
 
   });
+  axios.get("/api/skills").then((res)=>{
+    skills.value=res.data.data
+  
 
+  });
 
 }
 
@@ -65,6 +71,10 @@ const edit=(id)=>{
     loading.value= false
     usersdata.value= res.data.user
     usersdata.value.role= res.data.user.roles.id
+//     for (let i = 0; i < res.data.role.permissions.length; i++) {
+//       res.data.role.permissions[i].id
+//       role.value.permissions.push(res.data.role.permissions[i].id)
+// }
     console.log(users.value)
 
   });
@@ -77,12 +87,16 @@ const edit=(id)=>{
 
 const editesuser=()=>{
   const body = new FormData();
-  body.append("name", usersdata.value.name);
-  body.append("email", usersdata.value.email);
-  body.append("title", usersdata.value.title);
-  body.append("password", usersdata.value.password);
-  body.append("image", usersdata.value.file);
-  body.append("role", usersdata.value.role);
+  console.log(usersdata.value.name)
+  if(usersdata.value.name && usersdata.value.email && usersdata.value.title && usersdata.value.password && usersdata.value.file && usersdata.value.role ){
+    body.append("name", usersdata.value.name);
+    body.append("email", usersdata.value.email);
+    body.append("title", usersdata.value.title);
+    body.append("password", usersdata.value.password);
+    body.append("image", usersdata.value.file);
+    body.append("role", usersdata.value.role);
+
+  };
     axios
     .post(`/api/users/${confir_id.value}/edit`,body)
     .then((res) => {
@@ -124,12 +138,17 @@ const uploadFile = (e) => {
 
 const createuser=()=>{
   const body = new FormData();
-  body.append("name", usersdata.value.name);
-  body.append("email", usersdata.value.email);
-  body.append("title", usersdata.value.title);
-  body.append("password", usersdata.value.password);
-  body.append("image", usersdata.value.file);
-  body.append("role", usersdata.value.role);
+  console.log(usersdata.value.name)
+    body.append("name", usersdata.value.name);
+    body.append("email", usersdata.value.email);
+    body.append("title", usersdata.value.title);
+    body.append("password", usersdata.value.password);
+    body.append("image", usersdata.value.file);
+    body.append("role", usersdata.value.role);
+    body.append("skills", usersdata.value.skills);
+    body.append("type",usersdata.value.type)
+
+  
 
 
     axios
@@ -320,6 +339,17 @@ const initFilters = () => {
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
             <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('type') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="type" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
+            </div>
+            <div v-if="usersdata.types == 0" class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
+                  <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
+              class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('email') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.email" :placeholder='$t("email")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
@@ -360,6 +390,17 @@ const initFilters = () => {
                   <label class="w-full text-right" for="username">{{ $t('name') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.name" :placeholder='$t("name")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('type') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="type" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
+            </div>
+            <div v-if="usersdata.types == 0" class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
+                  <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
+              class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
             </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('email') }}</label>

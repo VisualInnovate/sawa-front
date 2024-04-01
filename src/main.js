@@ -53,8 +53,10 @@ import MultiSelect from 'primevue/multiselect'
 import FileUpload from 'primevue/fileupload'
 import Password from 'primevue/password';
 import Calendar from 'primevue/calendar'
-
-
+import Accordion from 'primevue/accordion'
+import AccordionTab from 'primevue/accordiontab'
+import OrganizationChart from 'primevue/organizationchart'
+import Chart from 'primevue/chart'
 //////////////////////////////////////////////////////////////////////////////////////////////
 import App from "@/App.vue";
 const pinia = createPinia();
@@ -123,6 +125,9 @@ app.component('Toast', Toast)
 app.component('MultiSelect', MultiSelect)
 app.component('FileUpload', FileUpload)
 app.component('Password ', Password )
+app.component('Accordion', Accordion)
+app.component('AccordionTab', AccordionTab)
+app.component('Chart', Chart)
 app.directive('can', (el, binding, vnode) =>{
   // console.log(JSON.parse(localStorage.getItem('permissions')))
   if (! JSON.parse(localStorage.getItem('userPermissions'))

@@ -14,6 +14,7 @@ const group = ref(null);
 const authStore = useAuthStore();
 const appLangStore = useAppLangStore();
 const routename=ref('')
+
 // methods
 // const onClick = () => {
 //     theme.value = theme.value === "light" ? "dark" : "light";
@@ -33,9 +34,12 @@ const isRtl = computed({
 watch(group, (newGroupValue) => {
   drawer.value = false;
 });
+watch(routename.value, (newValue, oldValue) => {
+         console.log('ssss')
+    });
 onMounted(async () => {
-  routename.value=router.currentRoute._rawValue.fullPath
-  console.log(router.currentRoute._rawValue.fullPath)
+  routename.value=router.currentRoute._rawValue.name
+  console.log(router.currentRoute._rawValue.name)
   await authStore.getUser();
 });
 </script>
@@ -150,6 +154,8 @@ onMounted(async () => {
       <!-- sidebar menu -->
       <v-navigation-drawer id="navbar" v-model="drawer">
         <v-list density="compact" nav>
+          <v-list-item prepend-icon="mdi-home"  :title="$t('dashbored')" 
+              :to="{ name: 'dashbord' }"></v-list-item>
           <v-list-group prepend-icon="mdi-shield-account" value="Admin">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('Adminstration')"></v-list-item>
@@ -274,7 +280,11 @@ onMounted(async () => {
 
               <v-list-item  :title="$t('area')" value="area"
               :to="{ name: 'regin' }"></v-list-item>
+
+              <v-list-item  :title="$t('veciles')" value="transportation"
+              :to="{ name: 'transportation' }"></v-list-item>
 <!--                
+
             <v-list-item  value="Pages" :to="{ name: 'ProgramType' }"
               class="mb-2 py-2"><v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("ProgramType") }}
@@ -326,44 +336,7 @@ onMounted(async () => {
         </v-container>
 <!-- CONTAINS of home page -->
 
-      <!--  <div v-if="router.currentRoute._rawValue.fullPath == '/sawa-admin'" class="grid   grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 px-1 ">
-        <div class="px-3 ">
-                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
-                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
-                  <div class="text-white">
-                    <p class="font-semibold text-3xl">237</p>
-                    <p>{{ $t("users") }}</p>
-                  </div>
-                </div>
-        </div>
-        <div class="px-3 ">
-                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
-                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
-                  <div class="text-white">
-                    <p class="font-semibold text-3xl">237</p>
-                    <p>{{ $t("users") }}</p>
-                  </div>
-                </div>
-        </div>
-        <div class="px-3 ">
-                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
-                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
-                  <div class="text-white">
-                    <p class="font-semibold text-3xl">237</p>
-                    <p>{{ $t("users") }}</p>
-                  </div>
-                </div>
-        </div>
-        <div class="px-3 ">
-                <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
-                  <i class="pi pi-user w-16 h-10 fill-current mr-4 " style="font-size: 2.5rem"></i>
-                  <div class="text-white">
-                    <p class="font-semibold text-3xl">237</p>
-                    <p>{{ $t("users") }}</p>
-                  </div>
-                </div>
-        </div>
-       </div> -->
+
 
         
        

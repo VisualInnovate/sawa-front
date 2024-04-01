@@ -297,5 +297,16 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   treatementname:"اسم العلاج",
   area:"المنطقة",
   area_name:"اسم المنطقة",
-  regin:"المنطقه الكبري"
+  regin:"المنطقه الكبري",
+  dashbored:"لوحة التحكم ",
+  type:"نوع المستخدم ",
+  veciles:" المواصلات",
+  driver_name:"اسم السائق",
+  vecile_type:"نوع المركبه",
+  seats_number:"عدد المقاعد",
+  Vehicle_ID:"رقم المركبة",
+  License_expiration:"تاريخ انتهاء الرخصه",
+  Insurance_date:"تاريخ التامين"
+
+
 };

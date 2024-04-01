@@ -69,6 +69,15 @@ td{
   background-color:#135C65 !important;
   border-radius: 0px !important;
 }
+.v-list-item--density-compact.v-list-item--one-line{
+  background-color: white  !important ;
+  color: black !important;
+  border-radius: 5px !important;
+}
+canvas {
+  width: 100% !important;
+  height: 60vh !important;
+}
 /* .fc-daygrid-block-event .fc-event-time, .fc-daygrid-block-event .fc-event-title{
   background-color: #135C65!important;
   color: white !important;

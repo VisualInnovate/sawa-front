@@ -39,7 +39,7 @@ export const useAuthStore = defineStore("Auth", {
         this.authUser = response.data.user;
         this.userPermissions = response.data.user.roles_permissions;
 
-        this.router.push({ name: "Home" });
+        this.router.push({ name: "dashbord" });
       } catch (error) {
         if (error.response.status === 422) {
           console.log(error);
@@ -63,7 +63,7 @@ export const useAuthStore = defineStore("Auth", {
         this.authenticated = true;
         this.token = response.data.token;
         this.authUser = response.data.user;
-        this.router.push({ name: "Home" });
+        this.router.push({ name: "dashbord" });
       } catch (error) {
         if (error.response.status === 422) {
           this.authErrors = error.response.data.errors;

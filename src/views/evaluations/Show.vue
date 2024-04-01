@@ -19,18 +19,18 @@ export default {
       },
     ],
 
-
-
-// <p></p>
     title: "",
+    skills:[],
+    skill:{},
     answers: [],
-    alert_text: '',
+   error:{},
     type: "success",
     snackbar: true,
     load:false,
     selected: [],
     children: [],
     selectBox: [],
+    c:{},
     child_id: '',
     child: '',
     numberOfMonth: '',
@@ -77,15 +77,17 @@ export default {
       axios.post(`/api/evaluations/${this.$route.params.id}/submit`, {
         'answers': this.answers,
         'child_id': this.child_id,
-        'date':this.examDate
+        'date':this.examDate,
+        skills:this.skills
       }).then(res => {
         if (res.data.status == 200) {
           this.child.childInMonths = -1 //reset child in months to -1 to not show any question header
-          this.alert_text = "evaluation added successfully "
+        
           this.type = "success"
         }
       }).catch((error) => {
-        this.alert_text = error.response.data.message
+
+       this.error=error.data
         this.type = "error"
       })
 
@@ -169,7 +171,8 @@ export default {
           axios.post(`/api/evaluations/${this.$route.params.id}/${prev}/basalAge`, {
             answers: this.answers,
             child_id: this.child_id,
-            date:this.examDate
+            date:this.examDate,
+            skills:this.skills
           }).then(res => {
             console.log(res.data.resultEvaluation)
           })
@@ -179,6 +182,16 @@ export default {
 
       })
     }, 
+
+    getallskills(){
+      axios.get("/api/skills").then((res)=>{
+        this.skill=res.data.data
+       
+  });
+    },
+
+
+
     getSpecificChildren() {
 
 
@@ -202,7 +215,7 @@ export default {
   , mounted() {
     this.getQuestions()
     this.getChildren()
-
+    this.getallskills()
     this.examDate =  moment(new Date()).format("YYYY-MM-DD HH:mm")
     
     console.log(this.examDate)
@@ -226,39 +239,34 @@ export default {
       {{$t('back')}}
     </v-btn>
     <v-sheet max-width="1200" class="mx-auto">
-      <v-alert
-          :type="type"
-          variant="tonal"
-          border="start"
-          elevation="2"
-          closable
-          :close-label="$t('close')"
-          :text="alert_text"
-          v-if="alert_text != '' "
-          class="mb-8"
-      >
-      </v-alert>
+      
       <h1 class="text-center"> {{ title }}</h1>
   
   
-      <v-form fast-fail ref="form" @submit.prevent="submit">
+      <v-form fast-fail ref="form" @submit.prevent="submit" class="shadow-lg lg:p-[2%]" >
+        
         <v-select
             label="Child"
             v-model="child_id"
             @update:modelValue="getSpecificChildren"
             :items="selectBox"
-            :rules="NameRules"
-        ></v-select>
-        <!-- <v-text-field
-            v-model="examDate"
-            :label="$t('examDate')"
-            type="datetime-local"
             
-        ></v-text-field> -->
-        <div class="card flex justify-content-center">
-          <Calendar style="width: 100%;" v-model="examDate" @change="fomate()" date-format="dd-mm-yy" showIcon :rules="NameRules"  :show-time="true"  />
-        
-      </div>
+        ></v-select>
+     
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              
+            <div class="flex flex-column gap-2 py-2">
+                  <label class="w-full text-right" for="username">{{ $t('created_at') }}</label>
+                  <Calendar style="width: 100%;" v-model="examDate" @change="fomate()" date-format="dd-mm-yy" showIcon :rules="NameRules"  :show-time="true"  />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-2">
+                  <label class="w-full text-right" for="username">{{ $t('skill_add') }}</label>
+                  <MultiSelect v-model="skills" filter option-value="id"  optionLabel="name" :options="skill" :placeholder='$t("skill_add")'
+              class="w-full md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+             </div>
        
         <div v-for="questions in Object.values(headerAndQuestions).reverse()">
   
@@ -286,7 +294,8 @@ export default {
           </div>
   
         </div>
-        <v-btn :loading="load" type="submit" block class="mt-2">{{ $t('submit') }}</v-btn>
+        <Button :loading="load" type="submit"  class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+        <!-- <v-btn :loading="load" type="submit" block class="create text-white lg:w-[50%] mt-2">{{ $t('submit') }}</v-btn> -->
   
       </v-form>
       

@@ -212,7 +212,7 @@ export default {
   },
 
   watch: {
-    "langStore.appLang"(newLang) {
+    "localStorage.appLang"(newLang) {
       if (newLang == "en") {
         this.opts.locale = "";
       } else {

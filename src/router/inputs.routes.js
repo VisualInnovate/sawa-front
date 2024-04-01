@@ -3,6 +3,12 @@
 
 
 const inputs = [
+  {
+    path: "/dashbord",
+    name: "dashbord",
+    component: () => import("../views/home.vue"),
+   
+  },
    
     { 
         path: '/area',
@@ -14,21 +20,22 @@ const inputs = [
       name: 'regin',
     component: () => import("../views/inputs/areas/regin/index.vue")
   },
-    // {
-    //   path: '/create-treatments-type', 
-    //   name: 'createtreatments',
-    //   component: () => import("../views/inputs/treatementtype/create.vue")
-    // },
-    // {
-    //   path: '/test-room', 
-    //   name: 'TestRoom',
-    //   component: () => import("../views/rooms/Test.vue")
-    // },
-    // {
-    // path: '/edit-room/:id',
-    // name: 'EditRoom',
-    // component: () => import("../views/rooms/Edit.vue")
-    // },
+  
+    {
+      path: '/transportation', 
+      name: 'transportation',
+      component: () => import("../views/inputs/vicales/index.vue")
+    },
+    {
+      path: '/transportation-create', 
+      name: 'transportation-create',
+      component: () => import("../views/inputs/vicales/create.vue")
+    },
+    {
+    path: '/transportation-update/:id',
+    name: 'transportation-update',
+    component: () => import("../views/inputs/vicales/update.vue")
+    },
 ];
 
 export default {

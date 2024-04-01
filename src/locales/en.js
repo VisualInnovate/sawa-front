@@ -282,5 +282,16 @@ merge:"Merge",
   treatementname:"Treatment Name",
   area:"Area",
   area_name:"Area name",
-  regin:"large area"
+  regin:"large area",
+  dashbored:"Panel control",
+  type:"user type",
+  veciles:"Transportation",
+  driver_name:"driver name",
+  vecile_type:"vehicle type",
+  Vehicle_ID:"Vehicle ID",
+  seats_number:"seats number",
+  License_expiration:"License expiration date",
+  Insurance_date:"Insurance Date"
+
+  
 };
