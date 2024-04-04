@@ -306,7 +306,14 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   seats_number:"عدد المقاعد",
   Vehicle_ID:"رقم المركبة",
   License_expiration:"تاريخ انتهاء الرخصه",
-  Insurance_date:"تاريخ التامين"
+  Insurance_date:"تاريخ التامين",
+  student_tans:"رحلة الطالب ",
+  One_way:"رحلة ذهاب ",
+  tow_way:"رحلة ذهاب وعودة",
+  trip_type:"نوع الرحلة",
+  student_location:"عنوان الطالب ",
+  transportation_schedule:"جدول الرحلة",
+  status:"الحالة"
 
 
 };

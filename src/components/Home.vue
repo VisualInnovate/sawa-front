@@ -283,12 +283,19 @@ onMounted(async () => {
 
               <v-list-item  :title="$t('veciles')" value="transportation"
               :to="{ name: 'transportation' }"></v-list-item>
+
+              <v-list-item  :title="$t('student_tans')" value="student-transportation"
+              :to="{ name: 'student-transportation' }"></v-list-item>
+
+              <v-list-item  :title="$t('transportation_schedule')" value="transportation-schedule"
+              :to="{ name: 'transportation-schedule' }"></v-list-item>
 <!--                
 
+transportation_schedule
             <v-list-item  value="Pages" :to="{ name: 'ProgramType' }"
               class="mb-2 py-2"><v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("ProgramType") }}
-              </v-list-item-title>
+              </v-list-item-title>student_tans
             </v-list-item> -->
 
             <!-- <v-list-item :to="{ name: 'SystemProgram' }" class="">

@@ -196,6 +196,12 @@ export default {
       time_start: "",
       time_end: "",
       opts: {
+        eventTimeFormat: { // like '14:30:00'
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  },
         plugins: [dayGridPlugin, interactionPlugin, TimeGridplugin, listPlugin],
         initialView: "dayGridMonth",
         footerToolbar: true,
@@ -455,9 +461,9 @@ export default {
             this.rooms.type=res.data.data.type
             this.rooms.admin_id=res.data.data.admin_id
         this.opts.events = res.data.data.slots.map(event => ({
-            title:  event.date,
-            start: event.date,
-            end: event.date,
+            title: event.date+"T"+event.to,
+            start: event.date+"T"+event.from,
+            end: event.date+"T"+event.to,
             id: event.id
           }));
        

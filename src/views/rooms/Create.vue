@@ -447,9 +447,9 @@ export default {
         console.log(res.data.data);
 
         this.opts.events = res.data.data.slots.map(event => ({
-            title: event.date,
-            start: event.date,
-            end: event.date,
+            title: event.date+"T"+event.to,
+            start: event.date+"T"+event.from,
+            end: event.date+"T"+event.to,
             id: event.id
           }));
        

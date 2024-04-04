@@ -291,7 +291,14 @@ merge:"Merge",
   Vehicle_ID:"Vehicle ID",
   seats_number:"seats number",
   License_expiration:"License expiration date",
-  Insurance_date:"Insurance Date"
-
+  Insurance_date:"Insurance Date",
+  student_tans:"Student journey",
+  One_way:"One way trip",
+  tow_way:"Round trip",
+  trip_type:"trip type",
+  student_location:"student location",
+  transportation_schedule:"transportation schedule",
+  status:"status",
+  
   
 };
