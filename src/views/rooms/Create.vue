@@ -39,12 +39,17 @@
               </div> 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('typeroom') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type_tow"  option-value="value" :options="arr2()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.type_tow">{{ error.type_tow[0] }}</div>
+              </div>
+              <div v-if="rooms.type_tow == 2" class="flex flex-column gap-2">
+                  <label for="username">{{ $t('typeroom') }}</label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
               </div>
                 
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('roomsnumber') }}</label>
+              <div  v-if="rooms.type_tow !=0 && rooms.type !=0 && rooms.type_tow  " class="flex flex-column gap-2">
+                  <label for="username">{{ $t('roomsnumber') + " "}}</label>
                   <InputNumber required class="bg-[#f7f5f5]" v-model="rooms.capacity" :placeholder='$t("roomsnumber")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.capacity">{{ error.capacity[0] }}</div>
               </div>
@@ -210,7 +215,7 @@ export default {
         },
 
         selectable: true,
-        droppable: false,
+        droppable: true,
         editable: true,
         selectHelper: true,
         validRange: {
@@ -240,16 +245,27 @@ export default {
             });
         },
         eventDrop: function (event) {
+        console.log(this.room_id)
+        const date1 = new Date(event.event.start);
+        const hours1 = String(date1.getHours()).padStart(2, '0');
+      const minutes1 = String(date1.getMinutes()).padStart(2, '0');
+      const date2 = new Date(event.event.end);
+        const hours2 = String(date2.getHours()).padStart(2, '0');
+      const minutes2 = String(date2.getMinutes()).padStart(2, '0');
           axios
-            .post(`/api/calender/${event.event.id}/update`, {
+            .post(`/api/slot`, {
               title: event.event.title,
-              start: moment(event.event.start).format("00:00:00 YYYY-MM-d"),
-              end: moment(event.event.end).format("00:00:00 YYYY-MM-d"),
+              from:hours1 +":"+minutes1,
+              to:hours2 +":"+minutes2,
+              room_id:this.room_id,
+              start_event: moment(event.event.start),
+              end_event: moment(event.event.end),
             })
             .then((res) => {
+              this.update()
               console.log(res.data.k);
             });
-        },
+        }.bind(this),
 
         eventClick: function (event) {
           this.event_id = event.event.id;
@@ -272,8 +288,10 @@ export default {
           this.visible = true;
 
           console.log(event);
+          const originalDate = new Date(event.end);
+          originalDate.setDate(originalDate.getDate() - 1);
           this.start_event = moment(event.start).format("YYYY-MM-DD");
-          this.end_event = moment(event.end).format("YYYY-MM-DD");
+          this.end_event = moment(originalDate.toISOString().split('T')[0]).format("YYYY-MM-DD");
           console.log(event.backgroundColor);
         }.bind(this),
       },
@@ -288,6 +306,18 @@ export default {
     Therapeutic (){
       this.$router.push({ name: 'Rooms' });
     },
+    arr2(){
+      return this.roomType =[
+            
+            { name:this.$t('Administrative') , value:0 },
+            { name:this.$t('social') , value:1},
+            { name:this.$t('Consultation_evaluation') , value:2},
+           
+           
+        ]
+    },
+
+    
     arr (){
       return this.roomType =[
             
@@ -417,6 +447,8 @@ export default {
       axios
         .post("/api/slot", {
           title: this.event_title,
+          end_event:this.end_event,
+          start_event:this.start_event,
           date: this.start_event,
           from: this.time_start,
           to: this.time_end,
@@ -444,13 +476,14 @@ export default {
     },
     update() {
       axios.get(`/api/room/${this.room_id}`).then((res) => {
-        console.log(res.data.data);
-
+        console.log(res.data.data.id);
+        this.room_id=res.data.data.id
         this.opts.events = res.data.data.slots.map(event => ({
-            title: event.date+"T"+event.to,
-            start: event.date+"T"+event.from,
-            end: event.date+"T"+event.to,
-            id: event.id
+            title: event.start_event+"T"+event.to,
+            start: event.start_event+"T"+event.from,
+            end: event.end_event+"T"+event.to,
+            id: event.id,
+            from:event.from
           }));
        
        

@@ -343,7 +343,7 @@ const initFilters = () => {
                   <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="type" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
             </div>
-            <div v-if="usersdata.types == 0" class="flex flex-column gap-2">
+            <div v-if="usersdata.type == 0" class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />
@@ -396,7 +396,7 @@ const initFilters = () => {
                   <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="type" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
             </div>
-            <div v-if="usersdata.types == 0" class="flex flex-column gap-2">
+            <div v-if="usersdata.type == 0" class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />

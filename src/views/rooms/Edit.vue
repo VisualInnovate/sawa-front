@@ -27,7 +27,7 @@
       <v-form class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
         <!-- ... existing code ... -->
           
-              <div class="flex flex-column gap-2">
+        <div class="flex flex-column gap-2">
                 <label for="username">{{ $t('roomnumber') }}</label>
               <InputText required class="bg-[#f7f5f5]" v-model="rooms.name" :placeholder='$t("roomnumber")' />
               <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
@@ -39,12 +39,19 @@
               </div> 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('typeroom') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type_tow"  option-value="value" :options="arr2()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.type_tow">{{ error.type_tow[0] }}</div>
+              </div>
+              <div v-if="rooms.type_tow == 2" class="flex flex-column gap-2">
+                  <label for="username">{{ $t('typeroom') }}</label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
               </div>
-                
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('roomsnumber') }}</label>
+             
+              
+              
+              <div  v-if="rooms.type_tow !=0 && rooms.type_tow  " class="flex flex-column gap-2">
+                  <label for="username">{{ $t('roomsnumber') + " "}}</label>
                   <InputNumber required class="bg-[#f7f5f5]" v-model="rooms.capacity" :placeholder='$t("roomsnumber")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.capacity">{{ error.capacity[0] }}</div>
               </div>
@@ -80,6 +87,32 @@
       >
         <form>
           <div>
+
+            <div v-if="updat_event" class="py-3">
+              <label  for="time_start">{{ $t("start_date") }}</label>
+              <Calendar
+              
+            style="width: 100%"
+            showButtonBar
+            v-model.number="start_event"
+            showIcon
+            placeholder="dd/mm/yy"
+            
+
+          />
+            </div>
+            <div v-if="updat_event" class="py-3">
+              <label for="time_start">{{ $t("end_date") }}</label>
+              <Calendar
+            style="width: 100%"
+            showButtonBar
+            v-model.number="end_event"
+            showIcon
+            placeholder="dd/mm/yy"
+         
+
+          />
+            </div>
             <div>
               <label for="time_start">{{ $t("from") }}</label>
               <input
@@ -110,20 +143,16 @@
               @click="createvent"
             />
             <Button
-              style="
-                background-color: #6241f1;
-                margin-left: 10px;
-                margin-right: 10px;
-                border: 0;
-              "
-              label="update "
+            icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
               v-if="updat_event"
               :loading="loading"
               @click="updateevent"
             />
             <Button
-              style="background-color: #b00020; border: 0"
-              label="Delet "
+            icon="pi pi-trash"
+                class="delete mt-2"
+          
               v-if="updat_event"
               :loading="loading"
               @click="deletevent"
@@ -244,16 +273,27 @@ export default {
             });
         },
         eventDrop: function (event) {
+       
+        const date1 = new Date(event.event.start);
+        const hours1 = String(date1.getHours()).padStart(2, '0');
+      const minutes1 = String(date1.getMinutes()).padStart(2, '0');
+      const date2 = new Date(event.event.end);
+        const hours2 = String(date2.getHours()).padStart(2, '0');
+      const minutes2 = String(date2.getMinutes()).padStart(2, '0');
           axios
-            .post(`/api/calender/${event.event.id}/update`, {
+            .post(`/api/slot`, {
               title: event.event.title,
-              start: moment(event.event.start).format("00:00:00 YYYY-MM-d"),
-              end: moment(event.event.end).format("00:00:00 YYYY-MM-d"),
+              from:hours1 +":"+minutes1,
+              to:hours2 +":"+minutes2,
+              room_id:this.$route.params.id,
+              start_event: moment(event.event.start),
+              end_event: moment(event.event.end),
             })
             .then((res) => {
+              this.update()
               console.log(res.data.k);
             });
-        },
+        }.bind(this),
 
         eventClick: function (event) {
           
@@ -272,16 +312,16 @@ export default {
         select: function (event) {
           console.log(event);
           this.event_title = "";
-          this.time_start = "";
-          this.time_end = "";
           this.modal_text = this.$t("create_event");
           this.creat_event = true;
           this.updat_event = false;
           this.visible = true;
 
           console.log(event);
+          const originalDate = new Date(event.end);
+          originalDate.setDate(originalDate.getDate() - 1);
           this.start_event = moment(event.start).format("YYYY-MM-DD");
-          this.end_event = moment(event.end).format("YYYY-MM-DD");
+          this.end_event = moment(originalDate.toISOString().split('T')[0]).format("YYYY-MM-DD");
           console.log(event.backgroundColor);
         }.bind(this),
       },
@@ -295,6 +335,16 @@ export default {
     // ... existing methods ...
     Therapeutic (){
       this.$router.push({ name: 'Rooms' });
+    },
+    arr2(){
+      return this.roomType =[
+            
+            { name:this.$t('Administrative') , value:0 },
+            { name:this.$t('social') , value:1},
+            { name:this.$t('Consultation_evaluation') , value:2},
+           
+           
+        ]
     },
     arr (){
       return this.roomType =[
@@ -406,7 +456,8 @@ export default {
       axios
         .put(`/api/slot/${this.event_id}`, {
           
-          date: this.start_event ,
+          start_event:this.start_event,
+          end_event:this.end_event,
           from: this.time_start,
           
           to: this.time_end,
@@ -431,6 +482,8 @@ export default {
       axios
         .post("/api/slot", {
           title: this.event_title,
+          end_event:this.end_event,
+          start_event:this.start_event,
           date: this.start_event,
           from: this.time_start,
           to: this.time_end,
@@ -442,10 +495,11 @@ export default {
           if (res.status != 200) {
             this.valid = true;
           }
+          this.update();
         });
      
       setTimeout(() => {
-        this.update();
+        
           (this.event_title = null),
           (this.start_event = null),
           (this.end_event = null),
@@ -459,12 +513,14 @@ export default {
         this.rooms.name=res.data.data.name
             this.rooms.capacity=res.data.data.capacity
             this.rooms.type=res.data.data.type
-            this.rooms.admin_id=res.data.data.admin_id
-        this.opts.events = res.data.data.slots.map(event => ({
-            title: event.date+"T"+event.to,
-            start: event.date+"T"+event.from,
-            end: event.date+"T"+event.to,
-            id: event.id
+            this.rooms.admin_id=res.data.data.admin_id 
+            this.rooms.type_tow=res.data.data.type_tow 
+            this.opts.events = res.data.data.slots.map(event => ({
+            title: event.start_event+"T"+event.to,
+            start: event.start_event+"T"+event.from,
+            end: event.end_event+"T"+event.to,
+            id: event.id,
+            from:event.from
           }));
        
        

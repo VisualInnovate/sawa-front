@@ -299,6 +299,8 @@ merge:"Merge",
   student_location:"student location",
   transportation_schedule:"transportation schedule",
   status:"status",
-  
+  Administrative:"Administrative",
+  social:"social",
+  Consultation_evaluation:"Consultation or evaluation"
   
 };

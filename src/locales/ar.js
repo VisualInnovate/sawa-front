@@ -313,7 +313,10 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   trip_type:"نوع الرحلة",
   student_location:"عنوان الطالب ",
   transportation_schedule:"جدول الرحلة",
-  status:"الحالة"
+  status:"الحالة",
+  Administrative:"اداري",
+  social:"اجتماعي",
+  Consultation_evaluation:"استشاره او تقيم"
 
 
 };
