@@ -1,6 +1,7 @@
 <script setup>
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
+import { useI18n } from 'vue-i18n';
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -10,14 +11,26 @@ const router = useRouter()
 const usersdata=ref({
  
 })
-
+const { t } = useI18n();
 const roles=ref([])
 const skills=ref([])
-const type=ref([
-    { name: 'doctor', id: '0' },
-    { name: 'user', id: '1' },
 
-])
+
+
+const tpes=()=>{
+  return[
+   
+   { name: t('driver'), id: '1' },
+  { name: t('doctor'), id: '2' },
+  { name: t('room_admin'), id: '4' },
+  { name:  t('Evaluator'), id: '5' },
+
+]
+}
+
+
+
+
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -191,7 +204,7 @@ const initFilters = () => {
 </script>
 
 <template>
-  <div  class="grid" style="overflow-x: scroll !important;">
+  <div  class="grid" style="max-height: 90vh !important; overflow: scroll;">
     <div class="col-12">
       <va-card class="card">
         <Toolbar class="mb-4 shadow-md">
@@ -281,11 +294,7 @@ const initFilters = () => {
               {{ slotProps.data.title }}
             </template>
            </Column>
-           <Column  field="title" :header='$t("roles")' :sortable="true" header-style="width:14%; min-width:11rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data?.roles[0]?.name }}
-            </template>
-           </Column>
+         
           
 
 
@@ -340,10 +349,10 @@ const initFilters = () => {
             </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('type') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="type" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="tpes()" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
             </div>
-            <div v-if="usersdata.type == 0" class="flex flex-column gap-2">
+            <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />
@@ -393,7 +402,7 @@ const initFilters = () => {
             </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('type') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="type" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="tpes()" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
             </div>
             <div v-if="usersdata.type == 0" class="flex flex-column gap-2">

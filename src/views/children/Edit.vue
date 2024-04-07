@@ -71,8 +71,8 @@ export default {
       >
       </v-alert>
   
-      <v-form fast-fail @submit.prevent>
-        <div class="flex flex-column gap-2 py-2">
+      <v-form fast-fail @submit.prevent class="animate__animated animate__zoomIn ">
+        <div class="animate__animated animate__zoomIn  flex flex-column gap-2 py-2">
                 <label for="username">{{ $t('child_name') }}</label>
               <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' />
               <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>

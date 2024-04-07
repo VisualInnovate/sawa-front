@@ -301,6 +301,10 @@ merge:"Merge",
   status:"status",
   Administrative:"Administrative",
   social:"social",
-  Consultation_evaluation:"Consultation or evaluation"
+  Consultation_evaluation:"Consultation or evaluation",
+  driver:"driver",
+  doctor:"doctor",
+  room_admin:"room admin",
+  Evaluator:"Evaluator"
   
 };

@@ -122,7 +122,7 @@
   
       getusers(){
         axios
-          .post("api/users")
+          .post("api/driver")
           .then((response) => {
             console.log(response.data.data)
             this.drivers = response.data.users.data;

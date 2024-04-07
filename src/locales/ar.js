@@ -316,7 +316,10 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   status:"الحالة",
   Administrative:"اداري",
   social:"اجتماعي",
-  Consultation_evaluation:"استشاره او تقيم"
-
+  Consultation_evaluation:"استشاره او تقيم",
+  driver:"سائق",
+  doctor:"الدكتور",
+  room_admin:"مسئول الاقاعة",
+  Evaluator:"المقييم"
 
 };

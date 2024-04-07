@@ -59,7 +59,7 @@ export default {
     <v-sheet max-width="1200" class="mx-auto">
      
     
-      <v-form class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-1 shadow-lg" fast-fail @submit.prevent>
+      <v-form class="animate__animated animate__zoomIn  p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-1 shadow-lg" fast-fail @submit.prevent>
         <div class="flex flex-column gap-2 py-2">
                 <label for="username">{{ $t('child_name') }}</label>
               <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' />

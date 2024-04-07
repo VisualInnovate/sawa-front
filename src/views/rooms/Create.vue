@@ -24,7 +24,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-form class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+      <v-form class="animate__animated animate__zoomIn  p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
         <!-- ... existing code ... -->
           
               <div class="flex flex-column gap-2">
@@ -321,7 +321,7 @@ export default {
     arr (){
       return this.roomType =[
             
-                { name:this.$t('typeroom2') , value:0 },
+                { name:c , value:0 },
                 { name:this.$t('typeroom1') , value:1},
                 { name:this.$t('typeroom3') , value:2},
                
@@ -364,15 +364,16 @@ export default {
     },
     getAllDoctor() {
       axios
-        .get("api/doctors")
+        .get("api/hall/official")
         .then((response) => {
-          this.doctors = response.data.doctors;
+          this.doctors = response.data.HallOfficial;
           console.log(this.doctors);
         })
         .catch((error) => {
           console.error("Error retrieving doctors:", error);
         });
     },
+    
   
     createtreatment() {
       this.timeshow=!(this.timeshow)
