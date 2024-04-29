@@ -158,7 +158,9 @@ const createuser=()=>{
     body.append("password", usersdata.value.password);
     body.append("image", usersdata.value.file);
     body.append("role", usersdata.value.role);
-    body.append("skills", usersdata.value.skills);
+    if(usersdata.value.skills){
+      body.append("skills", usersdata.value.skills);
+    }
     body.append("type",usersdata.value.type)
 
   
@@ -391,11 +393,13 @@ const initFilters = () => {
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="">
-                 <div class=""><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :src="usersdata.image" >
+                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src="usersdata.image" >
+                  <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-else src="../frontend/image/Ellipse2.png" >
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
                   </div>
            
           </div>
-          <div class="flex flex-column gap-2 py-1">
+            <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('name') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.name" :placeholder='$t("name")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
@@ -405,7 +409,7 @@ const initFilters = () => {
                   <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="tpes()" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
             </div>
-            <div v-if="usersdata.type == 0" class="flex flex-column gap-2">
+            <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />
@@ -434,7 +438,7 @@ const initFilters = () => {
             </div>
             <div class=" flex-column gap-2 py-1 hidden">
                   <label class="w-full text-right" for="username">{{ $t('personal_image') }}</label>
-                  <InputText name="file"  ref="file" @change="uploadFile" accept="image/*"  id="filr" type="file" class="w-full" />
+                  <InputText name="file"  ref="file" @change="uploadFile" accept="image/*" id="filr"   type="file" class="w-full" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
             </div>
            <div class="w-full text-center">

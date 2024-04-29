@@ -78,6 +78,18 @@ const routes = [
     beforeEnter: guestForNormalUser,
   },
   {
+    path: "/web/parent/forgetpassword",
+    name: "forgetpassword",
+    component: ()=>import("../views/frontend/views/forgetpassword.vue"),
+    beforeEnter: guestForNormalUser,
+  },
+  {
+    path: "/web/parent/restepassword",
+    name: "restepassword",
+    component: ()=>import("../views/frontend/views/resetpassword.vue"),
+    beforeEnter: guestForNormalUser,
+  },
+  {
     path: "/web/code",
     name: "code",
     component: code,

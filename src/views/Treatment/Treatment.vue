@@ -50,9 +50,11 @@
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.program_type"  option-value="value" :options="programetype()" optionLabel="name" :placeholder='$t("ProgramType")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.program_type">{{ error.program_type[0] }}</div>
               </div> 
+
+             
               <div  v-if="treatments.session_type == 0 || treatments.session_type == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('number_sessaion') }}</label>
-                  <InputNumber required class="  bg-[#f7f5f5]" v-model="treatments.individual_sessions" :placeholder='$t("number_sessaion")' />
+                  <InputNumber   required class="  bg-[#f7f5f5]"  @update:model-value="sparte" v-model="treatments.individual_sessions" :placeholder='$t("number_sessaion")' />
                   <small id="username-help"></small>
               </div>
               
@@ -61,8 +63,15 @@
        
               <div v-if="treatments.session_type == 1 || treatments.session_type == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('gruop_sessaion') }}</label>
-                  <InputNumber required class="bg-[#f7f5f5]" v-model="treatments.collective_sessions" :placeholder='$t("gruop_sessaion")' />
+                  <InputNumber  required class="bg-[#f7f5f5]" v-model="treatments.collective_sessions"  @update:model-value="sparte" :placeholder='$t("gruop_sessaion")' />
                   <small id="username-help"></small>
+              </div>
+
+
+              <div   class="flex flex-column gap-2">
+                  <label for="username">{{ $t('Spotter') }}</label>
+                  <InputNumber required class="  bg-[#f7f5f5]" v-model="treatments.Spotter" :readonly="true" :placeholder='$t("Spotter")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.Spotter">{{ error.Spotter[0] }}</div>
               </div>
               <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
@@ -114,6 +123,20 @@ export default {
                
             ]
     },
+    sparte(){
+      console.log("csacsa")
+      if(this.treatments.collective_sessions && this.treatments.individual_sessions){
+        this.treatments.Spotter= this.treatments.collective_sessions + this.treatments.individual_sessions
+      }
+      if(this.treatments.collective_sessions){
+           this.treatments.Spotter= this.treatments.collective_sessions
+      }
+      if( this.treatments.individual_sessions){
+           this.treatments.Spotter= this.treatments.individual_sessions
+      }
+      
+    },
+
     programetype (){
       return this.roomType =[
             
@@ -132,22 +155,10 @@ export default {
           console.log(this.treatmentTypes);
         })
         .catch((error) => {
-          console.error("Error retrieving Appointment Types:", error);
+    
         });
     },
 
-    getprograme(){
-      axios
-        .get("api/treatmentcounts")
-        .then((response) => {
-          // this.treatmentTypes = response.data.treatmentTypes;
-          console.log(this.treatmentTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving Appointment Types:", error);
-        });
-
-    },
 
   
     createtreatment() {
@@ -163,7 +174,7 @@ export default {
       axios.post("/api/program",this.treatments).then((res) => {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
       }).catch((el)=>{
-        console.log(el.response.data.errors.name)
+      
      this.error = el.response.data.errors
     })
     },
@@ -172,7 +183,7 @@ export default {
     },
   },
   mounted() {
-   this.getprograme()
+
   },
 };
 </script>

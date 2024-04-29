@@ -167,14 +167,10 @@ const initFilters = () => {
               {{ slotProps.data.price }}
             </template>
            </Column>
-           <Column field="collective_sessions" :header='$t("gruop_sessaion")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+          
+           <Column field="Spotter" :header='$t("Spotter")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.collective_sessions }}
-            </template>
-           </Column>
-           <Column field="individual_sessions" :header='$t("number_sessaion")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.individual_sessions }}
+              {{ slotProps.data.sessions_number }}
             </template>
            </Column>
            <Column field="program_type" :header='$t("ProgramType")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">

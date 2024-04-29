@@ -22,7 +22,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-form class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <v-form class="p-[2%] animate-pulse bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
           <!-- ... existing code ... -->
             
               
@@ -122,10 +122,10 @@
   
       getusers(){
         axios
-          .post("api/driver")
+          .get("api/driver")
           .then((response) => {
             console.log(response.data.data)
-            this.drivers = response.data.users.data;
+            this.drivers = response.data.driver
            
           })
           .catch((error) => {

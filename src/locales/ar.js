@@ -86,7 +86,7 @@ price:"السعر",
   name:"الاسم",
   You_can_now_create_your_own_account_with_us_to_follow_up_your_requests_directly:
     "يمكنك الآن إنشاء حسابك الخاص معنا لمتابعة طلباتك مباشرة",
-  If_you_do_not_have_an_account: "اذا كنت تمتلك لا حساب اضغط هنا",
+  If_you_do_not_have_an_account: "اذا كنت لا تمتلك  حساب اضغط هنا",
   Create_an_account: "انشاء حساب",
   about_us: " من نحن",
   connect_us: "تواصل معنا",
@@ -320,6 +320,8 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   driver:"سائق",
   doctor:"الدكتور",
   room_admin:"مسئول الاقاعة",
-  Evaluator:"المقييم"
+  Evaluator:"المقييم",
+  Spotter:"النصاب",
+  forgetpass:"? نسيت كلمة المرور"
 
 };

@@ -138,6 +138,7 @@ const initFilters = () => {
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
           v-can="'room show'"
+        
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">

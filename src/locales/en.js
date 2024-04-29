@@ -305,6 +305,7 @@ merge:"Merge",
   driver:"driver",
   doctor:"doctor",
   room_admin:"room admin",
-  Evaluator:"Evaluator"
-  
+  Evaluator:"Evaluator",
+  Spotter:"Spotter",
+  forgetpass:"Forgotten password?"  
 };

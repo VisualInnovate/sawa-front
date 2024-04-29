@@ -38,19 +38,11 @@
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_id"  @update:model-value=" getAllDoctor"   option-value="id" filter :options="child" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.student_id">{{ error.student_id[0] }}</div>
                 </div> 
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('roomdoctor') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.roomdoctor"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
-                </div> 
+            
 
                
                   
-                <div class="flex flex-column gap-2 invisible">
-                    <label for="username">{{ $t('Sn') }}</label>
-                    <InputNumber required class="bg-[#f7f5f5]" v-model="student.capacity" :placeholder='$t("Sn")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.capacity">{{ error.capacity[0] }}</div>
-                </div>
+           
 
                 <div v-if="student.program_id && maxcapsity>0 && setiontype != 1 " class="flex flex-column gap-2">
                     <label for="username">{{ $t('Typetreatment') }}-</label>
@@ -375,7 +367,7 @@
             
         }
         this.capasity.push(this.capasityboj);
-        this.maxcapsity= this.maxcapsity-this.student.sessions_number
+       this.maxcapsity=  this.maxcapsity - this.student.sessions_number
              });
 
         
@@ -383,9 +375,11 @@
       },
       getprograme(e){
                 this.capasity=[]
+                this.student.sessions_number=''
         axios.get(`/api/program/${this.student.program_id}`).then((res) => {
-                this.maxcapsity=res.data.data.sessions_number
+                this.maxcapsity=res.data.data.individual_sessions
                 this.setiontype=res.data.data.session_type
+                
 
              });
      
@@ -557,11 +551,12 @@
           console.log(res.data.data);
   
           this.opts.events = res.data.data.map(event => ({
-              title:"from "+ event.from +" "+"to " +event.to,
-              start: event.date,
-              end: event.date,
-              id: event.id
-            }));
+            title: event.start_event+"T"+event.to,
+            start: event.start_event+"T"+event.from,
+            end: event.end_event+"T"+event.to,
+            id: event.id,
+            from:event.from
+          }));
          
          
           

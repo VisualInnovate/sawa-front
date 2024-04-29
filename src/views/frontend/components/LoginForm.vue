@@ -80,6 +80,15 @@
                   {{ $t("Create_an_account") }}
                 </router-link>
               </p>
+              <p class="text-xl">
+              
+                <router-link
+                  :to="{ name: 'forgetpassword' }"
+                  class="px-2 text-[#649297]"
+                >
+                  {{ $t("forgetpass") }}
+                </router-link>
+              </p>
             </div>
           </div>
         </form>

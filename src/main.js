@@ -58,6 +58,7 @@ import AccordionTab from 'primevue/accordiontab'
 import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 import App from "@/App.vue";
 const pinia = createPinia();
@@ -122,6 +123,7 @@ app.component('InputNumber', InputNumber)
 app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
 app.component('DynamicDialog', DynamicDialog)
+
 app.component('Toast', Toast)
 app.component('MultiSelect', MultiSelect)
 app.component('FileUpload', FileUpload)
