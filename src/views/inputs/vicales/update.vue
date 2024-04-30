@@ -175,10 +175,11 @@
   
       getusers(){
         axios
-          .post(`api/driver`)
+          .get(`api/driver`)
           .then((response) => {
+            
             console.log(response.data.data)
-            this.drivers = response.data.users.data;
+            this.drivers = response.data.driver;
             this.getonevecile()
           })
           .catch((error) => {

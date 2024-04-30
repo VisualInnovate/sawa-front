@@ -181,11 +181,7 @@ const initFilters = () => {
            
             </template>
            </Column>
-           <Column field="license_exp_date" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.price }}
-            </template>
-           </Column>
+          
 
            <Column field="type" :header='$t("vecile_type")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">

@@ -20,10 +20,10 @@ const skills=ref([])
 const tpes=()=>{
   return[
    
-   { name: t('driver'), id: '1' },
-  { name: t('doctor'), id: '2' },
-  { name: t('room_admin'), id: '4' },
-  { name:  t('Evaluator'), id: '5' },
+   { name: t('driver'), id: 1 },
+  { name: t('doctor'), id: 2 },
+  { name: t('room_admin'), id: 4 },
+  { name:  t('Evaluator'), id: 5 },
 
 ]
 }
@@ -84,6 +84,8 @@ const edit=(id)=>{
     loading.value= false
     usersdata.value= res.data.user
     usersdata.value.role= res.data.user.roles.id
+   
+    usersdata.value.type= res.data.user.type
 //     for (let i = 0; i < res.data.role.permissions.length; i++) {
 //       res.data.role.permissions[i].id
 //       role.value.permissions.push(res.data.role.permissions[i].id)

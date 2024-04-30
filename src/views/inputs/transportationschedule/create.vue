@@ -44,7 +44,7 @@
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('start_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :maxDate="maxDate" />
+                    <Calendar  style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
 
                 </div> 
