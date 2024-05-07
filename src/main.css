@@ -89,3 +89,12 @@ canvas {
   background-color: white !important;
   border: 0 !important;
 } */
+
+
+@media (min-width: 1280px) {
+ 
+      .v-container {
+          max-width: 1300px !important;
+          /* width: 100%; */
+      }
+  }

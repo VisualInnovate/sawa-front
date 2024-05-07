@@ -364,9 +364,9 @@ export default {
     },
     getAllDoctor() {
       axios
-        .get("api/hall/official")
+        .get("api/doctors")
         .then((response) => {
-          this.doctors = response.data.HallOfficial;
+          this.doctors = response.data.doctors;
           console.log(this.doctors);
         })
         .catch((error) => {

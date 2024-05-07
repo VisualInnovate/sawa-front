@@ -8,6 +8,8 @@ export const useAuthStore = defineStore("Auth", {
     authUser: useStorage("authUser", {}),
     authenticated: useStorage("authenticated", false),
     userPermissions: useStorage("userPermissions", []),
+    type: useStorage("type", []),
+    user_id: useStorage("user_id", []),
     authErrors: [],
     token: useStorage("token", null),
     msg: "",
@@ -38,7 +40,8 @@ export const useAuthStore = defineStore("Auth", {
         this.token = response.data.tokens;
         this.authUser = response.data.user;
         this.userPermissions = response.data.user.roles_permissions;
-
+        this.type=response.data.user.type
+        this.user_id=response.data.user.user_id
         this.router.push({ name: "dashbord" });
       } catch (error) {
         if (error.response.status === 422) {

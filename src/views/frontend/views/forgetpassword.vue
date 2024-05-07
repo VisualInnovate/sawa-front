@@ -95,7 +95,7 @@
 
         forget(){
             axios
-        .post("api/forgot/password",{
+        .post("api/forgot-password",{
             email:this.parent.email
         })
         .then((response) => {

@@ -22,7 +22,6 @@ const tpes=()=>{
    
    { name: t('driver'), id: 1 },
   { name: t('doctor'), id: 2 },
-  { name: t('room_admin'), id: 4 },
   { name:  t('Evaluator'), id: 5 },
 
 ]
@@ -291,11 +290,6 @@ const initFilters = () => {
            <Column field="email" :header='$t("email")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.email }}
-            </template>
-           </Column>
-           <Column field="title" :header='$t("title")' :sortable="true" header-style="width:14%; min-width:11rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.title }}
             </template>
            </Column>
          

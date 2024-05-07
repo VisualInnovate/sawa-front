@@ -25,6 +25,9 @@ export default {
     return {
       langStore: useAppLangStore(),
       visible: false,
+      doctorshow:"",
+      doctors:{},
+      user_type:'',
       create_visible: false,
       event_id: null,
       creat_event: ref(false),
@@ -166,8 +169,13 @@ export default {
     },
     async createvent() {
       this.loading = true;
+      if(localStorage.getItem("type") == 2 ){
+            this.user_type=localStorage.getItem("user_id")
+        }
       axios
         .post("/api/calender/create", {
+          user_id:this.user_type,
+         
           title: this.event_title,
           start: this.start_event,
           end: this.end_event,
@@ -198,9 +206,24 @@ export default {
     refreshEvents() {
       this.$refs.calendar.$emit("refetch-events");
     },
+
+fetchdoctor(){
+  axios
+        .get("api/doctors")
+        .then((response) => {
+          this.doctors = response.data.doctors;
+          console.log(this.doctors);
+        })
+        .catch((error) => {
+          console.error("Error retrieving doctors:", error);
+        });
+}
+
   },
 
   mounted() {
+    this.fetchdoctor()
+    this.doctorshow =localStorage.getItem("type")
     if (localStorage.appLang == "en") {
       console.log("ascasc");
     } else {
@@ -252,6 +275,12 @@ export default {
       >
         <form>
           <div>
+          
+            <div v-if="doctorshow != 2 " class="flex flex-column gap-2">
+                  <label for="username">{{ $t('roomdoctor') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="user_type"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
+            </div> 
             <div>
               <label for="time_start">{{ $t("from") }}</label>
               <input

@@ -50,7 +50,7 @@
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('seats_number') }}</label>
-                    <InputNumber inputId="minmaxfraction" :minFractionDigits="2" :maxFractionDigits="5" required class="bg-[#f7f5f5]" v-model="student.available_seats" :placeholder='$t("seats_number")' />
+                    <InputNumber  required class="bg-[#f7f5f5]" v-model="student.available_seats" :placeholder='$t("seats_number")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.available_seats">{{ error.available_seats[0] }}</div>
                 </div> 
         

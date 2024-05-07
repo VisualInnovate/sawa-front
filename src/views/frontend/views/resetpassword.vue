@@ -78,16 +78,18 @@
                 <div style="display: grid;" class="mt-1 mb-1 text-red-500" v-if="error?.password">{{ error.password[0] }}</div>
               </div>
               <div class="flex flex-col">
+                <otp-entry></otp-entry>
                 <input
                   style="border-bottom: 2px solid black"
-                  v-model="parent.otp"
+                  v-model="parent.code"
                   type="text"
                   id="child_name"
                   :placeholder="$t('otp')"
                   class="min-w-full text-xl bg-white/10 focus:ring-0 text-center"
                 />
-                <div class="mt-1 mb-1 text-red-500" v-if="error?.otp">{{ error.otp[0] }}</div>
+                <div class="mt-1 mb-1 text-red-500" v-if="error?.code">{{ error.code[0] }}</div>
               </div>
+              
 
   
                 <button
@@ -113,13 +115,19 @@
         </div>
       </div>
     </section>
+    
   </template>
   <script>
   import { useParentStore } from "../../../stores/ParentStore";
   import Map from "../components/Map.vue";
+  import OtpEntry from '../components/OtpEntry.vue';
+  
+
+
+
   import axios from "axios";
   export default {
-    components: { Map },
+    components: { Map, },
     props: ["alert"],
     data() {
       return {
@@ -133,9 +141,10 @@
 
         forget(){
             axios
-        .post("api/rest/password",this.parent)
+        .post("api/reast-password",this.parent)
         .then((response) => {
-            this.$router.push({ name: 'restepassword' });
+          console.log(response)
+            this.$router.push({ name: 'parentLogin' });
         }).catch((el)=>{
        
        this.error = el.response.data.errors

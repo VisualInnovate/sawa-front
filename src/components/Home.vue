@@ -337,7 +337,7 @@ transportation_schedule
       </v-navigation-drawer>
 
       <!-- this is main content for the application -->
-      <v-main>
+      <v-main style="width:100% !important;">
         <v-container>
           <RouterView />
         </v-container>
