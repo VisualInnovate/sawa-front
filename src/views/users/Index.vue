@@ -86,9 +86,10 @@ const edit=(id)=>{
    
     usersdata.value.type= res.data.user.type
  
-    for (let i = 0; i < res.data.role.permissions.length; i++) {
-      res.data.role.permissions[i].id
-      role.value.permissions.push(res.data.role.permissions[i].id)
+    for (let i = 0; i < res.data.user.skills.length; i++) {
+      
+      
+      usersdata.value.skills.push(res.data.user.skills[i].id)
 }
     console.log(users.value)
 

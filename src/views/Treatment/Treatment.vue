@@ -68,11 +68,11 @@
               </div>
 
 
-              <div   class="flex flex-column gap-2">
+              <!-- <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('Spotter') }}</label>
                   <InputNumber required class="  bg-[#f7f5f5]" v-model="treatments.Spotter" :readonly="true" :placeholder='$t("Spotter")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.Spotter">{{ error.Spotter[0] }}</div>
-              </div>
+              </div> -->
               <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                 <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
