@@ -85,10 +85,11 @@ const edit=(id)=>{
     usersdata.value.role= res.data.user.roles.id
    
     usersdata.value.type= res.data.user.type
-//     for (let i = 0; i < res.data.role.permissions.length; i++) {
-//       res.data.role.permissions[i].id
-//       role.value.permissions.push(res.data.role.permissions[i].id)
-// }
+ 
+    for (let i = 0; i < res.data.role.permissions.length; i++) {
+      res.data.role.permissions[i].id
+      role.value.permissions.push(res.data.role.permissions[i].id)
+}
     console.log(users.value)
 
   });
@@ -102,15 +103,16 @@ const edit=(id)=>{
 const editesuser=()=>{
   const body = new FormData();
   console.log(usersdata.value.name)
-  if(usersdata.value.name && usersdata.value.email && usersdata.value.title && usersdata.value.password && usersdata.value.file && usersdata.value.role ){
     body.append("name", usersdata.value.name);
     body.append("email", usersdata.value.email);
     body.append("title", usersdata.value.title);
     body.append("password", usersdata.value.password);
     body.append("image", usersdata.value.file);
     body.append("role", usersdata.value.role);
-
-  };
+    if(usersdata.value.skills){
+      body.append("skills", usersdata.value.skills);
+    }
+    body.append("type",usersdata.value.type)
     axios
     .post(`/api/users/${confir_id.value}/edit`,body)
     .then((res) => {

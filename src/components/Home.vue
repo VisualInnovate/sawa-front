@@ -234,6 +234,15 @@ onMounted(async () => {
            
               
           </v-list-group>
+          <v-list-group prepend-icon="mdi-bed">
+            <template #activator="{ props }" value="Evaluation">
+              <v-list-item v-bind="props" title="VB"></v-list-item>
+            </template>
+            
+            <v-list-item :title="$t('levels')" value="SideProfiles" :to="{ name: 'levels' }"></v-list-item>
+           
+              
+          </v-list-group>
 
           <v-list-group prepend-icon=" mdi-calendar" value="Calender">
             <template #activator="{ props }">

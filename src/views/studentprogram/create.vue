@@ -41,9 +41,6 @@
             
 
                
-                  
-           
-
                 <div v-if="student.program_id && maxcapsity>0 && setiontype != 1 " class="flex flex-column gap-2">
                     <label for="username">{{ $t('Typetreatment') }}-</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.Type"  option-value="id" filter :options="treaments" optionLabel="name" :placeholder='$t("Typetreatment")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
@@ -73,11 +70,11 @@
                   <Button  v-if="buttomaddcal" @click="createtreatment" :loading="timeshow" class="create m-auto w-full  lg:w-[50%] " icon="pi pi-plus" :label='$t("Add_appointment")'></Button>
                   <small id="username-help"></small>
                 </div> -->
-               
                 
-  
         
         </v-form>
+        <!-- <Button   @click="deletearray"  :label='$t("submit")' class="delete m-auto s "  ></Button> -->
+
        <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-1 gap-4">
         <div class="px-[2%] py-1 flex">
             <ol>
@@ -103,68 +100,7 @@
       />
       <div class="mt-1 mb-5 text-red-500" v-if="error?.time_slots">{{ error.time_slots[0] }}</div>
       <div class="card flex justify-content-center">
-        <Dialog
-          v-model:visible="visible"
-          id="modal"
-          modal
-          :header="modal_text"
-          :style="{ width: '40vw' }"
-        >
-          <form>
-            <div>
-              <div>
-                <label for="time_start">{{ $t("from") }}</label>
-                <input
-                class="cal"
-                  type="time"
-                  name="time_start"
-                  id="time_start"
-                  v-model="time_start"
-                  style="border-radius: 5px"
-                />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.from">{{ error.from[0] }}</div>
-              </div>
-              <div>
-                <label for="time_end">{{ $t("to") }}</label>
-                <input
-                  class="cal"
-                  type="time"
-                  name="time_end"
-                  id="time_end"
-                  v-model="time_end"
-                  style="border-radius: 5px"
-                />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.to">{{ error.to[0] }}</div>
-              </div>
-              <Button
-                style="background-color: rgb(4, 171, 4); border: 0"
-                label="Create "
-                v-if="creat_event"
-                :loading="loading"
-                @click="createvent"
-              />
-              <Button
-                style="
-                  background-color: #6241f1;
-                  margin-left: 10px;
-                  margin-right: 10px;
-                  border: 0;
-                "
-                label="update "
-                v-if="updat_event"
-                :loading="loading"
-                @click="updateevent"
-              />
-              <Button
-                style="background-color: #b00020; border: 0"
-                label="Delet "
-                v-if="updat_event"
-                :loading="loading"
-                @click="deletevent"
-              />
-            </div>
-          </form>
-        </Dialog>
+
         
       </div>
       <div class="flex flex-column gap-2 w-full">
@@ -178,6 +114,18 @@
   
   
     </v-card>
+
+    <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+      <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('doctor') }}</label>
+                  <Dropdown  @update:model-value="pushtimeslot"  required id="pv_id_1" style="direction: ltr !important;" v-model="admin_id"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("doctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
+                    <Button   @click="addtimedoctor"  class="create m-auto w-full  lg:w-[50%] "  :label='$t("submit")'></Button>
+
+              </div> 
+              <Button @click="cansel" style="position: absolute; top:15px ;right: 15px;" icon="pi pi-times" severity="danger" rounded aria-label="Cancel" />
+        </Dialog>
+
   </template>
   
   <script>
@@ -203,6 +151,9 @@
     },
     data() {
       return {
+        doctors:{},
+        admin_id:"",
+        deleteDialog:false,
         setiontype:"",
         programes:{},
         child:{},
@@ -302,7 +253,6 @@
             this.handleEventClick(event)
             this.time_slotename.push(event.event.title)
             console.log( this.time_slotename)
-             this.pushtimeslot()
             this.start_event = moment(event.event.start).format("YYYY-MM-DD");
             this.end_event = moment(event.event.end).format("YYYY-MM-DD");
             console.log(this.start_event);
@@ -329,7 +279,20 @@
     },
   
     methods: {
+
+      getAllDocto() {
+      axios
+        .get("api/doctors")
+        .then((response) => {
+          this.doctors = response.data.doctors;
+          console.log(this.doctors);
+        })
+        .catch((error) => {
+          console.error("Error retrieving doctors:", error);
+        });
+    },
       handleEventClick(info) {
+        this.deleteDialog = !(this.deleteDialog)
         console.log(info)
       // Get the clicked event
       const clickedEvent = info.event;
@@ -363,13 +326,14 @@
             treatment_id: this.student.Type,
             sessions_number: this.student.sessions_number,
             name:res.data.data.name
-            
+       
             
         }
         this.capasity.push(this.capasityboj);
        this.maxcapsity=  this.maxcapsity - this.student.sessions_number
+       this.student.sessions_number=""
              });
-
+             
         
         console.log(this.capasity)
       },
@@ -405,20 +369,26 @@
             console.error("Error retrieving doctors:", error);
           });
       },
-      pushtimeslot(){
+      pushtimeslot(id){
+        console.log(id)
         this.time_sloteobj={
-            time_slot_id:this.event_id
+            time_slot_id:this.event_id,
+            doctor_id:id
         }
-       this.time_slots.push( this.time_sloteobj)
-       console.log(this.time_slots)
-    //    axios
-    //     .delete(`/api/slot/${this.event_id}`)
-    //     .then((res) => {
-    //       this.update()
-    //       this.visible = false
-    //     });
+      
+    
       },
-  
+      addtimedoctor(){
+        console.log(this.time_sloteobj)
+        
+        this.time_slots.push( this.time_sloteobj)
+        this.deleteDialog=!(this.deleteDialog)
+      },
+    cansel(){
+      this.pushtimeslot()
+      this.addtimedoctor()
+
+    },
       getallprogrames(){
         axios
           .get("api/program")
@@ -573,6 +543,7 @@
   
     
     mounted() {
+      this.getAllDocto()
       this.update()
       this.getallprogrames()
       this.getallchild()
