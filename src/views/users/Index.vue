@@ -110,6 +110,7 @@ const editesuser=()=>{
     body.append("password", usersdata.value.password);
     body.append("image", usersdata.value.file);
     body.append("role", usersdata.value.role);
+    body.append("spotter", usersdata.value.spotter);
     if(usersdata.value.skills){
       body.append("skills", usersdata.value.skills);
     }
@@ -162,6 +163,7 @@ const createuser=()=>{
     body.append("password", usersdata.value.password);
     body.append("image", usersdata.value.file);
     body.append("role", usersdata.value.role);
+    body.append("spotter", usersdata.value.spotter);
     if(usersdata.value.skills){
       body.append("skills", usersdata.value.skills);
     }
@@ -359,6 +361,13 @@ const initFilters = () => {
               class="w-full bg-[#f7f5f5] md:w-20rem" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
             </div>
+            <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>
+                  <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.spotter" :placeholder='$t("Spotter")' />
+
+           
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('email') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.email" :placeholder='$t("email")' />
@@ -412,6 +421,13 @@ const initFilters = () => {
                   <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+            <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>
+                  <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.spotter" :placeholder='$t("Spotter")' />
+
+              
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
             </div>
             <div class="flex flex-column gap-2 py-1">

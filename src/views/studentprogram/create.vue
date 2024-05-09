@@ -30,7 +30,7 @@
                
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('ProgramName') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.program_id" @update:model-value="getprograme"   option-value="id" filter :options="programes" optionLabel="name" :placeholder='$t("ProgramName")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Dropdown   required id="pv_id_1" style="direction: ltr !important;" v-model="student.program_id" @update:model-value="getprograme"   option-value="id" filter :options="programes" optionLabel="name" :placeholder='$t("ProgramName")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.program_id">{{ error.program_id[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
@@ -338,12 +338,17 @@
         console.log(this.capasity)
       },
       getprograme(e){
+      
                 this.capasity=[]
                 this.student.sessions_number=''
-        axios.get(`/api/program/${this.student.program_id}`).then((res) => {
+            axios.get(`/api/program/${this.student.program_id}`).then((res) => {
                 this.maxcapsity=res.data.data.individual_sessions
                 this.setiontype=res.data.data.session_type
                 
+
+             });
+             axios.get(`api/users/filter/${e}`).then((res) => {
+              this.doctors = res.data.data;
 
              });
      
@@ -403,18 +408,7 @@
       },
 
    
-      getAllDoctor() {
-        
-        axios
-          .get(`api/student-program/auto_assign/${this.student.student_id}`)
-          .then((response) => {
-            this.doctors = response.data.doctors;
-            console.log(this.doctors);
-          })
-          .catch((error) => {
-            console.error("Error retrieving doctors:", error);
-          });
-      },
+
     
       createtreatment() {
       
@@ -468,7 +462,7 @@
             (this.loading = false);
         }, 700);
       },
-  
+
       updateevent() {
         axios
           .post(`/api/calender/${this.event_id}/update`, {
@@ -517,7 +511,7 @@
         }, 2000);
       },
       update() {
-        axios.get(`/api/slot`).then((res) => {
+        axios.get(`/api/slot/student-program`).then((res) => {
           console.log(res.data.data);
   
           this.opts.events = res.data.data.map(event => ({
@@ -543,7 +537,6 @@
   
     
     mounted() {
-      this.getAllDocto()
       this.update()
       this.getallprogrames()
       this.getallchild()
