@@ -142,8 +142,11 @@ export default {
 
       axios
         .delete(`/api/calender/${this.event_id}/delete`)
-        .then((res) => {});
-      this.update();
+        .then((res) => {
+          this.loading = false
+          this.update();
+        });
+     
       setTimeout(() => {
         (this.visible = false),
           (this.event_title = null),
@@ -167,7 +170,7 @@ export default {
           (this.loading = false);
       }, 700);
     },
-    async createvent() {
+     createvent() {
       this.loading = true;
       if(localStorage.getItem("type") == 2 ){
             this.user_type=localStorage.getItem("user_id")
@@ -183,18 +186,20 @@ export default {
           time_end: this.time_end,
         })
         .then((res) => {
+          this.visible = false
+          this.loading = false
           if (res.status != 200) {
             this.valid = true;
           }
+          this.update();
         });
-      await this.update();
+      
       setTimeout(() => {
-        (this.visible = false),
           (this.event_title = null),
           (this.start_event = null),
           (this.end_event = null),
-          (this.create_visible = false),
-          (this.loading = false);
+          (this.create_visible = false)
+        
       }, 700);
     },
     update() {
@@ -277,8 +282,8 @@ fetchdoctor(){
           <div>
           
             <div v-if="doctorshow != 2 " class="flex flex-column gap-2">
-                  <label for="username">{{ $t('roomdoctor') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="user_type"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label for="username">{{ $t('doctor') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="user_type"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("doctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
             </div> 
             <div>

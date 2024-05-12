@@ -123,13 +123,14 @@
             ]
     },
     createtreatment() {
+
       if(this.treatments.individual_sessions && this.treatments.collective_sessions){
         this.treatments.sessions_number=this.treatments.collective_sessions + this.treatments.individual_sessions
       }
-      if(this.treatments.collective_sessions == null){
+      if(this.treatments.collective_sessions == 0){
         this.treatments.sessions_number=this.treatments.individual_sessions
       }
-      if(this.treatments.individual_sessions == null){
+      if(this.treatments.individual_sessions == 0){
         this.treatments.sessions_number=this.treatments.collective_sessions
       }
       axios.put(`/api/program/${this.$route.params.id}`,this.treatments).then((res) => {
@@ -143,6 +144,7 @@
  
      
       onetreatement(){
+     
         axios.get(`api/program/${this.$route.params.id}`).then((res) => {
             console.log(res.data.ProgramTreatmentCount)
             this.treatments.name=res.data.data.name

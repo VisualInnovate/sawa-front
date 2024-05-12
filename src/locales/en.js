@@ -307,5 +307,7 @@ merge:"Merge",
   room_admin:"room admin",
   Evaluator:"Evaluator",
   Spotter:"Spotter",
-  forgetpass:"Forgotten password?"  
+  forgetpass:"Forgotten password?",
+  levels:"levels",
+  sympol:"sympol"
 };

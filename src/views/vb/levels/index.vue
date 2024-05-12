@@ -194,7 +194,7 @@ const initFilters = () => {
 
         
          
-           <Column field="name" :header='$t("title")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="name" :header='$t("name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.title }}
             </template>

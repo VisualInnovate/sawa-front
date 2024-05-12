@@ -318,10 +318,12 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   social:"اجتماعي",
   Consultation_evaluation:"استشاره او تقيم",
   driver:"سائق",
-  doctor:"اخائي علاج",
+  doctor:"اخصائي علاج",
   room_admin:"مسئول الاقاعة",
   Evaluator:"المقييم",
   Spotter:"النصاب",
-  forgetpass:"? نسيت كلمة المرور"
+  forgetpass:"? نسيت كلمة المرور",
+  levels:"المستويات",
+  sympol:"رمز"
 
 };

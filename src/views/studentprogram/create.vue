@@ -351,6 +351,17 @@
               this.doctors = res.data.data;
 
              });
+             axios.get(`api/slot/filter/${e}`).then((res) => {
+              this.opts.events = res.data.data.map(event => ({
+              title: event.start_event+"T"+event.to,
+              start: event.start_event+"T"+event.from,
+              end: event.end_event+"T"+event.to,
+              id: event.id,
+              from:event.from
+          }));
+         
+
+             });
      
       },
       getalltreatement(){
@@ -537,7 +548,7 @@
   
     
     mounted() {
-      this.update()
+      
       this.getallprogrames()
       this.getallchild()
       this.getalltreatement()

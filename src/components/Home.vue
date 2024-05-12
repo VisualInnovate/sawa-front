@@ -234,12 +234,35 @@ onMounted(async () => {
            
               
           </v-list-group>
+          
           <v-list-group prepend-icon="mdi-bed">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props" title="VB"></v-list-item>
             </template>
+            <v-list-group>
+            <template #activator="{ props }" >
+              <v-list-item v-bind="props" :title="$t('milestone ')"></v-list-item>
+            </template>
             
             <v-list-item :title="$t('levels')" value="SideProfiles" :to="{ name: 'levels' }"></v-list-item>
+            <v-list-item :title="$t('questions')" value="SideProfiles" :to="{ name: 'question' }"></v-list-item>
+
+            <v-list-item :title="$t('Question Types')" value="SideProfiles" :to="{ name: 'question-types' }"></v-list-item>
+            <v-list-item :title="$t('Subtest')" value="SideProfiles" :to="{ name: 'milestone-subtest' }"></v-list-item>
+              
+          </v-list-group>
+          <!-- <v-list-group>
+            <template #activator="{ props }" >
+              <v-list-item v-bind="props" :title="$t('milestone ')"></v-list-item>
+            </template>
+            
+            <v-list-item :title="$t('levels')" value="SideProfiles" :to="{ name: 'levels' }"></v-list-item>
+            <v-list-item :title="$t('Question Types')" value="SideProfiles" :to="{ name: 'question-types' }"></v-list-item>
+           
+              
+          </v-list-group> -->
+            
+            
            
               
           </v-list-group>
