@@ -9,7 +9,7 @@ import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
 const usersdata=ref({
- 
+ skills:[]
 })
 const { t } = useI18n();
 const roles=ref([])
@@ -85,15 +85,23 @@ const edit=(id)=>{
     usersdata.value.role= res.data.user.roles.id
    
     usersdata.value.type= res.data.user.type
- 
-    for (let i = 0; i < res.data.user.skills.length; i++) {
-      
-      
-      usersdata.value.skills.push(res.data.user.skills[i].id)
+    usersdata.value.skills=[]
+
+  if(res.data.user.skills){
+    for (let i =0 ; i < res.data.user.skills.length; i++) {
+  // Check if the current element is defined and has an id property
+  console.log(i)
+  console.log(res.data.user.skills[i].id)
+  usersdata.value.skills.push(res.data.user.skills[i].id);
+  // if (res.data.user.skills[i] && res.data.user.skills[i].id) {
+
+  //  } 
+  }
 }
-    console.log(users.value)
+   
 
   });
+  console.log(usersdata.value.skills)
     confir_id.value=id
     updatedialog.value=!(updatedialog.value)
 }
