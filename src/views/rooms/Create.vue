@@ -91,6 +91,32 @@
       >
         <form>
           <div>
+
+            <div v-if="updat_event" class="py-3">
+              <label  for="time_start">{{ $t("start_date") }}</label>
+              <Calendar
+              
+            style="width: 100%"
+            showButtonBar
+            v-model.number="start_event"
+            showIcon
+            placeholder="dd/mm/yy"
+            
+
+          />
+            </div>
+            <div v-if="updat_event" class="py-3">
+              <label for="time_start">{{ $t("end_date") }}</label>
+              <Calendar
+            style="width: 100%"
+            showButtonBar
+            v-model.number="end_event"
+            showIcon
+            placeholder="dd/mm/yy"
+         
+
+          />
+            </div>
             <div>
               <label for="time_start">{{ $t("from") }}</label>
               <input
@@ -101,7 +127,6 @@
                 v-model="time_start"
                 style="border-radius: 5px"
               />
-              <div class="mt-1 mb-5 text-red-500" v-if="error?.from">{{ error.from[0] }}</div>
             </div>
             <div>
               <label for="time_end">{{ $t("to") }}</label>
@@ -113,7 +138,6 @@
                 v-model="time_end"
                 style="border-radius: 5px"
               />
-              <div class="mt-1 mb-5 text-red-500" v-if="error?.to">{{ error.to[0] }}</div>
             </div>
             <Button
               style="background-color: rgb(4, 171, 4); border: 0"
@@ -123,24 +147,22 @@
               @click="createvent"
             />
             <Button
-              style="
-                background-color: #6241f1;
-                margin-left: 10px;
-                margin-right: 10px;
-                border: 0;
-              "
-              label="update "
+            icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
               v-if="updat_event"
               :loading="loading"
               @click="updateevent"
             />
             <Button
-              style="background-color: #b00020; border: 0"
-              label="Delet "
+            icon="pi pi-trash"
+                class="delete mt-2"
+          
               v-if="updat_event"
               :loading="loading"
               @click="deletevent"
             />
+           
+          
           </div>
         </form>
       </Dialog>
@@ -273,7 +295,8 @@ export default {
           this.modal_text = this.$t("update_event");
           this.creat_event = false;
           this.updat_event = true;
-        
+          this.getslotid()
+          this.visible= true;
           this.start_event = moment(event.event.start).format("YYYY-MM-DD");
           this.end_event = moment(event.event.end).format("YYYY-MM-DD");
           console.log(this.start_event);
@@ -316,7 +339,20 @@ export default {
            
         ]
     },
+    getslotid(){
+      axios
+        .get(`/api/slot/${this.event_id}`)
+        .then((res) => {
+          this.time_start=res.data.data.from
+          this.time_end=res.data.data.to
+          this.room_id=res.data.data.room_id
+         
+        })
+        .catch((error) => {
+          console.error("Error retrieving doctors:", error);
+        });
 
+    },
     
     arr (){
       return this.roomType =[
@@ -416,28 +452,39 @@ export default {
       console.log(event);
 
       axios
-        .delete(`/api/calender/${this.event_id}/delete`)
-        .then((res) => {});
-      this.update();
+        .delete(`/api/slot/${this.event_id}`)
+        .then((res) => {
+          this.update()
+          this.visible = false
+        });
+   
       setTimeout(() => {
-        (this.visible = false),
+        
           (this.event_title = null),
           (this.loading = false);
       }, 700);
     },
-
     updateevent() {
+      
       axios
-        .post(`/api/calender/${this.event_id}/update`, {
-          title: this.event_title,
-          start: moment(this.start_event).format(" YYYY-MM-d"),
-          end: moment(this.end_event).format(" YYYY-MM-d"),
+        .put(`/api/slot/${this.event_id}`, {
+          
+          start_event:this.start_event,
+          end_event:this.end_event,
+          from: this.time_start,
+          
+          to: this.time_end,
+          room_id:this.room_id
+         
         })
-        .then((res) => {});
+        .then((res) => {
+          this.update()
+          this.visible = false
+        });
      
       setTimeout(() => {
         
-        (this.visible = false),
+       
           (this.event_title = null),
           (this.event_id = null),
           (this.loading = false);
