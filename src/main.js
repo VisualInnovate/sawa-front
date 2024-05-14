@@ -59,6 +59,8 @@ import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 
+import ColorPicker from 'primevue/colorpicker';
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 import App from "@/App.vue";
 const pinia = createPinia();
@@ -123,6 +125,7 @@ app.component('InputNumber', InputNumber)
 app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
 app.component('DynamicDialog', DynamicDialog)
+app.component('ColorPicker', ColorPicker)
 
 app.component('Toast', Toast)
 app.component('MultiSelect', MultiSelect)

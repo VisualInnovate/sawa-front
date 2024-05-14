@@ -78,6 +78,10 @@ canvas {
   width: 100% !important;
   height: 60vh !important;
 }
+.p-inputtext:enabled{
+  
+  height: 50px!important;
+}
 /* .fc-daygrid-block-event .fc-event-time, .fc-daygrid-block-event .fc-event-title{
   background-color: #135C65!important;
   color: white !important;

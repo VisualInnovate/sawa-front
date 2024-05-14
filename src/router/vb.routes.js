@@ -19,6 +19,21 @@ const vb = [
         name: 'question',
         component: () => import("../views/vb/Questions/index.vue")
       },
+      {
+        path: '/answer', // Define the path for your addRoom route
+        name: 'answer',
+        component: () => import("../views/vb/Answers/index.vue")
+      },
+      {
+        path: '/answer-create', // Define the path for your addRoom route
+        name: 'answer-create',
+        component: () => import("../views/vb/Answers/create.vue")
+      },
+      {
+        path: '/answer-update/:id', // Define the path for your addRoom route
+        name: 'answer-update',
+        component: () => import("../views/vb/Answers/update.vue")
+      },
 ];
 
 

@@ -79,24 +79,27 @@ fetchData()
 
 })
 const edit=(id)=>{
+  usersdata.value.skills=[]
     axios.get(`/api/users/${id}`).then((res)=>{
     loading.value= false
-    usersdata.value= res.data.user
+ 
     usersdata.value.role= res.data.user.roles.id
    
     usersdata.value.type= res.data.user.type
-    usersdata.value.skills=[]
+    usersdata.value.image= res.data.user.image
+    usersdata.value.email= res.data.user.email
+    usersdata.value.spotter= res.data.user.spotter
+    usersdata.value.title= res.data.user.title
+    usersdata.value.name= res.data.user.name
+  
 
-  if(res.data.user.skills){
     for (let i =0 ; i < res.data.user.skills.length; i++) {
-  // Check if the current element is defined and has an id property
-  console.log(i)
-  console.log(res.data.user.skills[i].id)
-  usersdata.value.skills.push(res.data.user.skills[i].id);
-  // if (res.data.user.skills[i] && res.data.user.skills[i].id) {
+     
+        if(res.data.user.skills[i].id){
+          
+          usersdata.value.skills.push(res.data.user.skills[i].id);
+        }
 
-  //  } 
-  }
 }
    
 
@@ -429,7 +432,7 @@ const initFilters = () => {
                   <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.skills">{{ error.skills[0] }}</div>
             </div>
             <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>

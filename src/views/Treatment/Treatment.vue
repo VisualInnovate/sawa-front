@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="Therapeutic()">{{ $t("addTherapeutic") }}</p>
+      <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("addTherapeutic") }}</p>
     </div>
     <div v-if="loading" class="loader"></div>
     <!-- Your existing content goes here -->
@@ -172,7 +172,8 @@ export default {
         this.treatments.sessions_number=this.treatments.collective_sessions
       }
       axios.post("/api/program",this.treatments).then((res) => {
-        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        // this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        this.$router.push({ name: 'AllTherapeutic' });
       }).catch((el)=>{
       
      this.error = el.response.data.errors

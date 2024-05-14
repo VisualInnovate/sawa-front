@@ -21,7 +21,8 @@ const filters = ref({})
 const createdialog=ref(false)
 const levels=ref({})
 const updatedialog=ref(false)
-
+const questions =ref([])
+const Subtests=ref([])
 onBeforeMount(() => {
   initFilters()
 })
@@ -29,7 +30,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/mileston-question-type").then((res)=>{
+  axios.get("/api/milestone-question").then((res)=>{
     loading.value= false
     users.value= res.data.data
     console.log(users.value)
@@ -38,16 +39,32 @@ onBeforeMount(() => {
 
 
 }
+const getSubtests=()=>{
+  axios.get("/api/milestone-subtest").then((res)=>{
+    
+    Subtests.value= res.data.data
+  
 
+  });
+}
+const getquestions=()=>{
+  axios.get("/api/mileston-question-type").then((res)=>{
+  
+    questions.value= res.data.data
+    
+
+  });
+}
 
 
 onMounted(() => {
   // productService.getProducts().then((data) => (products.value = data));
 fetchData()
-
+getquestions()
+getSubtests()
 })
 const edit=(id)=>{
-    axios.get(`/api/mileston-question-type/${id}`).then((res)=>{
+    axios.get(`/api/milestone-question/${id}`).then((res)=>{
     loading.value= false
     levels.value= res.data.data
     console.log(users.value)
@@ -62,7 +79,7 @@ const edit=(id)=>{
 
 const editescrud=()=>{
     axios
-    .post(`/api/milestone-question/${confir_id.value}`,levels.value)
+    .put(`/api/milestone-question/${confir_id.value}`,levels.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -104,7 +121,7 @@ const createcrude=()=>{
 }
 const deleteAction = () => {
   axios
-    .delete(`/api/mileston-question-type/${confir_id.value}`)
+    .delete(`/api/milestone-question/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -200,11 +217,7 @@ const initFilters = () => {
               {{ slotProps.data.title }}
             </template>
            </Column> 
-           <Column field="sympol" :header='$t("sympol")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.sympol }}
-            </template>
-           </Column> 
+          
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div >
@@ -241,30 +254,41 @@ const initFilters = () => {
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
+          <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.sympol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
             </div>
+          <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('level') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("level")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.question_type_id">{{ error.question_type_id[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('Subtest') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.subtest_id"  option-value="id" filter :options="Subtests" optionLabel="title" :placeholder='$t("Subtest")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.subtest_id">{{ error.subtest_id[0] }}</div>
+            </div>
+           
            <div class="w-full text-center">
             <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
+          <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center"  v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
+            </div>
+          <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('level') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("level")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.question_type_id">{{ error.question_type_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.sympol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
+                  <label class="w-full text-right" for="username">{{ $t('Subtest') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.subtest_id"  option-value="id" filter :options="Subtests" optionLabel="title" :placeholder='$t("Subtest")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.subtest_id">{{ error.subtest_id[0] }}</div>
             </div>
            <div class="w-full text-center">
             <Button @click="editescrud" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 

@@ -1,7 +1,7 @@
 <template>
     <div>
       <div>
-        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="Therapeutic()">{{ $t("addTherapeutic") }}</p>
+        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold">{{ $t("addTherapeutic") }}</p>
       </div>
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
@@ -123,7 +123,14 @@
             ]
     },
     createtreatment() {
+      if(this.treatments.session_type==0){
+        this.treatments.collective_sessions=''
 
+      }
+      if(this.treatments.session_type==1){
+        this.treatments.individual_sessions=''
+
+      }
       if(this.treatments.individual_sessions && this.treatments.collective_sessions){
         this.treatments.sessions_number=this.treatments.collective_sessions + this.treatments.individual_sessions
       }
@@ -133,8 +140,10 @@
       if(this.treatments.individual_sessions == 0){
         this.treatments.sessions_number=this.treatments.collective_sessions
       }
+
       axios.put(`/api/program/${this.$route.params.id}`,this.treatments).then((res) => {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        this.$router.push({ name: 'AllTherapeutic' });
        
       }).catch((el)=>{
         console.log(el.response.data.errors.name)
