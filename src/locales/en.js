@@ -309,5 +309,12 @@ merge:"Merge",
   Spotter:"Spotter",
   forgetpass:"Forgotten password?",
   levels:"levels",
-  sympol:"sympol"
+  sympol:"sympol",
+  department:"departments",
+  questions:"questions",
+  notes:"notes",
+  score:"score",
+  color:"color",
+  Answers:"Answers",
+  question_id:"question name"
 };

@@ -324,6 +324,13 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   Spotter:"النصاب",
   forgetpass:"? نسيت كلمة المرور",
   levels:"المستويات",
-  sympol:"رمز"
+  sympol:"رمز",
+  department:"التخصصات",
+  questions:"الاسئلة",
+  notes:"ملاحظات",
+  score:"نتيجة",
+  color:"اللون",
+  Answers:"الاجابات",
+  question_id:"اسم السؤال"
 
 };

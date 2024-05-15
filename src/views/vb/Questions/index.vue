@@ -152,7 +152,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("question-types")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -197,7 +197,7 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("question-types") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("questions") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>

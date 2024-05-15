@@ -9,7 +9,8 @@ import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
 const usersdata=ref({
- skills:[]
+ skills:[],
+ department:[]
 })
 const { t } = useI18n();
 const roles=ref([])
@@ -29,7 +30,7 @@ const tpes=()=>{
 
 
 
-
+const departments=ref({})
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -68,7 +69,11 @@ onBeforeMount(() => {
   
 
   });
+  axios.get("/api/department").then((res)=>{
+    departments.value=res.data.data
+  
 
+  });
 }
 
 
@@ -80,6 +85,7 @@ fetchData()
 })
 const edit=(id)=>{
   usersdata.value.skills=[]
+  usersdata.value.department=[]
     axios.get(`/api/users/${id}`).then((res)=>{
     loading.value= false
  
@@ -99,6 +105,14 @@ const edit=(id)=>{
           
           usersdata.value.skills.push(res.data.user.skills[i].id);
         }
+
+}
+for (let i =0 ; i < res.data.user.departments.length; i++) {
+     
+     if(res.data.user.departments[i].id){
+       
+       usersdata.value.department.push(res.data.user.departments[i].id);
+     }
 
 }
    
@@ -124,6 +138,9 @@ const editesuser=()=>{
     body.append("spotter", usersdata.value.spotter);
     if(usersdata.value.skills){
       body.append("skills", usersdata.value.skills);
+    }
+    if(usersdata.value.department){
+      body.append("department_id", usersdata.value.department);
     }
     body.append("type",usersdata.value.type)
     axios
@@ -177,6 +194,9 @@ const createuser=()=>{
     body.append("spotter", usersdata.value.spotter);
     if(usersdata.value.skills){
       body.append("skills", usersdata.value.skills);
+    }
+    if(usersdata.value.department){
+      body.append("department_id", usersdata.value.department);
     }
     body.append("type",usersdata.value.type)
 
@@ -373,6 +393,12 @@ const initFilters = () => {
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
             </div>
             <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('department') }}</label>
+                  <MultiSelect  v-model="usersdata.department" filter option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department")'
+              class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+            <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>
                   <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.spotter" :placeholder='$t("Spotter")' />
 
@@ -433,6 +459,12 @@ const initFilters = () => {
                   <MultiSelect  v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
               class="w-full bg-[#f7f5f5] md:w-20rem" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.skills">{{ error.skills[0] }}</div>
+            </div>
+            <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('department') }}</label>
+                  <MultiSelect  v-model="usersdata.department" filter option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department")'
+              class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
             </div>
             <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>

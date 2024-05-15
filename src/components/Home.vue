@@ -249,7 +249,7 @@ onMounted(async () => {
 
             <v-list-item :title="$t('Question Types')" value="SideProfiles" :to="{ name: 'question-types' }"></v-list-item>
             <v-list-item :title="$t('Subtest')" value="SideProfiles" :to="{ name: 'milestone-subtest' }"></v-list-item>
-            <v-list-item :title="$t('answer')" value="answer" :to="{ name: 'answer' }"></v-list-item>
+            <v-list-item :title="$t('Answers')" value="answer" :to="{ name: 'answer' }"></v-list-item>
               
           </v-list-group>
           <!-- <v-list-group>
@@ -306,9 +306,11 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('inputs')"></v-list-item>
             </template>
-            
-            <v-list-item  :title="$t('skills')" value="skills"
+             <v-list-item  :title="$t('skills')" value="skills"
               :to="{ name: 'skills' }"></v-list-item>
+              <v-list-item  :title="$t('department')" value="department"
+              :to="{ name: 'department' }"></v-list-item>
+           
 
 
               <v-list-item  :title="$t('area')" value="area"

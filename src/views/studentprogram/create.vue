@@ -52,7 +52,6 @@
                     <div class="flex">
                         <InputNumber :max="maxcapsity" :min="1" required class="bg-[#f7f5f5] w-[90%]" v-model="student.sessions_number" :placeholder='$t("Sn")' />
                         <Button   @click="addarray"  class="create m-auto s " icon="pi pi-plus" ></Button>
-                        <Button   @click="deletearray"  class="delete m-auto s " icon="pi pi-minus" ></Button>
                     </div>
 
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.details">{{ error.details[0] }}</div>
@@ -75,7 +74,7 @@
         </v-form>
         <!-- <Button   @click="deletearray"  :label='$t("submit")' class="delete m-auto s "  ></Button> -->
 
-       <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-1 gap-4">
+       <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="px-[2%] py-1 flex">
             <ol>
       <li v-for="(t,index ) in capasity" :key="index">
@@ -84,6 +83,8 @@
       </li>
     </ol>
         </div>
+        <Button v-if="capasity !=''"  @click="deletearray"  class="delete m-auto s " icon="pi pi-pencil" ></Button>
+
        
        </div>
         <Toast/>
@@ -190,6 +191,7 @@
         modal_text: "",
         time_start: "",
         time_end: "",
+        refmaxcapsity:"",
         opts: {
           plugins: [dayGridPlugin, interactionPlugin, TimeGridplugin, listPlugin],
           initialView: "dayGridMonth",
@@ -316,7 +318,9 @@
               ]
       },
       deletearray(){
-        this.capasity.length=this.capasity.length -1
+        this.capasity.length=[]
+        this.maxcapsity=this.refmaxcapsity
+        
       },
 
       addarray(){
@@ -342,6 +346,7 @@
                 this.capasity=[]
                 this.student.sessions_number=''
             axios.get(`/api/program/${this.student.program_id}`).then((res) => {
+                this.refmaxcapsity=res.data.data.individual_sessions
                 this.maxcapsity=res.data.data.individual_sessions
                 this.setiontype=res.data.data.session_type
                 

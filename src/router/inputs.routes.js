@@ -75,6 +75,14 @@ const inputs = [
   name: 'transportation-schedule-update',
   component: () => import("../views/inputs/transportationschedule/update.vue")
   },
+
+
+  ///////
+  {
+    path: '/department', 
+    name: 'department',
+    component: () => import("../views/inputs/department/index.vue")
+  },
 ];
 
 export default {

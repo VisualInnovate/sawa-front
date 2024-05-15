@@ -127,6 +127,19 @@ const deleteAction = () => {
     .catch(() => {})
 
 }
+const copyrole=(id)=>{
+  loading.value= true
+  axios
+    .get(`/api/permissions/copy/${id}`)
+    .then((res) => {
+     
+      fetchData()
+     
+    
+    })
+    .catch(() => {})
+
+}
 
 
 const exportCSV = () => {
@@ -237,6 +250,13 @@ const initFilters = () => {
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"
+              />
+              <Button
+                v-can="'roles delete'"
+                icon="pi pi-wallet"
+                
+                class="show mt-2"
+                @click="copyrole(slotProps.data.id)"
               />
               </div>
             </template>
