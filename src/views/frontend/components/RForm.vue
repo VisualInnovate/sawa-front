@@ -91,7 +91,7 @@
             </div>
         
       
-            <div class="flex flex-column gap-2 w-full lg:col-span-2 ">
+            <div class="flex flex-column gap-2 w-full ">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                   <Button @click="addChild" class="create m-auto w-full " :label='$t("Register_now")'></Button>
                   <small id="username-help"></small>
