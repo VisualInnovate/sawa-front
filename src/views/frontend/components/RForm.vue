@@ -45,220 +45,54 @@
       </p>
       <!-- End Alert -->
 
-      <form class="space-y-6">
-        <div class="flex flex-col gap-4">
+      <form class="">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 ">
           <!--  Child Name -->
-          <div>
-            <div
-              class="flex flex-col"
-              style="border-bottom: 2px solid rgb(194, 188, 188)"
-            >
-              <label class="text-base font-bold">{{ $t("Full_Name") }}</label>
-              <input
-                type="text"
-                id="name"
-                v-model="child.name"
-                class="border-b focus:ring-0"
-              />
+  
+            <div class="lg:col-span-2 flex flex-column gap-2">
+                  <label class="w-full font-bold " for="username">{{ $t('Full_Name') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.name" :placeholder='$t("Full_Name")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
-            <div
-              v-if="errors != null"
-              class="text-red-600 font-semibold text-sm rounded-md"
-            >
-              <p v-for="error in errors['name']">
-                <span v-for="err in error">{{ err }} </span>
-              </p>
+            <div class="flex flex-column gap-2">
+                    <label class="font-bold" for="username">{{ $t('date_of_birth') }}</label>
+                    <Calendar  style="width: 100%" showButtonBar   v-model="child.birth_date" showIcon  :placeholder='$t("date_of_birth")'  :minDate="maxDate" />   
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_date">{{ error.birth_date[0] }}</div>
             </div>
-          </div>
-          <!-- End Child Name -->
-
-          <!-- Birth Data -->
-          <div
-            class="flex flex-col md:flex-row md:items-center md:justify-between md:gap-4"
-          >
-            <div class="flex-1">
-              <div class="flex flex-col">
-                <label class="text-base font-bold">{{
-                  $t("date_of_birth")
-                }}</label>
-                <div class="flex justify-center items-center" id="calender">
-                  <Calendar
-                    style="width: 100%; padding: "
-                    showButtonBar
-                    v-model="child.birth_date"
-                    dateFormat="dd/mm/yy"
-                    :maxDate="maxDate"
-                  />
-                </div>
-              </div>
-              <div
-                v-if="errors != null"
-                class="text-red-600 font-semibold text-sm rounded-md"
-              >
-                <p v-for="error in errors['birth_date']">
-                  <span v-for="err in error">{{ err }} </span>
-                </p>
-              </div>
+            <div class=" flex flex-column gap-2">
+                  <label class="w-full font-bold " for="username">{{ $t('place_of_birth') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :placeholder='$t("place_of_birth")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_place">{{ error.birth_place[0] }}</div>
             </div>
-
-            <div class="flex-1">
-              <div
-                class="flex flex-col"
-                style="border-bottom: 2px solid rgb(194, 188, 188)"
-              >
-                <label class="text-base font-bold">{{
-                  $t("place_of_birth")
-                }}</label>
-                <input
-                  type="text"
-                  id="birth_place"
-                  v-model="child.birth_place"
-                  class="border-b focus:ring-0"
-                />
-              </div>
-              <div
-                v-if="errors != null"
-                class="text-red-600 font-semibold text-sm rounded-md"
-              >
-                <p v-for="error in errors['birth_place']">
-                  <span v-for="err in error">{{ err }} </span>
-                </p>
-              </div>
+            <div class=" flex flex-column gap-2">
+                  <label class="w-full font-bold " for="username">{{ $t('national_id') }}</label>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :placeholder='$t("national_id")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.national_id">{{ error.national_id[0] }}</div>
             </div>
-          </div>
-          <!-- End Birth Data -->
-
-          <!-- Child Lang And Address -->
-          <div
-            class="flex flex-col md:flex-row md:items-center md:justify-between md:gap-4"
-          >
-            
-            <div  style="border-bottom: 2px solid rgb(194, 188, 188)"  class="card w-[50%]  justify-content-center">
-                <label class="text-base font-bold">{{
-                  $t("primary_language")
-                }}</label>
-                 
-              
-                <select  class="w-full" name="drinks" id="cars" v-model="child.lang">
-                  <option value="" disabled selected hidden>{{ $t('primary_language') }}</option>
-                  <option v-for="l in lan" >{{ l.lang }}</option>
-                </select>
-             </div>
-
-            <div class="flex-1">
-              <div
-                class="flex flex-col"
-                style="border-bottom: 2px solid rgb(194, 188, 188)"
-              >
-                <label class="text-base font-bold">{{ $t("address") }}</label>
-                <input
-                  type="text"
-                  id="address"
-                  v-model="child.address"
-                  class="border-b focus:ring-0"
-                />
-              </div>
-              <div
-                v-if="errors != null"
-                class="text-red-600 font-semibold text-sm rounded-md"
-              >
-                <p v-for="error in errors['address']">
-                  <span v-for="err in error">{{ err }} </span>
-                </p>
-              </div>
+            <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('Type') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.gender">{{ error.gender[0] }}</div>
             </div>
-          </div>
-          <!-- End Child Lang And Nationalty -->
-
-          <!-- Child Nationalty and National ID -->
-          <div
-            class="flex flex-col md:flex-row md:items-center md:justify-between md:gap-4"
-          >
-            <div class="flex-1">
-              <!-- <div
-                class="flex flex-col"
-                style="border-bottom: 2px solid rgb(194, 188, 188)"
-              >
-                <label class="text-base font-bold">{{
-                  $t("Nationality")
-                }}</label>
-                <input
-                  type="text"
-                  id="nationalty"
-                  v-model="child.nationalty"
-                  class="border-b focus:ring-0"
-                />
-              </div> -->
-              <div    class="card  justify-content-center">
-                <label class="text-base font-bold">{{
-                  $t("Nationality")
-                }}</label>
-                 
-                <select style="border-bottom: 2px solid rgb(194, 188, 188)" class="w-full" name="drinks" id="cars" v-model="child.nationalty">
-                  <option value="" disabled selected hidden>{{ $t('Nationality_choose') }}</option>
-                  <option v-for="city in cities"  >{{ city.nationality }}</option>
-
-                </select>
-                <div
-                v-if="errors != null"
-                class="text-red-600 font-semibold text-sm rounded-md"
-              >
-                <p v-for="error in errors['nationalty']">
-                  <span v-for="err in error">{{ err }} </span>
-                </p>
-              </div>
-             </div>
-              <div
-                v-if="errors != null"
-                class="text-red-600 font-semibold text-sm rounded-md"
-              >
-                <p v-for="error in errors['nationalty']">
-                  <span v-for="err in error">{{ err }} </span>
-                </p>
-              </div>
+            <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('Nationality') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="value" :options="cities" optionLabel="name" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.nationalty">{{ error.nationalty[0] }}</div>
             </div>
-
-            <div class="flex-1">
-              <div
-                class="flex flex-col"
-                style="border-bottom: 2px solid rgb(194, 188, 188)"
-              >
-                <label class="text-base font-bold">{{
-                  $t("national_id")
-                }}</label>
-                <input
-                  type="text"
-                  id="national_id"
-                  v-model="child.national_id"
-                  class="border-b focus:ring-0"
-                />
-              </div>
-              <div
-                v-if="errors != null"
-                class="text-red-600 font-semibold text-sm rounded-md"
-              >
-                <p v-for="error in errors['national_id']">
-                  <span v-for="err in error">{{ err }} </span>
-                </p>
-              </div>
+            <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('primary_language') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.lang">{{ error.lang[0] }}</div>
             </div>
-          </div>
-          
-          
-          <div class="card w-[49%]">
-            <h3 class="text-base font-bold text-right ">
-              {{ $t("Type") }}
-            </h3>
-                 <Dropdown id="pv_id_2" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")'  class="w-full  md:w-14rem focus:ring-0" />
-             </div>
+        
+      
+            <div class="flex flex-column gap-2 w-full lg:col-span-2 ">
+                  <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
+                  <Button @click="addChild" class="create m-auto w-full " :label='$t("Register_now")'></Button>
+                  <small id="username-help"></small>
+              </div>
         </div>
-        <button
-          style="padding: 2%"
-          class="w-full rounded-3xl bg-[#148A98] text-white text-xl"
-          @click.prevent="addChild"
-        >
-          {{ $t("Register_now") }}
-        </button>
+       
       </form>
     </div>
   </div>
@@ -277,26 +111,16 @@ export default {
     return {
       show: false,
       lan:[],
+
       selectedCity: null,
             cities: {},
             type:[ ],
       maxDate: new Date(),
       parentStore: useParentStore(),
-      errors: [],
+      error:{},
       alert_text: "",
       show_alert: false,
-      child: {
-        parent_id: "",
-        name: "",
-        
-        birth_date: "",
-        birth_place: "",
-        lang: "",
-        gender: "",
-        nationalty: "",
-        national_id: "",
-        address: "",
-      },
+      child: { },
     };
   },
   computed: {
@@ -317,39 +141,23 @@ export default {
     goback() {
       this.$router.go(-1);
     },
+    
     addChild() {
-      this.errors = null;
-      this.show_alert = false;
-      this.alert_text = null;
-      this.child.parent_id = this.parentStore.user.id;
-      this.child.birth_date = moment(this.child.birth_date).format(
-        "YYYY-MM-DD"
-      );
-      this.child.gender=this.child.gender
-      console.log(this.child.gender)
-      axios
-        .post("/api/parent/child/create", this.child)
-        .then((res) => {
-         
-          console.log("feweqf")
-          this.errors = null;
-          this.show_alert = true;
-          this.alert_text = this.$t("child_added");
-          
-           
-            
-      
-          Object.keys(this.child).forEach((key) => {
-            this.child[key] = null;
-          });
-          this.$router.push({name:"Following"});
+      this.child.parent_id =  localStorage.getItem("parent_id");
+      axios.post("/api/parent/child/create",this.child).then((res) => {
+        this.$router.push({name:"Following"});
+        }).catch((el)=>{
+          console.log(el.response.data.errors.name)
+       this.error = el.response.data.errors
+      })
      
-          console.log(res);
-        })
-        .catch((err) => {
-          this.errors = err.response.data.errors;
-          console.log(err);
-        });
+      
+     
+     
+     
+     
+           
+         
     },
 
     getCountries() {
@@ -385,9 +193,9 @@ export default {
 </script>
 <style>
 /* Target the placeholder pseudo-element and set opacity */
-input::placeholder {
+/* input::placeholder {
   opacity: 0.5;
-}
+} */
 
 #calender input {
   
@@ -397,7 +205,7 @@ input::placeholder {
   font-family: "Cairo", sans-serif;
   font-size: 20px;
 }
-#pv_id_3  {
+/* #pv_id_3  {
   border: none;
   border-bottom: 2px solid #818080;
   text-align: center;
@@ -417,10 +225,10 @@ input::placeholder {
 #pv_id_2:focus {
   border: none;
 
-}
+} */
 
-input::placeholder {
+/* input::placeholder {
   opacity: 50%;
   color: black;
-}
+} */
 </style>

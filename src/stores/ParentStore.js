@@ -5,8 +5,11 @@ import { useStorage } from "@vueuse/core";
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
     parent: useStorage("parent", {}),
+    parent_id: useStorage("parent_id", ''),
+
     token: useStorage("token", null),
     parentAuth: useStorage("parentAuth", false),
+
     showErrors: ref(false),
     authErrors: {},
   }),
@@ -23,6 +26,7 @@ export const useParentStore = defineStore("parentStore", {
         .post("api/parent/login", parent)
         .then((res) => {
           this.parent = res.data.user;
+          this.parent_id=res.data.user.parent_id
           this.token = res.data.token;
           this.parentAuth = true;
 
