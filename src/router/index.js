@@ -43,7 +43,7 @@ function guest(to, from, next) {
 }
 
 function authForNormalUser(to, from, next) {
-  if (!useParentStore().parentAuth) {
+  if (!useParentStore().parent_id ) {
     return next({ name: "parentLogin" });
   }
 
