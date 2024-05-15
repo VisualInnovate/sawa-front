@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import { ref } from "vue";
 import { useStorage } from "@vueuse/core";
+import { useAuthStore } from "../stores/Auth";
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
     parent: useStorage("parent", {}),
@@ -25,6 +26,7 @@ export const useParentStore = defineStore("parentStore", {
       await axios
         .post("api/parent/login", parent)
         .then((res) => {
+          useAuthStore().resetAuthStore()
           this.parent = res.data.user;
           this.parent_id=res.data.user.parent_id
           this.token = res.data.token;

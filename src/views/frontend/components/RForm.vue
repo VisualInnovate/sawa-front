@@ -65,6 +65,11 @@
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_place">{{ error.birth_place[0] }}</div>
             </div>
             <div class=" flex flex-column gap-2">
+                  <label class="w-full font-bold " for="username">{{ $t('address') }}</label>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :placeholder='$t("address")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.address">{{ error.address[0] }}</div>
+            </div>
+            <div class=" flex flex-column gap-2">
                   <label class="w-full font-bold " for="username">{{ $t('national_id') }}</label>
                 <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :placeholder='$t("national_id")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.national_id">{{ error.national_id[0] }}</div>
@@ -76,7 +81,7 @@
             </div>
             <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="value" :options="cities" optionLabel="name" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.nationalty">{{ error.nationalty[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
