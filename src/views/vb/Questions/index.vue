@@ -260,13 +260,13 @@ const initFilters = () => {
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
             </div>
           <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('level') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("level")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('level_id') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.question_type_id">{{ error.question_type_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('Subtest') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.subtest_id"  option-value="id" filter :options="Subtests" optionLabel="title" :placeholder='$t("Subtest")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('Subtest_id') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.subtest_id"  option-value="id" filter :options="Subtests" optionLabel="title" :placeholder='$t("Subtest_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.subtest_id">{{ error.subtest_id[0] }}</div>
             </div>
            
@@ -281,13 +281,13 @@ const initFilters = () => {
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
             </div>
           <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('level') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("level")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('level_id') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.question_type_id">{{ error.question_type_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('Subtest') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.subtest_id"  option-value="id" filter :options="Subtests" optionLabel="title" :placeholder='$t("Subtest")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('Subtest_id') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.subtest_id"  option-value="id" filter :options="Subtests" optionLabel="title" :placeholder='$t("Subtest_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.subtest_id">{{ error.subtest_id[0] }}</div>
             </div>
            <div class="w-full text-center">

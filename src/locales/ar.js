@@ -331,6 +331,11 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   score:"نتيجة",
   color:"اللون",
   Answers:"الاجابات",
-  question_id:"اسم السؤال"
+  question_id:"اسم السؤال",
+  level_id:"اسم المستوي",
+  Subtest_id:"اسم الاختبار الفرعي",
+  Subtest:" الاختبار الفرعي",
+  head_question:"السؤال الرئيسي",
+  question_types:"انواع الاسئلة"
 
 };

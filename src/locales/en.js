@@ -316,5 +316,10 @@ merge:"Merge",
   score:"score",
   color:"color",
   Answers:"Answers",
-  question_id:"question name"
+  question_id:"question name",
+  level_id:"level",
+  Subtest_id:"Subtest name",
+  Subtest:"Subtest",
+  head_question:"head question",
+  question_types:"questions types"
 };

@@ -142,7 +142,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("question-types")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -187,7 +187,7 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("question-types") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("Subtest") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
@@ -259,8 +259,8 @@ const initFilters = () => {
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('level') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.level_id"  option-value="id" filter :options="all_levels" optionLabel="title" :placeholder='$t("level")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('level_id') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.level_id"  option-value="id" filter :options="all_levels" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.level_id">{{ error.level_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
@@ -284,8 +284,8 @@ const initFilters = () => {
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('level') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.level_id"  option-value="id" filter :options="all_levels" optionLabel="title" :placeholder='$t("level")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('level_id') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.level_id"  option-value="id" filter :options="all_levels" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.level_id">{{ error.level_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">

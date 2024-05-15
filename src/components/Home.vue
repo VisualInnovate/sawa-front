@@ -247,7 +247,7 @@ onMounted(async () => {
             <v-list-item :title="$t('levels')" value="SideProfiles" :to="{ name: 'levels' }"></v-list-item>
             <v-list-item :title="$t('questions')" value="SideProfiles" :to="{ name: 'question' }"></v-list-item>
 
-            <v-list-item :title="$t('Question Types')" value="SideProfiles" :to="{ name: 'question-types' }"></v-list-item>
+            <v-list-item :title="$t('question_types')" value="SideProfiles" :to="{ name: 'question-types' }"></v-list-item>
             <v-list-item :title="$t('Subtest')" value="SideProfiles" :to="{ name: 'milestone-subtest' }"></v-list-item>
             <v-list-item :title="$t('Answers')" value="answer" :to="{ name: 'answer' }"></v-list-item>
               
