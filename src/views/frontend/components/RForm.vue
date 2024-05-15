@@ -75,17 +75,17 @@
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.national_id">{{ error.national_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('Type') }}</label>
+                    <label class="w-full font-bold " for="username">{{ $t('Type') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.gender">{{ error.gender[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('Nationality') }}</label>
+                    <label class="w-full font-bold " for="username">{{ $t('Nationality') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.nationalty">{{ error.nationalty[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('primary_language') }}</label>
+                    <label class="w-full font-bold " for="username">{{ $t('primary_language') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.lang">{{ error.lang[0] }}</div>
             </div>
