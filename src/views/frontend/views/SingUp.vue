@@ -2,7 +2,7 @@
     <div class="grid grid-row-3">
         <Map />
         <SingForm />
-        <About />
+       
         </div>
 </template>
 <script>

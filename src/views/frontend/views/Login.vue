@@ -3,7 +3,7 @@
       <Map />
     <LoginForm />
     </div>
-    <About />
+  
 </template>
 <script>
 import Map from "../components/Map.vue";

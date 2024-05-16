@@ -57,7 +57,7 @@ export const useParentStore = defineStore("parentStore", {
           this.token = res.data.token;
           this.parentAuth = true;
           console.log(res);
-          this.router.push("/web/");
+          this.router.push("/web");
         })
         .catch((err) => {
           this.showErrors = true;

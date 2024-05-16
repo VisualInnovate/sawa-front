@@ -102,7 +102,7 @@ const routes = [
     component: contactus,
   },
   {
-    path: "/web/",
+    path: "/web",
     name: "home",
     component: HomeView,
   },
