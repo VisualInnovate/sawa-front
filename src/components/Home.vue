@@ -181,6 +181,9 @@ onMounted(async () => {
            
           </v-list-group>
 
+          
+          
+
           <v-list-group prepend-icon="mdi-human-male-boy" value="Children">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('parents')"></v-list-item>
@@ -192,6 +195,22 @@ onMounted(async () => {
             <v-list-item  :title="$t('children')" value="children"
               :to="{ name: 'Children' }"></v-list-item>
           </v-list-group>
+
+
+
+          <!-- Employees -->
+          <!-- <v-list-group prepend-icon="mdi-bed">
+            <template #activator="{ props }" value="Evaluation">
+              <v-list-item v-bind="props" :title="$t('hr')"></v-list-item>
+            </template>
+            
+            <v-list-item :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
+           
+              
+          </v-list-group> -->
+
+
+       
 
           <v-list-group prepend-icon="mdi-help-box-multiple-outline" value="Evaluation">
             <template #activator="{ props }">
@@ -245,9 +264,10 @@ onMounted(async () => {
             </template>
             
             <v-list-item :title="$t('levels')" value="levels" :to="{ name: 'levels' }"></v-list-item>
-            <v-list-item :title="$t('questions')" value="question" :to="{ name: 'question' }"></v-list-item>
+       
 
             <v-list-item :title="$t('question_types')" value="question-types" :to="{ name: 'question-types' }"></v-list-item>
+            <v-list-item :title="$t('questions')" value="question" :to="{ name: 'question' }"></v-list-item>
             <v-list-item :title="$t('Subtest')" value="milestone-subtest" :to="{ name: 'milestone-subtest' }"></v-list-item>
             <v-list-item :title="$t('Answers')" value="answer" :to="{ name: 'answer' }"></v-list-item>
               

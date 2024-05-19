@@ -336,6 +336,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   Subtest_id:"اسم الاختبار الفرعي",
   Subtest:" الاختبار الفرعي",
   head_question:"السؤال الرئيسي",
-  question_types:"انواع الاسئلة"
+  question_types:"انواع الاسئلة",
+  "question_type_name":"نوع السوال"
 
 };

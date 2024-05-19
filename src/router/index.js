@@ -4,6 +4,7 @@ import permissionsRoutes from "./permissions.routes";
 import rolesRoutes from "./roles.routes";
 import usersRoutes from "./users.routes";
 import vb from "./vb.routes";
+import hr from "./hr.routes";
 import parentsRoutes from "./parents.routes";
 import siteRoutes from "./settings.routes";
 import rooms from "./room.routes";
@@ -232,6 +233,7 @@ const routes = [
       ...Object.values(studentprogram),
       ...Object.values(treatment_type),
       ...Object.values(inputs),
+      ...Object.values(hr),
  
       ...Object.values(sideProfileRoutes),
       ...Object.values(calender),
