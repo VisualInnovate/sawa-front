@@ -322,5 +322,8 @@ merge:"Merge",
   Subtest:"Subtest",
   head_question:"head question",
   question_types:"questions types",
-  question_type_name:"question type name"
+  question_type_name:"question type name",
+  "question_number":" question number",
+  answer_type:"answer type"
+
 };

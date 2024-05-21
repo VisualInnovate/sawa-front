@@ -319,7 +319,7 @@ export default {
 
           console.log(event);
           const originalDate = new Date(event.end);
-          originalDate.setDate(originalDate.getDate());
+          originalDate.setDate(originalDate.getDate() -1);
           this.start_event = moment(event.start).format("YYYY-MM-DD");
           this.end_event = moment(originalDate.toISOString().split('T')[0]).format("YYYY-MM-DD");
           console.log(event.backgroundColor);

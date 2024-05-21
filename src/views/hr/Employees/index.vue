@@ -243,8 +243,8 @@ const initFilters = () => {
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                  <MultiSelect v-model="employee.users_ids"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-right" for="username">{{ $t('users') }}</label>
+                  <MultiSelect v-model="employee.users_ids"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
               
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>

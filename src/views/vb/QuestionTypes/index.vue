@@ -1,6 +1,7 @@
 <script setup>
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
+import Evaluation from '../../../components/Evaluation.vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -132,33 +133,8 @@ const initFilters = () => {
   <div class="grid">
     <div class="col-12">
       <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
-          <template #start>
-            <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
-            </div>
-          </template>
-
-          <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
-            <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
-          </template>
-        </Toolbar>
-
+        <Evaluation></Evaluation>
+      
         <Toast/>
 
 
@@ -180,6 +156,8 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
+              <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+
               <h5 class="m-0 my-auto">{{ $t("question_types") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
@@ -240,7 +218,7 @@ const initFilters = () => {
             <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
           </template>
         </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+        <Dialog v-model:visible="createdialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
@@ -255,7 +233,7 @@ const initFilters = () => {
             <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+        <Dialog v-model:visible="updatedialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center"  v-model="levels.title" :placeholder='$t("title")' />

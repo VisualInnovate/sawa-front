@@ -34,6 +34,29 @@ const vb = [
         name: 'answer-update',
         component: () => import("../views/vb/Answers/update.vue")
       },
+
+      ////////////////////////barrier  barrier-subtest
+      {
+        path: '/barrier-subtest', // Define the path for your addRoom route
+        name: 'barrier-subtest',
+        component: () => import("../views/vb/barrier/subtest/index.vue")
+      },
+      {
+        path: '/barrier-question', // Define the path for your addRoom route
+        name: 'barrier-question',
+        component: () => import("../views/vb/barrier/Question/index.vue")
+      },
+      {
+        path: '/barrier-answer-type', // Define the path for your addRoom route
+        name: 'barrier-answer-type',
+        component: () => import("../views/vb/barrier/answer-type/index.vue")
+      },
+    
+     
+
+
+
+
 ];
 
 

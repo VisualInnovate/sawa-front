@@ -199,15 +199,26 @@ onMounted(async () => {
 
 
           <!-- Employees -->
-          <!-- <v-list-group prepend-icon="mdi-bed">
+           <!-- <v-list-group prepend-icon="mdi-bed">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props" :title="$t('hr')"></v-list-item>
             </template>
             
+     
+            <v-list-group >
+
+            <template #activator="{ props }" value="Employees">
+              <v-list-item v-bind="props" :title="$t('Employees')"></v-list-item>
+            </template>
+            
             <v-list-item :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
+            <v-list-item :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
+            
            
               
-          </v-list-group> -->
+          </v-list-group> 
+              
+          </v-list-group>  -->
 
 
        
@@ -221,7 +232,18 @@ onMounted(async () => {
               :to="{ name: 'Headers' }"></v-list-item>
             <v-list-item  :title="$t('side_profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
+              
+              <v-list-group value="VB">
+            <template #activator="{ props }">
+              <v-list-item v-bind="props" :title="$t('VB')"></v-list-item>
+            </template>
 
+           
+              <v-list-item :title="$t('milestone')" value="milestone" :to="{ name: 'levels' }"></v-list-item>
+              <v-list-item :title="$t('barriers')" value="barriers" :to="{ name: 'barrier-subtest' }"></v-list-item>
+
+           
+          </v-list-group>
            
           </v-list-group>
           <!-- edit Last -->
@@ -254,39 +276,7 @@ onMounted(async () => {
               
           </v-list-group>
           
-          <v-list-group prepend-icon="mdi-bed">
-            <template #activator="{ props }" value="Evaluation">
-              <v-list-item v-bind="props" title="VB"></v-list-item>
-            </template>
-            <v-list-group>
-            <template #activator="{ props }" >
-              <v-list-item v-bind="props" :title="$t('milestone ')"></v-list-item>
-            </template>
-            
-            <v-list-item :title="$t('levels')" value="levels" :to="{ name: 'levels' }"></v-list-item>
-       
-
-            <v-list-item :title="$t('question_types')" value="question-types" :to="{ name: 'question-types' }"></v-list-item>
-            <v-list-item :title="$t('questions')" value="question" :to="{ name: 'question' }"></v-list-item>
-            <v-list-item :title="$t('Subtest')" value="milestone-subtest" :to="{ name: 'milestone-subtest' }"></v-list-item>
-            <v-list-item :title="$t('Answers')" value="answer" :to="{ name: 'answer' }"></v-list-item>
-              
-          </v-list-group>
-          <!-- <v-list-group>
-            <template #activator="{ props }" >
-              <v-list-item v-bind="props" :title="$t('milestone ')"></v-list-item>
-            </template>
-            
-            <v-list-item :title="$t('levels')" value="SideProfiles" :to="{ name: 'levels' }"></v-list-item>
-            <v-list-item :title="$t('Question Types')" value="SideProfiles" :to="{ name: 'question-types' }"></v-list-item>
-           
-              
-          </v-list-group> -->
-            
-            
-           
-              
-          </v-list-group>
+        
 
           <v-list-group prepend-icon=" mdi-calendar" value="Calender">
             <template #activator="{ props }">

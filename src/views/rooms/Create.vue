@@ -239,7 +239,7 @@ export default {
         selectable: true,
         droppable: true,
         editable: true,
-        selectHelper: true,
+        selectHelper: false,
         validRange: {
           start: new Date(),
         },
@@ -270,10 +270,10 @@ export default {
         console.log(this.room_id)
         const date1 = new Date(event.event.start);
         const hours1 = String(date1.getHours()).padStart(2, '0');
-      const minutes1 = String(date1.getMinutes()).padStart(2, '0');
-      const date2 = new Date(event.event.end);
+        const minutes1 = String(date1.getMinutes()).padStart(2, '0');
+        const date2 = new Date(event.event.end);
         const hours2 = String(date2.getHours()).padStart(2, '0');
-      const minutes2 = String(date2.getMinutes()).padStart(2, '0');
+         const minutes2 = String(date2.getMinutes()).padStart(2, '0');
           axios
             .post(`/api/slot`, {
               title: event.event.title,
@@ -281,7 +281,7 @@ export default {
               to:hours2 +":"+minutes2,
               room_id:this.room_id,
               start_event: moment(event.event.start),
-              end_event: moment(event.event.end),
+              end_event: moment(event.event.start),
             })
             .then((res) => {
               this.update()
@@ -312,7 +312,7 @@ export default {
 
           console.log(event);
           const originalDate = new Date(event.end);
-          originalDate.setDate(originalDate.getDate() );
+          originalDate.setDate(originalDate.getDate() -1);
           this.start_event = moment(event.start).format("YYYY-MM-DD");
           this.end_event = moment(originalDate.toISOString().split('T')[0]).format("YYYY-MM-DD");
           console.log(event.backgroundColor);
