@@ -339,6 +339,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   question_types:"انواع الاسئلة",
   "question_type_name":"نوع السوال",
   "question_number":"ترتيب السؤال",
-  "answer_type":"انواع الاجابات"
+  "answer_type":"انواع الاجابات",
+  "add_evalution":"اضافة تقييم"
 
 };

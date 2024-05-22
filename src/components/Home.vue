@@ -232,7 +232,7 @@ onMounted(async () => {
               :to="{ name: 'Headers' }"></v-list-item>
             <v-list-item  :title="$t('side_profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
-              
+              <v-list-item :title="$t('add_evalution')" value="milestone-evaluation" :to="{ name: 'milestone-evaluation' }"></v-list-item>
               <v-list-group value="VB">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('VB')"></v-list-item>

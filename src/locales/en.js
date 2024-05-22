@@ -324,6 +324,7 @@ merge:"Merge",
   question_types:"questions types",
   question_type_name:"question type name",
   "question_number":" question number",
-  answer_type:"answer type"
+  answer_type:"answer type",
+  "add_evalution":" add evalutaion"
 
 };

@@ -59,6 +59,8 @@ import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 
+import RadioButton from 'primevue/radiobutton';
+
 
 
 import ColorPicker from 'primevue/colorpicker';
@@ -128,6 +130,7 @@ app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
 app.component('DynamicDialog', DynamicDialog)
 app.component('ColorPicker', ColorPicker)
+app.component('RadioButton', RadioButton)
 
 
 app.component('Toast', Toast)
