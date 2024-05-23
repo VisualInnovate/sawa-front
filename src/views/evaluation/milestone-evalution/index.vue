@@ -19,11 +19,19 @@
                     <Dropdown filter required id="pv_id_1" style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
+               
                 <div  v-if="answer.child_id" class="flex flex-column gap-2">
+                  <label for="username">{{ $t('date') }}</label>
+                  <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :maxDate="maxDate" />   
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
+
+              </div> 
+              <div  v-if="answer.date" class="flex flex-column gap-2">
                     <label for="username">{{ $t('age') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="answer.child_age" :placeholder='$t("age")' />
+                    <InputNumber readonly  required class="bg-[#f7f5f5]" v-model="answer.child_age" :placeholder='$t("age")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
                 </div> 
+               
                 <div  class="flex flex-column gap-2">
                     <label for="username">{{ $t('level_id') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;"  @update:model-value="getquation" v-model="answer.level_id"  option-value="id" :options="qustions" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
@@ -45,48 +53,46 @@
     
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
                 </div>  -->
-                <!-- <div v-if="answer.child_id" class=" flex flex-column gap-2">
+                <div v-if="answer.child_id" class=" flex flex-column gap-2">
                     <label for="username">{{ $t('color') }}</label>
                     <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
                    
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
-                </div>  -->
+                </div> 
                 
                 <div v-if="answer.child_age && answer.child_id" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
-                    <h2 class="text-[black] font-bold" for="username">{{head.head_question }}</h2>
+                  <h1  class="text-[black] font-bold" >{{head.title }}</h1>
+                 <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
+                  <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{head.head_question }}</h2>
                   
                         
-                        <div style="border: 1px solid black; border-radius: 5px;padding: 1%;" v-for="(question, index) in head.questions" :key="index">
-                            
-                             <p class="py-1">{{ index+1 }} - {{ question.title }}:</p>
-                             <div>
-                           
-                             </div>
-                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                              <div>
-                                
-                                <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
-                                <label for="html">0</label><br>
-                                <input  @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
-                                <label for="css">0.5</label><br>
-                                <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
-                                <label for="javascript">1</label>
-                              </div>
-                              <div  class=" flex my-auto gap-2">
-                                <label for="username">{{ $t('color') }}</label>
-                                <input    @change="getcolor($event)" :id="question.id" type="color" value="#00a2ff" />
-                              
-                               
-                               </div> 
-                               <div v-for="not in notanswer">
-                                
-                                   <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
-                               </div>
-                             </div>
-                             
-                             
+                  <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.questions" :key="index">
+                      
+                       <p class="py-1">{{ index+1 }} - {{ question.title }}:</p>
+                       <div>
+                     
+                       </div>
+                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
                           
+                          <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
+                          <label for="html">0</label><br>
+                          <input  @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
+                          <label for="css">0.5</label><br>
+                          <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
+                          <label for="javascript">1</label>
                         </div>
+                       
+                         <div v-for="not in notanswer">
+                          
+                             <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
+                         </div>
+                       </div>
+                       
+                       
+                    
+                  </div>
+                 </div>
                         
                            
                    
@@ -170,7 +176,17 @@
            
           })
       },
-
+      getage(){
+        axios
+          .post("api/milestone-answers/get-age-child",{
+            date:this.answer.date,
+            child_id:this.answer.child_id
+          })
+          .then((response) => {
+           this.answer.child_age=response.data
+           
+          })
+      },
       getanswer(event,y,z){
         console.log(event.target.value)
        
