@@ -63,7 +63,7 @@
                      <div v-for="type in alltypes" class="grid grid-cols-1 lg:grid-cols-2 ">
                       <div>
                         
-                        <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  name="0" :value="type.id">
+                        <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" :value="type.id">
                         <label for="html">{{ type.title }}</label><br>
                         <div v-for="not in notanswer">
                         
@@ -220,7 +220,7 @@ export default {
   
     createtreatment() {
     
-      axios.post("/api/milestone-answers/check/answers",{
+      axios.post("api/barrier-question/check/answers",{
         child_id:this.answer.child_id,
         level_id:this.answer.level_id,
 
