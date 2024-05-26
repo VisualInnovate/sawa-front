@@ -281,7 +281,7 @@ fetchdoctor(){
         <form>
           <div>
           
-            <div  class="flex flex-column gap-2">
+            <div v-if="doctorshow != 2 " class="flex flex-column gap-2">
                   <label for="username">{{ $t('doctor') }}</label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="user_type"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("doctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
