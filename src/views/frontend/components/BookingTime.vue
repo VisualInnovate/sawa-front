@@ -32,7 +32,7 @@
         </p>
       </div>
       <div class="p-[5%]">
-        <v-table class="border-2 border-[#967a80]">
+        <v-table class="border-2 border-[#967a80] " style="overflow: scroll;">
           <thead>
             <tr class="bg-[#135C65] border-b-2 border-[#474042]">
               <th
@@ -56,7 +56,7 @@
                   class="rounded-full border-2 border-gray-500 w-full py-2"
                 >
                   <p
-                    class="m-auto w-full text-center item hover:hidden lg:hover:block text-sm text-gray-700 font-medium"
+                    class="m-auto text-right w-full px-1 item hover:hidden lg:hover:block text-[11px] text-gray-700 font-medium"
                     v-if="events.events"
                   >
                     {{ Object.values(tableEvent)[j - 1][i - 1]?.day }}
@@ -64,9 +64,9 @@
                     {{ Object.values(tableEvent)[j - 1][i - 1]?.start_time }}
                   </p>
                   <button
-                    style="position: absolute"
+                    style="position: absolute;left: 5px;"
                     @click="submit(Object.values(tableEvent)[j - 1][i - 1]?.id)"
-                    class="top-[30%] left-0 text-sm trans pr-2 bg-gray-200 font-medium rounded-full px-2"
+                    class="top-[30%] left-0 text-sm trans pr-2  font-medium rounded-full px-2"
                   >
                     احجز الان
                   </button>
@@ -124,7 +124,7 @@ export default {
   methods: {
     getEvents() {
       axios
-        .get("/api/calender/events")
+        .post("/api/calender/events")
         .then((res) => {
           this.events = res.data.events;
 
