@@ -223,7 +223,7 @@ onMounted(async () => {
 
        
 
-          <v-list-group prepend-icon="mdi-help-box-multiple-outline" value="Evaluation">
+          <v-list-group v-can="'show user'" prepend-icon="mdi-help-box-multiple-outline" value="Evaluation">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('evaluations')"></v-list-item>
             </template>
@@ -266,7 +266,7 @@ onMounted(async () => {
             
           </v-list-group>
           
-          <v-list-group prepend-icon="mdi-bed">
+          <v-list-group v-can="'show user'" prepend-icon="mdi-bed">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props" :title="$t('room')"></v-list-item>
             </template>

@@ -71,6 +71,16 @@ const childrenRoutes = [
     },
   },
   {
+    path: 'children-detailes', // Define the path for your addRoom route
+    name: 'children-detailes',
+    component: () => import("../views/children/detailes.vue")
+  },
+  {
+    path: 'children-programe', // Define the path for your addRoom route
+    name: 'children-programe',
+    component: () => import("../views/children/programe.vue")
+  },
+  {
     path: "children/evaluation/:evaluation_result_id",
     name: "editChildResult",
     component: editResult,

@@ -237,6 +237,16 @@ const initFilters = () => {
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
             </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('strength_title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.strength_title" :placeholder='$t("strength_title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.strength_title">{{ error.strength_title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('weakness_title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.weakness_title" :placeholder='$t("weakness_title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.weakness_title">{{ error.weakness_title[0] }}</div>
+            </div>
           <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('question_type_name') }}</label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.question_type_id"  option-value="id" filter :options="questions" optionLabel="title" :placeholder='$t("question_type_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
@@ -257,6 +267,16 @@ const initFilters = () => {
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('strength_title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.strength_title" :placeholder='$t("strength_title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.strength_title">{{ error.strength_title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('weakness_title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.weakness_title" :placeholder='$t("weakness_title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.weakness_title">{{ error.weakness_title[0] }}</div>
             </div>
           <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('question_type_name') }}</label>

@@ -3,6 +3,7 @@ import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
+import { useStorage } from "@vueuse/core";
 import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
@@ -18,8 +19,7 @@ const confir_id=ref('')
 const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
-
-
+const child_id= useStorage("child_id", Number)
 
 
 onBeforeMount(() => {
@@ -55,11 +55,17 @@ const edit=(id)=>{
   router.push({name:'EditChildren',params:{'id':id} })
 }
 const showItem=(id)=>{
+  
   router.push({name:'ShowChildren',params:{'id':id} })
 }
 
 const openNew = () => {
   router.push({name:'CreateChildren'})
+}
+
+const detail=(id)=>{
+  child_id.value=id
+   router.push({name:'children-detailes'})
 }
 
 const confirmDelete = (id) => {
@@ -207,6 +213,7 @@ const initFilters = () => {
               
                 icon="pi pi-user"
                 class="show mt-2"
+                @click="detail(slotProps.data.id)"
              
               />
               </div>

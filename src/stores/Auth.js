@@ -37,6 +37,7 @@ export const useAuthStore = defineStore("Auth", {
           password: data.password,
         });
         useParentStore().resetAuthStore()
+        
         this.authenticated = true;
         this.token = response.data.tokens;
         this.authUser = response.data.user;

@@ -3,6 +3,7 @@ import axios from "axios";
 import { ref } from "vue";
 import { useStorage } from "@vueuse/core";
 import { useAuthStore } from "../stores/Auth";
+import Code from "../views/frontend/views/code.vue";
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
     parent: useStorage("parent", {}),
@@ -51,7 +52,11 @@ export const useParentStore = defineStore("parentStore", {
       this.authErrors = [];
       this.showErrors = false;
       await axios
-        .post("api/parent/register", parent)
+        .post("api/parent/verify-code",{
+          email:localStorage.getItem("email_parent"),
+          code:parent.num1+parent.num2+parent.num3+parent.num4
+
+        } )
         .then((res) => {
           this.parent = res.data.user;
           this.token = res.data.token;
@@ -84,6 +89,7 @@ export const useParentStore = defineStore("parentStore", {
     resetAuthStore() {
       this.token = null;
       this.parent = null;
+      this.parent_id=null
       this.parentAuth = null;
       this.showErrors = null;
       this.authErrors = null;

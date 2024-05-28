@@ -135,7 +135,9 @@ const editesuser=()=>{
     body.append("password", usersdata.value.password);
     body.append("image", usersdata.value.file);
     body.append("role", usersdata.value.role);
-    body.append("spotter", usersdata.value.spotter);
+    if(usersdata.value.spotter){
+      body.append("spotter", usersdata.value.spotter);
+    }
     if(usersdata.value.skills){
       body.append("skills", usersdata.value.skills);
     }

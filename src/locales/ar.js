@@ -125,7 +125,7 @@ price:"السعر",
   if_your_child_suffers_from_any_diseases_please_write_them_down:
     " اذا كان طفلك يعاني من اي امراض يرجي كتابتها  ",
   Note: "ملاحظه",
-  Register_now: "التسجيل الان",
+  Register_now: "تسجيل الدخول",
   From_here_you_can_register_your_child_with_us_to_be_monitored:
     "يمكنك من هنا تسجيل طفلك معنا لمراقبه  ",
   The_extent_to_which_his_mental_and_physical_skill_developed:
@@ -340,6 +340,11 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   "question_type_name":"نوع السوال",
   "question_number":"ترتيب السؤال",
   "answer_type":"انواع الاجابات",
-  "add_evalution":"اضافة تقييم"
+  "add_evalution":"اضافة تقييم",
+  student_details:"المعومات الشخصية",
+  "tables":"الجدول",
+  Consultations_evaluations:"الاستشارات والتقييمات",
+  strength_title:"نقاط القوة",
+  weakness_title:"نقاط الضعف"
 
 };

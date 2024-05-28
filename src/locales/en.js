@@ -325,6 +325,11 @@ merge:"Merge",
   question_type_name:"question type name",
   "question_number":" question number",
   answer_type:"answer type",
-  "add_evalution":" add evalutaion"
+  "add_evalution":" add evalutaion",
+  student_details:" student details",
+  "tables":"schedule",
+  Consultations_evaluations:"Consultations and evaluations",
+  strength_title:"strength title",
+  weakness_title:"weakness title"
 
 };

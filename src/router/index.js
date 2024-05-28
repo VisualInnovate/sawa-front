@@ -123,6 +123,12 @@ const routes = [
     component: () => import("../views/frontend/views/Number.vue"),
   },
   {
+    path: "/web/register-code",
+    name: "register-code",
+    beforeEnter: authForNormalUser,
+    component: () => import("../views/frontend/views/registercode.vue"),
+  },
+  {
     path: "/web/booking-time",
     name: "BookingTime",
     component: BookingTime,

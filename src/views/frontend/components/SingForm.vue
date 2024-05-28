@@ -163,14 +163,16 @@ import { useParentStore } from "../../../stores/ParentStore";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import InlineMessage from "primevue/inlinemessage";
-
+import { useStorage } from "@vueuse/core";
 export default {
   components: { Button, InputText, InlineMessage },
   data() {
     return {
+      email_parent: useStorage("email_parent", ),
       alert: {},
       alert_text: null,
       alert: {},
+      errors:{},
       parentStore: useParentStore(),
       parent: {
         fname: null,
@@ -181,7 +183,22 @@ export default {
         password_confirmation: null,
       },
     };
+  
   },
+  methods:{
+          createtreatment() {
+
+      axios.post("/api/parent/register",this.parent).then((res) => {
+        this.email_parent=this.parent.email
+        this.$router.push({ name: 'register-code' });
+      }).catch((el)=>{
+   
+         this.errors = el.response.data.errors
+      })
+      },
+
+
+  }
 };
 </script>
 <template>
@@ -237,7 +254,7 @@ export default {
               
               <div class="flex flex-column gap-2 w-full ">
                     <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                    <Button @click="parentStore.register(parent)" class="create m-auto w-full " :label='$t("Register_now")'></Button>
+                    <Button @click="createtreatment" class="create m-auto w-full " :label='$t("Register_now")'></Button>
                     <small id="username-help"></small>
                 </div>
                 <div class="mt-2 flex items-center justify-between">
