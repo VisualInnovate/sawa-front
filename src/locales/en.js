@@ -330,6 +330,7 @@ merge:"Merge",
   "tables":"schedule",
   Consultations_evaluations:"Consultations and evaluations",
   strength_title:"strength title",
-  weakness_title:"weakness title"
+  weakness_title:"weakness title",
+  strart_evaluate:"strart evaluate"
 
 };

@@ -17,7 +17,7 @@
     </div>
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("nationalty") }} :</h3>
-          <p class="text-xl  px-1 my-auto">{{ details.nationalty }}</p>
+          <p class="text-xl  px-1 my-auto">{{ details.nationality }}</p>
     </div>
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("national id") }} :</h3>
@@ -34,6 +34,14 @@
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("address") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.address }}</p>
+    </div>
+    <div class="flex py-2 ">
+          <h3 class="my-auto font-bold">{{ $t("parent_fname") }} :</h3>
+          <p class="text-xl  px-1 my-auto">{{ details.parent?.fname }}</p>
+    </div>
+    <div class="flex py-2 ">
+          <h3 class="my-auto font-bold">{{ $t("email") }} :</h3>
+          <p class="text-xl  px-1 my-auto">{{ details.parent?.email }}</p>
     </div>
     
    </div>
@@ -69,7 +77,7 @@ export default {
 
     getusers(){
       axios
-        .get(`api/get-child/${localStorage.getItem("child_id")}`)
+        .get(`api/child/${localStorage.getItem("child_id")}/get/evaluations`)
         .then((response) => {
           console.log(response.data.data)
           this.details = response.data

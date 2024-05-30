@@ -16,7 +16,7 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown filter required id="pv_id_1" style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Dropdown   filter required id="pv_id_1" style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
                
@@ -53,14 +53,17 @@
     
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
                 </div>  -->
-                <div v-if="answer.child_id" class=" flex flex-column gap-2">
+                <div v-if="answer.child_id && answer.child_age && answer.level_id" class=" flex flex-column gap-2">
                     <label for="username">{{ $t('color') }}</label>
-                    <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
-                   
+
+                     <div class="flex">
+                      <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
+                    <Button @click="createevalutae"  class="create m-auto  w-full h-[50px] " :label='$t("strart_evaluate")'></Button>
+                     </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
                 
-                <div v-if="answer.child_age && answer.child_id" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
+                <div v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
                   <h1  class="text-[black] font-bold" >{{head.title }}</h1>
                  <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
                   <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{head.head_question }}</h2>
@@ -95,18 +98,19 @@
                  </div>
                         
                            
-                   
+                
               
                 </div> 
-              
-         
-         
-             
-                <div class="flex flex-column gap-2 w-full">
+                <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                   <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
                   <small id="username-help"></small>
                 </div>
+              
+         
+         
+             
+                
                 
   
         
@@ -128,8 +132,10 @@
   
     data() {
       return {
-        
+        strart_evaluate:false,
         answers:[],
+        type:2,
+        
            
         answer:{ 
             color:"00a2ff"
@@ -158,7 +164,24 @@
         
         
       },
+      createevalutae(id){
+        console.log(id)
+        
+        axios
+          .post(`api/evaluations/create`,{
+            type:this.type,
+            title:"VB-MAPP تقييم",
+            child_id:this.answer.child_id,
+            specialist_id:localStorage.getItem("user_id")
 
+          })
+          .then((response) => {
+            
+           this.strart_evaluate=!(this.strart_evaluate)
+           
+           
+          })
+      },
       anserdata(id,val){
         console.log(id)
         console.log(val)

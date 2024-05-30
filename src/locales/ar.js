@@ -345,6 +345,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   "tables":"الجدول",
   Consultations_evaluations:"الاستشارات والتقييمات",
   strength_title:"نقاط القوة",
-  weakness_title:"نقاط الضعف"
+  weakness_title:"نقاط الضعف",
+  strart_evaluate:"بداء التقييم "
 
 };
