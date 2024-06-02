@@ -335,6 +335,7 @@ merge:"Merge",
   doctors:"doctors",
   evalute_type:"Evaluation type",
   Evaluation_date:"Evaluation_date",
-  Name_evaluator:"evaluator Name "
+  Name_evaluator:"evaluator Name ",
+  evaluation_order:"evaluations orders"
 
 };

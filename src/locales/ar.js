@@ -350,7 +350,9 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   doctors:"المعالجين",
   evalute_type:"نوع التقييم",
   Evaluation_date:"موعد التقييم ",
-  Name_evaluator:"اسم المقييم"
+  Name_evaluator:"اسم المقييم",
+  evaluation_order:"طلبات التقييم",
+  
 
 
 };

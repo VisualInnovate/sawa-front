@@ -1,5 +1,5 @@
 
-  <template>
+<template>
     <div>
       <EvaluationType></EvaluationType>
       
@@ -8,28 +8,23 @@
      <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
         <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details">
           <div class="col-span-2">
-            <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==2">milestone</p>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==1">side profile</p>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==3">Barrier</p>
+        <div class="flex py-2 ">
+            <h3 class="my-auto font-bold">{{ $t("اسم المقييم") }} :</h3>
+            <p class="text-xl  px-1 my-auto">{{ evalu?.title }}</p>
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
             <p class="text-xl  px-1 my-auto">{{ evalu.date }}</p>
           </div>
-          <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("اسم المقييم") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.specialist?.name }}</p>
-          </div>
+         
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.child?.name }}</p>
+            <p class="text-xl  px-1 my-auto">{{ evalu.kid?.name }}</p>
           </div>
           </div>
-          <div class="text-center" >
-          <Button @click="go_evaluate(evalu.child.id,evalu.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
-          </div>
+          <!-- <div class="text-center" >
+          <Button @click="go_evaluate(evalu.child_id,evalu.type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          </div> -->
             
         </div>
         
@@ -39,38 +34,7 @@
   
       
     </v-card>
-    <div>
-      <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="">
-                
-           
-            <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.evaluation_type">{{ error.evaluation_type[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('Name_evaluator') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.specialist_id"  option-value="id" filter :options="doctors"  optionLabel="name" :placeholder='$t("Name_evaluator")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">{{ error.specialist_id[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                    <label  class="w-full text-right" for="username">{{ $t('Evaluation_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :placeholder='$t("Evaluation_date")'  :maxDate="maxDate" />   
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-                </div> 
-           
-            
-          </div>
-           
-            
-           <div class="w-full text-center">
-            <Button @click="createevaluate" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-
-           
-        </Dialog>
-    </div>
+  
     <toast></toast>
 
     </div>
@@ -153,7 +117,7 @@
           .get(`api/users/${localStorage.getItem("doctor_id")}/get/evaluations`)
           .then((response) => {
             console.log(response.data.evaluation_requests)
-            this.details = response.data.evaluation_requests
+            this.details = response.data.evaluations
            
           })
           .catch((error) => {

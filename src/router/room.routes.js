@@ -44,6 +44,11 @@ const rooms = [
           name: 'doctors-programe',
           component: () => import("../views/doctors/programe.vue")
           },
+          {
+            path: '/doctors-evaluation',
+            name: 'doctors-evaluation',
+            component: () => import("../views/doctors/evaluation.vue")
+            },
 
 
 ];
