@@ -3,14 +3,35 @@
     <ChildTaps></ChildTaps>
     <v-card>
        
-     <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details">
-          <div>
-            <div class="flex py-2 ">
-                  <h3 class="my-auto font-bold">{{ $t("ProgramName") }} :</h3>
-                  <p class="text-xl  px-1 my-auto">{{ details?.program?.name }}</p>
+     <div  class="grid grid-cols-1 lg:grid-cols-1 gap-4 p-4">
+        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-1" >
+          <div class="w-full">
+            <div class=" flex py-2 ">
+                  <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
+                  <p class="text-xl  px-1 my-auto">{{ details?.name }}</p>
+            </div>  
+            <div class=" flex py-2 ">
+                  <h3 class="my-auto font-bold">{{ $t("ProgramType") }} :</h3>
+                  <p class="text-xl  px-1 my-auto" v-if=" details?.student_program?.program.program_type == 0">{{ $t("diurnal") }}</p>
+                  <p class="text-xl  px-1 my-auto" v-if=" details?.student_program?.program.program_type == 1">{{ $t("Clinics") }}</p>
+                  <p class="text-xl  px-1 my-auto" v-if=" details?.student_program?.program.program_type == 2">{{ $t("house") }}</p>
             </div>
-         
+            <div class=" flex py-2 ">
+                  <h3 class="my-auto font-bold">{{ $t("ProgramName") }} :</h3>
+                  <p class="text-xl  px-1 my-auto">{{ details?.student_program?.program.name }}</p>
+            </div>
+            <div class="flex py-2 ">
+                  <h3 class="my-auto font-bold">{{ $t("price") }} :</h3>
+                  <p class="text-xl  px-1 my-auto">{{ details?.student_program?.program?.price }}</p>
+            </div>
+            <div class="flex py-2 ">
+                  <h3 class="my-auto font-bold">{{ $t("number_sessaion") }} :</h3>
+                  <p class="text-xl  px-1 my-auto">{{ details?.student_program?.program?.individual_sessions }}</p>
+            </div>
+            <div class="flex py-2 ">
+                  <h3 class="my-auto font-bold">{{ $t("gruop_sessaion") }} :</h3>
+                  <p class="text-xl  px-1 my-auto">{{ details?.student_program?.program?.collective_sessions }}</p>
+            </div>
           </div>
           
             
@@ -54,7 +75,7 @@ export default {
         .get(`api/program/programFor/${localStorage.getItem("child_id")}`)
         .then((response) => {
           console.log(response.data.data)
-          this.details = response.data.data.student_program
+          this.details = response.data.data
          
         })
         .catch((error) => {

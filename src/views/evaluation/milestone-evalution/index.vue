@@ -172,11 +172,13 @@
             type:this.type,
             title:"VB-MAPP تقييم",
             child_id:this.answer.child_id,
-            specialist_id:localStorage.getItem("user_id")
-
+            specialist_id:localStorage.getItem("user_id"),
+            
+          
           })
           .then((response) => {
-            
+          
+            this.answer.evaluation_id=response.data.evaluation.id
            this.strart_evaluate=!(this.strart_evaluate)
            
            
@@ -234,6 +236,7 @@
            
             this.childs = response.data.children
             this.answer.child_id=parseInt(this.$route.params.id)
+            this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
           })
           axios
           .get("api/mileston-levels")

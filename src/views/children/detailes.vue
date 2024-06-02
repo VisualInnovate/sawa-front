@@ -2,7 +2,7 @@
   <div>
     <ChildTaps></ChildTaps>
   <v-card>
-   <div class="p-[1%]">
+   <div class="p-[1%] bg-slate-100">
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.name }}</p>

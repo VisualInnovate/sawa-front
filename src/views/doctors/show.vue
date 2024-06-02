@@ -7,7 +7,7 @@
            <img  class="w-[100px] h-[100px] rounded-full" :src="'https://sawa.sawa.academy/' + details.image" alt="not found">
       </div>
       <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
+            <h3 class="my-auto font-bold">{{ $t("name") }} :</h3>
             <p class="text-xl  px-1 my-auto">{{ details.name }}</p>
       </div>
       <div class="flex py-2 ">

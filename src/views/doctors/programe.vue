@@ -28,7 +28,7 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button @click="go_evaluate(evalu.child.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button @click="go_evaluate(evalu.child.id,evalu.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
           </div>
             
         </div>
@@ -111,15 +111,15 @@
       },
     
 
-      go_evaluate(id,evalu_id){
+      go_evaluate(id,evalulation,evalu_id){
         if(evalu_id == 1){
-          this.$router.push({ name: 'ShowSideProfiles', params:{'id':id}});
+          this.$router.push({ name: 'ShowSideProfiles', params:{'id':id,'evaluation':evalulation}});
         }
         if(evalu_id == 2){
-          this.$router.push({ name: 'milestone-evaluation', params:{'id':id}});
+          this.$router.push({ name: 'milestone-evaluation',  params:{'id':id,'evaluation':evalulation}});
         }
         if(evalu_id == 3){
-          this.$router.push({ name: 'barrier-evaluation', params:{'id':id}});
+          this.$router.push({ name: 'barrier-evaluation',  params:{'id':id,'evaluation':evalulation}});
         }
        
       },

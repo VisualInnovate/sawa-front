@@ -1,6 +1,7 @@
 <template>
        <div>
             <h1 class="w-full py-3 text-3xl font-bold text-center">LEVEL 1</h1>
+        
       </div>
 <div class="grid grid-cols-9 "  style="border: 1px 1px 0px 0px solid black;">
       
