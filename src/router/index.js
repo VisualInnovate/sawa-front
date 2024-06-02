@@ -44,6 +44,7 @@ function guest(to, from, next) {
 }
 
 function authForNormalUser(to, from, next) {
+  localStorage.setItem('lastRoute', to.path);
   if (!useParentStore().parent_id ) {
     return next({ name: "parentLogin" });
   }
@@ -295,6 +296,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
 
 // router.beforeEach((to, from, next) => {
 //   let user_permissions = JSON.parse(localStorage.getItem("userPermissions"));

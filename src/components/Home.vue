@@ -191,6 +191,8 @@ onMounted(async () => {
 
             <v-list-item  :title="$t('parents')" value="parents"
               :to="{ name: 'Parents' }"></v-list-item>
+              <v-list-item  :title="$t('doctors')" value="doctors"
+              :to="{ name: 'doctors' }"></v-list-item>
 
             <v-list-item  :title="$t('children')" value="children"
               :to="{ name: 'Children' }"></v-list-item>

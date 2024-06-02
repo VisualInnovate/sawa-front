@@ -28,6 +28,24 @@ const rooms = [
     name: 'EditRoom',
     component: () => import("../views/rooms/Edit.vue")
     },
+    //////// doctor
+    {
+      path: '/doctors',
+      name: 'doctors',
+      component: () => import("../views/doctors/index.vue")
+      },
+      {
+        path: '/doctors-show',
+        name: 'doctors-show',
+        component: () => import("../views/doctors/show.vue")
+        },
+        {
+          path: '/doctors-programe',
+          name: 'doctors-programe',
+          component: () => import("../views/doctors/programe.vue")
+          },
+
+
 ];
 
 export default {

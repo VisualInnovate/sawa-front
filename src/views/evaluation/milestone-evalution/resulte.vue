@@ -41,7 +41,7 @@ export default {
   methods:{
     getresulte(){
       axios
-          .get("api/mileston-levels/flow-chart/1")
+          .get(`api/mileston-levels/flow-chart/${this.$route.params.id}`)
           .then((response) => {
             console.log(response.data.data)
             this.mainSquares = response.data.data[0].subtests

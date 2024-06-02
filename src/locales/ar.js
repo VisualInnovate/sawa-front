@@ -346,6 +346,11 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   Consultations_evaluations:"الاستشارات والتقييمات",
   strength_title:"نقاط القوة",
   weakness_title:"نقاط الضعف",
-  strart_evaluate:"بداء التقييم "
+  strart_evaluate:"بداء التقييم ",
+  doctors:"المعالجين",
+  evalute_type:"نوع التقييم",
+  Evaluation_date:"موعد التقييم ",
+  Name_evaluator:"اسم المقييم"
+
 
 };

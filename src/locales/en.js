@@ -331,6 +331,10 @@ merge:"Merge",
   Consultations_evaluations:"Consultations and evaluations",
   strength_title:"strength title",
   weakness_title:"weakness title",
-  strart_evaluate:"strart evaluate"
+  strart_evaluate:"strart evaluate",
+  doctors:"doctors",
+  evalute_type:"Evaluation type",
+  Evaluation_date:"Evaluation_date",
+  Name_evaluator:"evaluator Name "
 
 };
