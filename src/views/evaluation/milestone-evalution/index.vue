@@ -1,6 +1,6 @@
 <template>
     <div>
-        <EvaluationType></EvaluationType>
+
     
     </div>
     <v-card>
@@ -226,12 +226,14 @@
 
       },
       getusers(){
+        
+       
         axios
           .get("api/child")
           .then((response) => {
-            console.log(response.data.data)
-            this.childs = response.data.children
            
+            this.childs = response.data.children
+            this.answer.child_id=parseInt(this.$route.params.id)
           })
           axios
           .get("api/mileston-levels")

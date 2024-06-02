@@ -1,6 +1,6 @@
 <template>
   <div>
-      <EvaluationType></EvaluationType>
+      
   
   </div>
   <v-card>
