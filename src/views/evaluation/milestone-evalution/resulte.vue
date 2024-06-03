@@ -3,7 +3,7 @@
             <h1 class="w-full py-3 text-3xl font-bold text-center">LEVEL 1</h1>
         
       </div>
-<div class="grid grid-cols-10 "  style="border: 1px 1px 0px 0px solid black;">
+<div v-if="mainSquares" class="grid grid-cols-10 "  style="border: 1px 1px 0px 0px solid black;">
       
       <div  class="grid grid-cols-1">
         <div class="w-20 h-20 text-center" style="overflow: hidden;font-size: 13px;" ></div>
@@ -19,9 +19,10 @@
 
       <div style="border: 1px solid black !important;" class="w-20 h-20 border border-black flex flex-col justify-between" v-for="(mainSquare, index) in mainSquares[index]?.questions" :key="index">
         
-        <!-- <div style="border: 1px dotted black !important; " class="h-1/2 border border-blue-500 bg-[#ff0800]" ></div> -->
-        <div style="border: 1px dotted black !important; " class="h-1/2 border border-blue-500 " :class="{[`bg-[#${mainSquare?.answer_color}]`]: mainSquare.answer_score == 1,'': mainSquare.answer_score == 0.5 || mainSquare.answer_score == 0 }"></div>
-        <div class="h-1/2 border border-blue-500" :class="{[`bg-[#${mainSquare?.answer_color}]`]: mainSquare?.answer_score == 1 || mainSquare?.answer_score == 0.5,'':mainSquare?.answer_score == 0 }"></div>
+      
+        <div class="h-1/2 border border-blue-500 "  :style="{ border: '1px dotted black',  backgroundColor: mainSquare.answer_score == 1 ? `#${mainSquare.answer_color}` : (mainSquare.answer_score == 0.5 || mainSquare.answer_score == 0 ? '' : '')}"></div>
+        <div class="h-1/2 border border-blue-500 " :style="{ border: '1px dotted black', backgroundColor: mainSquare?.answer_score == 1 || mainSquare?.answer_score == 0.5 ? `#${mainSquare?.answer_color}` : '' }"></div>
+
       </div>
     </div>
 
@@ -91,6 +92,7 @@ export default {
   name: 'SquareGrid',
   data() {
     return {
+      color:'bg-[red]',
       mainSquares: [],
       table_resulte:[]
     };
@@ -102,6 +104,7 @@ export default {
           .then((response) => {
             console.log(response.data.data[0].subtests)
             this.mainSquares = response.data.data[0].subtests
+            
            
           })
           .catch((error) => {
