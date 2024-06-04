@@ -8,6 +8,7 @@ import hr from "./hr.routes";
 import parentsRoutes from "./parents.routes";
 import siteRoutes from "./settings.routes";
 import rooms from "./room.routes";
+import reinforcer from './reinforcers.routes'
 import childrenRoutes from "./children.routes";
 import QuestionHeadersRoutes from "./question-headers.routes";
 import EvaluationsRoutes from "./evaluation.routes";
@@ -241,7 +242,7 @@ const routes = [
       ...Object.values(treatment_type),
       ...Object.values(inputs),
       ...Object.values(hr),
- 
+      ...Object.values(reinforcer),
       ...Object.values(sideProfileRoutes),
       ...Object.values(calender),
       ...Object.values(parentsRoutes),

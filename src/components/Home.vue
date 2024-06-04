@@ -321,8 +321,10 @@ onMounted(async () => {
               :to="{ name: 'skills' }"></v-list-item>
               <v-list-item  :title="$t('department')" value="department"
               :to="{ name: 'department' }"></v-list-item>
+              <v-list-item  :title="$t('reinforcers')" value="reinforcers"
+              :to="{ name: 'reinforcers' }"></v-list-item>
            
-
+              
 
               <v-list-item  :title="$t('area')" value="area"
               :to="{ name: 'regin' }"></v-list-item>
