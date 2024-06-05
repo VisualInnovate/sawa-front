@@ -8,10 +8,11 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
-
+const alllevels=ref({})
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
+const value=ref('')
 const users = ref(null)
 const productDialog = ref(false)
 const deleteDialog = ref(false)
@@ -40,6 +41,17 @@ onBeforeMount(() => {
 
 
 }
+
+
+const getdatafilter=(id)=>{
+  loading.value= true
+  axios.get(`/api/milestone-subtest/filter/${id}`).then((res)=>{
+    loading.value= false
+    users.value= res.data.data
+    console.log(users.value)
+
+  });
+}
 const getSubtests=()=>{
   axios.get("/api/milestone-subtest").then((res)=>{
     
@@ -56,11 +68,20 @@ const getquestions=()=>{
 
   });
 }
+const filterlevel=()=>{
+  axios.get("/api/mileston-levels").then((res)=>{
+   
+    alllevels.value= res.data.data
+    
+
+  });
+}
 
 
 onMounted(() => {
   // productService.getProducts().then((data) => (products.value = data));
 fetchData()
+filterlevel()
 getquestions()
 getSubtests()
 })
@@ -175,12 +196,16 @@ const initFilters = () => {
             <div class="flex w-full  justify-between align-items-center">
               <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
               <h5 class="m-0 my-auto">{{ $t("questions") }}</h5>
+              <Dropdown  @update:model-value="getdatafilter" required id="pv_id_1" v-model="value" style="direction: ltr !important;"  option-value="id" :options="alllevels" optionLabel="title" :placeholder='$t("level_id")' class=" bg-[#f7f5f5] [&>div>div>span]:bg-black my-auto md:w-14rem h-12" />
+
              <div>
+              
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
               </span>
               </div>
+          
             </div>
           </template>
 
@@ -189,11 +214,21 @@ const initFilters = () => {
 
         
          
-           <Column field="name" :header='$t("name")' :sortable="true" header-style="width:24%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="name" :header='$t("name")' :sortable="true" header-style="width:26%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.title }}
             </template>
            </Column> 
+           <Column field="name" :header='$t("question_type_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data?.subtest?.level.title }}
+            </template>
+           </Column> 
+           <Column field="name" :header='$t("level_id")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data?.question_type.title }}
+            </template>
+           </Column>
           
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
@@ -233,8 +268,8 @@ const initFilters = () => {
         <Dialog v-model:visible="createdialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
           <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.title" ></v-textarea>
               
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
@@ -265,7 +300,9 @@ const initFilters = () => {
         <Dialog v-model:visible="updatedialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
           <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
+                  <v-textarea  bg-color="#EAE8E9" v-model="levels.title" ></v-textarea>
+                 
+              
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.name[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">

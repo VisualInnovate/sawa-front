@@ -14,13 +14,17 @@
                 </div> 
     </div>
     <div class="lg:col-span-2 m-auto">
+        <div class="flex">
+            <Button  :disabled="count <= 2"  @click="deletearray"  class="delete m-auto  " icon="pi pi-minus" label="ازالة عنصر"></Button>
+            <Button   @click="addarray"  class="create m-auto  " icon="pi pi-plus" label="اضافة عنصر" ></Button>
+        </div>
         <div v-for="item,index in items" class="flex border-b-2 border-black">
-            <Dropdown v-model="items[index].value" class="hover:ring-0 w-44"   :options="stimulus" optionLabel="name" :placeholder=" ' select ' + ' '+item.name "  />
-
-          <p class="my-auto w-16" > : {{ item.name }} </p>
+            <Dropdown v-model="items[index].value" class="hover:ring-0 w-52"  option-value="id"  :options="stimulus" optionLabel="name" :placeholder=" ' select ' + ' '+item.name "  />
+             
+          <p class="my-auto w-16" > item : {{ item.name }} </p>
         </div>
         <div class="mt-1 mb-5 w-full text-center text-red-500" v-if="error?.result">{{ error.result[0] }}</div>
-
+        
     </div>
 
 <div class="relative overflow-x-auto">
@@ -48,15 +52,17 @@
                 <th  scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                     <div v-for="pair,index in pairs" :key="pair.join('-')">
                         <div class="flex">
-                            <div class="px-[1%]">
-                                <span>{{ pair[0] }}</span>
-                                <input @change="getanswer(index,pair[0])"  style="border: 1px solid black " class="mx-2" type="radio"  :name="index" :value="pair[0]" >
-                            </div>
-                            <span>  </span>
                             <div>
                                 <span>{{ pair[1] }}</span>
                                 <input @change="getanswer(index,pair[1])" style="border: 1px solid black " class="mx-2" type="radio"  :name="index" :value="pair[1]" >
                             </div>
+                            <span>  </span>
+                            <div class="px-[1%]">
+                                <span>{{ pair[0] }}</span>
+                                <input @change="getanswer(index,pair[0])"  style="border: 1px solid black " class="mx-2" type="radio"  :name="index" :value="pair[0]" >
+                            </div>
+                            
+                           
                         </div>
 
                     
@@ -81,7 +87,9 @@
     <v-card v-if="result" class="my-[2%] py-[2%]">
         <div class="flex py-2">
             <h2 class="font-bold px-1 ">highest preferred :</h2>
-            <p> {{ result.highest_preferred }}</p>
+            <span v-if="result?.highest_preferred ">letter: {{ result?.highest_preferred[0].letter }} </span>
+            <span>    </span>
+            <span v-if="result?.highest_preferred"> percentage {{ result?.highest_preferred[0].percentage }}  </span>
                   
         </div>
         <div class="flex py-2">
@@ -110,31 +118,21 @@
     data() {
       return {
         error:{},
+        count:2,
         pair:{
             result:[],
             values:[]
         },
-
+        namesToCheck: [],
         result:{},
         childs:[],
-        
+        charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         stimulus:[],
-        cities: [
-                { name: 'New York', code: 'NY' },
-                { name: 'Rome', code: 'RM' },
-                { name: 'London', code: 'LDN' },
-                { name: 'Istanbul', code: 'IST' },
-                { name: 'Paris', code: 'PRS' }
-            ],
+
         items: [
-                { name: 'item A', value: ' ' },
-                { name: 'item B', value: ' ' },
-                { name: 'item C', value: ' ' },
-                { name: 'item D', value: ' ' },
-                { name: 'item E', value: ' ' },
-                { name: 'item F', value: ' ' }
-            ],
-        arr: ['A', 'B', 'C', 'D', 'E', 'F'],
+            {name:'A', value: ' ' },
+            {name:'B', value: ' ' }],
+        arr: ['A','B'],
          pairs: [],
         // Add other validation rules for the title field
       };
@@ -143,6 +141,33 @@
 
   
     methods: {
+        getdatafilter(id){
+            this.namesToCheck.push(id)
+            this.missingNames()
+        },
+        missingNames() {
+            this.stimulus=this.stimulus.filter(item => !this.namesToCheck.includes(item.id));
+            
+        },
+        deletearray(){
+          if( this.items.length > 2){
+            this.items.length--
+            this.arr.length--
+            this.count--
+            this.generatePairs()
+          }
+         
+        },
+        addarray(){
+           
+           
+            this.items.push({ name: `${this.charset[this.count]}`, value: ' ' });
+            this.arr.push(this.charset[this.count]);
+            this.generatePairs()
+            this.count ++
+           
+            
+        },
         getanswer(id,value){
             
             this.pair.result[id]=value
@@ -165,6 +190,7 @@
           })
         },
         createevalation(){
+
             this.pair.date= moment(this.pair.date).format("Y-MM-DD") ,
             this.pair.specialist_id=localStorage.getItem("user_id") ,
             this.pair.type=0
@@ -195,7 +221,8 @@
      
     },
     mounted() {
-        this.generatePairs();
+       
+        this.generatePairs()
         this.getchilde()
     },
   };

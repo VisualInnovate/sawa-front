@@ -249,7 +249,7 @@ const initFilters = () => {
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('head_question') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.head_question" :placeholder='$t("head_question")' />
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.head_question"  ></v-textarea>
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
             </div>
            <div class="w-full text-center">
@@ -274,7 +274,7 @@ const initFilters = () => {
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('head_question') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.head_question" :placeholder='$t("head_question")' />
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.head_question"  ></v-textarea>
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
             </div>
            <div class="w-full text-center">

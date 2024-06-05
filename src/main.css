@@ -91,6 +91,10 @@ canvas {
   background-color: white !important;
   border: 0 !important;
 } */
+.v-textarea .v-field--no-label textarea, .v-textarea .v-field--active textarea {
+  
+    background-color: #EAE8E9 !important;
+  }
 
 
 @media (min-width: 1280px) {

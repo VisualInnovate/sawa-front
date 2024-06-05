@@ -9,6 +9,11 @@ const reinforcer = [
         name: 'pair',
         component: () => import("../views/Reinforcers/pair.vue")
       },
+      {
+        path: '/return', // Define the path for your addRoom route
+        name: 'return',
+        component: () => import("../views/Reinforcers/return.vue")
+      },
 
 
 
