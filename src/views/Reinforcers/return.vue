@@ -2,7 +2,7 @@
     <Stimulu></Stimulu>
    <v-card class="grid grid-cols-1 lg:grid-cols-4 gap-4">
     <div class="m-auto">
-       <div class="flex justify-between flex-column gap-2">
+       <div class="flex  flex-column gap-2">
                 <label for="username">{{ $t('child_name') }}</label>
                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="pair.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
@@ -27,7 +27,7 @@
        
    </div>
 
-<div class="relative overflow-x-auto">
+<div class=" overflow-x-auto">
    <table class="min-w-3xl text-sm text-left m-auto rtl:text-right text-gray-500 dark:text-gray-400">
        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
            <tr>
@@ -77,8 +77,7 @@
 
         <div></div>
 
-            <Button @click="createevalation" class="col-span-2 mb-2 create m-auto w-full " :label='$t("submit")'></Button>
-
+          <div>            <Button @click="createevalation" class="col-span-2 mb-2 create m-auto w-full " :label='$t("submit")'></Button></div>
    </v-card>
 
    <v-card v-if="result" class="my-[2%] py-[2%]">

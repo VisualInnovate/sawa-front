@@ -80,7 +80,8 @@
 
          <div></div>
 
-             <Button @click="createevalation" class="col-span-2 mb-2 create m-auto w-full " :label='$t("submit")'></Button>
+         <div>            <Button @click="createevalation" class="col-span-2 mb-2 create m-auto w-full " :label='$t("submit")'></Button></div>
+
 
     </v-card>
 
