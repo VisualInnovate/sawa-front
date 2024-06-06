@@ -58,10 +58,10 @@
              <th  scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
             <div v-for="(array, index) in arr" :key="index">
                     <span v-for="(item, idx) in array" :key="idx">
-                        <input :disabled=" index != arr.length - 1"  @click="selectItem(item, index)"  style="border: 1px solid black " class="mx-2" type="radio"  :name="index" :value="pair[0]" >
+                    <input :disabled=" index != arr.length - 1"  @click="selectItem(item, index)"  style="border: 1px solid black " class="mx-2" type="radio"  :name="index" :value="pair[0]" >
 
                     <button v-if="index === arr.length - 1">{{ item }}</button>
-                    <span v-else>{{ item }}</span>
+                    <button v-else>{{ item }}</button>
                     </span>
                
             </div>
