@@ -10,6 +10,10 @@ import './main.css'
 import "vuetify/styles";
 import vuetify from "@/plugins/vuetify";
 
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+
+
 import 'primevue/resources/themes/saga-blue/theme.css'; // Choose the theme you prefer
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
@@ -59,7 +63,10 @@ import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 
+
 import RadioButton from 'primevue/radiobutton';
+
+
 
 
 
@@ -130,6 +137,9 @@ app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
 app.component('DynamicDialog', DynamicDialog)
 app.component('ColorPicker', ColorPicker)
+app.component('TabView', TabView)
+app.component('TabPanel', TabPanel)
+
 app.component('RadioButton', RadioButton)
 
 

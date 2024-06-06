@@ -14,6 +14,11 @@ const reinforcer = [
         name: 'return',
         component: () => import("../views/Reinforcers/return.vue")
       },
+      {
+        path: '/without', // Define the path for your addRoom route
+        name: 'without',
+        component: () => import("../views/Reinforcers/without.vue")
+      },
 
 
 
