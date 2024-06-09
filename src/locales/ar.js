@@ -352,7 +352,13 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   Evaluation_date:"موعد التقييم ",
   Name_evaluator:"اسم المقييم",
   evaluation_order:"طلبات التقييم",
-  
-
+  percentage:"النسبة المئوية",
+  highest_preferred:"الاكثر تفضيلا",
+  without:"بدون استرجاع",
+  return:"استرجاع",
+  highest_preferred:"الاقل تفضبلا",
+  moderately_preferred:"المتوسط تفضيلا",
+  reinforcers:"المعززات",
+  pair:" عرض الازواج"
 
 };

@@ -336,6 +336,13 @@ merge:"Merge",
   evalute_type:"Evaluation type",
   Evaluation_date:"Evaluation_date",
   Name_evaluator:"evaluator Name ",
-  evaluation_order:"evaluations orders"
-
+  evaluation_order:"evaluations orders",
+  percentage:"percentage",
+  highest_preferred:"highest preferred",
+  without:"No refund",
+  return:"refund",
+  highest_preferred:" highest preferred",
+  moderately_preferred:"moderately preferred",
+  reinforcers:"reinforcers",
+  pair:"pair"
 };

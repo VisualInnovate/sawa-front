@@ -1,13 +1,9 @@
 <template>
     <Stimulu></Stimulu>
-
-   <v-card class="grid grid-cols-1 lg:grid-cols-4 gap-4">
     
-    
-
-   
-    <div class="m-auto">
-       <div class="flex  flex-column gap-2">
+    <v-card class="p-[2%]">
+      <div class="m-auto bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="flex  flex-column gap-2">
                 <label for="username">{{ $t('child_name') }}</label>
                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="pair.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
@@ -17,28 +13,75 @@
                    <Calendar  style="width: 100%" showButtonBar v-model.number="pair.date" showIcon  :placeholder='$t("Evaluation_date")'   />   
                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
                </div> 
-   </div>
-   <div class="lg:col-span-2 m-auto">
-       <div class="flex">
-           <Button  :disabled="count <= 2"  @click="deletearray"  class="delete m-auto  " icon="pi pi-minus" label="ازالة عنصر"></Button>
-           <Button   @click="addarray"  class="create m-auto  " icon="pi pi-plus" label="اضافة عنصر" ></Button>
        </div>
-       <div v-for="item,index in items" class="flex border-b-2 border-black">
-           <Dropdown v-model="items[index].value" class="hover:ring-0 w-52"  option-value="id"  :options="stimulus" optionLabel="name" :placeholder=" ' select ' + ' '+item.name "  />
-            
-         <p class="my-auto w-16" > item : {{ item.name }} </p>
-       </div>
-       <div class="mt-1 mb-5 w-full text-center text-red-500" v-if="error?.result">{{ error.result[0] }}</div>
-       
-   </div>
 
-<div class=" overflow-x-auto">
-   <table class="min-w-3xl text-sm text-left m-auto rtl:text-right text-gray-500 dark:text-gray-400">
+       <!-- item -->
+       <div class="m-auto my-5 bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-2 lg:grid-cols-3">
+        <div>
+            <Button   @click="addarray"  class="create m-auto  " icon="pi pi-plus" ></Button>
+            <Button  :disabled="count <= 0"  @click="deletearray"  class="delete m-auto  " icon="pi pi-minus" ></Button>
+            <Dropdown v-model="stimul" class="hover:ring-0 w-52 mx-2"  option-value="name"  :options="stimulus" optionLabel="name"  placeholder="select item" />
+      
+        </div>
+        <div class='bg-white p-2 flex justify-between rounded-sm' v-for="item,index in items" >
+            <div class="flex">
+                <h3 class="my-auto font-bold">{{ $t("name") }} :</h3>
+                <p class="font-bold text-sm my-auto  text-green-600 " style=" word-wrap: unset">   {{item.value  }}</p>
+            </div>
+            <div class="flex">
+                <h3 class="my-auto font-bold">{{ $t("ترتيب المعزز") }} :</h3>
+                <p class="font-bold  my-auto  text-green-600">   {{item.name  }}</p>
+            </div>
+            
+        </div>
+          
+       </div>
+       <div class="m-auto my-5 bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-2 lg:grid-cols-2">
+        <div class="shadow-md bg-[#FFFFFF] rounded-sm p-2 min-h-[250px]">
+          <div class="flex justify-between py-2">
+          <div class="flex">
+            <h2 class="font-bold px-1 ">{{$t("highest_preferred") }} :</h2>
+            <span class="font-bold text-[green]" v-if="result?.highest_preferred "> {{ result?.highest_preferred[0].letter }} </span>
+          </div>
+           <div class="flex">
+            <h4 class="text-xl ">{{ $t("percentage") }} :</h4>
+             <span class="m-auto text-xl text-[green] font-bold" v-if="result?.highest_preferred">  {{ result?.highest_preferred[0].percentage }}  </span>
+           </div>
+                 
+       </div>
+       
+       <div  class="flex justify-between py-2">
+          <div class="flex">
+            <h2 class="font-bold px-1 ">{{ $t("moderately_preferred") }} :</h2>
+            <span class="font-bold text-[green]" v-if="result?.moderately_preferred "> {{ result?.moderately_preferred[0].letter }} </span>
+          </div>
+           <div class="flex">
+            <h4 class="text-xl ">{{ $t("percentage") }} :</h4>
+             <span class="m-auto text-xl text-[green] font-bold" v-if="result?.moderately_preferred">  {{ result?.moderately_preferred[0].percentage }}  </span>
+           </div>
+                 
+       </div>
+       <div class="flex justify-between py-2">
+          <div class="flex">
+            <h2 class="font-bold px-1 ">{{ $t("highest_preferred") }} :</h2>
+            <span class="font-bold text-[green]" v-if="result?.lowest_preferred "> {{ result?.lowest_preferred[0].letter }} </span>
+          </div>
+           <div class="flex">
+            <h4 class="text-xl ">{{ $t("percentage") }} :</h4>
+             <span class="m-auto text-xl text-[green] font-bold" v-if="result?.lowest_preferred">  {{ result?.lowest_preferred[0].percentage }}  </span>
+           </div>
+                 
+       </div>
+    
+       <Button @click="createevalation" class=" mt-4 m-auto create  w-full " :label='$t("submit")'></Button>
+        </div>
+      <div>
+        <table class="w-full h-full rounded-md shadow-md text-sm text-left m-auto rtl:text-right text-gray-500 dark:text-gray-400">
        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
            <tr>
              
                <th scope="col" class="px-6 py-3">
-                   الرقم
+                 {{ $t("index") }}
                </th>
                <th scope="col" class="px-6 py-3">
                    العنصر المختار
@@ -75,33 +118,16 @@
        </tbody>
        
    </table>
-</div>
-
-        <div></div>
-
-          <div>            <Button @click="createevalation" class="col-span-2 mb-2 create m-auto w-full " :label='$t("submit")'></Button></div>
-   </v-card>
-
-   <v-card v-if="result" class="my-[2%] py-[2%]">
-       <div class="flex py-2">
-           <h2 class="font-bold px-1 ">highest preferred :</h2>
-           <span v-if="result?.highest_preferred ">letter: {{ result?.highest_preferred[0].letter }} </span>
-           <span>    </span>
-           <span v-if="result?.highest_preferred"> percentage {{ result?.highest_preferred[0].percentage }}  </span>
-                 
+      </div>
+          
        </div>
-       <div class="flex py-2">
-           <h2 class="font-bold px-1 ">moderately preferred :</h2>
-           <p> {{ result.moderately_preferred }}</p>
-                 
-       </div>
-       <div class="flex py-2">
-           <h2 class="font-bold px-1 ">lowest preferred :</h2>
-           <p> {{ result.lowest_preferred }}</p>
-                 
-       </div>
-       
-   </v-card>
+
+       <toast></toast>
+    </v-card>
+
+
+
+
  </template>
  
  <script>
@@ -116,11 +142,11 @@
    data() {
      return {
        error:{},
-       count:2,
+       count:0,
        countlength:1,
        originalArray: ["A", "B", "C", "D", "E"],
        history: [["A", "B", "C", "D", "E"]],
-    
+       stimul:' ',
        
        pair:{
            result:[],
@@ -132,10 +158,8 @@
        charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
        stimulus:[],
 
-       items: [
-           {name:'A', value: ' ' },
-           {name:'B', value: ' ' }],
-       arr: [['A','B']],
+       items: [],
+       arr: [[]],
         pairs: [],
        // Add other validation rules for the title field
      };
@@ -155,22 +179,41 @@
    
       
        deletearray(){
-         if( this.items.length > 2){
-           this.items.length--
-           this.arr.length--
+      
+         if(this.items.length > 0){
+            this.items.length--
+           this.arr[0].length--
            this.count--
-           this.generatePairs()
+           this.pusharr()
+           this.getchilde()
+          
+       
          }
+          
+           
+          
+          
+           
+       
         
        },
        addarray(){
           
-          
-           this.items.push({ name: `${this.charset[this.count]}`, value: ' ' });
+        
+          if(this.stimul !== ' ' ){
+            console.log(this.stimul !== '' )
+            this.items.push({ name: `${this.charset[this.count]}`, value:`${this.stimul}` });
            this.arr[0].push(this.charset[this.count]);
           
            this.count ++
+           this.stimul=' '
            this.pusharr()
+           const valuesToFilter = this.items.map(item => item.value);
+           this.stimulus=this.stimulus.filter(item => !valuesToFilter.includes(item.name));
+          }
+          
+       
+          
            
        },
        getanswer(id,value,index){
@@ -193,6 +236,8 @@
          .then((response) => {
           
            this.stimulus = response.data.data
+           const valuesToFilte = this.items.map(item => item.value);
+           this.stimulus=this.stimulus.filter(item => !valuesToFilte.includes(item.name));
           
          })
        },
@@ -200,15 +245,18 @@
 
            this.pair.date= moment(this.pair.date).format("Y-MM-DD") ,
            this.pair.specialist_id=localStorage.getItem("user_id") ,
-           this.pair.type=1
+           this.pair.type=2
            this.pair.values=this.items
            axios.post("api/stimulus-test" ,this.pair).then((response) => {
            console.log(response.data.data)
            this.result = response.data.data
           
          }).catch((el)=>{
+         
                this.error = el.response.data.errors
            })
+          
+          
        },
        
 
