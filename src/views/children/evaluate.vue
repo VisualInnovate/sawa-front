@@ -56,7 +56,7 @@
             </div>
             <div class="flex flex-column gap-2">
                     <label  class="w-full text-right" for="username">{{ $t('Evaluation_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :placeholder='$t("Evaluation_date")'  :maxDate="maxDate" />   
+                    <Calendar  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :placeholder='$t("Evaluation_date")'  :minDate="maxDate" />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
                 </div> 
            
@@ -97,7 +97,8 @@
                       { name: 'side profile', id: 1 },
                       { name: 'milestone', id: 2 },
                       { name: 'barrier', id: 3 },
-                     
+                      { name: 'ablls', id: 4 },
+   
                   ]
        
         // Add other validation rules for the title field

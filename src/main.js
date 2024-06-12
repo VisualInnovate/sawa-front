@@ -63,6 +63,7 @@ import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 
+import Rating from 'primevue/rating';
 
 import RadioButton from 'primevue/radiobutton';
 
@@ -139,6 +140,7 @@ app.component('DynamicDialog', DynamicDialog)
 app.component('ColorPicker', ColorPicker)
 app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
+app.component('Rating', Rating)
 
 app.component('RadioButton', RadioButton)
 

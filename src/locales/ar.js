@@ -359,6 +359,8 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   highest_preferred:"الاقل تفضبلا",
   moderately_preferred:"المتوسط تفضيلا",
   reinforcers:"المعززات",
-  pair:" عرض الازواج"
+  pair:" عرض الازواج",
+  sample:"مثال",
+  goal:"الهدف"
 
 };

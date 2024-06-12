@@ -29,6 +29,33 @@ const evaluationRoutes = [
     name: "EditEvaluations",
     component: Edit,
   },
+  // ablls && missions
+  {
+    path: '/ablls', // Define the path for your addRoom route
+    name: 'ablls',
+    component: () => import("../views/ablls/index.vue")
+  },
+  {
+    path: '/missions', // Define the path for your addRoom route
+    name: 'missions',
+    component: () => import("../views/ablls/missions.vue")
+  },
+  {
+    path: '/mission-create', // Define the path for your addRoom route
+    name: 'mission-create',
+    component: () => import("../views/ablls/mission-create.vue")
+  },
+  {
+    path: '/mission-update/:id', // Define the path for your addRoom route
+    name: 'mission-update',
+    component: () => import("../views/ablls/mission-update.vue")
+  },
+  {
+    path: '/mission-test/:id', // Define the path for your addRoom route
+    name: 'mission-test',
+    component: () => import("../views/ablls/mission-test.vue")
+  },
+
 ];
 
 export default {

@@ -344,5 +344,7 @@ merge:"Merge",
   highest_preferred:" highest preferred",
   moderately_preferred:"moderately preferred",
   reinforcers:"reinforcers",
-  pair:"pair"
+  pair:"pair",
+  sample:"sample",
+  goal:"goal"
 };

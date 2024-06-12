@@ -78,11 +78,11 @@
                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
                           
-                          <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
+                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
                           <label for="html">0</label><br>
-                          <input  @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
+                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
                           <label for="css">0.5</label><br>
-                          <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
+                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
                           <label for="javascript">1</label>
                         </div>
                        

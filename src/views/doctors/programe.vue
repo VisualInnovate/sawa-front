@@ -121,6 +121,9 @@
         if(evalu_id == 3){
           this.$router.push({ name: 'barrier-evaluation',  params:{'id':id}});
         }
+        if(evalu_id == 4){
+          this.$router.push({ name: 'mission-test',  params:{'id':id}});
+        }
        
       },
 
