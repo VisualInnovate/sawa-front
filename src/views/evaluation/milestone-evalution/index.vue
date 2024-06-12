@@ -12,7 +12,12 @@
           <!-- ... existing code ... -->
             
               
-            
+             
+          <div   class="flex flex-column gap-2">
+                    <label for="username">{{ $t('evaluation_name') }}</label>
+                    <InputText   required class="bg-[#f7f5f5]" v-model="answer.title" :placeholder='$t("evaluation_name")' />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+                </div> 
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
@@ -170,10 +175,10 @@
         axios
           .post(`api/evaluations/create`,{
             type:this.type,
-            title:"VB-MAPP تقييم",
+            title:this.answer.title,
             child_id:this.answer.child_id,
             specialist_id:localStorage.getItem("user_id"),
-            
+            date:this.answer.date
           
           })
           .then((response) => {

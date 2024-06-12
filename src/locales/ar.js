@@ -361,6 +361,6 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   reinforcers:"المعززات",
   pair:" عرض الازواج",
   sample:"مثال",
-  goal:"الهدف"
-
+  goal:"الهدف",
+  evaluation_name:"اسم التقييم"
 };

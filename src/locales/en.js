@@ -346,5 +346,6 @@ merge:"Merge",
   reinforcers:"reinforcers",
   pair:"pair",
   sample:"sample",
-  goal:"goal"
+  goal:"goal",
+  evaluation_name:"evaluation name"
 };

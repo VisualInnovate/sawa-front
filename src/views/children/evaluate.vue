@@ -28,7 +28,7 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button @click="go_evaluate(evalu.id)" class="details m-auto"> نتائج التقييم</Button>
+          <Button @click="go_evaluate(evalu.id,evalu.type)" class="details m-auto"> نتائج التقييم</Button>
           </div>
             
         </div>
@@ -43,7 +43,7 @@
       <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="">
                 
-           
+          
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
@@ -112,8 +112,13 @@
       },
     
 
-      go_evaluate(id){
-        this.$router.push({ name: 'milestone-resulte', params:{'id':id}});
+      go_evaluate(id,type){
+        if(type==2){
+          this.$router.push({ name: 'milestone-resulte', params:{'id':id}});
+        }
+        if(type==4){
+          this.$router.push({ name: 'ablls-resulte', params:{'id':id}});
+        }
       },
 
       createevaluate(){

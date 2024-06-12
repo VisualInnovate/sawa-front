@@ -55,6 +55,11 @@ const evaluationRoutes = [
     name: 'mission-test',
     component: () => import("../views/ablls/mission-test.vue")
   },
+  {
+    path: '/ablls-resulte/:id', // Define the path for your addRoom route
+    name: 'ablls-resulte',
+    component: () => import("../views/ablls/ablls-resulte.vue")
+  },
 
 ];
 
