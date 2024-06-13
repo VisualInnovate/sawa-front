@@ -63,6 +63,8 @@ import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 
+import Paginator from 'primevue/paginator';
+
 import Rating from 'primevue/rating';
 
 import RadioButton from 'primevue/radiobutton';
@@ -141,6 +143,7 @@ app.component('ColorPicker', ColorPicker)
 app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
 app.component('Rating', Rating)
+app.component('Paginator', Paginator)
 
 app.component('RadioButton', RadioButton)
 

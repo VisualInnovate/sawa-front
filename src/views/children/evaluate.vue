@@ -3,11 +3,13 @@
       <ChildTaps></ChildTaps>
       
     <v-card>
-        <div class=" my-2"  >
+        <div class=" my-2 "  >
           <Button @click="opennew" class="bg-[green] m-auto" >  اضافة تقييم</Button>
+         
           </div>
+        
      <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details">
+        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details.data">
           <div>
             <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
@@ -28,7 +30,10 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button @click="go_evaluate(evalu.id,evalu.type)" class="details m-auto"> نتائج التقييم</Button>
+          
+              <Button @click="go_evaluate(evalu.id,evalu.type)" class="details m-auto"> نتائج التقييم</Button>     
+              <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
+            
           </div>
             
         </div>
@@ -36,10 +41,34 @@
 
      </div>
         
-  
+     <div class=" w-full pb-2 text-center"  >
+      <div class="card">
+        
+        <Paginator v-model:first="current_page" :rows="1" :totalRecords="total_pages" :rowsPerPageOptions="[10, 20, 30]"
+        :template="{
+       
+        default: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  JumpToPageDropdown'
+    }"
+        ></Paginator>
+    </div>
+     
+      </div>
       
     </v-card>
     <div>
+      <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
+            <span 
+            >{{ $t('هل انت متاكد من ازالة هذا العنصر') }} 
+            >?</span
+            >
+          </div>
+          <template #footer>
+            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
+            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+          </template>
+        </Dialog>
       <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="">
                 
@@ -91,7 +120,11 @@
            details:[],
            evalate:{},
            error:{},
+           delete_id:0,
            doctors:{},
+           deleteDialog:false,
+           total_pages:0,
+           current_page:0,
            updatedialog:false,
           evaluate_types : [
                       { name: 'side profile', id: 1 },
@@ -148,7 +181,8 @@
         axios
           .get(`api/child/${localStorage.getItem("child_id")}/get/evaluations`)
           .then((response) => {
-           
+
+            this.total_pages=response.data.evaluations.last_page+1
             this.details = response.data.evaluations
            
           })
@@ -157,6 +191,20 @@
           });
   
       },
+      deleteevalution(id){
+        this.delete_id=id
+        this.deleteDialog=!(this.deleteDialog)
+      
+      },
+      deleteAction(){
+        axios.delete(`api/evaluations/${this.delete_id}/delete`)
+          .then((response) => {
+
+           this.getusers()
+           this.deleteDialog=!(this.deleteDialog)
+          })
+      },
+  
       getdoctors(){
         axios
           .get(`api/doctors`)
@@ -174,6 +222,21 @@
   
      
     },
+    watch: {
+      current_page(newVal, oldVal) {
+      console.log(`Counter changed from ${oldVal} to ${newVal}`);
+       
+      axios
+          .get(`api/child/${localStorage.getItem("child_id")}/get/evaluations?page=${newVal}`)
+          .then((response) => {
+            
+            this.details = response.data.evaluations
+            
+           
+        })
+      // Perform any additional actions here
+    }
+  },
     mounted() {
      this.getusers()
      this.getdoctors()
