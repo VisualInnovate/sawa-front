@@ -230,7 +230,7 @@
             this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
           
         }).catch((el)=>{
-          console.log(el.response.data.errors.name)
+        
        this.error = el.response.data.errors
       })
       

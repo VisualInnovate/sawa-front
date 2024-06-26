@@ -60,6 +60,41 @@ const evaluationRoutes = [
     name: 'ablls-resulte',
     component: () => import("../views/ablls/ablls-resulte.vue")
   },
+  {
+    path: '/agerange', // Define the path for your addRoom route
+    name: 'agerange',
+    component: () => import("../views/carolina/agerange-index.vue")
+  },
+  {
+    path: '/agerange-update/:id', // Define the path for your addRoom route
+    name: 'agerange-update',
+    component: () => import("../views/carolina/agerange-update.vue")
+  },
+  {
+    path: '/answer_type', // Define the path for your addRoom route
+    name: 'answer_type',
+    component: () => import("../views/carolina/answer-type.vue")
+  },
+  {
+    path: '/agerange-create', // Define the path for your addRoom route
+    name: 'agerange-create',
+    component: () => import("../views/carolina/agerange-create.vue")
+  },
+  {
+    path: '/category', // Define the path for your addRoom route
+    name: 'category',
+    component: () => import("../views/carolina/category-index.vue")
+  },
+  {
+    path: '/test', // Define the path for your addRoom route
+    name: 'test',
+    component: () => import("../views/carolina/test-index.vue")
+  },
+  {
+    path: '/carolina-test/:id', // Define the path for your addRoom route
+    name: 'carolina-test',
+    component: () => import("../views/carolina/carolina-test.vue")
+  },
 
 ];
 

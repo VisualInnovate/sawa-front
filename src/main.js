@@ -146,6 +146,7 @@ app.component('Rating', Rating)
 app.component('Paginator', Paginator)
 
 app.component('RadioButton', RadioButton)
+app.component('OrganizationChart', OrganizationChart)
 
 
 app.component('Toast', Toast)

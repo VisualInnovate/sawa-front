@@ -13,6 +13,8 @@
             <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==2">milestone</p>
             <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==1">side profile</p>
             <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==3">Barrier</p>
+            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==4">ablls</p>
+            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==5">carolina</p>
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
@@ -28,7 +30,7 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button @click="go_evaluate(evalu.child.id,evalu.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button @click="go_evaluate(evalu.child.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
           </div>
             
         </div>
@@ -111,7 +113,8 @@
       },
     
 
-      go_evaluate(id,evalulation,evalu_id){
+      go_evaluate(id,evalu_id){
+        console.log(id,evalu_id)
         if(evalu_id == 1){
           this.$router.push({ name: 'ShowSideProfiles', params:{'id':id}});
         }
@@ -123,6 +126,9 @@
         }
         if(evalu_id == 4){
           this.$router.push({ name: 'mission-test',  params:{'id':id}});
+        }
+        if(evalu_id == 5){
+          this.$router.push({ name: 'carolina-test',  params:{'id':id}});
         }
        
       },

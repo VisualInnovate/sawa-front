@@ -362,5 +362,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   pair:" عرض الازواج",
   sample:"مثال",
   goal:"الهدف",
-  evaluation_name:"اسم التقييم"
+  evaluation_name:"اسم التقييم",
+  age_range:"الفئة العمرية",
+  parent_category:"القسم الرئيسي"
 };

@@ -47,9 +47,15 @@ export default {
             
            
           })
-          .catch((error) => {
-            console.error("Error retrieving Appointment Types:", error);
-          });
+          axios
+          .get(`api/api/evaluations/report/${this.$route.params.id}`)
+          .then((response) => {
+            
+            this.mainSquares = response.data.data
+            
+           
+          })
+         
          
     }
   },
