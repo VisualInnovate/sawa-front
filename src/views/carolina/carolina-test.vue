@@ -37,12 +37,7 @@
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
                 </div> 
                
-                <div  class="flex flex-column gap-2">
-                    <label for="username">{{ $t('level_id') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;"  @update:model-value="getquation" v-model="answer.level_id"  option-value="id" :options="qustions" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.level_id">{{ error.level_id[0] }}</div>
-                </div>
-              
+               
                 <!-- <div  v-if="answer.child_id" class="flex flex-column gap-2">
                     <label for="username">{{ $t('score') }}</label>
                     
@@ -58,7 +53,8 @@
     
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
                 </div>  -->
-                <div v-if="answer.child_id && answer.child_age && answer.level_id" class=" flex flex-column gap-2">
+               
+                <div v-if="answer.child_id && answer.child_age " class=" flex flex-column gap-2">
                     <label for="username">{{ $t('color') }}</label>
 
                      <div class="flex">
@@ -67,50 +63,49 @@
                      </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
-                
-                <div v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
-                  <h1  class="text-[black] font-bold" >{{head.title }}</h1>
+             
+                <div v-if="strart_evaluate" v-for="cat,ind in category" class="col-span-2 flex flex-column gap-2">
+                  <h1  class="text-[black] font-bold" >{{cat.title }}</h1>
                  <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
-                  <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{head.head_question }}</h2>
+                  <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{cat.tests[0]?.skill  }}</h2>
                   
                         
-                  <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.questions" :key="index">
+                  <div style="border-radius: 5px;padding: 1%;" class=""  v-for="(goal, index) in cat.tests[0]?.goals" :key="index">
                       
-                       <p class="py-1">{{ index+1 }} - {{ question.title }}:</p>
-                       <div>
-                     
-                       </div>
-                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                       <p class="">{{ index+1 }} - {{ goal.body }}:</p>
+
+                       <!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
-                          
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
+                          <input  required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
                           <label for="html">0</label><br>
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
-                          <label for="css">0.5</label><br>
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
-                          <label for="javascript">1</label>
                         </div>
                        
                          <div v-for="not in notanswer">
                           
                              <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
                          </div>
-                       </div>
+                       </div> -->
                        
                        
                     
-                  </div>
+                  </div> 
+                    <div class="flex">
+                        <div  v-for="an in allanswer">
+                          <input  required @change="getanswer($event,cat.tests[0].id,an.id)" style="border: 1px solid black " class="mx-2" :name="ind" type="radio"   value="0">
+                          <label for="html">{{ an.name }}</label><br>
+                        </div>
+                    </div>
                  </div>
                         
                            
                 
               
                 </div> 
-                <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
+                <!-- <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                   <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
                   <small id="username-help"></small>
-                </div>
+                </div> -->
               
          
          
@@ -140,14 +135,14 @@
         strart_evaluate:false,
         answers:[],
         type:2,
-        
+        allanswer:{},
            
         answer:{ 
             color:"00a2ff"
         },
        allquestion:[],
         childs:{},
-        qustions:{},
+        category:{},
         error: {},
         maxDate: new Date(),
         notanswer:[],
@@ -206,6 +201,18 @@
            
           })
       },
+      
+      getall(){
+        axios
+          .get("api/carolina-answer-type")
+          .then((response) => {
+            this.allanswer = response.data.data
+           
+          })
+       
+
+      },
+
       getage(){
         axios
           .post("api/milestone-answers/get-age-child",{
@@ -217,14 +224,16 @@
            
           })
       },
-      getanswer(event,y,z){
-        console.log(event.target.value)
+      getanswer(event,x,y){
        
-        this.answer.score=event.target.value
-        this.answer.question_id=y
+       
         
-        axios.post("/api/milestone-answers",this.answer).then((res) => {
-          
+        this.answer.answer_type_id=y
+        this.answer.test_id=x
+        
+        axios.post("/api/carolina-answer",this.answer).then((res) => {
+            this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+
         }).catch((el)=>{
           console.log(el.response.data.errors.name)
        this.error = el.response.data.errors
@@ -244,10 +253,10 @@
             this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
           })
           axios
-          .get("api/mileston-levels")
+          .get("api/carolina-category/list/tests")
           .then((response) => {
             console.log(response.data.data)
-            this.qustions = response.data.data
+            this.category = response.data.data
            
           })
          
@@ -277,6 +286,7 @@
     },
     mounted() {
      this.getusers()
+     this.getall()
     },
   };
   </script>

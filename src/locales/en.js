@@ -349,6 +349,7 @@ merge:"Merge",
   goal:"goal",
   evaluation_name:"evaluation name",
   age_range:"Age Range",
-  parent_category:"parent category"
+  parent_category:"parent category",
+  date:"date"
 
 };

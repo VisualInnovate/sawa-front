@@ -192,7 +192,7 @@ onBeforeMount(() => {
 
 }
 const getallcatogray=()=>{
-    axios.get("/api/carolina-category").then((res)=>{
+    axios.get("/api/carolina-category/list/sub").then((res)=>{
     loading.value= false
     allcat.value= res.data.data
     console.log(users.value)
