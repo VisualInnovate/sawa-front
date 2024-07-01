@@ -341,7 +341,7 @@ merge:"Merge",
   highest_preferred:"highest preferred",
   without:"No refund",
   return:"refund",
-  highest_preferred:" highest preferred",
+  latest_preferred:" Least  preferred",
   moderately_preferred:"moderately preferred",
   reinforcers:"reinforcers",
   pair:"pair",
@@ -350,6 +350,7 @@ merge:"Merge",
   evaluation_name:"evaluation name",
   age_range:"Age Range",
   parent_category:"parent category",
-  date:"date"
+  date:"date",
+  Selected_item:"Selected item"
 
 };

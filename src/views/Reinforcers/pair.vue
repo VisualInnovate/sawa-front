@@ -18,7 +18,7 @@
         <div>
             <Button   @click="addarray"  class="create m-auto  " icon="pi pi-plus" ></Button>
             <Button  :disabled="count <= 0"  @click="deletearray"  class="delete m-auto  " icon="pi pi-minus" ></Button>
-            <Dropdown v-model="stimul" class="hover:ring-0 w-52 mx-2"  option-value="name"  :options="stimulus" optionLabel="name"  placeholder="select item" />
+            <Dropdown v-model="stimul" class="hover:ring-0 w-52 mx-2"  option-value="name" filter :options="stimulus" optionLabel="name"  placeholder="select item" />
       
         </div>
         <div class='bg-white p-2 flex justify-between rounded-sm' v-for="item,index in items" >
@@ -62,7 +62,7 @@
        </div>
        <div class="flex justify-between py-2">
           <div class="flex">
-            <h2 class="font-bold px-1 ">{{ $t("highest_preferred") }} :</h2>
+            <h2 class="font-bold px-1 ">{{ $t("latest_preferred") }} :</h2>
             <span class="font-bold text-[green]" v-if="result?.lowest_preferred "> {{ result?.lowest_preferred[0].letter }} </span>
           </div>
            <div class="flex">
@@ -84,7 +84,7 @@
                     {{ $t("index") }}   
                              </th>
                 <th scope="col" class="px-6 py-3">
-                    العنصر المختار
+                  {{ $t('Selected_item') }}
                 </th>
             </tr>
         </thead>

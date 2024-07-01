@@ -153,6 +153,9 @@
         if(type==4){
           this.$router.push({ name: 'ablls-resulte', params:{'id':id}});
         }
+        if(type==5){
+          this.$router.push({ name: 'carolina-resulte', params:{'id':id}});
+        }
       },
 
       createevaluate(){

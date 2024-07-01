@@ -1,7 +1,17 @@
 
   <template>
     <div>
-      <EvaluationType></EvaluationType>
+      <div class=" relative">
+        <EvaluationType></EvaluationType>
+        <div class="absolute  top-4 ltr:left-2 rtl:right-4 flex flex-column gap-2">
+                    
+          <InputText @update:model-value="serchdata($event)"  :placeholder='$t("search")'/>                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
+                </div>
+      </div>
+     
+        
+      
+      
       
     <v-card>
         
@@ -93,6 +103,7 @@
            details:[],
            evalate:{},
            error:{},
+          
            doctors:{},
            updatedialog:false,
           evaluate_types : [
@@ -132,6 +143,15 @@
         }
        
       },
+      serchdata(e){
+
+        axios
+          .get(`api/users/${localStorage.getItem("doctor_id")}/search/evaluations?search=${e}`)
+          .then((response) => {
+            this.details = response.data.evaluation_requests
+           
+          })
+      },
 
       createevaluate(){
         axios
@@ -165,11 +185,9 @@
             this.details = response.data.evaluation_requests
            
           })
-          .catch((error) => {
-            console.error("Error retrieving Appointment Types:", error);
-          });
-  
+        
       },
+      
       getdoctors(){
         axios
           .get(`api/doctors`)

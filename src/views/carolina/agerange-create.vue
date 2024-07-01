@@ -4,12 +4,12 @@
             <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('from') }} (years)</label>
                     <InputNumber  required class="bg-[#f7f5f5]" v-model="carolina.from" :placeholder='$t("from")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.from">{{ error.from[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('to') }} (years)</label>
                     <InputNumber  required class="bg-[#f7f5f5]" v-model="carolina.to" :placeholder='$t("to")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.to">{{ error.to[0] }}</div>
                 </div> 
        </v-card>
        <v-card class="bg-slate-100 my-5" >
@@ -44,6 +44,7 @@
                         <Button   @click="deletearray(index)"  class="delete m-auto absolute top-1 ltr:right-2 rtl:left-2  " icon="pi pi-minus" ></Button>
                     </div>
                 </div>
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.groups">{{ error.groups[0] }}</div>
      
        <div class="w-full text-center">
         <Button @click="createtreatment" class="create m-auto w-64 my-4 " :label='$t("submit")'></Button>
@@ -101,7 +102,7 @@ export default {
 
     },
     addarry(){
-        if(this.carolina.tomonth &&this.carolina.frommonth ){
+        if(this.carolina.tomonth  || this.carolina.frommonth ){
             this.carolina.groups.push({ from: `${this.carolina.frommonth}` ,to:`${this.carolina.tomonth}`})
 
         }

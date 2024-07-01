@@ -134,7 +134,7 @@
       return {
         strart_evaluate:false,
         answers:[],
-        type:2,
+        type:5,
         allanswer:{},
            
         answer:{ 

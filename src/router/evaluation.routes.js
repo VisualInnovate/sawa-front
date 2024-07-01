@@ -95,6 +95,12 @@ const evaluationRoutes = [
     name: 'carolina-test',
     component: () => import("../views/carolina/carolina-test.vue")
   },
+  {
+    path: '/carolina-resulte/:id', // Define the path for your addRoom route
+    name: 'carolina-resulte',
+    component: () => import("../views/carolina/caroline-resulte.vue")
+  },
+
 
 ];
 

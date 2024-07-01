@@ -230,7 +230,7 @@ onMounted(async () => {
               <v-list-item v-bind="props" :title="$t('evaluations')"></v-list-item>
             </template>
 
-            <v-list-item  :title="$t('headers')" value="Categories"
+            <v-list-item  :title="$t('headers')" value="headers"
               :to="{ name: 'Headers' }"></v-list-item>
             <v-list-item  :title="$t('side_profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
@@ -276,7 +276,7 @@ onMounted(async () => {
               <v-list-item v-bind="props" :title="$t('room')"></v-list-item>
             </template>
             
-            <v-list-item :title="$t('room')" value="SideProfiles" :to="{ name: 'Rooms' }"></v-list-item>
+            <v-list-item :title="$t('room')" value="Rooms" :to="{ name: 'Rooms' }"></v-list-item>
            
               
           </v-list-group>

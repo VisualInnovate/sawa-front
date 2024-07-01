@@ -12,11 +12,11 @@
           <p class="text-xl  px-1 my-auto">{{ details.birth_date }}</p>
     </div>
     <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("gender") }} :</h3>
+          <h3 class="my-auto font-bold">{{ $t("selectgender") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.gender }}</p>
     </div>
     <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("nationalty") }} :</h3>
+          <h3 class="my-auto font-bold">{{ $t("Nationality") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.nationality }}</p>
     </div>
     <div class="flex py-2 ">
@@ -24,11 +24,11 @@
           <p class="text-xl  px-1 my-auto">{{ details.national_id }}</p>
     </div>
     <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("birth_place") }} :</h3>
+          <h3 class="my-auto font-bold">{{ $t("place_of_birth") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.birth_place }}</p>
     </div>
     <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("lang") }} :</h3>
+          <h3 class="my-auto font-bold">{{ $t("primary_language") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.lang }}</p>
     </div>
     <div class="flex py-2 ">
