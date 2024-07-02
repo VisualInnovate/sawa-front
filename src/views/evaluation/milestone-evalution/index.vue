@@ -13,7 +13,7 @@
             
               
              
-          <div   class="flex flex-column gap-2">
+                <div   class="flex flex-column gap-2">
                     <label for="username">{{ $t('evaluation_name') }}</label>
                     <InputText   required class="bg-[#f7f5f5]" v-model="answer.title" :placeholder='$t("evaluation_name")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
@@ -106,11 +106,11 @@
                 
               
                 </div> 
-                <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
+                <!-- <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                   <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
                   <small id="username-help"></small>
-                </div>
+                </div> -->
               
          
          
@@ -224,7 +224,7 @@
         this.answer.question_id=y
         
         axios.post("/api/milestone-answers",this.answer).then((res) => {
-          
+          this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
         }).catch((el)=>{
           console.log(el.response.data.errors.name)
        this.error = el.response.data.errors

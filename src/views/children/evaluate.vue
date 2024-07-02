@@ -149,6 +149,9 @@
       go_evaluate(id,type){
         if(type==2){
           this.$router.push({ name: 'milestone-resulte', params:{'id':id}});
+        } 
+        if(type==3){
+          this.$router.push({ name: 'barrier-resulte', params:{'id':id}});
         }
         if(type==4){
           this.$router.push({ name: 'ablls-resulte', params:{'id':id}});

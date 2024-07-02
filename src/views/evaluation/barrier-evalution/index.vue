@@ -11,7 +11,11 @@
       <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="submit" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
         <!-- ... existing code ... -->
           
-            
+              <div   class="flex flex-column gap-2">
+                    <label for="username">{{ $t('evaluation_name') }}</label>
+                    <InputText   required class="bg-[#f7f5f5]" v-model="answer.title" :placeholder='$t("evaluation_name")' />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+                </div> 
           
     
               <div class="flex flex-column gap-2">
@@ -44,12 +48,16 @@
 
               <div v-if="answer.child_id" class=" flex flex-column gap-2">
                   <label for="username">{{ $t('color') }}</label>
-                  <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
-                 
+                  <div class="flex">
+                    <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
+                    <Button @click="createevalutae" class="create m-auto  w-full h-[50px] " :label='$t("strart_evaluate")'></Button>
+                  </div>
+                  
+                  
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
               </div> 
               
-              <div v-if="answer.child_id && answer.child_age" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
+              <div v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
                 <h1  class="text-[black] font-bold" >{{head.title }}</h1>
                <div style="border: 1px solid black; border-radius: 5px;">
                 
@@ -87,12 +95,12 @@
        
        
            
-              <div class="flex flex-column gap-2 w-full">
+              <!-- <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                 <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
                 <small id="username-help"></small>
               </div>
-              
+               -->
 
       
       </v-form>
@@ -116,7 +124,7 @@ export default {
       
       answers:[],
       alltypes:[],
-         
+      strart_evaluate:false,
       answer:{ 
           color:"00a2ff"
       },
@@ -138,7 +146,26 @@ export default {
     Therapeutic (){
       this.$router.push({ name: 'answer' });
     },
-
+    createevalutae(id){
+        console.log(id)
+        
+        axios
+          .post(`api/evaluations/create`,{
+            type:3,
+            title:this.answer.title,
+            child_id:this.answer.child_id,
+            specialist_id:localStorage.getItem("user_id"),
+            date:this.answer.date
+          
+          })
+          .then((response) => {
+          
+            this.answer.evaluation_id=response.data.evaluation.id
+           this.strart_evaluate=!(this.strart_evaluate)
+           
+           
+          })
+      },
 
     submit(){
       
@@ -189,7 +216,8 @@ export default {
       this.answer.question_id=y
       
       axios.post("/api/barrier-answer",this.answer).then((res) => {
-        
+        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+
       }).catch((el)=>{
         console.log(el.response.data.errors.name)
      this.error = el.response.data.errors
@@ -198,13 +226,14 @@ export default {
 
     },
     getusers(){
-      axios
-        .get("api/child")
-        .then((response) => {
-          console.log(response.data.data)
-          this.childs = response.data.children
-         
-        })
+     axios
+          .get("api/child")
+          .then((response) => {
+           
+            this.childs = response.data.children
+            this.answer.child_id=parseInt(this.$route.params.id)
+            this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
+          })
         axios
         .get("api/mileston-levels")
         .then((response) => {
