@@ -351,6 +351,7 @@ merge:"Merge",
   age_range:"Age Range",
   parent_category:"parent category",
   date:"date",
-  Selected_item:"Selected item"
+  Selected_item:"Selected item",
+  send_answer:"send answer"
 
 };

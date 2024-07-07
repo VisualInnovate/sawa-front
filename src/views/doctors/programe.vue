@@ -41,6 +41,8 @@
           </div>
           <div class="text-center" >
           <Button @click="go_evaluate(evalu.child.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
+
           </div>
             
         </div>
@@ -52,6 +54,19 @@
       
     </v-card>
     <div>
+      <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
+            <span 
+            >{{ $t('هل انت متاكد من ازالة هذا العنصر') }} 
+            >?</span
+            >
+          </div>
+          <template #footer>
+            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
+            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+          </template>
+        </Dialog>
       <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="">
                 
@@ -103,7 +118,8 @@
            details:[],
            evalate:{},
            error:{},
-          
+           deleteDialog:false,
+           delete_id:'',
            doctors:{},
            updatedialog:false,
           evaluate_types : [
@@ -122,8 +138,20 @@
       opennew(){
         this.updatedialog=!(this.updatedialog)
       },
-    
 
+          deleteAction(){
+        axios.delete(`api/evaluation-request/${this.delete_id}`)
+          .then((response) => {
+
+           this.getusers()
+           this.deleteDialog=!(this.deleteDialog)
+          })
+      },
+      deleteevalution(id){
+        this.delete_id=id
+        this.deleteDialog=!(this.deleteDialog)
+      
+      },
       go_evaluate(id,evalu_id){
         console.log(id,evalu_id)
         if(evalu_id == 1){

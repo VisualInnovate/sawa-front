@@ -56,34 +56,28 @@
                   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
               </div> 
-              
-              <div v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
-                <h1  class="text-[black] font-bold" >{{head.title }}</h1>
+             <div class="col-span-2">
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                <a style="color: blue;" v-if="strart_evaluate" v-for="head,ind in allquestion" :href="'#'+ind">{{ head.title.substring(0, 30) + '...' }}</a>
+              </div>
+              <div v-if="strart_evaluate" v-for="head,ind in allquestion" class="col-span-2 flex flex-column gap-2">
+                <a :id="ind" class="text-[black] font-bold" >{{head.title }}</a>
                <div style="border: 1px solid black; border-radius: 5px;">
                 
                       
                 <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.barriers_questiont" :key="index">
-                    
-                     <p class="py-1">{{ index+1 }} - {{ question.title }}:</p>
-                     <div>
-                   
-                     </div>
-                     <div v-for="type in alltypes" class="grid grid-cols-1 lg:grid-cols-2 ">
-                      <div>
-                        
-                        <input @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" :value="type.id">
-                        <label for="html">{{ type.title }}</label><br>
-                        <div v-for="not in notanswer">
-                        
-                        <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
-                          </div>
-                      </div>
-                     
-                      
-                     </div>
-                     
+                    <div class="flex">
+                      <input  @change="getscore(index)" type="checkbox" style="border: 1px solid black " class="p-1 mx-2 my-auto" :value="index+1">
+                     <p class="py-1"> {{ question.title }}:</p>
+                    </div>
+
+                  
                      
                   
+                </div>
+                <div class="w-full text-center">
+                  <Button @click="getanswer(head.id,)"  class="create lg:w-44 m-auto my-2 " :label='$t("send_answer")'></Button>
+
                 </div>
                </div>
                       
@@ -92,6 +86,7 @@
             
               </div> 
             
+             </div>
        
        
            
@@ -128,6 +123,7 @@ export default {
       answer:{ 
           color:"00a2ff"
       },
+      score:'',
      allquestion:[],
       childs:{},
       qustions:{},
@@ -179,6 +175,11 @@ export default {
     getcolor(id){
       this.answer.color=id.target.value
     },
+    getscore(score){
+      this.score=score
+    
+
+    },
 
     getage(){
       axios
@@ -209,12 +210,11 @@ export default {
         })
 
     },
-    getanswer(event,y,z){
-      console.log(event.target.value)
-     
-      this.answer.answer_type_id=event.target.value
-      this.answer.question_id=y
-      
+    getanswer(subtest_id){
+  
+      this.answer.subtest_id=subtest_id
+      this.answer.score=this.score
+  
       axios.post("/api/barrier-answer",this.answer).then((res) => {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
 

@@ -366,5 +366,6 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   age_range:"الفئة العمرية",
   parent_category:"القسم الرئيسي",
   date:"موعد التقييم",
-  Selected_item:"العنصر المختار"
+  Selected_item:"العنصر المختار",
+  send_answer:"ارسل الاجابة"
 };

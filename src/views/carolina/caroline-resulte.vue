@@ -8,18 +8,23 @@
             <th scope="col" class="px-6 py-3">
                  الفئة الرئيسية
              </th>
-             <th scope="col" class="px-6 py-3">
-                 العمر
+             <th scope="col" class="px-6 py-3 " style="    display: flex; justify-content: space-around;">
+                  
+                  <th style="margin-left: 10px !important;">
+                    العمر
+                  </th>
+                  <th style="margin-left: 10px !important;">
+                    الرمز
+                  </th>
+                  <th style="margin-left: 10px !important;">
+                    المهاره
+                </th>
+                <th style="margin-left: 10px !important;">
+                    الاستجابة
+                </th>
              </th>
-             <th scope="col" class="px-6 py-3">
-                 الرمز
-             </th>
-             <th scope="col" class="px-6 py-3">
-                 المهارة 
-             </th>
-             <th scope="col" class="px-6 py-3">
-                   الاستجابة
-             </th>
+           
+
          </tr>
      </thead>
      <tbody>
@@ -27,25 +32,37 @@
 
 
             <tr v-for="res,index in table_resulte"  class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <td>
+                <td style="border: 1px  solid black;" class="font-bold text-lg">
                  {{ res.category }}   
                 </td>
-                <td  class="px-6 py-4">
-                    <td style="display: block;" v-for="r,x in res.tests">{{ r.age }}</td>
+                <td  class=" w-[70%]">
+                    <td style="display: flex;justify-content: space-around;border: 1px solid black" v-for="r,x in res.groups">
+                    <td  class="w-[50%] m-auto" >{{ r.age }}</td>
+                    <div style="display: inline-grid;border-left: 1px solid black;border-right: 1px solid black;" class="w-[50%]" > 
+                        <p style="border: 1px solid black;" v-for="rr in r.tests">{{ rr.symbol }}</p> 
+                      
+                    </div>
+                    <div style="display: block;" class="w-[50%]" > 
+                        <p style=" height: 80px;border: 1px solid black" v-for="rr in r.tests">{{ rr.skill }}</p>
+                      
+                    </div>
+                    <div style="display: block;" class="w-[50%]" > 
+                        <p style=" height: 80px;border: 1px solid black" class="m-auto" v-for="rr in r.tests">{{ rr.response }}</p> 
+                      
+                    </div>
+                    </td>
+                    
                    
                  </td>
                  <td  class="px-6 py-4">
-                    <p v-for="r,x in res.tests">{{ r.symbol }}</p>
+                    
                    
                  </td>
                  <td  class="px-6 py-4">
                     <p v-for="r,x in res.tests">{{ r.skill }}</p>
                    
                  </td>
-                 <td  class="px-6 py-4">
-                    <p v-for="r,x in res.tests">{{ r.response }}</p>
-                   
-                 </td>
+                
                  
               
            

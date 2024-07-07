@@ -55,7 +55,7 @@ const openNew = () => {
   router.push({name:'CreateRoom'})
 }
 
-const confirmDelete = (id) => {a
+const confirmDelete = (id) => {
   console.log(id)
   deleteDialog.value = true
   confir_id.value=id
