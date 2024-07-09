@@ -31,8 +31,8 @@
           </div>
           <div class="text-center" >
           
-              <Button @click="go_evaluate(evalu.id,evalu.type)" class="details m-auto"> نتائج التقييم</Button>     
-              <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
+              <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id)" class="details m-auto"> نتائج التقييم</Button>     
+              <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="delete m-auto"> </Button>
             
           </div>
             
@@ -146,12 +146,12 @@
       },
     
 
-      go_evaluate(id,type){
+      go_evaluate(id,type,child_id){
         if(type==2){
           this.$router.push({ name: 'milestone-resulte', params:{'id':id}});
         } 
         if(type==3){
-          this.$router.push({ name: 'barrier-resulte', params:{'id':id}});
+          this.$router.push({ name: 'barrier-resulte', params:{'id':child_id}});
         }
         if(type==4){
           this.$router.push({ name: 'ablls-resulte', params:{'id':id}});

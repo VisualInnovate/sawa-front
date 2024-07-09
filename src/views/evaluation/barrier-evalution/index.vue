@@ -67,7 +67,7 @@
                       
                 <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.barriers_questiont" :key="index">
                     <div class="flex">
-                      <input  @change="getscore(index)" type="checkbox" style="border: 1px solid black " class="p-1 mx-2 my-auto" :value="index+1">
+                      <input  @change="getscore(question.id,question.subtest_id)" type="checkbox" style="border: 1px solid black " class="p-1 mx-2 my-auto" :value="index">
                      <p class="py-1"> {{ question.title }}:</p>
                     </div>
 
@@ -75,10 +75,10 @@
                      
                   
                 </div>
-                <div class="w-full text-center">
-                  <Button @click="getanswer(head.id,)"  class="create lg:w-44 m-auto my-2 " :label='$t("send_answer")'></Button>
+                <!-- <div class="w-full text-center">
+                  <Button @click="pushanser(head.id,ind)"  class="create lg:w-44 m-auto my-2 " :label='$t("send_answer")'></Button>
 
-                </div>
+                </div> -->
                </div>
                       
                          
@@ -90,12 +90,12 @@
        
        
            
-              <!-- <div class="flex flex-column gap-2 w-full">
+              <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
+                <Button @click="getanswer"  class="create m-auto w-full " :label='$t("submit")'></Button>
                 <small id="username-help"></small>
               </div>
-               -->
+              
 
       
       </v-form>
@@ -107,6 +107,7 @@
 
 <script>
 import axios from "axios";
+import moment from "moment";
 import InputNumber from "primevue/inputnumber";
 import EvaluationType from '../../../components/EvaluationType.vue'
   import {useToast} from 'primevue/usetoast'
@@ -123,7 +124,7 @@ export default {
       answer:{ 
           color:"00a2ff"
       },
-      score:'',
+      score:[],
      allquestion:[],
       childs:{},
       qustions:{},
@@ -175,8 +176,14 @@ export default {
     getcolor(id){
       this.answer.color=id.target.value
     },
-    getscore(score){
-      this.score=score
+    getscore(index,question_id){
+      if( this.score[index] && this.score.length >0){
+        this.score.splice(index, 1)
+      }else{
+        this.score[index]=question_id
+      }
+      
+      console.log(this.score)
     
 
     },
@@ -210,12 +217,17 @@ export default {
         })
 
     },
-    getanswer(subtest_id){
-  
-      this.answer.subtest_id=subtest_id
-      this.answer.score=this.score
-  
-      axios.post("/api/barrier-answer",this.answer).then((res) => {
+      pushanser(subtest_id,index){
+           console.log(index,subtest_id)
+           this.answer.date= moment(this.answer.date).format("Y-MM-DD")
+      
+        console.log(this.answers)
+      },
+
+    getanswer(){
+              
+        this.answer.scores=this.score
+        axios.post("/api/barrier-answer",this.answer).then((res) => {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
 
       }).catch((el)=>{

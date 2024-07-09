@@ -1,22 +1,22 @@
 <template>
-<div class="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-y-4">
-    <div class="" v-for="x in mainSquares">
-        <P class="font-bold w-full text-center py-1">{{ x.subtest }}</P>
+<div class="grid grid-cols-1 md:grid-cols-3  lg:grid-cols-3 gap-y-4">
+    <div class="" v-for="x,top in mainSquares">
+        <P class="font-bold w-full h-20 text-center py-1">{{ x.subtest }}</P>
         <div v-if="mainSquares" class=" flex "  style="border: 1px 1px 0px 0px solid black;">
        
        <div  class="grid grid-cols-1">
         
        <div class="w-20 h-16  m-auto text-center " v-for="(mainSquare, index) in  mainSquares[0]?.questions.slice().reverse()" :key="index">
          
-         <p class=" h-full text-center ">{{ mainSquare.answer  }}</p>
+         <p class=" h-full text-center ">{{ mainSquares[0]?.questions.length - index }}</p>
        </div>
      </div>
+   
     
-    
-     <div  class="grid grid-cols-1" v-for="mil,index in  mainSquares[0]?.questions">
-          
-        <div   class="grid grid-cols-1   m-auto text-center "  v-for="m,ind in  mainSquares[0]?.questions.slice().reverse()" >
-            <p  class=" text-center pt-7 w-16 h-16 " style="border: 1px solid black;" :style="{backgroundColor: mainSquares[0]?.questions[index].answer >= mainSquares[0]?.questions.length - ind ? `#${mainSquares[0]?.questions[index].color}` : ''  }" ></p>
+     <div  class="grid grid-cols-1" v-for="mil,index in  5">
+        
+        <div   class="grid grid-cols-1   m-auto text-center "  v-for="m,ind in  5" >
+            <p   class=" text-center pt-7 w-16 h-16 " style="border: 1px solid black;" :style="{backgroundColor: mainSquares[top]?.questions[index].score >= mainSquares[top]?.questions.length - ind ? `#${mainSquares[top]?.questions[index].color}` : ''  }" ></p>
         </div>
         <p class="text-center pt-">{{ index+1  }}</p>
      </div>
@@ -101,8 +101,21 @@ methods:{
    axios
        .get(`api/barrier-subtest/result/${this.$route.params.id}`)
        .then((response) => {
-  
+          
          this.mainSquares = response.data
+                for (let i = 0; i < this.mainSquares.length; i++) {
+                  
+                  for (let x = 0; x < 5; x++) {
+                    if(this.mainSquares[i].questions[x]){
+                      
+                    }else{
+                      this.mainSquares[i].questions[x]={score:0,color:"FFFFFF"}
+                    }
+                  
+                            
+                }         
+                }
+                console.log(this.mainSquares)
          this.mainSquares[0].questions.slice().reverse();
         
        })

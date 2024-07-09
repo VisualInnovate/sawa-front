@@ -61,17 +61,8 @@
                  <td  class="px-6 py-4">
                     <p v-for="r,x in res.tests">{{ r.skill }}</p>
                    
-                 </td>
-                
-                 
-              
-           
-             
-            
-         </tr>
-        
-        
-        
+                 </td>        
+         </tr>  
      </tbody>
  </table>
 </div>
