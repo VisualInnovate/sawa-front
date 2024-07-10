@@ -6,7 +6,7 @@
   <v-card>
     <div>
 
-
+{{ error.questions }}
     
       <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="submit" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
         <!-- ... existing code ... -->
@@ -67,7 +67,7 @@
                       
                 <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.barriers_questiont" :key="index">
                     <div class="flex">
-                      <input  @change="getscore(question.id,question.subtest_id)" type="checkbox" style="border: 1px solid black " class="p-1 mx-2 my-auto" :value="index">
+                      <input  @change="getscore(ind,question.id,question.subtest_id,question.index)" type="radio" style="border: 1px solid black " class="p-1 mx-2 my-auto" :name="ind" :value="index">
                      <p class="py-1"> {{ question.title }}:</p>
                     </div>
 
@@ -85,9 +85,10 @@
                  
             
               </div> 
-            
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.scores">{{ error.scores[0] }}</div>
+              
              </div>
-       
+             
        
            
               <div class="flex flex-column gap-2 w-full">
@@ -161,7 +162,11 @@ export default {
            this.strart_evaluate=!(this.strart_evaluate)
            
            
-          })
+          }).catch((el)=>{
+        console.log(el.response.data)
+     this.error = el.response.data.errors
+     console.log(this.error)
+    })
       },
 
     submit(){
@@ -176,12 +181,10 @@ export default {
     getcolor(id){
       this.answer.color=id.target.value
     },
-    getscore(index,question_id){
-      if( this.score[index] && this.score.length >0){
-        this.score.splice(index, 1)
-      }else{
-        this.score[index]=question_id
-      }
+    getscore(index,question_id,subtest_id,question_index){
+    
+        this.score[index]={subtest_id:subtest_id,question_id:question_id,question_index:question_index}
+      
       
       console.log(this.score)
     
@@ -229,10 +232,11 @@ export default {
         this.answer.scores=this.score
         axios.post("/api/barrier-answer",this.answer).then((res) => {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
-
+        this.$router.push({ name: 'barrier-resulte', params:{'id':this.answer.child_id}});
       }).catch((el)=>{
-        console.log(el.response.data.errors.name)
+        console.log(el.response.data)
      this.error = el.response.data.errors
+     console.log(this.error)
     })
     
 

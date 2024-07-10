@@ -14,6 +14,9 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 
+
+
+
 import 'primevue/resources/themes/saga-blue/theme.css'; // Choose the theme you prefer
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
@@ -142,6 +145,9 @@ app.component('DynamicDialog', DynamicDialog)
 app.component('ColorPicker', ColorPicker)
 app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
+
+
+
 app.component('Rating', Rating)
 app.component('Paginator', Paginator)
 

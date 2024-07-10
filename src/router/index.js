@@ -81,6 +81,7 @@ const routes = [
     component: Login,
     beforeEnter: guestForNormalUser,
   },
+
   {
     path: "/web/parent/forgetpassword",
     name: "forgetpassword",
@@ -260,6 +261,7 @@ const routes = [
     beforeEnter: guest,
     component: () => import("@/components/Register.vue"),
   },
+  
   {
     path: "/unauthorized",
     name: "unauthorized",

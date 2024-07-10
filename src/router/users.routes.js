@@ -14,6 +14,12 @@ const usersRoutes = [
       permissions: ["users.index"],
     },
   },
+  {
+    path: "/profile",
+    name: "profile-deltails",
+    component: ()=>import("../views/users/proflie.vue"),
+
+  },
   // create
   {
     path: "users/create",

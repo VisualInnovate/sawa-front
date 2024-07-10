@@ -1,11 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from "../stores/Auth";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const { handleLogout } = useAuthStore();
+const Profile=()=>{
+  router.push({name:'profile-deltails' })
+}
 
 const items = ref([
-  { title: "My Profile" , clickAction: '', icon:'mdi-account-tie' },
+  { title: "My Profile" , clickAction:Profile, icon:'mdi-account-tie' },
   { title: "Logout", clickAction: handleLogout, icon: 'mdi-logout' },
 ]);
 </script>
