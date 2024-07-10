@@ -80,15 +80,17 @@
                       
                    
                  </div> 
-                 <div  v-for="an in allanswer">
-                          <input  required @change="getanswer($event,cat.tests[0].id,an.id)" style="border: 1px solid black " class="mx-2" :name="s" type="radio"   value="0">
-                          <label for="html">{{ an.name }}</label><br>
-                        </div>
+                 <div  class="flex" >
+                       
+                      <div v-for="an in allanswer">
+                        <input  required @change="getanswer($event,cat.tests[0].id,an.id)" style="border: 1px solid black " class="mx-2" :name="s" type="radio"   value="0">
+                          <sapn for="html">{{ an.name }}</sapn>
+                      </div>
+                       
+                   </div>
                   </div> 
                  
-                    <div class="flex">
-                       
-                    </div>
+                    
                  </div>
                         
                            
