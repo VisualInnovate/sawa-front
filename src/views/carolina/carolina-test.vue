@@ -67,33 +67,27 @@
                 <div v-if="strart_evaluate" v-for="cat,ind in category" class="col-span-2 flex flex-column gap-2">
                   <h1  class="text-[black] font-bold" >{{cat.title }}</h1>
                  <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
-                  <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{cat.tests[0]?.skill  }}</h2>
                   
-                        
-                  <div style="border-radius: 5px;padding: 1%;" class=""  v-for="(goal, index) in cat.tests[0]?.goals" :key="index">
+                  
+                  <div v-for="skill,s in cat.tests">
+                    <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{cat.tests[s]?.skill  }}</h2>
+                    <div style="border-radius: 5px;padding: 1%;" class=""  v-for="(goal, index) in cat.tests[s]?.goals" :key="index">
                       
-                       <p class="">{{ index+1 }} - {{ goal.body }}:</p>
+                      <p class="">{{ index+1 }} - {{ goal.body }}:</p>
 
-                       <!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div>
-                          <input  required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
-                          <label for="html">0</label><br>
-                        </div>
-                       
-                         <div v-for="not in notanswer">
-                          
-                             <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
-                         </div>
-                       </div> -->
-                       
-                       
-                    
-                  </div> 
-                    <div class="flex">
-                        <div  v-for="an in allanswer">
-                          <input  required @change="getanswer($event,cat.tests[0].id,an.id)" style="border: 1px solid black " class="mx-2" :name="ind" type="radio"   value="0">
+                     
+                      
+                      
+                   
+                 </div> 
+                 <div  v-for="an in allanswer">
+                          <input  required @change="getanswer($event,cat.tests[0].id,an.id)" style="border: 1px solid black " class="mx-2" :name="s" type="radio"   value="0">
                           <label for="html">{{ an.name }}</label><br>
                         </div>
+                  </div> 
+                 
+                    <div class="flex">
+                       
                     </div>
                  </div>
                         

@@ -117,6 +117,7 @@
            maxDate: new Date(),
            details:[],
            evalate:{},
+           evalate_type: useStorage("evalate_type", ''),
            error:{},
            deleteDialog:false,
            delete_id:'',
@@ -154,6 +155,9 @@
       },
       go_evaluate(id,evalu_id){
         console.log(id,evalu_id)
+
+
+
         if(evalu_id == 1){
           this.$router.push({ name: 'ShowSideProfiles', params:{'id':id}});
         }
@@ -169,6 +173,13 @@
         if(evalu_id == 5){
           this.$router.push({ name: 'carolina-test',  params:{'id':id}});
         }
+       
+        // localStorage.setItem("child_id",id)
+        // this.evalate_type=evalu_id
+     
+        //   this.$router.push({ name: 'reinforcers'});
+       
+       
        
       },
       serchdata(e){
