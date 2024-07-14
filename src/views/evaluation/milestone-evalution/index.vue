@@ -21,7 +21,7 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown   filter required id="pv_id_1" style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Dropdown   filter required id="pv_id_1" disabled style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
                
@@ -178,7 +178,8 @@
             title:this.answer.title,
             child_id:this.answer.child_id,
             specialist_id:localStorage.getItem("user_id"),
-            date:this.answer.date
+            date:this.answer.date,
+            stimulus_test_id:parseInt(this.$route.params.id) 
           
           })
           .then((response) => {
@@ -238,10 +239,11 @@
         axios
           .get("api/child")
           .then((response) => {
-           
+           console.log(localStorage.getItem("child_id"))
             this.childs = response.data.children
-            this.answer.child_id=parseInt(this.$route.params.id)
+            this.answer.child_id=parseInt(localStorage.getItem("child_id")) 
             this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
+          
           })
           axios
           .get("api/mileston-levels")
@@ -250,6 +252,7 @@
             this.qustions = response.data.data
            
           })
+        
          
   
       },
@@ -276,7 +279,8 @@
      
     },
     mounted() {
-     this.getusers()
+    this.getusers()
+     
     },
   };
   </script>

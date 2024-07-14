@@ -58,7 +58,9 @@
         </Dialog>
 
              <div>
-
+              <v-card class="w-full text-center col-span-2">
+            <Button icon="pi pi-arrow-right" v-if="stimulus_id"  @click="goevalute" class=" m-4 m-auto create  w-44 " :label='$t("مرحله التقييم")'></Button>
+          </v-card>
              </div>
             
           </div>
