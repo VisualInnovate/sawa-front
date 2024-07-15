@@ -3,7 +3,7 @@
   <v-card class="card relative ">
          
 <div class="absolute z-50 top-1 ltr:right-0-4 rtl:left-4 flex flex-column gap-2">
-  <Dropdown @update:model-value="get_request" required id="pv_id_1" style="direction: ltr !important;" v-model="user.child_id"  option-value="child.id" filter :options="user.evaluation_requests" optionLabel="child.name" :placeholder='$t("child_name")' class=" bg-[#f7f5f5] [&>div>div>span]:bg-black w-[200px] h-[90%]" />   
+  <Dropdown @update:model-value="get_request" required id="pv_id_1" style="direction: ltr !important;" v-model="user.child_id"  option-value="id" filter :options="user.children" optionLabel="name" :placeholder='$t("child_name")' class=" bg-[#f7f5f5] [&>div>div>span]:bg-black w-[200px] h-[90%]" />   
                         
                 </div>
       <TabView  v-model:activeIndex="active">
@@ -209,9 +209,9 @@ export default {
 get_request(e){
 
   axios
-        .get(`api/users/evaluations/requests/${localStorage.getItem("user_id")}/${e}`)
+        .get(`api/evaluations/requests/${localStorage.getItem("user_id")}/${e}`)
         .then((response) => {
-          this.details = response.data.evaluation_requests
+          this.user.evaluation_requests=response.data.data
          
         })
 },
@@ -300,7 +300,7 @@ get_request(e){
 
   });
       axios
-        .get(`api/users/13`)
+        .get(`api/users/${localStorage.getItem("user_id")}`)
         .then((response) => {
           console.log(response.data.evaluation_requests)
           this.user.type = response.data.type
@@ -311,6 +311,7 @@ get_request(e){
           this.user.image = response.data.image
           this.user.role = response.data.roles[0].id
           this.user.evaluation_requests=response.data.evaluation_requests
+          this.user.children=response.data.children
           for (let i =0 ; i < response.data.skills.length; i++) {
           
                 
