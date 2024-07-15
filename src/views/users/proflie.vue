@@ -1,9 +1,13 @@
 
 <template>
-  <v-card class="card">
-     
-
+  <v-card class="card relative ">
+         
+<div class="absolute z-50 top-1 ltr:right-0-4 rtl:left-4 flex flex-column gap-2">
+  <Dropdown @update:model-value="get_request" required id="pv_id_1" style="direction: ltr !important;" v-model="user.child_id"  option-value="child.id" filter :options="user.evaluation_requests" optionLabel="child.name" :placeholder='$t("child_name")' class=" bg-[#f7f5f5] [&>div>div>span]:bg-black w-[200px] h-[90%]" />   
+                        
+                </div>
       <TabView  v-model:activeIndex="active">
+            
           <TabPanel :header="$t('student_details')">
          <div class="grid grid-cols-2 gap-4">
           <div class="col-span-2">
@@ -202,8 +206,17 @@ export default {
  
 ]
 },
+get_request(e){
 
-        deleteAction(){
+  axios
+        .get(`api/users/evaluations/requests/${localStorage.getItem("user_id")}/${e}`)
+        .then((response) => {
+          this.details = response.data.evaluation_requests
+         
+        })
+},
+
+      deleteAction(){
       axios.delete(`api/evaluation-request/${this.delete_id}`)
         .then((response) => {
 
@@ -287,7 +300,7 @@ export default {
 
   });
       axios
-        .get(`api/users/${localStorage.getItem("user_id")}`)
+        .get(`api/users/13`)
         .then((response) => {
           console.log(response.data.evaluation_requests)
           this.user.type = response.data.type
