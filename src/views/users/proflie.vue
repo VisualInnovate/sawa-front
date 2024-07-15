@@ -5,35 +5,74 @@
 
       <TabView  v-model:activeIndex="active">
           <TabPanel :header="$t('student_details')">
-            <div class="p-[1%]">
-        <div class="flex py-2 ">
-           <img  class="w-[100px] h-[100px] rounded-full" :src="'https://sawa.sawa.academy/' + user.image" alt="not found">
-      </div>
-      <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("name") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ user.name }}</p>
-      </div>
-      <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("email") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ user.email }}</p>
-      </div>
-      <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("title") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ user.title }}</p>
-      </div>
-    
-      <div class="flex py-2 " >
-            <h3 class="my-auto font-bold">{{ $t("skills") }} :</h3>
-            <p class="text-xl  px-1 my-auto" v-for="x in user.skills">
-                <span class="text-xl  px-1 my-auto">{{ x.name }} ,</span>
-            </p>
+         <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2">
+                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="user.image" :src="'https://sawa.sawa.academy/'+user.image" >
+                  <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-else src="../frontend/image/Ellipse2.png" >
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
+                  </div>
+           
+          </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('name') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="user.name" :placeholder='$t("name")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('type') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="user.type"  option-value="id" filter :options="tpes()" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
+            </div>
+            <div v-if="user.type == 0 || user.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
+                  <MultiSelect  v-model="user.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")'
+              class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.skills">{{ error.skills[0] }}</div>
+            </div>
+            <div v-if="user.type == 0 || user.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('department') }}</label>
+                  <MultiSelect  v-model="user.department" filter option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department")'
+              class="w-full bg-[#f7f5f5] md:w-20rem" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+            <div v-if="user.type == 0 || user.type ==2 " class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>
+                  <InputText required class="bg-[#f7f5f5] text-center" v-model="user.spotter" :placeholder='$t("Spotter")' />
+
+              
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('email') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="user.email" :placeholder='$t("email")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="user.title" :placeholder='$t("title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('password') }}</label>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="user.password" :placeholder='$t("password")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.password">{{ error.password[0] }}</div>
+            </div>
             
-      </div>
-     
-     
-      
-      
-     </div>
+            <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('roles') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="user.role"  option-value="id" filter :options="roles" optionLabel="name" :placeholder='$t("roles")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.role">{{ error.role[0] }}</div>
+            </div>
+            <div class=" flex-column gap-2 py-1 hidden">
+                  <label class="w-full text-right" for="username">{{ $t('personal_image') }}</label>
+                  <InputText name="file"  ref="file" @change="uploadFile" accept="image/*" id="filr"   type="file" class="w-full" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
+            </div>
+           <div class="w-full text-center">
+            <Button @click="editesuser" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+           </div>
+         </div>
+
           </TabPanel>
           <TabPanel :header="$t('Consultations_evaluations')">
             <div>
@@ -103,7 +142,7 @@
 
     </div>
           </TabPanel>
-          <TabPanel :header="$t('student_details')">
+          <TabPanel :header="$t('children')">
               <p class="m-0">
                   At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui
                   officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
@@ -126,7 +165,13 @@ export default {
     return {
         child_id: useStorage("child_id", Number),
          maxDate: new Date(),
-         user:[],
+         user:{
+          skills:[],
+          department:[]
+         },
+         skills:[],
+         roles:[],
+         departments:[],
          evalate:{},
          error:{},
          deleteDialog:false,
@@ -149,6 +194,14 @@ export default {
     opennew(){
       this.updatedialog=!(this.updatedialog)
     },
+  tpes(){
+  return[
+            { name:this.$t('driver') , id:1},
+                { name:this.$t('doctor') , id:2},
+                { name:this.$t('Evaluator') , id:3},
+ 
+]
+},
 
         deleteAction(){
       axios.delete(`api/evaluation-request/${this.delete_id}`)
@@ -217,16 +270,93 @@ export default {
 
 
     getusers(){
+      axios.post("/api/roles").then((res)=>{
+ 
+    this.roles= res.data.roles.data
+    console.log(users.value)
+
+  });
+  axios.get("/api/skills").then((res)=>{
+    this.skills=res.data.data
+  
+
+  });
+  axios.get("/api/department").then((res)=>{
+    this.departments=res.data.data
+  
+
+  });
       axios
-        .get(`api/users/13`)
+        .get(`api/users/${localStorage.getItem("user_id")}`)
         .then((response) => {
           console.log(response.data.evaluation_requests)
-          this.user = response.data
+          this.user.type = response.data.type
+          this.user.email = response.data.email
+          this.user.name = response.data.name
+          this.user.spotter = response.data.spotter
+          this.user.title = response.data.title
+          this.user.image = response.data.image
+          this.user.role = response.data.roles[0].id
+          this.user.evaluation_requests=response.data.evaluation_requests
+          for (let i =0 ; i < response.data.skills.length; i++) {
+          
+                
+          this.user.skills.push(response.data.skills[i].id);
+
+}
+for (let i =0 ; i < response.data.departments.length; i++) {
+          
+                
+          this.user.department.push(response.data.departments[i].id);
+
+}
          
         })
       
     },
-    
+     editesuser(){
+  const body = new FormData();
+
+    body.append("name", this.user.name);
+    body.append("email", this.user.email);
+    body.append("title", this.user.title);
+    body.append("password", this.user.password);
+    body.append("image", this.user.file);
+    body.append("role", this.user.role);
+    if(this.user.spotter){
+      body.append("spotter", this.user.spotter);
+    }
+    if(this.user.skills){
+      body.append("skills", this.user.skills);
+    }
+    if(this.user.department){
+      body.append("department_id", this.user.department);
+    }
+    body.append("type",this.user.type)
+    axios
+    .post(`/api/users/${localStorage.getItem("user_id")}/edit`,body)
+    .then((res) => {
+      console.log(res.data)
+      fetchData()
+      
+      
+    })
+    .catch((el)=>{
+      error.value = el.response.data.errors
+    })
+},
+ uploadFile(e){
+  const image = e.target.files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(image);
+      reader.onload = (e) => {
+        this.user.image = e.target.result;
+        this.user.file = image;
+       
+      };
+      console.log(this.user.image)
+
+},
     getdoctors(){
       axios
         .get(`api/doctors`)
