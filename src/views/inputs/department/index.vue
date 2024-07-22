@@ -77,6 +77,7 @@ const editescrud=()=>{
 
 const openNew = () => {
     createdialog.value=!(createdialog.value)
+    levels.value={}
 }
 
 const confirmDelete = (id) => {

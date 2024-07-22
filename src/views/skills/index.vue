@@ -77,6 +77,7 @@ const editeskills=()=>{
 
 const openNew = () => {
     createdialog.value=!(createdialog.value)
+    skill.value={}
 }
 
 const confirmDelete = (id) => {

@@ -5,292 +5,71 @@
       {{ $t("settings_menu") }}
     </p>
   </div>
-  <v-container class="container">
-    <v-row>
-      <!-- Social Links -->
-      <v-col cols="3">
-        <div class="flex-input m2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            x="0px"
-            y="0px"
-            width="48"
-            height="48"
-            viewBox="0 0 48 48"
-          >
-            <path
-              fill="#039be5"
-              d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z"
-            ></path>
-            <path
-              fill="#fff"
-              d="M26.572,29.036h4.917l0.772-4.995h-5.69v-2.73c0-2.075,0.678-3.915,2.619-3.915h3.119v-4.359c-0.548-0.074-1.707-0.236-3.897-0.236c-4.573,0-7.254,2.415-7.254,7.917v3.323h-4.701v4.995h4.701v13.729C22.089,42.905,23.032,43,24,43c0.875,0,1.729-0.08,2.572-0.194V29.036z"
-            ></path>
-          </svg>
-          <input
-            style="font-size: 20px"
-            class="bg-white/30 focus:ring-0 w-full text-center"
-            type="text"
-            v-model="settings.social_links.facebook"
-            placeholder="Facebook"
-          />
-        </div>
+  <v-card>
+    <v-card class=" bg-slate-50 m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2">
 
-        <div class="flex-input m2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            x="0px"
-            y="0px"
-            width="48"
-            height="48"
-            viewBox="0 0 48 48"
-          >
-            <radialGradient
-              id="yOrnnhliCrdS2gy~4tD8ma_Xy10Jcu1L2Su_gr1"
-              cx="19.38"
-              cy="42.035"
-              r="44.899"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0" stop-color="#fd5"></stop>
-              <stop offset=".328" stop-color="#ff543f"></stop>
-              <stop offset=".348" stop-color="#fc5245"></stop>
-              <stop offset=".504" stop-color="#e64771"></stop>
-              <stop offset=".643" stop-color="#d53e91"></stop>
-              <stop offset=".761" stop-color="#cc39a4"></stop>
-              <stop offset=".841" stop-color="#c837ab"></stop>
-            </radialGradient>
-            <path
-              fill="url(#yOrnnhliCrdS2gy~4tD8ma_Xy10Jcu1L2Su_gr1)"
-              d="M34.017,41.99l-20,0.019c-4.4,0.004-8.003-3.592-8.008-7.992l-0.019-20	c-0.004-4.4,3.592-8.003,7.992-8.008l20-0.019c4.4-0.004,8.003,3.592,8.008,7.992l0.019,20	C42.014,38.383,38.417,41.986,34.017,41.99z"
-            ></path>
-            <radialGradient
-              id="yOrnnhliCrdS2gy~4tD8mb_Xy10Jcu1L2Su_gr2"
-              cx="11.786"
-              cy="5.54"
-              r="29.813"
-              gradientTransform="matrix(1 0 0 .6663 0 1.849)"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0" stop-color="#4168c9"></stop>
-              <stop offset=".999" stop-color="#4168c9" stop-opacity="0"></stop>
-            </radialGradient>
-            <path
-              fill="url(#yOrnnhliCrdS2gy~4tD8mb_Xy10Jcu1L2Su_gr2)"
-              d="M34.017,41.99l-20,0.019c-4.4,0.004-8.003-3.592-8.008-7.992l-0.019-20	c-0.004-4.4,3.592-8.003,7.992-8.008l20-0.019c4.4-0.004,8.003,3.592,8.008,7.992l0.019,20	C42.014,38.383,38.417,41.986,34.017,41.99z"
-            ></path>
-            <path
-              fill="#fff"
-              d="M24,31c-3.859,0-7-3.14-7-7s3.141-7,7-7s7,3.14,7,7S27.859,31,24,31z M24,19c-2.757,0-5,2.243-5,5	s2.243,5,5,5s5-2.243,5-5S26.757,19,24,19z"
-            ></path>
-            <circle cx="31.5" cy="16.5" r="1.5" fill="#fff"></circle>
-            <path
-              fill="#fff"
-              d="M30,37H18c-3.859,0-7-3.14-7-7V18c0-3.86,3.141-7,7-7h12c3.859,0,7,3.14,7,7v12	C37,33.86,33.859,37,30,37z M18,13c-2.757,0-5,2.243-5,5v12c0,2.757,2.243,5,5,5h12c2.757,0,5-2.243,5-5V18c0-2.757-2.243-5-5-5H18z"
-            ></path>
-          </svg>
-          <input
-            style="font-size: 20px"
-            class="bg-white/30 focus:ring-0 w-full text-center"
-            type="text"
-            v-model="settings.social_links.instagram"
-            placeholder="Instagram"
-          />
-        </div>
+    <div class="">
+    
+      <div class="flex">
+        <label class="my-auto" for="password">Twitter  </label>
+        <svg class="mx-6" width="24px" height="24px" viewBox="0 -4 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Twitter-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-300.000000, -164.000000)" fill="#00AAEC"> <path d="M348,168.735283 C346.236309,169.538462 344.337383,170.081618 342.345483,170.324305 C344.379644,169.076201 345.940482,167.097147 346.675823,164.739617 C344.771263,165.895269 342.666667,166.736006 340.418384,167.18671 C338.626519,165.224991 336.065504,164 333.231203,164 C327.796443,164 323.387216,168.521488 323.387216,174.097508 C323.387216,174.88913 323.471738,175.657638 323.640782,176.397255 C315.456242,175.975442 308.201444,171.959552 303.341433,165.843265 C302.493397,167.339834 302.008804,169.076201 302.008804,170.925244 C302.008804,174.426869 303.747139,177.518238 306.389857,179.329722 C304.778306,179.280607 303.256911,178.821235 301.9271,178.070061 L301.9271,178.194294 C301.9271,183.08848 305.322064,187.17082 309.8299,188.095341 C309.004402,188.33225 308.133826,188.450704 307.235077,188.450704 C306.601162,188.450704 305.981335,188.390033 305.381229,188.271578 C306.634971,192.28169 310.269414,195.2026 314.580032,195.280607 C311.210424,197.99061 306.961789,199.605634 302.349709,199.605634 C301.555203,199.605634 300.769149,199.559408 300,199.466956 C304.358514,202.327194 309.53689,204 315.095615,204 C333.211481,204 343.114633,188.615385 343.114633,175.270495 C343.114633,174.831347 343.106181,174.392199 343.089276,173.961719 C345.013559,172.537378 346.684275,170.760563 348,168.735283" id="Twitter"> </path> </g> </g> </g></svg>
+      </div>
+      <InputText  v-model="settings.social_links.twitter "  class="mt-3 w-full mb-3"/>
 
-        <div class="flex-input m2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            x="0px"
-            y="0px"
-            width="48"
-            height="48"
-            viewBox="0 0 48 48"
-          >
-            <linearGradient
-              id="_osn9zIN2f6RhTsY8WhY4a_5MQ0gPAYYx7a_gr1"
-              x1="10.341"
-              x2="40.798"
-              y1="8.312"
-              y2="38.769"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0" stop-color="#2aa4f4"></stop>
-              <stop offset="1" stop-color="#007ad9"></stop>
-            </linearGradient>
-            <path
-              fill="url(#_osn9zIN2f6RhTsY8WhY4a_5MQ0gPAYYx7a_gr1)"
-              d="M46.105,11.02c-1.551,0.687-3.219,1.145-4.979,1.362c1.789-1.062,3.166-2.756,3.812-4.758	c-1.674,0.981-3.529,1.702-5.502,2.082C37.86,8.036,35.612,7,33.122,7c-4.783,0-8.661,3.843-8.661,8.582	c0,0.671,0.079,1.324,0.226,1.958c-7.196-0.361-13.579-3.782-17.849-8.974c-0.75,1.269-1.172,2.754-1.172,4.322	c0,2.979,1.525,5.602,3.851,7.147c-1.42-0.043-2.756-0.438-3.926-1.072c0,0.026,0,0.064,0,0.101c0,4.163,2.986,7.63,6.944,8.419	c-0.723,0.198-1.488,0.308-2.276,0.308c-0.559,0-1.104-0.063-1.632-0.158c1.102,3.402,4.299,5.889,8.087,5.963	c-2.964,2.298-6.697,3.674-10.756,3.674c-0.701,0-1.387-0.04-2.065-0.122C7.73,39.577,12.283,41,17.171,41	c15.927,0,24.641-13.079,24.641-24.426c0-0.372-0.012-0.742-0.029-1.108C43.483,14.265,44.948,12.751,46.105,11.02"
-            ></path>
-          </svg>
-          <input
-            style="font-size: 20px"
-            class="bg-white/30 focus:ring-0 w-full text-center"
-            type="text"
-            v-model="settings.social_links.twitter"
-            placeholder="Twitter"
-          />
-        </div>
+    </div>
+    <!-- <div class="">
+      <div class="flex">
+        <label class="my-auto" for="password">email </label>
+        <svg class="mx-6" width="24px" height="24px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Whatsapp-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-700.000000, -360.000000)" fill="#67C15E"> <path d="M723.993033,360 C710.762252,360 700,370.765287 700,383.999801 C700,389.248451 701.692661,394.116025 704.570026,398.066947 L701.579605,406.983798 L710.804449,404.035539 C714.598605,406.546975 719.126434,408 724.006967,408 C737.237748,408 748,397.234315 748,384.000199 C748,370.765685 737.237748,360.000398 724.006967,360.000398 L723.993033,360.000398 L723.993033,360 Z M717.29285,372.190836 C716.827488,371.07628 716.474784,371.034071 715.769774,371.005401 C715.529728,370.991464 715.262214,370.977527 714.96564,370.977527 C714.04845,370.977527 713.089462,371.245514 712.511043,371.838033 C711.806033,372.557577 710.056843,374.23638 710.056843,377.679202 C710.056843,381.122023 712.567571,384.451756 712.905944,384.917648 C713.258648,385.382743 717.800808,392.55031 724.853297,395.471492 C730.368379,397.757149 732.00491,397.545307 733.260074,397.27732 C735.093658,396.882308 737.393002,395.527239 737.971421,393.891043 C738.54984,392.25405 738.54984,390.857171 738.380255,390.560912 C738.211068,390.264652 737.745308,390.095816 737.040298,389.742615 C736.335288,389.389811 732.90737,387.696673 732.25849,387.470894 C731.623543,387.231179 731.017259,387.315995 730.537963,387.99333 C729.860819,388.938653 729.198006,389.89831 728.661785,390.476494 C728.238619,390.928051 727.547144,390.984595 726.969123,390.744481 C726.193254,390.420348 724.021298,389.657798 721.340985,387.273388 C719.267356,385.42535 717.856938,383.125756 717.448104,382.434484 C717.038871,381.729275 717.405907,381.319529 717.729948,380.938852 C718.082653,380.501232 718.421026,380.191036 718.77373,379.781688 C719.126434,379.372738 719.323884,379.160897 719.549599,378.681068 C719.789645,378.215575 719.62006,377.735746 719.450874,377.382942 C719.281687,377.030139 717.871269,373.587317 717.29285,372.190836 Z" id="Whatsapp"> </path> </g> </g> </g></svg>
+      </div>
 
-        <div class="flex-input m2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            x="0px"
-            y="0px"
-            width="48"
-            height="48"
-            viewBox="0 0 48 48"
-          >
-            <linearGradient
-              id="PgB_UHa29h0TpFV_moJI9a_9a46bTk3awwI_gr1"
-              x1="9.816"
-              x2="41.246"
-              y1="9.871"
-              y2="41.301"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0" stop-color="#f44f5a"></stop>
-              <stop offset=".443" stop-color="#ee3d4a"></stop>
-              <stop offset="1" stop-color="#e52030"></stop>
-            </linearGradient>
-            <path
-              fill="url(#PgB_UHa29h0TpFV_moJI9a_9a46bTk3awwI_gr1)"
-              d="M45.012,34.56c-0.439,2.24-2.304,3.947-4.608,4.267C36.783,39.36,30.748,40,23.945,40	c-6.693,0-12.728-0.64-16.459-1.173c-2.304-0.32-4.17-2.027-4.608-4.267C2.439,32.107,2,28.48,2,24s0.439-8.107,0.878-10.56	c0.439-2.24,2.304-3.947,4.608-4.267C11.107,8.64,17.142,8,23.945,8s12.728,0.64,16.459,1.173c2.304,0.32,4.17,2.027,4.608,4.267	C45.451,15.893,46,19.52,46,24C45.89,28.48,45.451,32.107,45.012,34.56z"
-            ></path>
-            <path
-              d="M32.352,22.44l-11.436-7.624c-0.577-0.385-1.314-0.421-1.925-0.093C18.38,15.05,18,15.683,18,16.376	v15.248c0,0.693,0.38,1.327,0.991,1.654c0.278,0.149,0.581,0.222,0.884,0.222c0.364,0,0.726-0.106,1.04-0.315l11.436-7.624	c0.523-0.349,0.835-0.932,0.835-1.56C33.187,23.372,32.874,22.789,32.352,22.44z"
-              opacity=".05"
-            ></path>
-            <path
-              d="M20.681,15.237l10.79,7.194c0.689,0.495,1.153,0.938,1.153,1.513c0,0.575-0.224,0.976-0.715,1.334	c-0.371,0.27-11.045,7.364-11.045,7.364c-0.901,0.604-2.364,0.476-2.364-1.499V16.744C18.5,14.739,20.084,14.839,20.681,15.237z"
-              opacity=".07"
-            ></path>
-            <path
-              fill="#fff"
-              d="M19,31.568V16.433c0-0.743,0.828-1.187,1.447-0.774l11.352,7.568c0.553,0.368,0.553,1.18,0,1.549	l-11.352,7.568C19.828,32.755,19,32.312,19,31.568z"
-            ></path>
-          </svg>
-          <input
-            style="font-size: 20px"
-            class="bg-white/30 focus:ring-0 w-full text-center"
-            type="text"
-            v-model="settings.social_links.youtube"
-            placeholder="Youtube"
-          />
-        </div>
-      </v-col>
-      <!-- End Social Links -->
+      <InputText  v-model="settings.social_links.facebook"  class="mt-3 w-full mb-3"/>
+      <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
 
-      <!-- Site Settings -->
-      <v-col cols="5">
-        <div
-          style="background-color: #f5f5f5; padding: 2rem"
-          class="rounded-xl"
+    </div> -->
+
+    <div class="">
+      <div class="flex">
+        <label class="my-auto" for="password">facebook </label>
+        <svg class="mx-6" width="24px" height="24px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Facebook-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0"> <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,208 Z" id="Facebook"> </path> </g> </g> </g></svg>
+      </div>
+
+      <InputText type="text" v-model="settings.social_links.facebook"  class="mt-3 w-full mb-3"/>
+      
+
+    </div>
+    <div class="">
+      <div class="flex">
+        <label class="my-auto" for="password">Instagram </label>
+        <svg class="mx-6" width="24px" height="24px" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint0_radial_87_7153)"></rect> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint1_radial_87_7153)"></rect> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint2_radial_87_7153)"></rect> <path d="M23 10.5C23 11.3284 22.3284 12 21.5 12C20.6716 12 20 11.3284 20 10.5C20 9.67157 20.6716 9 21.5 9C22.3284 9 23 9.67157 23 10.5Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21ZM16 19C17.6569 19 19 17.6569 19 16C19 14.3431 17.6569 13 16 13C14.3431 13 13 14.3431 13 16C13 17.6569 14.3431 19 16 19Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M6 15.6C6 12.2397 6 10.5595 6.65396 9.27606C7.2292 8.14708 8.14708 7.2292 9.27606 6.65396C10.5595 6 12.2397 6 15.6 6H16.4C19.7603 6 21.4405 6 22.7239 6.65396C23.8529 7.2292 24.7708 8.14708 25.346 9.27606C26 10.5595 26 12.2397 26 15.6V16.4C26 19.7603 26 21.4405 25.346 22.7239C24.7708 23.8529 23.8529 24.7708 22.7239 25.346C21.4405 26 19.7603 26 16.4 26H15.6C12.2397 26 10.5595 26 9.27606 25.346C8.14708 24.7708 7.2292 23.8529 6.65396 22.7239C6 21.4405 6 19.7603 6 16.4V15.6ZM15.6 8H16.4C18.1132 8 19.2777 8.00156 20.1779 8.0751C21.0548 8.14674 21.5032 8.27659 21.816 8.43597C22.5686 8.81947 23.1805 9.43139 23.564 10.184C23.7234 10.4968 23.8533 10.9452 23.9249 11.8221C23.9984 12.7223 24 13.8868 24 15.6V16.4C24 18.1132 23.9984 19.2777 23.9249 20.1779C23.8533 21.0548 23.7234 21.5032 23.564 21.816C23.1805 22.5686 22.5686 23.1805 21.816 23.564C21.5032 23.7234 21.0548 23.8533 20.1779 23.9249C19.2777 23.9984 18.1132 24 16.4 24H15.6C13.8868 24 12.7223 23.9984 11.8221 23.9249C10.9452 23.8533 10.4968 23.7234 10.184 23.564C9.43139 23.1805 8.81947 22.5686 8.43597 21.816C8.27659 21.5032 8.14674 21.0548 8.0751 20.1779C8.00156 19.2777 8 18.1132 8 16.4V15.6C8 13.8868 8.00156 12.7223 8.0751 11.8221C8.14674 10.9452 8.27659 10.4968 8.43597 10.184C8.81947 9.43139 9.43139 8.81947 10.184 8.43597C10.4968 8.27659 10.9452 8.14674 11.8221 8.0751C12.7223 8.00156 13.8868 8 15.6 8Z" fill="white"></path> <defs> <radialGradient id="paint0_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 23) rotate(-55.3758) scale(25.5196)"> <stop stop-color="#B13589"></stop> <stop offset="0.79309" stop-color="#C62F94"></stop> <stop offset="1" stop-color="#8A3AC8"></stop> </radialGradient> <radialGradient id="paint1_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11 31) rotate(-65.1363) scale(22.5942)"> <stop stop-color="#E0E8B7"></stop> <stop offset="0.444662" stop-color="#FB8A2E"></stop> <stop offset="0.71474" stop-color="#E2425C"></stop> <stop offset="1" stop-color="#E2425C" stop-opacity="0"></stop> </radialGradient> <radialGradient id="paint2_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0.500002 3) rotate(-8.1301) scale(38.8909 8.31836)"> <stop offset="0.156701" stop-color="#406ADC"></stop> <stop offset="0.467799" stop-color="#6A45BE"></stop> <stop offset="1" stop-color="#6A45BE" stop-opacity="0"></stop> </radialGradient> </defs> </g></svg>
+      </div>
+
+      <InputText    v-model="settings.social_links.instagram"  class="mt-3 w-full mb-3"/>
+   
+
+    </div>
+    <div class="">
+      <div class="flex">
+        <label class="my-auto" for="password">youtube </label>
+        <svg class="mx-6" width="24px" height="24px" viewBox="0 -7 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Youtube-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-200.000000, -368.000000)" fill="#CE1312"> <path d="M219.044,391.269916 L219.0425,377.687742 L232.0115,384.502244 L219.044,391.269916 Z M247.52,375.334163 C247.52,375.334163 247.0505,372.003199 245.612,370.536366 C243.7865,368.610299 241.7405,368.601235 240.803,368.489448 C234.086,368 224.0105,368 224.0105,368 L223.9895,368 C223.9895,368 213.914,368 207.197,368.489448 C206.258,368.601235 204.2135,368.610299 202.3865,370.536366 C200.948,372.003199 200.48,375.334163 200.48,375.334163 C200.48,375.334163 200,379.246723 200,383.157773 L200,386.82561 C200,390.73817 200.48,394.64922 200.48,394.64922 C200.48,394.64922 200.948,397.980184 202.3865,399.447016 C204.2135,401.373084 206.612,401.312658 207.68,401.513574 C211.52,401.885191 224,402 224,402 C224,402 234.086,401.984894 240.803,401.495446 C241.7405,401.382148 243.7865,401.373084 245.612,399.447016 C247.0505,397.980184 247.52,394.64922 247.52,394.64922 C247.52,394.64922 248,390.73817 248,386.82561 L248,383.157773 C248,379.246723 247.52,375.334163 247.52,375.334163 L247.52,375.334163 Z" id="Youtube"> </path> </g> </g> </g></svg>
+      </div>
+
+      <InputText   v-model="settings.social_links.youtube"  class="mt-3 w-full mb-3"/>
+
+    </div>
+
+
+    
+
+
+</v-card>
+<v-card class=" bg-slate-50  m-[2%] p-[2%] ">
+  <div
+          class="text-center font-bold  grid grid-cols-2"
+        
         >
-          <div class="m2">
-            <input
-              style="
-                font-size: 20px;
-                border-bottom: 2.5px solid gray;
-                background: transparent;
-              "
-              class="focus:ring-0 w-full text-center"
-              type="text"
-              v-model="settings.name"
-              placeholder="Site Name"
-            />
-          </div>
-          <div class="m2">
-            <input
-              style="
-                font-size: 20px;
-                border-bottom: 2.5px solid gray;
-                background: transparent;
-              "
-              class="focus:ring-0 w-full text-center"
-              type="text"
-              v-model="settings.number_1"
-              placeholder="Site Phone"
-            />
-          </div>
-          <div class="m2">
-            <input
-              style="
-                font-size: 20px;
-                border-bottom: 2.5px solid gray;
-                background: transparent;
-              "
-              class="focus:ring-0 w-full text-center"
-              type="text"
-              v-model="settings.number_2"
-              placeholder="Site Phone"
-            />
-          </div>
-          <div class="m2">
-            <input
-              style="
-                font-size: 20px;
-                border-bottom: 2.5px solid gray;
-                background: transparent;
-              "
-              class="focus:ring-0 w-full text-center"
-              type="text"
-              v-model="settings.address"
-              placeholder="Site Address"
-            />
-          </div>
-          <div class="m2">
-            <input
-              style="
-                font-size: 20px;
-                border-bottom: 2.5px solid gray;
-                background: transparent;
-              "
-              class="focus:ring-0 w-full text-center"
-              type="email"
-              v-model="settings.email"
-              placeholder="Site Email"
-            />
-          </div>
-          <div class="">
-            <textarea
-              name="site_description"
-              id="site_description"
-              rows="5"
-              style="
-                font-size: 20px;
-                border-bottom: 2.5px solid gray;
-                background: transparent;
-              "
-              class="focus:ring-0 w-full text-center"
-              type="text"
-              v-model="settings.description"
-              placeholder="Site Description"
-            ></textarea>
-          </div>
-          <button
-            @click="updateSettings"
-            class="p-4 mt-10 text-center bg-[#148A98] text-white w-full rounded-2xl text-xl"
-          >
-            حفظ التغيرات
-          </button>
-        </div>
-      </v-col>
-      <!-- End Site Settings -->
-
-      <!-- Site Images -->
-      <v-col cols="4">
-        <div
-          class="text-center font-bold"
-          style="
-            color: #2a2828;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-          "
-        >
-          <label for="" style=" font-size: 20px;font;">Site Logo</label>
+          <div>
+            <label for="" style=" font-size: 20px;">Site Logo</label>
           <div class="relative m-auto">
             <input
               type="file"
@@ -329,8 +108,10 @@
               </g>
             </svg>
           </div>
+          </div>
 
-          <label for="" style="padding: 1rem; font-size: 20px;font;"
+          <div class="w-full">
+            <label for="" style="padding: 1rem; font-size: 20px;font;"
             >Site Cover</label
           >
           <div class="relative m-auto p-2">
@@ -345,7 +126,7 @@
             <img
               @click="openCoverFile"
               :src="imageSrcCover"
-              class="uploaded-image relative m-auto cursor-pointer object-cover"
+              class="uploaded-image relative m-auto w-full cursor-pointer object-cover"
             />
 
             <svg
@@ -371,34 +152,77 @@
               </g>
             </svg>
           </div>
+          </div>
+
         </div>
-      </v-col>
-      <!-- End Site Images -->
-    </v-row>
-  </v-container>
+
+
+
+</v-card>
+    <v-card  class="m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2 bg-slate-50 ">
+        <div   class="flex flex-column gap-2">
+                  <label for="username">{{ $t('Site Name ') }}</label>
+                  <InputText required class="bg-[#f7f5f5]" v-model="settings.name" :placeholder='$t("Site Name ")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+           </div>
+          
+          <div   class="flex flex-column gap-2">
+                  <label for="username">{{ $t('Site Phone') }}</label>
+                  <InputText required class="bg-[#f7f5f5]" v-model="settings.number_1" :placeholder='$t("Site Phone")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.number_1">{{ error.number_1[0] }}</div>
+           </div>
+           <div   class="flex flex-column gap-2">
+                  <label for="username">{{ $t('Site Phone') }}</label>
+                  <InputText required class="bg-[#f7f5f5]" v-model="settings.number_2" :placeholder='$t("Site Phone")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.number_2">{{ error.number_2[0] }}</div>
+           </div>
+           <div   class="flex flex-column gap-2">
+                  <label for="username">{{ $t('address ') }}</label>
+                  <InputText required class="bg-[#f7f5f5]" v-model="settings.address" :placeholder='$t("address ")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.address">{{ error.address[0] }}</div>
+           </div>
+           <div   class="flex flex-column gap-2">
+                  <label for="username">{{ $t('Site Email ') }}</label>
+                  <InputText required class="bg-[#f7f5f5]" v-model="settings.email" :placeholder='$t("Site Email ")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
+           </div>
+     
+       
+          <div class=" ">
+            <label for="username">{{ $t('Site description ') }}</label>
+            <v-textarea rows="2" bg-color="#EAE8E9" v-model="settings.description" ></v-textarea>
+         
+          </div>
+          <button @click="updateSettings" class="p-4 mt-10 text-center bg-[#148A98] text-white w-full rounded-2xl text-xl" > حفظ التغيرات</button>
+        </v-card>
+  </v-card>
+  <Toast/>
 </template>
 <script>
+import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 export default {
   data() {
     return {
       imageSrc: null,
       imageSrcCover: null,
+      toast:useToast(),
+      error:'',
       settings: {
         name: "",
-        number_1: "",
-        number_2: "",
-        address: "",
-        email: "",
-        logo: "",
-        cover: "",
-        description: "",
-        social_links: {
-          facebook: "",
-          instagram: "",
-          twitter: "",
-          youtube: "",
-        },
+        
+        number_1: " ",
+        number_2: " ",
+        address: " ",
+        email: " ",
+        logo: " ",
+        cover: " ",
+        description: " ",
+        social_links: [
+          {
+            facebook:""
+          }
+        ],
       },
     };
   },
@@ -412,9 +236,7 @@ export default {
             return;
           }
           this.settings = res.data.settings;
-          this.settings.social_links = JSON.parse(
-            res.data.settings.social_links
-          ).links;
+        
           this.imageSrc = this.settings.logo;
           this.imageSrcCover = this.settings.cover;
         })
@@ -455,10 +277,8 @@ export default {
       formData.append("address", this.settings.address);
       formData.append("email", this.settings.email);
       formData.append("description", this.settings.description);
-      formData.append(
-        "social_links",
-        JSON.stringify({ links: this.settings.social_links })
-      );
+      formData.append("social_links",this.settings.social_links);
+   
       if (this.$refs.fileInput.files[0] != null) {
         formData.append("logo", this.$refs.fileInput.files[0]);
       }
@@ -468,11 +288,13 @@ export default {
       axios
         .post("/api/site/settings", formData)
         .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+          this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+         
+        }).catch((el)=>{
+           this.error = el.response.data.errors
+        
+    })
+        
     },
   },
   mounted() {

@@ -503,7 +503,7 @@ export default {
           room_id:this.room_id
         })
         .then((res) => {
-          this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+          c
           this.visible = false
           if (res.status != 200) {
             this.valid = true;
