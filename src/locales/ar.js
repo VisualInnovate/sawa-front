@@ -5,6 +5,7 @@ export default {
   permissions: "الصلاحيات",
   users: "المستخدمين",
   parents: "الاباء",
+  parent_name:"اسم الاب",
   children: "الاطفال",
   birth_date: "تاريخ الميلاد",
   actions: "العمليات",
@@ -367,5 +368,48 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   parent_category:"القسم الرئيسي",
   date:"موعد التقييم",
   Selected_item:"العنصر المختار",
-  send_answer:"ارسل الاجابة"
+  send_answer:"ارسل الاجابة",
+///////////////////////////////////////////anttend
+deduction_title:"عنوان الخصم",
+deductions:"الخصومات",
+Employees:"الموظفيين",
+basic_salary:"الراتب الاساسي ",
+job_title:"المسمي الوظيفي",
+deduction_add:"اضافة خصومات",
+employee_name:"اسم الموظف",
+deduction_type:"نوع الخصم",
+deduction_mount:"كمية الخصم",
+deduction_reason:"سبب الخصم",
+deduction_date:"معاد الخصم",
+holiday_date:"تاريخ الاجازه",
+holiday_add:"اضافة اجازة",
+holidays:"الاجازات",
+request_reason:"سبب الاجازة",
+leaves:"المغادرات",
+hours:"عدد الساعات",
+days:"عدد الأيام",
+leave_setup_type:"اختر نوع المغادرة",
+Settings: "الاعدادات",
+company_lat:"خط عرض الشركة",
+company_long:"خط طول الشركة",
+payroll:"كشف الرواتب",
+employee_payroll:" كشف رواتب الموظفين",
+bonus:"علاوات"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 };

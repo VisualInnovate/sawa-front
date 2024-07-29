@@ -56,7 +56,7 @@
             </div>
             <div class="flex flex-column gap-2">
                     <label class="font-bold" for="username">{{ $t('date_of_birth') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar   v-model="child.birth_date" showIcon  :placeholder='$t("date_of_birth")'  :minDate="maxDate" />   
+                    <Calendar  style="width: 100%" showButtonBar   v-model="child.birth_date" showIcon  :placeholder='$t("date_of_birth")'  :maxDate="maxDate" />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_date">{{ error.birth_date[0] }}</div>
             </div>
             <div class=" flex flex-column gap-2">

@@ -236,7 +236,6 @@ export default {
                   <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.phone">{{ parentStore.errors?.phone }}</div>
               </div>
               <div class=" flex flex-column gap-2">
-  
                     <label class="w-full  " for="username">{{ $t('email') }}</label>
                   <InputText v-model="parent.email" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="email" required class="bg-[#f7f5f5] text-center"  :placeholder='$t("email")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.email">{{ parentStore.errors?.email }}</div>

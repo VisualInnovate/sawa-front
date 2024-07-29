@@ -104,18 +104,18 @@ const edit=(id)=>{
 
     for (let i =0 ; i < res.data.skills.length; i++) {
      
-        if(res.data.user.skills[i].id){
+        
           
           usersdata.value.skills.push(res.data.skills[i].id);
-        }
+        
 
 }
 for (let i =0 ; i < res.data.departments.length; i++) {
      
-     if(res.data.departments[i].id){
+
        
        usersdata.value.department.push(res.data.departments[i].id);
-     }
+     
 
 }
    

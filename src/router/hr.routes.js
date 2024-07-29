@@ -7,12 +7,12 @@ const BookingDetails = () => import("../views/calender/BookingDetails.vue");
 const hr = [
  ////// Employees
  {
-    path: '/Employees', // Define the path for your addRoom route
+    path: '/Employees', 
     name: 'Employees',
     component: () => import("../views/hr/Employees/index.vue")
   },
   {
-    path: '/Employee-update/:id', // Define the path for your addRoom route
+    path: '/Employee-update/:id', 
     name: 'Employee-update',
     component: () => import("../views/hr/Employees/update.vue")
   },
@@ -20,24 +20,67 @@ const hr = [
 
 /////////////////////leave-balance
     {
-      path: '/leave-balance', // Define the path for your addRoom route
+      path: '/leave-balance', 
       name: 'leave-balance',
-      component: () => import("../views/hr/leave-balance/index.vue")
+      component: () => import("../views/hr/leave/leave-balance/index.vue")
     },
 ///////////////////// leave-setup
     {
-      path: '/leave-setup', // Define the path for your addRoom route
+      path: '/leave-setup', 
       name: 'leave-setup',
-      component: () => import("../views/hr/leave-setup/index.vue")
+      component: () => import("../views/hr/leave/leave-setup/index.vue")
     },
 
 /////////////////////////////leaves
       {
-        path: '/leaves', // Define the path for your addRoom route
+        path: '/leaves', 
         name: 'leaves',
-        component: () => import("../views/hr/Leaves/index.vue")
+        component: () => import("../views/hr/leave/Leaves/index.vue")
+      },
+      /////////////////////////////////////////// setting
+
+   {
+        path: '/setting', 
+        name: 'setting',
+        component: () => import("../views/hr/setting/index.vue")
       },
 
+
+      ///////////////////////////////////////deductions
+      {
+        path: '/deduction-types', 
+        name: 'deduction-types',
+        component: () => import("../views/hr/deductions/deduction-types.vue")
+      },
+      {
+        path: '/deduction', 
+        name: 'deduction',
+        component: () => import("../views/hr/deductions/deduction.vue")
+      },
+
+      /////////////////////////////////////////Holidays
+
+ {
+        path: '/holidays', 
+        name: 'holidays',
+        component: () => import("../views/hr/holidays/index.vue")
+      },
+
+///////////////////////////////////////////// payroll
+
+{
+  path: '/payroll', 
+  name: 'payroll',
+  component: () => import("../views/hr/PayRoll/index.vue")
+},
+
+///////////////////////////////////////////////bonus
+
+{
+  path: '/bonus', 
+  name: 'bonus',
+  component: () => import("../views/hr/bonus/index.vue")
+},
 ];
 
 export default {

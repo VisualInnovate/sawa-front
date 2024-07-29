@@ -274,6 +274,7 @@ onMounted(async () => {
             <v-list-item  :title="$t('Settings')" value="Settings"
               :to="{ name: 'settings' }"></v-list-item>
           </v-list-group>
+          
 
          <!-- student_programe -->
           <!-- <v-list-group value="student_programe">
@@ -347,8 +348,23 @@ transportation_schedule
             </v-list-item> -->
             
           </v-list-group>
-          
+          <!-- <v-list-group v-can="'room show'" prepend-icon="mdi-bed">
+            <template #activator="{ props }" value="Evaluation">
+              <v-list-item v-bind="props" :title="$t('hr')"></v-list-item>
+            </template>
+            
+            <v-list-item v-can="'room show'"  :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('holidays')" value="holidays" :to="{ name: 'holidays' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('payroll')" value="payroll" :to="{ name: 'payroll' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('bonus')" value="bonus" :to="{ name: 'bonus' }"></v-list-item>
+           
+              
+          </v-list-group> -->
         </v-list>
+        
 
             <!-- <v-list-group style="text-align: center !important; width: 100% !important;" value="Settings">
               <template #activator="{ props }">

@@ -13,16 +13,15 @@
     </div>
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("selectgender") }} :</h3>
-          <p class="text-xl  px-1 my-auto">{{ details.gender }}</p>
+          <p class="text-xl  px-1 my-auto" v-if="details.gender == 0">{{ $t("male") }}</p>
+          <p class="text-xl  px-1 my-auto" v-if="details.gender == 1">{{ $t("female") }}</p>
+   
     </div>
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("Nationality") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.nationality }}</p>
     </div>
-    <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("national id") }} :</h3>
-          <p class="text-xl  px-1 my-auto">{{ details.national_id }}</p>
-    </div>
+   
     <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("place_of_birth") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.birth_place }}</p>
@@ -36,7 +35,7 @@
           <p class="text-xl  px-1 my-auto">{{ details.address }}</p>
     </div>
     <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("parent_fname") }} :</h3>
+          <h3 class="my-auto font-bold">{{ $t("parent_name") }} :</h3>
           <p class="text-xl  px-1 my-auto">{{ details.parent?.fname }}</p>
     </div>
     <div class="flex py-2 ">

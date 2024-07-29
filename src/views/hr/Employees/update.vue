@@ -1,7 +1,7 @@
 <template>
     <div>
       <div>
-        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("employee") }}</p>
+        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("Employees") }}</p>
       </div>
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
@@ -32,7 +32,12 @@
     
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
                  </div> 
-
+                 <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('job_title') }}</label>
+                    <InputText  style="width: 100% !important; max-height: 50px !important;;"  class="bg-[#f7f5f5]"  v-model="employee.job_title"  :placeholder='$t("name")' />
+    
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.job_title">{{ error.job_title[0] }}</div>
+                 </div> 
                  <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('email') }}</label>
                     <InputText   style="width: 100% !important; max-height: 50px !important;;"  class="bg-[#f7f5f5]"  v-model="employee.email"  :placeholder='$t("email")' />
