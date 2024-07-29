@@ -203,8 +203,8 @@ onMounted(async () => {
               <v-list-item v-bind="props" :title="$t('evaluations')"></v-list-item>
             </template>
 
-            <v-list-item  :title="$t('headers')" value="headers"
-              :to="{ name: 'Headers' }"></v-list-item>
+            <!-- <v-list-item  :title="$t('headers')" value="headers"
+              :to="{ name: 'Headers' }"></v-list-item> -->
             <v-list-item  :title="$t('side_profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
               <v-list-item  v-can="'able-mission show'" :title="$t('ablls')" value="ablls"
@@ -348,7 +348,7 @@ transportation_schedule
             </v-list-item> -->
             
           </v-list-group>
-          <!-- <v-list-group v-can="'room show'" prepend-icon="mdi-bed">
+          <v-list-group v-can="'room show'" prepend-icon="mdi-bed">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props" :title="$t('hr')"></v-list-item>
             </template>
@@ -362,7 +362,7 @@ transportation_schedule
             <v-list-item v-can="'room show'"  :title="$t('bonus')" value="bonus" :to="{ name: 'bonus' }"></v-list-item>
            
               
-          </v-list-group> -->
+          </v-list-group>
         </v-list>
         
 

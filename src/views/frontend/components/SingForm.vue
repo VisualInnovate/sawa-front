@@ -172,7 +172,7 @@ export default {
       alert: {},
       alert_text: null,
       alert: {},
-      errors:{},
+      error:{},
       parentStore: useParentStore(),
       parent: {
         fname: null,
@@ -193,7 +193,7 @@ export default {
         this.$router.push({ name: 'register-code' });
       }).catch((el)=>{
    
-         this.errors = el.response.data.errors
+        this.error = el.response.data.errors
       })
       },
 
@@ -222,38 +222,43 @@ export default {
                 <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('first_name') }}</label>
                   <InputText v-model="parent.fname"   required class="bg-[#f7f5f5] text-center"  :placeholder='$t("first_name")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.fname">{{ parentStore.errors?.fname }}</div>
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.fname">{{ error.fname[0] }}</div>
+                  
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('family_name') }}</label>
                   <InputText      v-model="parent.lname"  required class="bg-[#f7f5f5] text-center"  :placeholder='$t("family_name")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.lname">{{ parentStore.errors?.lname }}</div>
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.lname">{{ error.lname[0] }}</div>
+
               </div>
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('Mobile_number') }}</label>
                   <InputText   v-model="parent.phone"     required class="bg-[#f7f5f5] text-center"  :placeholder='$t("Mobile_number")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.phone">{{ parentStore.errors?.phone }}</div>
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.phone">{{ error.phone[0] }}</div>
+
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('email') }}</label>
                   <InputText v-model="parent.email" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="email" required class="bg-[#f7f5f5] text-center"  :placeholder='$t("email")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.email">{{ parentStore.errors?.email }}</div>
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
+
               </div>
               <div class=" flex flex-column gap-2">
                 <label class="w-full  " for="username">{{ $t('password') }}</label>
               <InputText v-model="parent.password" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="password" required class="bg-[#f7f5f5] text-center"  :placeholder='$t("password")' />
-              <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.password">{{ parentStore.errors?.password }}</div>
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.password">{{ error.password[0] }}</div>
               </div>
               <div class=" flex flex-column gap-2">
                 <label class="w-full  " for="username">{{ $t('password') }}</label>
               <InputText v-model="parent.password_confirmation" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="password" required class="bg-[#f7f5f5] text-center"  :placeholder='$t("password")' />
-              <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.password">{{ parentStore.errors?.password }}</div>
+              <div class="mt-1 mb-5 text-red-500" v-if="error?.password">{{ error.password[0] }}</div>
+
               </div>
               
               <div class="flex flex-column gap-2 w-full ">
                     <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                    <Button @click="createtreatment" class="create m-auto w-full " :label='$t("Register_now")'></Button>
+                    <Button @click="createtreatment" class="create m-auto w-full " :label='$t("create_button")'></Button>
                     <small id="username-help"></small>
                 </div>
                 <div class="mt-2 flex items-center justify-between">

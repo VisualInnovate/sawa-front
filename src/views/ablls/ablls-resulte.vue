@@ -1,6 +1,6 @@
 <template>
 <div class="grid grid-cols-7 gap-4">
-    <div class="shadow-md py-2" v-for="abll in mainSquares">
+    <div v-if="mainSquares" class="shadow-md py-2" v-for="abll in mainSquares">
         <p class="m-auto text-center w-full py-2">{{ abll?.category }}</p>
         <div    >
             <div v-for=" count in abll.missions" class="">

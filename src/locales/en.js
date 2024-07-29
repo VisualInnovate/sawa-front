@@ -378,5 +378,7 @@ merge:"Merge",
   company_long:"company longitude",
   payroll:"payroll",
   employee_payroll:"Employee employment disclosure",
-  bonus:"bonus"
+  bonus:"bonus",
+  Adding_bonus_employee:"Adding bonus to  employee",
+  bouns_reason:"bouns reason"
 };

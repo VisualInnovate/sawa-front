@@ -53,7 +53,7 @@ fetchData()
 
 })
 const edit=(id)=>{
-    axios.get(`/api/payroll/${id}`).then((res)=>{
+    axios.get(`/api/bonus/${id}`).then((res)=>{
     loading.value= false
     bouns.value= res.data.data
 
@@ -68,7 +68,7 @@ const edit=(id)=>{
 
 const update=()=>{
     axios
-    .put(`/api/payroll/${confir_id.value}`,bouns.value)
+    .put(`/api/bonus/${confir_id.value}`,bouns.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -96,7 +96,7 @@ const confirmDelete = (id) => {
 
 const create=()=>{
     axios
-    .post('/api/payroll',bouns.value)
+    .post('/api/bonus',bouns.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -110,7 +110,7 @@ const create=()=>{
 }
 const deleteAction = () => {
   axios
-    .delete(`/api/payroll/${confir_id.value}`)
+    .delete(`/api/bonus/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -141,7 +141,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("payroll")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'skills create'" :label='$t("Adding_bonus_employee")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -248,6 +248,12 @@ const initFilters = () => {
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('bouns_reason') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
+            </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('employee_payroll') }}</label>
                   <MultiSelect v-model="bouns.employees_ids"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allemployee" optionLabel="name" :placeholder='$t("employee_payroll")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />          

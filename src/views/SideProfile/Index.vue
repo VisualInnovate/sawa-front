@@ -1,8 +1,10 @@
 -<script>
 import axios from 'axios'
 import {th} from "vuetify/locale";
+import Sideprofiletap from '../../components/Sideprofiletap.vue'
 
 export default {
+  components:{Sideprofiletap},
 
   data() {
     return {
@@ -97,10 +99,16 @@ export default {
   >
 
   </v-alert>
-
-  <v-btn text="Create" color="green" height="45" class="mb-5 mt-5" @click="create" v-click-outside="onClickOutside">
+  <div class="relative">
+    <Sideprofiletap></Sideprofiletap>
+    <v-btn text="Create" color="green" height="45" class="p-button-success mr-2 absolute top-3" @click="create" v-click-outside="onClickOutside">
     {{ $t('create_button') }}
   </v-btn>
+        
+
+    </div>
+ 
+
 
   <v-card>
     <v-card-title>

@@ -1,6 +1,7 @@
 <script setup>
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
+import Sideprofiletap from '../../components/Sideprofiletap.vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -93,32 +94,14 @@ const initFilters = () => {
   <div class="grid">
     <div class="col-12">
       <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
-          <template #start>
-            <div class="my-2">
-            <Button  v-can="'room create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
-            </div>
-          </template>
+        <div class="relative">
+          <Sideprofiletap></Sideprofiletap>
+          <Button  v-can="'room create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2 absolute top-3" @click="openNew"></Button>
+          <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" class="export absolute top-3 ltr:left-[15%] rtl:right-[15%] " @click="exportCSV($event)"/>
 
-          <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
-            <Button :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
-          </template>
-        </Toolbar>
+        </div>
+      
+      
 
         <Toast/>
 
