@@ -53,8 +53,8 @@
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
                 
-                <div v-if="strart_evaluate && answer.mission_id && answer.child_age"  class="col-span-2 flex flex-column gap-2">
-                  <h1  class="text-[black] text-xl font-bold" >{{allquestion.category.title }}</h1>
+                <div  class="col-span-2 flex flex-column gap-2">
+                  <h1  class="text-[black] text-xl font-bold" >{{allquestion?.category?.title }}</h1>
                  <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
                     <h3 class="text-lg font-semibold ">{{allquestion.question}}</h3>
                     <div class="flex" v-for=" answer,index in allquestion.benchmarks">
@@ -63,15 +63,15 @@
                     </div>
                     
                     <div class="py-2 px-4" >
-                        <Rating v-model="answer.score" :cancel="false" :stars="allquestion.benchmarks.length">
+                        <Rating v-model="answer.score" :cancel="false" :stars="allquestion?.benchmarks.length">
 
-    <template #onicon>
-        <img src="../frontend/image/hhh.jfif" height="30" width="30" />
-    </template>
-    <template #officon>
-        <img src="../frontend/image/nnn.png" height="34" width="34" />
-    </template>
-</Rating>
+                              <template #onicon>
+                                  <img src="../frontend/image/hhh.jfif" height="30" width="30" />
+                              </template>
+                              <template #officon>
+                                  <img src="../frontend/image/nnn.png" height="34" width="34" />
+                              </template>
+                          </Rating>
                        
                     </div>
                     <!-- <Rating  v-model="answer.score" :stars="allquestion.benchmarks.length" :cancel="false" /> -->
