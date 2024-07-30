@@ -1,5 +1,6 @@
 <template>
 <v-card class="p-[1%]">
+
   <div class="grid md:grid-cols-3 grid-cols-2 lg:grid-cols-5 gap-4">
     <div v-if="mainSquares" class="shadow-md py-2" v-for="abll in mainSquares">
         <p class="m-auto text-center w-full py-2">{{ abll?.category }}</p>
@@ -54,7 +55,7 @@ export default {
           .then((response) => {
             
             this.mainSquares = response.data.data
-            
+          
            
           })
          
@@ -64,6 +65,11 @@ export default {
 
   beforeMount() {
      this.getresulte()
+      
     },
+    mounted(){
+      this.getresulte()
+    }
+  
 };
 </script>

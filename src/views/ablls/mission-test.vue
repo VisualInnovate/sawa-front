@@ -38,7 +38,7 @@
                 </div> 
                
               
-              
+                   
                 <div v-if="answer.child_age && answer.title"  class=" flex flex-column gap-2">
                     <label for="username">{{ $t('color') }}</label>
 
@@ -48,10 +48,14 @@
                      </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
+                <div class="col-span-2" >
+                  <a  style="color: blue;" class="text-xl mx-[2%] underline" v-for="que,index in qustions" :href="'#'+index">{{ que.category }}</a>
+                  
+                </div>
                 
                 <div v-if="strart_evaluate" v-for="que,index in qustions" class="col-span-2 flex flex-column gap-2">
                   <div style="border: 1px solid black" class="p-2">
-                    <p class="text-xl font-bold underline text-blue-900 py-1" >{{ que.category }}</p>
+                    <a :id="index" class="text-xl font-bold underline text-blue-900 py-1" >{{ que.category }}</a>
                   <div v-for=" q,ind in que.missions">
                     
                     <h3 class="text-base font-semibold ">{{q.question}}</h3>
@@ -204,7 +208,7 @@
 
         
         axios.post("/api/able-answer",this.answers).then((res) => {
-            this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+          this.$router.push({ name: 'ablls-resulte', params:{'id':this.answer.evaluation_id}});
           
         }).catch((el)=>{
             this.alert_text='please answer all questions'
