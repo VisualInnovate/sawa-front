@@ -8,13 +8,13 @@
 
 
       
-        <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="submit" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
+        <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="validation" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
           <!-- ... existing code ... -->
             
               
                 <div   class="flex flex-column gap-2">
                     <label for="username">{{ $t('evaluation_name') }}</label>
-                    <InputText   required class="bg-[#f7f5f5]" v-model="answer.title" :placeholder='$t("evaluation_name")' />
+                    <InputText  invalid  class="bg-[#f7f5f5]" v-model="answer.title" :placeholder='$t("evaluation_name")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
                 </div> 
       
@@ -36,14 +36,9 @@
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
                 </div> 
                
-                <div  class="flex flex-column gap-2">
-                    <label for="username">{{ $t('mission_id') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;"  @update:model-value="getquation" v-model="answer.mission_id"  option-value="id" :options="qustions" optionLabel="name" :placeholder='$t("mission_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.mission_id">{{ error.mission_id[0] }}</div>
-                </div>
               
               
-                <div  class=" flex flex-column gap-2">
+                <div v-if="answer.child_age && answer.title"  class=" flex flex-column gap-2">
                     <label for="username">{{ $t('color') }}</label>
 
                      <div class="flex">
@@ -53,17 +48,16 @@
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
                 
-                <div  class="col-span-2 flex flex-column gap-2">
-                  <h1  class="text-[black] text-xl font-bold" >{{allquestion?.category?.title }}</h1>
-                 <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
-                    <h3 class="text-lg font-semibold ">{{allquestion.question}}</h3>
-                    <div class="flex" v-for=" answer,index in allquestion.benchmarks">
-                        <p>{{ index+1 }} - </p>
-                        <p class="px-2"> {{ answer.body }}</p>
-                    </div>
+                <div v-if="strart_evaluate" v-for="que,index in qustions" class="col-span-2 flex flex-column gap-2">
+                  <div style="border: 1px solid black" class="p-2">
+                    <p class="text-xl font-bold underline text-blue-900 py-1" >{{ que.category }}</p>
+                  <div v-for=" q,ind in que.missions">
+                    
+                    <h3 class="text-base font-semibold ">{{q.question}}</h3>
+                  
                     
                     <div class="py-2 px-4" >
-                        <Rating v-model="answer.score" :cancel="false" :stars="allquestion?.benchmarks.length">
+                        <Rating @change="getanswerscore($event,q.id,ind)" v-model="score[q.id]" :cancel="false" :stars="q?.benchmarks?.length">
 
                               <template #onicon>
                                   <img src="../frontend/image/hhh.jfif" height="30" width="30" />
@@ -74,39 +68,10 @@
                           </Rating>
                        
                     </div>
-                    <!-- <Rating  v-model="answer.score" :stars="allquestion.benchmarks.length" :cancel="false" /> -->
-                       
-                    
+                  </div>
+                  </div>
                   
-<!--                         
-                  <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.questions" :key="index">
-                      
-                       <p class="py-1">{{ index+1 }} - {{ question.title }}:</p>
-                       <div>
-                     
-                       </div>
-                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div>
-                          
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
-                          <label for="html">0</label><br>
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
-                          <label for="css">0.5</label><br>
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
-                          <label for="javascript">1</label>
-                        </div>
-                       
-                         <div v-for="not in notanswer">
-                          
-                             <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
-                         </div>
-                       </div>
-                       
-                       
-                    
-                  </div> -->
-                 </div>
-                        
+              
                            
                 
               
@@ -142,13 +107,15 @@
     data() {
       return {
         strart_evaluate:false,
-        answers:[],
+        answers:{
+          answers:[]
+        },
         type:4,
         
-           
+           score:[],
         answer:{ 
             color:"00a2ff",
-            score:0
+            
             
         },
        allquestion:{},
@@ -171,9 +138,53 @@
       },
 
 
-      submit(){
+      validateForm() {
+      this.error = {};
+
+      // Check title
+      if (!this.answer.title) {
+        this.error.title = ['الاسم مطلوب'];
+      }
+
+      // Check child_id
+      if (!this.answer.child_id) {
+        this.error.child_id = ['اسم الطفل مطلوب'];
+      }
+
+      // Check date
+      if (!this.answer.date) {
+        this.error.date = ['التاريخ مطلوب'];
+      }
+
+      // Check child_age
+      if (!this.answer.child_age) {
+        this.error.child_age = ['العمر مطلوب'];
+      }
+
+      // Check color
+      if (!this.answer.color) {
+        this.error.color = ['اللون مطلوب'];
+      }
+
+      // Return true if no errors
+      return Object.keys(this.error).length === 0;
+    },
+    validation() {
+      if (this.validateForm()) {
+        // Form is valid, submit the form
+        this.createevalutae();
+      } else {
+        // Form is invalid, show errors
+        alert('الرجاء تصحيح الأخطاء في النموذج.');
+      }
+    },
+      getanswerscore(e,id,index){
+        console.log(e.value)
+        this.answer.mission_id=id
         
-        
+           
+        this.answers.answers[id]=({mission_id:id,score:e.value,color:this.answer.color,child_id:this.answer.child_id,date:this.answer.date,child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
+        console.log(this.answers.answers)
       },
       createevalutae(id){
         console.log(id)
@@ -205,7 +216,7 @@
       },
       getquation(id){
         axios
-          .get(`api/able-mission/${id}`)
+          .get(`api/able-mission/1`)
           .then((response) => {
             console.log(response.data.data)
             this.allquestion = response.data.data
@@ -227,7 +238,7 @@
       getanswer(){
 
         
-        axios.post("/api/able-answer",this.answer).then((res) => {
+        axios.post("/api/able-answer",this.answers).then((res) => {
             this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
           
         }).catch((el)=>{
@@ -249,7 +260,7 @@
             this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
           })
           axios
-          .get("api/able-mission")
+          .get("api/able-category/grouped/category")
           .then((response) => {
             console.log(response.data.data)
             this.qustions = response.data.data
@@ -282,6 +293,7 @@
     },
     mounted() {
      this.getusers()
+     this.getquation()
     },
   };
   </script>
