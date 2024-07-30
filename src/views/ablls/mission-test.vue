@@ -48,7 +48,7 @@
                      </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
-                <div class="col-span-2" >
+                <div v-if="strart_evaluate" class="col-span-2" >
                   <a  style="color: blue;" class="text-xl mx-[2%] underline" v-for="que,index in qustions" :href="'#'+index">{{ que.category }}</a>
                   
                 </div>
