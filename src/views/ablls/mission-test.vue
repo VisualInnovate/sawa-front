@@ -6,7 +6,8 @@
     <v-card>
       <div>
 
-
+        <v-alert title="Alert title" :text="alert_text" v-if="alert_text" closable type="error" class="absolute w-full"></v-alert>
+        
       
         <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="validation" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
           <!-- ... existing code ... -->
@@ -99,7 +100,7 @@
   <script>
   import axios from "axios";
   import InputNumber from "primevue/inputnumber";
-    import {useToast} from 'primevue/usetoast'
+  
   export default {
     components:{},
   
@@ -107,6 +108,7 @@
     data() {
       return {
         strart_evaluate:false,
+        alert_text:"",
         answers:{
           answers:[]
         },
@@ -136,48 +138,11 @@
       Therapeutic (){
         this.$router.push({ name: 'answer' });
       },
+      showContrast() {
+        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Message Content', life: 3000 });
+        },
 
-
-      validateForm() {
-      this.error = {};
-
-      // Check title
-      if (!this.answer.title) {
-        this.error.title = ['الاسم مطلوب'];
-      }
-
-      // Check child_id
-      if (!this.answer.child_id) {
-        this.error.child_id = ['اسم الطفل مطلوب'];
-      }
-
-      // Check date
-      if (!this.answer.date) {
-        this.error.date = ['التاريخ مطلوب'];
-      }
-
-      // Check child_age
-      if (!this.answer.child_age) {
-        this.error.child_age = ['العمر مطلوب'];
-      }
-
-      // Check color
-      if (!this.answer.color) {
-        this.error.color = ['اللون مطلوب'];
-      }
-
-      // Return true if no errors
-      return Object.keys(this.error).length === 0;
-    },
-    validation() {
-      if (this.validateForm()) {
-        // Form is valid, submit the form
-        this.createevalutae();
-      } else {
-        // Form is invalid, show errors
-        alert('الرجاء تصحيح الأخطاء في النموذج.');
-      }
-    },
+ 
       getanswerscore(e,id,index){
         console.log(e.value)
         this.answer.mission_id=id
@@ -242,8 +207,11 @@
             this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
           
         }).catch((el)=>{
-        
-       this.error = el.response.data.errors
+            this.alert_text='please answer all questions'
+            setTimeout(() => {
+        this.alert_text=''
+      }, 2500); // Hide after 3 seconds
+       
       })
       
 

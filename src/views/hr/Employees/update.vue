@@ -137,7 +137,7 @@
     
       createtreatment() {
       
-        axios.put(`/api/employees/${this.$route.params.id}`,this.employee).then((res) => {
+        axios.post(`/api/employees/${this.$route.params.id}`,this.employee).then((res) => {
           this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
         }).catch((el)=>{
           console.log(el.response.data.errors.name)

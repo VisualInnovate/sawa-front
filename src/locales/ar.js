@@ -369,6 +369,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   date:"موعد التقييم",
   Selected_item:"العنصر المختار",
   send_answer:"ارسل الاجابة",
+  answer_all_questions:"اجب علي جميع الاسئلة",
 ///////////////////////////////////////////anttend
 deduction_title:"عنوان الخصم",
 deductions:"الخصومات",

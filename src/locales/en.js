@@ -354,6 +354,7 @@ merge:"Merge",
   date:"date",
   Selected_item:"Selected item",
   send_answer:"send answer",
+  answer_all_questions:"answer all questions",
   ///////////////////////////////////
   deduction_title:"deduction title",
   deductions:"deductions",
