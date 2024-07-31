@@ -381,5 +381,10 @@ merge:"Merge",
   employee_payroll:"Employee employment disclosure",
   bonus:"bonus",
   Adding_bonus_employee:"Adding bonus to  employee",
-  bouns_reason:"bouns reason"
+  bouns_reason:"bouns reason",
+  departments:"Departments",
+  department_add:"add new department",
+  bouns_amount:"bouns amount",
+  bouns_date:"bouns date ",
+  
 };

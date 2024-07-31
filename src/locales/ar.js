@@ -395,10 +395,13 @@ company_lat:"خط عرض الشركة",
 company_long:"خط طول الشركة",
 payroll:"كشف الرواتب",
 employee_payroll:" كشف رواتب الموظفين",
-bonus:"علاوات",
+bonus:"عــلاوات",
 Adding_bonus_employee:"إضافة علاوة للموظف",
-bouns_reason:"سبب العلاوة"
-
+bouns_reason:"سبب العلاوة",
+departments:"الاقســام",
+department_add:"اضافة قسم جديد",
+bouns_amount:"كم العلاوة",
+bouns_date:"تاريخ العلاوة"
 
 
 

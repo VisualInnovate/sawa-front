@@ -81,6 +81,12 @@ const hr = [
   name: 'bonus',
   component: () => import("../views/hr/bonus/index.vue")
 },
+////////////////////////////////////////////departments
+{
+  path: '/departments', 
+  name: 'departments',
+  component: () => import("../views/hr/departments/index.vue")
+},
 ];
 
 export default {

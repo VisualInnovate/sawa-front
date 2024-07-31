@@ -1,7 +1,7 @@
 <script setup>
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
-import moment from "moment";
+
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
@@ -19,7 +19,7 @@ const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const createdialog=ref(false)
-const bouns=ref({})
+const department=ref({})
 const updatedialog=ref(false)
 
 onBeforeMount(() => {
@@ -29,7 +29,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/bonus").then((res)=>{
+  axios.get("/api/department").then((res)=>{
     loading.value= false
     users.value= res.data.data
     console.log(users.value)
@@ -53,9 +53,9 @@ fetchData()
 
 })
 const edit=(id)=>{
-    axios.get(`/api/bonus/${id}`).then((res)=>{
+    axios.get(`/api/department/${id}`).then((res)=>{
     loading.value= false
-    bouns.value= res.data.data
+    department.value= res.data.data
 
 
   });
@@ -68,13 +68,13 @@ const edit=(id)=>{
 
 const update=()=>{
     axios
-    .put(`/api/bonus/${confir_id.value}`,bouns.value)
+    .put(`/api/department/${confir_id.value}`,department.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
       toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      payroll.value = ref({})
+      department.value = ref({})
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -83,7 +83,7 @@ const update=()=>{
 
 const openNew = () => {
     createdialog.value=!(createdialog.value)
-    bouns.value={}
+    payroll.value={}
 }
 
 const confirmDelete = (id) => {
@@ -95,15 +95,14 @@ const confirmDelete = (id) => {
 }
 
 const create=()=>{
-  bouns.value.date = moment(bouns.value.dat).format("YYYY-MM-DD" );
     axios
-    .post('/api/bonus',bouns.value)
+    .post('/api/department',department.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      bouns.value = ref({})
+      department.value = ref({})
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -111,7 +110,7 @@ const create=()=>{
 }
 const deleteAction = () => {
   axios
-    .delete(`/api/bonus/${confir_id.value}`)
+    .delete(`/api/department/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -142,7 +141,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("Adding_bonus_employee")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'skills create'" :label='$t("department_add")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -187,7 +186,7 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("bonus") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("departments") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
@@ -202,18 +201,13 @@ const initFilters = () => {
 
         
          
-           <Column field="amount" :header='$t("bouns_amount")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="title" :header='$t("title")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.amount }}
+              {{ slotProps.data.title }}
             </template>
            </Column>
 
-        
-           <Column field="date" :header='$t("bouns_date")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.date }}
-            </template>
-           </Column>
+      
           
 
 
@@ -254,48 +248,32 @@ const initFilters = () => {
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_reason') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
+               <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center"  v-model="department.title" :placeholder='$t("title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_amount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
+                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="department.description" ></v-textarea> 
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.description">{{ error.description[0] }}</div>
             </div>
-            <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('bouns_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="bouns.date" showIcon  :placeholder='$t("holiday_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('Employees') }}</label>
-                  <MultiSelect v-model="bouns.employees"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allemployee" optionLabel="name" :placeholder='$t("Employees")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />          
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.employees">{{ error.employees[0] }}</div>
-            </div>
+          
            <div class="w-full text-center">
             <Button @click="create" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_reason') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
+                <InputText required class="bg-[#f7f5f5] text-center"  v-model="department.title" :placeholder='$t("title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_amount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
+                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="department.description" ></v-textarea> 
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.description">{{ error.description[0] }}</div>
             </div>
-            <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('bouns_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="bouns.date" showIcon  :placeholder='$t("bouns_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
-            
            <div class="w-full text-center">
             <Button @click="update" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>

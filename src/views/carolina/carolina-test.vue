@@ -4,6 +4,8 @@
     
     </div>
     <v-card>
+      <v-alert title="Alert title" :text="alert_text" v-if="alert_text" closable type="error" class="absolute w-full"></v-alert>
+
       <div>
 
 
@@ -83,7 +85,7 @@
                  <div  class="flex" >
                        
                       <div v-for="an in allanswer">
-                        <input  required @change="getanswer($event,cat.tests[s].id,an.id)" style="border: 1px solid black " class="mx-2" :name="s" type="radio"   value="0">
+                        <input  required @change="getanswerscore($event,cat.tests[s].id,an.id)" style="border: 1px solid black " class="mx-2" :name="cat.tests[s].id" type="radio"   value="0">
                           <sapn for="html">{{ an.name }}</sapn>
                       </div>
                        
@@ -97,11 +99,11 @@
                 
               
                 </div> 
-                <!-- <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
+                <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button @click="getanswer"  class="create m-auto w-full " :label='$t("submit")'></Button>
                   <small id="username-help"></small>
-                </div> -->
+                </div>
               
          
          
@@ -129,7 +131,10 @@
     data() {
       return {
         strart_evaluate:false,
-        answers:[],
+        alert_text:"",
+        answers:{
+          answers:[]
+        },
         type:5,
         allanswer:{},
            
@@ -155,11 +160,14 @@
         this.$router.push({ name: 'answer' });
       },
 
+ getanswerscore(event,x,y){
 
-      submit(){
-        
-        
+            
+        this.answers.answers[x]=({answer_type_id:y,test_id:x,color:this.answer.color,child_id:this.answer.child_id,date:this.answer.date,child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
+        console.log(this.answers.answers)
       },
+
+
       createevalutae(id){
         console.log(id)
         
@@ -225,15 +233,14 @@
        
        
         
-        this.answer.answer_type_id=y
-        this.answer.test_id=x
-        
-        axios.post("/api/carolina-answer",this.answer).then((res) => {
-            this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        axios.post("/api/carolina-answer",this.answers).then((res) => {
+          this.$router.push({ name: 'carolina-resulte', params:{'id':this.answer.evaluation_id}});
 
         }).catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
+          this.alert_text='please answer all questions'
+            setTimeout(() => {
+        this.alert_text=''
+      }, 2500); // Hide after 3 seconds
       })
       
 

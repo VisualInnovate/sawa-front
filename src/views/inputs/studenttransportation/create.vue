@@ -30,8 +30,8 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.child_id"  option-value="id" :options="children" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
+                    <MultiSelect filter required id="pv_id_1" style="direction: ltr !important;" v-model="student.child_ids"  option-value="id" :options="children" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_ids">{{ error.child_ids[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('area_name') }}</label>
