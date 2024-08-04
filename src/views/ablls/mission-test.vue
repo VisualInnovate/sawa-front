@@ -208,6 +208,7 @@
 
         
         axios.post("/api/able-answer",this.answers).then((res) => {
+          this.change_status
           this.$router.push({ name: 'ablls-resulte', params:{'id':this.answer.evaluation_id}});
           
         }).catch((el)=>{
@@ -219,6 +220,9 @@
       })
       
 
+      },
+      change_status(){
+        axios.post("/api/evaluation-request/change-status",this.answers)
       },
       getusers(){
         

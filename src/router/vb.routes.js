@@ -58,7 +58,7 @@ const vb = [
       component: () => import("../views/evaluation/milestone-evalution/index.vue")
     },
     {
-      path: '/milestone-resulte/:id', // Define the path for your addRoom route
+      path: '/milestone-resulte/:id/:evla_id', // Define the path for your addRoom route
       name: 'milestone-resulte',
       component: () => import("../views/evaluation/milestone-evalution/resulte.vue")
     },

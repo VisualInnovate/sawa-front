@@ -22,7 +22,12 @@ const filters = ref({})
 const createdialog=ref(false)
 const levels=ref({})
 const updatedialog=ref(false)
-
+const ages = ref([
+    { name: ' من 0 الي 18 شهر', code: 1 },
+    {  name: ' من 18 الي 30 شهر', code:2 },
+    { name: ' من 30 الي 48 شهر', code: 3 },
+   
+]);
 onBeforeMount(() => {
   initFilters()
 })
@@ -219,6 +224,11 @@ const initFilters = () => {
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
+             <div class="flex flex-column gap-2">
+                <label class="w-full text-right" for="username">{{ $t('from') }} - {{ $t('to') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.age"  option-value="code" :options="ages" optionLabel="name" :placeholder='$t("from") +" - "+ $t("to") ' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.age">{{ error.age[0] }}</div>
+              </div>
            <div class="w-full text-center">
             <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
@@ -229,6 +239,11 @@ const initFilters = () => {
                 <InputText required class="bg-[#f7f5f5] text-center"  v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
             </div>
+            <div class="flex flex-column gap-2">
+                <label class="w-full text-right" for="username">{{ $t('from') }} - {{ $t('to') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.age"  option-value="code" :options="ages" optionLabel="name" :placeholder='$t("from") +" - "+ $t("to") ' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.age">{{ error.age[0] }}</div>
+              </div>
            <div class="w-full text-center">
             <Button @click="editescrud" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>

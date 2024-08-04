@@ -5,6 +5,7 @@
     </div>
     <v-card>
       <div>
+        <v-alert title="Alert title" :text="alert_text" v-if="alert_text" closable type="error" class="absolute w-full"></v-alert>
 
 
       
@@ -27,7 +28,7 @@
                
                 <div  v-if="answer.child_id" class="flex flex-column gap-2">
                   <label for="username">{{ $t('date') }}</label>
-                  <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :maxDate="maxDate" />   
+                  <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
 
               </div> 
@@ -37,11 +38,7 @@
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
                 </div> 
                
-                <div  class="flex flex-column gap-2">
-                    <label for="username">{{ $t('level_id') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;"  @update:model-value="getquation" v-model="answer.level_id"  option-value="id" :options="qustions" optionLabel="title" :placeholder='$t("level_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.level_id">{{ error.level_id[0] }}</div>
-                </div>
+              
               
                 <!-- <div  v-if="answer.child_id" class="flex flex-column gap-2">
                     <label for="username">{{ $t('score') }}</label>
@@ -58,7 +55,7 @@
     
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
                 </div>  -->
-                <div v-if="answer.child_id && answer.child_age && answer.level_id" class=" flex flex-column gap-2">
+                <div v-if="answer.child_id && answer.child_age" class=" flex flex-column gap-2">
                     <label for="username">{{ $t('color') }}</label>
 
                      <div class="flex">
@@ -68,49 +65,33 @@
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
                 </div> 
                 
-                <div v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
-                  <h1  class="text-[black] font-bold" >{{head.title }}</h1>
-                 <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
-                  <h2 style="border-bottom: 1px solid black !important" class="py-1 text-[black] font-bold" for="username">{{head.head_question }}</h2>
+                <div  v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
                   
-                        
-                  <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.questions" :key="index">
-                      
-                       <p class="py-1">{{ index+1 }} - {{ question.title }}:</p>
-                       <div>
-                     
-                       </div>
-                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div>
+                 <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
+                  <h1  class="text-[black] font-bold" >{{head.title }}</h1>
+                  <div>
                           
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="question.id" value="0">
+                          <input required @change="collectanswer($event, head.id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="head.id" value="0">
                           <label for="html">0</label><br>
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black " type="radio"  :name="question.id" value=".5">
+                          <input required @change="collectanswer($event, head.id)" style="border: 1px solid black " type="radio"  :name="head.id" value=".5">
                           <label for="css">0.5</label><br>
-                          <input required @change="getanswer($event, question.id,answer.level_id)" style="border: 1px solid black "   type="radio"  :name="question.id" value="1">
+                          <input required @change="collectanswer($event, head.id)" style="border: 1px solid black "   type="radio"  :name="head.id" value="1">
                           <label for="javascript">1</label>
                         </div>
-                       
-                         <div v-for="not in notanswer">
-                          
-                             <div class="mt-1 mb-5 text-red-500" v-if="not ==  question.id">please answer this qustions</div>
-                         </div>
-                       </div>
-                       
-                       
-                    
-                  </div>
+                  
+                        
+                 
                  </div>
                         
                            
                 
               
                 </div> 
-                <!-- <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
+                <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="createtreatment"  class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button @click="getanswer"  class="create m-auto w-full " :label='$t("submit")'></Button>
                   <small id="username-help"></small>
-                </div> -->
+                </div>
               
          
          
@@ -138,7 +119,10 @@
     data() {
       return {
         strart_evaluate:false,
-        answers:[],
+       alert_text:"",
+        answers:{
+          answers:[]
+        },
         type:2,
         
            
@@ -188,7 +172,10 @@
            this.strart_evaluate=!(this.strart_evaluate)
            
            
-          })
+          }).catch((el)=>{
+          console.log(el.response.data.errors.name)
+       this.error = el.response.data.errors
+      })
       },
       anserdata(id,val){
         console.log(id)
@@ -199,10 +186,10 @@
       },
       getquation(id){
         axios
-          .get(`api/mileston-levels/get-all-by-subtest/${id}`)
+          .get(`api/milestone-answers/question/${localStorage.getItem("child_id")}`)
           .then((response) => {
             console.log(response.data[0].subtests)
-            this.allquestion = response.data[0].subtests
+            this.allquestion = response.data
            
            
           })
@@ -218,17 +205,23 @@
            
           })
       },
-      getanswer(event,y,z){
-        console.log(event.target.value)
-       
-        this.answer.score=event.target.value
-        this.answer.question_id=y
+
+      collectanswer(e,id){
         
-        axios.post("/api/milestone-answers",this.answer).then((res) => {
-          this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        this.answers.answers[id]=({question_id:id,score:e.target.value,color:this.answer.color,child_id:this.answer.child_id,date:this.answer.date,child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
+        console.log(this.answers.answers)
+      },
+
+      getanswer(event,y,z){
+       
+        
+        axios.post("/api/milestone-answers",this.answers).then((res) => {
+          this.$router.push({ name: 'milestone-resulte', params:{'id':this.answer.child_id,'evla_id':this.answer.evaluation_id}});
         }).catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
+          this.alert_text='please answer all questions'
+            setTimeout(() => {
+        this.alert_text=''
+      }, 2500); 
       })
       
 
@@ -280,6 +273,7 @@
     },
     mounted() {
     this.getusers()
+    this.getquation()
      
     },
   };

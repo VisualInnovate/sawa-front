@@ -114,7 +114,7 @@ export default {
             console.error("Error retrieving Appointment Types:", error);
           });
           axios
-          .get(`api/evaluations/report/${this.$route.params.id}`)
+          .get(`api/evaluations/report/${this.$route.params.evla_id}`)
           .then((response) => {
             console.log(response.data)
             this.table_resulte = response.data

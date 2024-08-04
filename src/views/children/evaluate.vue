@@ -148,7 +148,7 @@
 
       go_evaluate(id,type,child_id){
         if(type==2){
-          this.$router.push({ name: 'milestone-resulte', params:{'id':id}});
+          this.$router.push({ name: 'milestone-resulte', params:{'id':child_id,'evla_id':id}});
         } 
         if(type==3){
           this.$router.push({ name: 'barrier-resulte', params:{'id':child_id}});
