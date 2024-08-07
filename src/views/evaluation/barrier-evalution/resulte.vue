@@ -117,6 +117,7 @@ methods:{
                 }
                 console.log(this.mainSquares)
          this.mainSquares[0].questions.slice().reverse();
+     
         
        })
       
@@ -125,6 +126,7 @@ methods:{
 },
 mounted() {
   this.getresulte()
+  localStorage.getItem("child_id")
  },
 };
 </script>

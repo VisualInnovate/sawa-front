@@ -205,7 +205,7 @@ onMounted(async () => {
 
             <!-- <v-list-item  :title="$t('headers')" value="headers"
               :to="{ name: 'Headers' }"></v-list-item> -->
-            <v-list-item  :title="$t('side_profile')" value="SideProfiles"
+            <v-list-item  :title="$t('side profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
               <v-list-item  v-can="'able-mission show'" :title="$t('ablls')" value="ablls"
               :to="{ name: 'ablls' }"></v-list-item>

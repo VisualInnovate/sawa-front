@@ -5,8 +5,8 @@
   </div>
   <v-card>
     <div>
+      <v-alert title="Alert title" :text="alert_text" v-if="alert_text" closable type="error" class="absolute w-full"></v-alert>
 
-{{ error.questions }}
     
       <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="submit" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
         <!-- ... existing code ... -->
@@ -118,7 +118,7 @@ export default {
 
   data() {
     return {
-      
+      alert_text:"",
       answers:[],
       alltypes:[],
       strart_evaluate:false,
@@ -235,10 +235,11 @@ export default {
         this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
         this.$router.push({ name: 'barrier-resulte', params:{'id':this.answer.child_id}});
       }).catch((el)=>{
-        console.log(el.response.data)
-     this.error = el.response.data.errors
-     console.log(this.error)
-    })
+          this.alert_text='please answer all questions'
+            setTimeout(() => {
+        this.alert_text=''
+      }, 2500); 
+      })
     
 
     },
