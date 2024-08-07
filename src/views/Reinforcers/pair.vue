@@ -7,11 +7,7 @@
                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="pair.child_id" disabled option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                </div>
-               <div class="flex flex-column gap-2">
-                   <label for="username">{{ $t('Evaluation_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="pair.date" showIcon  :placeholder='$t("Evaluation_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
+              
        </div>
          <!-- items -->
          <div class="m-auto my-5 bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-2 lg:grid-cols-3">

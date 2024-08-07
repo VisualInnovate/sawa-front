@@ -1,7 +1,7 @@
 <template>
     <div>
       <div>
-        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("veciles") }}</p>
+        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("missions") }}</p>
       </div>
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
@@ -17,8 +17,8 @@
             
       
                 <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('category_id') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="mission.category_id"  option-value="id" :options="allcategory" optionLabel="title" :placeholder='$t("category_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label for="username">{{ $t('category') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="mission.category_id"  option-value="id" :options="allcategory" optionLabel="title" :placeholder='$t("category")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1  text-red-500" v-if="error?.category_id">{{ error.category_id[0] }}</div>
                 </div>
                

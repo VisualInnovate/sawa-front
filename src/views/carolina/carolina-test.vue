@@ -29,7 +29,7 @@
                
                 <div  v-if="answer.child_id" class="flex flex-column gap-2">
                   <label for="username">{{ $t('date') }}</label>
-                  <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :maxDate="maxDate" />   
+                  <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
 
               </div> 
@@ -130,6 +130,9 @@
   
     data() {
       return {
+        change:{
+        status:"1"
+      },
         strart_evaluate:false,
         alert_text:"",
         answers:{
@@ -234,6 +237,7 @@
        
         
         axios.post("/api/carolina-answer",this.answers).then((res) => {
+          axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
           this.$router.push({ name: 'carolina-resulte', params:{'id':this.answer.evaluation_id}});
 
         }).catch((el)=>{

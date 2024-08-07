@@ -370,6 +370,11 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   Selected_item:"العنصر المختار",
   send_answer:"ارسل الاجابة",
   answer_all_questions:"اجب علي جميع الاسئلة",
+  missions:"المهمات",
+  category:"الفئة",
+  degree:"الدرجه",
+  key:"المفتاح",
+
 ///////////////////////////////////////////anttend
 deduction_title:"عنوان الخصم",
 deductions:"الخصومات",

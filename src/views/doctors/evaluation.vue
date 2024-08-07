@@ -51,6 +51,7 @@
     data() {
       return {
           child_id: useStorage("child_id", Number),
+          child_id: useStorage("child_id", Number),
            maxDate: new Date(),
            details:[],
            evalate:{},

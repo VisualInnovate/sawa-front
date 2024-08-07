@@ -42,9 +42,9 @@
      </div>
         
      <div class=" w-full pb-2 text-center"  >
-      <div class="card">
+      <div v-if="details.data != []" class="card">
         
-        <Paginator v-model:first="current_page" :rows="1" :totalRecords="total_pages" :rowsPerPageOptions="[10, 20, 30]"
+        <Paginator  v-model:first="current_page" :rows="1" :totalRecords="total_pages" :rowsPerPageOptions="[10, 20, 30]"
         :template="{
        
         default: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  JumpToPageDropdown'

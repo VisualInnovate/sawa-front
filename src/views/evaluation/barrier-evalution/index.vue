@@ -26,7 +26,7 @@
               
               <div  v-if="answer.child_id" class="flex flex-column gap-2">
                 <label for="username">{{ $t('date') }}</label>
-                <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :maxDate="maxDate" />   
+                <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
 
             </div> 
@@ -120,6 +120,9 @@ export default {
     return {
       alert_text:"",
       answers:[],
+      change:{
+        status:"1"
+      },
       alltypes:[],
       strart_evaluate:false,
       answer:{ 
@@ -232,7 +235,7 @@ export default {
               
         this.answer.scores=this.score
         axios.post("/api/barrier-answer",this.answer).then((res) => {
-        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+          axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
         this.$router.push({ name: 'barrier-resulte', params:{'id':this.answer.child_id}});
       }).catch((el)=>{
           this.alert_text='please answer all questions'

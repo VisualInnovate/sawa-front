@@ -111,6 +111,9 @@
   
     data() {
       return {
+        change:{
+        status:"1"
+      },
         strart_evaluate:false,
         alert_text:"",
         answers:{
@@ -209,6 +212,7 @@
         
         axios.post("/api/able-answer",this.answers).then((res) => {
           this.change_status
+          axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
           this.$router.push({ name: 'ablls-resulte', params:{'id':this.answer.evaluation_id}});
           
         }).catch((el)=>{

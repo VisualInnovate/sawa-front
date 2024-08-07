@@ -40,7 +40,7 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button @click="go_evaluate(evalu.child.id,evalu.evaluation_type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button @click="go_evaluate(evalu.child.id,evalu.evaluation_type,evalu.id)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
           <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
 
           </div>
@@ -114,6 +114,7 @@
     data() {
       return {
           child_id: useStorage("child_id", Number),
+          eavl_id: useStorage("eavl_id", Number),
            maxDate: new Date(),
            details:[],
            evalate:{},
@@ -153,7 +154,7 @@
         this.deleteDialog=!(this.deleteDialog)
       
       },
-      go_evaluate(id,evalu_id){
+      go_evaluate(id,evalu_id,eva_id){
         console.log(id,evalu_id)
 
 
@@ -173,8 +174,10 @@
         // if(evalu_id == 5){
         //   this.$router.push({ name: 'carolina-test',  params:{'id':id}});
         // }
-       
+ 
          localStorage.setItem("child_id",id)
+         localStorage.setItem("eavl_id",eva_id)
+        
          this.evalate_type=evalu_id
      
         this.$router.push({ name: 'reinforcers'});

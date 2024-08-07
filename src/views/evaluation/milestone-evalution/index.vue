@@ -118,6 +118,9 @@
   
     data() {
       return {
+        change:{
+        status:"1"
+      },
         strart_evaluate:false,
        alert_text:"",
         answers:{
@@ -216,6 +219,7 @@
        
         
         axios.post("/api/milestone-answers",this.answers).then((res) => {
+          axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
           this.$router.push({ name: 'milestone-resulte', params:{'id':this.answer.child_id,'evla_id':this.answer.evaluation_id}});
         }).catch((el)=>{
           this.alert_text='please answer all questions'
