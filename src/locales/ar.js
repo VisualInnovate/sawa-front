@@ -374,6 +374,8 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   category:"الفئة",
   degree:"الدرجه",
   key:"المفتاح",
+  test:"الاختبار",
+  sub_category:"هل فئة فرعية",
 
 ///////////////////////////////////////////anttend
 deduction_title:"عنوان الخصم",
@@ -406,8 +408,11 @@ bouns_reason:"سبب العلاوة",
 departments:"الاقســام",
 department_add:"اضافة قسم جديد",
 bouns_amount:"كم العلاوة",
-bouns_date:"تاريخ العلاوة"
-
+bouns_date:"تاريخ العلاوة",
+posttion:"المسمي الوظيفي",
+posttion_add:"اضافة موسمي وظيفي",
+posttion_dgree:"الدرجة الاعلي ",
+posttion_description:"وصف المسمي الوظيفي "
 
 
 

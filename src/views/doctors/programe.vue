@@ -159,28 +159,29 @@
 
 
 
-        // if(evalu_id == 1){
-        //   this.$router.push({ name: 'ShowSideProfiles', params:{'id':id}});
-        // }
-        // if(evalu_id == 2){
-        //   this.$router.push({ name: 'milestone-evaluation',  params:{'id':id}});
-        // }
-        // if(evalu_id == 3){
-        //   this.$router.push({ name: 'barrier-evaluation',  params:{'id':id}});
-        // }
-        // if(evalu_id == 4){
-        //   this.$router.push({ name: 'mission-test',  params:{'id':id}});
-        // }
-        // if(evalu_id == 5){
-        //   this.$router.push({ name: 'carolina-test',  params:{'id':id}});
-        // }
+        if(evalu_id == 1){
+          this.$router.push({ name: 'ShowSideProfiles', params:{'id':id}});
+        }
+        if(evalu_id == 2){
+          this.$router.push({ name: 'milestone-evaluation',  params:{'id':id}});
+        }
+        if(evalu_id == 3){
+          this.$router.push({ name: 'barrier-evaluation',  params:{'id':id}});
+        }
+        if(evalu_id == 4){
+          this.$router.push({ name: 'mission-test',  params:{'id':id}});
+        }
+        if(evalu_id == 5){
+          this.$router.push({ name: 'carolina-test',  params:{'id':id}});
+        }
+        
  
          localStorage.setItem("child_id",id)
          localStorage.setItem("eavl_id",eva_id)
         
          this.evalate_type=evalu_id
      
-        this.$router.push({ name: 'reinforcers'});
+       
        
        
        

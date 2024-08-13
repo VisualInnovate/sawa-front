@@ -8,7 +8,7 @@
         <router-link
           :to="{ name: 'agerange' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('Age Range') }}</router-link>
+        > {{ $t('age_range') }}</router-link>
    
         <router-link
           :to="{ name: 'category' }"

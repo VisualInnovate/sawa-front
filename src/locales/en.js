@@ -359,6 +359,8 @@ merge:"Merge",
   answer_all_questions:"answer all questions",
   degree:"degree",
   key:"key",
+  test:"test",
+  sub_category:"is sub category",
   ///////////////////////////////////
   deduction_title:"deduction title",
   deductions:"deductions",
@@ -390,5 +392,9 @@ merge:"Merge",
   department_add:"add new department",
   bouns_amount:"bouns amount",
   bouns_date:"bouns date ",
-  
+  posttion:"position",
+  posttion_add:"add posttion",
+  posttion_dgree:"degree posttion ",
+  posttion_description:"description posttion"
+
 };

@@ -163,7 +163,7 @@ export default {
           .then((response) => {
           
             this.answer.evaluation_id=response.data.evaluation.id
-           this.strart_evaluate=!(this.strart_evaluate)
+            this.strart_evaluate=!(this.strart_evaluate)
            
            
           }).catch((el)=>{

@@ -7,7 +7,7 @@
              <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
                <div class="col-span-2">
                 <div class="flex">
-                      <h3 class="text-base font-bold " >  رقم</h3>
+                      <h3 class="text-base font-bold " >  {{ $t("index") }}</h3>
                       <p> : {{ index +1}}</p>
                    </div>
                    <div style="overflow: hidden !important;" class="flex max-w-full">
@@ -42,7 +42,7 @@
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
                 <div class="flex">
                   <InputSwitch v-model="levels.sub" />
-                  <span class="px-2"> is sub category</span>
+                  <span class="px-2"> {{ $t('sub_category') }}</span>
                 </div>
                 <div v-if="levels.sub" class="flex flex-column gap-2">
                     <label class="text-right" for="username">{{ $t('parent_category') }}</label>

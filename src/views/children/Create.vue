@@ -8,6 +8,7 @@ import { max } from "date-fns";
 export default {
   components: { InputText, Calendar },
   data: () => ({
+    pasrents:{},
     minDate: new Date(1640426400000),
     maxDate: new Date(),
     toast:useToast(),
@@ -51,6 +52,13 @@ export default {
           console.log(res.data.countries)
           this.cities = res.data.countries
           console.log(res);
+        })
+        axios
+        .get("/api/admin-parents")
+        .then((res) => {
+          console.log(res.data.countries)
+          this.pasrents = res.data.parents
+        
         })
     },
     submit() {
@@ -111,6 +119,11 @@ export default {
                     <label class="w-full  " for="username">{{ $t('primary_language') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.lang">{{ error.lang[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                    <label class="w-full  " for="username">{{ $t('parent_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.parent_id"  option-value="id" :options="pasrents" optionLabel="fname" :placeholder='$t("parent_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.parent_id">{{ error.parent_id[0] }}</div>
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full " for="username">{{ $t('place_of_birth') }}</label>
