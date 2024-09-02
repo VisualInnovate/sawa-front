@@ -235,11 +235,13 @@ onMounted(async () => {
 
              
             </template>
-           
+            
             <v-list-item v-can="'program show'" :title="$t('addTherapeutic')" value="Categories"
               :to="{ name: 'AllTherapeutic' }"></v-list-item>
               <v-list-item v-can="'student-program show'" :title="$t('student_programe')" value="student-programe"
               :to="{ name: 'student-programe' }"></v-list-item>
+              <v-list-item v-can="'student-program show'" :title="$t('sessions')" value="sessions"
+              :to="{ name: 'sessions' }"></v-list-item>
              
             
           </v-list-group>
@@ -299,9 +301,7 @@ onMounted(async () => {
               :to="{ name: 'skills' }"></v-list-item>
               <v-list-item v-can="'department show'" :title="$t('department')" value="department"
               :to="{ name: 'department' }"></v-list-item>
-              <v-list-item v-can="'stimulus show'" :title="$t('reinforcers')" value="reinforcers"
-              :to="{ name: 'reinforcers' }"></v-list-item>
-           
+             
               
 
               <v-list-item v-can="'area show'" :title="$t('area')" value="area"

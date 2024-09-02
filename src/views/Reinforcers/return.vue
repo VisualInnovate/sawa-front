@@ -1,14 +1,17 @@
 <template>
     <Stimulu></Stimulu>
+     
+      <Button icon="pi pi-angle-left" @click="gosession" class=" my-4  m-auto create  " :label='$t("العودة للجلسة")'></Button>
+  
     <v-card class="p-[2%]">
-        <div class="m-auto bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <!-- <div class="m-auto bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="flex  flex-column gap-2">
                 <label for="username">{{ $t('child_name') }}</label>
                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="pair.child_id" disabled option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                </div>
                
-       </div>
+       </div> -->
 
        <!-- items -->
        <div class="m-auto my-5 bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-2 lg:grid-cols-3">
@@ -120,9 +123,7 @@
        
    </table>
       </div>
-      <v-card class="w-full text-center col-span-2">
-            <Button icon="pi pi-arrow-right" v-if="stimulus_id"  @click="goevalute" class=" m-4 m-auto create  w-44 " :label='$t("مرحله التقييم")'></Button>
-          </v-card>
+     
        </div>
     </v-card>
   
@@ -143,7 +144,6 @@
      return {
        error:{},
        count:0,
-       evalate_type:'',
        pair:{
            result:[],
            values:[]
@@ -154,7 +154,7 @@
        charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
        stimulus:[],
       stimul:' ',
-      stimulus_id:'',
+      
        items: [],
        arr: [],
         pairs: [],
@@ -197,24 +197,7 @@
         }
            
        },
-       goevalute(){
-        if( this.evalate_type == 1){
-          this.$router.push({ name: 'ShowSideProfiles', params:{'id':this.stimulus_id}});
-         }
-         if(this.evalate_type == 2){
-          this.$router.push({ name: 'milestone-evaluation',  params:{'id':this.stimulus_id}});
-        }
-         if(this.evalate_type == 3){
-          this.$router.push({ name: 'barrier-evaluation',  params:{'id':this.stimulus_id}});
-        }
-        if(this.evalate_type == 4){
-          this.$router.push({ name: 'mission-test',  params:{'id':this.stimulus_id}});
-        }
-        if(this.evalate_type == 5){
-          this.$router.push({ name: 'carolina-test',  params:{'id':this.stimulus_id}});
-        }
-
-       },
+      
        getanswer(id,value){
            console.log(value)
            this.pair.result[id]=value
@@ -239,10 +222,14 @@
           
          })
        },
+
+       gosession(){
+        this.$router.push({name:'sessions-update',params:{'id':this.$route.params.id} });
+       },
        createevalation(){
 
            this.pair.date= moment(this.pair.date).format("Y-MM-DD") ,
-           this.pair.specialist_id=localStorage.getItem("user_id") ,
+           this.pair.session_id=this.$route.params.id,
            this.pair.type=1
            this.pair.values=this.items
            axios.post("api/stimulus-test" ,this.pair).then((response) => {
@@ -276,7 +263,7 @@
       
        
        this.getchilde()
-       this.evalate_type=localStorage.getItem("evalate_type")
+      
    },
  };
  </script>
