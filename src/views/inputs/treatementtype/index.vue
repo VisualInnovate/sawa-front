@@ -135,7 +135,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("treatementname")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'treatment show'" :label='$t("treatementname")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -155,7 +155,7 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button v-can="'treatment show'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
@@ -176,7 +176,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
-          v-can="'skills list'"
+          v-can="'treatment show'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">

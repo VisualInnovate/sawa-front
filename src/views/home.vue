@@ -1,5 +1,5 @@
 <template>
-       <div >
+       <div v-can="'show dashboard'">
         <div  class="grid   grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 px-1 ">
         <div class="px-3 ">
                 <div class="element w-full shadow-md bg-[#EC477C] border text-white rounded-lg flex items-center p-6 mb-6 xl:mb-0"> 
