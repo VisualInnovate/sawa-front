@@ -141,7 +141,7 @@ const editesuser=()=>{
     if(usersdata.value.spotter){
       body.append("spotter", usersdata.value.spotter);
     }
-    if(usersdata.value.skills){
+    if(usersdata.value.skills.length >=1){
       body.append("skills", usersdata.value.skills);
     }
     if(usersdata.value.department){
