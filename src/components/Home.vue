@@ -358,6 +358,7 @@ transportation_schedule
             <v-list-item v-can="'room show'"  :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
             <v-list-item v-can="'room show'"  :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
             <v-list-item v-can="'room show'"  :title="$t('holidays')" value="holidays" :to="{ name: 'holidays' }"></v-list-item>
+            <v-list-item v-can="'room show'"  :title="$t('official_leaves')" value="official-leaves" :to="{ name: 'official-leaves' }"></v-list-item>
             <v-list-item v-can="'room show'"  :title="$t('payroll')" value="payroll" :to="{ name: 'payroll' }"></v-list-item>
             <v-list-item v-can="'room show'"  :title="$t('bonus')" value="bonus" :to="{ name: 'bonus' }"></v-list-item>
             <v-list-item v-can="'room show'"  :title="$t('departments')" value="departments" :to="{ name: 'departments' }"></v-list-item>

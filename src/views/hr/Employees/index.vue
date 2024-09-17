@@ -60,25 +60,9 @@ const edit=(id)=>{
 
 
 
-///// update
-
-const editescrud=()=>{
-    axios
-    .post(`/api/mileston-levels/${confir_id.value}`,employee.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      levels.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
 
 const openNew = () => {
-    createdialog.value=!(createdialog.value)
+  router.push({name:'Employees-create'})
 }
 
 const confirmDelete = (id) => {
@@ -91,7 +75,7 @@ const confirmDelete = (id) => {
 
 const createcrude=()=>{
     axios
-    .post('/api/employees/import-users',employee.value)
+    .post('/api/employees/import/users',employee.value)
     .then((res) => {
       console.log(res.data)
       fetchData()

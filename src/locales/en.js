@@ -394,12 +394,21 @@ merge:"Merge",
   Adding_bonus_employee:"Adding bonus to  employee",
   bouns_reason:"bouns reason",
   departments:"Departments",
+  department_name:"department name",
   department_add:"add new department",
   bouns_amount:"bouns amount",
   bouns_date:"bouns date ",
   posttion:"position",
   posttion_add:"add posttion",
   posttion_dgree:"degree posttion ",
-  posttion_description:"description posttion"
-
+  posttion_description:"description posttion",
+  location:"location",
+  lat:"latitude",
+  long:"longitude",
+  official_leaves:"official leaves",
+  add_official_leaves:"add official leaves",
+  save:" save",
+  cancel:"cancel",
+  shift_name:"shift name",
+  position_name:"position name"
 };

@@ -410,23 +410,25 @@ bonus:"عــلاوات",
 Adding_bonus_employee:"إضافة علاوة للموظف",
 bouns_reason:"سبب العلاوة",
 departments:"الاقســام",
+department_name:"اسم القسم",
 department_add:"اضافة قسم جديد",
 bouns_amount:"كم العلاوة",
 bouns_date:"تاريخ العلاوة",
 posttion:"المسمي الوظيفي",
 posttion_add:"اضافة موسمي وظيفي",
 posttion_dgree:"الدرجة الاعلي ",
-posttion_description:"وصف المسمي الوظيفي "
+posttion_description:"وصف المسمي الوظيفي ",
 
+location:"الموقع",
+lat:"خطوط العرض",
+long:"خطوط الطول",
+official_leaves:"الإجازات الرسمية",
+add_official_leaves:"اضاقة اجازة رسمية",
+save:" حفظ",
+cancel:"الغاء",
 
-
-
-
-
-
-
-
-
+shift_name:"اسم الدوام",
+position_name:"اسم الوظيفة"
 
 
 

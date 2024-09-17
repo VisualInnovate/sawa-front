@@ -11,6 +11,12 @@ const hr = [
     name: 'Employees',
     component: () => import("../views/hr/Employees/index.vue")
   },
+
+  {
+    path: '/Employees-create', 
+    name: 'Employees-create',
+    component: () => import("../views/hr/Employees/create.vue")
+  },
   {
     path: '/Employee-update/:id', 
     name: 'Employee-update',
@@ -92,6 +98,12 @@ const hr = [
   path: '/posttion', 
   name: 'posttion',
   component: () => import("../views/hr/posttion/index.vue")
+},
+/////////////////////////////////// official-leaves
+{
+  path: '/official-leaves', 
+  name: 'official-leaves',
+  component: () => import("../views/hr/official-leaves/index.vue")
 },
 ];
 
