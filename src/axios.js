@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "https://sawa.sawa.academy/";
+axios.defaults.baseURL = "https://sys.sawa.sawa.academy/";
 
 axios.defaults.headers.common['Access-Control-Allowffff-Origin'] = '*'
 

@@ -117,9 +117,7 @@ export default {
             this.employee.position_id = response.data.data.position_id
             this.employee.basic_salary = response.data.data.basic_salary
             this.employee.shift_id = response.data.data.shift_id
-            this.employee.department_id = response.data.data.department_id
-            
-           
+            this.employee.department_id = response.data.data.department_id          
           })
 
        },
