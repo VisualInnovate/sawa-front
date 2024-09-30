@@ -22,10 +22,15 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-form class="p-[2%] c shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <form  class="p-[2%] c shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="submitForm">
           <!-- ... existing code ... -->
             
-              
+          <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('driver_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.driver_id">{{ error.driver_id[0] }}</div>
+                </div>
+
             
       
                 <div class="flex flex-column gap-2">
@@ -56,12 +61,12 @@
         
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('from') }}</label>
-                       <input class="bg-[#F7F5F5] py-2 text-center" type="time" name="time_end" id="time_end" v-model="student.from" style="border-radius: 5px" />
+                       <input class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="time_end" v-model="student.from" style="border-radius: 5px" />
                         <div class="mt-1 mb-5 text-red-500" v-if="error?.from">{{ error.from[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('to') }}</label>
-                        <input   class="bg-[#F7F5F5] py-2 text-center" type="time" name="time_end" id="pv_id_1" v-model="student.to"  />
+                        <input   class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="pv_id_1" v-model="student.to"  />
                         <div class="mt-1 mb-5 text-red-500" v-if="error?.to">{{ error.to[0] }}</div>
                 </div>
                   
@@ -87,14 +92,14 @@
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                     <div class="flex">
                         <InputSwitch class="m-auto px-3" v-model="student.is_active"/>
-                  <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
                     </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.is_active">{{ error.is_active[0] }}</div>
                 </div>
            
               
         
-        </v-form>
+        </form>
   <toast></toast>
         <!-- ... existing code ... -->
       </div>
@@ -126,6 +131,7 @@
       student:{
        is_active:true
       },
+      drivers:{},
       vehicle:{},
         areas:{},
         error: {},
@@ -174,6 +180,7 @@
             console.log(response.data.data)
             // this.student.from= moment(event.event.start).format("00:00:00 YYYY-MM-d")
            
+             this.student.driver_id=response.data.data.driver_id
              this.student.vehicle_id=response.data.data.vehicle_id
              this.student.available_seats=response.data.data.available_seats
              this.student.student_transportation_id=response.data.data.student_transportation_id
@@ -193,7 +200,15 @@
           });
    
       },
-
+  getDrivers(){
+    axios
+          .get("api/driver")
+          .then((response) => {
+            console.log(response.data.data)
+            this.drivers = response.data.driver
+            this.getonetrip()
+          })
+  },
   ////get all areas
   getareas(){
         axios
@@ -257,7 +272,7 @@
     },
     
     
-      createtreatment() {
+    submitForm() {
        
          if(this.student.is_active == true){
             this.student.is_active=1
@@ -275,9 +290,10 @@
      
     },
     mounted() {
-        this.setupCircles();
+     this.setupCircles();
      this.getvehicle()
      this.getareas()
+     this.getDrivers()
     },
   };
   </script>

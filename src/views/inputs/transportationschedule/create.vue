@@ -22,10 +22,15 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-form class="p-[2%] c shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <form  class="p-[2%] c shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="submitForm">
           <!-- ... existing code ... -->
             
-              
+          <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('driver_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.driver_id">{{ error.driver_id[0] }}</div>
+                </div>
+
             
       
                 <div class="flex flex-column gap-2">
@@ -44,7 +49,7 @@
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('start_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate" />
+                    <Calendar required style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
 
                 </div> 
@@ -61,40 +66,28 @@
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('to') }}</label>
-                        <input   class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="pv_id_1" v-model="student.to"  />
+                        <input  required class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="pv_id_1" v-model="student.to"  />
                         <div class="mt-1 mb-5 text-red-500" v-if="error?.to">{{ error.to[0] }}</div>
                 </div>
                   
               
 
-                <!-- <div class="col-span-2" style="width: 100%; height: 300px">
-                    <GoogleMap
-                    
-                    style="width: 100%; height: 100%"
-                    mapTypeId="terrain"
-                    :center="center"
-                    :zoom="4"
-                    >
-                    <Circle v-for="(circle, key) in circles" :key="key" :options="circle" />
-                    </GoogleMap>
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.location_url">{{ error.location_url[0] }}</div>
-
-                 </div> -->
+               
   
                 
              
                 <div class="flex flex-column gap-2 w-[70%]">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                     <div class="flex">
-                        <InputSwitch class="m-auto px-3" v-model="student.is_active"/>
-                  <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                        <InputSwitch required class="m-auto px-3" v-model="student.is_active"/>
+                  <Button type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
                     </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.is_active">{{ error.is_active[0] }}</div>
                 </div>
            
               
         
-        </v-form>
+        </form>
   <toast></toast>
         <!-- ... existing code ... -->
       </div>
@@ -127,6 +120,7 @@
        is_active:true
       },
       vehicle:{},
+      drivers:{},
         areas:{},
         error: {},
         studenttransportation:{},
@@ -206,9 +200,13 @@
             this.vehicle = response.data.data;
            
           })
-          .catch((error) => {
-            console.error("Error retrieving Appointment Types:", error);
-          });
+          axios
+          .get("api/driver")
+          .then((response) => {
+            console.log(response.data.data)
+            this.drivers = response.data.driver
+           
+          })
   
       },
       arr (){
@@ -229,7 +227,7 @@
     },
     
     
-      createtreatment() {
+    submitForm() {
        
          if(this.student.is_active == true){
             this.student.is_active=1
@@ -250,6 +248,7 @@
         this.setupCircles();
      this.getvehicle()
      this.getareas()
+
     },
   };
   </script>
