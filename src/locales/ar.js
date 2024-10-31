@@ -21,11 +21,11 @@ export default {
   roomnumber:"اسم القاعه",
   RoomAc:"قائمة قاعات العلاج الاكاديمية",
 ///////
-Appointment_type:"نوع الموعد",
-AppointmentAc:"قائمه نوع الموعد ",
-add_Appointment:"اضافة موعد",
+  Appointment_type:"نوع الموعد",
+  AppointmentAc:"قائمه نوع الموعد ",
+  add_Appointment:"اضافة موعد",
 
-merge:"دمج",
+  merge:"دمج",
 
 
 
@@ -426,12 +426,13 @@ official_leaves:"الإجازات الرسمية",
 add_official_leaves:"اضاقة اجازة رسمية",
 save:" حفظ",
 cancel:"الغاء",
-
+title:"العنوان",
 shift_name:"اسم الدوام",
-position_name:"اسم الوظيفة"
-
-
-
-
-
+position_name:"اسم الوظيفة",
+body_event:"الوصف",
+ create_button: "انشاء",
+ events:"الاحداث",
+ image:"الصورة",
+ shift_days:" ايام الدوام",
+ shift:"الدوام"
 };

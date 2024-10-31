@@ -7,6 +7,7 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
+const scrollableTabs = ref(Array.from({ length: 3 }, (_, i) => ({ title: `Tab ${i + 1}`, content: `Tab ${i + 1} Content` })));
 
 const loading = ref(true)
 const user = ref({})
@@ -18,10 +19,31 @@ const confir_id=ref('')
 const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
+const move=ref(false)
 
+ const isStartActive = ref(false);
+    const isMidActive = ref(false);
+    const isEndActive = ref(false);
 
+    const activateStart = () => {
+      isStartActive.value = true;
+      isMidActive.value = false;
+      isEndActive.value = false;
+    };
 
+    const activateMid = () => {
+      isMidActive.value = true;
+      isEndActive.value = false;
+    };
 
+    const activateEnd = () => {
+      isEndActive.value = true;
+      isMidActive.value = true;
+      isStartActive.value = true;
+    };
+const moveing=()=>{
+  move.value=!(move.value)
+}
 onBeforeMount(() => {
   initFilters()
 })
@@ -156,12 +178,7 @@ const initFilters = () => {
 
         
          
-           <Column field="users.name" :header='$t("child_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.child.name }}
-            </template>
-           </Column>
-
+          
            <Column field="plate_number" :header='$t("area_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.region.name }}
@@ -188,15 +205,24 @@ const initFilters = () => {
               <p v-if="slotProps.data.type == 0"> angel car </p>
               <p v-if="slotProps.data.type == 1"> bus  </p>
               <p v-if="slotProps.data.type == 2">  Minibus </p>
+         
            
             </template>
            </Column> 
-
+       
+          
 
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div >
+
+                <Button
+                v-can="'program edit'"
+                icon="pi pi-car"
+                class="p-button-rounded p-button-success details mr-2"
+                @click="moveing(slotProps.data.id)"
+              />
                 <Button
                 v-can="'program edit'"
                 icon="pi pi-pencil"
@@ -216,6 +242,17 @@ const initFilters = () => {
 
 
         </DataTable>
+
+        <Dialog v-model:visible="move" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <div class="line-container m-auto w-full">
+          <Button label="start" class="p-button-rounded p-button-success mr-2" :class="['dot', { active: isStartActive }]" @click="activateStart"></Button>
+         
+          <div :class="['line', { endActive: isEndActive }]"></div>
+          <Button label="end" class="p-button-rounded p-button-success mr-2" :class="['dot', { active: isEndActive }]" @click="activateEnd"></Button>
+        </div>
+         
+        </Dialog>
+
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
@@ -235,4 +272,36 @@ const initFilters = () => {
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style>
+.line-container {
+  display: flex;
+  margin: auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot {
+
+  background-color: gray;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: #135C65 ;
+}
+
+.line {
+  width: 50px;
+  height: 4px;
+  background-color: gray;
+  transition: background-color 0.3s ease;
+}
+
+.line.midActive {
+  background-color: rgb(255, 77, 77) 
+}
+
+.line.endActive {
+  background-color: rgb(255, 77, 77) 
+}
+</style>

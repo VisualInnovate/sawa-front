@@ -30,6 +30,16 @@ const hr = [
       name: 'leave-balance',
       component: () => import("../views/hr/leave/leave-balance/index.vue")
     },
+    {
+      path: '/balance-create', 
+      name: 'balance-create',
+      component: () => import("../views/hr/leave/leave-balance/create.vue")
+    },
+    {
+      path: '/balance-update/:id', 
+      name: 'balance-update',
+      component: () => import("../views/hr/leave/leave-balance/update.vue")
+    },
 ///////////////////// leave-setup
     {
       path: '/leave-setup', 
@@ -104,6 +114,28 @@ const hr = [
   path: '/official-leaves', 
   name: 'official-leaves',
   component: () => import("../views/hr/official-leaves/index.vue")
+},
+{
+  path: '/event', 
+  name: 'event',
+  component: () => import("../views/hr/event/index.vue")
+},
+
+
+{
+  path: '/shift', 
+  name: 'shift',
+  component: () => import("../views/hr/shift/index.vue")
+},
+{
+  path: '/shift-create', 
+  name: 'shift-create',
+  component: () => import("../views/hr/shift/create.vue")
+},
+{
+  path: '/shift-update/:id', 
+  name: 'shift-update',
+  component: () => import("../views/hr/shift/update.vue")
 },
 ];
 

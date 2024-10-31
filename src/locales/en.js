@@ -410,5 +410,12 @@ merge:"Merge",
   save:" save",
   cancel:"cancel",
   shift_name:"shift name",
-  position_name:"position name"
+  position_name:"position name",
+  title:"title",
+  body_event:"body",
+   create_button: "Create",
+   events:"ُvents",
+    image:"image",
+    shift_days:"shift days",
+    shift:"shift"
 };

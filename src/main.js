@@ -44,6 +44,7 @@ import "./views/frontend/assets/main.css";
 ///////////////////////////////////////////////////////////////////////////////////////////
 import DataTable from 'primevue/datatable'
 import Toast from 'primevue/toast'
+import Image from 'primevue/image'
 import ToastService from 'primevue/toastservice'
 import Toolbar from 'primevue/toolbar'
 import Button from 'primevue/button'
@@ -65,11 +66,11 @@ import AccordionTab from 'primevue/accordiontab'
 import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
-
 import Paginator from 'primevue/paginator';
 
-import Rating from 'primevue/rating';
 
+
+import Rating from 'primevue/rating';
 import RadioButton from 'primevue/radiobutton';
 
 
@@ -145,7 +146,7 @@ app.component('DynamicDialog', DynamicDialog)
 app.component('ColorPicker', ColorPicker)
 app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
-
+app.component('Image', Image)
 
 
 app.component('Rating', Rating)

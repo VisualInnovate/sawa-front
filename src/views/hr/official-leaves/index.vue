@@ -8,7 +8,7 @@
           <Toolbar class="mb-4">
             <template v-slot:start>
               <div class="my-2">
-                <Button :label='$t("add_official_leaves")' icon="pi pi-plus" class="p-button-success mr-2"
+                <Button  v-can="'official leave create'" :label='$t("add_official_leaves")' icon="pi pi-plus" class="p-button-success mr-2"
                         @click="openNew"/>
               </div>
   
@@ -17,7 +17,7 @@
   
             <template v-slot:end>
             
-              <Button :label='$t("export")' icon="pi pi-upload" class="p-button-help"
+              <Button  v-can="'official leave list'" :label='$t("export")' icon="pi pi-upload" class="p-button-help"
                       @click="exportCSV($event)"/>
             </template>
           </Toolbar>
@@ -33,7 +33,7 @@
               :rowsPerPageOptions="[5, 10, 25]"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
               responsiveLayout="scroll"
-         
+              v-can="'official leave list'"
   
           >
             <template #header>
@@ -93,7 +93,9 @@
   
                   <!-- <Button icon="pi pi-eye" v-can="'clock in-out user'" class="p-button-rounded p-button-info mr-2"/> -->
                 </router-link>
-                <Button icon="pi pi-pencil"
+                <Button
+                 v-can="'official leave edit'"
+                 icon="pi pi-pencil"
                         class="p-button-rounded p-button-success mr-2"
                         @click="updateleave(slotProps.data.id)"/>
                 <!-- <Button v-can="'update user'" v-if="myUser == slotProps.data.user_id " icon="pi pi-plus"
@@ -101,7 +103,7 @@
                         @click="editRequest(slotProps.data)"/> -->
                
                         <Button
-                          v-can="'skills delete'"
+                          v-can="'official leave delete'"
                           icon="pi pi-trash"
                           class="delete mt-2"
                           @click="confirmDeleteUser(slotProps.data.id)"

@@ -8,7 +8,7 @@
       <v-alert title="Alert title" :text="alert_text" v-if="alert_text" closable type="error" class="absolute w-full"></v-alert>
 
     
-      <v-form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="submit" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
+      <form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="getanswer" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
         <!-- ... existing code ... -->
           
               <div   class="flex flex-column gap-2">
@@ -93,13 +93,13 @@
            
               <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button @click="getanswer"  class="create m-auto w-full " :label='$t("submit")'></Button>
+                <Button type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
                 <small id="username-help"></small>
               </div>
               
 
       
-      </v-form>
+      </form>
 <toast></toast>
       <!-- ... existing code ... -->
     </div>
@@ -157,7 +157,7 @@ export default {
             child_id:this.answer.child_id,
             specialist_id:localStorage.getItem("user_id"),
             date:this.answer.date,
-            stimulus_test_id:parseInt(this.$route.params.id) 
+             
           
           })
           .then((response) => {

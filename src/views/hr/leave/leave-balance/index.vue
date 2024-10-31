@@ -6,6 +6,7 @@ import LeavesNave from '../../../../components/LeavesNave.vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import InputNumber from 'primevue/inputnumber';
 const toast = useToast()
 const router = useRouter()
 const allusers=ref([])
@@ -21,25 +22,20 @@ const dt = ref(null)
 const filters = ref({})
 const createdialog=ref(false)
 const levels=ref({})
-const employee=ref({})
+const balnce=ref({})
 const updatedialog=ref(false)
 
 onBeforeMount(() => {
   initFilters()
 })
-  const getallusers=()=>{
-    axios.post("/api/users").then((res)=>{  
-    allusers.value= res.data.users.data
-    
-  });
-  }
+
  const fetchData= ()=>{
 
 
   axios.get("/api/leave-balance").then((res)=>{
     loading.value= false
-    users.value= res.data.data[0].balance
-    console.log(users.value)
+    users.value= res.data.data
+ 
 
   });
  
@@ -52,11 +48,10 @@ onBeforeMount(() => {
 onMounted(() => {
   // productService.getProducts().then((data) => (products.value = data));
 fetchData()
-getallusers()
 
 })
 const edit=(id)=>{
-  router.push({name:'Employee-update',params:{'id':id} })
+  router.push({name:'balance-update',params:{'id':id} })
 }
 
 
@@ -65,7 +60,7 @@ const edit=(id)=>{
 
 const editescrud=()=>{
     axios
-    .post(`/api/mileston-levels/${confir_id.value}`,employee.value)
+    .post(`/api/mileston-levels/${confir_id.value}`,balnce.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -79,7 +74,10 @@ const editescrud=()=>{
 }
 
 const openNew = () => {
-    createdialog.value=!(createdialog.value)
+  
+
+  router.push({name:'balance-create'})
+  
 }
 
 const confirmDelete = (id) => {
@@ -92,7 +90,7 @@ const confirmDelete = (id) => {
 
 const createcrude=()=>{
     axios
-    .post('/api/employees/import-users',employee.value)
+    .post('/api/leave-balance',balnce.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -127,7 +125,7 @@ const initFilters = () => {
   filters.value = {
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
   }
-}
+};
 </script>
 
 <template>
@@ -173,21 +171,12 @@ const initFilters = () => {
 
         
          
-           <Column field="type" :header='$t("type")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="type" :header='$t("employee_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.type }}
+              {{ slotProps.data?.employee.name}}
             </template>
            </Column> 
-           <Column field="title" :header='$t("title")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.title }}
-            </template>
-           </Column> 
-           <Column field="days" :header='$t("days")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.days }}
-            </template>
-           </Column> 
+         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div >
@@ -226,9 +215,17 @@ const initFilters = () => {
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('users') }}</label>
-                  <MultiSelect v-model="employee.users_ids"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Dropdown v-model="balnce.employee_id"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
               
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+            <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('users') }}</label>
+                  
+                  <Dropdown v-model="balnce.employee_id"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <InputNumber required class="bg-[#f7f5f5] text-center"  v-model="levels.title" :placeholder='$t("title")' />
+
+            <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
            <div class="w-full text-center">
             <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 

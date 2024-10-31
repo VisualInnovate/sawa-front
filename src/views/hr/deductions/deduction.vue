@@ -151,8 +151,8 @@ const initFilters = () => {
       <va-card class="card">
         <div class="relative">
           <Deduction ></Deduction>
-          <Button  v-can="'skills create'" :label='$t("deduction_add")' icon="pi pi-plus" class="p-button-success mr-2 absolute top-3" @click="openNew"></Button>
-          <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" class="export absolute top-3 ltr:left-[15%] rtl:right-[15%] " @click="exportCSV($event)"/>
+          <Button  v-can="'deduction create'" :label='$t("deduction_add")' icon="pi pi-plus" class="p-button-success mr-2 absolute top-3" @click="openNew"></Button>
+          <Button v-can="'deduction list'" :label='$t("export")' icon="pi pi-upload" class="export absolute top-3 ltr:left-[15%] rtl:right-[15%] " @click="exportCSV($event)"/>
 
         </div>
         
@@ -176,7 +176,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
-          v-can="'skills list'"
+          v-can="'deduction list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
@@ -218,13 +218,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'skills edit'"
+                v-can="'deduction edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'skills delete'"
+                v-can="'deduction delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

@@ -1,4 +1,4 @@
-<template>
+<template v-can="'employees edit'">
   <div>
     <div>
       <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("Employees") }}</p>
@@ -113,11 +113,12 @@ export default {
           .get(`api/employees/${this.$route.params.id}`)
           .then((response) => {
             console.log(response.data.data)
-            this.employee.user_id = response.data.data.id
+            this.employee.user_id = response.data.data.user_id
             this.employee.position_id = response.data.data.position_id
             this.employee.basic_salary = response.data.data.basic_salary
             this.employee.shift_id = response.data.data.shift_id
             this.employee.department_id = response.data.data.department_id          
+            this.employee.national_id =parseInt( response.data.data.national_id   )       
           })
 
        },
@@ -129,6 +130,7 @@ export default {
         .post("api/users")
         .then((response) => {
           this.users=response.data.users.data
+          this.getoneanswer()
         })
         axios
         .get("api/shifts")

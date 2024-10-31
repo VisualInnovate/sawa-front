@@ -1,4 +1,5 @@
-<template>
+<template  >
+  <div v-can="'employees create'">
     <div>
       <div>
         <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("Employees") }}</p>
@@ -73,13 +74,14 @@
         <!-- ... existing code ... -->
       </div>
     </v-card>
+  </div>
   </template>
   
   <script>
   import axios from "axios";
   import InputNumber from "primevue/inputnumber";
   
-    import {useToast} from 'primevue/usetoast'
+  import {useToast} from 'primevue/usetoast'
   export default {
   
   
