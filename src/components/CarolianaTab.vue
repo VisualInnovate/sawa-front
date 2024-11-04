@@ -6,25 +6,25 @@
             class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
             > {{ $t('multiple') }}</router-link> -->
         <router-link
-          v-can="'carolina-age-range show'"
+          v-can="'carolina-age-range list'"
           :to="{ name: 'agerange' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('age_range') }}</router-link>
    
         <router-link
-        v-can="'carolina-age-range show'"
+        v-can="'carolina-age-range list'"
           :to="{ name: 'category' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('category') }}</router-link>
 
         <router-link
-      v-can="'carolina-age-range show'"
+     v-can="'carolina-age-range list'"
           :to="{ name: 'answer_type' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('answer_type') }}</router-link>
       
         <router-link
-        v-can="'carolina-answer show'"
+        v-can="'carolina-age-range list'"
           :to="{ name: 'test' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('test') }}</router-link>

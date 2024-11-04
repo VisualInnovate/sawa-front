@@ -15,10 +15,10 @@
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('evaluations_details') }}</router-link>
       
-        <!-- <router-link
-          :to="{ name: 'barrier-answer-type' }"
+        <router-link
+          :to="{ name: 'children-request' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('tables') }}</router-link> -->
+        > طلبات الطفل</router-link>
        
   </template>
   

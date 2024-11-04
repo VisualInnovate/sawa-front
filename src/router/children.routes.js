@@ -86,6 +86,11 @@ const childrenRoutes = [
     component: () => import("../views/children/evaluate.vue")
   },
   {
+    path: 'children-request', // Define the path for your addRoom route
+    name: 'children-request',
+    component: () => import("../views/children/requests.vue")
+  },
+  {
     path: "children/evaluation/:evaluation_result_id",
     name: "editChildResult",
     component: editResult,

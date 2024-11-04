@@ -137,6 +137,13 @@ const hr = [
   name: 'shift-update',
   component: () => import("../views/hr/shift/update.vue")
 },
+// Report
+
+{
+  path: '/reports', 
+  name: 'reports',
+  component: () => import("../views/hr/report/index.vue")
+},
 ];
 
 export default {

@@ -12,6 +12,7 @@ import Calendar from "primevue/calendar";
 
 
 import { useAppLangStore } from "../../stores/AppLangStore";
+import InputText from "primevue/inputtext";
 
 export default {
   components: {
@@ -39,7 +40,7 @@ export default {
       modal_text: "",
       time_start: "",
       time_end: "",
-     
+ 
 
       opts: {
         plugins: [dayGridPlugin, interactionPlugin, TimeGridplugin, listPlugin],
@@ -204,7 +205,7 @@ export default {
     },
     update() {
       axios.post("/api/calender").then((res) => {
-        console.log(res);
+        
         this.opts.events = res.data.calender;
       });
     },
@@ -280,7 +281,12 @@ fetchdoctor(){
       >
         <form>
           <div>
-          
+            <div class="flex flex-column gap-2">
+                  <label for="username">{{ $t('title') }}</label>
+                  <InputText required class="bg-[#f7f5f5]" v-model="event_title" :placeholder='$t("title")' />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+            </div> 
+                
             <div v-if="doctorshow != 2 " class="flex flex-column gap-2">
                   <label for="username">{{ $t('doctor') }}</label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="user_type"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("doctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
