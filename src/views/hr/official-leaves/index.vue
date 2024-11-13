@@ -182,7 +182,7 @@
                  </GoogleMap>
               
                 </div>
-                <Button :label='$t("save")' icon="pi pi-check " class="create" @click="submitted=true"/>
+                <Button :label='$t("save")' icon="pi pi-check " type="submit" class="create" @click="submitted=true"/>
                </form>
         
         </Dialog>     
@@ -242,7 +242,7 @@
                  </GoogleMap>
               
                 </div>
-                <Button :label='$t("save")' icon="pi pi-check " class="create" @click="submitted=true"/>
+                <Button :label='$t("save")' icon="pi pi-check " type="submit" class="create" @click="submitted=true"/>
                </form>
         </Dialog>     
         
@@ -264,6 +264,9 @@
   import {GoogleMap, Marker, Circle} from "vue3-google-map";
   import axios from 'axios'
   import moment from "moment";
+  import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
   const toast = useToast()
   const leave=ref({
     long:'',
@@ -349,10 +352,10 @@
    const openNew=()=>{
 
     RequestDialog.value=!( RequestDialog.value)
-
+    leave.value={}
   
    }
-   const saveRequest=()=>{
+   const create=()=>{
     
     leave.value.end = moment(leave.value.end).format("YYYY-MM-DD HH:mm:ss");
     leave.value.start = moment(leave.value.start).format("YYYY-MM-DD HH:mm:ss");
@@ -360,10 +363,11 @@
     axios.post(`api/official-leaves`,leave.value).then((res) => {
       fetchData()
       RequestDialog.value=!( RequestDialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})  
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_add_success")}`, life: 3000 });
         }).catch((el)=>{
           
-       error.value = el.response.data.errors
+          toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+
       })
    }
 
@@ -395,11 +399,11 @@
     axios.put(`api/official-leaves/${data_id.value}`,leave.value).then((res) => {
       fetchData()
       updata.value=!( updata.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_update_success")}`, life: 3000 });
         
         }).catch((el)=>{
           
-          error.value = el.response.data.errors
+          toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
          })
   }
 

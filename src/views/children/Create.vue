@@ -48,7 +48,7 @@ export default {
         })
       
         axios
-        .get("/api/countries")
+        .get(`/api/countries/${localStorage.getItem("appLang")}`)
         .then((res) => {
           console.log(res.data.countries)
           this.cities = res.data.countries
@@ -116,7 +116,7 @@ export default {
          </div>
            <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('primary_language') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5]" :class="{ 'p-invalid': submitted && !child.lang }" />
+                    <Dropdown filter required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5]" :class="{ 'p-invalid': submitted && !child.lang }" />
                     <small v-if="submitted && !child.lang" class="p-invalid text-red-600" > {{$t("primary_language") + ' ' + $t("required") }}.</small>
                   </div>
             <div class="flex flex-column gap-2">
@@ -146,7 +146,7 @@ export default {
                   </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full" :class="{ 'p-invalid': submitted && !child.nationalty }" />
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty" filter  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full" :class="{ 'p-invalid': submitted && !child.nationalty }" />
                     <small v-if="submitted && !child.nationalty" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small>
             </div>
       <div class="card text-center py-3">

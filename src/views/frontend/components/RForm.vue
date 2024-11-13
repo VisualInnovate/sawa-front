@@ -45,55 +45,47 @@
       </p>
       <!-- End Alert -->
 
-      <form class="">
+      <form @submit.prevent="addChild">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 ">
           <!--  Child Name -->
   
             <div class="lg:col-span-2 flex flex-column gap-2">
-                  <label class="w-full font-bold " for="username">{{ $t('Full_Name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.name" :placeholder='$t("Full_Name")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                  <label class="w-full font-bold " for="username">{{ $t('Full_Name') }}  </label>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.name"  :class="{ 'p-invalid': submitted && !child.name}" />
             </div>
             <div class="flex flex-column gap-2">
                     <label class="font-bold" for="username">{{ $t('date_of_birth') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar   v-model="child.birth_date" showIcon  :placeholder='$t("date_of_birth")'  :maxDate="maxDate" />   
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_date">{{ error.birth_date[0] }}</div>
+                    <Calendar  style="width: 100%" showButtonBar   v-model="child.birth_date" showIcon  :class="{ 'p-invalid': submitted && !child.birth_date}"  :maxDate="maxDate" />   
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full font-bold " for="username">{{ $t('place_of_birth') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :placeholder='$t("place_of_birth")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_place">{{ error.birth_place[0] }}</div>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :class="{ 'p-invalid': submitted && !child.birth_place}" />
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full font-bold " for="username">{{ $t('address') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :placeholder='$t("address")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.address">{{ error.address[0] }}</div>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :class="{ 'p-invalid': submitted && !child.address}" />
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full font-bold " for="username">{{ $t('national_id') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :placeholder='$t("national_id")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.national_id">{{ error.national_id[0] }}</div>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :class="{ 'p-invalid': submitted && !child.national_id}" />
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full font-bold " for="username">{{ $t('Type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.gender">{{ error.gender[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :class="{ 'p-invalid': submitted && !child.gender}" class="w-full " />
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full font-bold " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.nationalty">{{ error.nationalty[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty" filter  option-value="nationality" :options="cities" optionLabel="nationality" :class="{ 'p-invalid': submitted && !child.nationalty}" class="w-full " />
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full font-bold " for="username">{{ $t('primary_language') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.lang">{{ error.lang[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :class="{ 'p-invalid': submitted && !child.lang}" class="w-full " />
             </div>
         
       
             <div class="flex flex-column gap-2 w-full ">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="addChild" class="create m-auto w-full " :label='$t("Register_now")'></Button>
+                  <Button @click="submitted=true" type="submit" class="create m-auto w-full " :label='$t("Register_now")'></Button>
                   <small id="username-help"></small>
               </div>
         </div>
@@ -126,6 +118,7 @@ export default {
       error:{},
       alert_text: "",
       show_alert: false,
+      submitted:false,
       child: { },
     };
   },
@@ -168,7 +161,7 @@ export default {
 
     getCountries() {
       axios
-        .get("/api/countries")
+      .get(`/api/countries/${localStorage.getItem("appLang")}`)
         .then((res) => {
           console.log(res.data.countries)
           this.cities = res.data.countries

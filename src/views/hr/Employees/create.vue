@@ -20,7 +20,7 @@
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.national_id"  option-value="id" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full " :class="{ 'p-invalid': submitted && !employee.national_id }" />
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.national_id" filter option-value="id" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full " :class="{ 'p-invalid': submitted && !employee.national_id }" />
                     <small v-if="submitted && !employee.national_id" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small> 
                 </div>
                 
@@ -125,7 +125,7 @@
             this.departments=response.data.data
           })
           axios
-        .get("/api/countries")
+          .get(`/api/countries/${localStorage.getItem("appLang")}`)
         .then((res) => {
          
           this.cities = res.data.countries

@@ -191,7 +191,6 @@ const uploadFile = (e) => {
 
 const createuser=()=>{
   const body = new FormData();
-  console.log(usersdata.value.name)
     body.append("name", usersdata.value.name);
     body.append("email", usersdata.value.email);
     body.append("title", usersdata.value.title);
@@ -454,7 +453,7 @@ const initFilters = () => {
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="">
-                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src="'https://sawa.sawa.academy/'+usersdata.image" >
+                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src="usersdata.image" >
                   <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-else src="../frontend/image/Ellipse2.png" >
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
                   </div>

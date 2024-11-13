@@ -42,7 +42,7 @@ export default {
         })
       
         axios
-        .get("/api/countries")
+        .get(`/api/countries/${localStorage.getItem("appLang")}`)
         .then((res) => {
           console.log(res.data.countries)
           this.cities = res.data.countries
