@@ -7,13 +7,13 @@
       <div class="backdrop-blur-sm bg-white/30 p-6">
         <div class="mx-auto lg:py-0">
           <div class="mb-4 text-center">
-            <h1 class="text-3xl py-2 font-bold text-[#FF2A5B] pb-3">
+            <h1 class="text-3xl py-2 font-bold sec2 pb-3">
               {{ $t("Book_an_appointment") }}
             </h1>
-            <p class="text-xl text-[#6D9AA0]">
+            <p class="text-xl sec1">
               {{ $t("Consult_doctors_for_your_child_condition") }}
             </p>
-            <p class="text-xl text-[#6D9AA0]">
+            <p class="text-xl sec1">
               {{
                 $t(
                   "And_communicate_correctly_to_give_you_the_appropriate_diagnosis"
@@ -27,34 +27,36 @@
         <p class="pb-4 text-3xl font-bold">
           {{ $t("Book_an_appointment_with_the_specialist") }}
         </p>
-        <p class="text-[#3AD0FF] text-xl">
+        <p class="sec1 text-xl">
           {{ $t("You_can_choose_the_appropriate") }}
         </p>
       </div>
       <div class="p-[5%]">
         <v-table class="border-2 border-[#967a80] " style="overflow: scroll;">
           <thead>
-            <tr class="bg-[#135C65] border-b-2 border-[#474042]">
+            <tr class="details border-b-2 border-[#474042]">
               <th
                 class="text-white w-52 text-center"
                 v-for="(event, key) in tableEvent"
               >
-                {{ key }}
+                {{ $t(key) }}
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-if="events.events" v-for="i in events.max">
+            <tr  v-if="events.events && events.max" v-for="i in events.max">
               <td
                 class="w-60"
                 style="position: relative; padding: 0 0.3rem"
                 v-if="events.max"
                 v-for="j in Object.keys(events.events).length"
               >
+              
                 <diV
-                  v-if="Object.values(tableEvent)[j - 1][i - 1]"
+                  v-if="Object.values(tableEvent)[j-1 ][i-1 ]"
                   class="rounded-full border-2 border-gray-500 w-full py-2"
                 >
+
                   <p
                     class="m-auto text-right w-full px-1 item hover:hidden lg:hover:block text-[11px] text-gray-700 font-medium"
                     v-if="events.events"
@@ -68,7 +70,7 @@
                     @click="submit(Object.values(tableEvent)[j - 1][i - 1]?.id)"
                     class="top-[30%] left-0 text-sm trans pr-2  font-medium rounded-full px-2"
                   >
-                    احجز الان
+                     {{ $t("book_now") }}
                   </button>
                 </diV>
                 <div v-else class="rounded-full w-full">

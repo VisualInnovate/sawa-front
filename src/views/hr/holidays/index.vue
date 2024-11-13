@@ -6,14 +6,15 @@ import {ref, onMounted, onBeforeMount} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const toast = useToast()
 const router = useRouter()
-
+const submitted=ref(false)
 const loading = ref(true)
 const user = ref({})
-const error = ref('')
 const users = ref(null)
-const productDialog = ref(false)
 const deleteDialog = ref(false)
 const confir_id=ref('')
 const selectedProducts = ref(null)
@@ -61,7 +62,7 @@ const edit=(id)=>{
 
 ///// update
 
-const updateitem=()=>{
+const update=()=>{
     holiday.value.date = moment(holiday.value.dat).format("YYYY-MM-DD" );
     axios
     .put(`/api/holidays/${confir_id.value}`,holiday.value)
@@ -69,11 +70,13 @@ const updateitem=()=>{
       console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_update_success")}`, life: 3000 });
+
       holiday.value = ref({})
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+
     })
 }
 
@@ -98,11 +101,11 @@ const create=()=>{
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_add_success")}`, life: 3000 });
       holiday.value = ref({})
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
     })
 }
 const deleteAction = () => {
@@ -112,9 +115,12 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_delete_success")}`, life: 3000 });
+
     })
-    .catch(() => {})
+    .catch(() => {
+      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+    })
 
 }
 
@@ -128,7 +134,7 @@ const initFilters = () => {
   filters.value = {
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
   }
-}
+};
 </script>
 
 <template>
@@ -250,34 +256,40 @@ const initFilters = () => {
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <form @submit.prevent="create">
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
+                <small v-if="submitted && !holiday.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
+
             </div>
             <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" for="username">{{ $t('holiday_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon  :placeholder='$t("holiday_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
+                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon   :class="{ 'p-invalid': submitted && !holiday.date}"  />   
+                   <small v-if="submitted && !holiday.date" class="p-invalid text-red-600 w-full text-center" > {{$t("holiday_date") + ' ' + $t("required") }}.</small>  
+                  </div> 
            <div class="w-full text-center">
-            <Button @click="create" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
+            <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+           </div>  
+          </form>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <form @submit.prevent="update">
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
+                <small v-if="submitted && !holiday.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
+
             </div>
             <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" for="username">{{ $t('holiday_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon  :placeholder='$t("holiday_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
+                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon   :class="{ 'p-invalid': submitted && !holiday.date}"  />   
+                   <small v-if="submitted && !holiday.date" class="p-invalid text-red-600 w-full text-center" > {{$t("holiday_date") + ' ' + $t("required") }}.</small>  
+                  </div> 
            <div class="w-full text-center">
-            <Button @click="updateitem" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
+            <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+           </div>  
+          </form>
         </Dialog>
       </div>
       </va-card>

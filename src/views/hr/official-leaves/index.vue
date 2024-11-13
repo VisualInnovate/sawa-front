@@ -129,47 +129,46 @@
         </Dialog>
         <Dialog v-model:visible="RequestDialog" :style="{ width: '550px' }" :header='$t("add_official_leaves")' :modal="true"
                 class="p-fluid">
+               <form @submit.prevent="create">
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                    <InputText required class="bg-[#f7f5f5] text-center" v-model="leave.title" :placeholder='$t("title")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-                </div>
+                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.title"  :class="{ 'p-invalid': submitted && !leave.title}"/>
+                    <small v-if="submitted && !leave.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
+                  </div>
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('location') }}</label>
-                    <InputText required class="bg-[#f7f5f5] text-center" v-model="leave.location" :placeholder='$t("location")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.location">{{ error.location[0] }}</div>
+                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.location" :class="{ 'p-invalid': submitted && !leave.location}"  />
+                    <small v-if="submitted && !leave.location" class="p-invalid text-red-600 w-full text-center" > {{$t("location") + ' ' + $t("required") }}.</small>  
                 </div>
               
             
             
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username ">{{ $t('start_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :placeholder='$t("start_date")'   />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.start">{{ error.start[0] }}</div>
+                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
+                    <small v-if="submitted && !leave.start" class="p-invalid text-red-600 w-full text-center" > {{$t("start_date") + ' ' + $t("required") }}.</small>  
 
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('end_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :placeholder='$t("end_date")'  />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.end">{{ error.end[0] }}</div>
-
+                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
+                    <small v-if="submitted && !leave.end" class="p-invalid text-red-600 w-full text-center" > {{$t("end_date") + ' ' + $t("required") }}.</small>  
                 </div> 
             
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('Employees') }}</label>
-                    <MultiSelect filter required id="pv_id_1" style="direction: ltr !important;" v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name" :placeholder='$t("Employees")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.assigners">{{ error.assigners[0] }}</div>
-                </div>
+                    <MultiSelect filter  id="pv_id_1" style="direction: ltr !important;" v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name"  :class="{ 'p-invalid': submitted && !leave.assigners}"  class="w-full" />
+                     <small v-if="submitted && !leave.assigners" class="p-invalid text-red-600 w-full text-center" > {{$t("Employees") + ' ' + $t("required") }}.</small>                  </div>
              
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('lat') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="leave.lat" :placeholder='$t("lat")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.lat">{{ error.lat[0] }}</div>
+                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.lat" :class="{ 'p-invalid': submitted && !leave.lat}" />
+                    <small v-if="submitted && !leave.lat" class="p-invalid text-red-600 w-full text-center" > {{$t("lat") + ' ' + $t("required") }}.</small>  
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('long') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="leave.long" :placeholder='$t("long")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.long">{{ error.long[0] }}</div>
+                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.long" :class="{ 'p-invalid': submitted && !leave.long}" />
+                    <small v-if="submitted && !leave.long" class="p-invalid text-red-600 w-full text-center" > {{$t("long") + ' ' + $t("required") }}.</small>  
                 </div> 
              
         
@@ -181,57 +180,55 @@
               :options="{ position: { lat: parseFloat(location.latitude)		, lng: parseFloat(location.longitude) } }"/>
          
                  </GoogleMap>
-
+              
                 </div>
-          <template #footer>
-            <Button :label='$t("cancel")'  icon="pi pi-times" class="p-button-text" @click="hideDialogRequest"/>
-            <Button :label='$t("save")' icon="pi pi-check" class="p-button-text" @click="saveRequest"/>
-          </template>
+                <Button :label='$t("save")' icon="pi pi-check " class="create" @click="submitted=true"/>
+               </form>
+        
         </Dialog>     
         
         <Dialog v-model:visible="updata" :style="{ width: '450px' }" :header='$t("add_official_leaves")' :modal="true"
                 class="p-fluid">
+                <form @submit.prevent="updatel">
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                    <InputText required class="bg-[#f7f5f5] text-center" v-model="leave.title" :placeholder='$t("title")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-                </div>
+                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.title"  :class="{ 'p-invalid': submitted && !leave.title}"/>
+                    <small v-if="submitted && !leave.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
+                  </div>
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('location') }}</label>
-                    <InputText required class="bg-[#f7f5f5] text-center" v-model="leave.location" :placeholder='$t("location")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.location">{{ error.location[0] }}</div>
+                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.location" :class="{ 'p-invalid': submitted && !leave.location}"  />
+                    <small v-if="submitted && !leave.location" class="p-invalid text-red-600 w-full text-center" > {{$t("location") + ' ' + $t("required") }}.</small>  
                 </div>
               
             
             
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username ">{{ $t('start_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :placeholder='$t("start_date")'   />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.start">{{ error.start[0] }}</div>
+                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
+                    <small v-if="submitted && !leave.start" class="p-invalid text-red-600 w-full text-center" > {{$t("start_date") + ' ' + $t("required") }}.</small>  
 
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('end_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :placeholder='$t("end_date")'  />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.end">{{ error.end[0] }}</div>
-
+                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
+                    <small v-if="submitted && !leave.end" class="p-invalid text-red-600 w-full text-center" > {{$t("end_date") + ' ' + $t("required") }}.</small>  
                 </div> 
             
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('Employees') }}</label>
-                    <MultiSelect filter required id="pv_id_1" style="direction: ltr !important;" v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name" :placeholder='$t("Employees")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.assigners">{{ error.assigners[0] }}</div>
-                </div>
+                    <MultiSelect filter  id="pv_id_1" style="direction: ltr !important;" v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name"  :class="{ 'p-invalid': submitted && !leave.assigners}"  class="w-full" />
+                     <small v-if="submitted && !leave.assigners" class="p-invalid text-red-600 w-full text-center" > {{$t("Employees") + ' ' + $t("required") }}.</small>                  </div>
              
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('lat') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="leave.lat" :placeholder='$t("lat")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.lat">{{ error.lat[0] }}</div>
+                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.lat" :class="{ 'p-invalid': submitted && !leave.lat}" />
+                    <small v-if="submitted && !leave.lat" class="p-invalid text-red-600 w-full text-center" > {{$t("lat") + ' ' + $t("required") }}.</small>  
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('long') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="leave.long" :placeholder='$t("long")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.long">{{ error.long[0] }}</div>
+                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.long" :class="{ 'p-invalid': submitted && !leave.long}" />
+                    <small v-if="submitted && !leave.long" class="p-invalid text-red-600 w-full text-center" > {{$t("long") + ' ' + $t("required") }}.</small>  
                 </div> 
              
         
@@ -243,13 +240,10 @@
               :options="{ position: { lat: parseFloat(location.latitude)		, lng: parseFloat(location.longitude) } }"/>
          
                  </GoogleMap>
-
+              
                 </div>
-
-          <template #footer>
-            <Button :label='$t("cancel")'  icon="pi pi-times" class="p-button-text" @click="hideDialogRequest"/>
-            <Button :label='$t("save")' icon="pi pi-check" class="p-button-text" @click="updatel"/>
-          </template>
+                <Button :label='$t("save")' icon="pi pi-check " class="create" @click="submitted=true"/>
+               </form>
         </Dialog>     
         
 

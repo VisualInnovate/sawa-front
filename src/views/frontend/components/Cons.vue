@@ -459,7 +459,7 @@ show_alert:false,
   methods: {
     async bookTime() {
       this.errors = null;
-      this.booking.user_id = this.parentStore.user.id;
+      this.booking.user_id=localStorage.getItem("parent_id")
       this.booking.event_id = this.event_id;
       this.alert_text = null;
       this.show_alert = false;
@@ -526,6 +526,7 @@ show_alert:false,
    
     this.getEvent();
     this.getChilds();
+   
     console.log(this.event_id);
   },
 };

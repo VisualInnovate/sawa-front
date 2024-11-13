@@ -7,12 +7,14 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
-
+const submitted=ref(false)
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
 const deductions = ref(null)
-const productDialog = ref(false)
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const deleteDialog = ref(false)
 const confir_id=ref('')
 const selectedProducts = ref(null)
@@ -46,7 +48,7 @@ onMounted(() => {
 fetchData()
 
 })
-const edit=(id)=>{
+const show=(id)=>{
     axios.get(`/api/deduction-types/${id}`).then((res)=>{
     loading.value= false
     deduction.value= res.data.data
@@ -60,24 +62,26 @@ const edit=(id)=>{
 
 ///// update
 
-const editeskills=()=>{
+const edit=()=>{
     axios
     .put(`/api/deduction-types/${confir_id.value}`,deduction.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_update_success")}`, life: 3000 });
       deduction.value = ref({})
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+
     })
 }
 
 const openNew = () => {
     createdialog.value=!(createdialog.value)
     deduction.value={}
+    submitted.value=false
 }
 
 const confirmDelete = (id) => {
@@ -88,18 +92,20 @@ const confirmDelete = (id) => {
 
 }
 
-const createskill=()=>{
+const create=()=>{
     axios
     .post('/api/deduction-types',deduction.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_add_success")}`, life: 3000 });
+
       deduction.value = ref({})
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+
     })
 }
 const deleteAction = () => {
@@ -109,9 +115,11 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_delet_success")}`, life: 3000 });
     })
-    .catch(() => {})
+    .catch(() => {
+      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+        })
 
 }
 
@@ -196,7 +204,7 @@ const initFilters = () => {
                 v-can="'skills edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
+                @click="show(slotProps.data.id)"
               />
                 <Button
                 v-can="'skills delete'"
@@ -225,24 +233,34 @@ const initFilters = () => {
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+           <form @submit.prevent="create" >
+
+            
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('deduction_title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="deduction.title" :placeholder='$t("deduction_title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                  <p class="w-full text-right" for="username">{{ $t('deduction_title') }}</p>
+                <InputText  class="bg-[#f7f5f5] " v-model="deduction.title" :class="{ 'p-invalid': submitted && !deduction.title }" />
+                <small v-if="submitted && !deduction.title" class="p-invalid text-red-600 w-full text-center" > {{$t("deduction_title") + ' ' + $t("required") }}.</small>  
+
             </div>
            <div class="w-full text-center">
-            <Button @click="createskill" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
+            <Button @click="submitted=true" type="submit" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+           </div> 
+           </form>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+          <form @submit.prevent="edit" >
+
+            
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('deduction_title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center"  v-model="deduction.title" :placeholder='$t("deduction_title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                  <p class="w-full text-right" for="username">{{ $t('deduction_title') }}</p>
+                <InputText  class="bg-[#f7f5f5] " v-model="deduction.title" :class="{ 'p-invalid': submitted && !deduction.title }" />
+                <small v-if="submitted && !deduction.title" class="p-invalid text-red-600 w-full text-center" > {{$t("deduction_title") + ' ' + $t("required") }}.</small>  
+
             </div>
-           <div class="w-full text-center">
-            <Button @click="editeskills" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
+            <div class="w-full text-center">
+            <Button @click="submitted=true" type="submit" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            </div> 
+          </form>
         </Dialog>
       </div>
       </va-card>
