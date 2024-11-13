@@ -8,6 +8,7 @@ export default {
   data: () => ({
     maxDate: new Date(),
     pasrents:{},
+    submitted:false,
     toast:useToast(),
     NameRules: [
       value => {
@@ -88,11 +89,11 @@ export default {
     <v-sheet max-width="1200" class="mx-auto">
      
     
-      <v-form class="animate__animated animate__zoomIn  p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-3 shadow-lg" fast-fail @submit.prevent>
+      <form @submit.prevent="submit" class="animate__animated animate__zoomIn  p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-3 shadow-lg" fast-fail >
         <div class="flex flex-column gap-2 py-2">
                 <label for="username">{{ $t('child_name') }}</label>
-              <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' />
-              <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+              <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' :class="{ 'p-invalid': submitted && !child.name }" />
+              <small v-if="submitted && !child.name" class="p-invalid text-red-600" > {{$t("child_name") + ' ' + $t("required") }}.</small>
          </div>
          <div class="flex flex-column gap-2 py-2">
                 <label for="username">{{ $t('birth_date') }}</label>
@@ -103,49 +104,51 @@ export default {
             showIcon
             placeholder="dd/mm/yy"
             :maxDate="maxDate"
+            :class="{ 'p-invalid': submitted && !child.birth_date }"
 
           />
-              <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_date">{{ error.birth_date[0] }}</div>
+          <small v-if="submitted && !child.birth_date" class="p-invalid text-red-600" > {{$t("birth_date") + ' ' + $t("required") }}.</small>
+
          </div>
            <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('primary_language') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.lang">{{ error.lang[0] }}</div>
-            </div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5]" :class="{ 'p-invalid': submitted && !child.lang }" />
+                    <small v-if="submitted && !child.lang" class="p-invalid text-red-600" > {{$t("primary_language") + ' ' + $t("required") }}.</small>
+                  </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('parent_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.parent_id"  option-value="id" :options="pasrents" optionLabel="fname" :placeholder='$t("parent_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.parent_id">{{ error.parent_id[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.parent_id"  option-value="id" :options="pasrents" optionLabel="fname" :placeholder='$t("parent_name")' class="w-full bg-[#f7f5f5] " :class="{ 'p-invalid': submitted && !child.parent_id }" />
+                    <small v-if="submitted && !child.parent_id" class="p-invalid text-red-600" > {{$t("parent_name") + ' ' + $t("required") }}.</small>
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full " for="username">{{ $t('place_of_birth') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :placeholder='$t("place_of_birth")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.birth_place">{{ error.birth_place[0] }}</div>
-            </div>
+                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :placeholder='$t("place_of_birth")' :class="{ 'p-invalid': submitted && !child.birth_place }"/>
+                <small v-if="submitted && !child.birth_place" class="p-invalid text-red-600" > {{$t("place_of_birth") + ' ' + $t("required") }}.</small>
+              </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full  " for="username">{{ $t('address') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :placeholder='$t("address")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.address">{{ error.address[0] }}</div>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :placeholder='$t("address")' :class="{ 'p-invalid': submitted && !child.address }"/>
+                <small v-if="submitted && !child.address" class="p-invalid text-red-600" > {{$t("address") + ' ' + $t("required") }}.</small>
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full  " for="username">{{ $t('national_id') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :placeholder='$t("national_id")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.national_id">{{ error.national_id[0] }}</div>
+                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :placeholder='$t("national_id")' :class="{ 'p-invalid': submitted && !child.national_id }"/>
+                <small v-if="submitted && !child.address" class="p-invalid text-red-600" > {{$t("address") + ' ' + $t("required") }}.</small>
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full " for="username">{{ $t('Type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.gender">{{ error.gender[0] }}</div>
-            </div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")' class="w-full " :class="{ 'p-invalid': submitted && !child.gender }" />
+                    <small v-if="submitted && !child.gender" class="p-invalid text-red-600" > {{$t("Type") + ' ' + $t("required") }}.</small>
+                  </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.nationalty">{{ error.nationalty[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="nationality" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full" :class="{ 'p-invalid': submitted && !child.nationalty }" />
+                    <small v-if="submitted && !child.nationalty" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small>
             </div>
       <div class="card text-center py-3">
-        <Button type="submit" @click="submit" :label='$t("submit")' class="create w-[90%] lg:w-[50%]"/>
+        <Button type="submit"  @click="submitted =true" :label='$t("submit")' class="create w-[90%] lg:w-[50%]"/>
     </div>   
-      </v-form>
+      </form>
       <Toast/>
     </v-sheet>
   </div>

@@ -1,131 +1,73 @@
 <script setup>
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
+import {GoogleMap, Marker, Circle} from "vue3-google-map";
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
-import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n'
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+
+  const { t } = useI18n()
 const toast = useToast()
-const router = useRouter()
-const allusers=ref([])
+const location = ref(
+    {name: '', latitude: '', longitude: '', distance: 1000}
+)
 const loading = ref(true)
-const user = ref({})
-const error = ref('')
-const users = ref(null)
-const productDialog = ref(false)
-const deleteDialog = ref(false)
-const confir_id=ref('')
-const selectedProducts = ref(null)
-const dt = ref(null)
+const department=ref('')
+const settings = ref({})
+const edditing=ref({
+  editelong:true,
+  editelate:true
+})
 const filters = ref({})
-const createdialog=ref(false)
-const company_long=ref('')
-const company_lat=ref('')
-const employee=ref({})
-const updatedialog=ref(false)
+const submitted = ref(false)
+const delete_id =ref(Number)
 
 onBeforeMount(() => {
   initFilters()
 })
-  const getallusers=()=>{
-    axios.post("/api/users").then((res)=>{  
-    allusers.value= res.data.users.data
-    
-  });
-  }
+
  const fetchData= ()=>{
 
 
-  axios.get("/api/settings").then((res)=>{
+  axios.get("api/settings").then((res)=>{
     loading.value= false
-    users.value= res.data.data
-    company_long.value=res.data.data[0].company_long
-    company_lat.value=res.data.data[0].company_lat
-    console.log(users.value)
+    settings.value= res.data.data[0]
+    location.value.latitude=settings.value.company_lat
+    location.value.longitude=settings.value.company_long
 
   });
- 
-
 
 }
-
-
+function handleMapClick(event) {
+  const clickedLatLng = event.latLng; // LatLng object representing the clicked coordinates
+  const lat = clickedLatLng.lat();
+  const lng = clickedLatLng.lng();
+  settings.value.company_long= lng;
+  settings.value.company_lat = lat;
+  console.log('Clicked coordinates:', lat, lng);
+  // Do something with the latitude and longitude values
+}
 
 onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
+
 fetchData()
-getallusers()
 
 })
-const edit=(id)=>{
-  updatedialog.value=!(updatedialog.value)
-
-}
 
 
 
-///// update
-
-const editescrud=()=>{
-    axios
-    .put(`/api/settings`,{
-      company_long:company_long.value,
-      company_lat:company_lat.value
-    })
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
- 
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-
-const openNew = () => {
-    createdialog.value=!(createdialog.value)
-}
-
-const confirmDelete = (id) => {
-  console.log(id)
-  deleteDialog.value = true
-  confir_id.value=id
- 
-
-}
-
-const createcrude=()=>{
-    axios
-    .post('/api/payroll/',employee.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      skill.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-const deleteAction = () => {
-  axios
-    .delete(`/api/employees/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
-      deleteDialog.value=false
-      fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-    })
-    .catch(() => {})
-
-}
 
 
-const exportCSV = () => {
-  dt.value.exportCSV()
+const update =()=>{
+  console.log(settings.value)
+  axios.put(`api/settings`,settings.value).then((res)=>{
+    toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_update_success")}`, life: 3000 });
+
+    fetchData()
+  });
 }
 
 
@@ -133,145 +75,60 @@ const initFilters = () => {
   filters.value = {
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
   }
-}
+};
 </script>
 
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
-          <template #start>
-            <div class="my-2">
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
-            </div>
-          </template>
-
-          <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
-            <Button  v-can="'hr settings list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
-          </template>
-        </Toolbar>
-
+      <v-card class="card max-w-3xl p-[2%] m-auto bg-slate-50">
+              <h2 class="text-3xl py-1 font-bold text-center text-[#473e3e]">Hr Settings</h2>
         <Toast/>
+        <form @submit.prevent="update" class="grid lg:grid-cols-2 grid-cols-1 gap-4">
+          <div class="py-3">
+                  <GoogleMap api-key="AIzaSyDZnJeq94aaneiA3QWUZdWYV9uKDEjxjas" @click="handleMapClick"
+                  style="width: 100%; height: 400px;"
+                  :center="{ lat: 		parseFloat(location.latitude), lng: parseFloat(location.longitude)} " :zoom="14">
+                  <Marker
+                  :options="{ position: { lat: parseFloat(location.latitude)		, lng: parseFloat(location.longitude) } }"/>
+                
+                 </GoogleMap>
 
-
-      <div style="" class="shadow-xl ">
-        <DataTable
-          ref="dt"
-          v-model:selection="selectedProducts"
-          :value="users"
-          :loading="loading"
-          data-key="id"
-          :paginator="true"
-          :rows="10"
-          :filters="filters"
-          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
-          responsive-layout="scroll"
-          v-can="'hr settings list'"
-        >
-          <template #header>
-            <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("Settings") }}</h5>
-             <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
-                <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
-              </div>
-            </div>
-          </template>
-
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-         
-
-        
-         
-           <Column field="company_long" :header='$t("company_lat")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.company_long }}
-            </template>
-           </Column> 
-           <Column field="company_lat" :header='$t("company_lat")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.company_lat}}
-            </template>
-           </Column> 
-          <Column header-style="min-width:10rem;">
-            <template #body="slotProps">
-              <div >
-                <Button
-                v-can="'hr settings edit'"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
-              
-              </div>
-            </template>
-          </Column>
-
-
-
-        </DataTable>
-        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
           </div>
-          <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
-          </template>
-        </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('users') }}</label>
-                  <MultiSelect v-model="employee.employees_ids"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-              
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+       <div class="m-auto w-full">
+        <div class="field mb-5">
+            <p for="last">{{ $t("company_long") }} </p>
+            <div class="flex">
+              <InputText readonly   v-model="settings.company_long"   class="mt-3 w-full" id="last"  required autofocus   :class="{ 'p-invalid': submitted && !settings.company_long }" />
             </div>
-           <div class="w-full text-center">
-            <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('company_lat') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center"  v-model="company_lat" :placeholder='$t("company_lat")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
+            <small v-if="submitted && !settings?.company_long" class="p-invalid text-red-600" > {{$t("company_long") + ' ' + $t("required") }}.</small>
+
+
+
+          </div>
+          
+          <div class="field mb-5">
+            <p for="last">{{ $t("company_lat") }} </p>
+            <div class="flex">
+              <InputText readonly   class="mt-3 mx-1 w-full" v-model="settings.company_lat" required="true"  :class="{ 'p-invalid': submitted && !settings.company_lat } " />
             </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('company_long') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center"  v-model="company_long" :placeholder='$t("company_long")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="editescrud" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-      </div>
-      </va-card>
+            <small v-if="submitted && !settings?.company_lat" class="p-invalid text-red-600" > {{$t("company_lat") + ' ' + $t("required") }}.</small>
+
+
+          </div>
+          <div class="flex ">
+            <Button @click="submitted=true"  type="submit" :label='$t("save")' icon="pi pi-check" class=" create " />
+
+          </div>
+
+       </div>
+
+        </form>
+
+      </v-card>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss"></style>
+

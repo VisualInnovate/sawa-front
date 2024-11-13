@@ -9,66 +9,55 @@
   <v-card>
     <div>
       <!-- ... existing code ... -->
-      <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-        <v-card>
-          <v-card-title>{{ $t("Success!") }}</v-card-title>
-          <v-card-text>
-            {{ $t("Data seeded successfully!") }}
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="closeSuccessModal" color="success">
-              {{ $t("OK") }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
-        <!-- ... existing code ... -->
-          
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('employee_name') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.user_id"  option-value="id" :options="users" optionLabel="name" :placeholder='$t("employee_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.user_id">{{ error.user_id[0] }}</div>
-              </div>
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('Nationality') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.national_id"  option-value="id" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.national_id">{{ error.national_id[0] }}</div>
-              </div>
-              
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('department_name') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.department_id"  option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.department_id">{{ error.department_id[0] }}</div>
-              </div>
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('shift_name') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.shift_id"  option-value="id" :options="shifts" optionLabel="title" :placeholder='$t("shift_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.shift_id">{{ error.shift_id[0] }}</div>
-              </div>
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('position_name') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.position_id"  option-value="id" :options="positions" optionLabel="title" :placeholder='$t("position_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.position_id">{{ error.position_id[0] }}</div>
-              </div>
-
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('basic_salary') }}</label>
-                  <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.basic_salary" :placeholder='$t("basic_salary")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.basic_salary">{{ error.basic_salary[0] }}</div>
-              </div> 
+     
+      <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="update">
+          <!-- ... existing code ... -->
             
-             
-  
-              <div class="flex flex-column gap-2 w-full">
-                <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
-                <small id="username-help"></small>
-              </div>
-              
+                <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('employee_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.user_id"  option-value="id" :options="users" optionLabel="name" :placeholder='$t("employee_name")' class="w-full "  :class="{ 'p-invalid': submitted && !employee.user_id }"/>
+                    <small v-if="submitted && !employee.user_id" class="p-invalid text-red-600" > {{$t("employee_name") + ' ' + $t("required") }}.</small>  
+                </div>
+                <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('Nationality') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.national_id"  option-value="id" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full " :class="{ 'p-invalid': submitted && !employee.national_id }" />
+                    <small v-if="submitted && !employee.national_id" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small> 
+                </div>
+                
+                <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('department_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.department_id"  option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department_name")' class="w-full " :class="{ 'p-invalid': submitted && !employee.department_id }"/>
+                      <small v-if="submitted && !employee.department_id" class="p-invalid text-red-600" > {{$t("department_name") + ' ' + $t("required") }}.</small> 
+                    </div>
+                <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('shift_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.shift_id"  option-value="id" :options="shifts" optionLabel="title" :placeholder='$t("shift_name")' class="w-full  "  :class="{ 'p-invalid': submitted && !employee.shift_id }"/>
+                    <small v-if="submitted && !employee.shift_id" class="p-invalid text-red-600" > {{$t("shift_name") + ' ' + $t("required") }}.</small>  
 
-      
-      </v-form>
+                </div>
+                <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('position_name') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.position_id"  option-value="id" :options="positions" optionLabel="title" :placeholder='$t("position_name")' class="w-full "  :class="{ 'p-invalid': submitted && !employee.position_id }"/>
+                    <small v-if="submitted && !employee.position_id" class="p-invalid text-red-600" > {{$t("position_name") + ' ' + $t("required") }}.</small>  
+                </div>
+
+                <div class="flex flex-column gap-2">
+                    <label for="username">{{ $t('basic_salary') }}</label>
+                    <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.basic_salary" :placeholder='$t("basic_salary")' :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
+                    <small v-if="submitted && !employee.basic_salary" class="p-invalid text-red-600" > {{$t("basic_salary") + ' ' + $t("required") }}.</small>  
+                </div> 
+              
+               
+    
+                <div class="flex flex-column gap-2 w-full">
+                  <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
+                  <Button @click="submitted=true" type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <small id="username-help"></small>
+                </div>
+                
+  
+        
+        </form>
 <toast></toast>
       <!-- ... existing code ... -->
     </div>
@@ -158,13 +147,12 @@ export default {
    
     
   
-    createtreatment() {
+    update() {
     
-      axios.post(`/api/employees/import/users`,this.employee).then((res) => {
-        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
-      }).catch((el)=>{
-        console.log(el.response.data.errors.name)
-     this.error = el.response.data.errors
+      axios.post(`/api/employees/${this.$route.params.id}`,this.employee).then((res) => {
+        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_update_success"), life: 3000 });
+        }).catch((el)=>{
+          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: this.$t("mission_error"), life: 3000 });
     })
     },
    

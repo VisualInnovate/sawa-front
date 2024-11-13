@@ -201,14 +201,28 @@ const initFilters = () => {
 
         
          
-           <Column field="name" :header='$t("employee_payroll")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="employee.name " :header='$t("employee_payroll")' :sortable="true" header-style="width:20%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.employee.name }}
             </template>
            </Column>
 
-      
-          
+           <Column field="base_salary" :header='$t("basic_salary")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.base_salary }}
+            </template>
+           </Column>
+           <Column field="deduction" :header='$t("deduction_mount")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.deduction }}
+            </template>
+           </Column>
+           <Column field="bonus" :header='$t("bonus")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.bonus }}
+            </template>
+           </Column>
+           
 
 
         

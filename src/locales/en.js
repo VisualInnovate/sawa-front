@@ -367,6 +367,12 @@ merge:"Merge",
   sumi_test:"Test reinforcers",
   sumi_end:"End reinforcers",
   ///////////////////////////////////
+  success_message:"success message",
+  element_delet_success:"   element delet success",
+element_update_success:" element update success ",
+element_add_success:" element add success ",
+mission_error:" task has not been completed",
+error:"error",
   deduction_title:"deduction title",
   deductions:"deductions",
   Employees:"Employees",
@@ -417,5 +423,6 @@ merge:"Merge",
    events:"ُvents",
     image:"image",
     shift_days:"shift days",
-    shift:"shift"
+    shift:"shift",
+     required:"required"
 };
