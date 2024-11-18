@@ -210,7 +210,7 @@
             child_id:localStorage.getItem("child_id"),
             consultant_id:localStorage.getItem("user_id"),
             evaluation_type:this.evalate.evaluation_type,
-            date:moment(this.evalate.datet).format("Y-MM-DD") ,
+            date:moment(this.evalate.date).format("Y-MM-DD") ,
             specialist_id:this.evalate?.specialist_id,
             start_time:this.evalate?.Session_time?.start,
             end_time:this.evalate?.Session_time?.end,
