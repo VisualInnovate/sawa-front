@@ -70,32 +70,35 @@
           </template>
         </Dialog>
       <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="">
+          <form @submit.prevent="create" class="">
                 
           
-            <div class="flex flex-column gap-2 py-1">
+            <div  class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.evaluation_type">{{ error.evaluation_type[0] }}</div>
+                  <Dropdown @update:model-value="getdoctor_evalte" required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !evalate.evaluation_type}" />
             </div>
-            <div class="flex flex-column gap-2 py-1">
+            <div v-if="evalate.evaluation_type" class="flex flex-column gap-2 py-1">
                   <label class="w-full text-right" for="username">{{ $t('Name_evaluator') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.specialist_id"  option-value="id" filter :options="doctors"  optionLabel="name" :placeholder='$t("Name_evaluator")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Dropdown @update:model-value="getDays" required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.specialist_id"  option-value="id" filter :options="doctors"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !evalate.specialist_id}"/>
+            </div>
+            <div v-if="evalate.specialist_id" class="flex flex-column gap-2">
+                    <label  class="w-full text-right" for="username">{{ $t('Evaluation_date') }}</label>
+                    <Calendar  @update:model-value="gettimes($event)"   :disabledDays="filteredDays"  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :class="{ 'p-invalid': submitted && !evalate.date}"  :minDate="maxDate" />   
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
+            </div> 
+            <div  v-if="evalate.date" class="flex flex-column gap-2 py-1">
+                  <label class="w-full text-right" for="username">{{ $t('hour_evaluator') }}</label>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.Session_time"   filter :options="slots"  optionLabel="key" :class="{ 'p-invalid': submitted && !evalate.Session_time}" class="w-full " />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">{{ error.specialist_id[0] }}</div>
             </div>
-            <div class="flex flex-column gap-2">
-                    <label  class="w-full text-right" for="username">{{ $t('Evaluation_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :placeholder='$t("Evaluation_date")'  :minDate="maxDate" />   
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-                </div> 
            
-            
-          </div>
-           
-            
-           <div class="w-full text-center">
-            <Button @click="createevaluate" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <div class="w-full text-center">
+            <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
+          </form>
+           
+            
+          
 
            
         </Dialog>
@@ -120,6 +123,10 @@
            details:[],
            evalate:{},
            error:{},
+           days:[0,1,2,3,4,5,6],
+           business_hours:[],
+           submitted:false,
+           slots:[],
            delete_id:0,
            doctors:{},
            deleteDialog:false,
@@ -145,7 +152,43 @@
         this.updatedialog=!(this.updatedialog)
       },
     
+      getdoctor_evalte(id){
+        axios
+          .post(`api/evaluation-doctors`,{
+            evaluation_type:id
+          })
+          .then((response) => {
+           
+            this.doctors = response.data.doctors
+           
+          })
+          .catch((error) => {
+              
+          });
 
+      },
+      getDays(id){
+        this.business_hours=this.doctors.find(item => item.id == id).business_hours
+        console.log(this.business_hours)
+      },
+      gettimes(e){
+        console.log()
+        axios
+          .post(`api/users/available/slots`,{
+            user_id:this.evalate.specialist_id,
+            evaluation_type:this.evalate.evaluation_type,
+            date:moment(e).format("Y-MM-DD") 
+          })
+          .then((response) => {
+           
+           this.slots=response.data.slots
+          })
+          .catch((error) => {
+              
+          });
+
+
+      },
       go_evaluate(id,type,child_id){
         if(type==2){
           this.$router.push({ name: 'milestone-resulte', params:{'id':child_id,'evla_id':id}});
@@ -161,24 +204,28 @@
         }
       },
 
-      createevaluate(){
+      create(){
         axios
           .post(`api/evaluation-request`,{
             child_id:localStorage.getItem("child_id"),
             consultant_id:localStorage.getItem("user_id"),
             evaluation_type:this.evalate.evaluation_type,
             date:moment(this.evalate.datet).format("Y-MM-DD") ,
-            specialist_id:this.evalate.specialist_id
+            specialist_id:this.evalate?.specialist_id,
+            start_time:this.evalate?.Session_time?.start,
+            end_time:this.evalate?.Session_time?.end,
+
 
           })
           .then((response) => {
             this.updatedialog=!(this.updatedialog)
-            this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+            this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_add_success")}`, life: 3000 });
+            
+            this.$router.push({ name: 'children-request' });
            
           })
           .catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
+            this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.$t("mission_error")}`, life: 3000 });
       });
 
       },
@@ -229,6 +276,14 @@
   
      
     },
+    computed: {
+    filteredDays() {
+      // Extract the `day` values from `business_hours`
+      const usedDays = this.business_hours.map(entry => entry.day);
+      // Filter `days` to only include those present in `usedDays`
+      return this.days.filter(day => !usedDays.includes(day));
+    },
+  },
     watch: {
       current_page(newVal, oldVal) {
       console.log(`Counter changed from ${oldVal} to ${newVal}`);
@@ -248,6 +303,8 @@
      this.getusers()
      this.getdoctors()
      this.child_id=localStorage.getItem("child_id") 
+
+     
     },
   };
   </script>

@@ -89,43 +89,8 @@ fetchData()
 
 })
 const edit=(id)=>{
-  usersdata.value.skills=[]
-  usersdata.value.department=[]
-    axios.get(`/api/users/${id}`).then((res)=>{
-    loading.value= false
- 
-    usersdata.value.role= res.data.roles.id
-   
-    usersdata.value.type= res.data.type
-    usersdata.value.image= res.data.image
-    usersdata.value.email= res.data.email
-    usersdata.value.spotter= res.data.spotter
-    usersdata.value.title= res.data.title
-    usersdata.value.name= res.data.name
-  
+  router.push({name:'user-update',params:{'id':id} })
 
-    for (let i =0 ; i < res.data.skills.length; i++) {
-     
-       
-          
-          usersdata.value.skills.push(res.data.skills[i].id);
-        
-
-}
-for (let i =0 ; i < res.data.departments.length; i++) {
-     
-
-       
-       usersdata.value.department.push(res.data.departments[i].id);
-     
-
-}
-   
-
-  });
-  console.log(usersdata.value.skills)
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
 }
 
 
@@ -327,7 +292,8 @@ const initFilters = () => {
            </Column>
            <Column field="image" :header='$t("personal_image")' :sortable="true" header-style="width:10%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              <img class="m-auto rounded-full" style="width: 100px ;height: 100px;" :src="slotProps.data.image">
+              
+              <img class="m-auto rounded-full" style="width: 100px ;height: 90px;" :src="slotProps.data.image">
              
             </template>
            </Column>

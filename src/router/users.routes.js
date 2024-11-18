@@ -31,7 +31,7 @@ const usersRoutes = [
   },
   // show
   {
-    path: "users/:id",
+    path: 'users/:id',
     name: "ShowUser",
     component: Show,
     meta: {
@@ -40,11 +40,11 @@ const usersRoutes = [
   },
   // edit
   {
-    path: "users/:id/edit",
-    name: "EditUser",
+    path: 'user-update/:id',
+    name: "user-update",
     component: Edit,
     meta: {
-      permissions: ["users.edit"],
+      permissions: ["users.create"],
     },
   },
 ];

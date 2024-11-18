@@ -1,267 +1,157 @@
 <template>
-  <div class="mt-6">
+  <v-card class="p-[1%]">
     <h1 class="border-b text-3xl w-full md:w-1/2 uppercase text-green-800 py-4">
       {{ $t("bookings") }} / {{ booking.requester_name }}
     </h1>
-    <div class="grid grid-cols-2 w-full mt-4 py-2">
+    <div class="w-full mt-4 py-2 ">
+     
+        <div class=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 bg-slate-50 gap-y-8 gap-x-4 shadow-md p-[1%]">
+
+        <div class="flex " v-if="booking.requester_name ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >{{ $t("applicant") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.requester_name }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.relative_degree ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("degree_closeness_child") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.relative_degree }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_name ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Full_Name") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_name }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_birth_place ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("place_of_birth") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_birth_place }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_birth_date ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("birth_date") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_birth_date }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_lang ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("primary_language") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_lang }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_nationalty ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Nationality") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_nationalty }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_national_id ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("national_number") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_national_id }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.child_address ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("address") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_address }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.requester_phone ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("phone_number") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.requester_phone }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.addtional_phone ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Additional_phone_number") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.addtional_phone }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.addtional_phone_owner ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("owner_extra_number") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.addtional_phone_owner }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.addtional_phone_degree ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("degree_closeness_child") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.addtional_phone_degree }}</p>
+
+        </div>
+        <div class="flex " v-if="booking.conversion_type ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("conversion_source") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.conversion_type }}</p>
+
+        </div>
+        
+        <div class="flex " v-if="booking.doctor_code ">
+          <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+          <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Specialist_code") }} :</p>
+          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.doctor_code }}</p>
+        </div>
+        
+        <div class="flex " v-if="booking.doctor_code ">
+         <Button @click="show_answer_modal = true" class="create" icon="pi pi-arrow-left" :label='$t("Answer_the_questions")'></Button>
+
+        </div>
+       
+        </div>
+        <div class="my-[2%] p-[1%] bg-slate-50">
+        
+        <div class="flex py-[1%]" v-if="doctor.name">
+              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("اسم الاستشاري") }} :</p>
+              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor.name }}</p>
+           </div>
+            <div class="flex py-[1%]" v-if="doctor.title">
+              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("title") }} :</p>
+              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor.title }}</p>
+            </div>
+            <div class="flex py-[1%]" v-if="booking.requester_name">
+              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("request_sender") }} :</p>
+              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.requester_name }}</p>
+            </div>
+        <div class="flex py-[1%]" v-if="event_data ">
+              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Consultation_date") }} :</p>
+              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{event_data }}</p>
+            </div>
+            <form @submit.prevent="updateBooking">
+              <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full t" for="username">{{ $t('change_of_specialist') }}</label>
+                  <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="doctor"  option-value="user_id" filter :options="new_doctors" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
+              </div>
+              <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full t" for="username">{{ $t('Submit_a_note') }}</label>
+                  <textarea name="notes" v-model="accept_notes" id="notes" class="border ring-1 ring-black border-black rounded-md focus:ring-black" cols="30" rows="4"></textarea>
+
+              </div>
+              <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full t" for="username">{{ $t('new_status') }}</label>
+                  <Dropdown  :style="{ backgroundColor: new_status === 1 ? '#10B981' : new_status === 2 ? '#EF4444' : new_status === 0 ? '#F59E0B' : 'transparent' }"                  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="new_status"  option-value="code" filter :options="status" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
+              </div>
+              <div class="flex flex-column gap-2 py-1 text-center">
+                <Button :label='$t("submit")' type="submit" class="create w-60" icon="pi pi-check"></Button>
+
+              </div>
+             
+            </form>
+          
+        </div>
       <!-- Left Side -->
-      <div
-        class="bg-gray-100 rounded-xl text-right pb-6 md:pb-0 px-6 mx-6 self-start"
-      >
-        <div
-          class="border-b relative py-8 flex flex-col items-center justify-center"
-        >
-          <div
-            class="w-full flex flex-col md:flex-row md:justify-between md:items-center"
-          >
-            <div
-              @click="changeDoctor(booking.event_date)"
-              class="cursor-pointer flex flex-row-reverse pt-4 pb-2 m-3"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="25"
-                height="25"
-                viewBox="0 0 36 36"
-              >
-                <path
-                  id="edit"
-                  d="M0,0V36H36V12.729l-5.906,5.906V30.094H5.906V5.906H17.365L23.271,0ZM31.5,0,29.195,2.305l4.5,4.5L36,4.5ZM28.107,3.393,14.915,16.585l4.5,4.5L32.607,7.893l-4.5-4.5ZM13.258,18.67c-.067,0-.135.006-.2.011v4.263h4.263A4.507,4.507,0,0,0,15.9,19.778a3.761,3.761,0,0,0-2.641-1.107Z"
-                />
-              </svg>
-              <p class="text-base font-bold px-2">
-                {{
-                  doctor
-                    ? $t("change_of_specialist")
-                    : $t("Choose_a_specialist")
-                }}
-              </p>
-            </div>
-            <div class="flex-1">
-              <select name="" id="" class="w-full" v-model="doctor">
-                <option v-for="new_doctor in new_doctors" :value="new_doctor">
-                  {{ new_doctor.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <img
-            v-if="doctor"
-            v-cloak
-            :src="doctor.image"
-            class="object-cover rounded-xl mt-12"
-            width="400"
-            alt=""
-            srcset=""
-          />
-          <p class="flex flex-col text-center py-2" v-if="doctor">
-            <span style="color: #00897b; font-size: 2rem">
-              {{ doctor.name }}
-            </span>
-            <span style="color: #00897b">{{ doctor.title }}</span>
-          </p>
-        </div>
-        <div>
-          <p class="py-2">
-            <span>
-              {{ $t("Consultation_date") }} :
-              <span style="color: #00897b">{{ event_data }}</span>
-            </span>
-          </p>
-          <div class="flex flex-col">
-            <label for="notes" class="my-2 w-full">
-              {{ $t("Submit_a_note") }} :
-            </label>
-            <textarea
-              name="notes"
-              v-model="accept_notes"
-              id="notes"
-              class="border ring-1 ring-black border-black rounded-md focus:ring-black"
-              cols="30"
-              rows="4"
-            ></textarea>
-          </div>
-          <p class="my-9 py-2 border-black">
-            <span class="">
-              {{ $t("request_sender") }} :
-              <span style="color: #00897b">{{ booking.requester_name }}</span>
-            </span>
-          </p>
-        </div>
-
-        <div class="flex flex-col relative">
-          <input
-            @click="show_status = !show_status"
-            type="button"
-            class="w-full my-2 text-center py-2.5 px-4 text-white rounded-lg text-lg font-bold tracking-wider cursor-pointer"
-            :class="{
-              'bg-emerald-500': new_status == 1,
-              'bg-red-500': new_status == 2,
-              'bg-yellow-400': new_status == 0,
-            }"
-            :value="status_text"
-          />
-
-          <div class="flex flex-col" v-show="show_status">
-            <select
-              v-model="new_status"
-              class="w-full my-2 text-center py-2.5 px-4 rounded-lg text-lg font-bold tracking-wider cursor-pointer"
-              @change="show_status = false"
-            >
-              <option value="0">Pending</option>
-              <option value="1">Accept</option>
-              <option value="2">Cancell</option>
-            </select>
-          </div>
-        </div>
-
-        <!--  {{
-          status_text
-          }} -->
-        <button
-          @click.prevent="updateBooking"
-          id="submit"
-          class="w-full text-center py-2.5 px-4 text-white rounded-lg"
-          style="background-color: #00838f"
-          :disabled="doctor == null"
-        >
-          {{ $t("submit") }}
-        </button>
-      </div>
+     
       <!-- End Left Side -->
       <!-- Right Side -->
-      <div class="">
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("applicant") }} :
-            <span style="color: #00897b">{{ booking.requester_name }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("degree_closeness_child") }} :
-            <span style="color: #00897b">{{ booking.relative_degree }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("Full_Name") }} :
-            <span style="color: #00897b">{{ booking.child_name }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("place_of_birth") }} :
-            <span style="color: #00897b">{{ booking.child_birth_place }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("birth_date") }} :
-            <span style="color: #00897b">{{ booking.child_birth_date }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("primary_language") }}:
-            <span style="color: #00897b">{{ booking.child_lang }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("Nationality") }} :
-            <span style="color: #00897b">{{ booking.child_nationalty }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("national_number") }} :
-            <span style="color: #00897b">{{ booking.child_national_id }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("address") }} :
-            <span style="color: #00897b">{{ booking.child_address }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("phone_number") }}:
-            <span style="color: #00897b">{{ booking.requester_phone }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("Additional_phone_number") }} :
-            <span style="color: #00897b">{{ booking.addtional_phone }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("owner_extra_number") }} :
-            <span style="color: #00897b">{{
-              booking.addtional_phone_owner
-            }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("degree_closeness_child") }} :
-            <span style="color: #00897b">{{
-              booking.addtional_phone_degree
-            }}</span>
-          </span>
-        </p>
-        <p class="border-b-2 my-9 py-2 border-black">
-          <span class="">
-            {{ $t("conversion_source") }} :
-            <span style="color: #00897b">{{ booking.conversion_type }}</span>
-          </span>
-        </p>
-        <div class="flex justify-between items-center">
-          <p class="my-9 py-2 border-b" style="color: #00897b">
-            <span class="">
-              {{ $t("Specialist_code") }}:
-              <span>{{ booking.doctor_code }}</span>
-            </span>
-          </p>
-          <p
-            class="my-9 py-2 flex items-center cursor-pointer"
-            @click="show_answer_modal = true"
-          >
-            <svg
-              id="__TEMP__SVG__"
-              xmlns="http://www.w3.org/2000/svg"
-              width="18.003"
-              height="15.754"
-              viewBox="0 0 18.003 15.754"
-              class="mx-2"
-            >
-              <path
-                id="Path_246"
-                data-name="Path 246"
-                d="M26.672,10.454a1.125,1.125,0,0,0-1.593,0l-6.75,6.75a1.125,1.125,0,0,0,0,1.593l6.75,6.75a1.126,1.126,0,1,0,1.593-1.593L20.717,18l5.955-5.954a1.125,1.125,0,0,0,0-1.593Z"
-                transform="translate(-17.998 -10.123)"
-                fill="#135C65"
-                fill-rule="evenodd"
-              />
-              <path
-                id="Path_247"
-                data-name="Path 247"
-                d="M25.875,18a1.125,1.125,0,0,0-1.125-1.125H10.125a1.125,1.125,0,0,0,0,2.25H24.75A1.125,1.125,0,0,0,25.875,18Z"
-                transform="translate(-7.872 -10.123)"
-                fill="#135C65"
-                fill-rule="evenodd"
-              />
-            </svg>
-            <span style="color: #00897b">{{ $t("Answer_the_questions") }}</span>
-          </p>
-        </div>
-      </div>
+    
       <!-- End Right Side -->
     </div>
-  </div>
+  </v-card>
 
   <div class="w-full mx-auto">
     <div class="flex justify-center">
@@ -291,64 +181,43 @@
             </svg>
           </div>
           <div class="mt-4">
-            <p class="border-b-2 my-9 py-2 border-black">
-              <span class="font-bold">
-                {{ $t("Type") }} :
-                <span
-                  class="font-normal text-gray-400"
-                  style="color: #00897b"
-                  >{{ booking.child_gender == 1 ? "male" : "female" }}</span
-                >
-              </span>
-            </p>
-            <p class="border-b-2 my-9 py-2 border-black">
-              <span class="font-bold">
-                {{ $t("problem_type") }} :
-                <span
-                  class="font-normal text-gray-400"
-                  style="color: #00897b"
-                  >{{ booking.child_problem }}</span
-                >
-              </span>
-              <span class="block">
-                <span class="text-sm font-normal text-gray-400">{{
-                  booking.child_problems_notes
-                }}</span>
-              </span>
-            </p>
-            <p class="border-b-2 my-9 py-2 border-black">
-              <span class="font-bold">
-                {{ $t("child_problem") }} :
-                <span
-                  class="font-normal text-gray-400"
-                  style="color: #00897b"
-                  >{{ booking.child_aids == 1 ? "yes" : "no" }}</span
-                >
-              </span>
-              <span class="block">
-                <span class="text-sm font-normal text-gray-400">{{
-                  booking.child_aids_notes
-                }}</span>
-              </span>
-            </p>
-            <p class="border-b-2 my-9 py-2 border-black">
-              <span class="font-bold">
-                {{ $t("main_problems") }} :
-                <span class="block">
-                  <span class="text-sm font-normal text-gray-400">{{
-                    booking.child_aids_notes
-                  }}</span>
-                </span>
-              </span>
-            </p>
-            <p class="border-b-2 my-9 py-2 border-black">
-              <span class="font-bold">
-                {{ $t("priority_parents") }} :
-                <span class="block font-normal text-gray-400">{{
-                  booking.parents_priorities
-                }}</span>
-              </span>
-            </p>
+          <div class="flex flex-initial " v-if="booking.child_gender ">
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Type") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_gender == 1 ? "male" : "female" }}</p>
+          </div>
+          <div class="flex flex-initial  py-4" v-if="booking.child_problem ">
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("problem_type") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_problem  }}</p>
+          </div>
+          <div class="flex flex-initial  py-4" v-if="booking.child_problems_notes ">
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("child_problems_notes") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_problems_notes  }}</p>
+          </div>
+          <div class="flex flex-initial  py-4" >
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("child_problem") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_aids == 1 ? "yes" : "no" }}</p>
+          </div>
+          <div class="flex flex-initial  py-4" v-if="booking.child_aids_notes ">
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("child_aids_notes") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_aids_notes  }}</p>
+          </div>
+          <div class="flex flex-initial  py-4" v-if="booking.child_aids_notes ">
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("main_problems") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_aids_notes  }}</p>
+          </div>
+          <div class="flex flex-initial  py-4" v-if="booking.parents_priorities ">
+            <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
+            <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("priority_parents") }} :</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.parents_priorities  }}</p>
+          </div>
+            
+            
           </div>
         </div>
       </div>
@@ -466,6 +335,12 @@ export default {
   data() {
     return {
       booking: {},
+    
+      status:[
+        { name: 'Pending', code: 0 },
+        { name: 'Accept', code: 1 },
+        { name: 'Cancell', code: 2 },
+      ],
       show_status: false,
       doctor: {},
       new_status: null,

@@ -26,8 +26,14 @@ export default {
   add_Appointment:"اضافة موعد",
 
   merge:"دمج",
-
-
+  Sunday:"الأحد",
+  Monday:"الاتنين",
+  Saturday:"السبت",
+  Tuesday:"الثلاثاء",
+  Wednesday:"الأربعاء",
+  Thursday:"الخميس",
+  Friday:"الجمعة",
+  day:"اليوم",
 
   child_name: "اسم الطفل",
   evaluation_title: "اسم التقييم الفرعي",
@@ -352,6 +358,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   evalute_type:"نوع التقييم",
   Evaluation_date:"موعد التقييم ",
   Name_evaluator:"اسم المقييم",
+  hour_evaluator:" ساعة التقييم",
   evaluation_order:"طلبات التقييم",
   percentage:"النسبة المئوية",
   highest_preferred:"الاكثر تفضيلا",

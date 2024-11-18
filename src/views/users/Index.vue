@@ -84,46 +84,8 @@ fetchData()
 
 })
 const edit=(id)=>{
-  usersdata.value.skills=[]
-  usersdata.value.department=[]
-    axios.get(`/api/users/${id}`).then((res)=>{
-    loading.value= false
-    
- 
-    usersdata.value.role= res.data.roles.id
-   
+  router.push({name:'user-update',params:{'id':id} })
 
-    usersdata.value.image= res.data.image
-    usersdata.value.type= res.data.type
-    usersdata.value.email= res.data.email
-    usersdata.value.spotter= res.data.spotter
-    usersdata.value.title= res.data.title
-    usersdata.value.name= res.data.name
-    usersdata.value.role = res.data.roles[0].id
-
-
-    for (let i =0 ; i < res.data.skills.length; i++) {
-     
-        
-          
-          usersdata.value.skills.push(res.data.skills[i].id);
-        
-
-}
-for (let i =0 ; i < res.data.departments.length; i++) {
-     
-
-       
-       usersdata.value.department.push(res.data.departments[i].id);
-     
-
-}
-   
-
-  });
-  console.log(usersdata.value.skills)
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
 }
 
 
@@ -163,8 +125,7 @@ const editesuser=()=>{
 }
 
 const openNew = () => {
-  usersdata.value= ref({})
-    createdialog.value=!(createdialog.value)
+  router.push({name:'CreateUser' })
 }
 
 const confirmDelete = (id) => {
@@ -378,7 +339,7 @@ const initFilters = () => {
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("users")' :modal="true">
           <div class="">
-                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src="'https://sawa.sawa.academy/'+ usersdata.image" >
+                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src=" usersdata.image" >
                   <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-else src="../frontend/image/Ellipse2.png" >
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
                   </div>
@@ -446,7 +407,7 @@ const initFilters = () => {
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="">
-                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src="'https://sawa.sawa.academy/'+ usersdata.image" >
+                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-if="usersdata.image" :src=" usersdata.image" >
                   <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" v-else src="../frontend/image/Ellipse2.png" >
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
                   </div>

@@ -1,10 +1,10 @@
 <template>
     <div>
       <EvaluationType></EvaluationType>
-    <v-card>
-     <div class="p-[1%]">
+    <v-card class="bg-slate-50">
+     <div class="p-[1%] ">
         <div class="flex py-2 ">
-           <img  class="w-[100px] h-[100px] rounded-full" :src="'https://sawa.sawa.academy/' + details.image" alt="not found">
+          <Image :src=" details.image" preview width="150"  alt="Image" />
       </div>
       <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("name") }} :</h3>
@@ -27,7 +27,13 @@
             
       </div>
      
-     
+      <div class="flex py-2 " >
+            <h3 class="my-auto font-bold">{{ $t("department") }} :</h3>
+            <p class="text-xl  px-1 my-auto" v-for="x in details.departments">
+                <span class="text-xl  px-1 my-auto">{{ x.title }} ,</span>
+            </p>
+            
+      </div>
       
       
      </div>
