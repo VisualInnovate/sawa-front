@@ -1,7 +1,7 @@
 <template>
 
 
-    <nav ref="staticDiv"  :class="{ 'fixed': isFixed }" class="static-div bg-white border-gray-200  w-full " style="z-index: 100;">
+    <nav ref="staticDiv"  :class="{ 'fixed': isFixed }" class="static-div bg-white border-gray-200  w-full nave " style="z-index: 100;">
       <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto ">
     
     
@@ -158,7 +158,7 @@
     });
     </script>
     <style>
-    .router-link-active {
+    .nave .router-link-active {
     
     transition: 1s;
     color: black;
