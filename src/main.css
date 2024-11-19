@@ -2,8 +2,9 @@
   /* background-image: url('./views/frontend/image/112.png') !important;
   background-size: cover !important;
   background-repeat: no-repeat !important; */
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
 
+  }
   Button{
     transform: scale(.9) !important;
   }
@@ -59,6 +60,10 @@ td{
 .p-inputtext:enabled{
   background-color: #f7f5f5 !important;
 ;
+}
+.primer{
+  
+  background-color: #FFCF24 !important;
 }
 
 .p-multiselect .p-multiselect-label.p-placeholder{

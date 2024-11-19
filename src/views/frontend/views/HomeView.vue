@@ -1,7 +1,9 @@
 <script setup></script>
 
 <template>
+  
   <div class="switcher">
+    <!-- <Test></Test> -->
     <nave-1 />
     <nave class="w-full z-30" />
     <HeadeForm />
@@ -16,6 +18,7 @@
 <script setup(props) { }>
 // import { useParentStore } from "../../../stores/ParentStore";
 import Nave from "../components/Nave.vue";
+import Test from "../components/Test.vue";
 import HeadeForm from "../components/HeadeForm.vue";
 import Services from "../components/Services.vue";
 import Card from "../components/Card.vue";
@@ -35,6 +38,7 @@ export default {
     About,
     DoCard,
     See,
+    Test,
     Nave1,
     Cursale,
   },

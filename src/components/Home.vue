@@ -46,13 +46,14 @@ onMounted(async () => {
 <style lang="scss">
 //@use '../settings.scss';
 #local-switcher {
-  width: 30px;
-  height: 60px;
+  width: 40px;
+  height: 50px;
   border-radius: 50%;
+  margin: auto;
   background-color: #a9ab7f;
   color: #ffffff;
   display: flex;
-  margin: 0 15px;
+  margin: 0 2px;
   justify-content: center;
 
   i {

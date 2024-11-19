@@ -112,7 +112,6 @@
   import { useStorage } from "@vueuse/core";
   import ChildTaps from '../../components/ChildTaps.vue'
   import moment from "moment";
-    import {useToast} from 'primevue/usetoast'
   export default {
      components:{ChildTaps},
   
@@ -162,17 +161,14 @@
             this.doctors = response.data.doctors
            
           })
-          .catch((error) => {
-              
-          });
-
+         
       },
       getDays(id){
         this.business_hours=this.doctors.find(item => item.id == id).business_hours
         console.log(this.business_hours)
       },
       gettimes(e){
-        console.log()
+        
         axios
           .post(`api/users/available/slots`,{
             user_id:this.evalate.specialist_id,
@@ -183,9 +179,7 @@
            
            this.slots=response.data.slots
           })
-          .catch((error) => {
-              
-          });
+        
 
 
       },

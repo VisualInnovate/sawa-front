@@ -1,5 +1,5 @@
 <template>
-  <v-card class="p-[2%]  bg-[#FDFDFD] shadow-xl gap-4" >
+  <v-card class="p-[2%]  bg-slate-50 shadow-xl gap-4" >
   
     <div class="flex flex-column gap-2 md:w-[50%] py-[2%]">
        <label for="username">{{ $t('employee_name') }}</label>
