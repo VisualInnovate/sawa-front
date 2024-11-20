@@ -46,13 +46,8 @@
     >
       <SwiperSlide v-for="doctor in doctors">
         <div class="text-center bg-teal-100 rounded-3xl m-2">
-          <!-- Doctor -->
-          <div class="bg-white rounded-3xl">
-            <img
-              style="width: 210px; height: 310px"
-              class="m-auto px-5 object-cover w-[100%] h-[100%]"
-              :src="doctor.image"
-            />
+          <div :style="{ backgroundImage: `url(${doctor.image})` }" class="bg-white rounded-3xl bg-cover bg-no-repeat bg-center h-[310px] w-[210]" >
+           
           </div>
           <p class="text-center pt-2 opacity-80">{{ doctor.name }}</p>
           <p class="text-center text-teal-400 pb-4 p-1">

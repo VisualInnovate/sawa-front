@@ -59,11 +59,10 @@ export default {
     submit(){
    
       axios.post(`/api/child/${this.$route.params.id }/update`,this.child).then(res =>{
-        this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
-
+        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_update_success")}`, life: 3000 });
       }).catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
+        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.$t("mission_error")}`, life: 3000 });
+
       })
     },
     getChild(){

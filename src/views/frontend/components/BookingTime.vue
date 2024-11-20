@@ -25,8 +25,8 @@
           {{ $t("You_can_choose_the_appropriate") }}
         </p>
       </div>
-      <div class="p-[5%]">
-        <v-table class="border-2 border-[#967a80] no-scrollbar ">
+      <div class="px-4  py-[4%] lg:p-[5%] min-w-[1399px]  overflow-x-auto">
+        <v-table class="min-w-full border-2 border-[#967a80]  ">
           <thead>
             <tr class="details border-b-2 border-[#474042]">
               <th
@@ -38,7 +38,7 @@
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="">
             <tr v-if="events.events && events.max" v-for="i in events.max" :key="i">
               <td
                 class="w-60 relative p-[0_0.3rem]"
@@ -116,7 +116,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style >
 .no-scrollbar {
   overflow: hidden;
   scrollbar-width: none; /* Firefox */

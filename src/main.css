@@ -87,6 +87,10 @@ canvas {
   
   height: 50px!important;
 }
+.p-accordion .p-accordion-tab:first-child .p-accordion-header .p-accordion-header-link{
+  display: flex !important;
+  justify-content: space-between !important;
+}
 /* .fc-daygrid-block-event .fc-event-time, .fc-daygrid-block-event .fc-event-title{
   background-color: #135C65!important;
   color: white !important;

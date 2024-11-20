@@ -112,10 +112,7 @@
               <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("اسم الاستشاري") }} :</p>
               <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor.name }}</p>
            </div>
-            <div class="flex py-[1%]" v-if="doctor.title">
-              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("title") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor.title }}</p>
-            </div>
+          
             <div class="flex py-[1%]" v-if="booking.requester_name">
               <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("request_sender") }} :</p>
               <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.requester_name }}</p>
@@ -125,10 +122,10 @@
               <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{event_data }}</p>
             </div>
             <form @submit.prevent="updateBooking">
-              <div class="flex flex-column gap-2 py-1">
+              <!-- <div class="flex flex-column gap-2 py-1">
                   <label class="w-full t" for="username">{{ $t('change_of_specialist') }}</label>
-                  <Dropdown   id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="doctor"  option-value="user_id" filter :options="new_doctors" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
-              </div>
+                  <Dropdown   id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="booking.event_id"  option-value="id" filter :options="new_doctors" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
+              </div> -->
               <div class="flex flex-column gap-2 py-1">
                   <label class="w-full t" for="username">{{ $t('Submit_a_note') }}</label>
                   <textarea  name="notes" v-model="accept_notes" id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="4"></textarea>
@@ -136,7 +133,7 @@
               </div>
               <div class="flex flex-column gap-2 py-1">
                   <label class="w-full t" for="username">{{ $t('status') }}</label>
-                  <Dropdown  :style="{ backgroundColor: new_status === 1 ? '#10B981' : new_status === 2 ? '#EF4444' : new_status === 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="new_status"  option-value="code" filter :options="status" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
+                  <Dropdown  :style="{ backgroundColor: new_status == 1 ? '#10B981' : new_status == 2 ? '#EF4444' : new_status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="new_status"  option-value="code" filter :options="status" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
               </div>
               <div class="flex flex-column gap-2 py-1 text-center">
                 <Button :label='$t("submit")' type="submit" class="create w-60" icon="pi pi-check"></Button>
@@ -303,9 +300,9 @@ export default {
       booking: {},
       student_massage:'',
       status:[
-        { name: this.$t("Pending"), code: 0 },
-        { name: this.$t("Accept"), code: 1 },
-        { name: this.$t("Cancell"), code: 2 },
+        { name: this.$t("Pending"), code: '0' },
+        { name: this.$t("Accept"), code: '1' },
+        { name: this.$t("Cancell"), code: '2' },
       
       ],
       evaluate_types : [
@@ -420,6 +417,7 @@ export default {
         .then((res) => {
           this.booking = res.data.booking.booking;
           this.new_status = res.data.booking.booking.accepted;
+          this.accept_notes = res.data.booking.booking.accepted_notes;
           this.doctor = res.data.booking.doctor;
           console.log(res);
         })
@@ -433,7 +431,7 @@ export default {
           status: this.new_status,
           accepted_notes: this.accept_notes,
           user_id: this.booking.user_id,
-          event_id: this.doctor.event_id,
+          event_id:this.booking.event_id,
           doctor_name: this.doctor.name,
           doctor_title: this.doctor.title,
         })
@@ -446,11 +444,9 @@ export default {
           ;
         });
     },
-    changeDoctor(start) {
+    changeDoctor() {
       axios
-        .post("/api/calender/change-doctor", {
-          start: start,
-        })
+        .get("/api/doctors")
         .then((res) => {
           this.new_doctors = res.data.doctors;
           console.log(res);
@@ -470,6 +466,7 @@ export default {
   },
   mounted() {
     this.getBooking();
+    this.changeDoctor()
   },
 };
 </script>

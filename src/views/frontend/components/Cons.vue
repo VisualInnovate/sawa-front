@@ -193,31 +193,22 @@ show_alert:false,
   },
   methods: {
     async bookTime() {
-      this.errors = null;
       this.booking.user_id=localStorage.getItem("parent_id")
       this.booking.event_id = this.event_id;
-      this.alert_text = null;
       this.show_alert = false;
       console.log(this.booking);
       await axios
         .post("/api/calender/store-booking", this.booking)
         .then((res) => {
-          this.alert_text=this.$t("your_booking_was_successfully_submitted")
-          this.show_alert = true;
-          this.errors = null;
+        
           Object.keys(this.booking).forEach((key) => {
             this.booking[key] = null;
           });
-          console.log(res);
-         setTimeout(()=>{
-          this.show_alert = false;
           this.$router.push({name:'Booking'})
-         }, 3000);
         })
         .catch((err) => {
-          this.errors = err.response.data.errors;
-          console.log(this.errors);
-          console.log(err);
+          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.$t("mission_error")}`, life: 3000 });
+
         });
     },
     async getEvent() {

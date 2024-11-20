@@ -169,7 +169,7 @@ const initFilters = () => {
 </script>
 
 <template>
-    <card v-can="'create event'" class="card mb-5 p-4 shadow-md">
+    <v-card v-can="'create event'" class="card mb-5 p-4 shadow-md bg-slate-50">
     <form @submit.prevent="onSubmit" >
      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
        <div>
@@ -204,7 +204,7 @@ const initFilters = () => {
       <Button v-can="'events list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
       <Button v-can="'create event'"  type="submit"  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" ></Button>
     </form>
-    </card>
+    </v-card>
   <div class="grid">
 
     <div class="col-12 " style="overflow-y: scroll;">

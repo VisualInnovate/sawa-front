@@ -55,16 +55,13 @@
         <div class="p-2 grid gap-5 grid-cols-2 md:grid-cols-3 text-cyan-700">
           <a
             v-for="booking in bookings"
-            class="flex flex-col items-center bg-white border-gray-200 rounded-xl shadow-md md:flex-row max-w-sm hover:bg-gray-100"
+            class="grid grid-cols-1 p-2 items-center bg-white border-gray-200 rounded-xl shadow-md md:grid-cols-2 hover:bg-gray-100"
           >
-          <img v-if="booking.user_image == null" src="../image/Rectangle63.png">
-            <img
-              width="250"
-              class="rounded-xl"
-              v-if="booking.user_image != null"
-              :src="booking.user_image"
-              alt=""
-            />
+            <div>
+              
+              <img  class="w-full"  :src="booking?.user_image ? booking?.user_image : require('../image/Rectangle63.png')">
+               
+            </div>
             <div class="flex flex-col justify-between p-4 leading-normal">
               <p class="p-2 w-full text-center text-lg text-[#148A98]">
                 {{ booking.user_name }}
@@ -74,10 +71,10 @@
               >
                 {{ booking.user_title }}
               </p>
-              <p class="p-2 text-[#FF3765]">
+              <p class="p-2 text-[#FF3765] text-center">
                 {{ event_day(booking.event_date) }}
               </p>
-              <p class="px-2 pb-2 text-[#FF3765]">
+              <p class="px-2 pb-2 text-[#FF3765] text-center">
                 {{ event_hour(booking.event_date) }}
               </p>
               <p
