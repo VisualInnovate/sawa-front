@@ -6,7 +6,9 @@ import moment from "moment";
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n'
 const toast = useToast()
+const { t } = useI18n()
 const router = useRouter()
 const deduction_types=ref('')
 const loading = ref(true)
@@ -23,7 +25,12 @@ const filters = ref({})
 const createdialog=ref(false)
 const deduction=ref({})
 const updatedialog=ref(false)
-
+const  status=ref([
+        { name: t("Pending"), code: 0 },
+        { name: t("Accept"), code: 1 },
+        { name: t("Cancell"), code: -1 },
+      
+      ])
 onBeforeMount(() => {
   initFilters()
 })
@@ -103,7 +110,16 @@ const confirmDelete = (id) => {
  
 
 }
+const updateStatus=(id,status)=>{
+  
+  loading.value=true
+ 
+  axios.get(`/api/deductions/change-status/${id}?status=${status}`).then((res)=>{
+      loading.value=false
+      fetchData()
+      });
 
+}
 const createskill=()=>{
   deduction.value.date = moment(deduction.value.dat).format("YYYY-MM-DD" );
     axios
@@ -211,7 +227,13 @@ const initFilters = () => {
             </template>
            </Column>
           
+           <Column field="status" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+                <Dropdown  @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
 
+               
+            </template>
+           </Column>
 
         
           <Column header-style="min-width:10rem;">

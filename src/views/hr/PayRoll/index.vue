@@ -9,6 +9,9 @@ const toast = useToast()
 const router = useRouter()
 const allemployee=ref({})
 const loading = ref(true)
+const fetchFilter=ref({
+  base_salary:''
+})
 const user = ref({})
 const error = ref('')
 const users = ref(null)
@@ -21,7 +24,7 @@ const filters = ref({})
 const createdialog=ref(false)
 const payroll=ref({})
 const updatedialog=ref(false)
-
+const selectedMonths=ref('')
 onBeforeMount(() => {
   initFilters()
 })
@@ -29,7 +32,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/payroll").then((res)=>{
+  axios.get(`/api/payroll?base_salary=${fetchFilter.value?.base_salary}`).then((res)=>{
     loading.value= false
     users.value= res.data.data
     console.log(users.value)
@@ -142,31 +145,28 @@ const initFilters = () => {
           <template #start>
             <div class="my-2">
             <Button v-can="'payroll create'" :label='$t("payroll")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
+           
             </div>
           </template>
 
           <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
+      
             <Button v-can="'payroll list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
         <Toast/>
-
+        <Toolbar class="mb-4 shadow-md">
+          <template #start>
+          <Calendar  v-model="fetchFilter.start_date"   :placeholder='$t("from")'  />   
+          <Calendar  v-model="fetchFilter.end_date"   :placeholder='$t("to")' class="mx-1"  />   
+          <InputNumber  required class="bg-[#f7f5f5]" v-model="fetchFilter.base_salary" :placeholder='$t("basic_salary")' />
+        </template>
+        <template #end>
+      
+          <Button v-can="'payroll list'"  icon="pi pi-search" class="create" @click="fetchData"/>
+        </template>
+          </Toolbar>
 
       <div style="" class="shadow-xl ">
         <DataTable

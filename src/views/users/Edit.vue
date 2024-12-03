@@ -187,7 +187,7 @@ const update=()=>{
       toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_update_success")}`, life: 3000 });
     })
     .catch((el)=>{
-      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+      toast.add({ severity: 'error', summary: t("error"), detail: `${el.response.data.message}`, life: 3000 });
       
     })
 }

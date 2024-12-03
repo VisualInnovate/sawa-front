@@ -189,6 +189,16 @@ const initFilters = () => {
               {{ slotProps.data.email }}
             </template>
            </Column> 
+           <Column field="basic_salary" :header='$t("basic_salary")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.basic_salary }}
+            </template>
+           </Column> 
+           <Column field="shift.title" :header='$t("shift_title")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.shift.title }}
+            </template>
+           </Column> 
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div >

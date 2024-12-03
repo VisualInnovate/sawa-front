@@ -361,6 +361,7 @@
               title: event.start_event+"T"+event.to,
               start: event.start_event+"T"+event.from,
               end: event.end_event+"T"+event.to,
+              
               id: event.id,
               from:event.from
           }));

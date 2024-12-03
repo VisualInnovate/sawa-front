@@ -163,8 +163,8 @@ onMounted(async () => {
             </template>
 
             <!--            here  your v- item list -->
-            <v-list-item  :title="$t('users')" value="users"
-              :to="{ name: 'Users' }"></v-list-item>
+            <v-list-item   :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
+           
 
             
             <v-list-item  :title="$t('permissions')" value="permissions"
@@ -265,8 +265,12 @@ onMounted(async () => {
             </template>
             <v-list-item  :title="$t('calender')" value="calender"
               :to="{ name: 'Calender' }"></v-list-item>
+
             <v-list-item  :title="$t('bookings')" value="bookings"
               :to="{ name: 'ShowBooking' }"></v-list-item>
+              
+            <v-list-item  :title="$t('Working_hours')" value="Working hours"
+              :to="{ name: 'working-hours' }"></v-list-item>
           </v-list-group>
           <v-list-group prepend-icon="mdi-wrench"  value="Settings">
             <template #activator="{ props }">
@@ -354,7 +358,7 @@ transportation_schedule
               <v-list-item v-bind="props" :title="$t('hr')"></v-list-item>
             </template>
             
-            <v-list-item   :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
+       
             <v-list-item   :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
             <v-list-item  :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
             <v-list-item  :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
@@ -366,7 +370,8 @@ transportation_schedule
             <v-list-item   :title="$t('posttion')" value="posttion" :to="{ name: 'posttion' }"></v-list-item>
             <v-list-item   :title="$t('events')" value="posttion" :to="{ name: 'event' }"></v-list-item>
             <v-list-item   :title="$t('shift')" value="shift" :to="{ name: 'shift' }"></v-list-item>
-           
+            <v-list-item   :title="$t('advance')" value="advance" :to="{ name: 'advance' }"></v-list-item>
+            
             
           </v-list-group>
         </v-list>

@@ -63,7 +63,8 @@ const edit=(id)=>{
 ///// update
 
 const update=()=>{
-    holiday.value.date = moment(holiday.value.dat).format("YYYY-MM-DD" );
+  holiday.value.end_date = moment(holiday.value.end_date).format("YYYY-MM-DD" );
+  holiday.value.start_date = moment(holiday.value.start_date).format("YYYY-MM-DD" );
     axios
     .put(`/api/holidays/${confir_id.value}`,holiday.value)
     .then((res) => {
@@ -94,7 +95,8 @@ const confirmDelete = (id) => {
 }
 
 const create=()=>{
-    holiday.value.date = moment(holiday.value.dat).format("YYYY-MM-DD" );
+    holiday.value.end_date = moment(holiday.value.end_date).format("YYYY-MM-DD" );
+    holiday.value.start_date = moment(holiday.value.start_date).format("YYYY-MM-DD" );
     axios
     .post('/api/holidays',holiday.value)
     .then((res) => {
@@ -209,12 +211,17 @@ const initFilters = () => {
               {{ slotProps.data.title }}
             </template>
            </Column>
-           <Column field="holiday_date" :header='$t("holiday_date")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="start_date" :header='$t("start_date")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.date }}
+              {{ slotProps.data.start_date }}
             </template>
            </Column>
-
+           <Column field="end_date" :header='$t("end_date")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.end_date }}
+            </template>
+           </Column>
+      
       
           
 
@@ -260,14 +267,16 @@ const initFilters = () => {
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
-                <small v-if="submitted && !holiday.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
 
             </div>
-            <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('holiday_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon   :class="{ 'p-invalid': submitted && !holiday.date}"  />   
-                   <small v-if="submitted && !holiday.date" class="p-invalid text-red-600 w-full text-center" > {{$t("holiday_date") + ' ' + $t("required") }}.</small>  
+                <div class="flex flex-column gap-2">
+                   <label style="text-align: right !important;" for="username">{{ $t('start_date') }}</label>
+                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.start_date" showIcon   :class="{ 'p-invalid': submitted && !holiday.start_date}"  />   
                   </div> 
+              <div class="flex flex-column gap-2">
+                <label style="text-align: right !important;" for="username">{{ $t('end_date') }}</label>
+                <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.end_date" showIcon   :class="{ 'p-invalid': submitted && !holiday.end_date}"  />   
+              </div> 
            <div class="w-full text-center">
             <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>  
@@ -278,14 +287,16 @@ const initFilters = () => {
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
-                <small v-if="submitted && !holiday.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
 
             </div>
             <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('holiday_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon   :class="{ 'p-invalid': submitted && !holiday.date}"  />   
-                   <small v-if="submitted && !holiday.date" class="p-invalid text-red-600 w-full text-center" > {{$t("holiday_date") + ' ' + $t("required") }}.</small>  
+                   <label style="text-align: right !important;" for="username">{{ $t('start_date') }}</label>
+                   <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.start_date" showIcon   :class="{ 'p-invalid': submitted && !holiday.start_date}"  />   
                   </div> 
+              <div class="flex flex-column gap-2">
+                <label style="text-align: right !important;" for="username">{{ $t('end_date') }}</label>
+                <Calendar  style="width: 100%" showButtonBar v-model.number="holiday.end_date" showIcon   :class="{ 'p-invalid': submitted && !holiday.end_date}"  />   
+              </div> 
            <div class="w-full text-center">
             <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>  

@@ -44,7 +44,7 @@
 
                    <div class="flex">
                     <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
-                  <Button @click="createevalutae"  class="create m-auto  w-full h-[50px] " :label='$t("strart_evaluate")'></Button>
+                      <Button @click="createevalutae"  class="create m-auto  w-full h-[50px] " :label='$t("strart_evaluate")'></Button>
                    </div>
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
               </div> 

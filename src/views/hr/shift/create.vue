@@ -122,7 +122,7 @@ const changeStatus= (index)=>{
   
 
 
-    <v-card style="overflow-x: scroll;" >
+    <v-card style="overflow-x: scroll;"  class="bg-slate-50">
         <div class="card " >
         <div class="w-full  m-5">
 

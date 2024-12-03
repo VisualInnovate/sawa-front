@@ -18,15 +18,6 @@ const skills=ref([])
 
 
 
-const tpes=()=>{
-  return[
-   
-   { name: t('driver'), id: 1 },
-  { name: t('doctor'), id: 2 },
-  { name:  t('Evaluator'), id: 5 },
-
-]
-}
 
 
 
@@ -58,22 +49,7 @@ onBeforeMount(() => {
     loading.value= false
 
   });
-  axios.post("/api/roles").then((res)=>{
-    loading.value= false
-    roles.value= res.data.roles.data
-    console.log(users.value)
 
-  });
-  axios.get("/api/skills").then((res)=>{
-    skills.value=res.data.data
-  
-
-  });
-  axios.get("/api/department").then((res)=>{
-    departments.value=res.data.data
-  
-
-  });
 }
 
 
@@ -89,40 +65,6 @@ const edit=(id)=>{
 }
 
 
-///// update
-
-const editesuser=()=>{
-  const body = new FormData();
-  console.log(usersdata.value.name)
-    body.append("name", usersdata.value.name);
-    body.append("email", usersdata.value.email);
-    body.append("title", usersdata.value.title);
-    body.append("password", usersdata.value.password);
-    body.append("image", usersdata.value.file);
-    body.append("role", usersdata.value.role);
-    if(usersdata.value.spotter){
-      body.append("spotter", usersdata.value.spotter);
-    }
-    if(usersdata.value.skills.length >=1){
-      body.append("skills", usersdata.value.skills);
-    }
-    if(usersdata.value.department){
-      body.append("department_id", usersdata.value.department);
-    }
-    body.append("type",usersdata.value.type)
-    axios
-    .post(`/api/users/${confir_id.value}/edit`,body)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      skill.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
 
 const openNew = () => {
   router.push({name:'CreateUser' })
@@ -148,43 +90,7 @@ const uploadFile = (e) => {
 
 };
 
-const createuser=()=>{
-  const body = new FormData();
-  console.log(usersdata.value.name)
-    body.append("name", usersdata.value.name);
-    body.append("email", usersdata.value.email);
-    body.append("title", usersdata.value.title);
-    body.append("password", usersdata.value.password);
-    body.append("image", usersdata.value.file);
-    body.append("role", usersdata.value.role);
-    if(usersdata.value.spotter){
-      body.append("spotter", usersdata.value.spotter);
-    }
-   
-    if(usersdata.value.skills){
-      body.append("skills", usersdata.value.skills);
-    }
-    if(usersdata.value.department){
-      body.append("department_id", usersdata.value.department);
-    }
-    body.append("type",usersdata.value.type)
 
-  
-
-
-    axios
-    .post('/api/users/create',body)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      skill.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
 const deleteAction = () => {
   axios
     .delete(`/api/users/${confir_id.value}/delete`)

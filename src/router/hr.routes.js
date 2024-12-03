@@ -144,6 +144,13 @@ const hr = [
   name: 'reports',
   component: () => import("../views/hr/report/index.vue")
 },
+// advance
+
+{
+  path: '/advance', 
+  name: 'advance',
+  component: () => import("../views/hr/advance/index.vue")
+},
 ];
 
 export default {

@@ -1,369 +1,370 @@
+<template>
+  <v-card class="p-[1%] bg-slate-50">
+      <Toolbar class="mb-4 shadow-md">
+        <template #start>
+          <div class="flex ">
+              <Dropdown  @update:model-value="event.type=''" :placeholder='$t("employee_name")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.employee_id"  option-value="id" filter :options="employees" optionLabel="name" class="mx-2"  />
+              <Dropdown :loading="!event.employee_id"  @update:model-value="getTimes" :placeholder='$t("type_work")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.type"  option-value="id" filter :options="event_types" optionLabel="name"  />
+
+          </div>
+        </template>
+
+        <template #end>
+
+        </template>
+      </Toolbar>
+
+      <FullCalendar   v-if="business_hours.length >= 1" :options="opts" ref="fullCalendar" />
+    <Dialog v-model:visible="visible" id="modal" modal :header='$t("submit") ' :style="{ width: '40vw' }">
+      <form @submit.prevent="create" class="">
+                
+               <div class="flex flex-column ">
+              <label class="text-right ">{{ $t("title") }}</label>
+              <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
+            </div>
+            <div class="flex flex-column ">
+              <label class="text-right ">{{ $t("color") }}</label>
+              <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
+            </div>
+                <div  class="flex flex-column gap-2 py-1">
+                      <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
+                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.evaluation_type"  option-value="id"  :options="evaluate_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.evaluation_type}" />
+                </div>
+                <div  class="flex flex-column gap-2 py-1">
+                      <label class="w-full text-right" for="username">{{ $t('child_name') }}</label>
+                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.child_id"  option-value="id" filter :options="childreen"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.child_id}"/>
+                </div>
+               
+               
+                <div class="w-full text-center">
+                <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+               </div>
+              </form>
+    </Dialog>
+    <Dialog v-model:visible="updateevent" id="modal" modal :header="modal_text" :style="{ width: '40vw' }">
+      <form >
+        <h2 class="font-bold text-xl text-center py-1" >{{ event.title }}</h2>
+        <p class="font-bold text-lg text-center py-1"> {{ $t("from") }} {{event.start_time }} {{ $t("to") }} {{ event.end_time }}</p>
+        <Button  class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
+      </form>
+    </Dialog>
+  </v-card>
+  <Toast></Toast>
+</template>
+
 <script>
+import axios from "axios";
+import moment from "moment";
+import arLocale from "@fullcalendar/core/locales/ar";
 import FullCalendar from "@fullcalendar/vue3";
-import TimeGridplugin from "@fullcalendar/timegrid";
+import TimeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import axios from "axios";
-import { ref } from "vue";
-import moment from "moment";
-import arLocale from "@fullcalendar/core/locales/ar";
 import Calendar from "primevue/calendar";
-
-
-import { useAppLangStore } from "../../stores/AppLangStore";
 import InputText from "primevue/inputtext";
+import { useAppLangStore } from "../../stores/AppLangStore";
+import { Toast } from "flowbite-vue";
+import { watch } from "vue";
+import { text } from "@fortawesome/fontawesome-svg-core";
 
 export default {
   components: {
     FullCalendar,
-    
-   
     Calendar,
-    
+    InputText,
   },
   data() {
     return {
+      filter:{},
+      childreen:[],
+      evaluate_types : [
+                      { name: 'side profile', id: 1 },
+                      { name: 'milestone', id: 2 },
+                      { name: 'barrier', id: 3 },
+                      { name: 'ablls', id: 4 },
+                      { name: 'carolina', id: 5 },
+   
+                  ],
+      event_types : [
+                    { name: 'تقيممات', id: 1 },
+                    { name: 'اجتماعات', id: 2 },
+                   
+                   
+ 
+      ],
+      users:[],
+      business_hours:[],
       langStore: useAppLangStore(),
       visible: false,
-      doctorshow:"",
-      doctors:{},
-      user_type:'',
+      updateevent:false,
+      event:{color:'87ceeb'},
+      submitted:false,
+      employees: [],
+      days:[0,1,2,3,4,5,6],
+      doctorshow: "",
       create_visible: false,
-      event_id: null,
-      creat_event: ref(false),
-      updat_event: ref(false),
-      event_title: "",
-      start_event: "",
-      end_event: "",
-      loading: false,
-      modal_text: "",
-      time_start: "",
-      time_end: "",
- 
-
+      event_id: null,     
       opts: {
-        plugins: [dayGridPlugin, interactionPlugin, TimeGridplugin, listPlugin],
+        plugins: [dayGridPlugin, interactionPlugin, TimeGridPlugin, listPlugin],
         initialView: "dayGridMonth",
-        footerToolbar: true,
-        valid: false,
-        buttonIcons: false,
         locale: null,
-        validRange: {
-          start: new Date(), // Set your minimum date here
-          
-        },
+        slotDuration:'00:30:00',
+        slotLabelInterval: '00:30:00',
+        hiddenDays: [],
+        slotMinTime:'00:00:00',
+        slotMaxTime:'00:00:00',
         selectable: true,
-        droppable: false,
         editable: true,
-        selectHelper: true,
-        validRange: {
-          start: new Date(),
-        },
+        validRange: { start: new Date() },
         headerToolbar: {
-         
-          center: "prev next today",
-
           left: "title",
+          center: "prev next today",
           right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
         },
-        eventsTimeFormat: {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        },
-        eventDrop: function (event) {
-          console.log(event.event.id);
-          axios
-            .post(`/api/calender/${event.event.id}/update`, {
-              start: event.event.start,
-              end: event.event.end,
-            })
-            .then((res) => {
-              console.log(res.data.k);
-            });
-        },
-        eventDrop: function (event) {
-          axios
-            .post(`/api/calender/${event.event.id}/update`, {
-              title: event.event.title,
-              start: moment(event.event.start).format("00:00:00 YYYY-MM-d"),
-              end: moment(event.event.end).format("00:00:00 YYYY-MM-d"),
-            })
-            .then((res) => {
-              console.log(res.data.k);
-            });
-        },
+        selectAllow: (selectInfo) => {
+      const calendarApi = this.$refs.fullCalendar.getApi();
+      const events = calendarApi.getEvents();
 
-        eventClick: function (event) {
-          this.event_id = event.event.id;
-          this.event_title = event.event.title;
-          this.modal_text = this.$t("update_event");
-          this.creat_event = false;
-          this.updat_event = true;
-          this.visible = true;
-          this.start_event = moment(event.event.start).format("YYYY-MM-DD");
-          this.end_event = moment(event.event.end).format("YYYY-MM-DD");
-          console.log(this.start_event);
-        }.bind(this),
+      for (let event of events) {
+        // تحقق فقط من التداخل على مستوى الوقت داخل نفس اليوم
+        if (
+          moment(selectInfo.start).isSame(event.start, "day") && // نفس اليوم
+          (
+            (selectInfo.start >= event.start && selectInfo.start < event.end) || // البداية داخل الحدث
+            (selectInfo.end > event.start && selectInfo.end <= event.end)  // النهاية داخل الحدث
+          )
+        ) {
+          return false; // يوجد تداخل، لا تسمح
+        }
+      }
 
-        select: function (event) {
-          console.log(event);
-          this.event_title = "";
-          this.modal_text = this.$t("create_event");
-          this.creat_event = true;
-          this.updat_event = false;
-          this.visible = true;
+      return true; // لا يوجد تداخل، يمكن الإضافة
+    },
 
-          console.log(event);
-          this.start_event = moment(event.start).format("YYYY-MM-DD");
-          this.end_event = moment(event.end).format("YYYY-MM-DD");
-          console.log(event.backgroundColor);
-        }.bind(this),
+        eventClick: this.handleEventClick.bind(this),
+        dateClick: this.handleDateClick,
+        datesSet: this.handleDatesSet.bind(this),
+        select: this.handleSelect.bind(this),
+       
       },
     };
   },
-  
-  
   methods: {
-    loo(){
-      if (localStorage.appLang == "en"){
-      console.log ("ascasc")
-    }
-    else{
-     this.opts.locale = arLocale
-   
-    }
-    },
     goBack() {
       this.$router.go(-1);
     },
-    deletevent(event) {
-      console.log(event);
-
+    fetchEmployees() {
       axios
-        .delete(`/api/calender/${this.event_id}/delete`)
-        .then((res) => {
-          this.loading = false
-          this.update();
-        });
-     
-      setTimeout(() => {
-        (this.visible = false),
-          (this.event_title = null),
-          (this.loading = false);
-      }, 700);
-    },
-
-    updateevent() {
-      axios
-        .post(`/api/calender/${this.event_id}/update`, {
-          title: this.event_title,
-          start: moment(this.start_event).format(" YYYY-MM-d"),
-          end: moment(this.end_event).format(" YYYY-MM-d"),
+        .get("api/employees")
+        .then((response) => {
+          this.employees = response.data.data;
         })
-        .then((res) => {});
-      this.update();
-      setTimeout(() => {
-        (this.visible = false),
-          (this.event_title = null),
-          (this.event_id = null),
-          (this.loading = false);
-      }, 700);
+        .catch((error) => console.error("Error retrieving doctors:", error));
     },
-     createvent() {
-      this.loading = true;
-      if(localStorage.getItem("type") == 2 ){
-            this.user_type=localStorage.getItem("user_id")
-        }
-      axios
-        .post("/api/calender/create", {
-          user_id:this.user_type,
-         
-          title: this.event_title,
-          start: this.start_event,
-          end: this.end_event,
-          time_start: this.time_start,
-          time_end: this.time_end,
-        })
-        .then((res) => {
-          this.visible = false
-          this.loading = false
-          if (res.status != 200) {
-            this.valid = true;
-          }
-          this.update();
-        });
-      
-      setTimeout(() => {
-          (this.event_title = null),
-          (this.start_event = null),
-          (this.end_event = null),
-          (this.create_visible = false)
-        
-      }, 700);
+    handleDatesSet(event){
+      if(this.business_hours.length >= 1){
+          const clickedDate = new Date(event.startStr); 
+
+      this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
+      this.opts.slotMaxTime=this.business_hours.find(item => item.day === clickedDate.getDay()).end
+      }
     },
-    update() {
-      axios.post("/api/calender").then((res) => {
+
+    getClidreen(){
+      axios.get("/api/child").then((res)=>{
+
+    this.childreen= res.data.children
+
+
+  });
+    },
+    updateEvents() {
+      axios.get(`/api/event-calendar?employee_id=${this.event.employee_id}&type=${this.event.type}`).then((res) => {
+
+        this.opts.events = res.data.data.map(event => ({
+
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            type: event.type,
+            col :event.color,
+            id: event.id,
+            backgroundColor:'#'+event.color,
+           
+            // from:event.from
+          }));
         
-        this.opts.events = res.data.calender;
+       
+        
       });
     },
-    refreshEvents() {
-      this.$refs.calendar.$emit("refetch-events");
-    },
+    create(){
+        axios
+          .post(`api/evaluation-request`,{
+            employee_id:this.event.employee_id,
+            color:this.event.color,
+            title:this.event.title,
+            evaluation_type:this.event.evaluation_type,
+            consultant_id:this.event.employee_id,
+            child_id:this.event.child_id,
+            date:moment(this.event.start).format(' YYYY-MM-DD'),
+            start_time:moment(this.event.start).format('HH:mm:ss'),
+            end_time:moment(this.event.end).format('HH:mm:ss'),
+          })
+          .then((response) => {
+            this.visible=!(this.visible)
+            this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_add_success")}`, life: 3000 });
+            this.getTimes()
+            
+           
+          })
+          .catch((el)=>{
+            this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.$t("mission_error")}`, life: 3000 });
+      });
 
-fetchdoctor(){
-  axios
-        .get("api/doctors")
+      },
+    getTimes(id){
+      axios
+        .get(`api/employees/get/with/calendar/${this.event.employee_id}?type=${id}`)
         .then((response) => {
-          this.doctors = response.data.doctors;
-          console.log(this.doctors);
+          this.business_hours = response.data.data.days.map(event => ({
+
+            day: (new Date( event.start)).getDay(), 
+            start:moment(event.start).format('HH:mm:ss'),
+            end:moment(event.end).format('HH:mm:ss'),
+      
+           
+            }));
+            this.opts.events = response.data.data.booked.map(event => ({
+  
+              title: event.title,
+              start: event.date+"T"+event.start_time+"+02:00",
+              end: event.date+"T"+event.end_time+"+02:00",
+            
+              backgroundColor:'#'+event.color,
+            
+            }));
+         
+         
         })
-        .catch((error) => {
-          console.error("Error retrieving doctors:", error);
-        });
-}
-
-  },
-
-  mounted() {
-    this.fetchdoctor()
-    this.doctorshow =localStorage.getItem("type")
-    if (localStorage.appLang == "en") {
-      console.log("ascasc");
-    } else {
-      this.opts.locale = arLocale;
-    }
-    console.log(localStorage.appLang);
-    this.update();
-    console.log(this.opts);
-  },
-
-  watch: {
-    "localStorage.appLang"(newLang) {
-      if (newLang == "en") {
-        this.opts.locale = "";
-      } else {
-        this.opts.locale = arLocale;
-      }
-      this.update();
     },
+
+
+  
+  
+    handleEventClick(event) {
+      console.log(event)
+
+      // employee_id:this.event.employee_id,
+      //       color:this.event.color,
+      //       title:this.event.title,
+      //       evaluation_type:this.event.evaluation_type,
+      //       consultant_id:this.event.employee_id,
+      //       child_id:this.event.child_id,
+      //       date:moment(this.event.start).format(' YYYY-MM-DD'),
+      //       start_time:moment(this.event.start).format('HH:mm:ss'),
+      //       end_time:moment(this.event.end).format('HH:mm:ss'),
+
+
+      this.event_id=event.event.id
+      this.event.title = event.event.title
+      this.event.color = '#'+event.event.color
+      this.event.child_id = event.event.child_id
+      this.event.start_time = moment( event.event.start ).format('HH:mm:ss')   
+      this.event.end_time = moment( event.event.end ).format('HH:mm:ss')   
+    
+      this.updateevent = true;
+    },
+    handleSelect(event) {
+      const clickedDate = new Date(event.startStr); 
+
+      this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
+      this.opts.slotMaxTime=this.business_hours.find(item => item.day === clickedDate.getDay()).end
+      if(event.view.type == 'dayGridMonth'){
+        const calendarApi = this.$refs.fullCalendar.getApi();
+        calendarApi.changeView("timeGridDay", event.startStr);
+      }else{
+          this.event.start=event.startStr
+          this.event.end=event.endStr
+          this.visible = true;
+      }
+  
+},
+    createEvent() {
+    
+      
+      
+      axios.post("/api/event-calendar", this.event).then(() => {
+        this.updateEvents();
+        this.visible=false
+        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_add_success")}`, life: 3000 });
+
+      }) .catch((el)=>{
+        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${el.response.data.message}`, life: 3000 });
+
+      });
+    },
+    
+    updateEvent() {
+      axios.put(`/api/event-calendar/${this.event_id}`, this.event).then(() => {
+     this.updateevent=false
+        this.updateEvents();
+      });
+    },
+    deleteEvent() {
+
+      axios.delete(`api/evaluations/44/delete`)
+          .then((response) => {
+            // this.getTimes()
+           
+          })
+      
+    },
+    resetModal() {
+      this.visible = false;
+      this.updateevent=false
+      this.event={
+        color:'87ceeb'
+      }
+    },
+  },
+  watch: {
+          // Watch the variable for changes
+          business_hours(newValue, oldValue) {
+                  // Extract the `day` values from `business_hours`
+             if(newValue.length >=1){
+              const usedDays = newValue.map(entry =>   entry.day);
+              // Filter `days` to only include those present in `usedDays`
+              this.opts.hiddenDays=this.days.filter(day => !usedDays.includes(day));
+             }else{
+              this.opts.hiddenDays= []
+             }
+          },
+      },
+  mounted() {
+    this.getClidreen()
+    this.fetchEmployees();
+    this.doctorshow = localStorage.getItem("type");
+    this.opts.locale = localStorage.appLang === "en" ? null : arLocale;
+    // this.updateEvents();
   },
 };
 </script>
-<template>
-  <div>
-    <div class="mb-5 text-white">
-      <v-btn
-        height="45"
-        class="mx-5 text-white"
-        color="#135c65"
-        @click="goBack"
-      >
-        <v-icon start icon="mdi-arrow-left"></v-icon>
-        {{ $t("back") }}
-      </v-btn>
-    </div>
-    <FullCalendar
-      :options="opts"
-     
-      @change="refreshEvents()"
-      ref="fullCalendar"
-    />
-    <div class="card flex justify-content-center">
-      <Dialog
-        v-model:visible="visible"
-        id="modal"
-        modal
-        :header="modal_text"
-        :style="{ width: '60vw' }"
-      >
-        <form>
-          <div>
-            <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('title') }}</label>
-                  <InputText required class="bg-[#f7f5f5]" v-model="event_title" :placeholder='$t("title")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-            </div> 
-                
-            <div v-if="doctorshow != 2 " class="flex flex-column gap-2">
-                  <label for="username">{{ $t('doctor') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="user_type"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("doctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
-            </div> 
-            <div>
-              <label for="time_start">{{ $t("from") }}</label>
-              <input
-                type="time"
-                name="time_start"
-                id="time_start"
-                v-model="time_start"
-                style="border-radius: 5px"
-              />
-            </div>
-            <div>
-              <label for="time_end">{{ $t("to") }}</label>
-              <input
-                type="time"
-                name="time_end"
-                id="time_end"
-                v-model="time_end"
-                style="border-radius: 5px"
-              />
-            </div>
-            <Button
-              style="background-color: rgb(4, 171, 4); border: 0"
-              label="Create "
-              v-if="creat_event"
-              :loading="loading"
-              @click="createvent"
-            />
-            <Button
-              style="
-                background-color: #6241f1;
-                margin-left: 10px;
-                margin-right: 10px;
-                border: 0;
-              "
-              label="update "
-              v-if="updat_event"
-              :loading="loading"
-              @click="updateevent"
-            />
-            <Button
-              style="background-color: #b00020; border: 0"
-              label="Delet "
-              v-if="updat_event"
-              :loading="loading"
-              @click="deletevent"
-            />
-          </div>
-        </form>
-      </Dialog>
-    </div>
-  </div>
-</template>
 <style scoped>
 input {
   width: 100%;
   font-size: 20px;
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin: 20px 0;
   padding: 8px;
-  border: 2px solid rgb(130, 130, 168);
+  border: 2px solid #8284a8;
 }
 p {
   color: red;
-  width: 100%;
   font-size: 20px;
   text-align: center;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin: 5px 0;
 }
-body{
-  font-family: "" !important;
-  
-}
+
 </style>

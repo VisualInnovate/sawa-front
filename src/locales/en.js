@@ -63,6 +63,8 @@ export default {
   selectgender: "select a gender",
   sign_out: "sign out",
   Save_changes: "Save changes",
+  type_work:"work type",
+
 ///////////////
 Appointment_type:"Appointment type",
 AppointmentAc:"Appointment type list",
@@ -378,9 +380,10 @@ merge:"Merge",
   add_session:"Add Session",
   sumi_test:"Test reinforcers",
   sumi_end:"End reinforcers",
+  Working_hours:"Working hours",
   ///////////////////////////////////
   success_message:"success message",
-  element_delet_success:"   element delet success",
+  element_delete_success:"   element delet success",
 element_update_success:" element update success ",
 element_add_success:" element add success ",
 mission_error:" task has not been completed",
@@ -436,5 +439,10 @@ error:"error",
     image:"image",
     shift_days:"shift days",
     shift:"shift",
-     required:"required"
+     required:"required",
+     advance:"Advance",
+     advances:"السلفات",
+     advance_mount:" Advance Mount",
+     max_value:"max value",
+     advance_date:"Advance Date"
 };

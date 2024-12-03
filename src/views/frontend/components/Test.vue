@@ -64,8 +64,42 @@
           </ul>
         </div>
         <div class="hidden lg:block">
+          
+      
           <p  style="display:inline-block; height: 50px ;"><LocaleSelect  id="local-switcher"></LocaleSelect></p>
-          <router-link :to="{ name: 'parentLogin' }" class="  items-center  hidden lg:block" style="display: inline;">
+          <div style="display: inline-block;" v-if="parentStore.parentAuth">
+    <Dropdown
+    
+      v-model="selectedItem"
+      @update:model-value="action"
+      :options="items"
+      optionLabel="name"
+      class="w-fit"
+    >
+      <!-- Template for dropdown options -->
+      <template #option="slotProps">
+        <div class="flex items-center">
+          
+          <i :class="slotProps.option.icon" class="mr-2"></i>
+          {{ slotProps.option.name }}
+        </div>
+      </template>
+
+      <!-- Template for selected item display -->
+      <template #value="slotProps">
+        <div class="flex items-center" v-if="slotProps.value">
+          <div class="flex items-center" v-if="slotProps.value">
+         
+          {{ slotProps.value.code }}
+        </div>
+          
+        </div>
+      </template>
+    </Dropdown>
+
+   
+        </div>
+          <router-link v-if="!parentStore.parentAuth" :to="{ name: 'parentLogin' }" class="  items-center  hidden lg:block" style="display: inline;">
     
           <Button
           style="border: 0px;height: 45px;"
@@ -74,7 +108,7 @@
           </Button>
     
           </router-link>
-          <router-link :to="{ name: 'SingUp' }"  class="  text-lg items-center  hidden lg:block" style="display: inline;">
+          <router-link v-if="!parentStore.parentAuth" :to="{ name: 'SingUp' }"  class="  text-lg items-center  hidden lg:block" style="display: inline;">
     
             <Button
             style="border: 0px;height: 45px;"
@@ -121,21 +155,42 @@
         </div>
     </template>
     <script setup>
-    
+    import { useParentStore } from "../../../stores/ParentStore";
+    import { useI18n } from 'vue-i18n';
+    import {useRouter} from "vue-router";
+
+     
     import { ref, onMounted, onBeforeUnmount } from 'vue';
     import LocaleSelect from "../../../components/LocaleSelect.vue";
+    const parentStore =useParentStore()
     const scrollContainer = ref(null);
+    const { t } = useI18n();
     const content = ref(null);
     const staticDiv = ref(null);
+    const router = useRouter()
     const visible = ref(false);
     let observer;
     const show=ref(true)
     const opennave=()=>{
       show.value=!(show.value)
     }
-    
+    const items = ref([
+      { name:`${t("Profile_personly")}` , code: `${parentStore.parent.fname}`, icon:"pi pi-user" },
+      { name:`${t("sign_out")}`, code: `${parentStore.parent.fname}`, icon: "pi pi-sign-out" },
+     
+     
+    ]);
+
+    const selectedItem = ref( { name: `${parentStore.parent.fname}`, code: `${parentStore.parent.fname}`, });
     const isFixed = ref(false);
-    
+    const action=(value)=>{
+      if(value.name ==`${t("Profile_personly")}` ){
+        router.push({name:'Profile'})
+      }
+      if(value.name ==`${t("sign_out")}`){
+        parentStore.logout()
+      }
+    }
     const handleScroll = () => {
       // Set isFixed to true if scroll position is greater than 50px
       isFixed.value = window.scrollY > 100;

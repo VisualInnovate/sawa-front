@@ -7,46 +7,145 @@
     <!-- Your existing content goes here -->
   </div>
   <v-card>
-    <div>
-      <!-- ... existing code ... -->
-     
-      <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="update">
+      <div>
+       
+        <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="update">
           <!-- ... existing code ... -->
-            
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('employee_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.user_id"  option-value="id" :options="users" optionLabel="name" :placeholder='$t("employee_name")' class="w-full "  :class="{ 'p-invalid': submitted && !employee.user_id }"/>
-                    <small v-if="submitted && !employee.user_id" class="p-invalid text-red-600" > {{$t("employee_name") + ' ' + $t("required") }}.</small>  
+
+          <div class="col-span-2">
+                 <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :class="{ 'p-invalid': submitted && !employee.image}" v-if="employee.image" :src=" employee.image" >
+                  <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :class="{ 'p-invalid': submitted && !employee.image}" v-else src="https://sys.sawa.sawa.academy/public/default.jpg">
+                 
+                  </div>
+           
+          </div>
+           <div class="flex flex-column gap-2 py-1">                
+                <div class="flex">
+                        <label class="text-right ">{{ $t("employee_name") }}</label>
+                        <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                        </svg>
+                    </div>
+                  <InputText  class="bg-[#f7f5f5] text-center" v-model="employee.name" :class="{ 'p-invalid': submitted && !employee.name}" />
+              </div>
+              
+              <div class="flex flex-column gap-2 py-1">
+                 <div class="flex">
+                         <label class="text-right ">{{ $t("email") }}</label>
+                         <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                         <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                         </svg>
+                     </div>
+                   <InputText  type="email" class="bg-[#f7f5f5] text-center" v-model="employee.email" :class="{ 'p-invalid': submitted && !employee.email}" />
+               </div>
+
+               <div class="flex flex-column gap-2 py-1">                
+                <div class="flex">
+                        <label class="text-right ">{{ $t("password") }}</label>
+                        <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                        </svg>
+                    </div>
+                  <InputText type="password" class="bg-[#f7f5f5] text-center" v-model="employee.password" :class="{ 'p-invalid': submitted && !employee.password}" />
+              </div>
+              <div class="flex flex-column gap-2 py-1">                
+                <div class="flex">
+                        <label class="text-right ">{{ $t("title") }}</label>
+                        <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                        </svg>
+                    </div>
+                  <InputText  class="bg-[#f7f5f5] text-center" v-model="employee.title" :class="{ 'p-invalid': submitted && !employee.title}" />
+              </div>
+               <div class="flex flex-column gap-2">
+                   <div class="flex">
+                      <label class="text-right ">{{ $t("shift_name") }}</label>
+                      <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                      </svg>
+                    </div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.shift_id"  option-value="id" :options="shifts" optionLabel="title" :placeholder='$t("shift_name")' class="w-full  "  :class="{ 'p-invalid': submitted && !employee.shift_id }"/>
+
                 </div>
+
+                
+                  <div class="flex flex-column gap-2">
+                  <div class="flex">
+                      <label class="text-right ">{{ $t("position_name") }}</label>
+                      <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                      </svg>
+                    </div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.position_id"  option-value="id" :options="positions" optionLabel="title" :placeholder='$t("position_name")' class="w-full "  :class="{ 'p-invalid': submitted && !employee.position_id }"/>
+                </div>
+
                 <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.national_id" filter  option-value="id" :options="cities" optionLabel="nationality" :placeholder='$t("Nationality")' class="w-full " :class="{ 'p-invalid': submitted && !employee.national_id }" />
-                    <small v-if="submitted && !employee.national_id" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small> 
+                  <div class="flex">
+                      <label class="text-right ">{{ $t("national_id") }}</label>
+                      <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                      </svg>
+                    </div>
+                    <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.national_id" :placeholder='$t("national_id")' :class="{ 'p-invalid': submitted && !employee.national_id }" />
+                </div>
+
+                <div class="flex flex-column gap-2">
+                  <div class="flex">
+                      <label class="text-right ">{{ $t("basic_salary") }}</label>
+                      <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                      </svg>
+                    </div>
+                    <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.basic_salary" :placeholder='$t("basic_salary")' :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
+                </div> 
+                <div class="flex flex-column gap-2 py-1">
+                  <div class="flex">
+                    <label class="text-right ">{{ $t("type") }}</label>
+                    <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                    </svg>
+                  </div>
+                  <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="employee.type"  option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.type}"  />
+               </div>
+               <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
+                  <div class="flex">
+                    <label class="text-right ">{{ $t("skill_name") }}</label>
+                    <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                    </svg>
+                  </div>
+                  <MultiSelect  v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
+              </div>
+              <div  class="flex flex-column gap-2">
+                    <div class="flex">
+                      <label class="text-right ">{{ $t("department") }}</label>
+                      <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                      </svg>
+                    </div>
+                    <MultiSelect  v-model="employee.department" filter option-value="id" :options="departments" optionLabel="title" :class="{ 'p-invalid': submitted && !employee.department}" />
+              </div>
+              
+                
+              
+             
+              
+                <div class="flex flex-column gap-2 py-1">
+                  <div class="flex">
+                      <label class="text-right ">{{ $t("roles") }}</label>
+                      <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                      </svg>
+                    </div>
+                  <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="employee.role"  option-value="id" filter :options="roles" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.role}" />
                 </div>
                 
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('department_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.department_id"  option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department_name")' class="w-full " :class="{ 'p-invalid': submitted && !employee.department_id }"/>
-                      <small v-if="submitted && !employee.department_id" class="p-invalid text-red-600" > {{$t("department_name") + ' ' + $t("required") }}.</small> 
-                    </div>
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('shift_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.shift_id"  option-value="id" :options="shifts" optionLabel="title" :placeholder='$t("shift_name")' class="w-full  "  :class="{ 'p-invalid': submitted && !employee.shift_id }"/>
-                    <small v-if="submitted && !employee.shift_id" class="p-invalid text-red-600" > {{$t("shift_name") + ' ' + $t("required") }}.</small>  
-
-                </div>
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('position_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee.position_id"  option-value="id" :options="positions" optionLabel="title" :placeholder='$t("position_name")' class="w-full "  :class="{ 'p-invalid': submitted && !employee.position_id }"/>
-                    <small v-if="submitted && !employee.position_id" class="p-invalid text-red-600" > {{$t("position_name") + ' ' + $t("required") }}.</small>  
-                </div>
-
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('basic_salary') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.basic_salary" :placeholder='$t("basic_salary")' :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
-                    <small v-if="submitted && !employee.basic_salary" class="p-invalid text-red-600" > {{$t("basic_salary") + ' ' + $t("required") }}.</small>  
-                </div> 
-              
+                <div class=" flex-column gap-2 py-1 hidden">
+                  <label class="w-full " for="username">{{ $t('personal_image') }}</label>
+           
+                  <InputText name="file"  ref="file" @change="uploadFile" accept="image/*" id="filr"   type="file" class="w-full" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
+              </div>
                
     
                 <div class="flex flex-column gap-2 w-full">
@@ -58,10 +157,10 @@
   
         
         </form>
-<toast></toast>
-      <!-- ... existing code ... -->
-    </div>
-  </v-card>
+  <toast></toast>
+        <!-- ... existing code ... -->
+      </div>
+    </v-card>
 </template>
 
 <script>
@@ -74,16 +173,19 @@ export default {
 
   data() {
     return {
-      employee:{ },
-      users:{},
-      childs:{},
-      cities:{},
-      positions:{},
-      shifts:{},
-      departments:{},
-      qustions:{},
-      error: {},
-      maxDate: new Date(),
+     employee:{ },
+        users:{},
+        submitted:false,
+        childs:{},
+        cities:{},
+        positions:{},
+        shifts:{},
+        skills:[],
+        roles:[],
+        departments:{},
+        qustions:{},
+        error: {},
+        maxDate: new Date(),
      
       // Add other validation rules for the title field
     };
@@ -92,22 +194,45 @@ export default {
 
   methods: {
     // ... existing methods ...
-    Therapeutic (){
-      this.$router.push({ name: 'answer' });
-    },
+  
 
+    tpes(){
+        return[
+        
+        { name:this.$t('driver'), id: 1 },
+        { name:this.$t('doctor'), id: 2 },
+        { name:this.$t('Evaluator'), id: 5 },
 
+      ]
+      },
     getoneanswer(){
         axios
           .get(`api/employees/${this.$route.params.id}`)
           .then((response) => {
             console.log(response.data.data)
+            this.employee.name = response.data.data.name
             this.employee.user_id = response.data.data.user_id
             this.employee.position_id = response.data.data.position_id
             this.employee.basic_salary = response.data.data.basic_salary
             this.employee.shift_id = response.data.data.shift_id
             this.employee.department_id = response.data.data.department_id          
-            this.employee.national_id =parseInt( response.data.data.national_id   )       
+            this.employee.type = response.data.data.user.type          
+            this.employee.image = response.data.data.user.image          
+            this.employee.title = response.data.data.user.title          
+            this.employee.role = response.data.data.user.roles[0].id          
+            this.employee.national_id =parseInt( response.data.data.national_id  )     
+            this.employee.skills = [];
+            for (let i =0 ; i < response.data.data.user.skills.length; i++) {    
+              this.employee.skills.push(response.data.data.user.skills[i].id);
+        
+          
+               }  
+               this.employee.department = [];
+               for (let i =0 ; i < response.data.data.user.departments.length; i++) {    
+              this.employee.department.push(response.data.data.user.departments[i].id);
+        
+          
+               }  
           })
 
        },
@@ -131,6 +256,17 @@ export default {
         .then((response) => {
           this.positions=response.data.data
         })
+        axios.post("/api/roles").then((res)=>{
+
+        this.roles= res.data.roles.data
+
+
+        });
+        axios.get("/api/skills").then((res)=>{
+              this.skills=res.data.data
+            
+
+            });
         axios
         .get("api/department")
         .then((response) => {
@@ -148,11 +284,24 @@ export default {
     
   
     update() {
-    
-      axios.post(`/api/employees/${this.$route.params.id}`,this.employee).then((res) => {
+      const body = new FormData();
+        if (this.employee.name) body.append("name", this.employee.name);
+        if (this.employee.title) body.append("title", this.employee.title);
+        if (this.employee.email) body.append("email", this.employee.email);
+        if (this.employee.password) body.append("password", this.employee.password);
+        if (this.employee.shift_id) body.append("shift_id", this.employee.shift_id);
+        if (this.employee.position_id) body.append("position_id", this.employee.position_id);
+        if (this.employee.national_id) body.append("national_id", this.employee.national_id);
+        if (this.employee.basic_salary) body.append("basic_salary", this.employee.basic_salary);
+        if (this.employee.type) body.append("type", this.employee.type);
+        if (this.employee.role) body.append("role", this.employee.role);
+        if (this.employee.skills) body.append("skills", this.employee.skills);
+        if (this.employee.department) body.append("department_id", this.employee.department);
+        if (this.employee.file) body.append("file", this.employee.file);
+      axios.post(`/api/employees/${this.$route.params.id}`,body).then((res) => {
         this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_update_success"), life: 3000 });
         }).catch((el)=>{
-          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: this.$t("mission_error"), life: 3000 });
+          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail:  `${el.response.data.message}`, life: 3000 });
     })
     },
    

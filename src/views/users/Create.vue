@@ -5,7 +5,7 @@
      
   
     <form @submit.prevent="create">
-      <div class="">
+         <div class="">
                  <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :class="{ 'p-invalid': submitted && !usersdata.image}" v-if="usersdata.image" :src=" usersdata.image" >
                   <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :class="{ 'p-invalid': submitted && !usersdata.image}" v-else src="https://sys.sawa.sawa.academy/public/default.jpg">
                  
@@ -60,8 +60,8 @@
             </div>
 
            </div>
-           <p class="text-2xl font-bold py-2">{{ $t("add_Appointment") }}</p>
-           <table  class="item-table w-[70%]">
+           <!-- <p class="text-2xl font-bold py-2">{{ $t("add_Appointment") }}</p> -->
+           <!-- <table  class="item-table w-[70%]">
             
             <thead>
               <tr>
@@ -89,7 +89,7 @@
                 <td> <Button   @click="addItem"  class="create m-auto s " icon="pi pi-plus" ></Button></td>
               </tr>
             </tbody>
-          </table>
+          </table> -->
           <Button @click="submitted=true" type="submit" class=" mt-4 m-auto create  w-full " :label='$t("submit")'></Button>
     </form>
     <Toast/>
@@ -180,13 +180,14 @@ const create=()=>{
 
 
     axios
-    .post('/api/users/create',body)
+    .post('/api/users/create')
     .then((res) => {
     
       toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("element_add_success")}`, life: 3000 });
     })
     .catch((el)=>{
-      toast.add({ severity: 'error', summary: t("error"), detail: `${t("mission_error")}`, life: 3000 });
+      console.log(el)
+      toast.add({ severity: 'error', summary: t("error"), detail: `${el.response.data.message}`, life: 3000 });
       
     })
 }
