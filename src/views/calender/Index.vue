@@ -22,10 +22,7 @@
               <label class="text-right ">{{ $t("title") }}</label>
               <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
             </div>
-            <div class="flex flex-column ">
-              <label class="text-right ">{{ $t("color") }}</label>
-              <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
-            </div>
+          
                 <div  class="flex flex-column gap-2 py-1">
                       <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
                       <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.evaluation_type"  option-value="id"  :options="evaluate_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.evaluation_type}" />
@@ -122,7 +119,7 @@ export default {
           center: "prev next today",
           right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
         },
-        selectAllow: (selectInfo) => {
+      selectAllow: (selectInfo) => {
       const calendarApi = this.$refs.fullCalendar.getApi();
       const events = calendarApi.getEvents();
 

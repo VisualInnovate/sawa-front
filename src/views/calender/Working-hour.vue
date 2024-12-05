@@ -27,7 +27,7 @@
               <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
             </div> -->
             <div  class="flex flex-column gap-2">
-              <label class="text-right ">{{ $t("type_work") }}</label>
+              <label class="text-right ">{{ $t("نوع التكرار") }}</label>
               <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
             </div>
            
@@ -43,7 +43,11 @@
               <label class="text-right ">{{ $t("اختر ايام التكرار") }}</label>
                  <MultiSelect v-model="event.day"  :options="days_week"   optionLabel="name" optionValue="value" :class="{ 'p-invalid': submitted && !event.days}" />
               </div>
-           
+              <div v-if="event.repeat_type "  class="flex flex-column gap-2">
+              <label class="text-right ">{{ $t(" تاريخ نهاية التكرار") }}</label>
+              <Calendar    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
+              </div>
+
             
             <Button type="submit" class="create mt-3" :label='$t("submit") '  @click="submitted = true "  />
             <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
@@ -131,8 +135,8 @@ import { text } from "@fortawesome/fontawesome-svg-core";
         repeat_types:[
                       { name: 'تكرار ايام ',type:'single','dateFormat':'DD MM yy ', id: 1 },
                       { name: 'تكرار اسبوعي ',type:'single','dateFormat':'DD MM yy ', id: 2 },
-                      // { name: 'تكرار الشهور',type:'month','dateFormat':' MM yy ', id: 4 },
-                      // { name: 'تكرار السنوات',type:'year','dateFormat':'  yy ', id: 3 },
+                      { name: 'تكرار الشهور',type:'month','dateFormat':' MM yy ', id: 3 },
+                      { name: 'تكرار السنوات',type:'year','dateFormat':'  yy ', id: 4 },
         ],
         users:[],
         business_hours:[],
@@ -140,7 +144,13 @@ import { text } from "@fortawesome/fontawesome-svg-core";
         visible: false,
         updateevent:false,
         event:{color:'87ceeb',
-          repeate:{}
+          repeate:[
+            {
+              type:'',
+              days:'',
+              end_of_repeat:''
+            }
+          ]
         },
         submitted:false,
         employees: [],
@@ -274,9 +284,11 @@ import { text } from "@fortawesome/fontawesome-svg-core";
   },
       createEvent() {
       
-        this.event.repeate.type=this.event.repeat_type.id
-        this.event.repeate.days=this.event.day
-        
+        this.event.repeate[0].type=this.event?.repeat_type?.id
+        this.event.repeate[0].days=this.event.day
+        this.event.repeate[0].end_of_repeat=moment(this.event.end_of_repeat).format(' YYYY-MM-DD')
+        console.log( typeof(this.event.repeate))
+       
         axios.post("/api/event-calendar",{
           employee_id:this.event.employee_id,
           title:this.event.title,
@@ -316,6 +328,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
         }
       },
     },
+    
     watch: {
             // Watch the variable for changes
             business_hours(newValue, oldValue) {
@@ -323,7 +336,11 @@ import { text } from "@fortawesome/fontawesome-svg-core";
                 const usedDays = newValue.map(entry => entry.day);
                 // Filter `days` to only include those present in `usedDays`
                 this.opts.hiddenDays=this.days.filter(day => !usedDays.includes(day));
+                  this.days_week = this.days_week.filter(day => !this.opts.hiddenDays.includes(day.value));
+                
             },
+
+
         },
     mounted() {
        

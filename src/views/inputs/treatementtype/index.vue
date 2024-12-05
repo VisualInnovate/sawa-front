@@ -176,7 +176,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
-          v-can="'treatment show'"
+         
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">

@@ -10,65 +10,45 @@
   
   <v-card>
     <div>
-      <!-- ... existing code ... -->
-      <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-        <v-card>
-          <v-card-title>{{ $t("Success!") }}</v-card-title>
-          <v-card-text>
-            {{ $t("Data seeded successfully!") }}
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="closeSuccessModal" color="success">
-              {{ $t("OK") }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-form class=" p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+    
+      <form class=" p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="createtreatment">
         <!-- ... existing code ... -->
           
               <div class="flex flex-column gap-2">
                 <label for="username">{{ $t('roomnumber') }}</label>
-              <InputText required class="bg-[#f7f5f5]" v-model="rooms.name" :placeholder='$t("roomnumber")' />
+              <InputText required class="bg-[#f7f5f5]" v-model="rooms.name" :class="{ 'p-invalid': submitted && !rooms.name}" />
               <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
               </div>
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('roomdoctor') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.admin_id"  option-value="id" filter :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.admin_id">{{ error.admin_id[0] }}</div>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.admin_id"  option-value="id" filter :options="doctors" optionLabel="name"   :class="{ 'p-invalid': submitted && !rooms.admin_id}" />
               </div> 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('typeroom') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type_tow"  option-value="value" :options="arr2()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.type_tow">{{ error.type_tow[0] }}</div>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type_tow"  option-value="value" :options="arr2()" optionLabel="name" :class="{ 'p-invalid': submitted && !rooms.type_tow}" />
+                 
               </div>
               <div v-if="rooms.type_tow == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('typeroom') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("typeroom")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
+                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :class="{ 'p-invalid': submitted && !rooms.type}" />
               </div>
                 
               <div  v-if="rooms.type_tow !=0 && rooms.type !=0 && rooms.type_tow  " class="flex flex-column gap-2">
                   <label for="username">{{ $t('roomsnumber') + " "}}</label>
-                  <InputNumber required class="bg-[#f7f5f5]" v-model="rooms.capacity" :placeholder='$t("roomsnumber")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.capacity">{{ error.capacity[0] }}</div>
+                  <InputNumber required class="bg-[#f7f5f5]" v-model="rooms.capacity" :class="{ 'p-invalid': submitted && !rooms.capacity}" />
               </div>
-              <!-- <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('roomstable') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="treatments.session_type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("roomstable")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.session_type">{{ error.session_type[0] }}</div>
-              </div> -->
+         
               <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                 
-                <Button  v-if="buttomaddcal" @click="createtreatment" :loading="timeshow" class="create m-auto w-full  lg:w-[50%] " icon="pi pi-plus" :label='$t("Add_appointment")'></Button>
+                <Button type="submit"  @click="submitted=true"  class="create m-auto w-full  lg:w-[50%] " icon="pi pi-plus" :label='$t("Add_appointment")'></Button>
                 <small id="username-help"></small>
               </div>
              
               
 
       
-      </v-form>
+      </form>
       <Toast/>
       <!-- ... existing code ... -->
       <div class="px-4" >
@@ -76,97 +56,68 @@
     <FullCalendar
        
       :options="opts"
-        v-if="FullCalendarshow"
+     v-if="rooms.room_id"
       @change="refreshEvents()"
       ref="fullCalendar"
       :dayRender="highlightSelectedDay"
     />
     <div class="card flex justify-content-center">
-      <Dialog
-        v-model:visible="visible"
-        id="modal"
-        modal
-        :header="modal_text"
-        :style="{ width: '40vw' }"
-      >
-        <form>
+      <Dialog v-model:visible="visible" id="modal" modal :header='$t("submit") ' :style="{ width: '40vw' }">
+        <form @submit.prevent="create">
           <div>
 
-            <div v-if="updat_event" class="py-3">
-              <label  for="time_start">{{ $t("start_date") }}</label>
-              <Calendar
-              
-            style="width: 100%"
-            showButtonBar
-            v-model.number="start_event"
-            showIcon
-            placeholder="dd/mm/yy"
-            
-
-          />
+            <div class="flex flex-column ">
+              <label class="text-right ">{{ $t("title") }}</label>
+              <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
             </div>
-            <div v-if="updat_event" class="py-3">
-              <label for="time_start">{{ $t("end_date") }}</label>
-              <Calendar
-            style="width: 100%"
-            showButtonBar
-            v-model.number="end_event"
-            showIcon
-            placeholder="dd/mm/yy"
-         
-
-          />
-            </div>
-            <div>
-              <label for="time_start">{{ $t("from") }}</label>
-              <input
-              class="cal"
-                type="time"
-                name="time_start"
-                id="time_start"
-                v-model="time_start"
-                style="border-radius: 5px"
-              />
-            </div>
-            <div>
-              <label for="time_end">{{ $t("to") }}</label>
-              <input
-                class="cal"
-                type="time"
-                name="time_end"
-                id="time_end"
-                v-model="time_end"
-                style="border-radius: 5px"
-              />
-            </div>
-            <Button
-              style="background-color: rgb(4, 171, 4); border: 0"
-              label="Create "
-              v-if="creat_event"
-              :loading="loading"
-              @click="createvent"
-            />
-            <Button
-            icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-              v-if="updat_event"
-              :loading="loading"
-              @click="updateevent"
-            />
-            <Button
-            icon="pi pi-trash"
-                class="delete mt-2"
-          
-              v-if="updat_event"
-              :loading="loading"
-              @click="deletevent"
-            />
+            <!-- <div class="flex flex-column ">
+              <label class="text-right ">{{ $t("color") }}</label>
+              <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
+            </div> -->
            
-          
+           
+            <div class="flex gap-2 my-2">
+                <InputSwitch v-model="event.sub" /> 
+                  <span class="px-2"> {{ $t('هل تريد تكرار الحدث') }}</span>
+            </div>
+            <div v-if="event.sub" class="flex flex-column gap-2 py-1">
+                      <label class="w-full text-right" for="username">{{ $t('نوع التكرار') }}</label>
+                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
+              </div>
+              <div v-if="event.repeat_type?.id == 2"  class="flex flex-column gap-2">
+              <label class="text-right ">{{ $t("اختر ايام التكرار") }}</label>
+                 <MultiSelect v-model="event.day"  :options="days_week"   optionLabel="name" optionValue="value" :class="{ 'p-invalid': submitted && !event.days}" />
+              </div>
+              <div v-if="event.repeat_type "  class="flex flex-column gap-2">
+              <label class="text-right ">{{ $t(" تاريخ نهاية التكرار") }}</label>
+              <Calendar    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
+              </div>
+
+            
+            <Button type="submit" class="create mt-3" :label='$t("submit") '  @click="submitted = true "  />
+            <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
+            <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
+  
           </div>
         </form>
       </Dialog>
-      
+      <Dialog v-model:visible="updateDialog" id="modal" modal :header="modal_text" :style="{ width: '40vw' }">
+        <form @submit.prevent="updateevent">
+          <div>
+            <div class="flex flex-column ">
+              <label class="text-right ">{{ $t("title") }}</label>
+              <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
+            </div>
+            
+         
+           <div class="flex ">
+            <Button type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="submitted=true " />
+            <Button type="submit" class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
+           </div>
+        
+          </div>
+        </form>
+      </Dialog>
     </div>
   </div>
     </div>
@@ -177,16 +128,16 @@
 
 <script>
 import {useToast} from 'primevue/usetoast'
+import arLocale from "@fullcalendar/core/locales/ar";
 import FullCalendar from "@fullcalendar/vue3";
-import TimeGridplugin from "@fullcalendar/timegrid";
+import TimeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import Calendar from "primevue/calendar";
 import axios from "axios";
 import { ref } from "vue";
 import moment from "moment";
-import arLocale from "@fullcalendar/core/locales/ar";
-import Calendar from "primevue/calendar";
 
 
 import { useAppLangStore } from "../../stores/AppLangStore";
@@ -199,17 +150,44 @@ export default {
   data() {
     return {
       rooms:{},
+      days_week :[
+          
+          { name: 'Sunday', value: 0 },
+          { name: 'Monday', value: 1 },
+          { name: 'Tuesday', value: 2},
+          { name: 'Thursday', value: 3 },
+          { name: 'Wednesday', value: 4 },
+          { name: 'Friday', value: 5 },
+          { name: 'Saturday', value: 6 }
+        
+      ],
+      repeat_types:[
+                      { name: 'تكرار ايام ',type:'single','dateFormat':'DD MM yy ', id: 1 },
+                      { name: 'تكرار اسبوعي ',type:'single','dateFormat':'DD MM yy ', id: 2 },
+                      { name: 'تكرار الشهور',type:'month','dateFormat':' MM yy ', id: 3 },
+                      { name: 'تكرار السنوات',type:'year','dateFormat':'  yy ', id: 4 },
+        ],
       error: {},
       doctors:{},
+      submitted:false,
       isSubmitting: false,
+      updateDialog:false,
       programe_type:{},
       toast:useToast(),
       room_id:'',
       slot_id:"",
 
       // calender
+     event:{color:'87ceeb',
+          repeate:[
+            {
+              type:'',
+              days:'',
+              end_of_repeat:''
+            }
+          ]
+        },
       buttomaddcal:true,
-      timeshow:false,
       FullCalendarshow:false,
       langStore: useAppLangStore(),
       visible: false,
@@ -225,17 +203,36 @@ export default {
       time_start: "",
       time_end: "",
       opts: {
-        plugins: [dayGridPlugin, interactionPlugin, TimeGridplugin, listPlugin],
+      plugins: [dayGridPlugin, interactionPlugin, TimeGridPlugin, listPlugin],
         initialView: "dayGridMonth",
-        footerToolbar: true,
-        valid: false,
-        buttonIcons: false,
         locale: null,
-        validRange: {
-          start: new Date(), // Set your minimum date here
-          
-        },
+        slotDuration:'00:30:00',
+        slotLabelInterval: '00:30:00',
+     
+        slotMinTime:'08:00:00',
+        slotMaxTime:'13:00:00',
+        selectable: true,
+        editable: true,
+        validRange: { start: new Date() },
+        selectAllow: (selectInfo) => {
+            const calendarApi = this.$refs.fullCalendar.getApi();
+            const events = calendarApi.getEvents();
 
+            for (let event of events) {
+              // تحقق فقط من التداخل على مستوى الوقت داخل نفس اليوم
+              if (
+                moment(selectInfo.start).isSame(event.start, "day") && // نفس اليوم
+                (
+                  (selectInfo.start >= event.start && selectInfo.start < event.end) || // البداية داخل الحدث
+                  (selectInfo.end > event.start && selectInfo.end <= event.end)  // النهاية داخل الحدث
+                )
+              ) {
+                return false; // يوجد تداخل، لا تسمح
+              }
+            }
+
+            return true; // لا يوجد تداخل، يمكن الإضافة
+          },
         selectable: true,
         droppable: true,
         editable: true,
@@ -255,67 +252,31 @@ export default {
           minute: "2-digit",
           second: "2-digit",
         },
-        eventDrop: function (event) {
-          console.log(event.event.id);
-          axios
-            .post(`/api/calender/${event.event.id}/update`, {
-              start: event.event.start,
-              end: event.event.end,
-            })
-            .then((res) => {
-              console.log(res.data.k);
-            });
-        },
-        eventDrop: function (event) {
-        console.log(this.room_id)
-        const date1 = new Date(event.event.start);
-        const hours1 = String(date1.getHours()).padStart(2, '0');
-        const minutes1 = String(date1.getMinutes()).padStart(2, '0');
-        const date2 = new Date(event.event.end);
-        const hours2 = String(date2.getHours()).padStart(2, '0');
-         const minutes2 = String(date2.getMinutes()).padStart(2, '0');
-          axios
-            .post(`/api/slot`, {
-              title: event.event.title,
-              from:hours1 +":"+minutes1,
-              to:hours2 +":"+minutes2,
-              room_id:this.room_id,
-              start_event: moment(event.event.start),
-              end_event: moment(event.event.start),
-            })
-            .then((res) => {
-              this.update()
-              console.log(res.data.k);
-            });
-        }.bind(this),
+      
 
         eventClick: function (event) {
-          this.event_id = event.event.id;
-          this.event_title = event.event.title;
-          this.modal_text = this.$t("update_event");
-          this.creat_event = false;
-          this.updat_event = true;
-          this.getslotid()
-          this.visible= true;
-          this.start_event = moment(event.event.start).format("YYYY-MM-DD");
-          this.end_event = moment(event.event.end).format("YYYY-MM-DD");
-          console.log(this.start_event);
+          this.updateDialog=true
+          this.event.start=event.event.end
+          this.event.end=event.event.end
+          this.event.title = event.event.title;
+          this.event_id=event.event.id
+          this.rooms.room_id=event.event.extendedProps.room_id
+       
+
         }.bind(this),
 
         select: function (event) {
-          console.log(event);
-          this.event_title = "";
-          this.modal_text = this.$t("create_event");
-          this.creat_event = true;
-          this.updat_event = false;
-          this.visible = true;
+      
 
-          console.log(event);
-          const originalDate = new Date(event.end);
-          originalDate.setDate(originalDate.getDate() -1);
-          this.start_event = moment(event.start).format("YYYY-MM-DD");
-          this.end_event = moment(originalDate.toISOString().split('T')[0]).format("YYYY-MM-DD");
-          console.log(event.backgroundColor);
+          
+              if(event.view.type == 'dayGridMonth'){
+                const calendarApi = this.$refs.fullCalendar.getApi();
+                calendarApi.changeView("timeGridDay", event.startStr);
+              }else{
+                  this.event.start=event.startStr
+                  this.event.end=event.endStr
+                  this.visible = true;
+              }
         }.bind(this),
       },
 
@@ -339,20 +300,7 @@ export default {
            
         ]
     },
-    getslotid(){
-      axios
-        .get(`/api/slot/${this.event_id}`)
-        .then((res) => {
-          this.time_start=res.data.data.from
-          this.time_end=res.data.data.to
-          this.room_id=res.data.data.room_id
-         
-        })
-        .catch((error) => {
-          console.error("Error retrieving doctors:", error);
-        });
 
-    },
     
     arr (){
       return this.roomType =[
@@ -364,40 +312,9 @@ export default {
                
             ]
     },
-    programetype (){
-      return this.roomType =[
-            
-                { name:this.$t('diurnal') , value:0 },
-                { name:this.$t('Clinics') , value:1 },
-                { name:this.$t('house') , value:2 },
-               
-            ]
-    },
 
-    getTreatmentTypes() {
-      axios
-        .get("api/treatment-types")
-        .then((response) => {
-          this.treatmentTypes = response.data.treatmentTypes;
-          console.log(this.treatmentTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving Appointment Types:", error);
-        });
-    },
 
-    getprograme(){
-      axios
-        .get("api/treatmentcounts")
-        .then((response) => {
-          // this.treatmentTypes = response.data.treatmentTypes;
-          console.log(this.treatmentTypes);
-        })
-        .catch((error) => {
-          console.error("Error retrieving Appointment Types:", error);
-        });
 
-    },
     getAllDoctor() {
       axios
         .get("api/doctors")
@@ -412,23 +329,15 @@ export default {
     
   
     createtreatment() {
-      this.timeshow=!(this.timeshow)
+    
       axios.post("/api/room",this.rooms).then((res) => {
-        this.room_id=res.data.data.id
-        this.timeshow=!(this.timeshow)
-        this.FullCalendarshow=!(this.FullCalendarshow)
-        this.buttomaddcal=!(this.buttomaddcal)
-        // this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        this.rooms.room_id=res.data.data.id
 
       }).catch((el)=>{
-        this.timeshow=!(this.timeshow)
-        console.log(el.response.data.errors.name)
-     this.error = el.response.data.errors
+     
     })
     },
-    closeSuccessModal() {
-      this.isSuccessModalOpen = false;
-    },
+
 
 
     highlightSelectedDay(info) {
@@ -436,102 +345,72 @@ export default {
                 info.el.classList.add('selected-day');
             }
         },
-    loo(){
-      if (localStorage.appLang == "en"){
-      console.log ("ascasc")
-    }
-    else{
-     this.opts.locale = arLocale
-   
-    }
-    },
+  
     goBack() {
       this.$router.go(-1);
     },
-    deletevent(event) {
-      console.log(event);
-
+    deleteEvent() {
       axios
         .delete(`/api/slot/${this.event_id}`)
         .then((res) => {
           this.update()
-          this.visible = false
+          this.updateDialog = false
         });
    
-      setTimeout(() => {
-        
-          (this.event_title = null),
-          (this.loading = false);
-      }, 700);
+   
     },
     updateevent() {
-      
+      this.event.repeate[0].type=this.event?.repeat_type?.id
+        this.event.repeate[0].days=this.event.day
+        this.event.repeate[0].end_of_repeat=moment(this.event.end_of_repeat).format(' YYYY-MM-DD')
       axios
-        .put(`/api/slot/${this.event_id}`, {
-          
-          start_event:this.start_event,
-          end_event:this.end_event,
-          from: this.time_start,
-          
-          to: this.time_end,
-          room_id:this.room_id
-         
+        .put(`/api/slot/${this.event_id}`, {        
+          title: this.event.title,
+          start:this.event.start,
+          end: this.event.end,
+          color:this.event.color,
+          room_id:this.rooms.room_id, 
+          repeat:this.event.repeate,       
         })
         .then((res) => {
           this.update()
-          this.visible = false
+          this.updateDialog = false
         });
-     
-      setTimeout(() => {
-        
-       
-          (this.event_title = null),
-          (this.event_id = null),
-          (this.loading = false);
-      }, 700);
+
     },
-     createvent() {
-      this.loading = true;
+     create() {
+        this.event.repeate[0].type=this.event?.repeat_type?.id
+        this.event.repeate[0].days=this.event.day
+        this.event.repeate[0].end_of_repeat=moment(this.event.end_of_repeat).format(' YYYY-MM-DD')
       axios
         .post("/api/slot", {
-          title: this.event_title,
-          end_event:this.end_event,
-          start_event:this.start_event,
-          date: this.start_event,
-          from: this.time_start,
-          to: this.time_end,
-          room_id:this.room_id
+          title: this.event.title,
+          start:this.event.start,
+          end: this.event.end,
+          color:this.event.color,
+          room_id:this.rooms.room_id, 
+          repeat:this.event.repeate,
         })
         .then((res) => {
-          c
-          this.visible = false
-          if (res.status != 200) {
-            this.valid = true;
-          }
+          this.visible=false
+          this.update();
         }).catch((el)=>{
        
      this.error = el.response.data.errors
     });
      
-      setTimeout(() => {
-        this.update();
-          (this.event_title = null),
-          (this.start_event = null),
-          (this.end_event = null),
-          (this.create_visible = false),
-          (this.loading = false);
-      }, 2000);
+   
     },
     update() {
-      axios.get(`/api/room/${this.room_id}`).then((res) => {
+      axios.get(`/api/room/${this.rooms.room_id}`).then((res) => {
         console.log(res.data.data.id);
         this.room_id=res.data.data.id
         this.opts.events = res.data.data.slots.map(event => ({
-            title: event.start_event+"T"+event.to,
-            start: event.start_event+"T"+event.from,
-            end: event.end_event+"T"+event.to,
+            title: event.title,
+            start: event.start,
+            end: event.end,
             id: event.id,
-            from:event.from
+            room_id:event.room_id
           }));
        
        
@@ -575,139 +454,3 @@ export default {
 
 };
 </script>
-
-<style scoped>
-.grid::-webkit-scrollbar {
-  display: none !important;
-}
-/* Add custom styles for the name input field */
-.name-input {
-  height: 70vh;
-  margin: auto !important;
-   overflow-y: scroll;
-  width: 100%;
-  position: relative;
-  background-color: #e7e7e7;
-  padding: 10px;
-  margin-bottom: 15px !important;
-  border-radius: 10px;
-}
-.name-input::-webkit-scrollbar {
-  display: none;
-}
-#pv_id_1{
-  text-align: center;
-}
-/* Hide scrollbar for IE, Edge and Firefox */
-.name-input {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-.name-input {
-  width: 606px;
-}
-
-
-
-.seed {
-  width: 600px;
-
-  margin: auto !important;
-  background-color: #135c65;
-  display: block;
-  color: white;
- 
-
- 
-  /* Set the width to 606px */
-}
-
-.custom-select {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #f8f8f8;
-  color: #333;
-  appearance: none;
-  /* Remove default arrow in some browsers */
-  -webkit-appearance: none;
-  /* Remove default arrow in Chrome and Safari */
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-
-
-.loader {
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
-  margin: 20px auto;
-  /* Adjust margin as needed */
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  color: #ff0000;
-  /* Red color for errors */
-  margin-top: 5px;
-  font-size: 0.9em;
-}
-
-.error-icon {
-  margin-right: 5px;
-  /* Add styles for your error icon */
-}
-
-@media (max-width: 768px) {
-
-  .name-input,
-  .custom-select,
-  .error-message {
-    width: 100%;
-    /* Full width on smaller screens */
-    margin-bottom: 15px;
-  }
-
-  .v-btn {
-    width: 100%;
-    /* Full width button */
-    padding: 12px;
-    /* Larger touch target */
-  }
-
-  .error-message {
-    font-size: 0.8em;
-    /* Adjust font size */
-  }
-}
-.cal {
-  width: 100%;
-  font-size: 20px;
-  text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 8px;
-  border: 2px solid rgb(130, 130, 168);
-}
-
-/* Add additional CSS for animation or other styling as needed */
-
-/* Add any other custom styles here */
-</style>
