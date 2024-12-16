@@ -284,15 +284,14 @@ onMounted(async () => {
           
 
          <!-- student_programe -->
-          <!-- <v-list-group value="student_programe">
+          <v-list-group prepend-icon="mdi-message-question-outline" value="custom-files">
             <template #activator="{ props }">
-              <v-list-item v-bind="props" :title="$t('student_programe')"></v-list-item>
+              <v-list-item v-bind="props" :title="$t('custom_files')"></v-list-item>
             </template>
-            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('Pages')" value="Pages"
-              :to="{ name: 'pages' }"></v-list-item>
-            <v-list-item prepend-icon="mdi-message-question-outline" :title="$t('Settings')" value="Settings"
-              :to="{ name: 'settings' }"></v-list-item>
-          </v-list-group> -->
+            <v-list-item  :title="$t('custom_files')" value="custom-files"
+              :to="{ name: 'custom-files' }"></v-list-item>
+            
+          </v-list-group>
 
 
 

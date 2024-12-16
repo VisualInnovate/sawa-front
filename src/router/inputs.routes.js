@@ -83,6 +83,13 @@ const inputs = [
     name: 'department',
     component: () => import("../views/inputs/department/index.vue")
   },
+
+  // custom-files
+  {
+    path: '/custom-files', 
+    name: 'custom-files',
+    component: () => import("../views/custom-files/create.vue")
+  },
 ];
 
 export default {

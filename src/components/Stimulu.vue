@@ -13,7 +13,7 @@
         <router-link
           :to="{ name: 'reinforcers' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('Settings') }}</router-link>
+        > {{ $t('reinforcers') }}</router-link>
         <router-link
           :to="{ name: 'return' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"

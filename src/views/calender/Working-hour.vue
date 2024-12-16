@@ -27,7 +27,7 @@
               <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
             </div> -->
             <div  class="flex flex-column gap-2">
-              <label class="text-right ">{{ $t("نوع التكرار") }}</label>
+              <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
               <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
             </div>
            
@@ -36,6 +36,7 @@
                   <span class="px-2"> {{ $t('هل تريد تكرار الحدث') }}</span>
             </div>
             <div v-if="event.sub" class="flex flex-column gap-2 py-1">
+
                       <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
                       <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
               </div>

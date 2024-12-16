@@ -152,7 +152,7 @@
                   </div>
                   <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="employee.type"  option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.type}"  />
           </div>
-          <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
+           <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
                   <div class="flex">
                     <label class="text-right ">{{ $t("skill_name") }}</label>
                     <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,6 +160,15 @@
                     </svg>
                   </div>
                   <MultiSelect  v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
+              </div>
+              <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
+                  <div class="flex">
+                    <label class="text-right ">{{ $t("Typetreatment") }}</label>
+                    <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                    </svg>
+                  </div>
+                  <MultiSelect  v-model="employee.treatments" filter option-value="id" :options="treatments" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.treatments}" />
               </div>
               <div  class="flex flex-column gap-2">
                     <div class="flex">
@@ -196,6 +205,7 @@
 
 <script>
 import axios from "axios";
+import Treatment from "../../Treatment/Treatment.vue";
 export default {
   data() {
     return {
@@ -209,6 +219,7 @@ export default {
       employee: {},
       shifts: [],
       positions: [],
+      treatments:[]
     };
   },
   methods: {
@@ -265,6 +276,11 @@ export default {
       .then((response) => {
         this.positions=response.data.data
       })
+      axios.get("api/treatment/all")
+      .then((response) => {
+        this.treatments=response.data.data
+      })
+      
       axios.post("/api/roles").then((res)=>{
 
       this.roles= res.data.roles.data
@@ -305,6 +321,7 @@ export default {
         if (this.employee.basic_salary) body.append("basic_salary", this.employee.basic_salary);
         if (this.employee.type) body.append("type", this.employee.type);
         if (this.employee.role) body.append("role", this.employee.role);
+        if (this.employee.treatments) body.append("treatments", this.employee.treatments);
         if (this.employee.skills) body.append("skills", this.employee.skills);
         if (this.employee.department) body.append("department_id", this.employee.department);
         if (this.employee.file) body.append("file", this.employee.file);

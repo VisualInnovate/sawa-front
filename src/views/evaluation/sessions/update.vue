@@ -1,293 +1,369 @@
 <template>
-    <div>
-      <div>
-        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" @click="Therapeutic()">{{ $t("sessions") }}</p>
-      </div>
-      <div v-if="loading" class="loader"></div>
-      <!-- Your existing content goes here -->
-    </div>
-    <v-card>
-      <div>
-        <!-- ... existing code ... -->
-        <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-          <v-card>
-            <v-card-title>{{ $t("Success!") }}</v-card-title>
-            <v-card-text>
-              {{ $t("Data seeded successfully!") }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="closeSuccessModal" color="success">
-                {{ $t("OK") }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
-          <!-- ... existing code ... -->
-            
-              
-            
+  <v-card class="p-[1%] bg-slate-50">
       
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('roomdoctor') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="sesion.specialist_id"  option-value="id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">{{ error.specialist_id[0] }}</div>
-                </div>
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="sesion.child_id"  option-value="id" :options="childreen" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
-                </div>
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('addTherapeutic') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="sesion.student_program_id"  option-value="id" :options="programs" optionLabel="program.name" :placeholder='$t("addTherapeutic")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.student_program_id">{{ error.student_program_id[0] }}</div>
-                </div>
-                <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('sesion_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="sesion.date" showIcon  :placeholder='$t("sesion_date")'  :minDate="maxDate" />   
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-                </div> 
-               
-              
 
-                
-               
+      <FullCalendar  :options="opts" ref="fullCalendar" />
+    <Dialog v-model:visible="visible" id="modal" modal :header='$t("submit") ' :style="{ width: '40vw' }">
+      <form @submit.prevent="createEvent">
+        <div>
+
+          <div class="flex flex-column ">
+            <label class="text-right ">{{ $t("title") }}</label>
+            <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
+          </div>
+          <!-- <div class="flex flex-column ">
+            <label class="text-right ">{{ $t("color") }}</label>
+            <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
+          </div> -->
+          <div  class="flex flex-column gap-2">
+            <label class="text-right ">{{ $t("نوع التكرار") }}</label>
+            <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
+          </div>
          
+          <div class="flex gap-2 my-2">
+              <InputSwitch v-model="event.sub" /> 
+                <span class="px-2"> {{ $t('هل تريد تكرار الحدث') }}</span>
+          </div>
+          <div v-if="event.sub" class="flex flex-column gap-2 py-1">
+                    <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
+                    <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
+            </div>
+            <div v-if="event.repeat_type?.id == 2"  class="flex flex-column gap-2">
+            <label class="text-right ">{{ $t("اختر ايام التكرار") }}</label>
+               <MultiSelect v-model="event.day"  :options="days_week"   optionLabel="name" optionValue="value" :class="{ 'p-invalid': submitted && !event.days}" />
+            </div>
+            <div v-if="event.repeat_type "  class="flex flex-column gap-2">
+            <label class="text-right ">{{ $t(" تاريخ نهاية التكرار") }}</label>
+            <Calendar    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
+            </div>
+
+          
+          <Button type="submit" class="create mt-3" :label='$t("submit") '  @click="submitted = true "  />
+          <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
+          <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
+
+        </div>
+      </form>
+    </Dialog>
+    <Dialog v-model:visible="updateevent" id="modal" modal :header="modal_text" :style="{ width: '40vw' }">
+      <form @submit.prevent="updateEvent">
+        <div>
+          <div class="flex flex-column ">
+            <label class="text-right ">{{ $t("title") }}</label>
+            <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
+          </div>
+          <!-- <div class="flex flex-column ">
+            <label class="text-right ">{{ $t("color") }}</label>
+            <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
+          </div> -->
+          <div  class="flex flex-column gap-2">
+            <label class="text-right ">{{ $t("doctor") }}</label>
+            <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
+          </div>
+          
          
-                <div class="flex flex-column gap-2 w-[70%]">
-                  <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                    <div class="flex">
-                      
-                  <Button @click="go_sumi" style="background-color: green;" class=" m-auto w-full " :label='$t("sumi_test")'></Button>
-                  <Button @click="createtreatment" class="create m-auto w-full " :label='$t("sumi_end")'></Button>
-                    </div>
-                   
-                </div>
-              
-                
-  
-        
-        </v-form>
-  <toast></toast>
-        <!-- ... existing code ... -->
-      </div>
-    </v-card>
-  </template>
-  
-  <script>
-  import axios from "axios";
-  import InputNumber from "primevue/inputnumber";
-  
-    import {useToast} from 'primevue/usetoast'
-  export default {
-  
-  
-    data() {
-      return {
-        sesion:{},
-        doctors:{},
-        childreen:{},
-        programs:{},
-        error: {},
-        maxDate: new Date(),
        
-        // Add other validation rules for the title field
-      };
-  
+         <div class="flex ">
+          <Button type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="updateEvent " />
+          <Button type="submit" class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
+         </div>
+          <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
+          <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
+
+        </div>
+      </form>
+    </Dialog>
+  </v-card>
+  <Toast></Toast>
+</template>
+
+<script>
+import axios from "axios";
+import moment from "moment";
+import arLocale from "@fullcalendar/core/locales/ar";
+import FullCalendar from "@fullcalendar/vue3";
+import TimeGridPlugin from "@fullcalendar/timegrid";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import Calendar from "primevue/calendar";
+import InputText from "primevue/inputtext";
+import { useAppLangStore } from "../../../stores/AppLangStore";
+import { Toast } from "flowbite-vue";
+import { watch } from "vue";
+import { text } from "@fortawesome/fontawesome-svg-core";
+
+export default {
+  components: {
+    FullCalendar,
+    Calendar,
+    InputText,
+  },
+  data() {
+    return {
+      filter:{},
+
+       days_week :[
+        
+          { name: 'Sunday', value: 0 },
+          { name: 'Monday', value: 1 },
+          { name: 'Tuesday', value: 2},
+          { name: 'Thursday', value: 3 },
+          { name: 'Wednesday', value: 4 },
+          { name: 'Friday', value: 5 },
+          { name: 'Saturday', value: 6 }
+        
+      ],
+      event_types : [
+                    { name: 'تقيممات', id: 1 },
+                    { name: 'اجتماعات', id: 2 },
+                    { name: 'استشارات', id: 3 },
+                   
+ 
+      ],
+      repeat_types:[
+                    { name: 'تكرار ايام ',type:'single','dateFormat':'DD MM yy ', id: 1 },
+                    { name: 'تكرار اسبوعي ',type:'single','dateFormat':'DD MM yy ', id: 2 },
+                    { name: 'تكرار الشهور',type:'month','dateFormat':' MM yy ', id: 3 },
+                    { name: 'تكرار السنوات',type:'year','dateFormat':'  yy ', id: 4 },
+      ],
+      users:[],
+      business_hours:[],
+      langStore: useAppLangStore(),
+      visible: false,
+      updateevent:false,
+      event:{color:'87ceeb',
+        repeate:[
+          {
+            type:'',
+            days:'',
+            end_of_repeat:''
+          }
+        ]
+      },
+      submitted:false,
+      employees: [],
+      days:[0,1,2,3,4,5,6],
+      doctorshow: "",
+      create_visible: false,
+      event_id: null,     
+      opts: {
+        plugins: [dayGridPlugin, interactionPlugin, TimeGridPlugin, listPlugin],
+        initialView: "dayGridMonth",
+        locale: null,
+        slotDuration:'00:30:00',
+        slotLabelInterval: '00:30:00',
+        hiddenDays: [],
+        slotMinTime:'00:00:00',
+        slotMaxTime:'00:00:00',
+        selectable: true,
+        editable: true,
+        validRange: { start: new Date() },
+        headerToolbar: {
+          left: "title",
+          center: "prev next today",
+          right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+        },
+        selectAllow: (selectInfo) => {
+      const calendarApi = this.$refs.fullCalendar.getApi();
+      const events = calendarApi.getEvents();
+
+      for (let event of events) {
+        // تحقق فقط من التداخل على مستوى الوقت داخل نفس اليوم
+        if (
+          moment(selectInfo.start).isSame(event.start, "day") && // نفس اليوم
+          (
+            (selectInfo.start >= event.start && selectInfo.start < event.end) || // البداية داخل الحدث
+            (selectInfo.end > event.start && selectInfo.end <= event.end)  // النهاية داخل الحدث
+          )
+        ) {
+          return false; // يوجد تداخل، لا تسمح
+        }
+      }
+
+      return true; // لا يوجد تداخل، يمكن الإضافة
     },
-  
-    methods: {
-      // ... existing methods ...
-      Therapeutic (){
-        this.$router.push({ name: 'transportation' });
+
+        eventClick: this.handleEventClick.bind(this),
+        dateClick: this.handleDateClick,
+        datesSet: this.handleDatesSet.bind(this),
+        select: this.handleSelect.bind(this),
+       
       },
+    };
+  },
+  methods: {
+    goBack() {
+      this.$router.go(-1);
+    },
+    fetchTimes() {
+      axios
+        .get(`api/times/student/${this.$route.params.id}/${this.$route.params.program_id}`)
+        .then((response) => {
+          this.opts.events = response.data.data.map(event => ({
+
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            type: event.type,
+            col :event.color,
+            id: event.id,
+            backgroundColor:'#'+event.color,
+
+            }));
+        })
+        .catch((error) => console.error("Error retrieving doctors:", error));
+    },
+    handleDatesSet(event){
+      if(this.business_hours.length >= 1){
+          const clickedDate = new Date(event.startStr); 
+
+      this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
+      this.opts.slotMaxTime=this.business_hours.find(item => item.day === clickedDate.getDay()).end
+      }
+    },
+    updateEvents() {
+      axios.get(`/api/event-calendar?employee_id=${this.event.employee_id}`,).then((res) => {
+
+        this.opts.events = res.data.data.map(event => ({
+
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            type: event.type,
+            col :event.color,
+            id: event.id,
+            backgroundColor:'#'+event.color,
+           
+          }));
+        
+       
+        
+      });
+    },
+    getTimes(id){
+      axios
+        .get(`api/employees/get/with/shift-days/${id}`)
+        .then((response) => {
+         
+          this.business_hours = response.data.data.days
+         this.updateEvents()
+         
+        })
+    },
 
 
   
+  
+    handleEventClick(event) {
+      console.log(event)
+      this.event_id=event.event.id
+      this.event.title = event.event.title
+      this.event.color = '#'+event.event.color
+      this.event.start = event.event.start
+      this.event.end = event.event.start   
+      this.event.type = event.event.extendedProps.type   
+      this.event.color = event.event.extendedProps.col   
+      this.updateevent = true;
+    },
+    handleSelect(event) {
+      const clickedDate = new Date(event.startStr); 
 
+      this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
+      this.opts.slotMaxTime=this.business_hours.find(item => item.day === clickedDate.getDay()).end
+      if(event.view.type == 'dayGridMonth'){
+        const calendarApi = this.$refs.fullCalendar.getApi();
+        calendarApi.changeView("timeGridDay", event.startStr);
+      }else{
+          this.event.start=event.startStr
+          this.event.end=event.endStr
+          this.visible = true;
+      }
   
-      getusers(){
-        axios
-          .get("api/doctors")
-          .then((response) => {
-            console.log(response.data.data)
-            this.doctors = response.data.doctors
-           
-          })
-          axios
-          .get("api/child")
-          .then((response) => {
-            console.log(response.data.data)
-            this.childreen = response.data.children
-           
-          })
-          axios
-          .get("api/student-program")
-          .then((response) => {
-            console.log(response.data.data)
-            this.programs = response.data.data
-            this.getsesion()
-           
-          })
-        
-  
-      },
-      getsesion(){
-        axios
-          .get(`api/session/${this.$route.params.id}`)
-          .then((response) => {
-           
-            this.sesion.specialist_id = response.data.data.specialist_id
-            this.sesion.child_id = response.data.data.child_id
-            this.sesion.date = response.data.data.date
-            this.sesion.student_program_id = response.data.data.student_program_id
-           
-          })
-      },
-      go_sumi(){
-        this.$router.push({name:'reinforcers',params:{'id':this.$route.params.id} });
-      },
-      createtreatment() {
-       this.sesion.status="0"
-        
-        
-        axios.post("/api/session",this.sesion).then((res) => {
-            his.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
-        }).catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
-      })
-      },
+},
+    createEvent() {
+    
+      this.event.repeate[0].type=this.event?.repeat_type?.id
+      this.event.repeate[0].days=this.event.day
+      this.event.repeate[0].end_of_repeat=moment(this.event.end_of_repeat).format(' YYYY-MM-DD')
+      console.log( typeof(this.event.repeate))
      
+      axios.post("/api/event-calendar",{
+        employee_id:this.event.employee_id,
+        title:this.event.title,
+        type:this.event.type,
+        start:this.event.start,
+        end:this.event.end,
+        color:this.event.color,
+        repeat:this.event.repeate
+      }).then(() => {
+        this.updateEvents();
+        this.visible=false
+        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_add_success")}`, life: 3000 });
+
+      }) .catch((el)=>{
+        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${el.response.data.message}`, life: 3000 });
+
+      });
     },
-    mounted() {
-     this.getusers()
+    
+    updateEvent() {
+      axios.put(`/api/event-calendar/${this.event_id}`, this.event).then(() => {
+     this.updateevent=false
+        this.updateEvents();
+      });
     },
-  };
-  </script>
+    deleteEvent() {
+      axios.delete(`/api/event-calendar/${this.event_id}`).then(() => {
+        this.updateevent=false
+        this.updateEvents();
+      });
+    },
+    resetModal() {
+      this.visible = false;
+      this.updateevent=false
+      this.event={
+        color:'87ceeb'
+      }
+    },
+  },
   
-  <style scoped>
-  /* Add custom styles for the name input field */
-  .name-input {
-    height: 70vh;
-    margin: auto !important;
-     overflow-y: scroll;
-    width: 100%;
-    position: relative;
-    background-color: #e7e7e7;
-    padding: 10px;
-    margin-bottom: 15px !important;
-    border-radius: 10px;
-  }
-  .name-input::-webkit-scrollbar {
-    display: none;
-  }
-  #pv_id_1{
-    text-align: center;
-  }
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .name-input {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-  .name-input {
-    width: 606px;
-  }
-  
-  
-  
-  .seed {
-    width: 600px;
-  
-    margin: auto !important;
-    background-color: #135c65;
-    display: block;
-    color: white;
-   
-  
-   
-    /* Set the width to 606px */
-  }
-  
-  .custom-select {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    background-color: #f8f8f8;
-    color: #333;
-    appearance: none;
-    /* Remove default arrow in some browsers */
-    -webkit-appearance: none;
-    /* Remove default arrow in Chrome and Safari */
-    cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  
-  
-  
-  .loader {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 2s linear infinite;
-    margin: 20px auto;
-    /* Adjust margin as needed */
-  }
-  
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-  
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .error-message {
-    display: flex;
-    align-items: center;
-    color: #ff0000;
-    /* Red color for errors */
-    margin-top: 5px;
-    font-size: 0.9em;
-  }
-  
-  .error-icon {
-    margin-right: 5px;
-    /* Add styles for your error icon */
-  }
-  
-  @media (max-width: 768px) {
-  
-    .name-input,
-    .custom-select,
-    .error-message {
-      width: 100%;
-      /* Full width on smaller screens */
-      margin-bottom: 15px;
-    }
-  
-    .v-btn {
-      width: 100%;
-      /* Full width button */
-      padding: 12px;
-      /* Larger touch target */
-    }
-  
-    .error-message {
-      font-size: 0.8em;
-      /* Adjust font size */
-    }
-  }
-  
-  /* Add additional CSS for animation or other styling as needed */
-  
-  /* Add any other custom styles here */
-  </style>
-  
+  watch: {
+          // Watch the variable for changes
+          business_hours(newValue, oldValue) {
+                  // Extract the `day` values from `business_hours`
+              const usedDays = newValue.map(entry => entry.day);
+              // Filter `days` to only include those present in `usedDays`
+              this.opts.hiddenDays=this.days.filter(day => !usedDays.includes(day));
+                this.days_week = this.days_week.filter(day => !this.opts.hiddenDays.includes(day.value));
+              
+          },
+
+
+      },
+  mounted() {
+     
+    this.fetchTimes();
+    this.doctorshow = localStorage.getItem("type");
+    this.opts.locale = localStorage.appLang === "en" ? null : arLocale;
+   ;
+  },
+};
+</script>
+<style scoped>
+input {
+  width: 100%;
+  font-size: 20px;
+  text-align: center;
+  margin: 20px 0;
+  padding: 8px;
+  border: 2px solid #8284a8;
+}
+p {
+  color: red;
+  font-size: 20px;
+  text-align: center;
+  margin: 5px 0;
+}
+
+</style>

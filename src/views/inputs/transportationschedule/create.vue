@@ -80,7 +80,7 @@
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                     <div class="flex">
                         <InputSwitch required class="m-auto px-3" v-model="student.is_active"/>
-                  <Button type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
+                      <Button type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
                     </div>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.is_active">{{ error.is_active[0] }}</div>
                 </div>

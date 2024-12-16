@@ -38,7 +38,9 @@ onBeforeMount(() => {
 
 
 }
-
+const session =(id,program_id)=>{
+  router.push({name:'sessions-update',params:{'id':id,'program_id':program_id} })
+}
 
 
 onMounted(() => {
@@ -156,17 +158,17 @@ const initFilters = () => {
 
         
          
-           <Column field="name" :header='$t("child_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="name" :header='$t("child_name")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.student.name }}
             </template>
            </Column>
-           <Column field="name" :header='$t("ProgramName")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="name" :header='$t("ProgramName")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.program.name }}
             </template>
            </Column>
-
+          
            
          
 
@@ -175,6 +177,12 @@ const initFilters = () => {
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div >
+                <Button
+                v-can="'room delete'"              
+                :label='$t("sumi_start")'
+                class="create mt-2"
+                @click="session(slotProps.data.student_id,slotProps.data.id)"
+              />
                 <Button
                 v-can="'room edit'"
                 icon="pi pi-pencil"
@@ -187,6 +195,7 @@ const initFilters = () => {
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"
               />
+            
               </div>
             </template>
           </Column>

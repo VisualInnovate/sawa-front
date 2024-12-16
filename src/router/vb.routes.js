@@ -85,7 +85,7 @@ const vb = [
       component: () => import("../views/evaluation/sessions/create.vue")
     },
     {
-      path: '/sessions-update/:id', 
+      path: '/sessions-update/:id/:program_id', 
       name: 'sessions-update',
       component: () => import("../views/evaluation/sessions/update.vue")
     },
