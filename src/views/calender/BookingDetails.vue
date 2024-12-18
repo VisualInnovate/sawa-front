@@ -107,10 +107,10 @@
         <div class="my-[2%] p-[1%] bg-slate-50 grid lg:grid-cols-2 gap-4">
         <div>
           <h2 class="text-2xl text-slate-600 font-bold ">{{ $t("Confirm_Booking") }}</h2>
-        <div class="flex py-[1%]" v-if="doctor.name">
+        <div class="flex py-[1%]" v-if="doctor?.name">
           
               <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("اسم الاستشاري") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor.name }}</p>
+              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor?.name }}</p>
            </div>
           
             <div class="flex py-[1%]" v-if="booking.requester_name">
@@ -432,8 +432,8 @@ export default {
           accepted_notes: this.accept_notes,
           user_id: this.booking.user_id,
           event_id:this.booking.event_id,
-          doctor_name: this.doctor.name,
-          doctor_title: this.doctor.title,
+          doctor_name: this.doctor?.name,
+          doctor_title: this.doctor?.title,
         })
         .then((res) => {
           this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_update_success")}`, life: 3000 });

@@ -46,7 +46,7 @@
                   <label 
                     class="m-auto text-center cursor-pointer text-white duration-300 delay-200 transition-opacity w-full px-1 text-[13px]  font-medium hidden group-hover:block"
                   >
-                    {{ $t("show details") }}
+                    {{ $t("show_details") }}
                   </label>
                     </div>
                 <div v-else class="rounded-full w-full bg-gray-300 py-4 text-center"></div>

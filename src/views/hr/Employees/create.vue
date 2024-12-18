@@ -79,7 +79,7 @@
               </div>
        </div>
        <div class="w-full text-center">
-        <Button class="create w-[50%]" label="next" @click="nextStep"></Button>
+        <Button class="create w-[50%]" :label='$t("next")' @click="nextStep"></Button>
        </div>
       
       </div>
@@ -192,7 +192,7 @@
     
       </div>
       <div class="text-center">
-        <Button @click="previousStep" class="create" label="Back"></Button>
+        <Button @click="previousStep" class="create" :label='$t("Back")' ></Button>
         <Button  type="submit" @click="submitted=true"  class="create" :label='$t("submit")'></Button>
       </div>
         

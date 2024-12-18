@@ -1,5 +1,5 @@
 <template v-can="'employees edit'">
- <v-card class="p-[1%]">
+  <v-card class="p-[1%]">
    
 
    <form class="form-container" ref="myForm" @submit.prevent="update">
@@ -79,7 +79,7 @@
              </div>
       </div>
       <div class="w-full text-center">
-       <Button class="create w-[50%]" label="next" @click="nextStep"></Button>
+       <Button class="create w-[50%]" :label='$t("next")' @click="nextStep"></Button>
       </div>
      
      </div>
@@ -152,7 +152,7 @@
                  </div>
                  <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="employee.type"  option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.type}"  />
          </div>
-         <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
+          <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
                  <div class="flex">
                    <label class="text-right ">{{ $t("skill_name") }}</label>
                    <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,6 +160,15 @@
                    </svg>
                  </div>
                  <MultiSelect  v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
+             </div>
+             <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
+                 <div class="flex">
+                   <label class="text-right ">{{ $t("Typetreatment") }}</label>
+                   <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                   </svg>
+                 </div>
+                 <MultiSelect  v-model="employee.treatments" filter option-value="id" :options="treatments" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.treatments}" />
              </div>
              <div  class="flex flex-column gap-2">
                    <div class="flex">
@@ -183,7 +192,7 @@
    
      </div>
      <div class="text-center">
-       <Button @click="previousStep" class="create" label="Back"></Button>
+       <Button @click="previousStep" class="create" :label='$t("Back")' ></Button>
        <Button  type="submit" @click="submitted=true"  class="create" :label='$t("submit")'></Button>
      </div>
        
@@ -223,7 +232,7 @@ export default {
         qustions:{},
         error: {},
         maxDate: new Date(),
-     
+        treatments:[]
       // Add other validation rules for the title field
     };
 
@@ -275,6 +284,7 @@ export default {
           .then((response) => {
             console.log(response.data.data)
             this.employee.name = response.data.data.name
+            this.employee.email = response.data.data.email
             this.employee.user_id = response.data.data.user_id
             this.employee.position_id = response.data.data.position_id
             this.employee.basic_salary = response.data.data.basic_salary
@@ -320,6 +330,10 @@ export default {
         .then((response) => {
           this.positions=response.data.data
         })
+        axios.get("api/treatment/all")
+      .then((response) => {
+        this.treatments=response.data.data
+      })
         axios.post("/api/roles").then((res)=>{
 
         this.roles= res.data.roles.data
@@ -363,11 +377,12 @@ export default {
         if (this.employee.basic_salary) body.append("basic_salary", this.employee.basic_salary);
         if (this.employee.type) body.append("type", this.employee.type);
         if (this.employee.role) body.append("role", this.employee.role);
+        if (this.employee.treatments) body.append("treatments", this.employee.treatments);
         if (this.employee.skills) body.append("skills", this.employee.skills);
         if (this.employee.department) body.append("department_id", this.employee.department);
         if (this.employee.file) body.append("file", this.employee.file);
       axios.post(`/api/employees/${this.$route.params.id}`,body).then((res) => {
-        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_update_success"), life: 3000 });
+        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_add_success"), life: 3000 });
         }).catch((el)=>{
           this.$toast.add({ severity: 'error', summary: this.$t("error"), detail:  `${el.response.data.message}`, life: 3000 });
     })

@@ -45,6 +45,13 @@
         <Button  class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
       </form>
     </Dialog>
+    <Dialog v-model:visible="not_find" id="modal" modal :header="modal_text" :style="{ width: '40vw' }">
+      <form >
+        
+       <p>{{ $t("no_open_positions") }}</p>
+        
+      </form>
+    </Dialog>
   </v-card>
   <Toast></Toast>
 </template>
@@ -74,6 +81,7 @@ export default {
   data() {
     return {
       filter:{},
+      not_find:false,
       childreen:[],
       evaluate_types : [
                       { name: 'side profile', id: 1 },
@@ -98,6 +106,7 @@ export default {
       event:{color:'87ceeb'},
       submitted:false,
       employees: [],
+      avalible_day:[],
       days:[0,1,2,3,4,5,6],
       doctorshow: "",
       create_visible: false,
@@ -138,6 +147,7 @@ export default {
 
       return true; // لا يوجد تداخل، يمكن الإضافة
     },
+    
 
         eventClick: this.handleEventClick.bind(this),
         dateClick: this.handleDateClick,
@@ -178,7 +188,7 @@ export default {
     },
     updateEvents() {
       axios.get(`/api/event-calendar?employee_id=${this.event.employee_id}&type=${this.event.type}`).then((res) => {
-
+       
         this.opts.events = res.data.data.map(event => ({
 
             title: event.title,
@@ -221,31 +231,32 @@ export default {
       });
 
       },
-    getTimes(id){
-      axios
-        .get(`api/employees/get/with/calendar/${this.event.employee_id}?type=${id}`)
-        .then((response) => {
-          this.business_hours = response.data.data.days.map(event => ({
+      getTimes(id) {
+  axios
+    .get(`api/employees/get/with/calendar/${this.event.employee_id}?type=${id}`)
+    .then((response) => {
+      this.avalible_day=response.data.data.days
+      // Map business hours and store them in an array
+      this.business_hours = response.data.data.days.map((event) => ({
+        day: new Date(event.start).getDay(),
+        start: moment(event.start).format("HH:mm:ss"),
+        end: moment(event.end).format("HH:mm:ss"),
+      }));
 
-            day: (new Date( event.start)).getDay(), 
-            start:moment(event.start).format('HH:mm:ss'),
-            end:moment(event.end).format('HH:mm:ss'),
-      
-           
-            }));
-            this.opts.events = response.data.data.booked.map(event => ({
-  
-              title: event.title,
-              start: event.date+"T"+event.start_time+"+02:00",
-              end: event.date+"T"+event.end_time+"+02:00",
-            
-              backgroundColor:'#'+event.color,
-            
-            }));
-         
-         
-        })
-    },
+      // Dynamically set hiddenDays in calendar
+      const openDays = this.business_hours.map((item) => item.day);
+      this.opts.hiddenDays = this.days.filter((day) => !openDays.includes(day));
+
+      // Map the booked events and add to calendar
+      this.opts.events = response.data.data.booked.map((event) => ({
+        title: event.title,
+        start: `${event.date}T${event.start_time}+02:00`,
+        end: `${event.date}T${event.end_time}+02:00`,
+        backgroundColor: "#" + event.color,
+      }));
+    });
+},
+
 
 
   
@@ -278,13 +289,11 @@ export default {
 
       this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
       this.opts.slotMaxTime=this.business_hours.find(item => item.day === clickedDate.getDay()).end
-      if(event.view.type == 'dayGridMonth'){
+      if (event.view.type === 'dayGridMonth' && this.avalible_day.some(day => day.start.includes(event.startStr))) {
         const calendarApi = this.$refs.fullCalendar.getApi();
         calendarApi.changeView("timeGridDay", event.startStr);
       }else{
-          this.event.start=event.startStr
-          this.event.end=event.endStr
-          this.visible = true;
+        this.not_find=true
       }
   
 },
