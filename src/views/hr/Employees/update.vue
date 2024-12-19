@@ -123,7 +123,7 @@
                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                      </svg>
                    </div>
-                   <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.Spotter" :placeholder='$t("Spotter")' :class="{ 'p-invalid': submitted && !employee.Spotter }" />
+                   <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.spotter" :placeholder='$t("Spotter")' :class="{ 'p-invalid': submitted && !employee.Spotter }" />
            </div>
            <div class="flex flex-column gap-2 py-1">                
                <div class="flex">
@@ -291,6 +291,10 @@ export default {
             this.employee.shift_id = response.data.data.shift_id
             this.employee.department_id = response.data.data.department_id          
             this.employee.type = response.data.data.user.type          
+            this.employee.spotter = response.data.data.user.spotter          
+            this.employee.date_of_enrollment = response.data.data.date_of_enrollment          
+            this.employee.date_of_birth = response.data.data.date_of_birth          
+            this.employee.contract_period = response.data.data.contract_period          
             this.employee.image = response.data.data.user.image          
             this.employee.title = response.data.data.user.title          
             this.employee.role = response.data.data.user.roles[0].id          
@@ -298,6 +302,12 @@ export default {
             this.employee.skills = [];
             for (let i =0 ; i < response.data.data.user.skills.length; i++) {    
               this.employee.skills.push(response.data.data.user.skills[i].id);
+        
+          
+               }  
+               this.employee.treatments = [];
+               for (let i =0 ; i < response.data.data.user.treatments.length; i++) {    
+              this.employee.treatments.push(response.data.data.user.treatments[i].id);
         
           
                }  
@@ -368,7 +378,7 @@ export default {
         if (this.employee.email) body.append("email", this.employee.email);
         if (this.employee.password) body.append("password", this.employee.password);
         if (this.employee.shift_id) body.append("shift_id", this.employee.shift_id);
-        if (this.employee.Spotter) body.append("Spotter", this.employee.Spotter);
+        if (this.employee.spotter) body.append("spotter", this.employee.spotter);
         if (this.employee.position_id) body.append("position_id", this.employee.position_id);
         if (this.employee.date_of_birth) body.append("date_of_birth", this.employee.date_of_birth);
         if (this.employee.date_of_enrollment) body.append("date_of_enrollment", this.employee.date_of_enrollment);
