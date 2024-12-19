@@ -36,9 +36,12 @@
                   <span class="px-2"> {{ $t('هل تريد تكرار الحدث') }}</span>
             </div>
             <div v-if="event.sub" class="flex flex-column gap-2 py-1">
-
-                      <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
+                 <div class="flex text-center m-auto">
+                  <label class=" text-right text-base my-auto" v-for="day in days_week">{{ day.name + ',' }}</label>
+                  <label class=" text-right text-base my-auto">في الايام</label>
+                  <label class=" text-right my-auto" for="username">{{ $t(' التكرار') }}</label>
+                 </div>
+                  <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
               </div>
               <div v-if="event.repeat_type?.id == 2"  class="flex flex-column gap-2">
               <label class="text-right ">{{ $t("اختر ايام التكرار") }}</label>
@@ -127,7 +130,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
           
         ],
         event_types : [
-                      { name: 'تقيممات', id: 1 },
+                      { name: 'تقييمات', id: 1 },
                       { name: 'اجتماعات', id: 2 },
                       { name: 'استشارات', id: 3 },
                      

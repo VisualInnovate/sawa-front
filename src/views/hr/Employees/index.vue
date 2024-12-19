@@ -206,7 +206,7 @@ const initFilters = () => {
                 v-can="'employees edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
+                @click="edit(slotProps.data.user.id)"
               />
                 <Button
                 v-can="'employees delete'"
