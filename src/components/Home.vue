@@ -290,6 +290,8 @@ onMounted(async () => {
             </template>
             <v-list-item  :title="$t('custom_files')" value="custom-files"
               :to="{ name: 'custom-files' }"></v-list-item>
+              <v-list-item  :title="$t('module')" value="module"
+              :to="{ name: 'module' }"></v-list-item>
             
           </v-list-group>
 

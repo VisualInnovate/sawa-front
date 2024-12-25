@@ -262,18 +262,7 @@ export default {
   
   
     handleEventClick(event) {
-      console.log(event)
-
-      // employee_id:this.event.employee_id,
-      //       color:this.event.color,
-      //       title:this.event.title,
-      //       evaluation_type:this.event.evaluation_type,
-      //       consultant_id:this.event.employee_id,
-      //       child_id:this.event.child_id,
-      //       date:moment(this.event.start).format(' YYYY-MM-DD'),
-      //       start_time:moment(this.event.start).format('HH:mm:ss'),
-      //       end_time:moment(this.event.end).format('HH:mm:ss'),
-
+  
 
       this.event_id=event.event.id
       this.event.title = event.event.title
@@ -285,14 +274,19 @@ export default {
       this.updateevent = true;
     },
     handleSelect(event) {
+      console.log(event.view.type)
       const clickedDate = new Date(event.startStr); 
 
       this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
       this.opts.slotMaxTime=this.business_hours.find(item => item.day === clickedDate.getDay()).end
-      if (event.view.type === 'dayGridMonth' && this.avalible_day.some(day => day.start.includes(event.startStr))) {
+      if (event.view.type == 'dayGridMonth' && this.avalible_day.some(day => day.start.includes(event.startStr))) {
         const calendarApi = this.$refs.fullCalendar.getApi();
         calendarApi.changeView("timeGridDay", event.startStr);
-      }else{
+      }
+      else if(event.view.type == 'timeGridDay'){
+        this.visible=true
+      }
+      else{
         this.not_find=true
       }
   

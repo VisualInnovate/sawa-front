@@ -90,6 +90,11 @@ const inputs = [
     name: 'custom-files',
     component: () => import("../views/custom-files/create.vue")
   },
+  {
+    path: '/module', 
+    name: 'module',
+    component: () => import("../views/custom-files/module.vue")
+  },
 ];
 
 export default {

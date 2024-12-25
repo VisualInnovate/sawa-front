@@ -256,15 +256,10 @@ export default {
   
   
     handleEventClick(event) {
-      console.log(event)
-      this.event_id=event.event.id
-      this.event.title = event.event.title
-      this.event.color = '#'+event.event.color
-      this.event.start = event.event.start
-      this.event.end = event.event.start   
-      this.event.type = event.event.extendedProps.type   
-      this.event.color = event.event.extendedProps.col   
-      this.updateevent = true;
+      axios.get(`api/slot/updete/statas/${event.event.id}`).then(() => {
+        this.$router.push({ name: 'without', params:{'id':this.$route.params.id}});
+            })
+
     },
     handleSelect(event) {
       const clickedDate = new Date(event.startStr); 
