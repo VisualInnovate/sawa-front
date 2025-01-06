@@ -248,7 +248,7 @@ export default {
         { name:this.$t('driver'), id: 1 },
         { name:this.$t('doctor'), id: 2 },
         { name:this.$t('Evaluator'), id: 5 },
-
+        { name:this.$t('أداري'), id: 6 },
       ]
       },
 
