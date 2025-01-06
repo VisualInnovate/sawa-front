@@ -134,7 +134,7 @@ const changeStatus= (index)=>{
           <div class="field mx-5 " >
             <input type="checkbox" style="border: 1px solid black;" v-model="day.week_end" :binary="true" @click="changeStatus(index)"/>
           </div>
-          <div class="field mr-7 w-20">
+          <div class="field mr-7 w-24">
             {{day.day}}
           </div>
 
@@ -154,12 +154,12 @@ const changeStatus= (index)=>{
 
           <div class="field" v-if="!day.week_end" >
             <label class="mx-2.5 w-10"  >Clock Out</label>
-            <InputText class="w-28" type="time" v-model.trim="day.clock_out" timeOnly   disabled autofocus  />
+            <InputText  type="time" v-model.trim="day.clock_out" timeOnly   disabled autofocus  />
 
           </div>
           <div class="field" v-else>
             <label class="mx-5">Clock Out</label>
-            <InputText type="time" v-model.trim="day.clock_out" timeOnly class="w-28" required hourFormat="12" autofocus :class="{ 'p-invalid': submitted && !day.clock_out}"/>
+            <InputText type="time" v-model.trim="day.clock_out" timeOnly  required hourFormat="12" autofocus :class="{ 'p-invalid': submitted && !day.clock_out}"/>
             
           </div>
 

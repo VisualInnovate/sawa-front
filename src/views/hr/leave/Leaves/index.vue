@@ -166,7 +166,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
-          v-can="'skills list'"
+          v-can="'leaves list'"
         >
           <template #header>
             

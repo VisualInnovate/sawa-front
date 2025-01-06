@@ -89,8 +89,8 @@ fetchData()
 
 })
 const edit=(id)=>{
-  router.push({name:'user-update',params:{'id':id} })
-
+  router.push({name:'Employee-update',params:{'id':id} })
+333
 }
 
 

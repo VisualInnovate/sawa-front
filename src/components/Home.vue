@@ -360,18 +360,18 @@ transportation_schedule
             </template>
             
        
-            <v-list-item   :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
-            <v-list-item  :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
-            <v-list-item  :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
-            <v-list-item  :title="$t('holidays')" value="holidays" :to="{ name: 'holidays' }"></v-list-item>
-            <v-list-item  :title="$t('official_leaves')" value="official-leaves" :to="{ name: 'official-leaves' }"></v-list-item>
-            <v-list-item  :title="$t('payroll')" value="payroll" :to="{ name: 'payroll' }"></v-list-item>
-            <v-list-item   :title="$t('bonus')" value="bonus" :to="{ name: 'bonus' }"></v-list-item>
-            <v-list-item  :title="$t('departments')" value="departments" :to="{ name: 'departments' }"></v-list-item>
-            <v-list-item   :title="$t('posttion')" value="posttion" :to="{ name: 'posttion' }"></v-list-item>
-            <v-list-item   :title="$t('events')" value="posttion" :to="{ name: 'event' }"></v-list-item>
-            <v-list-item   :title="$t('shift')" value="shift" :to="{ name: 'shift' }"></v-list-item>
-            <v-list-item   :title="$t('advance')" value="advance" :to="{ name: 'advance' }"></v-list-item>
+            <v-list-item  v-can="'leaves list'"  :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
+            <v-list-item  v-can="'hr settings edit'" :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
+            <v-list-item  v-can="'deduction list'" :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
+            <v-list-item  v-can="'holidays list'" :title="$t('holidays')" value="holidays" :to="{ name: 'holidays' }"></v-list-item>
+            <v-list-item  v-can="'holidays list'" :title="$t('official_leaves')" value="official-leaves" :to="{ name: 'official-leaves' }"></v-list-item>
+            <v-list-item  v-can="'payroll list'" :title="$t('payroll')" value="payroll" :to="{ name: 'payroll' }"></v-list-item>
+            <v-list-item  v-can="'bonus list'" :title="$t('bonus')" value="bonus" :to="{ name: 'bonus' }"></v-list-item>
+            <v-list-item  v-can="'department list'" :title="$t('departments')" value="departments" :to="{ name: 'departments' }"></v-list-item>
+            <v-list-item  v-can="'positions list'" :title="$t('posttion')" value="posttion" :to="{ name: 'posttion' }"></v-list-item>
+            <v-list-item  v-can="'events list'"  :title="$t('events')" value="posttion" :to="{ name: 'event' }"></v-list-item>
+            <v-list-item  v-can="'shifts list'"  :title="$t('shift')" value="shift" :to="{ name: 'shift' }"></v-list-item>
+            <v-list-item  v-can="'shifts list'" :title="$t('advance')" value="advance" :to="{ name: 'advance' }"></v-list-item>
             
             
           </v-list-group>

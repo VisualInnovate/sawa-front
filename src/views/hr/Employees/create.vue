@@ -60,7 +60,7 @@
                       <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                       </svg>
                     </div>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="employee.national_id"  :class="{ 'p-invalid': submitted && !employee.national_id }" />
+                    <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid  required class="bg-[#f7f5f5]" v-model="employee.national_id"  :class="{ 'p-invalid': submitted && !employee.national_id }" />
                 </div>  
                 <div class="flex flex-column gap-2">
                   <div class="flex">

@@ -168,11 +168,11 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
-          v-can="'skills list'"
+          v-can="'leave setup list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+              <Button  v-can="'leave setup create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
               <h5 class="m-0 my-auto">{{ $t("leave setup") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
@@ -214,13 +214,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'skills edit'"
+                v-can="'leave setup edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'skills delete'"
+                v-can="'leave setup delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"
