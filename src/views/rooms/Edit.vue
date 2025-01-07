@@ -210,7 +210,7 @@ export default {
         slotLabelInterval: '00:30:00',
      
         slotMinTime:'08:00:00',
-        slotMaxTime:'13:00:00',
+       slotMaxTime:'17:00:00',
         selectable: true,
         editable: true,
         validRange: { start: new Date() },
