@@ -206,6 +206,7 @@
 <script>
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
+import moment from "moment";
 
   import {useToast} from 'primevue/usetoast'
 export default {
@@ -380,8 +381,8 @@ export default {
         if (this.employee.shift_id) body.append("shift_id", this.employee.shift_id);
         if (this.employee.spotter) body.append("spotter", this.employee.spotter);
         if (this.employee.position_id) body.append("position_id", this.employee.position_id);
-        if (this.employee.date_of_birth) body.append("date_of_birth", this.employee.date_of_birth);
-        if (this.employee.date_of_enrollment) body.append("date_of_enrollment", this.employee.date_of_enrollment);
+        if (this.employee.date_of_birth) body.append("date_of_birth",moment(this.employee.date_of_birth).format("YYYY-MM-DD" ) );
+        if (this.employee.date_of_enrollment) body.append("date_of_enrollment", moment( this.employee.date_of_enrollment).format("YYYY-MM-DD" ) );
         if (this.employee.contract_period) body.append("contract_period", this.employee.contract_period);
         if (this.employee.national_id) body.append("national_id", this.employee.national_id);
         if (this.employee.basic_salary) body.append("basic_salary", this.employee.basic_salary);

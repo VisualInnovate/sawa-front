@@ -148,7 +148,7 @@
 
           <div class="text-center w-full">
             
-          <Button @click="{ updatedialog = !updatedialog; evalate = {} }" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
+          <Button @click="AddEvalte" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
           <Button @click="sendMassage=!sendMassage" class="bg-[green] m-auto w-80" icon="pi pi-wallet" label=" نتيجة الاستشارة">  </Button>
           </div>
    
@@ -384,6 +384,10 @@ export default {
         
 
 
+      },
+
+      AddEvalte(){
+        this.$router.push({name:'Calender'})
       },
       create(){
         axios
