@@ -3,10 +3,7 @@
       <ChildTaps></ChildTaps>
       
     <v-card>
-        <div class=" my-2 "  >
-          <Button @click="opennew" class="bg-[green] m-auto" >  اضافة تقييم</Button>
-         
-          </div>
+      
         
      <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
         <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details.data">
