@@ -3,7 +3,6 @@
 <template>
   
   <div class="switcher">
-    <Test></Test>
     <nave-1 />
     <nave class="w-full z-30" />
     <HeadeForm />

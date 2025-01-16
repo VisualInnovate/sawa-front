@@ -193,7 +193,7 @@ show_alert:false,
   },
   methods: {
     async bookTime() {
-      this.booking.user_id=localStorage.getItem("parent_id")
+      this.booking.user_id=localStorage.getItem("user_id")
       this.booking.event_id = this.event_id;
       this.show_alert = false;
       console.log(this.booking);
