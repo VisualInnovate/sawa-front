@@ -141,7 +141,7 @@ export default {
                   </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="id" :options="cities" optionLabel="country" :placeholder='$t("Nationality")' class="w-full" :class="{ 'p-invalid': submitted && !child.nationalty }" />
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="country" :options="cities" optionLabel="country" :placeholder='$t("Nationality")' class="w-full" :class="{ 'p-invalid': submitted && !child.nationalty }" />
                     <small v-if="submitted && !child.nationalty" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small>
             </div>
       <div class="card text-center py-3">
