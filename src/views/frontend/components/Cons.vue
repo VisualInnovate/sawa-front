@@ -134,7 +134,7 @@
         </div>
      
         <div class="lg:col-span-2 flex flex-column gap-2">
-                <InputText  class="bg-[#f7f5f5] text-center" placeholder="ادخل كود استشاري تريده"     v-model="booking.doctor_code" :class="{ 'p-invalid': submitted && !booking.doctor_code}"  />
+                <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid class="bg-[#f7f5f5] text-center" placeholder="ادخل كود استشاري تريده"     v-model="booking.doctor_code" :class="{ 'p-invalid': submitted && !booking.doctor_code}"  />
         </div>
      
         <div class="text-right m-auto w-full space-x-4">
@@ -193,7 +193,7 @@ show_alert:false,
   },
   methods: {
     async bookTime() {
-      this.booking.user_id=localStorage.getItem("user_id")
+      this.booking.user_id=localStorage.getItem("parent_id")
       this.booking.event_id = this.event_id;
       this.show_alert = false;
       console.log(this.booking);
