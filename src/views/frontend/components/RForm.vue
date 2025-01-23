@@ -75,7 +75,7 @@
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full font-bold " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty" filter  option-value="nationality" :options="cities" optionLabel="nationality" :class="{ 'p-invalid': submitted && !child.nationalty}" class="w-full " />
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty" filter  option-value="id" :options="cities" optionLabel="country" :class="{ 'p-invalid': submitted && !child.nationalty}" class="w-full " />
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full font-bold " for="username">{{ $t('primary_language') }}</label>
@@ -175,7 +175,7 @@ export default {
       axios
         .get("/api/languages")
         .then((res) => {
-          this.lan=res.data.langs
+          this.lan=res.data.langs.ar_en
           console.log(res);
         })
         .catch((err) => {

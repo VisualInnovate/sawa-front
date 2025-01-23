@@ -77,12 +77,14 @@ export default {
     FullCalendar,
     Calendar,
     InputText,
+    
   },
   data() {
     return {
       filter:{},
       not_find:false,
       childreen:[],
+      modal_text:false,
       evaluate_types : [
                       { name: 'side profile', id: 1 },
                       { name: 'milestone', id: 2 },
