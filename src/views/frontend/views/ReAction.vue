@@ -1,5 +1,5 @@
 <template>
-  <Map2></Map2>
+  <!-- <Map2></Map2> -->
   <nave class="shadow"></nave>
   <RForm></RForm>
   <About />
