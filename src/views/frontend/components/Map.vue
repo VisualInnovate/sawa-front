@@ -1,5 +1,5 @@
 <template>
-  <div
+  <!-- <div
       style="background-color: #135c65"
       class="flex justify-between  text-center"
   >
@@ -36,7 +36,7 @@
       <div class="my-auto  "> <router-link to="/web"><img class="h-[80%] cursor-pointer" src="../image/header/Group22.png" /></router-link></div>
       </div>
 
-  </div>
+  </div> -->
 
 </template>
 <script>
