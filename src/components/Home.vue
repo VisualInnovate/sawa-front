@@ -263,8 +263,7 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('consulting')"></v-list-item>
             </template>
-            <v-list-item  :title="$t('calender')" value="calender"
-              :to="{ name: 'Calender' }"></v-list-item>
+           
 
             <v-list-item  :title="$t('bookings')" value="bookings"
               :to="{ name: 'ShowBooking' }"></v-list-item>

@@ -29,7 +29,7 @@
                 </div>
                 <div  class="flex flex-column gap-2 py-1">
                       <label class="w-full text-right" for="username">{{ $t('child_name') }}</label>
-                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.child_id"  option-value="id" filter :options="childreen"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.child_id}"/>
+                      <Dropdown  disabled required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.child_id"  option-value="id" filter :options="childreen"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.child_id}"/>
                 </div>
                
                
@@ -217,9 +217,9 @@ export default {
             evaluation_type:this.event.evaluation_type,
             consultant_id:this.event.employee_id,
             child_id:this.event.child_id,
-            date:moment(this.event.start).format(' YYYY-MM-DD'),
-            start_time:moment(this.event.start).format('HH:mm:ss'),
-            end_time:moment(this.event.end).format('HH:mm:ss'),
+            date:moment(this.opts.event.end).format(' YYYY-MM-DD'),
+            start_time:moment(this.opts.event.start).format('HH:mm:ss'),
+            end_time:moment(this.opts.event.end).format('HH:mm:ss'),
           })
           .then((response) => {
             this.visible=!(this.visible)
@@ -269,14 +269,15 @@ export default {
       this.event_id=event.event.id
       this.event.title = event.event.title
       this.event.color = '#'+event.event.color
-      this.event.child_id = event.event.child_id
+
       this.event.start_time = moment( event.event.start ).format('HH:mm:ss')   
       this.event.end_time = moment( event.event.end ).format('HH:mm:ss')   
     
       this.updateevent = true;
     },
     handleSelect(event) {
-      console.log(event.view.type)
+      this.opts.event=event
+      
       const clickedDate = new Date(event.startStr); 
 
       this.opts.slotMinTime=this.business_hours.find(item => item.day === clickedDate.getDay()).start
@@ -349,7 +350,8 @@ export default {
     this.fetchEmployees();
     this.doctorshow = localStorage.getItem("type");
     this.opts.locale = localStorage.appLang === "en" ? null : arLocale;
-    // this.updateEvents();
+    console.log(this.$route.params.id)
+    this.event.child_id=parseInt(this.$route.params.id)
   },
 };
 </script>

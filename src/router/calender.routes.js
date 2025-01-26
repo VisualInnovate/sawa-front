@@ -7,7 +7,7 @@ const working = () => import("../views/calender/Working-hour.vue");
 
 const calenderRoutes = [
   {
-    path: "calender",
+    path: "calender/:id",
     name: "Calender",
     component: Index,
   },

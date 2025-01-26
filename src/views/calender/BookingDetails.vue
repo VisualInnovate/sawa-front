@@ -148,7 +148,7 @@
 
           <div class="text-center w-full">
             
-          <Button @click="AddEvalte" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
+          <Button @click="AddEvalte(booking?.child_id)" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
           <Button @click="sendMassage=!sendMassage" class="bg-[green] m-auto w-80" icon="pi pi-wallet" label=" نتيجة الاستشارة">  </Button>
           </div>
    
@@ -386,8 +386,9 @@ export default {
 
       },
 
-      AddEvalte(){
-        this.$router.push({name:'Calender'})
+      AddEvalte(id){
+        this.$router.push({name:'Calender',params:{id:id}})
+       
       },
       create(){
         axios
