@@ -79,7 +79,7 @@
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full font-bold " for="username">{{ $t('primary_language') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :class="{ 'p-invalid': submitted && !child.lang}" class="w-full " />
+                    <Dropdown required id="pv_id_1" @update:model-value="getLangs($event)" filter style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :class="{ 'p-invalid': submitted && !child.lang}" class="w-full " />
             </div>
         
       
@@ -108,7 +108,9 @@ export default {
   data() {
     return {
       show: false,
-      lan:[],
+      lan:[
+       
+      ],
 
       selectedCity: null,
             cities: {},
@@ -171,16 +173,25 @@ export default {
           console.log(err);
         });
     },
-    getLangs() {
-      axios
+    getLangs(e) {
+      console.log(e)
+        axios
         .get("/api/languages")
         .then((res) => {
-          this.lan=res.data.langs.ar_en
-          console.log(res);
+          if(e=='اخر'){
+            this.lan=res.data.langs.other
+            this.lan.push({  "id": 8, "lang":"Arabic", "id": 44, "lang": "English",})
+          }else{
+            this.lan=res.data.langs.ar_en
+            this.lan.push({  "id": 0, "lang": "اخر"})
+          }
+      
         })
         .catch((err) => {
           console.log(err);
         });
+     
+     
     },
   },
 
