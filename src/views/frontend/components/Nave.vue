@@ -14,7 +14,7 @@
             </router-link>
           </p>
   
-  
+
       <button @click="visible = true" data-collapse-toggle="navbar-default" type="button" class="mx-1  inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 " aria-controls="navbar-default" aria-expanded="false">
           <span class="sr-only">Open main menu</span>
           <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
@@ -29,13 +29,13 @@
             </router-link>
           </li>
           <li class="my-auto text-center py-1 lg:py-0">
-            <router-link :to="{ name: 'home' }" class="text-lg font-bold  mx-3 text-black" style="line-height: 20px;" > {{ $t("home") }}</router-link>
+            <router-link :to="{ name: 'home' }" class="text-base font-bold  mx-3 text-black" style="line-height: 20px;" > {{ $t("home") }}</router-link>
           </li>
           <li class="hidden lg:block my-auto text-center py-1 lg:py-0">
-            <router-link :to="{ name: 'about' }"  class="text-lg font-bold mx-3 text-black" style="line-height: 20px;"> {{ $t("about_us") }} </router-link>
+            <router-link :to="{ name: 'about' }"  class="text-base font-bold mx-3 text-black" style="line-height: 20px;"> {{ $t("about_us") }} </router-link>
           </li>
           <li class="my-auto text-center py-1 lg:py-0">
-            <router-link :to="{ name: 'contactus' }"  class="text-lg font-bold mx-3 text-black" style="line-height: 20px;">{{ $t("تواصل معنا") }}</router-link>
+            <router-link :to="{ name: 'contactus' }"  class="text-base font-bold mx-3 text-black" style="line-height: 20px;">{{ $t("تواصل معنا") }}</router-link>
           </li>
           <!-- <li class="my-auto text-center py-1 lg:py-0">
             <a href="https://canv.sa/en/jobs"  class="text-lg font-bold mx-3 text-black" style="line-height: 20px;">   {{ $t("التربية الخاصة") }}</a>
@@ -80,6 +80,7 @@
       </div>
     </template>
   </Dropdown>
+  <Button style="background-color: white; color: #7B7B7B; border-color: #7B7B7B !important; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%) !important;"  class=" mx-2" icon="pi pi-angle-double-right" @click="dashboard = !(dashboard)"  />
 
  
       </div>
@@ -109,7 +110,7 @@
           <Sidebar  v-model:visible="visible" header="Sidebar">
            <ul>
             <li class="my-auto text-center py-4 lg:py-0">
-            <router-link :to="{ name: 'home' }" class="text-lg font-extrabold px-3 text-[#A5ABB4]" style="line-height: 20px;" > {{ $t("home") }}</router-link>
+            <router-link :to="{ name: 'home' }" class="text-base font-extrabold px-3 text-[#A5ABB4]" style="line-height: 20px;" > {{ $t("home") }}</router-link>
           </li>
           <li class="hidden lg:block my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'home' }"  class="text-lg font-extrabold px-3 text-[#A5ABB4]" style="line-height: 20px;">  {{ $t("about_us") }}</router-link>
@@ -137,12 +138,40 @@
           </Sidebar>
   
       </div>
+      <div style="direction: ltr !important;"  class=" flex justify-content-center">
+        <Sidebar v-model:visible="dashboard" header="Sidebar">
+            
+            <div>
+              <img :src="parentStore.parent.image ?? '/src/assets/img/Ellipse2.png'" style="width: 100px; height: 100px;" class="rounded-full m-auto" >
+            </div>
+            <div class="dash w-[85%] mx-auto py-[5%]">
+               <div class="flex justify-between pb-3" style="border-bottom: 1px solid #E0E0E0;">
+                <router-link :to="{ name: 'Profile' }" class="font-bold text-xl text-black"> {{ parentStore.user.fname }} {{ parentStore.user.lname }} </router-link>
+                <i class="pi pi-chevron-left font-bold my-auto" ></i>
+               </div>
+               <div class=" my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
+                <router-link :to="{ name: 'New' }" class="font-bold text-lg text-[#2F3843]">{{ $t("latest_developments") }}</router-link>
+               </div>
+               <div class=" my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
+                <router-link :to="{ name: 'Following' }" class="font-bold text-lg text-[#2F3843]">{{ $t("follow_the_child") }}</router-link>
+               </div>
+               <div class=" my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
+                <router-link :to="{ name: 'Edit' }" class="font-bold text-lg text-[#2F3843]">{{ $t("evaluation_result") }}</router-link>
+               </div>
+               <div class=" my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
+                <router-link :to="{ name: 'Booking' }" class="font-bold text-lg text-[#2F3843]">{{ $t("bookings") }}</router-link>
+               </div>
+              
+            </div>
+        </Sidebar>
+
+    </div>
   </template>
   <script setup>
   import { useParentStore } from "../../../stores/ParentStore";
   import { useI18n } from 'vue-i18n';
   import {useRouter} from "vue-router";
-
+  import Sidebar from 'primevue/sidebar';
    
   import { ref, onMounted, onBeforeUnmount } from 'vue';
   import LocaleSelect from "../../../components/LocaleSelect.vue";
@@ -150,6 +179,7 @@
   const scrollContainer = ref(null);
   const { t } = useI18n();
   const content = ref(null);
+  const dashboard = ref(false);
   const staticDiv = ref(null);
   const router = useRouter()
   const visible = ref(false);
@@ -202,10 +232,19 @@
   transition: 1s;
   color: black;
   background-color: white !important;
-  border-bottom: 2px solid #FF2A5B;
+  border-bottom: 2px solid #FF2A5B ;
   
   
   }
+  .dash .router-link-active {
+  
+  transition: 1s;
+  color: #FF2A5B !important;
+  
+  
+  
+  }
+  
   
   .button-with-triangle {
     position: relative; /* Ensure the button is positioned relative for the pseudo-element */

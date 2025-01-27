@@ -121,9 +121,10 @@
     </div>
   </div>
     </div>
-
+   
 
   </v-card>
+
 </template>
 
 <script>
@@ -401,6 +402,9 @@ export default {
      
    
     },
+
+   
+
     update() {
       axios.get(`/api/room/${this.rooms.room_id}`).then((res) => {
         console.log(res.data.data.id);

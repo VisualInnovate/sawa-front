@@ -43,7 +43,7 @@ export default {
       axios
         .get("/api/languages")
         .then((res) => {
-          this.lan=res.data.langs.
+          this.lan=res.data.langs.ar_en
           console.log(res);
         })
       

@@ -1,5 +1,5 @@
 <template>
-  <Map />
+  <Nave />
   <div
     class="flex justify-between border-b-2 p-2 border-x-cyan-950 border-solid"
   >
@@ -76,11 +76,12 @@
 import Map from "../components/Map.vue";
 import According from "../components/According.vue";
 import Sidbar from "../components/Sidbar.vue";
+import Nave from "../components/Nave.vue";
 import About from "../components/About.vue";
 import { useParentStore } from "../../../stores/ParentStore";
 import axios from "axios";
 export default {
-  components: { Map, According, Sidbar, About },
+  components: { Map, According, Sidbar, About ,Nave},
   data() {
     return {
       showsider: false,

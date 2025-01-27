@@ -1,5 +1,5 @@
 <template>
-  <Map />
+  <Nave />
 
   <div
     class="flex justify-between border-b-2 p-2 border-x-cyan-950 border-solid"
@@ -56,13 +56,13 @@
   <About />
 </template>
 <script>
-import Map from "../components/Map.vue";
 import NewAcorrding from "../components/NewAcorrding.vue";
 import Sidbar from "../components/Sidbar.vue";
 import About from "../components/About.vue";
 import axios from "axios";
+import Nave from "../components/Nave.vue";
 export default {
-  components: { Map, NewAcorrding, Sidbar, About },
+  components: { Nave, NewAcorrding, Sidbar, About },
   data() {
     return {
       showsider: false,

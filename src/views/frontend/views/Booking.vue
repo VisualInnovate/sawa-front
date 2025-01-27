@@ -1,14 +1,14 @@
 <template>
-  <Map />
+  <Nave />
   <AppointmentRecords />
   <About />
 </template>
 <script setup(props) { }>
-import Map from "../components/Map.vue";
+import Nave from "../components/Nave.vue";
 import AppointmentRecords from "../components/AppointmentRecords.vue";
 import About from "../components/About.vue";
 
 export default {
-  components: { Map, AppointmentRecords, About },
+  components: { Nave, AppointmentRecords, About },
 };
 </script>

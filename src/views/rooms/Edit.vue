@@ -122,7 +122,9 @@
   </div>
     </div>
 
-
+   <div class="w-full py-3 text-center">
+    <Button class="create w-[90%] m-auto lg:w-[50%] " :label='$t("update")' @click="updateRoom"></Button>
+   </div>
   </v-card>
 </template>
 
@@ -358,6 +360,15 @@ export default {
         });
    
    
+    },
+
+    updateRoom(){
+      axios.put(`/api/room/${this.$route.params.id}`,this.rooms).then((res) => {
+      this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_update_success")}`, life: 3000 });
+      }).catch((el)=>{
+        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.$t("mission_error")}`, life: 3000 });
+
+      })
     },
     updateevent() {
       this.event.repeate[0].type=this.event?.repeat_type?.id

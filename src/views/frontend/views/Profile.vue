@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <Map />
+    <Nave />
     <div class="w-full border-b-2 border-x-cyan-950 border-solid">
       <div class="m-auto w-full">
         <p class="text-center p-4 text-2xl text-[#6EB7BF]">
@@ -157,7 +157,7 @@
   </div>
 </template>
 <script>
-import Map from "../components/Map.vue";
+import Nave from "../components/Nave.vue";
 import Sidbar from "../components/Sidbar.vue";
 import About from "../components/About.vue";
 import Knob from "primevue/knob";
@@ -166,7 +166,7 @@ import { useParentStore } from "../../../stores/ParentStore";
 import axios from "axios";
 
 export default {
-  components: { Map, Sidbar, About, Knob, FileUpload },
+  components: { Nave, Sidbar, About, Knob, FileUpload },
   data() {
     return {
       imageSrc: null,
