@@ -423,6 +423,7 @@ export default {
           this.booking = res.data.booking.booking;
           this.new_status = res.data.booking.booking.accepted;
           this.accept_notes = res.data.booking.booking.accepted_notes;
+          this.student_massage=res.data.booking.booking.consultation_result
           this.doctor = res.data.booking.doctor;
           console.log(res);
         })
