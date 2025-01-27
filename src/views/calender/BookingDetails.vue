@@ -98,7 +98,7 @@
           <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.doctor_code }}</p>
         </div>
         
-        <div class="flex " v-if="booking.doctor_code ">
+        <div class="flex ">
          <Button @click="show_answer_modal = true" class="create" icon="pi pi-arrow-left" :label='$t("Answer_the_questions")'></Button>
 
         </div>
@@ -112,10 +112,10 @@
               <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("اسم الاستشاري") }} :</p>
               <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor?.name }}</p>
            </div>
-          
-            <div class="flex py-[1%]" v-if="booking.requester_name">
+       
+            <div class="flex py-[1%]" >
               <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("request_sender") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.requester_name }}</p>
+              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.details?.requester_name }}</p>
             </div>
           <div class="flex py-[1%]" v-if="event_data ">
               <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Consultation_date") }} :</p>
@@ -200,35 +200,35 @@
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Type") }} :</p>
             <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_gender == 1 ? "male" : "female" }}</p>
           </div>
-          <div class="flex flex-initial  py-4" v-if="booking.child_problem ">
+          <div class="flex flex-initial  py-4" v-if="booking.details?.child_parents_problems ">
             <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("problem_type") }} :</p>
-            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_problem  }}</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.details?.child_parents_problems  }}</p>
           </div>
-          <div class="flex flex-initial  py-4" v-if="booking.child_problems_notes ">
+          <div class="flex flex-initial  py-4" v-if="booking.details?.child_problems_notes ">
             <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("child_problems_notes") }} :</p>
-            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_problems_notes  }}</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.details?.child_problems_notes  }}</p>
           </div>
           <div class="flex flex-initial  py-4" >
             <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("child_problem") }} :</p>
             <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.child_aids == 1 ? "yes" : "no" }}</p>
           </div>
-          <div class="flex flex-initial  py-4" v-if="booking.child_aids_notes ">
+          <div class="flex flex-initial  py-4" v-if="booking.details?.child_aids_notes ">
             <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("child_aids_notes") }} :</p>
-            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_aids_notes  }}</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.details?.child_aids_notes  }}</p>
           </div>
-          <div class="flex flex-initial  py-4" v-if="booking.child_aids_notes ">
+          <div class="flex flex-initial  py-4" v-if="booking.details?.child_aids_notes ">
             <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("main_problems") }} :</p>
-            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.child_aids_notes  }}</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.details?.child_aids_notes  }}</p>
           </div>
-          <div class="flex flex-initial  py-4" v-if="booking.parents_priorities ">
+          <div class="flex flex-initial  py-4" v-if="booking.details?.parents_priorities ">
             <i class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"></i>
             <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("priority_parents") }} :</p>
-            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.parents_priorities  }}</p>
+            <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{ booking.details?.parents_priorities  }}</p>
           </div>
             
             
@@ -272,7 +272,7 @@
            
   </Dialog>
   <Dialog v-model:visible="sendMassage" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <form @submit.prevent="studentMassage" class="">
+          <form  class="">
                 
           
             <div class="flex flex-column gap-2 py-1">
@@ -280,7 +280,7 @@
                   <textarea :class="{ 'p-invalid': submitted && !student_massage}" required name="notes" v-model="student_massage" id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="4"></textarea>
 
               </div>
-              <Button @click="submitted=true"  :label='$t("submit")' type="submit" class="create  m-auto" icon="pi pi-check"></Button>
+              <Button @click="studentMassage"  :label='$t("submit")'  class="create  m-auto" icon="pi pi-check"></Button>
           </form>
            
             
