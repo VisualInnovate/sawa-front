@@ -8,6 +8,9 @@
   Button{
     transform: scale(.9) !important;
   }
+  .p-sidebar-mask{
+    direction: rtl !important;
+  }
   .p-button .p-button-icon-left {
     margin-left: 8px !important;
     /* visibility: hidden !important; */
@@ -46,6 +49,7 @@ td{
 }
 .delete{
   background-color: rgb(255, 77, 77) !important;
+  border: 0px !important;
 }
 .export{
   background-color: rgb(106, 106, 231) !important;
