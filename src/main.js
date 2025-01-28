@@ -66,7 +66,6 @@ import InputSwitch from 'primevue/inputswitch'
 import Paginator from 'primevue/paginator';
 
 
-
 import Rating from 'primevue/rating';
 import RadioButton from 'primevue/radiobutton';
 
@@ -135,6 +134,7 @@ app.component('v-otp-input', VOtpInput,'font-awesome-icon', FontAwesomeIcon)
 app.component('Column', Column)
 app.component('ColumnGroup', ColumnGroup)
 app.component('Dropdown', Dropdown)
+app.component('Password', Password)
 app.component('Calendar', Calendar)
 app.mount("#app");
 app.component('InputNumber', InputNumber)

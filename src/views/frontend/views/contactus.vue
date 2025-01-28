@@ -20,7 +20,7 @@
 
     <div >
       <div class="max-w-[1300px] mx-auto grid grid-cols-1 gap-4 lg:grid-cols-2 py-[4%] ">
-        <div class="bg-[#C82F60] p-5 rounded-xl m-1">
+        <div class="bg-[#C82F60] p-5 rounded-xl m-1 animate__animated animate__backInRight animate__delay-1s">
           <p class="text-[#F8F8F8] text-lg font-bold">تواصل معنا</p>
           <p class="text-[#F8F8F8] text-base pt-1">اشعر بالراحه فالتواصل معنا في اي وقت</p>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 py-4">
@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <div  class=" py-2 px-5">
+        <div  class=" py-2 px-5 animate__animated animate__backInLeft animate__delay-1s">
           <div  class="border flex justify-between rounded-2xl mb-3 p-2 shadow">
             <div class="p-4 w-20 h-20 border flex rounded-full justify-center"><svg width="48" class="" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M46 45.5H2C1.18 45.5 0.5 44.82 0.5 44C0.5 43.18 1.18 42.5 2 42.5H46C46.82 42.5 47.5 43.18 47.5 44C47.5 44.82 46.82 45.5 46 45.5Z" fill="#135C65"/>
