@@ -22,6 +22,21 @@
            <h3 class="font-bold text-2xl text-[#303843]">{{ $t("Child_follow_up") }}</h3>
            <Button @click="AddBooking" class="create" :label='$t(" اضافه طفل جديد")'></Button>
         </div>
+
+        <div class="card mt-3 px-4">
+
+          <Accordion v-for="child in childs" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
+             <AccordionTab :header="child.name  ">
+              
+                <div class="grid grid-cols-2 gap-2">
+                 
+                </div>
+            </AccordionTab>
+           
+        </Accordion>
+
+
+      </div>
         
       </div>
     </div>

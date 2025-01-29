@@ -147,6 +147,7 @@ app.component('TabPanel', TabPanel)
 app.component('Image', Image)
 
 
+
 app.component('Rating', Rating)
 app.component('Paginator', Paginator)
 

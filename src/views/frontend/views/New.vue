@@ -22,7 +22,54 @@
            <h3 class="font-bold text-2xl text-[#303843]">{{ $t("The_latest_developments") }}</h3>
         </div>
         
+        <div class="card mt-3">
+        <Accordion v-for="x in 4" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
+            <AccordionTab>
+                <template #header>
+                    <span class="flex align-items-center gap-2 w-full">
+                        <Avatar image="../image/childern.jpg" shape="circle" />
+                        <span class="font-bold white-space-nowrap">Amy Elsner</span>
+                        <Badge value="3" class="ml-auto mr-2" />
+                    </span>
+                </template>
+                <p class="m-0">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </p>
+            </AccordionTab>
+          
+          
+        </Accordion>
       </div>
+      </div>
+      <Accordion v-for="booking in bookings" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
+             <AccordionTab :header="booking.child_name  ">
+              
+                <div class="grid grid-cols-2 gap-2">
+                   <div>
+                      
+                       <div class="flex">
+                          <p class="my-auto text-lg font-bold " > {{ $t("child_age") }} : </p>
+                          <p class="my-auto px-3 text-base text-slate-600  "> {{  booking.child_age }}</p>
+                       </div>
+                       <div class="flex">
+                          <p class="my-auto text-lg font-bold " > {{ $t("parent.phone") }} : </p>
+                          <p class="my-auto px-3 text-base text-slate-600  "> {{ booking.requester_phone }} </p>
+                       </div>
+                     
+                       <div class="flex">
+                          <p class="my-auto text-lg font-bold " > {{ $t("موعد الاستشارة") }} : </p>
+                          <p class="my-auto px-3 text-base text-slate-600  "> {{ booking.event_date }} </p>
+                       </div>
+                   </div>
+                   <div>
+                    <Button @click="bookingDetailes(booking.id)" icon="pi pi-arrow-left"  class="create" :label='$t(" متابعة التفاصيل")'></Button>
+                   </div>
+                </div>
+            </AccordionTab>
+           
+        </Accordion>
+
     </div>
 
 
@@ -63,3 +110,9 @@ export default {
   },
 };
 </script>
+<style>
+.item:hover {
+  background-color: #e6f8f6;
+  transition: all linear 300ms;
+}
+</style>
