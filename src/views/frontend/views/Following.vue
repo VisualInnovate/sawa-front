@@ -1,75 +1,31 @@
 <template>
   <Nave />
-  <div
-    class="flex justify-between border-b-2 p-2 border-x-cyan-950 border-solid"
-  >
-    <div
-      class="col-span-1 text-right m-auto visible md:invisible"
-      @click="toggle()"
-    >
-      <svg
-        fill="#000000"
-        width="44px"
-        height="44px"
-        viewBox="0 0 16 16"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-        <g
-          id="SVGRepo_tracerCarrier"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        ></g>
-        <g id="SVGRepo_iconCarrier">
-          <path
-            d="M.5 7.42h15v1.25H.5zm0 3.6h15v1.25H.5zm0-7.29h15v1.25H.5z"
-          ></path>
-        </g>
+  <div  class="banner flex items-center h-[35vh] lg:h-[55vh] relative ">
+    <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#618999] opacity-40 w-full h-full z-50"></div>
+    <img class="w-full absolute h-full" src="../image/112.png">
+    <div class="z-50 text-white m-auto w-[80%] ">
+      <H1 class="font-bold text-5xl text-white z-50">{{ $t("Child_follow_up") }}</H1>
+     <div class="flex py-8 ">
+      <p class="text-2xl font-semibold "> {{ $t("home") }}</p>
+      <svg class="my-auto mx-[1%] ltr:rotate-180" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0.999878 6.49976L16.9999 6.49976" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5.99972 11.5C5.99972 11.5 0.999767 7.81756 0.999756 6.49996C0.999744 5.18237 5.99976 1.5 5.99976 1.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-    </div>
-
-    <div class="m-auto w-full">
-      <p class="w-full p-2 font-bold text-center text-2xl text-[#6EB7BF]">
-        {{ $t("Profile_personly") }}
-      </p>
-    </div>
-  </div>
-  
-  <div class="relative max-w-full max-h-screen flex">
-    <sidbar :sole="showsider" />
-    <div class="flex-1">
-     <div class="flex justify-between bg-white py-2  px-1 w-full text-[#6EB7BF] shadow ">
-      <div
-        class="bg-white text-3xl py-2 text-[#6EB7BF] font-bold"
-      >
-        {{ $t("Child_follow_up") }}
-      </div>
-      <div class=" my-auto text-center  ">
-        <router-link
-          :to="{ name: 'ReAction' }"
-          style="background-color: #135c65"
-          class="text-white py-2 px-3 rounded-lg"
-        >
-          اضافه طفل جديد
-        </router-link>
-      </div>
+      <p class="text-2xl font-semibold "> {{ $t("Child_follow_up") }}</p>
      </div>
-
-      <div class="overflow-auto" style="height: 70vh">
-        <according
-          v-for="child in childs"
-          class="text-xs block"
-          :name="child.name"
-          :id="child.id"
-          :age="child.age"
-          :report_date="child.report_date"
-          :report_text="child.report_text"
-        >
-        </according>
-      </div>
-     
     </div>
-  </div>
+   </div>
+
+   <div >
+      <div class="max-w-[1300px] mx-auto  py-[4%] ">
+        <div class="flex justify-between w-full m-auto px-2">
+           <h3 class="font-bold text-2xl text-[#303843]">{{ $t("Child_follow_up") }}</h3>
+           <Button @click="AddBooking" class="create" :label='$t(" اضافه طفل جديد")'></Button>
+        </div>
+        
+      </div>
+    </div>
+
   <About />
 </template>
 <script>

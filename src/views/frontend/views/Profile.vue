@@ -17,9 +17,9 @@
     </div>
    </div>
 
-    <div class="bg-white auctions px-[2%] py-[3%] pt-[5%] ">
+    <div class="bg-slate-50 auctions px-[2%] py-[3%] pt-[5%] ">
     <p class="text-3xl font-bold max-w-[1280px]  p-4  m-auto">المعلومات الشخصيه</p>
-    <form  @submit.prevent="updateProfile"  class="max-w-[1280px] shadow-md grid grid-cols-1 p-4 lg:grid-cols-6 gap-4  m-auto">
+    <form  @submit.prevent="updateProfile"  class="max-w-[1280px] bg-white shadow-md grid grid-cols-1 p-4 lg:grid-cols-6 gap-4  m-auto">
       <div class="col-span-4">
         <div class=" py-1 relative ">
                   <div class="flex ">
@@ -104,6 +104,7 @@
    
     <About />
   </div>
+  <Toast></Toast>
 </template>
 <script>
 import Nave from "../components/Nave.vue";
@@ -161,7 +162,8 @@ export default {
       axios
         .post("/api/parent/profile", formData)
         .then((res) => {
-          
+          this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_update_success")}`, life: 3000 });
+
         })
         .catch((err) => {
          

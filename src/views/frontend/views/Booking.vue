@@ -25,7 +25,7 @@
         </div>
         <div  class="p-3 grid grid-cols-2 lg:grid-cols-4 gap-8 m-auto animate__animated animate__backInRight animate__delay-1s">
            <div class="w-full shadow-xl rounded-lg grid grid-cols-2 gap-2 p-3" v-for="book in booking">
-              <div class="h-full m-auto w-full bg-cover bg-no-repeat bg-center rounded-lg" :style="{ backgroundImage: `url(${book?.user_image})` }" ></div>
+              <div class="h-full m-auto w-full bg-cover bg-no-repeat bg-center rounded-lg p-5" :style="{ backgroundImage: `url(${book?.user_image})` }" ></div>
               <div>
                 <h3 class="font-bold text-[#303843]">{{ book?.user_name }}</h3>
                 <p class="text-lg py-1 border-b-2  text-[#44A2AD] ">{{ book?.user_title }}</p>
