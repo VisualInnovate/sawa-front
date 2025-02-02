@@ -286,6 +286,7 @@
             program_id:this.student.program_id,
             student_id:this.student.student_id,
             details:this.capasity,
+            recommendations:this.student.recommendations,
             time_slots:this.student.time_slots,
             shared_slots:this.maxcapsity
         }).then((res) => {    

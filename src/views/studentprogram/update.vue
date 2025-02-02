@@ -273,6 +273,7 @@ export default {
         .then((response) => {
           this.student.student_id=response.data.data.student_id
           this.student.program_id=response.data.data.program_id
+          this.student.recommendations=response.data.data.recommendations
           this.maxcapsity=response.data.data.program.individual_sessions
           response.data.data.student_program_details.forEach(element => {
             this.maxcapsity= this.maxcapsity-element.sessions_number
