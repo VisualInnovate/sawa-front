@@ -6,7 +6,7 @@ import { useAuthStore } from "../stores/Auth";
 import Code from "../views/frontend/views/code.vue";
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
-    parent: useStorage("parent", {}),
+    parent: useStorage("parent", ''),
     parent_id: useStorage("parent_id", ''),
 
     token: useStorage("token", null),
@@ -28,7 +28,7 @@ export const useParentStore = defineStore("parentStore", {
         .post("api/parent/login", parent)
         .then((res) => {
           useAuthStore().resetAuthStore()
-          this.parent = res.data.user;
+          this.parent = res.data.user.image;
           this.parent_id=res.data.user.parent_id
           this.token = res.data.token;
           this.parentAuth = true;

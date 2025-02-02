@@ -84,6 +84,7 @@
 
  
       </div>
+
         <router-link v-if="!parentStore.parentAuth" :to="{ name: 'parentLogin' }" class="  items-center  hidden lg:block" style="display: inline;">
   
         <Button
@@ -140,9 +141,9 @@
       </div>
       <div style="direction: ltr !important;"  class=" flex justify-content-center">
         <Sidebar v-model:visible="dashboard" header="Sidebar">
-            
+        
             <div>
-              <img :src="parentStore.parent.image ?? '/src/assets/img/Ellipse2.png'" style="width: 100px; height: 100px;" class="rounded-full m-auto" >
+              <img :src="parent_Image" style="width: 100px; height: 100px;" class="rounded-full m-auto" >
             </div>
             <div class="dash w-[85%] mx-auto py-[5%]">
                <div class="flex justify-between pb-3" style="border-bottom: 1px solid #E0E0E0;">
@@ -178,7 +179,7 @@
   const parentStore =useParentStore()
   const scrollContainer = ref(null);
   const { t } = useI18n();
-  const content = ref(null);
+  const parent_Image=ref(localStorage.getItem("parent"))
   const dashboard = ref(false);
   const staticDiv = ref(null);
   const router = useRouter()

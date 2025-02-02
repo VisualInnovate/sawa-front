@@ -473,5 +473,6 @@ body_event:"الوصف",
  advances:"الســــلفات",
  advance_mount:"المبلغ المطلوب",
  max_value:"القيمة القصوي",
- advance_date:"تاريخ السلفة"
+ advance_date:"تاريخ السلفة",
+ Requests:"طلبات"
 };

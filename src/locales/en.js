@@ -397,6 +397,7 @@ merge:"Merge",
   sumi_test:"Test reinforcers",
   sumi_start:"start reinforcers",
   Working_hours:"Working hours",
+   Requests:"Requests",
   ///////////////////////////////////
   success_message:"success message",
   element_delete_success:"   element delet success",
