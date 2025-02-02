@@ -8,66 +8,46 @@
     </div>
     <v-card>
       <div>
-        <!-- ... existing code ... -->
-        <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-          <v-card>
-            <v-card-title>{{ $t("Success!") }}</v-card-title>
-            <v-card-text>
-              {{ $t("Data seeded successfully!") }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="closeSuccessModal" color="success">
-                {{ $t("OK") }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+      
         <form  class="p-[2%] c shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="submitForm">
           <!-- ... existing code ... -->
             
           <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('driver_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.driver_id">{{ error.driver_id[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' :class="{ 'p-invalid': submitted && !student.driver_id}" />
                 </div>
 
             
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('vecile_type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.vehicle_id"  option-value="id" :options="vehicle" optionLabel="plate_number" :placeholder='$t("vecile_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.vehicle_id">{{ error.vehicle_id[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.vehicle_id"  option-value="id" :options="vehicle" optionLabel="plate_number" :placeholder='$t("vecile_type")' :class="{ 'p-invalid': submitted && !student.vehicle_id}" />
                 </div>
 
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('student_tans') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_transportation_id"  option-value="id" :options="studenttransportation" optionLabel="location_url" :placeholder='$t("student_tans")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.student_transportation_id">{{ error.student_transportation_id[0] }}</div>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_transportation_id"  option-value="id" :options="studenttransportation" optionLabel="location_url" :placeholder='$t("student_tans")' :class="{ 'p-invalid': submitted && !student.student_transportation_id}" />
                 </div>
 
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('start_date') }}</label>
-                    <Calendar required style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate" />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
+                    <Calendar required style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate"  :class="{ 'p-invalid': submitted && !student.date}"/>
 
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('seats_number') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="student.available_seats" :placeholder='$t("seats_number")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.available_seats">{{ error.available_seats[0] }}</div>
+                    <InputNumber  required class="bg-[#f7f5f5]" v-model="student.available_seats" :placeholder='$t("seats_number")' :class="{ 'p-invalid': submitted && !student.available_seats}" />
                 </div> 
         
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('from') }}</label>
-                       <input class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="time_end" v-model="student.from" style="border-radius: 5px" />
-                        <div class="mt-1 mb-5 text-red-500" v-if="error?.from">{{ error.from[0] }}</div>
+                       <input class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="time_end" v-model="student.from" style="border-radius: 5px" :class="{ 'p-invalid': submitted && !student.from}" />
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('to') }}</label>
                         <input  required class="bg-[#F7F5F5] py-2" type="time" name="time_end" id="pv_id_1" v-model="student.to"  />
-                        <div class="mt-1 mb-5 text-red-500" v-if="error?.to">{{ error.to[0] }}</div>
                 </div>
                   
               
@@ -76,13 +56,12 @@
   
                 
              
-                <div class="flex flex-column gap-2 w-[70%]">
-                  <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
+                <div class="flex flex-column w-[70%]">
+                  <label for="username">{{ $t('Active') }}</label>
                     <div class="flex">
                         <InputSwitch required class="m-auto px-3" v-model="student.is_active"/>
-                      <Button type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
+                      <Button type="submit" class="create m-auto w-full " @click="submitted = true" :label='$t("submit")'></Button>
                     </div>
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.is_active">{{ error.is_active[0] }}</div>
                 </div>
            
               
@@ -100,6 +79,7 @@
   import InputNumber from "primevue/inputnumber";
   import { GoogleMap, Circle } from 'vue3-google-map';
     import {useToast} from 'primevue/usetoast'
+import { faL } from "@fortawesome/free-solid-svg-icons";
   export default {
     components: {
     GoogleMap,
@@ -108,6 +88,7 @@
   
     data() {
       return {
+        submitted:false,
         center: { lat: 37.09, lng: 8.712 },
       cities: {
         chicago: {
@@ -236,10 +217,11 @@
             this.student.is_active=0
          }
         axios.post("/api/transportation-schedule",this.student).then((res) => {
-          this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+          this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_add_success")}`, life: 3000 });
+
         }).catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
+          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail:  `${el.response.data.message}`, life: 3000 });
+
       })
       },
      

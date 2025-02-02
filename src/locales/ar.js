@@ -405,7 +405,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   add_session:"اضافة جلسة",
   sumi_test:"اختبار معززات",
   sumi_start:"بداء الجلسه",
-
+  Active:"نشط",
   type_work:"نوع العمل",
   Working_hours:"اوقات العمل",
 ///////////////////////////////////////////anttend
