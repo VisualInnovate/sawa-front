@@ -22,6 +22,10 @@
                     <label for="username">{{ $t('child_name') }}</label>
                     <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_id"  @update:model-value=" getAllDoctor"   option-value="id" filter :options="child" optionLabel="name" :placeholder='$t("child_name")' :class="{ 'p-invalid': submitted && !student.student_id}"  />
                 </div> 
+                <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('recommendations') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="student.recommendations" ></v-textarea> 
+                </div>
                 
         </div>
         <table v-if="student.program_id &&setiontype != 1" :class="{'animate__animated animate__bounce animate__delay-0s':error.balance}"  class="item-table w-[70%]">

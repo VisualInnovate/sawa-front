@@ -406,6 +406,7 @@ Group_individual_sessions:"جلسات جماعيه و فرديه",
   sumi_test:"اختبار معززات",
   sumi_start:"بداء الجلسه",
   Active:"نشط",
+  recommendations:"توصيات",
   type_work:"نوع العمل",
   Working_hours:"اوقات العمل",
 ///////////////////////////////////////////anttend

@@ -398,6 +398,8 @@ merge:"Merge",
   sumi_start:"start reinforcers",
   Working_hours:"Working hours",
   Active:"Active",
+  recommendations:"Recommendations",
+
    Requests:"Requests",
   ///////////////////////////////////
   success_message:"success message",
