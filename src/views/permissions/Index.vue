@@ -1,6 +1,7 @@
 <script setup>
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
+import Editor from 'primevue/editor';
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -9,10 +10,10 @@ const toast = useToast()
 const router = useRouter()
 
 const loading = ref(true)
-const user = ref({})
-const error = ref('')
-const users = ref(null)
-const productDialog = ref(false)
+const details = ref({})
+const description = ref('')
+const permissions = ref(null)
+const show = ref(false)
 const deleteDialog = ref(false)
 const confir_id=ref('')
 const selectedProducts = ref(null)
@@ -29,91 +30,37 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.post("/api/permissions").then((res)=>{
+  axios.get("/api/permissions").then((res)=>{
     loading.value= false
-    users.value= res.data.permissions
-    console.log(users.value)
+    permissions.value= res.data.permissions
+   
 
   });
 
 
 }
 
-
+const updateDis=()=>{
+  axios.put(`/api/permissions/${details.value.id}/edit`,{
+    description:description.value
+    
+  }).then((res)=>{
+    fetchData()
+    show.value=!(show.value)
+    
+  });
+}
 
 onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
+  
 fetchData()
 
 })
-const edit=(id)=>{
-    axios.get(`/api/skills/${id}`).then((res)=>{
-    loading.value= false
-    skill.value= res.data.data
-    console.log(users.value)
-
-  });
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
-}
-
-
-///// update
-
-const editeskills=()=>{
-    axios
-    .put(`/api/skills/${confir_id.value}`,skill.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      skill.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-
-const openNew = () => {
-    createdialog.value=!(createdialog.value)
-}
-
-const confirmDelete = (id) => {
-  console.log(id)
-  deleteDialog.value = true
-  confir_id.value=id
- 
-
-}
-
-const createskill=()=>{
-    axios
-    .post('/api/skills',skill.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'price Created', life: 3000})
-      skill.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-const deleteAction = () => {
-  axios
-    .delete(`/api/skills/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
-      deleteDialog.value=false
-      fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-    })
-    .catch(() => {})
-
-}
-
+    const showDirection=(e)=>{
+      show.value=!(show.value)
+      description.value=e.description
+      details.value=e
+    }
 
 const exportCSV = () => {
   dt.value.exportCSV()
@@ -130,129 +77,33 @@ const initFilters = () => {
 <template>
   <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
-          <template #start>
-            <div class="my-2">
-          <!--  <Button :label='$t("skill_add")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button> -->
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
+      <v-card class="card shadow-md">
+       
+        <div class="grid md:grid-cols-3 lg:grid-cols-4 grid-cols-1">
+          <div class="p-4" v-for="(permissionsList, category) in permissions" :key="category">
+            <h3 class="font-bold text-lg text-slate-800">{{ category }}</h3>
+            <div class="flex py-[1px]" v-for="permission in permissionsList" :key="permission.id">
+              <p class="">{{ permission.name }} </p>
+              <i @click="showDirection(permission)" class="pi pi-arrow-left px-4 my-auto text-base text-[#135C65]"></i>
             </div>
-          </template>
-
-          <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
-            <Button v-can="'permissions list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
-          </template>
-        </Toolbar>
-
-        <Toast/>
-
-
-      <div style="" class="shadow-xl ">
-        <DataTable
-          ref="dt"
-          v-model:selection="selectedProducts"
-          :value="users"
-          :loading="loading"
-          data-key="id"
-          :paginator="true"
-          :rows="10"
-          :filters="filters"
-          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
-          responsive-layout="scroll"
-          v-can="'permissions list'"
-        >
-          <template #header>
-            <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("permissions") }}</h5>
-             <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
-                <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
-              </div>
-            </div>
-          </template>
-
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-         
-
-          <Column field="index" :header='$t("index")' :sortable="true" header-style="width:14%; min-width:15rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.id }}
-            </template>
-           </Column>
-         
-           <Column field="name" :header='$t("name")' :sortable="true" header-style="width:14%; min-width:15rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.name }}
-            </template>
-           </Column>
-
-      
-          
-
-
-        
-          <Column header-style="min-width:10rem;">
-            <template #body="slotProps">
-            
-            </template>
-          </Column>
-
-
-
-        </DataTable>
-        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
+           
+          </div>
+        </div>
+        <Dialog v-model:visible="show" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
+          <div class="">
+           
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('description') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="description" ></v-textarea> 
+                </div>
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="show = false"/>
+            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="updateDis"/>
           </template>
         </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="skill.name" :placeholder='$t("skill_name")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="createskill" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center"  v-model="skill.name" :placeholder='$t("skill_name")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="editeskills" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-      </div>
-      </va-card>
+     
+      </v-card>
     </div>
   </div>
 </template>

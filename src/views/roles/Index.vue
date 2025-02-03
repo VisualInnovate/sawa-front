@@ -38,7 +38,7 @@ onBeforeMount(() => {
     console.log(users.value)
 
   });
-  axios.post("/api/permissions").then((res)=>{
+  axios.get("/api/permissions").then((res)=>{
     
     permissions.value= res.data.permissions
     loading.value= false
