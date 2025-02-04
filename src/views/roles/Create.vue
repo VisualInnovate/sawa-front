@@ -35,7 +35,26 @@ const fetchData= ()=>{
     permissions.value= res.data.permissions
   });
 }
+const handleSelectAll = (category, permissionsList) => {
+  const permissionIdsInCategory = permissionsList.map((permission) => permission.id);
 
+  if (areAllPermissionsSelected(permissionsList)) {
+    // If all permissions are already selected, deselect all
+    selectedPermissionIds.value = selectedPermissionIds.value.filter(
+      (id) => !permissionIdsInCategory.includes(id)
+    );
+  } else {
+    // If not all permissions are selected, select all
+    selectedPermissionIds.value = [
+      ...new Set([...selectedPermissionIds.value, ...permissionIdsInCategory]),
+    ];
+  }
+};
+const areAllPermissionsSelected = (permissionsList) => {
+  return permissionsList.every((permission) =>
+    selectedPermissionIds.value.includes(permission.id)
+  );
+};
 const submitForm=()=>{
   axios.post(`/api/roles/create`,{
     permissions:selectedPermissionIds.value,
@@ -99,18 +118,27 @@ const handleCheckboxClick = (permissionId) => {
       </form>
         <div class="grid md:grid-cols-3 lg:grid-cols-4 grid-cols-1">
           <div class="p-4" v-for="(permissionsList, category) in permissions" :key="category">
-            <h3 class=" mx-2 font-bold text-lg text-slate-800">{{ category }}</h3>
-            <div class="flex py-[1px]" v-for="permission in permissionsList" :key="permission.id">
-              <input 
-                class="border my-auto mx-2" 
-                type="checkbox" 
-                :checked="selectedPermissionIds.includes(permission.id)" 
-                @change="handleCheckboxClick(permission.id)" 
-              />
-              <p>{{ permission.name }}</p>
-              <i @click="showDirection(permission)" class="pi pi-arrow-left px-4 my-auto text-base text-[#135C65]"></i>
+              <div class="flex items-center">
+                <h3 class="mx-2 font-bold text-lg text-slate-800">{{ category }}</h3>
+                <input
+                  type="checkbox"
+                  class="border my-auto mx-2"
+                  :checked="areAllPermissionsSelected(permissionsList)"
+                  @change="handleSelectAll(category, permissionsList)"
+                />
+         
+              </div>
+              <div class="flex py-[1px]" v-for="permission in permissionsList" :key="permission.id">
+                <input
+                  class="border my-auto mx-2"
+                  type="checkbox"
+                  :checked="selectedPermissionIds.includes(permission.id)"
+                  @change="handleCheckboxClick(permission.id)"
+                />
+                <p>{{ permission.name }}</p>
+                <i @click="showDirection(permission)" class="pi pi-arrow-left px-4 my-auto text-base text-[#135C65]"></i>
+              </div>
             </div>
-          </div>
         </div>
         <Dialog v-model:visible="show" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
           <div class="">
