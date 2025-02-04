@@ -55,19 +55,8 @@ fetchData()
 
 })
 const edit=(id)=>{
-    axios.get(`/api/roles/${id}`).then((res)=>{
-    loading.value= false
-    role.value.name= res.data.role.name
-    for (let i = 0; i < res.data.role.permissions.length; i++) {
-      res.data.role.permissions[i].id
-      role.value.permissions.push(res.data.role.permissions[i].id)
-}
-   
+  router.push({name:'ShowRole',params:{'id':id} })
 
-  });
-  console.log(role.value.permissions)
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
 }
 
 
@@ -89,7 +78,8 @@ const editeroles=()=>{
 }
 
 const openNew = () => {
-    createdialog.value=!(createdialog.value)
+  router.push({name:'CreateRole'})
+  
 }
 
 const confirmDelete = (id) => {
