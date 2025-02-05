@@ -129,10 +129,7 @@
                   <label class="w-full " for="username">{{     $t("    برجاء تحديد اسم المعين  ")  }}  </label>
                 <InputText required class="bg-[#f7f5f5] text-center"     v-model="booking.details.aids"  :class="{ 'p-invalid': submitted && !booking.aids}" />
         </div>
-        <div class="lg:col-span-2 flex flex-column gap-2">
-                  <label class="w-full " for="username">{{     $t("اضف ملاحظات")  }}  </label>
-                  <Textarea class="w-full" v-model="booking.details.child_aids_notes" rows="5" cols="30" :class="{ 'p-invalid': submitted && !booking.child_aids_notes}"/>
-        </div>
+   
         <div class="lg:col-span-2 flex flex-column gap-2">
                   <label class="w-full " for="username">{{     $t(" :المشاكل الرئيسيه لدي الطفل حاليا من وجهه نظر الاهل")  }}  </label>
                   <Textarea class="w-full"    v-model="booking.details.child_parents_problems" rows="5" cols="30" :class="{ 'p-invalid': submitted && !booking.child_parents_problems}"/>
@@ -261,8 +258,7 @@ show_alert:false,
  
 
   mounted( ) {
-   
-    this.getEvent();
+  
     this.getChilds();
    
     console.log(this.event_id);
