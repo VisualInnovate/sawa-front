@@ -7,7 +7,8 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -19,7 +20,12 @@ const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
 
-
+const  status=ref([
+        { name: t("Pending"), code: -1 },
+        { name: t("Accept"), code: 1 },
+        { name: t("Cancell"), code: 0 },
+      
+      ])
 
 
 onBeforeMount(() => {
@@ -36,6 +42,18 @@ onBeforeMount(() => {
 
   });
 
+
+}
+
+
+const updateStatus=(id,status)=>{
+  
+  loading.value=true
+ 
+  axios.get(`api/student-program/change-status/${id}?status=${status}`).then((res)=>{
+      loading.value=false
+      fetchData()
+      });
 
 }
 const session =(id,program_id)=>{
@@ -139,7 +157,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           current-page-report-template="Showing {first} to {last} of {totalRecords} products"
           responsive-layout="scroll"
-          v-can="'student-program list'"
+          v-can="'student program details list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
@@ -168,8 +186,19 @@ const initFilters = () => {
               {{ slotProps.data.program.name }}
             </template>
            </Column>
+         
+           <Column field="price" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.program.price }}
+            </template>
+           </Column>
           
-           
+           <Column field="price" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              <Dropdown  @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#F59E0B' : slotProps.data.status == 0 ? '#EF4444' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+
+            </template>
+           </Column>
          
 
 

@@ -98,7 +98,7 @@
                 <InputText required class="bg-[#f7f5f5] text-center"      v-model="booking.details.conversion_type"  :class="{ 'p-invalid': submitted && !booking.conversion_type}" />
         </div>
         
-        <div class=" flex flex-column gap-2">
+        <div class=" col-span-2 flex flex-column gap-2">
                   <label class="w-full " for="username">{{     $t("الطبيب الخاص بالطفل")  }}  </label>
                 <InputText required class="bg-[#f7f5f5] text-center"      v-model="booking.details.child_doctor"  :class="{ 'p-invalid': submitted && !booking.child_doctor}" />
         </div>
@@ -109,16 +109,25 @@
        
         <div class="lg:col-span-2 flex flex-column gap-2">
                   <label class="w-full  " for="username">{{ $t('نرجو تحديد نوع المشكله') }}  </label>
-                  <Dropdown  placeholder="نرجو تحديد نوع المشكله"  required id="pv_id_1" style="direction: ltr !important;"   v-model="booking.details.child_problem"  option-value="name" :options="problem_type" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_aids}" class="w-full " />
+                  <Dropdown  placeholder="نرجو تحديد نوع المشكله"  required id="pv_id_1" style="direction: ltr !important;"   v-model="booking.details.child_problem"   :options="problem_type" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_aids}" class="w-full " />
+        </div>
+        <div v-if="booking.details.child_problem.code == 5" class=" col-span-2 flex flex-column gap-2">
+                  <label class="w-full " for="username">{{     $t("  برجاء تحديد نوع المشكلة")  }}  </label>
+                <InputText required class="bg-[#f7f5f5] text-center"     v-model="booking.details.problem"  :class="{ 'p-invalid': submitted && !booking.problem}" />
         </div>
          <div class="lg:col-span-2 flex flex-column gap-2">
+          <label class="w-full " for="username">{{     $t("التشخيص ان وجد")  }}  </label>
                 <InputText  class="bg-[#f7f5f5] text-center" placeholder="التشخيص ان وجد"     v-model="booking.details.child_problems_notes"   />
         </div>
       
         <div class="lg:col-span-2 flex flex-column gap-2">
                   <label class="w-full  " for="username">{{ $t('هل يستخدم الطفل اي معينات حركيه / سمعيه/ بصريه') }}  </label>
                   <Dropdown             placeholder="هل يستخدم الطفل اي معينات حركيه / سمعيه/ بصريه"
-                  required id="pv_id_1" style="direction: ltr !important;" v-model="booking.details.child_aids"  option-value="id" :options="approve" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_aids}" class="w-full " />
+                  required id="pv_id_1" style="direction: ltr !important;" v-model="booking.details.child_aids"   :options="approve" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_aids}" class="w-full " />
+        </div>
+        <div v-if="booking.details.child_aids.id == 1" class=" col-span-2 flex flex-column gap-2">
+                  <label class="w-full " for="username">{{     $t("    برجاء تحديد اسم المعين  ")  }}  </label>
+                <InputText required class="bg-[#f7f5f5] text-center"     v-model="booking.details.aids"  :class="{ 'p-invalid': submitted && !booking.aids}" />
         </div>
         <div class="lg:col-span-2 flex flex-column gap-2">
                   <label class="w-full " for="username">{{     $t("اضف ملاحظات")  }}  </label>
@@ -132,9 +141,12 @@
                   <label class="w-full " for="username">{{     $t("   :ما هي اولويه الاهل في البرامج التاهليه للتعامل مع الطفل")  }}  </label>
                   <Textarea class="w-full"    v-model="booking.details.parents_priorities" rows="5" cols="30" :class="{ 'p-invalid': submitted && !booking.parents_priorities}"/>
         </div>
-     
         <div class="lg:col-span-2 flex flex-column gap-2">
-                <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid class="bg-[#f7f5f5] text-center" placeholder="ادخل كود استشاري تريده"     v-model="booking.details.doctor_code" :class="{ 'p-invalid': submitted && !booking.doctor_code}"  />
+                  <label class="w-full " for="username">{{     $t("اضف ملاحظات")  }}  </label>
+                  <Textarea class="w-full" v-model="booking.details.child_aids_notes" rows="5" cols="30" :class="{ 'p-invalid': submitted && !booking.child_aids_notes}"/>
+        </div>
+        <div class="lg:col-span-2 flex flex-column gap-2">
+                <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid class="bg-[#f7f5f5] text-center" placeholder="كود الاستشاري ان وجد "     v-model="booking.details.doctor_code" :class="{ 'p-invalid': submitted && !booking.doctor_code}"  />
         </div>
      
         <div class="text-right m-auto w-full space-x-4">
@@ -170,12 +182,12 @@ export default {
       ],
       submitted:false,
       problem_type: [
-        { name: "حركيه" },
-        { name: "سمعيه" },
-        { name: "بصريه" },
-        { name: "عقليه/نمائيه" },
-        { name: "توحد" },
-        { name: "اخر" },
+        { name:this.$t("حركية"),code:1 },
+        { name:this.$t("سمعيه"),code:2 },
+        { name:this.$t("عقليه_نمائيه"),code:3 },
+        { name:this.$t("توحد"),code:4 },
+        { name:this.$t("اخر"),code:5 },
+      
       ],
       approve: [
         { id: 1, name: "نعم" },

@@ -173,6 +173,7 @@ const initFilters = () => {
               {{ slotProps.data.sessions_number }}
             </template>
            </Column>
+          
            <Column field="program_type" :header='$t("ProgramType")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               <p v-if="slotProps.data.program_type == 0">{{ $t('diurnal') }}</p>
