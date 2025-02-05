@@ -178,7 +178,7 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button   v-can="'parent show'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button   v-can="'child create'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
@@ -198,7 +198,7 @@ const initFilters = () => {
           paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rows-per-page-options="[5, 10, 25]"
           responsive-layout="scroll"
-          v-can="'parent show'"
+          v-can="'child list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">

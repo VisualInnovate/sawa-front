@@ -394,7 +394,7 @@ export default {
         axios
           .post(`api/evaluation-request`,{
             child_id:this.booking.child_id,
-            consultant_id:this.booking.user_id,
+            consultant_id:localStorage.getItem("user_id"),
             evaluation_type:this.evalate.evaluation_type,
             date:moment(this.evalate.date).format("Y-MM-DD") ,
             specialist_id:this.evalate?.specialist_id,
