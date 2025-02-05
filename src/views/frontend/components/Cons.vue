@@ -63,7 +63,7 @@
         <h2 class="text-right font-bold text-xl">{{ $t("Book_an_appointment_with_the_specialist") }}</h2>
         <p class="text-right text-[#29CCFF] text-xl">{{ $t("Please_fill_in_the_information") }}</p>
       </div>
-      <form class="py-4 min-w-full  p-2 grid grid-cols-2  gap-4" @submit.prevent="bookTime">
+      <form class="py-4 min-w-full grid-cols-1  p-2 lg:grid grid-cols-2  gap-4" @submit.prevent="bookTime">
         <div class="flex flex-column gap-2">
                   <label class="w-full  " for="username">{{ $t('child_name') }}  </label>
                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="booking.child_id"   option-value="id" :options="childs" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_id}"  />
@@ -111,7 +111,7 @@
                   <label class="w-full  " for="username">{{ $t('نرجو تحديد نوع المشكله') }}  </label>
                   <Dropdown  placeholder="نرجو تحديد نوع المشكله"  required id="pv_id_1" style="direction: ltr !important;"   v-model="booking.details.child_problem"   :options="problem_type" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_aids}" class="w-full " />
         </div>
-        <div v-if="booking.details.child_problem.code == 5" class=" col-span-2 flex flex-column gap-2">
+        <div v-if="booking.details?.child_problem?.code == 5" class=" col-span-2 flex flex-column gap-2">
                   <label class="w-full " for="username">{{     $t("  برجاء تحديد نوع المشكلة")  }}  </label>
                 <InputText required class="bg-[#f7f5f5] text-center"     v-model="booking.details.problem"  :class="{ 'p-invalid': submitted && !booking.problem}" />
         </div>
@@ -125,7 +125,7 @@
                   <Dropdown             placeholder="هل يستخدم الطفل اي معينات حركيه / سمعيه/ بصريه"
                   required id="pv_id_1" style="direction: ltr !important;" v-model="booking.details.child_aids"   :options="approve" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_aids}" class="w-full " />
         </div>
-        <div v-if="booking.details.child_aids.id == 1" class=" col-span-2 flex flex-column gap-2">
+        <div v-if="booking.details?.child_aids?.id == 1" class=" col-span-2 flex flex-column gap-2">
                   <label class="w-full " for="username">{{     $t("    برجاء تحديد اسم المعين  ")  }}  </label>
                 <InputText required class="bg-[#f7f5f5] text-center"     v-model="booking.details.aids"  :class="{ 'p-invalid': submitted && !booking.aids}" />
         </div>
