@@ -3,7 +3,7 @@
       <Toolbar class="mb-4 shadow-md">
         <template #start>
           <div class="flex ">
-              <Dropdown  @update:model-value="event.type=''" :placeholder='$t("employee_name")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.employee_id"  option-value="id" filter :options="employees" optionLabel="name" class="mx-2"  />
+              <Dropdown  @update:model-value="event.type=''" :placeholder='$t("employee_name")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.employee_id"  option-value="user_id" filter :options="employees" optionLabel="name" class="mx-2"  />
               <Dropdown :loading="!event.employee_id"  @update:model-value="getTimes" :placeholder='$t("type_work")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.type"  option-value="id" filter :options="event_types" optionLabel="name"  />
 
           </div>
@@ -215,7 +215,7 @@ export default {
             color:this.event.color,
             title:this.event.title,
             evaluation_type:this.event.evaluation_type,
-            consultant_id:this.event.employee_id,
+            consultant_id:localStorage.getItem("user_id"),
             child_id:this.event.child_id,
             date:moment(this.opts.event.end).format(' YYYY-MM-DD'),
             start_time:moment(this.opts.event.start).format('HH:mm:ss'),
