@@ -37,7 +37,7 @@
           <!-- Tooltip Message -->
           <div class="tooltip rounded-md absolute top-0 left-0 w-full h-full bg-black bg-opacity-75 text-white flex flex-col items-center justify-center opacity-0 transition-opacity duration-300">
                <p class="absolute top-2">ملاحظات المستشار</p>
-               <p v-if="book?.accepted_notes " > {{ book?.accepted_notes }}</p>
+               <p v-if="book?.accepted_notes !=null " > {{ book?.accepted_notes }}</p>
                <p v-els > لا يوجد ملاحظات</p>
           </div>
         </div>
