@@ -45,6 +45,17 @@ const handleSelectAll = (category, permissionsList) => {
     ];
   }
 };
+const handelSearch= (e)=>{
+
+axios.get(`/api/permissions?search=${e}`).then((res)=>{
+  loading.value= false
+  permissions.value= res.data.permissions
+ 
+
+});
+
+
+}
 const fetchData= ()=>{
   axios.get("/api/permissions").then((res)=>{
     loading.value= false
@@ -96,6 +107,15 @@ const handleCheckboxClick = (permissionId) => {
 
 <template>
   <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
+    <div class="flex w-full pb-4 px-4 justify-between align-items-center">
+              <h5 class="m-0 my-auto">{{ $t("roles") }}</h5>
+             <div>
+              <span class="block mt-2 md:mt-0 p-input-icon-left">
+                <i class="pi pi-search"/>
+                <InputText  @update:model-value="handelSearch" :placeholder='$t("search")'/>
+              </span>
+              </div>
+    </div>
     <div class="col-12">
       <v-card class="card shadow-md">
       <form class="flex " @submit.prevent="submitForm">
