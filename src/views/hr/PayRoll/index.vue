@@ -138,7 +138,7 @@ const initFilters = () => {
 </script>
 
 <template>
-  <div class="grid">
+  <div class="grid overflow-x-scroll">
     <div class="col-12">
       <va-card class="card">
         <Toolbar class="mb-4 shadow-md">
@@ -156,10 +156,10 @@ const initFilters = () => {
         </Toolbar>
 
         <Toast/>
-        <Toolbar class="mb-4 shadow-md">
+        <Toolbar class="mb-4 shadow-md overflow-x-scroll">
           <template #start>
           <Calendar  v-model="fetchFilter.start_date"   :placeholder='$t("from")'  />   
-          <Calendar  v-model="fetchFilter.end_date"   :placeholder='$t("to")' class="mx-1"  />   
+          <Calendar  v-model="fetchFilter.end_date"   :placeholder='$t("to")' class="mx-2"  />   
           <InputNumber  required class="bg-[#f7f5f5]" v-model="fetchFilter.base_salary" :placeholder='$t("basic_salary")' />
         </template>
         <template #end>

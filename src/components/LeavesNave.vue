@@ -9,11 +9,11 @@
                 <router-link
                   :to="{ name: 'leave-setup' }"
                   class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-                > {{ $t('leave-setup') }}</router-link>
+                > {{ $t('leave_setup') }}</router-link>
                 <router-link
                   :to="{ name: 'leave-balance' }"
                   class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-                > {{ $t('leave-balance') }}</router-link>
+                > {{ $t('leave_balance') }}</router-link>
           </template>
           
         </Toolbar>

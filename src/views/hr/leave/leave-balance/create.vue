@@ -12,8 +12,8 @@
   <table :class="{'animate__animated animate__bounce animate__delay-0s':error.balance}"  class="item-table w-[70%]">
     <thead>
       <tr>
-        <th>leave_setup</th>
-        <th>الكمية </th>
+        <th>{{ $t("holiday_type") }}</th>
+        <th>{{ $t("amount") }} </th>
       </tr>
     </thead>
     <tbody  >
@@ -24,7 +24,7 @@
         <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" /></td>
       </tr>
       <tr >
-        <td><Dropdown @update:model-value="getmaxvalue($event)"  style="direction: ltr !important;" v-model="selectedOption"  :options="filteredDays" optionLabel="title" :placeholder='$t("shift_name")' class="w-full " :class="{ 'p-invalid': submitted && !selectedOption}"/></td>
+        <td><Dropdown @update:model-value="getmaxvalue($event)"  style="direction: ltr !important;" v-model="selectedOption"  :options="filteredDays" optionLabel="title" :placeholder='$t("holiday_type")' class="w-full " :class="{ 'p-invalid': submitted && !selectedOption}"/></td>
         <td><InputNumber   class="w-full" v-model="quantity" :placeholder='$t("max_value")+ "=" + maxvalue' :max="maxvalue" :class="{ 'p-invalid': submitted && !quantity}" /></td>
         <td> <Button   @click="submitted=true" type="submit" required class="create m-auto s " icon="pi pi-plus" ></Button></td>
       </tr>

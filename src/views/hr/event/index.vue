@@ -169,7 +169,7 @@ const initFilters = () => {
 </script>
 
 <template>
-    <v-card v-can="'create event'" class="card mb-5 p-4 shadow-md bg-slate-50">
+    <v-card v-can="'events create'" class="card mb-5 p-4 shadow-md bg-slate-50">
     <form @submit.prevent="onSubmit" >
      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
        <div>
@@ -194,15 +194,14 @@ const initFilters = () => {
         </div>
         <div class="py-1">
                  <div class=" text-center" >
-                  <img  onclick="document.getElementById('filr').click()"  v-if=" event.image" :src=" event.image" alt="Image"  class="m-auto lg:w-[40%] h-[160px] cursor-pointer "  preview />
-                  <img   onclick="document.getElementById('filr').click()"  v-else src="https://farfallahc.com/public/assets/back-end/img/image-place-holder.png" alt="Image"  class="m-auto  lg:w-[40%] h-[180px] cursor-pointer"  preview />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
+                  <div onclick="document.getElementById('filr').click()" class=" border-4 h-40 m-auto rounded-full w-40" :style="{ backgroundImage: `url(${ event.image})` }" style="background-position: center;background-repeat: no-repeat;background-size: cover;"></div>
+                    <Button  onclick="document.getElementById('filr').click()" class="create mt-2" icon="pi pi-upload" label="Upload Icon" />
                   </div>
 
         </div>
       </div>
       <Button v-can="'events list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
-      <Button v-can="'create event'"  type="submit"  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" ></Button>
+      <Button v-can="'events create'"  type="submit"  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" ></Button>
     </form>
     </v-card>
   <div class="grid">
@@ -284,13 +283,13 @@ const initFilters = () => {
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <Button
-              v-can="'update event'"
+              v-can="'events edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
               <Button
-              v-can="'delete event'"
+              v-can="'events delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data)"

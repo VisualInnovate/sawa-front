@@ -145,13 +145,13 @@
             
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username ">{{ $t('start_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
+                    <Calendar showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
                     <small v-if="submitted && !leave.start" class="p-invalid text-red-600 w-full text-center" > {{$t("start_date") + ' ' + $t("required") }}.</small>  
 
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('end_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
+                    <Calendar showTime  id="calendar-12h" hourFormat="12"  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
                     <small v-if="submitted && !leave.end" class="p-invalid text-red-600 w-full text-center" > {{$t("end_date") + ' ' + $t("required") }}.</small>  
                 </div> 
             
@@ -205,13 +205,13 @@
             
               <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username ">{{ $t('start_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
+                    <Calendar showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
                     <small v-if="submitted && !leave.start" class="p-invalid text-red-600 w-full text-center" > {{$t("start_date") + ' ' + $t("required") }}.</small>  
 
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label class="w-full text-right" for="username">{{ $t('end_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
+                    <Calendar showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
                     <small v-if="submitted && !leave.end" class="p-invalid text-red-600 w-full text-center" > {{$t("end_date") + ' ' + $t("required") }}.</small>  
                 </div> 
             
@@ -373,6 +373,7 @@ const { t } = useI18n()
 
  ////update
   const updateleave=(id)=>{
+    leave.value=ref({})
     data_id.value=id
     updata.value=!(updata.value) 
 
@@ -387,7 +388,7 @@ const { t } = useI18n()
       location.value.latitude=res.data.data.lat
       location.value.longitude=res.data.data.long
      
-     
+      leave.value.assigners=[]
       for(let i=0 ;i<res.data.data.assigners.length;i++){
         
          leave.value.assigners.push(res.data.data.assigners[i].employee_id)
@@ -396,6 +397,8 @@ const { t } = useI18n()
   }
 
   const updatel=()=>{
+    leave.value.end = moment(leave.value.end).format("YYYY-MM-DD HH:mm:ss");
+    leave.value.start = moment(leave.value.start).format("YYYY-MM-DD HH:mm:ss");
     axios.put(`api/official-leaves/${data_id.value}`,leave.value).then((res) => {
       fetchData()
       updata.value=!( updata.value)

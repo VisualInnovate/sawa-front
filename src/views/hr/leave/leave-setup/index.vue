@@ -173,7 +173,7 @@ const initFilters = () => {
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
               <Button  v-can="'leave setup create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
-              <h5 class="m-0 my-auto">{{ $t("leave setup") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("leave_setup") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>

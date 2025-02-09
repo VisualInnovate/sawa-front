@@ -106,7 +106,7 @@ const handleCheckboxClick = (permissionId) => {
 </script>
 
 <template>
-  <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
+  <div v-can="'roles list'" class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
     <div class="flex w-full pb-4 px-4 justify-between align-items-center">
               <h5 class="m-0 my-auto">{{ $t("roles") }}</h5>
              <div>

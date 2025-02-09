@@ -156,7 +156,7 @@ const initFilters = () => {
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
               <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
-              <h5 class="m-0 my-auto">{{ $t("leave-balance") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("leave_balance") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
