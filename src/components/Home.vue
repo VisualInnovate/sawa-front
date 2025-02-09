@@ -368,7 +368,7 @@ transportation_schedule
             <v-list-item  v-can="'bonus list'" :title="$t('bonus')" value="bonus" :to="{ name: 'bonus' }"></v-list-item>
             <v-list-item  v-can="'department list'" :title="$t('departments')" value="departments" :to="{ name: 'departments' }"></v-list-item>
             <v-list-item  v-can="'positions list'" :title="$t('posttion')" value="posttion" :to="{ name: 'posttion' }"></v-list-item>
-            <v-list-item  v-can="'events list'"  :title="$t('events')" value="posttion" :to="{ name: 'event' }"></v-list-item>
+            <v-list-item  v-can="'events list'"  :title="$t('events')" value="event" :to="{ name: 'event' }"></v-list-item>
             <v-list-item  v-can="'shifts list'"  :title="$t('shift')" value="shift" :to="{ name: 'shift' }"></v-list-item>
             <v-list-item  v-can="'shifts list'" :title="$t('advance')" value="advance" :to="{ name: 'advance' }"></v-list-item>
             
