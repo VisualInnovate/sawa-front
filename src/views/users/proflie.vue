@@ -11,11 +11,12 @@
         
             <Details></Details>
           </TabPanel>
+          <TabPanel :header="$t('evaluation_order')">
+            <Requests></Requests>
+            
+          </TabPanel>
           <TabPanel :header="$t('Consultations_evaluations')">
             <Evaluation></Evaluation>
-          </TabPanel>
-          <TabPanel :header="$t('children')">
-              
           </TabPanel>
       </TabView>
   </v-card>
@@ -27,10 +28,11 @@ import { useStorage } from "@vueuse/core";
 import EvaluationType from '../../components/EvaluationType.vue'
 import Details from '../../components/profile/Details.vue'
 import Evaluation from '../../components/profile/Evaluation.vue'
+import Requests from '../../components/profile/Requests.vue'
 import moment from "moment";
   import {useToast} from 'primevue/usetoast'
 export default {
-   components:{EvaluationType,Details,Evaluation},
+   components:{EvaluationType,Details,Evaluation,Requests},
 
   data() {
     return {
