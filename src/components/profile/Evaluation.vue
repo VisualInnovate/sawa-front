@@ -19,13 +19,10 @@
             <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
             <p class="text-xl  px-1 my-auto">{{ evalu.date }}</p>
           </div>
-          <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("اسم المقييم") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.specialist?.name }}</p>
-          </div>
+        
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.child?.name }}</p>
+            <p class="text-xl  px-1 my-auto">{{ evalu.child.name }}</p>
           </div>
           </div>
           <div class="text-center" >
