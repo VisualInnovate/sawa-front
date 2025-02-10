@@ -371,6 +371,7 @@ transportation_schedule
             <v-list-item  v-can="'events list'"  :title="$t('events')" value="event" :to="{ name: 'event' }"></v-list-item>
             <v-list-item  v-can="'shifts list'"  :title="$t('shift')" value="shift" :to="{ name: 'shift' }"></v-list-item>
             <v-list-item  v-can="'shifts list'" :title="$t('advance')" value="advance" :to="{ name: 'advance' }"></v-list-item>
+            <v-list-item  v-can="'shifts list'" :title="$t('reports')" value="reports" :to="{ name: 'reports' }"></v-list-item>
             
             
           </v-list-group>

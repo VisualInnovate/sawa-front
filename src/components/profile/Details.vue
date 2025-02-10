@@ -398,7 +398,7 @@
           if (this.employee.treatments) body.append("treatments", this.employee.treatments);
           if (this.employee.skills) body.append("skills", this.employee.skills);
           if (this.employee.department) body.append("department_id", this.employee.department);
-          if (this.employee.file) body.append("file", this.employee.file);
+          if (this.employee.file) body.append("image", this.employee.file);
         axios.post(`/api/employees/${this.employee_id}`,body).then((res) => {
           this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_add_success"), life: 3000 });
           }).catch((el)=>{
