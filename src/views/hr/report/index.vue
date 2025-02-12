@@ -4,6 +4,7 @@ import {ref, onMounted, onBeforeMount,computed} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
+import { get } from '@vueuse/core';
 const toast = useToast()
 const models=ref([])
 const model=ref('')
@@ -51,10 +52,15 @@ fetchData()
 
 })
 const getreport=()=>{
+
+    const related=[]
+    relation.value.forEach(item =>{
+      related.push(item.relation)
+    })
     axios.post(`/api/report/generate-report?lang=${localStorage.getItem("appLang")}`,{
         model:model.value,
-        columns:column.value,
-        relations:relation.value
+        columns:columns.value,
+        relations:related
     }).then((res)=>{
     users.value= res.data.data
 
@@ -62,10 +68,22 @@ const getreport=()=>{
 }
 
 
+const getrelationColum=(data)=>{
+  const related_ids=[]
+  data.forEach(item =>{
+      related_ids.push(item.id)
+    })
+  axios.get(`/api/report/select-columns?lang=${localStorage.getItem("appLang")}&model=${related_ids}`).then((res)=>{
+    res.data.data.forEach(num => {
+      columns.value.push(num)
+    });
 
+  });
+}
 const getrelation = (id) => {
     relation.value=''
     column.value=''
+    columns.value=''
     users.value=''
     axios.get(`/api/report/select-relations?lang=${localStorage.getItem("appLang")}&model=${id}`).then((res)=>{
     relations.value= res.data.data
@@ -111,10 +129,10 @@ const initFilters = () => {
       <va-card class="card">
         <Toolbar class="mb-4  shadow-md">
           <template #start>
-            <div class="my-2 grid lg:grid-cols-5 gap-4 grid-cols-1">
+            <div class="my-2 grid md:grid-cols-5 gap-4 grid-cols-1">
                 <Dropdown @update:model-value="getrelation" v-model="model"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id"  :options="models" optionLabel="model" :placeholder='$t("model_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <MultiSelect :loading="model == ''"  v-model="relation"  required id="pv_id_1" style="direction: ltr !important;"  option-value="relation"  :options="relations" optionLabel="value" :placeholder='$t("relation_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <MultiSelect :loading="model == ''"   v-model="column"  required id="pv_id_1" style="direction: ltr !important;"  option-value="column"  :options="columns" optionLabel="value" :placeholder='$t("columns_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <MultiSelect    @update:model-value="getrelationColum"      :loading="model == ''"  v-model="relation"  required id="pv_id_1" style="direction: ltr !important;"  :options="relations" optionLabel="value" :placeholder='$t("relation_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <MultiSelect :loading="relation == ''"   v-model="column"  required id="pv_id_1" style="direction: ltr !important;"  option-value="column"  :options="columns" optionLabel="value" :placeholder='$t("columns_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <Button  :label='$t("search")'  class="create" @click="getreport" />
 <!--              <Button-->
 <!--                label="Delete"-->

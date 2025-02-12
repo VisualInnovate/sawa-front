@@ -285,8 +285,8 @@ const initFilters = () => {
               </div> 
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" class="w-full " for="username">{{ $t('deduction_mount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="deduction.amount" :placeholder='$t("deduction_mount")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
+                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="deduction.value" :placeholder='$t("deduction_mount")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.value">{{ error.value[0] }}</div>
               </div>
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" for="username">{{ $t('deduction_date') }}</label>
@@ -315,8 +315,8 @@ const initFilters = () => {
               </div> 
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" class="w-full " for="username">{{ $t('deduction_mount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="deduction.amount" :placeholder='$t("deduction_mount")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
+                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="deduction.value" :placeholder='$t("deduction_mount")' />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.value">{{ error.value[0] }}</div>
               </div>
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" for="username">{{ $t('deduction_date') }}</label>
