@@ -74,7 +74,7 @@ const getAllBooking = () => {
 };
 
 const AddBooking = () => {
-  router.push({ name: 'BookingTime' });
+  router.push({ name: 'clidreen_parents' });
 };
 
 onMounted(() => {
