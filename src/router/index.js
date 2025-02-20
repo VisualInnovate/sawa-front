@@ -133,7 +133,6 @@ const routes = [
   {
     path: "/web/register-code",
     name: "register-code",
-    beforeEnter: authForNormalUser,
     component: () => import("../views/frontend/views/registercode.vue"),
   },
   {

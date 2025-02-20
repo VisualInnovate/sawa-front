@@ -74,14 +74,14 @@ export default {
 
         <v-card-actions>
           <router-link
-            :to="{ name: 'BookingTime' }"
+            :to="{ name: 'clidreen_parents' }"
             class="text-xl lg:text-2xl p-2 text-[#135C65] z-10"
           >
             {{ $t("Book_an_appointment") }}
           </router-link>
           <v-spacer></v-spacer>
           <router-link
-            :to="{ name: 'BookingTime' }"
+            :to="{ name: 'clidreen_parents' }"
            
           >
           <v-btn

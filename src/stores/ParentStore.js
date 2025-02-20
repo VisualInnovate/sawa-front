@@ -39,15 +39,22 @@ export const useParentStore = defineStore("parentStore", {
           // } else {
           //   console.log(res);
           if(localStorage.getItem("lastRoute")){
+      
             this.router.push(localStorage.getItem("lastRoute"));
           }
           else{
             
-            this.router.push({name: 'home' });
+          
+              this.router.push({name: 'home' });
           }
           // }
         })
         .catch((err) => {
+          if (err.response.data.status== 401){
+            localStorage.setItem("email_parent",parent.email)
+            this.router.push({name: 'register-code' });
+            
+          } 
           this.showErrors = true;
           this.authErrors = err.response.data;
           console.log(err);
@@ -57,10 +64,11 @@ export const useParentStore = defineStore("parentStore", {
       console.log(parent);
       this.authErrors = [];
       this.showErrors = false;
+      parent.otp=(parent.otp).join('')
       await axios
         .post("api/parent/verify-code",{
           email:localStorage.getItem("email_parent"),
-          code:parent.num1+parent.num2+parent.num3+parent.num4
+          code:parent.otp
 
         } )
         .then((res) => {
