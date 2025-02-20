@@ -14,7 +14,7 @@ const group = ref(null);
 const authStore = useAuthStore();
 const appLangStore = useAppLangStore();
 const routename=ref('')
-
+const user_permissions=ref(localStorage.getItem("userPermissions"))
 // methods
 // const onClick = () => {
 //     theme.value = theme.value === "light" ? "dark" : "light";
@@ -180,17 +180,17 @@ onMounted(async () => {
           
           
 
-          <v-list-group prepend-icon="mdi-human-male-boy" value="Children">
+          <v-list-group v-if="user_permissions.includes('child list'||'doctor list'||'parents list')" prepend-icon="mdi-human-male-boy" value="Children">
             <template #activator="{ props }">
-              <v-list-item v-bind="props" :title="$t('parents')"></v-list-item>
+              <v-list-item v-can="'child list'" v-bind="props" :title="$t('parents')"></v-list-item>
             </template>
 
-            <v-list-item   :title="$t('parents')" value="parents"
+            <v-list-item   v-can="'parents list'" :title="$t('parents')" value="parents"
               :to="{ name: 'Parents' }"></v-list-item>
               <v-list-item   v-can="'doctor list'" :title="$t('doctors')" value="doctors"
               :to="{ name: 'doctors' }"></v-list-item>
 
-            <v-list-item  :title="$t('children')" value="children"
+            <v-list-item   v-can="'child list'"  :title="$t('children')" value="children"
               :to="{ name: 'Children' }"></v-list-item>
           </v-list-group>
 
@@ -199,20 +199,20 @@ onMounted(async () => {
 
        
 
-          <v-list-group  prepend-icon="mdi-help-box-multiple-outline" value="Evaluation">
+          <v-list-group  v-if="user_permissions.includes('milestone question list'||'milestone answer list'||'milestone level list'||'side-profiles list'||'able category list'||'carolina age range list'||'carolina test list'||'barrier answer list'||'barrier question list'||'able answer list'||'able category list'||'able mission list')" prepend-icon="mdi-help-box-multiple-outline" value="Evaluation">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('evaluations')"></v-list-item>
             </template>
 
             <!-- <v-list-item  :title="$t('headers')" value="headers"
               :to="{ name: 'Headers' }"></v-list-item> -->
-            <v-list-item  :title="$t('side profile')" value="SideProfiles"
+            <v-list-item v-can="'side-profiles list'" :title="$t('side profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
               <v-list-item  v-can="'able-mission list'" :title="$t('ablls')" value="ablls"
               :to="{ name: 'ablls' }"></v-list-item>
-              <v-list-item  :title="$t('Carolaina')" value="Carolaina"
+              <v-list-item v-if="user_permissions.includes('carolina test list'||'carolina category list'||'able category list'||'carolina answer list'||'carolina answer type list'||'able category list')" :title="$t('Carolaina')" value="Carolaina"
               :to="{ name: 'agerange' }"></v-list-item>
-              <v-list-group value="VB">
+              <v-list-group v-if="user_permissions.includes('milestone question list'||'milestone answer list'||'milestone level list')" value="VB">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('VB')"></v-list-item>
             </template>
@@ -226,7 +226,7 @@ onMounted(async () => {
            
           </v-list-group>
           <!-- edit Last -->
-          <v-list-group prepend-icon="mdi-doctor">
+          <v-list-group v-if="(user_permissions.includes('treatment list'||'student program list'))" prepend-icon="mdi-doctor">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props">
                 <v-list-item-title  class="mb-2">
@@ -237,53 +237,53 @@ onMounted(async () => {
              
             </template>
             
-            <v-list-item  :title="$t('addTherapeutic')" value="Categories"
+            <v-list-item v-can="'treatment list'"  :title="$t('addTherapeutic')" value="Categories"
               :to="{ name: 'AllTherapeutic' }"></v-list-item>
-              <v-list-item  :title="$t('student_programe')" value="student-programe"
+              <v-list-item  v-can="'student program list'"  :title="$t('student_programe')" value="student-programe"
               :to="{ name: 'student-programe' }"></v-list-item>
-              <v-list-item  :title="$t('sessions')" value="sessions"
+              <v-list-item  v-can="'sessions list'" :title="$t('sessions')" value="sessions"
               :to="{ name: 'sessions' }"></v-list-item>
              
             
           </v-list-group>
           
-          <v-list-group  prepend-icon="mdi-bed">
+          <v-list-group v-if="(user_permissions.includes('room list'))"  prepend-icon="mdi-bed">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props" :title="$t('room')"></v-list-item>
             </template>
             
-            <v-list-item   :title="$t('room')" value="Rooms" :to="{ name: 'Rooms' }"></v-list-item>
+            <v-list-item  v-can="'room list'" :title="$t('room')" value="Rooms" :to="{ name: 'Rooms' }"></v-list-item>
            
               
           </v-list-group>
           
         
 
-          <v-list-group prepend-icon=" mdi-calendar" value="Calender">
+          <v-list-group v-if="user_permissions.includes('bookings list'||'working hours list')" prepend-icon=" mdi-calendar" value="Calender">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('consulting')"></v-list-item>
             </template>
            
 
-            <v-list-item  :title="$t('bookings')" value="bookings"
+            <v-list-item   v-can="'bookings list'" :title="$t('bookings')" value="bookings"
               :to="{ name: 'ShowBooking' }"></v-list-item>
               
-            <v-list-item  :title="$t('Working_hours')" value="Working hours"
+            <v-list-item v-can="'working hours list'" :title="$t('Working_hours')" value="Working hours"
               :to="{ name: 'working-hours' }"></v-list-item>
           </v-list-group>
-          <v-list-group prepend-icon="mdi-wrench"  value="Settings">
+          <v-list-group v-if="(user_permissions.includes('pages list'||'settings list'))" prepend-icon="mdi-wrench"  value="Settings">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('Settings')"></v-list-item>
             </template>
-            <v-list-item :title="$t('Pages')" value="Pages"
+            <v-list-item v-can="'pages list'" :title="$t('Pages')" value="Pages"
               :to="{ name: 'pages' }"></v-list-item>
-            <v-list-item  :title="$t('Settings')" value="Settings"
+            <v-list-item v-can="'settings list'" :title="$t('Settings')" value="Settings"
               :to="{ name: 'settings' }"></v-list-item>
           </v-list-group>
           
 
          <!-- student_programe -->
-          <v-list-group prepend-icon="mdi-message-question-outline" value="custom-files">
+          <v-list-group v-if="(user_permissions.includes(''))" prepend-icon="mdi-message-question-outline" value="custom-files">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('custom_files')"></v-list-item>
             </template>
@@ -298,62 +298,38 @@ onMounted(async () => {
 
 
           <!-- edits -->
-          <v-list-group prepend-icon="mdi-apps" value="">
+          <v-list-group v-if="user_permissions.includes('department list' || 'area list'||'vehicle list'||'student transportation list'||'transportation schedule list'||'treatment list')" prepend-icon="mdi-apps" value="">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('inputs')"></v-list-item>
             </template>
              <v-list-item   :title="$t('skills')" value="skills"
               :to="{ name: 'skills' }"></v-list-item>
-              <v-list-item v-can="'department show'" :title="$t('department')" value="department"
+              <v-list-item v-can="'department list'" :title="$t('department')" value="department"
               :to="{ name: 'department' }"></v-list-item>
              
               
 
-              <v-list-item  :title="$t('area')" value="area"
+              <v-list-item  v-can="'area list'"  :title="$t('area')" value="area"
               :to="{ name: 'regin' }"></v-list-item>
 
-              <v-list-item :title="$t('veciles')" value="transportation"
+              <v-list-item v-can="'vehicle list'" :title="$t('veciles')" value="transportation"
               :to="{ name: 'transportation' }"></v-list-item>
 
-              <v-list-item  :title="$t('student_tans')" value="student-transportation"
+              <v-list-item v-can="'student transportation list'" :title="$t('student_tans')" value="student-transportation"
               :to="{ name: 'student-transportation' }"></v-list-item>
 
-              <v-list-item  :title="$t('transportation_schedule')" value="transportation-schedule"
+              <v-list-item v-can="'transportation schedule list'" :title="$t('transportation_schedule')" value="transportation-schedule"
               :to="{ name: 'transportation-schedule' }"></v-list-item>
-<!--                
 
-transportation_schedule
-            <v-list-item  value="Pages" :to="{ name: 'ProgramType' }"
-              class="mb-2 py-2"><v-list-item-title class="mb-2" style="padding: 10px">
-                {{ $t("ProgramType") }}
-              </v-list-item-title>student_tans
-            </v-list-item> -->
-
-            <!-- <v-list-item :to="{ name: 'SystemProgram' }" class="">
-              <v-list-item-title class="mb-2" style="padding: 10px">
-                {{ $t("SystemProgram") }}
-              </v-list-item-title>
-            </v-list-item> -->
-
-            <!-- <v-list-item  value="Settings" :to="{ name: 'SessionType' }" class="">
-              <v-list-item-title class="mb-2" style="padding: 10px">
-                {{ $t("SessionType") }}
-              </v-list-item-title>
-            </v-list-item> -->
-            <v-list-item   value="Settings" :to="{ name: 'treatments-type' }" class="">
+            <v-list-item  v-can="'treatment list'"  value="Settings" :to="{ name: 'treatments-type' }" class="">
               <v-list-item-title class="mb-2" style="padding: 10px">
                 {{ $t("Typetreatment") }}
               </v-list-item-title>
             </v-list-item>
-            <!-- <v-list-item  value="Settings" :to="{ name: 'AppointmentType' }"
-              class="mb-2">
-              <v-list-item-title class="mb-2" style="padding: 10px">
-                {{ $t("AppointmentType") }}
-              </v-list-item-title>
-            </v-list-item> -->
+          
             
           </v-list-group>
-          <v-list-group prepend-icon="mdi-bed">
+          <v-list-group v-if="user_permissions.includes('leaves list' || 'hr settings edit' || 'holidays list'||'payroll list'||'bonus list'||'department list'||'positions list'||'events list'||'shifts list')" prepend-icon="mdi-bed">
             <template #activator="{ props }" value="Evaluation">
               <v-list-item v-bind="props" :title="$t('hr')"></v-list-item>
             </template>

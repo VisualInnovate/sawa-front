@@ -126,6 +126,11 @@ const routes = [
     component: () => import("../views/frontend/views/Number.vue"),
   },
   {
+    path: "/web/clidreen_parents/:event_id",
+    name: "clidreen_parents",
+    component: () => import("../views/frontend/views/childreens.vue"),
+  },
+  {
     path: "/web/register-code",
     name: "register-code",
     beforeEnter: authForNormalUser,
@@ -151,7 +156,7 @@ const routes = [
     ],
   },
   {
-    path: "/web/more/:event_id",
+    path: "/web/more/:event_id/:child_id",
     name: "more",
     props: true,
     component: () => import("../views/frontend/views/more.vue"),

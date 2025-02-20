@@ -237,9 +237,16 @@ export default {
   axios
     .get(`api/employees/get/with/calendar/${this.event.employee_id}?type=${id}`)
     .then((response) => {
-      this.avalible_day=response.data.data.days
+      // Log the response for debugging
+      console.log(response.data.data.days);
+
+      // Ensure days is an array
+      const daysData = Array.isArray(response.data.data.days) ? response.data.data.days : [];
+
+      this.avalible_day = daysData;
+
       // Map business hours and store them in an array
-      this.business_hours = response.data.data.days.map((event) => ({
+      this.business_hours = daysData.map((event) => ({
         day: new Date(event.start).getDay(),
         start: moment(event.start).format("HH:mm:ss"),
         end: moment(event.end).format("HH:mm:ss"),
@@ -256,6 +263,9 @@ export default {
         end: `${event.date}T${event.end_time}+02:00`,
         backgroundColor: "#" + event.color,
       }));
+    })
+    .catch((error) => {
+      console.error("Error fetching times:", error);
     });
 },
 

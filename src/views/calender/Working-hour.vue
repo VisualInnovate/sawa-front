@@ -123,8 +123,8 @@ import { text } from "@fortawesome/fontawesome-svg-core";
             { name: 'Sunday', value: 0 },
             { name: 'Monday', value: 1 },
             { name: 'Tuesday', value: 2},
-            { name: 'Thursday', value: 3 },
-            { name: 'Wednesday', value: 4 },
+            { name: 'Thursday', value: 4 },
+            { name: 'Wednesday', value: 3 },
             { name: 'Friday', value: 5 },
             { name: 'Saturday', value: 6 }
           

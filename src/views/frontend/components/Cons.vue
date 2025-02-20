@@ -64,10 +64,7 @@
         <p class="text-right text-[#29CCFF] text-xl">{{ $t("Please_fill_in_the_information") }}</p>
       </div>
       <form class="py-4 min-w-full grid-cols-1  p-2 lg:grid grid-cols-2  gap-4" @submit.prevent="bookTime">
-        <div class="flex flex-column gap-2">
-                  <label class="w-full  " for="username">{{ $t('child_name') }}  </label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="booking.child_id"   option-value="id" :options="childs" optionLabel="name" :class="{ 'p-invalid': submitted && !booking.child_id}"  />
-        </div>
+      
         <div class="flex flex-column gap-2">
                   <label class="w-full  " for="username">{{     $t("اسم ولي امر  مقدم الطلب")}}  </label>
                 <InputText required class="bg-[#f7f5f5] text-center"    v-model="booking.details.requester_name"  :class="{ 'p-invalid': submitted && !booking.requester_name}" />
@@ -203,7 +200,8 @@ show_alert:false,
   methods: {
     async bookTime() {
       this.booking.user_id=localStorage.getItem("parent_id")
-      this.booking.event_id = this.event_id;
+      this.booking.event_id = this.$route.params.event_id;
+      this.booking.child_id = this.$route.params.child_id;
       this.show_alert = false;
       console.log(this.booking);
       await axios
@@ -231,17 +229,7 @@ show_alert:false,
           console.log(err);
         });
     },
-    async getChilds() {
-      await axios
-        .get("/api/parent/child/all")
-        .then((res) => {
-          this.childs = res.data.childs;
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
+
     event_day(event_day) {
       
       let day = moment(event_day).format("dddd");
@@ -258,10 +246,7 @@ show_alert:false,
  
 
   mounted( ) {
-  
-    this.getChilds();
    
-    console.log(this.event_id);
   },
 };
 </script>
