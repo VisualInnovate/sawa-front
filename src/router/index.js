@@ -126,7 +126,7 @@ const routes = [
     component: () => import("../views/frontend/views/Number.vue"),
   },
   {
-    path: "/web/clidreen_parents/:event_id",
+    path: "/web/clidreen_parents",
     name: "clidreen_parents",
     component: () => import("../views/frontend/views/childreens.vue"),
   },
@@ -137,7 +137,7 @@ const routes = [
     component: () => import("../views/frontend/views/registercode.vue"),
   },
   {
-    path: "/web/booking-time",
+    path: "/web/booking-time/:child_id",
     name: "BookingTime",
     component: BookingTime,
     beforeEnter: [

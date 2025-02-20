@@ -137,7 +137,7 @@ export default {
     
     },
     submit(id) {
-      this.$router.push({ name: "clidreen_parents", params: { event_id: id } });
+      this.$router.push({ name: "more", params: { event_id: id ,child_id:this.$route.params.child_id} });
     },
   },
   mounted() {
