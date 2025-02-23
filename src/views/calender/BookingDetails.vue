@@ -145,8 +145,8 @@
 
         <!-- left div -->
         <div class="flex items-center ">
-
-          <div class="text-center w-full">
+  
+          <div v-if="comparisonResult" class="text-center w-full">
             
           <Button @click="AddEvalte(booking?.child_id)" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
           <Button @click="sendMassage=!sendMassage" class="bg-[green] m-auto w-80" icon="pi pi-wallet" label=" نتيجة الاستشارة">  </Button>
@@ -297,6 +297,8 @@ export default {
   props: ["id"],
   data() {
     return {
+      comparisonResult:false,
+      current_date: moment(new Date()).format('YYYY-MM-DDTHH:mm:ssZ'),
       booking: {},
       student_massage:'',
       status:[
@@ -334,6 +336,20 @@ export default {
     };
   },
   methods: {
+    compareDates() {
+      // Parse the dates
+      const momentDate1 = moment(this.booking.event_data);
+      const momentDate2 = moment(this.current_date);
+
+      // Compare the dates
+      if (momentDate1.isAfter(momentDate2)) {
+        this.comparisonResult = false;
+      } else if (momentDate1.isBefore(momentDate2)) {
+        this.comparisonResult = true;
+      } else {
+        this.comparisonResult = true;
+      }
+    },
 
     studentMassage(){
       axios
@@ -425,7 +441,7 @@ export default {
           this.accept_notes = res.data.booking.booking.accepted_notes;
           this.student_massage=res.data.booking.booking.consultation_result
           this.doctor = res.data.booking.doctor;
-          console.log(res);
+          this.compareDates()
         })
         .catch((err) => {
           console.log(err);
@@ -473,6 +489,7 @@ export default {
   mounted() {
     this.getBooking();
     this.changeDoctor()
+    
   },
 };
 </script>

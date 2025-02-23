@@ -12,7 +12,7 @@
           </p>
           <span class="border-b w-1/5 lg:w-1/4"></span>
         </div>
-        <div class="flex justify-center gap-2 py-6">
+        <div   style="direction: ltr;" class="flex justify-center gap-2 py-6">
           <input
             v-for="(digit, index) in parent.otp"
             :key="index"
@@ -20,6 +20,7 @@
             v-model="parent.otp[index]"
             type="text"
             maxlength="1"
+          
             class="w-12 h-12 text-center border rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
             @input="handleInput(index, $event)"
             @keydown.backspace="handleBackspace(index, $event)"
@@ -30,11 +31,11 @@
           <Button @click="parentStore.register(parent)" class="create m-auto w-full" :label='$t("Register_now")'></Button>
           <small id="username-help"></small>
         </div>
-        <div class="mt-2 flex items-center justify-between">
+        <!-- <div class="mt-2 flex items-center justify-between">
           <p class="text-xl w-full text-center">
             <router-link :to="{ name: 'forgetpassword' }" class="text-xl text-[#135C65] uppercase"> {{ $t("Resend_the_code") }}</router-link>
           </p>
-        </div>
+        </div> -->
       </div>
       <div class="hidden bg-[url('../image/childern.jpg')] lg:block lg:w-1/2 bg-cover" style="background-position: center; background-size: cover"></div>
     </div>
