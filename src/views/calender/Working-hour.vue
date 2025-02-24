@@ -71,12 +71,16 @@
               <label class="text-right ">{{ $t("color") }}</label>
               <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
             </div> -->
+            
             <div  class="flex flex-column gap-2">
               <label class="text-right ">{{ $t("doctor") }}</label>
               <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
             </div>
             
-           
+            <div class="flex gap-2 my-2">
+                <InputSwitch v-model="repeat" /> 
+                  <span class="px-2 text-yellow-300"> {{ $t('انتبة سوف يتم حذف او تعديل جميع الاحداث المكررة') }}</span>
+            </div>
          
            <div class="flex ">
             <Button type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="updateEvent " />
@@ -105,8 +109,8 @@
   import InputText from "primevue/inputtext";
   import { useAppLangStore } from "../../stores/AppLangStore";
   import { Toast } from "flowbite-vue";
-import { watch } from "vue";
-import { text } from "@fortawesome/fontawesome-svg-core";
+  import { watch } from "vue";
+  import { text } from "@fortawesome/fontawesome-svg-core";
   
   export default {
     components: {
@@ -117,7 +121,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
     data() {
       return {
         filter:{},
-
+        repeat:false,
          days_week :[
           
             { name: 'Sunday', value: 0 },
@@ -231,7 +235,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
         axios.get(`/api/event-calendar?employee_id=${this.event.employee_id}`,).then((res) => {
   
           this.opts.events = res.data.data.map(event => ({
-  
+              
               title: event.title,
               start: event.start,
               end: event.end,
@@ -266,7 +270,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
         this.event.title = event.event.title
         this.event.color = '#'+event.event.color
         this.event.start = event.event.start
-        this.event.end = event.event.start   
+        this.event.end = event.event.end   
         this.event.type = event.event.extendedProps.type   
         this.event.color = event.event.extendedProps.col   
         this.updateevent = true;
@@ -313,13 +317,26 @@ import { text } from "@fortawesome/fontawesome-svg-core";
       },
       
       updateEvent() {
-        axios.put(`/api/event-calendar/${this.event_id}`, this.event).then(() => {
+        if (this.repeat) this.repeat=1
+        else this.repeat=0
+        axios.put(`/api/event-calendar/${this.event_id}`,
+         {
+          color:this.event.color,
+          repeat:this.repeat,
+          title:this.event.title,
+          employee_id:this.event.employee_id,
+          start:this.event.start,
+          type:this.event.type,
+          end:this.event.end,
+         }).then(() => {
        this.updateevent=false
           this.updateEvents();
         });
       },
       deleteEvent() {
-        axios.delete(`/api/event-calendar/${this.event_id}`).then(() => {
+        if (this.repeat) this.repeat=1
+        else this.repeat=0
+        axios.delete(`/api/event-calendar/${this.event_id}?repeat=${this,this.repeat}`).then(() => {
           this.updateevent=false
           this.updateEvents();
         });

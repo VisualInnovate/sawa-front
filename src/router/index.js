@@ -129,6 +129,10 @@ const routes = [
     path: "/web/clidreen_parents",
     name: "clidreen_parents",
     component: () => import("../views/frontend/views/childreens.vue"),
+    beforeEnter: [
+      authForNormalUser,
+      //  phoneIsVerified
+    ],
   },
   {
     path: "/web/register-code",

@@ -257,9 +257,10 @@ export default {
       
 
         eventClick: function (event) {
+          console.log(event.event.start)
           this.updateDialog=true
-          this.event.start=event.event.end
-          this.event.end=event.event.end
+          this.event.end=event.event._def.extendedProps.cole
+          this.event.start=event.event.start
           this.event.title = event.event.title;
           this.event_id=event.event.id
           this.rooms.room_id=event.event.extendedProps.room_id
@@ -371,9 +372,8 @@ export default {
       })
     },
     updateevent() {
-      this.event.repeate[0].type=this.event?.repeat_type?.id
-        this.event.repeate[0].days=this.event.day
-        this.event.repeate[0].end_of_repeat=moment(this.event.end_of_repeat).format(' YYYY-MM-DD')
+     if(this.repeat)this.repeat=1
+     else this.repeat=0
       axios
         .put(`/api/slot/${this.event_id}`, {        
           title: this.event.title,
@@ -381,7 +381,7 @@ export default {
           end: this.event.end,
           color:this.event.color,
           room_id:this.rooms.room_id, 
-          repeat:this.event.repeate,       
+          repeat:this.repeat,       
         })
         .then((res) => {
           this.update()
@@ -418,9 +418,9 @@ export default {
         this.rooms=res.data.data
         this.rooms.room_id=res.data.data.id
         this.opts.events = res.data.data.slots.map(event => ({
+            cole: event.end,
             title: event.title,
             start: event.start,
-            end: event.end,
             id: event.id,
             room_id:event.room_id
           }));
