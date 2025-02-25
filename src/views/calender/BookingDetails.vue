@@ -146,10 +146,10 @@
         <!-- left div -->
         <div class="flex items-center ">
   
-          <div v-if="comparisonResult" class="text-center w-full">
+          <div class="text-center w-full">
             
-          <Button @click="AddEvalte(booking?.child_id)" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
-          <Button @click="sendMassage=!sendMassage" class="bg-[green] m-auto w-80" icon="pi pi-wallet" label=" نتيجة الاستشارة">  </Button>
+          <Button :disabled='comparisonResult' @click="AddEvalte(booking?.child_id)" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
+          <Button :disabled='comparisonResult' @click="sendMassage=!sendMassage" class="bg-[green] m-auto w-80" icon="pi pi-wallet" label=" نتيجة الاستشارة">  </Button>
           </div>
    
         </div>
@@ -335,19 +335,20 @@ export default {
       submitted:false,
     };
   },
+  
   methods: {
     compareDates() {
-      // Parse the dates
-      const momentDate1 = moment(this.booking.event_data);
-      const momentDate2 = moment(this.current_date);
-
-      // Compare the dates
-      if (momentDate1.isAfter(momentDate2)) {
-        this.comparisonResult = false;
-      } else if (momentDate1.isBefore(momentDate2)) {
-        this.comparisonResult = true;
+      
+      const eventDate = new Date(this.booking.event_date);
+      const currentDate = new Date();
+    
+      if (eventDate > currentDate) {
+        this.comparisonResult=true;
+      } else if (eventDate.toDateString() === currentDate.toDateString()) {
+        this.comparisonResult=false;
       } else {
-        this.comparisonResult = true;
+        console.log("3")
+        this.comparisonResult=false;
       }
     },
 

@@ -259,7 +259,7 @@ onMounted(async () => {
           
         
 
-          <v-list-group v-if="user_permissions.includes('bookings list'||'working hours list')" prepend-icon=" mdi-calendar" value="Calender">
+          <v-list-group  prepend-icon=" mdi-calendar" value="Calender">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('consulting')"></v-list-item>
             </template>

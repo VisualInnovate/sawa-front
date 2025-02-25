@@ -28,8 +28,8 @@
           <div>
             <h3 class="font-bold text-[#303843]">{{ book?.user_name }}</h3>
             <p class="text-lg py-1 border-b-2 text-[#44A2AD]">{{ book?.user_title }}</p>
-            <p class="text-lg py-1 text-[#EB486D]">{{ $t(moment(book?.event_day).format("dddd")) }}</p>
-            <p class="text-lg py-1 text-[#EB486D]">{{ moment(book?.event_day).format("hh:mm: A") }}</p>
+            <p class="text-lg py-1 text-[#EB486D]">{{ $t(moment(book?.event_date).format("DD-MM-YY")) }}</p>
+            <p class="text-lg py-1 text-[#EB486D]">{{ moment(book?.event_date).format("hh:mm: A") }}</p>
             <p v-if="book?.accepted == 0" class="px-2 py-2 bg-yellow-400 text-white rounded-lg font-medium text-center">{{ $t("Pending") }}</p>
             <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white rounded-lg font-medium text-center">{{ $t("Accept") }}</p>
             <p v-if="book?.accepted == 2" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium text-center">{{ $t("Cancell") }}</p>

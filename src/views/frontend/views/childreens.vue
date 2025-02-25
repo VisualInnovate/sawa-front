@@ -15,11 +15,16 @@
       </div>
     </div>
   </div>
-
+  <div class="max-w-[1300px] mx-auto py-[4%]">
+  <div class="flex justify-between w-full m-auto px-2">
+        <h3 class="font-bold text-2xl text-[#303843]">{{ $t("children") }}</h3>
+        <Button @click="Newchilde" class="create" :label='$t("Add_new_child")'></Button>
+   </div>
   <!-- Double-Faced Cards for Each Child -->
- <div class="w-full grid grid-cols-1 lg:grid-cols-4 py-5  bg-gray-100">
-  <div v-for="(child, index) in childs" :key="child.id" class="  bg-gray-100">
-      <div class="flex justify-center items-center  bg-gray-100 rtl">
+ <div class="w-full grid grid-cols-1 lg:grid-cols-4 py-5  ">
+  
+  <div v-for="(child, index) in childs" :key="child.id" class="  ">
+      <div class="flex justify-center items-center   rtl">
   <div
     class="relative w-72 h-80 cursor-pointer perspective"
     @mouseenter="flipped = true"
@@ -51,7 +56,7 @@
 </div>
   </div>
  </div>
-
+</div>
 
 
 
@@ -113,7 +118,7 @@ export default {
       alert(`Navigating to the next page for child ID: ${childId}`);
     },
     Newchilde() {
-      this.$router.push({ name: "BookingTime" });
+      this.$router.push({ name: "ReAction" });
     },
   },
   mounted() {
