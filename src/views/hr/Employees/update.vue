@@ -162,6 +162,15 @@
                  <MultiSelect  v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
              </div>
              <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
+                  <div class="flex">
+                    <label class="text-right ">{{ $t("Evaluate Types") }}</label>
+                    <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
+                    </svg>
+                  </div>
+                  <MultiSelect  v-model="employee.evaluation" filter option-value="id" :options="evaluate_types" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
+              </div>
+             <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
                  <div class="flex">
                    <label class="text-right ">{{ $t("Typetreatment") }}</label>
                    <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -214,6 +223,13 @@ export default {
 
   data() {
     return {
+      evaluate_types :[
+                      { name: 'side profile', id: 1 },
+                      { name: 'milestone', id: 2 },
+                      { name: 'barrier', id: 3 },
+                      { name: 'ablls', id: 4 },
+                      { name: 'carolina', id: 5 },
+                  ],
       currentStep: 0,
       steps: [
         { label: "Personal Details" },
@@ -309,9 +325,14 @@ export default {
                this.employee.treatments = [];
                for (let i =0 ; i < response.data.data.user.treatments.length; i++) {    
               this.employee.treatments.push(response.data.data.user.treatments[i].id);
-        
-          
+
                }  
+               this.employee.evaluation = [];
+               for (let i =0 ; i < response.data.data.user?.evaluations.length; i++) {    
+                 this.employee.evaluation.push(response.data.data.user?.evaluations[i].id);
+
+               }  
+
                this.employee.department = [];
                for (let i =0 ; i < response.data.data.user.departments.length; i++) {    
               this.employee.department.push(response.data.data.user.departments[i].id);
@@ -388,6 +409,7 @@ export default {
         if (this.employee.basic_salary) body.append("basic_salary", this.employee.basic_salary);
         if (this.employee.type) body.append("type", this.employee.type);
         if (this.employee.role) body.append("role", this.employee.role);
+        if (this.employee.evaluation) body.append("evaluations", this.employee.evaluation);
         if (this.employee.treatments) body.append("treatments", this.employee.treatments);
         if (this.employee.skills) body.append("skills", this.employee.skills);
         if (this.employee.department) body.append("department_id", this.employee.department);

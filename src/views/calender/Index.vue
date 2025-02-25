@@ -3,9 +3,9 @@
       <Toolbar class="mb-4 shadow-md">
         <template #start>
           <div class="flex ">
-              <Dropdown  @update:model-value="event.type=''" :placeholder='$t("employee_name")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.employee_id"  option-value="user_id" filter :options="employees" optionLabel="name" class="mx-2"  />
-              <Dropdown :loading="!event.employee_id"  @update:model-value="getTimes" :placeholder='$t("type_work")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.type"  option-value="id" filter :options="event_types" optionLabel="name"  />
-
+              <Dropdown @update:model-value="fetchEmployees($event)"  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.evaluation_type"  option-value="id"  :options="evaluate_types"  optionLabel="name"  class="mx-2" />
+              <Dropdown  @update:model-value="getTimes($event)" :placeholder='$t("employee_name")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.employee_id"  option-value="id" filter :options="employees" optionLabel="name" class="mx-2"  />
+              <Dropdown class="invisible"  :loading="!event.evaluation_type"  disabled @update:model-value="getTimes" :placeholder='$t("type_work")' id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.type"  option-value="id" filter :options="event_types" optionLabel="name"  />
           </div>
         </template>
 
@@ -23,10 +23,7 @@
               <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
             </div>
           
-                <div  class="flex flex-column gap-2 py-1">
-                      <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.evaluation_type"  option-value="id"  :options="evaluate_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.evaluation_type}" />
-                </div>
+               
                 <div  class="flex flex-column gap-2 py-1">
                       <label class="w-full text-right" for="username">{{ $t('child_name') }}</label>
                       <Dropdown  disabled required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.child_id"  option-value="id" filter :options="childreen"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.child_id}"/>
@@ -105,7 +102,11 @@ export default {
       langStore: useAppLangStore(),
       visible: false,
       updateevent:false,
-      event:{color:'87ceeb'},
+      event:{
+        type:1,
+        color:'87ceeb',
+        evaluation_type:2
+      },
       submitted:false,
       employees: [],
       avalible_day:[],
@@ -165,7 +166,7 @@ export default {
     },
     fetchEmployees() {
       axios
-        .get("api/employees")
+        .get(`api/employees/get/with/${this.event.evaluation_type}`)
         .then((response) => {
           this.employees = response.data.data;
         })
@@ -234,8 +235,9 @@ export default {
 
       },
       getTimes(id) {
+      
   axios
-    .get(`api/employees/get/with/calendar/${this.event.employee_id}?type=${id}`)
+    .get(`api/employees/get/with/calendar/${id}?type=${this.event.type}`)
     .then((response) => {
       // Log the response for debugging
       console.log(response.data.data.days);
