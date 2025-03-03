@@ -4,12 +4,18 @@ const Index = () => import("../views/calender/Index.vue");
 const ShowBooking = () => import("../views/calender/ShowBooking.vue");
 const BookingDetails = () => import("../views/calender/BookingDetails.vue");
 const working = () => import("../views/calender/Working-hour.vue");
+const Recommendations = () => import("../views/calender/recommendations.vue");
 
 const calenderRoutes = [
   {
     path: "calender/:id",
     name: "Calender",
     component: Index,
+  },
+  {
+    path: "recommendations",
+    name: "recommendations",
+    component: Recommendations,
   },
   {
     path: "bookings",

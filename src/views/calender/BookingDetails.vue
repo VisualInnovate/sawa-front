@@ -149,7 +149,6 @@
           <div class="text-center w-full">
             
           <Button :disabled='comparisonResult' @click="AddEvalte(booking?.child_id)" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
-          <Button :disabled='comparisonResult' @click="sendMassage=!sendMassage" class="bg-[green] m-auto w-80" icon="pi pi-wallet" label=" نتيجة الاستشارة">  </Button>
           </div>
    
         </div>
@@ -271,23 +270,29 @@
 
            
   </Dialog>
-  <Dialog v-model:visible="sendMassage" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <form  class="">
+
+    <v-card class="mt-5  p-[2%] bg-slate-50">
+      <p class="w-full  text- font-bold" for="username">{{ $t('نتيجة الاستشارة') }}</p>
+
+      <form  class="  ">
                 
-          
-            <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-center" for="username">{{ $t('Submit_a_note') }}</label>
-                  <textarea :class="{ 'p-invalid': submitted && !student_massage}" required name="notes" v-model="student_massage" id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="4"></textarea>
 
-              </div>
-              <Button @click="studentMassage"  :label='$t("submit")'  class="create  m-auto" icon="pi pi-check"></Button>
-          </form>
-           
-            
-          
+                
+                  <div class="flex flex-column gap-2 py-1">
+                  <label class="w-full  " for="username">{{ $t('  ') }}</label>
+                  <MultiSelect  v-model="filed_value" filter option-value="value" :options="fileds" optionLabel="name" />
+                  </div>
+                
+                  <div v-for="filed,index in filed_value" class="flex flex-column gap-2 py-1">
+                  <label class="w-full  " for="username">{{ fileds[index].name }}</label>
 
-           
-  </Dialog>
+                      <textarea :class="{ 'p-invalid': submitted && !student_massage}" required name="notes" v-model="student_massage.filed" id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
+    
+                  </div>
+                  <Button @click="studentMassage"  :label='$t("submit")'  class="create  m-auto" icon="pi pi-check"></Button>
+              </form>
+      
+    </v-card>
 </template>
 <script>
 import axios from "axios";
@@ -297,16 +302,22 @@ export default {
   props: ["id"],
   data() {
     return {
+      filed_value:'',
       comparisonResult:false,
       current_date: moment(new Date()).format('YYYY-MM-DDTHH:mm:ssZ'),
       booking: {},
-      student_massage:'',
+      student_massage:{},
       status:[
         { name: this.$t("Pending"), code: '0' },
         { name: this.$t("Accept"), code: '1' },
         { name: this.$t("Cancell"), code: '2' },
       
       ],
+      fileds:[
+              { name: this.$t("Home_recommendations"), value: '0' },
+              { name: this.$t("Consultant_recommendations"), value: '1' },
+              { name: this.$t("Biography_development"), value: '2' },
+            ],
       evaluate_types : [
                       { name: 'side profile', id: 1 },
                       { name: 'milestone', id: 2 },
@@ -440,7 +451,7 @@ export default {
           this.booking = res.data.booking.booking;
           this.new_status = res.data.booking.booking.accepted;
           this.accept_notes = res.data.booking.booking.accepted_notes;
-          this.student_massage=res.data.booking.booking.consultation_result
+          // this.student_massage=res.data.booking.booking.consultation_result
           this.doctor = res.data.booking.doctor;
           this.compareDates()
         })

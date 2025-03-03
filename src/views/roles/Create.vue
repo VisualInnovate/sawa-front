@@ -29,7 +29,7 @@ onBeforeMount(() => {
   initFilters()
 })
 
-const fetchData= ()=>{
+const fetchData = ()=>{
   axios.get("/api/permissions").then((res)=>{
     loading.value= false
     permissions.value= res.data.permissions

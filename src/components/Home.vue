@@ -267,6 +267,8 @@ onMounted(async () => {
 
             <v-list-item   v-can="'bookings list'" :title="$t('bookings')" value="bookings"
               :to="{ name: 'ShowBooking' }"></v-list-item>
+              <v-list-item   v-can="'bookings list'" :title="$t('Consultation_Settings')" value="consultation_settings"
+              :to="{ name: 'recommendations' }"></v-list-item>
               
             <v-list-item v-can="'working hours list'" :title="$t('Working_hours')" value="Working hours"
               :to="{ name: 'working-hours' }"></v-list-item>

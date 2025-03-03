@@ -156,7 +156,7 @@
             {
               type:'',
               days:'',
-              end_of_repeat:''
+             
             }
           ]
         },
