@@ -2,23 +2,22 @@
   <div class="settings-page bg-gray-50 min-h-screen py-10 px-6">
     <!-- العنوان الرئيسي -->
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold text-blue-800">{{ $t("التوصيات") }}</h1>
-      <p class="text-lg text-gray-600 mt-2">{{ $t("قائمة خاصة بالتوصيات") }}</p>
+      <h1 class="text-4xl font-extrabold text-blue-800">{{ $t("اعدادات الاستشارات") }}</h1>
     </div>  
 
     <!-- إدخال العنوان -->
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg mb-6">
-      <input
-        v-model="header"
-        placeholder="قم بإدخال اسم الحقل"
-        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <p class="text-lg text-gray-600 my-2">{{ $t("تعليمات الاستشارة") }}</p>
+      <textarea  required name="notes" v-model="header"  id="notes" class="border ring-1 w-full ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
+     
     </div>
 
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+      <p class="text-lg text-gray-600 my-2">{{ $t(" توصييات منزلية") }}</p>
+
       <!-- زر إضافة عنصر جديد -->
       <button
-        @click="showInput = !showInput"
+        @click="addLabel"
         class="w-full create bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
       >
         <i class="pi pi-plus-circle"></i> إضافة عنصر جديد
@@ -27,14 +26,10 @@
       <!-- حقول الإدخال -->
       <transition name="fade">
         <div v-if="showInput" class="mt-5 bg-gray-100 p-4 rounded-lg shadow-md">
-          <input
-            v-model="newLabel"
-            placeholder="قم بإدخال اسم الحقل"
-            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        
           <input
             v-model="newValue"
-            placeholder="قم بإدخال قيمة الحقل"
+            placeholder=" قم بادخال التوصية"
             class="w-full p-3 border border-gray-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
@@ -54,19 +49,14 @@
           class="bg-gray-50 p-4 rounded-lg shadow-md flex items-center justify-between"
         >
           <div class="flex-1">
-            <label class="block font-semibold text-gray-700 mb-1">{{ item.label }}</label>
+      
             <input
               v-model="item.value"
               class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div class="flex justify-center m-auto text-center items-center gap-2">
-            <button
-              @click="updateLabel(index)"
-              class="p-2 text-blue-600 hover:text-blue-800 transition-transform transform hover:scale-105"
-            >
-              <i class="pi pi-pencil"></i>
-            </button>
+           
             <button
               @click="removeLabel(index)"
               class="p-2 m-auto text-red-600 hover:text-red-800 transition-transform transform hover:scale-105"
@@ -132,12 +122,12 @@ export default {
         .catch((err) => console.log(err));
     },
     addLabel() {
-      if (this.newLabel && this.newValue) {
-        this.labels.push({ label: this.newLabel, value: this.newValue });
+     
+        this.labels.push({  value: this.newValue });
         this.newLabel = "";
         this.newValue = "";
         this.showInput = false;
-      }
+      
     },
     removeLabel(index) {
       this.labels.splice(index, 1);

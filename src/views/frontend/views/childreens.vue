@@ -42,6 +42,9 @@
         <p class="text-base pt-1 text-gray-600">{{ $t("selectgender") }}: {{ child.gender === '0' ? 'ذكر' : 'أنثى' }}</p>
         <p class="text-base pt-1 text-gray-600">{{ $t("primary_language") }}: {{ child.lang }}</p>
         <p class="text-base pt-1 text-gray-600">{{ $t("Nationality") }}: {{ child.nationalty }}</p>
+
+        <i class="pi pi-arrow-right mt-4 text-xl "></i>
+
       </div>
       
       <!-- Back Side -->
@@ -93,6 +96,9 @@ export default {
       axios.get(`/api/child/${id}/check-active-booking`).then((res) => {
         if (!res.data.active) {
           this.$router.push({ name: "BookingTime", params: { child_id: id, } });
+        }else{
+          this.$router.push({ name: "request-meeting", params: { child_id: id, } });
+   
         }
       });
     },

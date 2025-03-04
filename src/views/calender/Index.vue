@@ -168,9 +168,36 @@ export default {
       axios
         .get(`api/employees/get/with/${this.event.evaluation_type}`)
         .then((response) => {
-          this.employees = response.data.data;
+          this.employees = response.data.data.employees;
+          const daysData = Array.isArray(response.data.data.days[0]) ? response.data.data.days[0] : [];
+
+          this.avalible_day = daysData;
+
+      // Map business hours and store them in an array
+      this.business_hours = daysData.map((event) => ({
+        day: new Date(event.start).getDay(),
+        start: moment(event.start).format("HH:mm:ss"),
+        end: moment(event.end).format("HH:mm:ss"),
+      }));
+
+      // Dynamically set hiddenDays in calendar
+      const openDays = this.business_hours.map((item) => item.day);
+      this.opts.hiddenDays = this.days.filter((day) => !openDays.includes(day));
+
+      // Map the booked events and add to calendar
+      this.opts.events = response.data.data.booked.map((event) => ({
+        title: event.title,
+        start: `${event.date}T${event.start_time}+02:00`,
+        end: `${event.date}T${event.end_time}+02:00`,
+        backgroundColor: "#" + event.color,
+      }));
         })
-        .catch((error) => console.error("Error retrieving doctors:", error));
+        .catch((error) => {
+          this.business_hours=[]
+          this.employees=[]
+          this.opts.hiddenDays=[]
+        }
+        );
     },
     handleDatesSet(event){
       if(this.business_hours.length >= 1){

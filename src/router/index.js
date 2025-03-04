@@ -111,6 +111,11 @@ const routes = [
     component: HomeView,
   },
   {
+    path: "/request-meeting/:child_id",
+    name: "request-meeting",
+    component: () => import("../views/frontend/views/metting.vue"),
+  },
+  {
     path: "/web/Cursale",
     name: "Cursale",
     component: Cursale,

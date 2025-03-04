@@ -276,17 +276,31 @@
 
       <form  class="  ">
                 
-
-                
-                  <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full  " for="username">{{ $t('  ') }}</label>
-                  <MultiSelect  v-model="filed_value" filter option-value="value" :options="fileds" optionLabel="name" />
+                  <div  class="flex flex-column gap-2 py-1">
+                       <label class="w-full  " for="username">السيرة الصحية والنمائية</label>
+                      <textarea v-model="student_massage.health"  required name="notes"  id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
+                  </div>
+                  <div  class="flex flex-column gap-2 py-1">
+                       <label class="w-full  " for="username"> توصيات المستشار</label>
+                      <textarea v-model="student_massage.consultant_recommendations"  required name="notes"  id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
                   </div>
                 
-                  <div v-for="filed,index in filed_value" class="flex flex-column gap-2 py-1">
-                  <label class="w-full  " for="username">{{ fileds[index].name }}</label>
+                  <div class="flex flex-column gap-2 py-1">
+                    <label class="w-full  " for="username">   اختر التوصيات المنزلية</label>
 
-                      <textarea :class="{ 'p-invalid': submitted && !student_massage}" required name="notes" v-model="student_massage.filed" id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
+                  <label class="w-full  " for="username">{{ $t('  ') }}</label>
+                       <MultiSelect  v-model="student_massage.filed_value" filter option-value="value" :options="fileds" optionLabel="value" />
+                  </div>
+                
+                  <div v-for="filed,index in student_massage.filed_value" class=" gap-2 py-1">
+                    <div class="">
+      
+                      <input
+                        v-model="fileds[index].value"
+                        readonly
+                        class="w-full p-2 bg-white border  border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
     
                   </div>
                   <Button @click="studentMassage"  :label='$t("submit")'  class="create  m-auto" icon="pi pi-check"></Button>
@@ -313,11 +327,7 @@ export default {
         { name: this.$t("Cancell"), code: '2' },
       
       ],
-      fileds:[
-              { name: this.$t("Home_recommendations"), value: '0' },
-              { name: this.$t("Consultant_recommendations"), value: '1' },
-              { name: this.$t("Biography_development"), value: '2' },
-            ],
+      fileds:[],
       evaluate_types : [
                       { name: 'side profile', id: 1 },
                       { name: 'milestone', id: 2 },
@@ -451,13 +461,13 @@ export default {
           this.booking = res.data.booking.booking;
           this.new_status = res.data.booking.booking.accepted;
           this.accept_notes = res.data.booking.booking.accepted_notes;
-          // this.student_massage=res.data.booking.booking.consultation_result
+          this.student_massage=res.data.booking.booking.consultation_result
           this.doctor = res.data.booking.doctor;
           this.compareDates()
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        axios.get('api/consultation-settings').then((res)=>{
+          this.fileds=res.data.data.recommendations
+        }) 
     },
     updateBooking() {
       axios
