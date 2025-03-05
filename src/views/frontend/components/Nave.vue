@@ -147,7 +147,7 @@
             </div>
             <div class="dash w-[85%] mx-auto py-[5%]">
                <div class="flex justify-between pb-3" style="border-bottom: 1px solid #E0E0E0;">
-                <router-link :to="{ name: 'Profile' }" class="font-bold text-xl text-black"> {{ parentStore.user.fname }} {{ parentStore.user.lname }} </router-link>
+                <router-link :to="{ name: 'Profile' }" class="font-bold text-xl text-black"> {{ parentStore?.user?.fname }} {{ parentStore.user.lname }} </router-link>
                 <i class="pi pi-chevron-left font-bold my-auto" ></i>
                </div>
                <div class=" my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
@@ -190,13 +190,13 @@
     show.value=!(show.value)
   }
   const items = ref([
-    { name:`${t("Profile_personly")}` , code: `${parentStore.parent.fname}`, icon:"pi pi-user" },
-    { name:`${t("sign_out")}`, code: `${parentStore.parent.fname}`, icon: "pi pi-sign-out" },
+    { name:`${t("Profile_personly")}` , code: `${parentStore?.parent?.fname}`, icon:"pi pi-user" },
+    { name:`${t("sign_out")}`, code: `${parentStore?.parent?.fname}`, icon: "pi pi-sign-out" },
    
    
   ]);
 
-  const selectedItem = ref( { name: `${parentStore.parent.fname}`, code: `${parentStore.parent.fname}`, });
+  const selectedItem = ref( { name: `${parentStore?.parent?.fname}`, code: `${parentStore?.parent?.fname}`, });
   const isFixed = ref(false);
   const action=(value)=>{
     if(value.name ==`${t("Profile_personly")}` ){

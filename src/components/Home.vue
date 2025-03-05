@@ -184,9 +184,11 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-can="'child list'" v-bind="props" :title="$t('parents')"></v-list-item>
             </template>
-
+            
             <v-list-item   v-can="'parents list'" :title="$t('parents')" value="parents"
               :to="{ name: 'Parents' }"></v-list-item>
+              <v-list-item   v-can="'parents list'" :title="$t('الاجتماعات')" value="meeting"
+              :to="{ name: 'parent-meeting' }"></v-list-item>
               <v-list-item   v-can="'doctor list'" :title="$t('doctors')" value="doctors"
               :to="{ name: 'doctors' }"></v-list-item>
 

@@ -189,7 +189,11 @@ const initFilters = () => {
 
           <Column selection-mode="multiple" header-style="width: 3rem"></Column>
          
-
+          <Column field="data.meeting_time " :header='$t(" اسم الاب")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.parent.fname  }}  {{ slotProps.data.parent.lname  }}
+            </template>
+           </Column>
         
          
            <Column field="data.meeting_time " :header='$t("موعد الاجتماع")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
@@ -201,7 +205,7 @@ const initFilters = () => {
           
            <Column field="status" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-                <Dropdown  @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+                <Dropdown  @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name" class="w-40"  />
 
                
             </template>

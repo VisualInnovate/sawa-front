@@ -35,7 +35,7 @@
       :class="{ 'rotate-y-180': flipped }"
     >
       <!-- Front Side -->
-      <div class="absolute w-full h-full bg-white shadow-lg rounded-lg backface-hidden flex flex-col items-center p-4 text-right">
+      <div class="absolute w-full h-full bg-slate-50 shadow-lg rounded-lg backface-hidden flex flex-col items-center p-4 text-right">
         <img :src="child.image" alt="Child Image" class="w-24 h-24 rounded-full object-cover border-2 border-gray-300" />
         <h2 class="text-lg font-semibold mt-2">{{ child.name }}</h2>
         <p class="text-base pt-1 text-gray-600">{{ $t("child_age") }}: {{ child.age }}</p>
