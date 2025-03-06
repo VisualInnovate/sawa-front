@@ -102,7 +102,7 @@ const updateStatus=(id,status)=>{
   
   loading.value=true
  
-  axios.get(`/api/parent-meetings/change-status/${id}?status=${status}`).then((res)=>{
+  axios.get(`/api/parent-meetings/for-admin/change-status/${id}?status=${status}`).then((res)=>{
       loading.value=false
       fetchData()
       });
