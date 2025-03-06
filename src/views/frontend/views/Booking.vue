@@ -2,7 +2,7 @@
   <Nave />
   <div class="banner flex items-center h-[35vh] lg:h-[55vh] relative">
     <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#618990] opacity-40 w-full h-full z-50"></div>
-    <img class="w-full absolute h-full" src="../image/112.png">
+    <img class="w-full absolute h-full" src="../image/112.png" alt="Banner Image">
     <div class="z-50 text-white m-auto w-[80%] text-center">
       <h1 class="font-bold text-5xl text-white">{{ $t("bookings") }}</h1>
       <div class="flex justify-center py-8">
@@ -23,33 +23,46 @@
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 px-4">
-  <div class="flip-card " v-for="book in booking" :key="book.id">
-    <div class="flip-card-inner">
-      <!-- Front Side -->
-      <div class="flip-card-front p-4 text-center">
-        <div class="w-20 h-20 mx-auto rounded-full overflow-hidden shadow-md">
-          <img :src="book?.user_image" alt="User Image" class="w-full h-full object-cover">
+      <div class="flip-card" v-for="book in booking" :key="book.id">
+        <div class="flip-card-inner">
+          <!-- Front Side -->
+          <div class="flip-card-front p-4 text-center flex flex-col justify-between">
+            <div>
+              <div class="w-20 h-20 mx-auto rounded-full overflow-hidden shadow-md">
+                <img :src="book?.user_image" alt="User Image" class="w-full h-full object-cover">
+              </div>
+              <h3 class="mt-3 font-bold text-lg text-gray-800">{{ book?.user_name }}</h3>
+              <p class="text-sm text-gray-600">{{ book?.user_title }}</p>
+              <p class="text-lg py-1 text-blue-600">{{ moment(book?.event_date).format("DD-MM-YY") }}</p>
+              <p class="text-lg py-1 text-gray-700">{{ moment(book?.event_date).format("hh:mm A") }}</p>
+              <p v-if="book?.accepted == 0" class="px-2 py-2 bg-yellow-400 text-white rounded-lg font-medium mt-2">{{ $t("انتظار") }}</p>
+              <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white rounded-lg font-medium mt-2">{{ $t("مقبول") }}</p>
+              <p v-if="book?.accepted == 2" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium mt-2">{{ $t("مرفوض") }}</p>
+            </div>
+           
+          </div>
+
+          <!-- Back Side -->
+          <div class="flip-card-back p-4 text-center">
+            <div v-if="book?.consultation_result">
+              <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
+              <p class="text-sm text-gray-600">{{ book.consultation_result.health }}</p>
+
+              <p class="mt-2 text-gray-700 font-semibold">{{ $t("توصييات المستشار") }} </p>
+              <p class="text-sm text-gray-600">{{ book.consultation_result.consultant_recommendations }}</p>
+
+              <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات المزلية") }}:</p>
+              <p class="text-sm text-gray-600" v-for="bok in book.consultation_result?.filed_value" :key="bok.id">{{ bok?.value }}</p>
+            </div>
+
+            <p v-else class="mt-2 italic text-gray-400">{{ book.consultation_settings }}</p>
+            <button @click="cancelBooking(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+              {{ $t("إلغاء الحجز") }}
+            </button>
+          </div>
         </div>
-        <h3 class="mt-3 font-bold text-lg text-gray-800">{{ book?.user_name }}</h3>
-        <p class="text-sm text-gray-600">{{ book?.user_title }}</p>
-        <p class="text-lg py-1 text-blue-600">{{ moment(book?.event_date).format("DD-MM-YY") }}</p>
-        <p class="text-lg py-1 text-gray-700">{{ moment(book?.event_date).format("hh:mm A") }}</p>
-        <p v-if="book?.accepted == 0" class="px-2 py-2 bg-yellow-400 text-white w-[50%] rounded-lg font-medium">{{ $t("انتظار") }}</p>
-        <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white w-[50%] rounded-lg font-medium">{{ $t("مقبول") }}</p>
-        <p v-if="book?.accepted == 2" class="px-2 py-2 bg-red-700 text-white w-[50%] rounded-lg font-medium">{{ $t("مرفوض") }}</p>
-
-      </div>
-
-      <!-- Back Side -->
-      <div class="flip-card-back p-4 text-center">
-       
-        <p class="mt-2 italic text-gray-500" v-if="book?.accepted_notes">{{ book?.accepted_notes }}</p>
-        <p class="mt-2 italic text-gray-400" v-else>{{ $t("No_notes") }}</p>
       </div>
     </div>
-  </div>
-</div>
-
   </div>
 
   <About />
@@ -81,21 +94,29 @@ const AddBooking = () => {
   router.push({ name: "clidreen_parents" });
 };
 
+const cancelBooking = (id) => {
+  axios
+    .delete(`/api/calender/appointments/${id}`)
+    .then(() => {
+      getAllBooking(); // Refresh the list after cancellation
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
 onMounted(() => {
   getAllBooking();
 });
 </script>
 
 <style scoped>
-.bg-white {
-  transition: transform 0.3s ease-in-out;
+.banner {
+  background-size: cover;
+  background-position: center;
 }
-.bg-white:hover {
-  transform: translateY(-5px);
-}
+
 .flip-card {
-
-
   width: 100%;
   height: 300px;
   perspective: 1000px;
@@ -103,7 +124,6 @@ onMounted(() => {
 
 .flip-card-inner {
   position: relative;
-  
   width: 100%;
   height: 100%;
   transition: transform 0.6s;
@@ -114,7 +134,8 @@ onMounted(() => {
   transform: rotateY(180deg);
 }
 
-.flip-card-front, .flip-card-back {
+.flip-card-front,
+.flip-card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -123,7 +144,6 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  
   background-color: whitesmoke;
   border-radius: 10px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -131,5 +151,13 @@ onMounted(() => {
 
 .flip-card-back {
   transform: rotateY(180deg);
+}
+
+.create {
+  background-color: #3b82f6;
+}
+
+.create:hover {
+  background-color: #2563eb;
 }
 </style>

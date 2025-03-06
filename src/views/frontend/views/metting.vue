@@ -60,13 +60,15 @@ import {useToast} from 'primevue/usetoast'
         meeting_time: null,
         location: "",
         notes: "", // Ensure this is initialized
+        // Ensure this is initialized
         });
   
         const submitForm = async () => {
             console.log(formData.value); // Check if notes is included
             try {
                 const response = await axios.post(`api/parent-meeting`,{
-                  data:formData.value
+                  data:formData.value,
+                  child_id:route.params.child_id,
                 } );
                 toast.add({ severity: 'success', summary: t("success_message"), detail: `${t("تم اضاف الاجتماع ")}`, life: 3000 });
 

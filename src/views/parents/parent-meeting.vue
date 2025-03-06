@@ -38,7 +38,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/parent-meeting/for-admin").then((res)=>{
+  axios.get("/api/parent-meetings/for-admin").then((res)=>{
     loading.value= false
     deduction_types.value= res.data.data
    
@@ -102,7 +102,7 @@ const updateStatus=(id,status)=>{
   
   loading.value=true
  
-  axios.get(`/api/parent-meeting/change-status/${id}?status=${status}`).then((res)=>{
+  axios.get(`/api/parent-meetings/change-status/${id}?status=${status}`).then((res)=>{
       loading.value=false
       fetchData()
       });
@@ -125,7 +125,7 @@ const createskill=()=>{
 }
 const deleteAction = () => {
   axios
-    .delete(`/api/parent-meeting/for-admin/${confir_id.value}`)
+    .delete(`/api/parent-meetings/for-admin/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -192,6 +192,11 @@ const initFilters = () => {
           <Column field="data.meeting_time " :header='$t(" اسم الاب")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.parent.fname  }}  {{ slotProps.data.parent.lname  }}
+            </template>
+           </Column>
+           <Column field="data.meeting_time " :header='$t(" اسم الطفل")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.child.name  }}  
             </template>
            </Column>
         

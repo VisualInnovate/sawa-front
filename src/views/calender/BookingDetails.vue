@@ -104,67 +104,93 @@
         </div>
        
         </div>
-        <div class="my-[2%] p-[1%] bg-slate-50 grid lg:grid-cols-2 gap-4">
-        <div>
-          <h2 class="text-2xl text-slate-600 font-bold ">{{ $t("Confirm_Booking") }}</h2>
-        <div class="flex py-[1%]" v-if="doctor?.name">
-          
-              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("اسم الاستشاري") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{doctor?.name }}</p>
-           </div>
        
-            <div class="flex py-[1%]" >
-              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("request_sender") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{booking.details?.requester_name }}</p>
-            </div>
-          <div class="flex py-[1%]" v-if="event_data ">
-              <p class="text-xl md:text-xl px-1 my-auto" >  {{ $t("Consultation_date") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto" >{{event_data }}</p>
-            </div>
-            <form @submit.prevent="updateBooking">
-              <!-- <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full t" for="username">{{ $t('change_of_specialist') }}</label>
-                  <Dropdown   id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="booking.event_id"  option-value="id" filter :options="new_doctors" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
-              </div> -->
-              <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full t" for="username">{{ $t('Submit_a_note') }}</label>
-                  <textarea  name="notes" v-model="accept_notes" id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="4"></textarea>
-
-              </div>
-              <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full t" for="username">{{ $t('status') }}</label>
-                  <Dropdown  :style="{ backgroundColor: new_status == 1 ? '#10B981' : new_status == 2 ? '#EF4444' : new_status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="new_status"  option-value="code" filter :options="status" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
-              </div>
-              <div class="flex flex-column gap-2 py-1 text-center">
-                <Button :label='$t("submit")' type="submit" class="create w-60" icon="pi pi-check"></Button>
-
-              </div>
-             
-            </form>
-        </div>
-
-        <!-- left div -->
-        <div class="flex items-center ">
-  
-          <div class="text-center w-full">
-            
-          <Button :disabled='comparisonResult' @click="AddEvalte(booking?.child_id)" class="bg-[green] m-auto w-80" icon="pi pi-plus" label="اضافــــة تقييم">  </Button>
-          </div>
-   
-        </div>
-          
-        </div>
-
 
        
-      <!-- Left Side -->
-     
-      <!-- End Left Side -->
-      <!-- Right Side -->
     
-      <!-- End Right Side -->
     </div>
   </v-card>
+  <v-card class="mt-5  p-[2%] bg-slate-50">
+  <form @submit.prevent="updateBooking" class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200">
+    <h2 class="text-2xl font-bold text-gray-700 mb-4 text-center">
+      {{ $t("Confirm_Booking") }}
+    </h2>
+
+    <div class="flex flex-col gap-2">
+      <!-- Consultant Name -->
+      <div class="flex items-center gap-2" v-if="doctor?.name">
+        <p class="text-lg font-semibold text-gray-800">{{ $t("اسم الاستشاري") }}:</p>
+        <p class="text-lg text-gray-600">{{ doctor?.name }}</p>
+      </div>
+
+      <!-- Request Sender -->
+      <div class="flex items-center gap-2">
+        <p class="text-lg font-semibold text-gray-800">{{ $t("request_sender") }}:</p>
+        <p class="text-lg text-gray-600">{{ booking.details?.requester_name }}</p>
+      </div>
+
+      <!-- Consultation Date -->
+      <div class="flex items-center gap-2" v-if="event_data">
+        <p class="text-lg font-semibold text-gray-800">{{ $t("Consultation_date") }}:</p>
+        <p class="text-lg text-gray-600">{{ event_data }}</p>
+      </div>
+
+      <!-- Notes Field -->
+      <div class="flex flex-col">
+        <label class="text-gray-700 font-medium" for="notes">{{ $t("Submit_a_note") }}</label>
+        <textarea
+          name="notes"
+          v-model="accept_notes"
+          id="notes"
+          class="border border-gray-300 focus:ring-2 focus:ring-green-500 rounded-lg p-3 text-gray-700 w-full shadow-sm"
+          cols="30"
+          rows="4"
+        ></textarea>
+      </div>
+
+      <!-- Status Dropdown -->
+      <div class="flex flex-col">
+        <label class="text-gray-700 font-medium" for="status">{{ $t("status") }}</label>
+        <Dropdown
+          :style="{
+            backgroundColor: new_status == 1 ? '#10B981' : new_status == 2 ? '#EF4444' : new_status == 0 ? '#F59E0B' : 'transparent',
+            color: 'white',
+          }"
+          id="pv_id_1"
+          class=" rounded-lg shadow-sm  text-center"
+          v-model="new_status"
+          option-value="code"
+          filter
+          :options="status"
+          optionLabel="name"
+        />
+      </div>
+
+      <!-- Evaluation Button -->
+      <div class="text-center mt-4">
+        <Button
+          :disabled="comparisonResult"
+          @click="AddEvalte(booking?.child_id)"
+          class="bg-gradient-to-r create from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-80"
+          icon="pi pi-plus"
+          label="اضافــــة تقييم"
+        ></Button>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-center mt-4">
+        <Button
+          :label='$t("submit")'
+          type="submit"
+          class="bg-gradient-to-r create from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-60"
+          icon="pi pi-check"
+        ></Button>
+      </div>
+    </div>
+  </form>
+</v-card>
+
+
 
   <div class="w-full mx-auto">
     <div class="flex justify-center">
@@ -237,74 +263,93 @@
     </div>
   </div>
   <toast></toast>
-  <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <form @submit.prevent="create" class="">
-                
-          
-            <div  class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                  <Dropdown @update:model-value="getdoctor_evalte" required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !evalate.evaluation_type}" />
-            </div>
-            <div v-if="evalate.evaluation_type" class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('Name_evaluator') }}</label>
-                  <Dropdown @update:model-value="getDays" required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.specialist_id"  option-value="id" filter :options="doctors"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !evalate.specialist_id}"/>
-            </div>
-            <div v-if="evalate.specialist_id" class="flex flex-column gap-2">
-                    <label  class="w-full text-right" for="username">{{ $t('Evaluation_date') }}</label>
-                    <Calendar  @update:model-value="gettimes($event)"   :disabledDays="filteredDays"  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :class="{ 'p-invalid': submitted && !evalate.date}"  :minDate="maxDate" />   
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-            </div> 
-            <div  v-if="evalate.date" class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('hour_evaluator') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.Session_time"   filter :options="slots"  optionLabel="key" :class="{ 'p-invalid': submitted && !evalate.Session_time}" class="w-full " />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">{{ error.specialist_id[0] }}</div>
-            </div>
-           
-            <div class="w-full text-center">
-            <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-          </form>
-           
-            
-          
 
-           
-  </Dialog>
+            <v-card class="mt-5  p-[2%] bg-slate-50">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">{{ $t('نتيجة الاستشارة') }}</h2>
+
+            <form class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200">
+              <div class="flex flex-col">
+                <label class="text-gray-600 font-medium text-sm">السيرة الصحية والنمائية</label>
+                <textarea 
+                  v-model="student_massage.health"
+                  required
+                  class="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
+                  rows="2">
+                </textarea>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-gray-600 font-medium text-sm">توصيات المستشار</label>
+                <textarea 
+                  v-model="student_massage.consultant_recommendations"
+                  required
+                  class="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
+                  rows="2">
+                </textarea>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-gray-600 font-medium text-sm">اختر التوصيات المنزلية</label>
+                <MultiSelect 
+                  v-model="student_massage.filed_value"
+                  filter
+                  :options="fileds"
+                  optionLabel="value"
+                  class="border border-gray-300 rounded-md p-1 focus:ring-1 focus:ring-blue-500 text-sm"
+                />
+              </div>
+
+              <div v-for="(filed, index) in student_massage.filed_value" :key="index" class="py-1">
+                <input
+                  v-model="fileds[index].value"
+                  readonly
+                  class="w-full p-2 bg-gray-100 border border-gray-300 rounded-md text-sm focus:outline-none"
+                />
+              </div>
+
+              <Button 
+                @click="studentMassage"
+                :label='$t("submit")'
+                class="w-full py-1.5 mt-3 create bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-200"
+                icon="pi pi-check">
+              </Button>
+            </form>
+          </v-card>
 
     <v-card class="mt-5  p-[2%] bg-slate-50">
-      <p class="w-full  text- font-bold" for="username">{{ $t('نتيجة الاستشارة') }}</p>
+     
+      <form class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200">
+    <div class="space-y-2">
+      <p class="w-full  text- font-bold" for="username">{{ $t(' اضافة مواعيد مسبقة ') }}</p>
 
-      <form  class="  ">
-                
-                  <div  class="flex flex-column gap-2 py-1">
-                       <label class="w-full  " for="username">السيرة الصحية والنمائية</label>
-                      <textarea v-model="student_massage.health"  required name="notes"  id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
-                  </div>
-                  <div  class="flex flex-column gap-2 py-1">
-                       <label class="w-full  " for="username"> توصيات المستشار</label>
-                      <textarea v-model="student_massage.consultant_recommendations"  required name="notes"  id="notes" class="border ring-1  ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
-                  </div>
-                
-                  <div class="flex flex-column gap-2 py-1">
-                    <label class="w-full  " for="username">   اختر التوصيات المنزلية</label>
+      <label class="block text-gray-700 font-semibold text-lg" for="username">
+        من هذة القائمه يمكنك اضافة مواعيد مسبقة للطفل
+      </label>
 
-                  <label class="w-full  " for="username">{{ $t('  ') }}</label>
-                       <MultiSelect  v-model="student_massage.filed_value" filter option-value="value" :options="fileds" optionLabel="value" />
-                  </div>
-                
-                  <div v-for="filed,index in student_massage.filed_value" class=" gap-2 py-1">
-                    <div class="">
-      
-                      <input
-                        v-model="fileds[index].value"
-                        readonly
-                        class="w-full p-2 bg-white border  border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-    
-                  </div>
-                  <Button @click="studentMassage"  :label='$t("submit")'  class="create  m-auto" icon="pi pi-check"></Button>
-              </form>
+      <label class="block text-gray-600 text-sm" for="username">{{ $t(' ') }}</label>
+          
+          <MultiSelect 
+            v-model="pre_evalutions.pre_evalutions"
+            filter  
+            :options="evaluate_types"
+            optionLabel="name"
+            class="w-full  border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-300"
+          />
+        </div>
+
+        <div class="bg-gray-100 p-3 rounded-md">
+          <p v-for="pre,index in pre_evalutions.pre_evalutions" :key="pre.name" class="text-gray-800 text-sm font-medium">
+           {{ index+1 }} - {{ pre.name }}
+          </p>
+        </div>
+
+        <Button 
+          @click="SenPrEvalutions(booking.id)"
+          :label='$t("submit")'
+          class="w-full create text-white py-2 px-4 rounded-md font-semibold transition-all duration-300 ease-in-out shadow-md flex items-center justify-center"
+          icon="pi pi-check"
+        />
+      </form>
       
     </v-card>
 </template>
@@ -320,6 +365,7 @@ export default {
       comparisonResult:false,
       current_date: moment(new Date()).format('YYYY-MM-DDTHH:mm:ssZ'),
       booking: {},
+      pre_evalutions:{},
       student_massage:{},
       status:[
         { name: this.$t("Pending"), code: '0' },
@@ -358,6 +404,14 @@ export default {
   },
   
   methods: {
+    SenPrEvalutions(id){
+      axios.post(`api/calender/bookings/${id}/evaluations`,{
+       pre_evaluations:this.pre_evalutions
+      }).then((res)=>{
+        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("تم ارسال التقيممات المسبقة ")}`, life: 3000 });
+
+      })
+    },
     compareDates() {
       
       const eventDate = new Date(this.booking.event_date);
@@ -461,7 +515,8 @@ export default {
           this.booking = res.data.booking.booking;
           this.new_status = res.data.booking.booking.accepted;
           this.accept_notes = res.data.booking.booking.accepted_notes;
-          this.student_massage=res.data.booking.booking.consultation_result
+          if(res.data.booking.booking.consultation_result) this.student_massage=res.data.booking?.booking?.consultation_result
+          if(res.data.booking.booking.pre_evaluations.pre_evalutions) this.pre_evalutions.pre_evalutions=res.data.booking?.booking?.pre_evaluations.pre_evalutions
           this.doctor = res.data.booking.doctor;
           this.compareDates()
         })
