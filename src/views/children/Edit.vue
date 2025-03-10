@@ -57,7 +57,7 @@ export default {
     getChild() {
       axios.get(`/api/child/${this.$route.params.id}`).then(res => {
         this.child = res.data.child;
-        this.child.skills = res.data.child.skills.map(skill => skill.id);
+        this.child.skills = res.data.child.skill.map(skill => skill.id);
       });
     }
   },
@@ -67,7 +67,6 @@ export default {
   }
 };
 </script>
-
 <template>
   <div class="container mx-auto p-6">
     <button @click="goBack" class="mb-5 flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
@@ -76,7 +75,7 @@ export default {
     </button>
     
     <div class="bg-white p-8 rounded-xl shadow-xl max-w-4xl mx-auto">
-      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ $t("تحديث بيانات الطفل") }}</h2>
+      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ $t("  اضافة طفل جديد") }}</h2>
       
       <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="flex flex-col">
@@ -91,7 +90,7 @@ export default {
         
         <div class="flex flex-col">
           <label class="text-gray-700 font-medium mb-2">{{ $t('primary_language') }}</label>
-          <Dropdown v-model="child.lang" :options="lan"  option-value="id" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Dropdown v-model="child.lang" :options="lan"   option-value="lang" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col">
@@ -121,16 +120,16 @@ export default {
         
         <div class="flex flex-col">
           <label class="text-gray-700 font-medium mb-2">{{ $t('Nationality') }}</label>
-          <Dropdown v-model="child.nationalty"   option-value="id" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Dropdown v-model="child.nationalty"   option-value="country" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col">
           <label class="text-gray-700 font-medium mb-2">{{ $t('skill_name') }}</label>
-          <MultiSelect v-model="child.skills" :options="skills" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <MultiSelect v-model="child.skills" :options="skills" optionLabel="name"  option-value="id" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
       
         <div class="col-span-2 text-center mt-6">
-          <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+          <button @click="submitted = true" type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105">
             {{ $t("submit") }}
           </button>
         </div>
@@ -139,7 +138,6 @@ export default {
   </div>
   <toast></toast>
 </template>
-
 <style scoped>
 button:hover {
   transform: scale(1.05);

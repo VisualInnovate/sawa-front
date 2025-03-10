@@ -110,7 +110,7 @@ export default {
         
         <div class="flex flex-col">
           <label class="text-gray-700 font-medium mb-2">{{ $t('primary_language') }}</label>
-          <Dropdown v-model="child.lang" :options="lan"  option-value="id" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Dropdown v-model="child.lang" :options="lan"   option-value="lang" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col">
@@ -140,7 +140,7 @@ export default {
         
         <div class="flex flex-col">
           <label class="text-gray-700 font-medium mb-2">{{ $t('Nationality') }}</label>
-          <Dropdown v-model="child.nationalty"   option-value="id" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Dropdown v-model="child.nationalty"   option-value="country" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col">
@@ -149,7 +149,7 @@ export default {
         </div>
       
         <div class="col-span-2 text-center mt-6">
-          <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+          <button @click="submitted = true" type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105">
             {{ $t("submit") }}
           </button>
         </div>
