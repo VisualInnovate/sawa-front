@@ -4,7 +4,7 @@
       <form @submit.prevent="submitForm" class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-lg w-full animate-fadeIn">
          <p class="font-semibold text-lg mb-2 text-slate-700">يمكنك حجز اجتماع لطفلك من هنا</p>
         <div class="mb-6">
-          <label for="meeting_time" class="block text-sm font-medium text-gray-700 mb-2">موعد الاجتماع </label>
+          <label for="meeting_time" class="block text-sm font-medium text-gray-700 mb-2"> الموعد المقترح للاجتماع </label>
           <Calendar
             id="meeting_time"
             v-model="formData.meeting_time"
@@ -18,7 +18,7 @@
         </div>
   
         <div class="mb-6">
-          <label for="location" class="block text-sm font-medium text-gray-700 mb-2">مكان الاجتماع</label>
+          <label for="location" class="block text-sm font-medium text-gray-700 mb-2"> عنوان الطلب </label>
           <InputText
             id="location"
             v-model="formData.location"

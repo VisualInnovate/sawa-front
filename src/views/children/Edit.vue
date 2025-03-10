@@ -2,153 +2,199 @@
 import axios from "axios";
 import InputText from 'primevue/inputtext';
 import Calendar from "primevue/calendar";
-import {useToast} from 'primevue/usetoast'
+import Dropdown from "primevue/dropdown";
+import MultiSelect from "primevue/multiselect";
+import { useToast } from 'primevue/usetoast';
+
 export default {
-  components:{InputText,Calendar},
+  components: { InputText, Calendar, Dropdown, MultiSelect },
   data: () => ({
+    skills: [],
     maxDate: new Date(),
-    pasrents:{},
-    submitted:false,
-    toast:useToast(),
-    NameRules: [
-      value => {
-        if (value?.length >= 3) return true
-
-        return ' name must be at least 3 characters.'
-      },
-    ],
-    error:{},
-    child:{},
-    alert_text: null
+    pasrents: {},
+    submitted: false,
+    toast: useToast(),
+    child: {},
+    alert_text: null,
+    lan: [],
+    cities: [],
   }),
-  methods:{
+  methods: {
     goBack() {
-        this.$router.go(-1)
-      },
-      arr (){
-      return this.type =[
-            { name:this.$t('male') , value:'0' },
-                { name:this.$t('female') , value:'1' },
-              
-               
-            ]
+      this.$router.go(-1);
     },
-    getlang(){
-      axios
-        .get("/api/languages")
-        .then((res) => {
-          this.lan=res.data.langs.ar_en
-          console.log(res);
-        })
+    arr() {
+      return [
+        { name: this.$t('male'), value: '0' },
+        { name: this.$t('female'), value: '1' },
+      ];
+    },
+    getSkills() {
+      axios.get("/api/skills").then(res => {
+        this.skills = res.data.data;
+      });
+    },
+    getlang() {
+      axios.get("/api/languages").then(res => {
+        this.lan = res.data.langs.ar_en;
+      });
+      axios.get(`/api/countries/${localStorage.getItem("appLang")}`).then(res => {
+        this.cities = res.data.countries;
+        this.getChild();
+      });
+      axios.get("/api/admin-parents").then(res => {
+        this.pasrents = res.data.parents;
+      });
+    },
+    submit() {
+      axios.post(`/api/child/${this.$route.params.id}/update`, this.child).then(res => {
+        this.toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_update_success"), life: 3000 });
+      }).catch((err) => {
+        this.toast.add({ severity: 'error', summary: this.$t("error"), detail: err.response.data.message, life: 3000 });
+      });
       
-        axios
-        .get(`/api/countries/${localStorage.getItem("appLang")}`)
-        .then((res) => {
-          console.log(res.data.countries)
-          this.cities = res.data.countries
-          this.getChild()
-        })
-        axios
-        .get("/api/admin-parents")
-        .then((res) => {
-          console.log(res.data.countries)
-          this.pasrents = res.data.parents
-        
-        })
     },
-    submit(){
-   
-      axios.post(`/api/child/${this.$route.params.id }/update`,this.child).then(res =>{
-        this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_update_success")}`, life: 3000 });
-      }).catch((el)=>{
-        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.$t("mission_error")}`, life: 3000 });
-
-      })
-    },
-    getChild(){
-      axios.get(`/api/child/${this.$route.params.id}`).then(res =>{
-        this.child=res.data.child
-      })
+    getChild() {
+      axios.get(`/api/child/${this.$route.params.id}`).then(res => {
+        this.child = res.data.child;
+        this.child.skills = res.data.child.skills.map(skill => skill.id);
+      });
     }
   },
   mounted() {
-    this.getlang()
+    this.getSkills();
+    this.getlang();
   }
-}
+};
 </script>
+
 <template>
-  <!--  <v-alert v-if="alert_text!= null " color="green" :text="alert_text" class="mb-5"></v-alert>-->
-
-  <div>
-    <v-btn height="45" class="mb-5 text-white" color="#135C65" @click="goBack">
-      <v-icon start icon="mdi-arrow-left"></v-icon>
+  <div class="container mx-auto p-6">
+    <button @click="goBack" class="mb-5 flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
+      <span class="mdi mdi-arrow-left mr-2"></span>
       {{ $t("back") }}
-    </v-btn>
-
-    <v-sheet max-width="1200" class="mx-auto">
-     
+    </button>
     
-      <form @submit.prevent="submit" class="animate__animated animate__zoomIn  p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-3 shadow-lg" fast-fail >
-        <div class="flex flex-column gap-2 py-2">
-                <label for="username">{{ $t('child_name') }}</label>
-              <InputText required class="bg-[#f7f5f5]" v-model="child.name" :placeholder='$t("child_name")' :class="{ 'p-invalid': submitted && !child.name }" />
-              <small v-if="submitted && !child.name" class="p-invalid text-red-600" > {{$t("child_name") + ' ' + $t("required") }}.</small>
-         </div>
-         <div class="flex flex-column gap-2 py-2">
-                <label for="username">{{ $t('birth_date') }}</label>
-                <Calendar
-            style="width: 100%"
-            showButtonBar
-            v-model.number="child.birth_date"
-            showIcon
-            placeholder="dd/mm/yy"
-            :maxDate="maxDate"
-            :class="{ 'p-invalid': submitted && !child.birth_date }"
-
-          />
-          <small v-if="submitted && !child.birth_date" class="p-invalid text-red-600" > {{$t("birth_date") + ' ' + $t("required") }}.</small>
-
-         </div>
-           <div class="flex flex-column gap-2">
-                    <label class="w-full  " for="username">{{ $t('primary_language') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :placeholder='$t("primary_language")' class="w-full bg-[#f7f5f5]" :class="{ 'p-invalid': submitted && !child.lang }" />
-                    <small v-if="submitted && !child.lang" class="p-invalid text-red-600" > {{$t("primary_language") + ' ' + $t("required") }}.</small>
-                  </div>
-            <div class="flex flex-column gap-2">
-                    <label class="w-full  " for="username">{{ $t('parent_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.parent_id"  option-value="id" :options="pasrents" optionLabel="fname" :placeholder='$t("parent_name")' class="w-full bg-[#f7f5f5] " :class="{ 'p-invalid': submitted && !child.parent_id }" />
-                    <small v-if="submitted && !child.parent_id" class="p-invalid text-red-600" > {{$t("parent_name") + ' ' + $t("required") }}.</small>
-            </div>
-            <div class=" flex flex-column gap-2">
-                  <label class="w-full " for="username">{{ $t('place_of_birth') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :placeholder='$t("place_of_birth")' :class="{ 'p-invalid': submitted && !child.birth_place }"/>
-                <small v-if="submitted && !child.birth_place" class="p-invalid text-red-600" > {{$t("place_of_birth") + ' ' + $t("required") }}.</small>
-              </div>
-            <div class=" flex flex-column gap-2">
-                  <label class="w-full  " for="username">{{ $t('address') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :placeholder='$t("address")' :class="{ 'p-invalid': submitted && !child.address }"/>
-                <small v-if="submitted && !child.address" class="p-invalid text-red-600" > {{$t("address") + ' ' + $t("required") }}.</small>
-            </div>
-            <div class=" flex flex-column gap-2">
-                  <label class="w-full  " for="username">{{ $t('national_id') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :placeholder='$t("national_id")' :class="{ 'p-invalid': submitted && !child.national_id }"/>
-                <small v-if="submitted && !child.address" class="p-invalid text-red-600" > {{$t("address") + ' ' + $t("required") }}.</small>
-            </div>
-            <div class="flex flex-column gap-2">
-                    <label class="w-full " for="username">{{ $t('Type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("selectgender")' class="w-full " :class="{ 'p-invalid': submitted && !child.gender }" />
-                    <small v-if="submitted && !child.gender" class="p-invalid text-red-600" > {{$t("Type") + ' ' + $t("required") }}.</small>
-                  </div>
-            <div class="flex flex-column gap-2">
-                    <label class="w-full " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty"  option-value="country" :options="cities" optionLabel="country" :placeholder='$t("Nationality")' class="w-full" :class="{ 'p-invalid': submitted && !child.nationalty }" />
-                    <small v-if="submitted && !child.nationalty" class="p-invalid text-red-600" > {{$t("Nationality") + ' ' + $t("required") }}.</small>
-            </div>
-      <div class="card text-center py-3">
-        <Button type="submit"  @click="submitted =true" :label='$t("submit")' class="create w-[90%] lg:w-[50%]"/>
-    </div>   
+    <div class="bg-white p-8 rounded-xl shadow-xl max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ $t("تحديث بيانات الطفل") }}</h2>
+      
+      <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('child_name') }}</label>
+          <InputText v-model="child.name" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" :placeholder="$t('child_name')"/>
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('birth_date') }}</label>
+          <Calendar v-model.number="child.birth_date" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" showIcon placeholder="dd/mm/yy" :maxDate="maxDate" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('primary_language') }}</label>
+          <Dropdown v-model="child.lang" :options="lan"  option-value="id" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('parent_name') }}</label>
+          <Dropdown v-model="child.parent_id" :options="pasrents" optionLabel="fname"  option-value="id" optiona class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('place_of_birth') }}</label>
+          <InputText v-model="child.birth_place" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('address') }}</label>
+          <InputText v-model="child.address" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('national_id') }}</label>
+          <InputText v-model="child.national_id" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('Type') }}</label>
+          <Dropdown v-model="child.gender" :options="arr()"  option-value="value" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('Nationality') }}</label>
+          <Dropdown v-model="child.nationalty"   option-value="id" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-2">{{ $t('skill_name') }}</label>
+          <MultiSelect v-model="child.skills" :options="skills" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+        </div>
+      
+        <div class="col-span-2 text-center mt-6">
+          <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+            {{ $t("submit") }}
+          </button>
+        </div>
       </form>
-      <Toast/>
-    </v-sheet>
+    </div>
   </div>
+  <toast></toast>
 </template>
+
+<style scoped>
+button:hover {
+  transform: scale(1.05);
+  transition: all 0.3s ease-in-out;
+}
+
+.container {
+  background-color: #f7fafc;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.shadow-xl {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.rounded-xl {
+  border-radius: 1rem;
+}
+
+.text-gray-800 {
+  color: #2d3748;
+}
+
+.text-gray-700 {
+  color: #4a5568;
+}
+
+.focus\:ring-blue-200:focus {
+  --tw-ring-color: rgba(191, 219, 254, 0.5);
+}
+
+.focus\:border-blue-500:focus {
+  border-color: #3b82f6;
+}
+
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transform {
+  transform: translateZ(0);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+</style>

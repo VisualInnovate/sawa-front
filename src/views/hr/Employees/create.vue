@@ -308,8 +308,6 @@ export default {
       });
       axios.get("/api/skills").then((res)=>{
             this.skills=res.data.data
-          
-
           });
       axios
       .get("api/department")

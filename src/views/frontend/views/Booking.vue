@@ -19,16 +19,18 @@
   <div class="max-w-[1300px] mx-auto py-10">
     <div class="flex justify-between px-4">
       <h3 class="font-bold text-2xl text-[#303843]">{{ $t("bookings") }}</h3>
-      <button @click="AddBooking" class="create text-white px-4 py-2 rounded-lg hover:bg-blue-700">{{ $t("Add_new_booking") }}</button>
+      <button @click="AddBooking" class="create text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        {{ $t("Add_new_booking") }}
+      </button>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 px-4">
-      <div class="flip-card" v-for="book in booking" :key="book.id">
-        <div class="flip-card-inner">
+      <div class="booking-card" v-for="book in booking" :key="book.id">
+        <div class="card-content">
           <!-- Front Side -->
-          <div class="flip-card-front p-4 text-center flex flex-col justify-between">
+          <div class="card-front p-6 text-center flex flex-col justify-between bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
             <div>
-              <div class="w-20 h-20 mx-auto rounded-full overflow-hidden shadow-md">
+              <div class="w-20 h-20 mx-auto rounded-full overflow-hidden shadow-md border-2 border-white">
                 <img :src="book?.user_image" alt="User Image" class="w-full h-full object-cover">
               </div>
               <h3 class="mt-3 font-bold text-lg text-gray-800">{{ book?.user_name }}</h3>
@@ -39,11 +41,10 @@
               <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white rounded-lg font-medium mt-2">{{ $t("مقبول") }}</p>
               <p v-if="book?.accepted == 2" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium mt-2">{{ $t("مرفوض") }}</p>
             </div>
-           
           </div>
 
           <!-- Back Side -->
-          <div class="flip-card-back p-4 text-center">
+          <div class="card-back p-6 text-center bg-white/80 backdrop-blur-sm rounded-lg shadow-lg">
             <div v-if="book?.consultation_result">
               <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
               <p class="text-sm text-gray-600">{{ book.consultation_result.health }}</p>
@@ -56,7 +57,7 @@
             </div>
 
             <p v-else class="mt-2 italic text-gray-400">{{ book.consultation_settings }}</p>
-            <button @click="cancelBooking(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            <button @click="confirmDelete(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
               {{ $t("إلغاء الحجز") }}
             </button>
           </div>
@@ -64,6 +65,15 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <Dialog v-model:visible="deleteDialogVisible" modal header="Confirm Delete" :style="{ width: '400px' }">
+    <p class="text-lg text-gray-700">Are you sure you want to delete this booking?</p>
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" @click="deleteDialogVisible = false" class="p-button-text" />
+      <Button label="Delete" icon="pi pi-check" @click="deleteBooking" class="p-button-danger" />
+    </template>
+  </Dialog>
 
   <About />
 </template>
@@ -75,9 +85,13 @@ import moment from "moment";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
 
 const router = useRouter();
 const booking = ref([]);
+const deleteDialogVisible = ref(false);
+const bookingToDelete = ref(null);
 
 const getAllBooking = () => {
   axios
@@ -94,15 +108,23 @@ const AddBooking = () => {
   router.push({ name: "clidreen_parents" });
 };
 
-const cancelBooking = (id) => {
-  axios
-    .delete(`/api/calender/appointments/${id}`)
-    .then(() => {
-      getAllBooking(); // Refresh the list after cancellation
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+const confirmDelete = (id) => {
+  bookingToDelete.value = id;
+  deleteDialogVisible.value = true;
+};
+
+const deleteBooking = () => {
+  if (bookingToDelete.value) {
+    axios
+      .delete(`/api/calender/appointments/${bookingToDelete.value}`)
+      .then(() => {
+        getAllBooking(); // Refresh the list after deletion
+        deleteDialogVisible.value = false;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
 };
 
 onMounted(() => {
@@ -116,13 +138,13 @@ onMounted(() => {
   background-position: center;
 }
 
-.flip-card {
+.booking-card {
+  perspective: 1000px;
   width: 100%;
   height: 300px;
-  perspective: 1000px;
 }
 
-.flip-card-inner {
+.card-content {
   position: relative;
   width: 100%;
   height: 100%;
@@ -130,12 +152,12 @@ onMounted(() => {
   transform-style: preserve-3d;
 }
 
-.flip-card:hover .flip-card-inner {
+.booking-card:hover .card-content {
   transform: rotateY(180deg);
 }
 
-.flip-card-front,
-.flip-card-back {
+.card-front,
+.card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -144,12 +166,18 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: whitesmoke;
   border-radius: 10px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.flip-card-back {
+.card-front {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.card-back {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
   transform: rotateY(180deg);
 }
 

@@ -165,7 +165,8 @@ onMounted(async () => {
             <!--            here  your v- item list -->
             <v-list-item   :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
            
-
+            <v-list-item   v-can="'doctor list'" :title="$t('doctors')" value="doctors"
+            :to="{ name: 'doctors' }"></v-list-item>
             
             <v-list-item  :title="$t('permissions')" value="permissions"
               :to="{ name: 'permissions' }"></v-list-item>
@@ -180,7 +181,7 @@ onMounted(async () => {
           
           
 
-          <v-list-group v-if="user_permissions.includes('child list'||'doctor list'||'parents list')" prepend-icon="mdi-human-male-boy" value="Children">
+          <v-list-group v-if="user_permissions.includes('child list'||'parents list')" prepend-icon="mdi-human-male-boy" value="Children">
             <template #activator="{ props }">
               <v-list-item v-can="'child list'" v-bind="props" :title="$t('parents')"></v-list-item>
             </template>
@@ -189,8 +190,7 @@ onMounted(async () => {
               :to="{ name: 'Parents' }"></v-list-item>
               <v-list-item   v-can="'parents list'" :title="$t('الاجتماعات')" value="meeting"
               :to="{ name: 'parent-meeting' }"></v-list-item>
-              <v-list-item   v-can="'doctor list'" :title="$t('doctors')" value="doctors"
-              :to="{ name: 'doctors' }"></v-list-item>
+            
 
             <v-list-item   v-can="'child list'"  :title="$t('children')" value="children"
               :to="{ name: 'Children' }"></v-list-item>
