@@ -153,7 +153,7 @@
         <label class="text-gray-700 font-medium" for="status">{{ $t("status") }}</label>
         <Dropdown
           :style="{
-            backgroundColor: new_status == 1 ? '#10B981' : new_status == 2 ? '#EF4444' : new_status == 0 ? '#F59E0B' : 'transparent',
+            backgroundColor: new_status == 1 ? '#10B981' : new_status == 0 ? '#EF4444' : new_status == -1 ? '#F59E0B' : 'transparent',
             color: 'white',
           }"
           id="pv_id_1"
@@ -367,10 +367,10 @@ export default {
       booking: {},
       pre_evalutions:{},
       student_massage:{},
-      status:[
-        { name: this.$t("Pending"), code: '0' },
+       status:[
+        { name: this.$t("Pending"), code: '-1' },
         { name: this.$t("Accept"), code: '1' },
-        { name: this.$t("Cancell"), code: '2' },
+        { name: this.$t("Cancell"), code: '0' },
       
       ],
       fileds:[],
