@@ -29,10 +29,10 @@
             </router-link>
           </li>
           <li class="my-auto text-center py-1 lg:py-0">
-            <router-link :to="{ name: 'home' }" class="text-base font-bold  mx-3 text-black" style="line-height: 20px;" > {{ $t("home") }}</router-link>
+            <router-link :to="{ name: 'Booking' }" class="text-base font-bold  mx-3 text-black" style="line-height: 20px;" > {{ $t("bookings") }}</router-link>
           </li>
           <li class="hidden lg:block my-auto text-center py-1 lg:py-0">
-            <router-link :to="{ name: 'about' }"  class="text-base font-bold mx-3 text-black" style="line-height: 20px;"> {{ $t("about_us") }} </router-link>
+            <router-link :to="{ name: 'clidreen_parents' }"  class="text-base font-bold mx-3 text-black" style="line-height: 20px;"> {{ $t("اطفالي") }} </router-link>
           </li>
           <li class="my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'contactus' }"  class="text-base font-bold mx-3 text-black" style="line-height: 20px;">{{ $t("تواصل معنا") }}</router-link>

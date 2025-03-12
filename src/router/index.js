@@ -98,7 +98,7 @@ const routes = [
     path: "/web/code",
     name: "code",
     component: code,
-    beforeEnter: authForNormalUser,
+  
   },
   {
     path: "/web/contactus",
@@ -114,6 +114,7 @@ const routes = [
     path: "/request-meeting/:child_id",
     name: "request-meeting",
     component: () => import("../views/frontend/views/metting.vue"),
+    beforeEnter: authForNormalUser,
   },
   {
     path: "/web/Cursale",

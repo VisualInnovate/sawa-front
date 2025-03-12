@@ -28,7 +28,7 @@
       <div class="booking-card" v-for="book in booking" :key="book.id">
         <div class="card-content">
           <!-- Front Side -->
-          <div class="card-front p-6 text-center flex flex-col justify-between bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="card-front p-6 text-center  bg-gradient-to-r from-[#74dbc5] to-[#618990] flex flex-col justify-between bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
             <div>
               <div class="w-20 h-20 mx-auto rounded-full overflow-hidden shadow-md border-2 border-white">
                 <img :src="book?.user_image" alt="User Image" class="w-full h-full object-cover">
@@ -44,8 +44,8 @@
           </div>
 
           <!-- Back Side -->
-          <div class="card-back p-6 text-center bg-white/80 backdrop-blur-sm rounded-lg shadow-lg">
-            <div v-if="book?.consultation_result">
+          <div class="card-back p-6 text-center  bg-gradient-to-r from-[#ffff] to-[#ED5586] rounded-lg shadow-lg">
+            <div  v-if="book?.consultation_result">
               <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
               <p class="text-sm text-gray-600">{{ book.consultation_result.health }}</p>
 
@@ -171,12 +171,11 @@ onMounted(() => {
 }
 
 .card-front {
-  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
 }
 
 .card-back {
-  background: rgba(255, 255, 255, 0.8);
+ 
   backdrop-filter: blur(10px);
   transform: rotateY(180deg);
 }

@@ -299,12 +299,21 @@
                 />
               </div>
 
-              <div v-for="(filed, index) in student_massage.filed_value" :key="index" class="py-1">
+              <div v-if="fileds.length > 0" v-for="(filed, index) in student_massage?.filed_value" :key="index" class="py-1">
                 <input
                   v-model="fileds[index].value"
                   readonly
                   class="w-full p-2 bg-gray-100 border border-gray-300 rounded-md text-sm focus:outline-none"
                 />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-gray-600 font-medium text-sm">  ملاحظات اضافية </label>
+                <textarea 
+                  v-model="student_massage.notes"
+                  required
+                  class="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm"
+                  rows="2">
+                </textarea>
               </div>
 
               <Button 
@@ -329,8 +338,7 @@
       <label class="block text-gray-600 text-sm" for="username">{{ $t(' ') }}</label>
           
           <MultiSelect 
-            v-model="pre_evalutions.pre_evalutions"
-            filter  
+            v-model="pre_evalutions.pre_evalutions"  
             :options="evaluate_types"
             optionLabel="name"
             class="w-full  border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-300"
@@ -365,7 +373,9 @@ export default {
       comparisonResult:false,
       current_date: moment(new Date()).format('YYYY-MM-DDTHH:mm:ssZ'),
       booking: {},
-      pre_evalutions:{},
+      pre_evalutions:{
+        pre_evalutions:[]
+      },
       student_massage:{},
        status:[
         { name: this.$t("Pending"), code: '-1' },

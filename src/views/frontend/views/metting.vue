@@ -1,9 +1,9 @@
 <template>
     <Nave />
-    <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-[#035B65] to-[#037B65] p-5">
+    <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-[#ffff] to-[#035b65] p-5">
       <form @submit.prevent="submitForm" class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-lg w-full animate-fadeIn">
          <p class="font-semibold text-lg mb-2 text-slate-700">يمكنك حجز اجتماع لطفلك من هنا</p>
-        <div class="mb-6">
+        <div class="mb-6 required-field">
           <label for="meeting_time" class="block text-sm font-medium text-gray-700 mb-2"> الموعد المقترح للاجتماع </label>
           <Calendar
             id="meeting_time"
@@ -13,14 +13,15 @@
             dateFormat="yy-mm-dd"
             :timeOnly="false"
             placeholder=" اختر موعد الاجتماع "
-            class="w-full p-3 border border-gray-300 rounded-lg focus:border-[#6a11cb] focus:ring-2 focus:ring-[#6a11cb] transition duration-300"
+            class="w-full  border border-gray-300 rounded-lg focus:border-[#6a11cb] focus:ring-2 focus:ring-[#6a11cb] transition duration-300"
           />
         </div>
   
-        <div class="mb-6">
+        <div class="mb-6 required-field">
           <label for="location" class="block text-sm font-medium text-gray-700 mb-2"> عنوان الطلب </label>
           <InputText
             id="location"
+            required
             v-model="formData.location"
             placeholder=" ادخل مكان الاجتماع"
             class="w-full p-3 border border-gray-300 rounded-lg focus:border-[#6a11cb] focus:ring-2 focus:ring-[#6a11cb] transition duration-300"
@@ -96,5 +97,11 @@ import {useToast} from 'primevue/usetoast'
   
   .animate-fadeIn {
     animation: fadeIn 1s ease-in-out;
+  }
+    /* إضافة علامة النجمة الحمراء للحقول المطلوبة */
+    .required-field label::after {
+    content: " *";
+    color: red;
+    font-weight: bold;
   }
   </style>

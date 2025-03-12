@@ -98,54 +98,54 @@ export default {
       <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ $t("  اضافة طفل جديد") }}</h2>
       
       <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="flex flex-col">
-          <label class="text-gray-700 font-medium mb-2">{{ $t('child_name') }}</label>
+        <div class="flex flex-col required-field">
+          <label class="text-gray-700 font-medium mb-2 ">{{ $t('child_name') }}</label>
           <InputText v-model="child.name" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" :placeholder="$t('child_name')"/>
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('birth_date') }}</label>
           <Calendar v-model.number="child.birth_date" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" showIcon placeholder="dd/mm/yy" :maxDate="maxDate" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('primary_language') }}</label>
           <Dropdown v-model="child.lang" :options="lan"   option-value="lang" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('parent_name') }}</label>
           <Dropdown v-model="child.parent_id" :options="pasrents" optionLabel="fname"  option-value="id" optiona class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('place_of_birth') }}</label>
           <InputText v-model="child.birth_place" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('address') }}</label>
           <InputText v-model="child.address" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('national_id') }}</label>
           <InputText v-model="child.national_id" class="border p-2 rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('Type') }}</label>
           <Dropdown v-model="child.gender" :options="arr()"  option-value="value" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('Nationality') }}</label>
           <Dropdown v-model="child.nationalty"   option-value="country" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
-        <div class="flex flex-col">
+        <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('skill_name') }}</label>
-          <MultiSelect v-model="child.skills" :options="skills" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <MultiSelect v-model="child.skills"  option-value="id" :options="skills" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
       
         <div class="col-span-2 text-center mt-6">
@@ -214,5 +214,11 @@ button:hover {
 
 .hover\:scale-105:hover {
   transform: scale(1.05);
+}
+/* إضافة علامة النجمة الحمراء للحقول المطلوبة */
+.required-field label::after {
+  content: " *";
+  color: red;
+  font-weight: bold;
 }
 </style>
