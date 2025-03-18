@@ -7,18 +7,34 @@
     </h1>
 
     <!-- Filter Dropdown -->
-    <div class="mt-6 flex justify-end">
+    <div class="mt-6 flex justify-end flex-col">
+      <label for="filter-by-status-2" class="mb-2">  اختر حاله الحجز</label>
+  <Dropdown
+    id="filter-by-status"
+    v-model="selectedStatus"
+    :options="status"
+    optionLabel="name"
+    optionValue="code"
+    placeholder="Filter by Status"
+    class="w-48"
+    @update:model-value="getBookings"
+  />
+    </div>
+
+    <div class="mt-6 flex justify-end flex-col">
+      <label for="filter-by-status" class="mb-2"> اختر حاله الاستشارة </label>
       <Dropdown
+        id="filter-by-status-2"
         v-model="selectedFilter"
-        :options="status"
+        :options="filter"
         optionLabel="name"
         optionValue="code"
         placeholder="Filter by Status"
         class="w-48"
-         @update:model-value="getBookings"
-     
+        @update:model-value="getBookings"
       />
     </div>
+    
     </div>
 
     <!-- Bookings List -->
@@ -71,6 +87,7 @@ export default {
       bookings: [],
       booking_result: "",
       booking_id: null,
+      selectedStatus:-1,
       selectedFilter:-1,
       show_result_modal: false,
       status:[
@@ -79,12 +96,18 @@ export default {
         { name: this.$t("Cancell"), code: 0 },
       
       ],
+      filter:[
+        { name: this.$t("  تحت التنفيذ"), code: -1 },
+        { name: this.$t("تم التنفيذ "), code: 1 },
+        { name: this.$t("تم الغائها"), code: 0 },
+      
+      ],
     };
   },
   methods: {
     getBookings() {
       axios
-        .get(`/api/calender/bookings?status=${this.selectedFilter}`)
+        .get(`/api/calender/bookings?accepted=${this.selectedFilter}&status=${this.selectedStatus}`)
         .then((res) => {
           this.bookings = res.data.bookings;
           console.log(res);

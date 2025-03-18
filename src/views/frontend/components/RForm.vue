@@ -1,99 +1,171 @@
 <template>
-  <div class="">
-    <div class="flex justify-between">
-      <div style="width: 25%" class="m-auto">
-        <img class="h-56 m-auto" src="../image/header/registernobg-01.png" />
+  <div class="min-h-screen bg-gray-50 py-8">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center px-8 mb-8">
+      <div class="w-1/4 flex justify-center">
+        <img class="h-56" src="../image/header/registernobg-01.png" alt="Register Child" />
       </div>
-      <div class="m-auto text-center w-[50%] space-y-2">
+      <div class="w-1/2 text-center space-y-2">
         <h1 class="text-3xl font-bold text-[#FF2A5B]">
           {{ $t("Register_your_child") }}
         </h1>
         <h2 class="text-[#6D9AA0] text-lg">
-          {{
-            $t("From_here_you_can_register_your_child_with_us_to_be_monitored")
-          }}
+          {{ $t("From_here_you_can_register_your_child_with_us_to_be_monitored") }}
         </h2>
         <h3 class="text-[#6D9AA0] text-lg">
-          {{
-            $t("The_extent_to_which_his_mental_and_physical_skill_developed")
-          }}
+          {{ $t("The_extent_to_which_his_mental_and_physical_skill_developed") }}
         </h3>
       </div>
-
-      <div style="width: 25%" class="relative my-auto">
+      <div class="w-1/4 flex justify-center">
         <v-icon
           @click="goback"
-          style="right: 50%"
-          class="bg-[#135C65] text-white p-6 absolute rounded-full"
+          class="bg-[#135C65] text-white p-4 rounded-full cursor-pointer hover:bg-[#0f4a52] transition-colors"
           start
           icon="mdi-arrow-left"
         ></v-icon>
       </div>
     </div>
 
-    <div
-      style="margin-bottom: 2%"
-      class="m-auto w-[95%] lg:w-[45%] shadow-xl p-[2%] rounded-xl relative"
-    >
+    <!-- Form Section -->
+    <div class="mx-auto w-[95%] lg:w-[45%] bg-white shadow-xl rounded-xl p-8 relative">
       <!-- Alert -->
-      <p
-        v-if="show_alert"
-        class="text-center text-xl font-bold tracking-wide"
-        style="color: green"
-      >
+      <p v-if="show_alert" class="text-center text-xl font-bold text-green-600 mb-4">
         {{ alert_text }}
       </p>
-      <!-- End Alert -->
 
-      <form @submit.prevent="addChild">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 ">
-          <!--  Child Name -->
-  
-            <div class="lg:col-span-2 flex flex-column gap-2">
-                  <label class="w-full font-bold " for="username">{{ $t('Full_Name') }}  </label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.name"  :class="{ 'p-invalid': submitted && !child.name}" />
-            </div>
-            <div class="flex flex-column gap-2">
-                    <label class="font-bold" for="username">{{ $t('date_of_birth') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar   v-model="child.birth_date" showIcon  :class="{ 'p-invalid': submitted && !child.birth_date}"  :maxDate="maxDate" />   
-            </div>
-            <div class=" flex flex-column gap-2">
-                  <label class="w-full font-bold " for="username">{{ $t('place_of_birth') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="child.birth_place" :class="{ 'p-invalid': submitted && !child.birth_place}" />
-            </div>
-            <div class=" flex flex-column gap-2">
-                  <label class="w-full font-bold " for="username">{{ $t('address') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.address" :class="{ 'p-invalid': submitted && !child.address}" />
-            </div>
-            <div class=" flex flex-column gap-2">
-                  <label class="w-full font-bold " for="username">{{ $t('national_id') }}</label>
-                <InputText  required class="bg-[#f7f5f5] text-center" v-model="child.national_id" :class="{ 'p-invalid': submitted && !child.national_id}" />
-            </div>
-            <div class="flex flex-column gap-2">
-                    <label class="w-full font-bold " for="username">{{ $t('Type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.gender"  option-value="value" :options="arr()" optionLabel="name" :class="{ 'p-invalid': submitted && !child.gender}" class="w-full " />
-            </div>
-            <div class="flex flex-column gap-2">
-                    <label class="w-full font-bold " for="username">{{ $t('Nationality') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="child.nationalty" filter  option-value="country" :options="cities" optionLabel="country" :class="{ 'p-invalid': submitted && !child.nationalty}" class="w-full " />
-            </div>
-            <div class="flex flex-column gap-2">
-                    <label class="w-full font-bold " for="username">{{ $t('primary_language') }}</label>
-                    <Dropdown required id="pv_id_1" @update:model-value="getLangs($event)" filter style="direction: ltr !important;" v-model="child.lang"  option-value="lang" :options="lan" optionLabel="lang" :class="{ 'p-invalid': submitted && !child.lang}" class="w-full " />
-            </div>
-        
-      
-            <div class="flex flex-column gap-2 w-full ">
-                  <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="submitted=true" type="submit" class="create m-auto w-full " :label='$t("Register_now")'></Button>
-                  <small id="username-help"></small>
-              </div>
+      <form @submit.prevent="addChild" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Child Name -->
+          <div class="lg:col-span-2 required-field">
+            <label class="block font-bold text-gray-700 mb-2 ">
+              {{ $t('Full_Name') }}
+            </label>
+            <InputText
+              v-model="child.name"
+              class="w-full bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-[#135C65]"
+              :class="{ 'border-red-500': submitted && !child.name }"
+           
+            />
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 ">
+              {{ $t('date_of_birth') }}
+            </label>
+            <Calendar
+              v-model="child.birth_date"
+              class="w-full"
+              :class="{ 'border-red-500': submitted && !child.birth_date }"
+              :maxDate="maxDate"
+              showButtonBar
+              showIcon
+             
+            />
+          </div>
+
+          <!-- Place of Birth -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 required-field">
+              {{ $t('place_of_birth') }}
+            </label>
+            <InputText
+              v-model="child.birth_place"
+              class="w-full bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-[#135C65]"
+              :class="{ 'border-red-500': submitted && !child.birth_place }"
+           
+            />
+          </div>
+
+          <!-- Address -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 required-field">
+              {{ $t('address') }}
+            </label>
+            <InputText
+              v-model="child.address"
+              class="w-full bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-[#135C65]"
+              :class="{ 'border-red-500': submitted && !child.address }"
+           
+            />
+          </div>
+
+          <!-- National ID -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 required-field">
+              {{ $t('national_id') }}
+            </label>
+            <InputText
+              v-model="child.national_id"
+              class="w-full bg-gray-100 p-3 rounded-lg focus:ring-2 focus:ring-[#135C65]"
+              :class="{ 'border-red-500': submitted && !child.national_id }"
+           
+            />
+          </div>
+
+          <!-- Gender -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 required-field">
+              {{ $t('Type') }}
+            </label>
+            <Dropdown
+              v-model="child.gender"
+              :options="arr()"
+              optionLabel="name"
+              optionValue="value"
+              class="w-full"
+              :class="{ 'border-red-500': submitted && !child.gender }"
+         
+            />
+          </div>
+
+          <!-- Nationality -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 required-field">
+              {{ $t('Nationality') }}
+            </label>
+            <Dropdown
+              v-model="child.nationalty"
+              :options="cities"
+              optionLabel="country"
+              optionValue="country"
+              filter
+              class="w-full"
+              :class="{ 'border-red-500': submitted && !child.nationalty }"
+             
+            />
+          </div>
+
+          <!-- Primary Language -->
+          <div class="required-field">
+            <label class="block font-bold text-gray-700 mb-2 required-field">
+              {{ $t('primary_language') }}
+            </label>
+            <Dropdown
+              v-model="child.lang"
+              :options="lan"
+              optionLabel="lang"
+              optionValue="lang"
+              filter
+              class="w-full"
+              :class="{ 'border-red-500': submitted && !child.lang }"
+            
+              @update:modelValue="getLangs($event)"
+            />
+          </div>
         </div>
-       
+
+        <!-- Submit Button -->
+        <div class="flex justify-center">
+          <Button
+            type="submit"
+            class="bg-[#135C65] text-white px-8 py-3 rounded-lg hover:bg-[#0f4a52] transition-colors"
+            :label='$t("سجل طفلك معنا")'
+          />
+        </div>
       </form>
     </div>
   </div>
-  
 </template>
 <script>
 import Dropdown from 'primevue/dropdown';
@@ -214,6 +286,11 @@ export default {
   text-align: center;
   font-family: "Cairo", sans-serif;
   font-size: 20px;
+}
+.required-field label::after {
+  content: " *";
+  color: red;
+  font-weight: bold;
 }
 /* #pv_id_3  {
   border: none;

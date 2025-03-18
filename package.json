@@ -30,6 +30,7 @@
     "flowbite": "^1.7.0",
     "flowbite-vue": "^0.0.16",
     "fullcalendar": "^6.1.6",
+    "html2pdf.js": "^0.10.3",
     "lodash.clonedeep": "^4.5.0",
     "pinia": "^2.0.30",
     "primeicons": "^6.0.1",

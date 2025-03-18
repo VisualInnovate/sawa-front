@@ -1,9 +1,9 @@
 <template>
   <div class="">
     <Nave />
-    <div  class="banner flex items-center h-[35vh] lg:h-[55vh] relative ">
+    <div  class="banner flex items-center h-[35vh] lg:h-[45vh] relative bg-cover bg-no-repeat " :style="{ backgroundImage: `url(${banner})` }">
     <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#618990] opacity-40 w-full h-full z-50"></div>
-    <img class="w-full absolute h-full" src="../image/112.png">
+
     <div class="z-50 text-white m-auto w-[80%] ">
       <H1 class="font-bold text-5xl text-white z-50">{{ $t("المعلومات الشخصيه") }}</H1>
      <div class="flex py-8 ">
@@ -109,6 +109,7 @@
 <script>
 import Nave from "../components/Nave.vue";
 import Sidbar from "../components/Sidbar.vue";
+import banner from '../image/header/112.png'
 import About from "../components/About.vue";
 import Knob from "primevue/knob";
 import FileUpload from "primevue/fileupload";
@@ -119,6 +120,7 @@ export default {
   components: { Nave, Sidbar, About, Knob, FileUpload },
   data() {
     return {
+      banner:banner,
       imageSrc: null,
       image: null,
       parentStore: useParentStore(),

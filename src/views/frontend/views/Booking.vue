@@ -41,21 +41,16 @@
               <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white rounded-lg font-medium mt-2">{{ $t("مقبول") }}</p>
               <p v-if="book?.accepted == 2" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium mt-2">{{ $t("مرفوض") }}</p>
             </div>
+          
           </div>
 
           <!-- Back Side -->
           <div class="card-back p-6 text-center  bg-gradient-to-r from-[#ffff] to-[#ED5586] rounded-lg shadow-lg">
-            <div  v-if="book?.consultation_result">
-              <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
-              <p class="text-sm text-gray-600">{{ book.consultation_result.health }}</p>
-
-              <p class="mt-2 text-gray-700 font-semibold">{{ $t("توصييات المستشار") }} </p>
-              <p class="text-sm text-gray-600">{{ book.consultation_result.consultant_recommendations }}</p>
-
-              <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات المزلية") }}:</p>
-              <p class="text-sm text-gray-600" v-for="bok in book.consultation_result?.filed_value" :key="bok.id">{{ bok?.value }}</p>
-            </div>
-
+           
+            <button v-if="book?.status == 1" @click="showConsultationResult(book)" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              {{ $t("نتيجة الاستشارة") }}
+            </button>
+            <p v-else-if="book.accepted == 0 || 1" class="mt-2 italic text-gray-400">{{ book?.accepted_notes }}</p>
             <p v-else class="mt-2 italic text-gray-400">{{ book.consultation_settings }}</p>
             <button @click="confirmDelete(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
               {{ $t("إلغاء الحجز") }}
@@ -75,9 +70,28 @@
     </template>
   </Dialog>
 
+  <!-- Consultation Result Modal -->
+   
+  <Dialog v-model:visible="consultationResultDialogVisible" modal header="نتيجة الاستشارة" :style="{ width: '600px' }">
+    <div v-if="selectedConsultationResult">
+      <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
+      <p class="text-sm text-gray-600">{{ selectedConsultationResult?.consultation_result?.health }}</p>
+
+      <p class="mt-2 text-gray-700 font-semibold">{{ $t("توصييات المستشار") }} </p>
+      <p class="text-sm text-gray-600">{{ selectedConsultationResult?.consultation_result?.consultant_recommendations }}</p>
+
+      <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات المزلية") }}:</p>
+      <p class="text-sm text-gray-600" v-for="bok in selectedConsultationResult.consultation_result?.filed_value" :key="bok.id">{{ bok?.value }}</p>
+    </div>
+    <template #footer>
+      <Button label="Print" icon="pi pi-print" @click="printConsultationResult" class="p-button-text" />
+      <Button label="Export as PDF" icon="pi pi-file-pdf" @click="exportConsultationResultAsPDF" class="p-button-success" />
+      <Button label="Close" icon="pi pi-times" @click="consultationResultDialogVisible = false" class="p-button-text" />
+    </template>
+  </Dialog>
+
   <About />
 </template>
-
 <script setup>
 import Nave from "../components/Nave.vue";
 import About from "../components/About.vue";
@@ -87,11 +101,14 @@ import { useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
+import html2pdf from "html2pdf.js";
 
 const router = useRouter();
 const booking = ref([]);
 const deleteDialogVisible = ref(false);
 const bookingToDelete = ref(null);
+const consultationResultDialogVisible = ref(false);
+const selectedConsultationResult = ref(null);
 
 const getAllBooking = () => {
   axios
@@ -125,6 +142,26 @@ const deleteBooking = () => {
         console.error(err);
       });
   }
+};
+
+const showConsultationResult = (book) => {
+  selectedConsultationResult.value = book;
+  consultationResultDialogVisible.value = true;
+};
+
+const printConsultationResult = () => {
+  window.print();
+};
+
+const exportConsultationResultAsPDF = () => {
+  const element = document.getElementById("consultation-result-content");
+  html2pdf(element, {
+    margin: 10,
+    filename: 'consultation_result.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  });
 };
 
 onMounted(() => {
@@ -175,7 +212,6 @@ onMounted(() => {
 }
 
 .card-back {
- 
   backdrop-filter: blur(10px);
   transform: rotateY(180deg);
 }
