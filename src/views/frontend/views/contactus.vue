@@ -2,21 +2,7 @@
   <template>
     <nave />
       <!-- banner -->
-      <div  class="banner flex items-center h-[35vh] lg:h-[55vh] relative ">
-    <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#618990] opacity-40 w-full h-full z-50"></div>
-    <img class="w-full absolute h-full" src="../image/112.png">
-    <div class="z-50 text-white m-auto w-[80%] ">
-      <H1 class="font-bold text-5xl text-white z-50">{{ $t("تواصل معنا") }}</H1>
-     <div class="flex py-8 ">
-      <p class="text-2xl font-semibold "> {{ $t("home") }}</p>
-      <svg class="my-auto mx-[1%] ltr:rotate-180" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0.999878 6.49976L16.9999 6.49976" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M5.99972 11.5C5.99972 11.5 0.999767 7.81756 0.999756 6.49996C0.999744 5.18237 5.99976 1.5 5.99976 1.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <p class="text-2xl font-semibold "> {{ $t("تواصل معنا") }}</p>
-     </div>
-    </div>
-   </div>
+      <Banner heading="تواصل معنا" title=" يمكنك التواصل مع فريق العمل  "></Banner>
 
     <div >
       <div class="max-w-[1300px] mx-auto grid grid-cols-1 gap-4 lg:grid-cols-2 py-[4%] ">
@@ -131,13 +117,14 @@
 import Nave from "../components/Nave.vue";
 import About from "../components/About.vue";
 import Nave1 from "../components/Nave1.vue";
+import Banner from '../components/Banner.vue'
 
 export default {
 components: {
 Nave,
 About,
 Nave1,
-
+Banner
 },
 data() {
       return {
