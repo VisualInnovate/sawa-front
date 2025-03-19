@@ -107,7 +107,7 @@ export default {
   methods: {
     getBookings() {
       axios
-        .get(`/api/calender/bookings?accepted=${this.selectedFilter}&status=${this.selectedStatus}`)
+        .get(`/api/calender/bookings?accepted=${this.selectedStatus}&status=${this.selectedFilter}`)
         .then((res) => {
           this.bookings = res.data.bookings;
           console.log(res);

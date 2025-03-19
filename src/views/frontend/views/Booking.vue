@@ -37,9 +37,9 @@
               <p class="text-sm text-gray-600">{{ book?.user_title }}</p>
               <p class="text-lg py-1 text-blue-600">{{ moment(book?.event_date).format("DD-MM-YY") }}</p>
               <p class="text-lg py-1 text-gray-700">{{ moment(book?.event_date).format("hh:mm A") }}</p>
-              <p v-if="book?.accepted == 0" class="px-2 py-2 bg-yellow-400 text-white rounded-lg font-medium mt-2">{{ $t("انتظار") }}</p>
+              <p v-if="book?.accepted == -1" class="px-2 py-2 bg-yellow-400 text-white rounded-lg font-medium mt-2">{{ $t("انتظار") }}</p>
               <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white rounded-lg font-medium mt-2">{{ $t("مقبول") }}</p>
-              <p v-if="book?.accepted == 2" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium mt-2">{{ $t("مرفوض") }}</p>
+              <p v-if="book?.accepted == 0" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium mt-2">{{ $t("مرفوض") }}</p>
             </div>
           
           </div>
@@ -50,8 +50,12 @@
             <button v-if="book?.status == 1" @click="showConsultationResult(book)" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               {{ $t("نتيجة الاستشارة") }}
             </button>
-            <p v-else-if="book.accepted == 0 || 1" class="mt-2 italic text-gray-400">{{ book?.accepted_notes }}</p>
-            <p v-else class="mt-2 italic text-gray-400">{{ book.consultation_settings }}</p>
+            <p v-else-if="book.accepted == 0 || book.accepted == 1 " class="mt-2 italic text-gray-500">{{ book?.accepted_notes }}</p>
+            <div v-else>
+              <p  class="mt-2 italic text-gray-500">{{ book.consultation_settings }}</p>
+              <p  class="mt-2 italic text-gray-500">{{ book.accepted_notes }}</p>
+            </div>
+            
             <button @click="confirmDelete(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
               {{ $t("إلغاء الحجز") }}
             </button>
