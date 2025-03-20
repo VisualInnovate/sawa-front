@@ -13,15 +13,18 @@
       </button>
       <div class="w-full md:block md:w-auto" id="navbar-default" :class="{ hidden: show }">
         <ul class="flex flex-col font-medium rounded-lg bg-gray-50 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white">
-          <li class="m-auto  text-center lg:py-0">
+          <li  class="m-auto  text-center lg:py-0">
             <router-link :to="{ name: 'home' }" class="text-lg font-extrabold lg:mx-6">
               <img src="/src/views/frontend/image/header/Group22.png" class="w-[150px] h-[60px] hover:scale-105 transition-transform duration-300">
             </router-link>
           </li>
-          <li class="my-auto text-center py-1 lg:py-0">
+          <li v-if="parentStore.parentAuth" class="my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'Booking' }" class="text-base font-bold mx-3 text-black hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("bookings") }}</router-link>
           </li>
-          <li class="hidden lg:block my-auto text-center py-1 lg:py-0">
+          <li v-if="!parentStore.parentAuth" class="my-auto text-center py-1 lg:py-0">
+            <router-link :to="{ name: 'clidreen_parents' }" class="text-base font-bold mx-3 text-black hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("home") }}</router-link>
+          </li>
+          <li v-if="parentStore.parentAuth" class="hidden lg:block my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'clidreen_parents' }" class="text-base font-bold mx-3 text-black hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("اطفالي") }}</router-link>
           </li>
           <li class="my-auto text-center py-1 lg:py-0">
@@ -31,31 +34,36 @@
       </div>
       <div class="hidden lg:block">
         <p style="display:inline-block; height: 50px;"><LocaleSelect id="local-switcher"></LocaleSelect></p>
-        <div style="display: inline-block;" v-if="parentStore.parentAuth">
+        <div style="display: inline-flex; justify-content: center; align-items: center; height: 100%;" v-if="parentStore.parentAuth">
+       
           <Button
-            style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
-            class="mx-2 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
+            style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
+            class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
             icon="pi pi-user"
+            :label='$t(" الملف الشخصي")'
+
             @click="goToProfile"
           />
-          <Button
-            style="background: linear-gradient(45deg, #7B7B7B, #9E9E9E); color: white; border: none;"
-            class="mx-2 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
-            icon="pi pi-sign-out"
-            @click="logout"
-          />
-        </div>
+      
+        <Button
+          style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
+          class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
+          icon="pi pi-sign-out"
+          :label='$t("تسجيل خروج")'
+          @click="logout"
+        />
+      </div>
 
         <router-link v-if="!parentStore.parentAuth" :to="{ name: 'parentLogin' }" class="items-center hidden lg:block" style="display: inline;">
           <Button
-            style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
+            style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
             :label='$t("sign_in")'
             class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
           />
         </router-link>
         <router-link v-if="!parentStore.parentAuth" :to="{ name: 'SingUp' }" class="text-lg items-center hidden lg:block" style="display: inline;">
           <Button
-            style="background: linear-gradient(45deg, #7B7B7B, #9E9E9E); color: white; border: none;"
+            style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
             :label='$t("Create_an_account")'
             class="h-full relative create my-auto ce lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
           />
