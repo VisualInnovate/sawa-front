@@ -301,7 +301,7 @@
 
               <div v-if="fileds.length > 0" v-for="(filed, index) in student_massage?.filed_value" :key="index" class="py-1">
                 <input
-                  v-model="fileds[index].value"
+                :value="removeBracesAndReplace(fileds[index].value)"
                   readonly
                   class="w-full p-2 bg-gray-100 border border-gray-300 rounded-md text-sm focus:outline-none"
                 />
@@ -486,6 +486,10 @@ export default {
         
 
 
+      },
+      removeBracesAndReplace(text) {
+        // استبدال النص المحاط بعلامتي {{}} باسم "محمد"
+        return text.replace(/\{\{.*?\}\}/g, this.booking.child_name);
       },
 
       AddEvalte(id){

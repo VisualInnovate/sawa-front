@@ -12,28 +12,23 @@ const loading = ref(true);
 const user = ref({});
 const error = ref('');
 const users = ref(null);
-const productDialog = ref(false);
 const deleteDialog = ref(false);
-const deleteProductsDialog = ref(false);
-const product = ref({});
+
+
 const selectedProducts = ref(null);
 const dt = ref(null);
 const filters = ref({});
-const submitted = ref(false);
+
 const rate = ref({
   tourist_rating: Number,
   reviewable_id: '',
   type: 1,
 });
-const statuses = ref([
-  { label: 'INSTOCK', value: 'instock' },
-  { label: 'LOWSTOCK', value: 'lowstock' },
-  { label: 'OUTOFSTOCK', value: 'outofstock' },
-]);
 
 onBeforeMount(() => {
-  initFilters();
-});
+  initFilters()
+})
+
 
 const fetchData = () => {
   axios.get('/api/admin-parents').then((res) => {
@@ -47,18 +42,8 @@ onMounted(() => {
   fetchData();
 });
 
-const formatCurrency = (value) => {
-  return value.toLocaleString('gb-US', { style: 'currency', currency: 'USD' });
-};
 
-const openNew = () => {
-  router.push({ name: 'Therapeutic' });
-};
 
-const hideDialog = () => {
-  productDialog.value = false;
-  submitted.value = false;
-};
 
 const confirmDelete = (id) => {
   console.log(id);
@@ -80,59 +65,19 @@ const deleteAction = () => {
     .catch(() => {});
 };
 
-const findIndexById = (id) => {
-  let index = -1;
-  for (let i = 0; i < products.value.length; i++) {
-    if (products.value[i].id === id) {
-      index = i;
-      break;
-    }
-  }
-  return index;
-};
 
-const rateValue = () => {
-  axios
-    .post(`/api/rating/create-admin`, rate.value)
-    .then((res) => {
-      fetchData();
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'rate send', life: 3000 });
-      deleteDialog.value = !deleteDialog.value;
-    })
-    .catch((el) => {
-      error.value = el.response.data.errors;
-    });
-};
 
-const createId = () => {
-  let id = '';
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 5; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return id;
-};
 
 const exportCSV = () => {
   dt.value.exportCSV();
 };
 
-const confirmDeleteSelected = () => {
-  deleteProductsDialog.value = true;
-};
-
-const deleteSelectedProducts = () => {
-  products.value = products.value.filter((val) => !selectedProducts.value.includes(val));
-  deleteProductsDialog.value = false;
-  selectedProducts.value = null;
-  toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
-};
 
 const initFilters = () => {
   filters.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  };
-};
+  }
+}
 </script>
 
 <template>
@@ -188,22 +133,22 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="phone" :header='$t("parent.fname")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <Column field="fname" :header='$t("parent.fname")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
               <template #body="slotProps">
                 {{ slotProps.data.fname }}
               </template>
             </Column>
-            <Column field="phone" :header='$t("parent.lname")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <Column field="lname" :header='$t("parent.lname")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
               <template #body="slotProps">
                 {{ slotProps.data.lname }}
               </template>
             </Column>
-            <Column field="phone" :header='$t("parent.email")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <Column field="email" :header='$t("parent.email")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
               <template #body="slotProps">
                 {{ slotProps.data.email }}
               </template>
             </Column>
-            <Column field="phone" :header='$t("parent.phone")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <Column field="phone" :header='$t("phone")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
               <template #body="slotProps">
                 {{ slotProps.data.phone }}
               </template>

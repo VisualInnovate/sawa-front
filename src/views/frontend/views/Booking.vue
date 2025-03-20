@@ -1,6 +1,6 @@
 <template>
   <Nave />
- <Banner heading="الحجوزات" title="يمكنك اضافة حجز من هنا"></Banner>
+  <Banner heading="الحجوزات" title="يمكنك اضافة حجز من هنا"></Banner>
 
   <div class="max-w-[1300px] mx-auto py-10">
     <div class="flex justify-between px-4">
@@ -9,12 +9,12 @@
         {{ $t("Add_new_booking") }}
       </button>
     </div>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 px-4">
       <div class="booking-card" v-for="book in booking" :key="book.id">
         <div class="card-content">
           <!-- Front Side -->
-          <div class="card-front p-6 text-center  bg-gradient-to-r from-[#74dbc5] to-[#618990] flex flex-col justify-between bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="card-front p-6 text-center bg-gradient-to-r from-[#74dbc5] to-[#618990] flex flex-col justify-between bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
             <div>
               <div class="w-20 h-20 mx-auto rounded-full overflow-hidden shadow-md border-2 border-white">
                 <img :src="book?.user_image" alt="User Image" class="w-full h-full object-cover">
@@ -27,21 +27,19 @@
               <p v-if="book?.accepted == 1" class="px-2 py-2 bg-green-700 text-white rounded-lg font-medium mt-2">{{ $t("مقبول") }}</p>
               <p v-if="book?.accepted == 0" class="px-2 py-2 bg-red-700 text-white rounded-lg font-medium mt-2">{{ $t("مرفوض") }}</p>
             </div>
-          
           </div>
 
           <!-- Back Side -->
-          <div class="card-back p-6 text-center  bg-gradient-to-r from-[#ffff] to-[#ED5586] rounded-lg shadow-lg">
-           
+          <div class="card-back p-6 text-center bg-gradient-to-r from-[#ffff] to-[#ED5586] rounded-lg shadow-lg">
             <button v-if="book?.status == 1" @click="showConsultationResult(book)" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               {{ $t("نتيجة الاستشارة") }}
             </button>
             <div v-else class="mt-4 text-gray-700">
               <div class="mb-2">
-                <label class="font-semibold text-gray-600">{{ $t(" تعليمات الاستشارة") }}:</label>
+                <label class="font-semibold text-gray-600">{{ $t("تعليمات الاستشارة") }}:</label>
                 <p class="mt-1 italic text-gray-500">{{ book.consultation_settings }}</p>
               </div>
-              
+
               <div>
                 <label class="font-semibold text-gray-600">{{ $t("ملاحظات المستشار") }}:</label>
                 <p class="mt-1 italic text-gray-500">{{ book.accepted_notes }}</p>
@@ -66,17 +64,18 @@
   </Dialog>
 
   <!-- Consultation Result Modal -->
-   
   <Dialog v-model:visible="consultationResultDialogVisible" modal header="نتيجة الاستشارة" :style="{ width: '600px' }">
     <div v-if="selectedConsultationResult">
       <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
-      <p class="text-sm text-gray-600">{{ selectedConsultationResult?.consultation_result?.health }}</p>
+      <p class="text-sm text-gray-600">{{ removeBracesAndReplace(selectedConsultationResult?.consultation_result?.health, selectedConsultationResult?.child_name) }}</p>
 
-      <p class="mt-2 text-gray-700 font-semibold">{{ $t("توصييات المستشار") }} </p>
-      <p class="text-sm text-gray-600">{{ selectedConsultationResult?.consultation_result?.consultant_recommendations }}</p>
+      <p class="mt-2 text-gray-700 font-semibold">{{ $t("توصييات المستشار") }}:</p>
+      <p class="text-sm text-gray-600">{{ removeBracesAndReplace(selectedConsultationResult?.consultation_result?.consultant_recommendations, selectedConsultationResult?.child_name) }}</p>
 
       <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات المزلية") }}:</p>
-      <p class="text-sm text-gray-600" v-for="bok in selectedConsultationResult.consultation_result?.filed_value" :key="bok.id">{{ bok?.value }}</p>
+      <p class="text-sm text-gray-600" v-for="bok in selectedConsultationResult.consultation_result?.filed_value" :key="bok.id">
+        {{ removeBracesAndReplace(bok?.value, selectedConsultationResult?.child_name) }}
+      </p>
     </div>
     <template #footer>
       <Button label="Print" icon="pi pi-print" @click="printConsultationResult" class="p-button-text" />
@@ -87,6 +86,7 @@
 
   <About />
 </template>
+
 <script setup>
 import Nave from "../components/Nave.vue";
 import About from "../components/About.vue";
@@ -97,7 +97,8 @@ import { ref, onMounted } from "vue";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import html2pdf from "html2pdf.js";
-import Banner from '../components/Banner.vue'
+import Banner from '../components/Banner.vue';
+
 const router = useRouter();
 const booking = ref([]);
 const deleteDialogVisible = ref(false);
@@ -137,6 +138,11 @@ const deleteBooking = () => {
         console.error(err);
       });
   }
+};
+
+const removeBracesAndReplace = (text, name) => {
+  if (!text) return ""; // Handle undefined or null text
+  return text.replace(/\{\{.*?\}\}/g, name || "محمد"); // Replace {{}} with the provided name or default to "محمد"
 };
 
 const showConsultationResult = (book) => {
