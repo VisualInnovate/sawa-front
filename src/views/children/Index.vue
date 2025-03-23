@@ -74,6 +74,11 @@ const initFilters = () => {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
+
+// New method to handle adding evaluation
+const addEvaluation = (id) => {
+  router.push({ name: 'Calender', params: { 'id': id } })
+};
 </script>
 
 <template>
@@ -141,9 +146,10 @@ const initFilters = () => {
               <template #body="slotProps">
                 <div class="flex gap-2">
                   <Button v-can="'child edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success" @click="edit(slotProps.data.id)" />
-                  <Button v-can="'child And Evaluation'" icon="pi pi-eye" class="p-button-rounded p-button-info" @click="showItem(slotProps.data.id)" />
                   <Button v-can="'child delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDelete(slotProps.data.id)" />
                   <Button icon="pi pi-user" class="p-button-rounded p-button-warning" @click="detail(slotProps.data.id)" />
+                  <!-- New button for adding evaluation -->
+                  <Button  icon="pi pi-plus" class="p-button-rounded p-button-help" @click="addEvaluation(slotProps.data.id)" />
                 </div>
               </template>
             </Column>
@@ -212,6 +218,11 @@ const initFilters = () => {
   &.p-button-warning {
     background-color: #ffc107;
     border-color: #ffc107;
+  }
+
+  &.p-button-help {
+    background-color: #6610f2;
+    border-color: #6610f2;
   }
 }
 
