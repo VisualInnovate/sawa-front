@@ -8,6 +8,7 @@ import { get } from '@vueuse/core';
 const toast = useToast()
 const models=ref([])
 const model=ref('')
+const maxSelection=ref(6)
 const relations=ref([])
 const relation=ref('')
 const columns=ref([])
@@ -131,8 +132,8 @@ const initFilters = () => {
           <template #start>
             <div class="my-2 grid md:grid-cols-5 gap-4 grid-cols-1">
                 <Dropdown @update:model-value="getrelation" v-model="model"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id"  :options="models" optionLabel="model" :placeholder='$t("model_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <MultiSelect    @update:model-value="getrelationColum"      :loading="model == ''"  v-model="relation"  required id="pv_id_1" style="direction: ltr !important;"  :options="relations" optionLabel="value" :placeholder='$t("relation_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <MultiSelect :loading="relation == ''"   v-model="column"  required id="pv_id_1" style="direction: ltr !important;"  option-value="column"  :options="columns" optionLabel="value" :placeholder='$t("columns_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <MultiSelect    :maxSelectedLabels="maxSelection" :selectionLimit="maxSelection"  @update:model-value="getrelationColum"      :loading="model == ''"  v-model="relation"  required id="pv_id_1" style="direction: ltr !important;"  :options="relations" optionLabel="value" :placeholder='$t("relation_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                <MultiSelect   :maxSelectedLabels="maxSelection" :selectionLimit="maxSelection" :loading="relation == ''"   v-model="column"  required id="pv_id_1" style="direction: ltr !important;"  option-value="column"  :options="columns" optionLabel="value" :placeholder='$t("columns_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
                 <Button  :label='$t("search")'  class="create" @click="getreport" />
 <!--              <Button-->
 <!--                label="Delete"-->

@@ -157,23 +157,23 @@ onMounted(async () => {
         <v-list density="compact" nav>
           <v-list-item prepend-icon="mdi-home"  :title="$t('dashbored')" 
               :to="{ name: 'dashbord' }"></v-list-item>
-          <v-list-group prepend-icon="mdi-shield-account" value="Admin">
+          <v-list-group v-if="user_permissions.includes('employees list' || 'doctor list' || 'permissions list' || 'roles list' )" prepend-icon="mdi-shield-account" value="Admin">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('Adminstration')"></v-list-item>
             </template>
 
             <!--            here  your v- item list -->
-            <v-list-item   :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
+            <v-list-item  v-can="'employees list'" :title="$t('Employees')" value="Employees" :to="{ name: 'Employees' }"></v-list-item>
            
             <v-list-item   v-can="'doctor list'" :title="$t('doctors')" value="doctors"
             :to="{ name: 'doctors' }"></v-list-item>
             
-            <v-list-item  :title="$t('permissions')" value="permissions"
+            <v-list-item v-can="'permissions list'" :title="$t('permissions')" value="permissions"
               :to="{ name: 'permissions' }"></v-list-item>
 
             <!-- <v-list-item  :title="$t('permissions')" value="roles"
               :to="{ name: 'permissions' }"></v-list-item> -->
-            <v-list-item  :title="$t('roles')" value="roles"
+            <v-list-item  v-can="'roles list'"  :title="$t('roles')" value="roles"
               :to="{ name: 'Roles' }"></v-list-item>
            
           </v-list-group>
@@ -220,7 +220,7 @@ onMounted(async () => {
             </template>
 
            
-              <v-list-item  :title="$t('milestone')" value="milestone" :to="{ name: 'levels' }"></v-list-item>
+              <v-list-item v-if="user_permissions.includes('milestone question list'||'milestone answer list'||'milestone level list')"  :title="$t('milestone')" value="milestone" :to="{ name: 'levels' }"></v-list-item>
               <v-list-item v-can="'barrier-subtest list'" :title="$t('barriers')" value="barriers" :to="{ name: 'barrier-subtest' }"></v-list-item>
 
            
@@ -306,7 +306,7 @@ onMounted(async () => {
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('inputs')"></v-list-item>
             </template>
-             <v-list-item   :title="$t('skills')" value="skills"
+             <v-list-item v-can="'skills list'"  :title="$t('skills')" value="skills"
               :to="{ name: 'skills' }"></v-list-item>
               <v-list-item v-can="'department list'" :title="$t('department')" value="department"
               :to="{ name: 'department' }"></v-list-item>

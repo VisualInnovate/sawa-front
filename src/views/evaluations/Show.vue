@@ -260,12 +260,7 @@ export default {
                   <Calendar style="width: 100%;" v-model="examDate" @change="fomate()" date-format="dd-mm-yy" showIcon :rules="NameRules"  :show-time="true"  />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
             </div>
-            <div class="flex flex-column gap-2 py-2">
-                  <label class="w-full text-right" for="username">{{ $t('skill_add') }}</label>
-                  <MultiSelect v-model="skills" filter option-value="id"  optionLabel="name" :options="skill" :placeholder='$t("skill_add")'
-              class="w-full md:w-20rem" />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
-            </div>
+           
              </div>
        
         <div v-for="questions in Object.values(headerAndQuestions).reverse()">
