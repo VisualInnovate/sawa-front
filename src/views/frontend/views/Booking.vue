@@ -45,7 +45,7 @@
                 <p class="mt-1 italic text-gray-500">{{ book.accepted_notes }}</p>
               </div>
             </div>
-            <button @click="confirmDelete(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            <button v-if="book.accepted !=1" @click="confirmDelete(book.booking_id)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
               {{ $t("إلغاء الحجز") }}
             </button>
           </div>

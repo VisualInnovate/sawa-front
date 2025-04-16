@@ -221,7 +221,7 @@ onMounted(async () => {
 
            
               <v-list-item v-if="user_permissions.includes('milestone question list'||'milestone answer list'||'milestone level list')"  :title="$t('milestone')" value="milestone" :to="{ name: 'levels' }"></v-list-item>
-              <v-list-item v-can="'barrier-subtest list'" :title="$t('barriers')" value="barriers" :to="{ name: 'barrier-subtest' }"></v-list-item>
+              <v-list-item v-if="user_permissions.includes('barrier question list'||'barrier answer list'||'barrier answer type list')"  :title="$t('barriers')" value="barriers" :to="{ name: 'barrier-subtest' }"></v-list-item>
 
            
           </v-list-group>
@@ -340,6 +340,7 @@ onMounted(async () => {
             
        
             <v-list-item  v-can="'leaves list'"  :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
+            <v-list-item  v-can="'leaves list'"  :title="$t('تقرير الحضور اليومي')" value="daily-attendance" :to="{ name: 'daily-attendance' }"></v-list-item>
             <v-list-item  v-can="'hr settings edit'" :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
             <v-list-item  v-can="'deduction list'" :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
             <v-list-item  v-can="'holidays list'" :title="$t('holidays')" value="holidays" :to="{ name: 'holidays' }"></v-list-item>

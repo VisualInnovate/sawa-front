@@ -11,7 +11,11 @@ const hr = [
     name: 'Employees',
     component: () => import("../views/hr/Employees/index.vue")
   },
-
+  {
+    path: '/daily-attendance', 
+    name: 'daily-attendance',
+    component: () => import("../views/hr/Employees/daily_attendance.vue")
+  },
   {
     path: '/Employees-create', 
     name: 'Employees-create',

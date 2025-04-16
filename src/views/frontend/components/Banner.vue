@@ -1,5 +1,5 @@
 <template>
-     <div  class="banner flex items-center h-[35vh] lg:h-[40vh] relative bg-cover bg-no-repeat " :style="{ backgroundImage: `url(${banner})` }">
+     <div  class="banner flex items-center h-[35vh] lg:h-[35vh] relative bg-cover bg-no-repeat " :style="{ backgroundImage: `url(${banner})` }">
     <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#193f47] opacity-40 w-full h-full z-50"></div>
 
     <div class="z-50 text-white m-auto w-[80%] ">

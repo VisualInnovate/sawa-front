@@ -274,12 +274,13 @@ const initFilters = () => {
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('strength_title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.strength_title" :placeholder='$t("strength_title")' />
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.strength_title" ></v-textarea>
+
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.strength_title">{{ error.strength_title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('weakness_title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.weakness_title" :placeholder='$t("weakness_title")' />
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.weakness_title" ></v-textarea>
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.weakness_title">{{ error.weakness_title[0] }}</div>
             </div>
           <div class="flex flex-column gap-2">
@@ -307,12 +308,13 @@ const initFilters = () => {
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('strength_title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.strength_title" :placeholder='$t("strength_title")' />
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.strength_title" ></v-textarea>
+
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.strength_title">{{ error.strength_title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('weakness_title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.weakness_title" :placeholder='$t("weakness_title")' />
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.weakness_title" ></v-textarea>
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.weakness_title">{{ error.weakness_title[0] }}</div>
             </div>
           <div class="flex flex-column gap-2">

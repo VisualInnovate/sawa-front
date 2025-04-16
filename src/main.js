@@ -65,6 +65,8 @@ import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 import Paginator from 'primevue/paginator';
 
+import Tag from 'primevue/tag';
+
 
 import Rating from 'primevue/rating';
 import RadioButton from 'primevue/radiobutton';
@@ -140,6 +142,7 @@ app.mount("#app");
 app.component('InputNumber', InputNumber)
 app.component('ConfirmDialog', ConfirmDialog)
 app.component('Dialog', Dialog)
+app.component('Tag', Tag)
 app.component('DynamicDialog', DynamicDialog)
 app.component('ColorPicker', ColorPicker)
 app.component('TabView', TabView)
