@@ -456,7 +456,7 @@ const initFilters = () => {
   }
   
   :deep(.p-datatable) {
-    font-size: 10pt;
+    font-size: 5pt;
     width: 100%;
   }
   

@@ -308,7 +308,7 @@ const initFilters = () => {
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.8rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0px;
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr) {
@@ -334,7 +334,7 @@ const initFilters = () => {
   }
   
   :deep(.p-datatable) {
-    font-size: 10pt;
+    font-size: 2pt;
     width: 100%;
   }
   
