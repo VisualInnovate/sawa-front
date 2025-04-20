@@ -29,7 +29,7 @@ onBeforeMount(() => {
 })
 
 const getallusers = () => {
-  axios.post("/api/users").then((res) => {  
+  axios.post("/api/users").then((res) => {
     allusers.value = res.data.users.data
   });
 }
@@ -42,7 +42,7 @@ const fetchData = () => {
     console.log(users.value)
   }).catch(() => {
     loading.value = false
-    toast.add({severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000})
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 })
   });
 }
 
@@ -52,11 +52,11 @@ onMounted(() => {
 })
 
 const edit = (id) => {
-  router.push({name: 'Employee-update', params: {'id': id} })
+  router.push({ name: 'Employee-update', params: { 'id': id } })
 }
 
 const openNew = () => {
-  router.push({name: 'Employees-create'})
+  router.push({ name: 'Employees-create' })
 }
 
 const confirmDelete = (id) => {
@@ -72,7 +72,7 @@ const createcrude = () => {
       console.log(res.data)
       fetchData()
       createdialog.value = !(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
       skill.value = ref({})
     })
     .catch((el) => {
@@ -87,9 +87,9 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value = false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
     })
-    .catch(() => {})
+    .catch(() => { })
 }
 
 const exportCSV = () => {
@@ -104,11 +104,11 @@ const printTable = () => {
   printLoading.value = true
   const printContents = document.querySelector('.p-datatable-wrapper').cloneNode(true)
   const originalContents = document.body.innerHTML
-  
+
   // Remove action buttons from print
   const actionButtons = printContents.querySelectorAll('.p-button')
   actionButtons.forEach(button => button.remove())
-  
+
   // Create print window
   const printWindow = window.open('', '_blank')
   printWindow.document.write(`
@@ -139,7 +139,7 @@ const printTable = () => {
       </body>
     </html>
   `)
-  
+
   printWindow.document.close()
   printWindow.focus()
   setTimeout(() => {
@@ -167,21 +167,10 @@ const initFilters = () => {
 
           <template #end>
             <div class="flex gap-2">
-              <Button 
-                :label='$t("print")' 
-                icon="pi pi-print" 
-                class="p-button-help no-print" 
-                :loading="printLoading"
-                @click="printTable"
-              />
-              <Button 
-                v-can="'employees list'" 
-                :label='$t("export")' 
-                icon="pi pi-download" 
-                class="p-button-info no-print" 
-                :loading="exportLoading"
-                @click="exportCSV"
-              />
+              <Button :label='$t("print")' icon="pi pi-print" class="p-button-help no-print" :loading="printLoading"
+                @click="printTable" />
+              <Button v-can="'employees list'" :label='$t("export")' icon="pi pi-download"
+                class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
             </div>
           </template>
         </Toolbar>
@@ -189,85 +178,63 @@ const initFilters = () => {
         <Toast />
 
         <div class="card shadow-1 surface-0">
-          <DataTable
-            ref="dt"
-            v-model:selection="selectedProducts"
-            :value="users"
-            :loading="loading"
-            data-key="id"
-            :paginator="true"
-            :rows="10"
-            :filters="filters"
+          <DataTable ref="dt" v-model:selection="selectedProducts" :value="users" :loading="loading" data-key="id"
+            :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
             current-page-report-template="Showing {first} to {last} of {totalRecords} records"
-            responsive-layout="scroll"
-            scrollable
-            scroll-height="flex"
-            v-can="'employees list'"
-            stripedRows
-            showGridlines
-            class="p-datatable-sm"
-          >
+            responsive-layout="scroll" scrollable scroll-height="flex" v-can="'employees list'" stripedRows
+            showGridlines class="p-datatable-sm">
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />
-                    <InputText 
-                      v-model="filters['global'].value" 
-                      :placeholder='$t("search")' 
-                      class="w-full"
-                    />
+                    <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
                   </span>
-                  <Button 
-                    icon="pi pi-refresh" 
-                    class="p-button-text" 
-                    @click="fetchData" 
-                    v-tooltip.top="'Refresh data'"
-                  />
+                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
+                    v-tooltip.top="'Refresh data'" />
                 </div>
               </div>
             </template>
 
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-            
+
             <Column field="employee.name" :header='$t("Employee")' :sortable="true">
               <template #body="slotProps">
                 <span class="font-medium">{{ slotProps.data.employee?.name || 'N/A' }}</span>
               </template>
             </Column>
-            
+
             <Column field="date" :header='$t("Date")' :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.date }}
               </template>
             </Column>
-            
+
             <Column field="clock_in" :header='$t("Clock In")' :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.clock_in" :severity="slotProps.data.late > 0 ? 'danger' : 'success'" />
               </template>
             </Column>
-            
+
             <Column field="clock_out" :header='$t("Clock Out")' :sortable="true">
               <template #body="slotProps">
-                <Tag :value="slotProps.data.clock_out || '--:--:--'" 
-                     :severity="slotProps.data.clock_out ? (slotProps.data.early_leave > 0 ? 'warning' : 'info') : 'danger'" />
+                <Tag :value="slotProps.data.clock_out || '--:--:--'"
+                  :severity="slotProps.data.clock_out ? (slotProps.data.early_leave > 0 ? 'warning' : 'info') : 'danger'" />
               </template>
             </Column>
-            
+
             <Column field="status" :header='$t("Status")' :sortable="true">
               <template #body="slotProps">
-                <Tag :value="slotProps.data.status" 
-                     :severity="{
-                       'clocked_in': 'info',
-                       'attend': 'success',
-                       'absent': 'danger'
-                     }[slotProps.data.status] || 'warning'" />
+                <Tag :value="slotProps.data.status" :severity="{
+                  'clocked_in': 'info',
+                  'attend': 'success',
+                  'absent': 'danger'
+                }[slotProps.data.status] || 'warning'" />
               </template>
             </Column>
-            
+
             <Column field="working_hours" :header='$t("Hours")' :sortable="true">
               <template #body="slotProps">
                 <span v-if="slotProps.data.working_hours !== null">
@@ -276,29 +243,28 @@ const initFilters = () => {
                 <span v-else>--</span>
               </template>
             </Column>
-            
+
             <Column field="late" :header='$t("Late (h)")' :sortable="true">
               <template #body="slotProps">
-                <span v-if="slotProps.data.late > 0" class="text-red-500 font-medium">
-                  {{ slotProps.data.late.toFixed(2) }}
+                <span class="text-red-500 font-medium">
+                  {{ !isNaN(Number(slotProps.data.late )) ? Number(slotProps.data.late ).toFixed(2) :
+                  slotProps.data.late }}
                 </span>
-                <span v-else>0</span>
               </template>
             </Column>
-            
+
             <Column field="early_leave" :header='$t("Early Leave (h)")' :sortable="true">
               <template #body="slotProps">
-                <span v-if="slotProps.data.early_leave > 0" class="text-orange-500 font-medium">
-                  {{ slotProps.data.early_leave.toFixed(2) }}
+                <span class="text-red-500 font-medium">
+                  {{ !isNaN(Number(slotProps.data.early_leave)) ? Number(slotProps.data.early_leave).toFixed(2) :
+                  slotProps.data.early_leave }}
                 </span>
-                <span v-else-if="slotProps.data.early_leave === null">--</span>
-                <span v-else>0</span>
               </template>
             </Column>
-            
-          
 
-           
+
+
+
 
             <template #empty>
               <div class="text-center py-4">
@@ -328,36 +294,29 @@ const initFilters = () => {
           </template>
         </Dialog>
 
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("create_employee")' :modal="true">
+        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("create_employee")'
+          :modal="true">
           <div class="flex flex-column gap-2">
             <label class="w-full text-right" for="username">{{ $t('users') }}</label>
-            <MultiSelect 
-              v-model="employee.users_ids"  
-              required 
-              id="pv_id_1" 
-              style="direction: ltr !important;"  
-              option-value="id" 
-              filter 
-              :options="allusers" 
-              optionLabel="name" 
-              :placeholder='$t("users")' 
-              class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" 
-            />
+            <MultiSelect v-model="employee.users_ids" required id="pv_id_1" style="direction: ltr !important;"
+              option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")'
+              class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
           </div>
           <div class="w-full text-center">
-            <Button @click="createcrude" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createcrude" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
           </div>
         </Dialog>
 
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("update_employee")' :modal="true">
+        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("update_employee")'
+          :modal="true">
           <div class="flex flex-column gap-2">
             <label class="w-full text-right" for="username">{{ $t('title') }}</label>
             <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
           </div>
           <div class="w-full text-center">
-            <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
           </div>
         </Dialog>
       </div>
@@ -400,12 +359,12 @@ const initFilters = () => {
   .no-print {
     display: none !important;
   }
-  
+
   :deep(.p-datatable) {
     font-size: 10pt;
     width: 100%;
   }
-  
+
   :deep(.p-datatable .p-datatable-thead > tr > th),
   :deep(.p-datatable .p-datatable-tbody > tr > td) {
     padding: 4px 6px;

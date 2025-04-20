@@ -1,87 +1,145 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
-import {ref, onMounted, onBeforeMount} from 'vue'
+import { FilterMatchMode } from 'primevue/api'
+import { ref, onMounted, onBeforeMount } from 'vue'
 // import ProductService from '@/service/ProductService';
-import {useToast} from 'primevue/usetoast'
+import { useToast } from 'primevue/usetoast'
 import axios from "axios";
-import {useRouter} from "vue-router";
+import { useRouter } from "vue-router";
 const toast = useToast()
 const router = useRouter()
-const allusers=ref([])
+const allusers = ref([])
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
 const users = ref(null)
 const deleteDialog = ref(false)
-const confir_id=ref('')
+const confir_id = ref('')
 const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
-const createdialog=ref(false)
-const levels=ref({})
-const employee=ref({})
-const updatedialog=ref(false)
+const createdialog = ref(false)
+const levels = ref({})
+const employee = ref({})
+const updatedialog = ref(false)
 
 onBeforeMount(() => {
   initFilters()
 })
-  const getallusers=()=>{
-    axios.post("/api/users").then((res)=>{  
-    allusers.value= res.data.users.data
-    
+const getallusers = () => {
+  axios.post("/api/users").then((res) => {
+    allusers.value = res.data.users.data
+
   });
-  }
- const fetchData= ()=>{
-  loading.value=true
-  axios.get("/api/employees").then((res)=>{
-    loading.value= false
-    users.value= res.data.data
+}
+const fetchData = () => {
+  loading.value = true
+  axios.get("/api/employees").then((res) => {
+    loading.value = false
+    users.value = res.data.data
     console.log(users.value)
 
   });
- 
+
 
 
 }
-
 
 
 onMounted(() => {
   // productService.getProducts().then((data) => (products.value = data));
-fetchData()
-getallusers()
+  fetchData()
+  getallusers()
 
 })
-const edit=(id)=>{
-  router.push({name:'Employee-update',params:{'id':id} })
+const edit = (id) => {
+  router.push({ name: 'Employee-update', params: { 'id': id } })
 }
 
+const restData = (id) => {
+  axios
+    .get(`/api/employees/rest/${id}`, { action: 'delete' })
+    .then((res) => {
+      console.log('Done', res.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+
+const status = (event, id) => {
+  axios
+    .get(`/api/employees`)
+    .then((res) => {
+      console.log('Done get api');
+
+      let userIndex;
+      let employee = res.data.data;
+      employee.forEach((e, i) => {
+        if (e.id == id) {
+          userIndex = i;
+          return;
+        }
+      })
+      let clocked_in = res.data.data[userIndex].is_clocked_in;
+      let btn;
+      if (event.target.id == 'stu') btn = event.target;
+      if (event.target.id != 'stu') btn = event.target.parentElement;
+
+      if (!clocked_in) {
+        axios.post(`/api/attendance/dashboard/clock-in/${id}`)
+          .then(res => {
+            btn.classList.remove("p-button-secondary");
+            btn.classList.add("p-button-info");
+            btn.children[0].classList.remove('pi-sign-out');
+            btn.children[0].classList.add('pi-sign-in');
+            console.log("Done clock in");
+          }).catch(err => {
+            console.log("cann't clock in", err);
+          })
+      }
+      if (clocked_in) {
+        axios.post(`/api/attendance/dashboard/clock-out/${id}`)
+          .then(res => {
+            btn.classList.remove("p-button-info");
+            btn.classList.add("p-button-secondary");
+            btn.children[0].classList.remove('pi-sign-in');
+            btn.children[0].classList.add('pi-sign-out');
+            console.log("Done clock out");
+          }).catch(err => {
+            console.log("cann't clock out", err);
+          })
+      }
 
 
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
 const openNew = () => {
-  router.push({name:'Employees-create'})
+  router.push({ name: 'Employees-create' })
 }
 
 const confirmDelete = (id) => {
   console.log(id)
   deleteDialog.value = true
-  confir_id.value=id
- 
+  confir_id.value = id
+
 
 }
 
-const createcrude=()=>{
-    axios
-    .post('/api/employees/import/users',employee.value)
+const createcrude = () => {
+  axios
+    .post('/api/employees/import/users', employee.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      createdialog.value = !(createdialog.value)
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
       skill.value = ref({})
     })
-    .catch((el)=>{
+    .catch((el) => {
       error.value = el.response.data.errors
     })
 }
@@ -90,12 +148,11 @@ const deleteAction = () => {
     .delete(`/api/employees/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
-      deleteDialog.value=false
+      deleteDialog.value = false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
     })
-    .catch(() => {})
-
+    .catch(() => { })
 }
 
 
@@ -106,7 +163,7 @@ const exportCSV = () => {
 
 const initFilters = () => {
   filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
 </script>
@@ -118,24 +175,15 @@ const initFilters = () => {
         <Toolbar class="mb-4">
           <template #start>
             <h2 class="text-2xl font-bold">{{ $t("Employees") }}</h2>
+
           </template>
 
           <template #end>
             <div class="flex gap-2">
-              <Button 
-                v-can="'employees create'" 
-                :label='$t("create_button")' 
-                icon="pi pi-plus" 
-                class="p-button-success mr-2 no-print" 
-                @click="openNew"
-              />
-              <Button 
-                v-can="'employees list'" 
-                :label='$t("export")' 
-                icon="pi pi-download" 
-                class="p-button-info no-print" 
-                @click="exportCSV"
-              />
+              <Button v-can="'employees create'" :label='$t("create_button")' icon="pi pi-plus"
+                class="p-button-success mr-2 no-print" @click="openNew" />
+              <Button v-can="'employees list'" :label='$t("export")' icon="pi pi-download"
+                class="p-button-info no-print" @click="exportCSV" />
             </div>
           </template>
         </Toolbar>
@@ -143,94 +191,68 @@ const initFilters = () => {
         <Toast />
 
         <div class="card shadow-1 surface-0">
-          <DataTable
-            ref="dt"
-            v-model:selection="selectedProducts"
-            :value="users"
-            :loading="loading"
-            data-key="id"
-            :paginator="true"
-            :rows="10"
-            :filters="filters"
+          <DataTable ref="dt" v-model:selection="selectedProducts" :value="users" :loading="loading" data-key="id"
+            :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
             current-page-report-template="Showing {first} to {last} of {totalRecords} records"
-            responsive-layout="scroll"
-            scrollable
-            scroll-height="flex"
-            v-can="'employees list'"
-            stripedRows
-            showGridlines
-            class="p-datatable-sm"
-          >
+            responsive-layout="scroll" scrollable scroll-height="flex" v-can="'employees list'" stripedRows
+            showGridlines class="p-datatable-sm">
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />
-                    <InputText 
-                      v-model="filters['global'].value" 
-                      :placeholder='$t("search")' 
-                      class="w-full"
-                    />
+                    <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
                   </span>
-                  <Button 
-                    icon="pi pi-refresh" 
-                    class="p-button-text" 
-                    @click="fetchData" 
-                    v-tooltip.top="'Refresh data'"
-                  />
+                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
+                    v-tooltip.top="'Refresh data'" />
                 </div>
               </div>
             </template>
 
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-            
+
             <Column field="name" :header='$t("name")' :sortable="true">
               <template #body="slotProps">
                 <span class="font-medium">{{ slotProps.data.name }}</span>
               </template>
             </Column>
-            
+
             <Column field="email" :header='$t("email")' :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.email }}
               </template>
             </Column>
-            
+
             <Column field="basic_salary" :header='$t("basic_salary")' :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.basic_salary }}
               </template>
             </Column>
-            
+
             <Column field="shift.title" :header='$t("shift_title")' :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.shift?.title || 'N/A'" severity="info" />
               </template>
             </Column>
-            
+
             <Column header-style="min-width:10rem;" class="no-print">
               <template #body="slotProps">
                 <div class="flex gap-2">
-                  <Button
-                    v-can="'employees edit'"
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-success"
-                    @click="edit(slotProps.data.user.id)"
-                    v-tooltip.top="'Edit'"
-                  />
-                  <Button
-                    v-can="'employees delete'"
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger"
-                    @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="'Delete'"
-                  />
+                  <Button v-can="'employees edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success"
+                    @click="edit(slotProps.data.user.id)" v-tooltip.top="'Edit'" />
+                  <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
+                    @click="confirmDelete(slotProps.data.id)" v-tooltip.top="'Delete'" />
+                  <Button icon="pi pi-wrench" class="p-button-rounded p-button-help"
+                    @click="restData(slotProps.data.id)" v-tooltip.top="'Rest'" />
+                  <Button v-can="'employees edit'" class="p-button-rounded"
+                    :class="slotProps.data.is_clocked_in ? 'p-button-info' : 'p-button-secondary'"
+                    :icon="slotProps.data.is_clocked_in ? 'pi pi-sign-in' : 'pi pi-sign-out'"
+                    @click="status($event, slotProps.data.id)" v-tooltip.top='Status' id="stu" />
                 </div>
               </template>
             </Column>
-
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
@@ -260,36 +282,29 @@ const initFilters = () => {
           </template>
         </Dialog>
 
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("create_employee")' :modal="true">
+        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("create_employee")'
+          :modal="true">
           <div class="flex flex-column gap-2">
             <label class="w-full text-right" for="username">{{ $t('users') }}</label>
-            <MultiSelect 
-              v-model="employee.users_ids"  
-              required 
-              id="pv_id_1" 
-              style="direction: ltr !important;"  
-              option-value="id" 
-              filter 
-              :options="allusers" 
-              optionLabel="name" 
-              :placeholder='$t("users")' 
-              class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" 
-            />
+            <MultiSelect v-model="employee.users_ids" required id="pv_id_1" style="direction: ltr !important;"
+              option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")'
+              class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
           </div>
           <div class="w-full text-center">
-            <Button @click="createcrude" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createcrude" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
           </div>
         </Dialog>
 
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("update_employee")' :modal="true">
+        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("update_employee")'
+          :modal="true">
           <div class="flex flex-column gap-2">
             <label class="w-full text-right" for="username">{{ $t('title') }}</label>
             <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
           </div>
           <div class="w-full text-center">
-            <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
           </div>
         </Dialog>
       </div>
@@ -332,12 +347,12 @@ const initFilters = () => {
   .no-print {
     display: none !important;
   }
-  
+
   :deep(.p-datatable) {
     font-size: 2pt;
     width: 100%;
   }
-  
+
   :deep(.p-datatable .p-datatable-thead > tr > th),
   :deep(.p-datatable .p-datatable-tbody > tr > td) {
     padding: 0px 0px;
@@ -349,4 +364,3 @@ const initFilters = () => {
   margin: 0.0rem;
 }
 </style>
-
