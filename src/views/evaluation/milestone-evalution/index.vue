@@ -55,15 +55,32 @@
   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
               </div>  -->
-              <div v-if="answer.child_id && answer.child_age" class=" flex flex-column gap-2">
-                  <label for="username">{{ $t('color') }}</label>
+             <div v-if="answer.child_id && answer.child_age" class=" flex flex-column gap-2">
+          <label for="username">{{ $t('color') }}</label>
 
-                   <div class="flex">
-                    <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
-                  <Button @click="createevalutae"  class="create m-auto  w-full h-[50px] " :label='$t("strart_evaluate")'></Button>
-                   </div>
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
-              </div> 
+          <div class="flex">
+            <!-- <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" /> -->
+            <div>
+              <div class="flex gap-1" >
+                <span @click="addcolor('00B8D9')"
+                  class="w-[30px] h-[30px] bg-[#00B8D9] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
+                <span @click="addcolor('36B37E')"
+                  class="w-[30px] h-[30px] bg-[#36B37E] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
+                <span @click="addcolor('FFAB00')"
+                  class="w-[30px] h-[30px] bg-[#FFAB00] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
+                <span @click="addcolor('FF5630')"
+                  class="w-[30px] h-[30px] bg-[#FF5630] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
+                <span @click="addcolor('6554C0')"
+                  class="w-[30px] h-[30px] bg-[#6554C0] cursor-pointer hover:border-2 hover:border-[#333] transition" ></span>
+              </div>
+              <div class="bg-[#00B8D9] h-[40%] mt-1" ref="showcolor"></div>
+            </div>
+            <Button @click="createevalutae" class="create m-auto  w-full h-[50px] "
+              :label='$t("strart_evaluate")'></Button>
+          </div>
+          <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
+        </div>
+ 
               
               <div  v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
                 
@@ -107,6 +124,7 @@
   </v-card>
 </template>
 
+
 <script>
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
@@ -130,7 +148,7 @@ export default {
       
          
       answer:{ 
-          color:"00a2ff"
+          color:"6554C0"
       },
      allquestion:[],
       childs:{},
@@ -151,7 +169,10 @@ export default {
       this.$router.push({ name: 'answer' });
     },
 
-
+    addcolor(color) {
+      this.answer.color = color
+      this.$refs.showcolor.style.background = '#' + color;
+    },
     submit(){
       
       
