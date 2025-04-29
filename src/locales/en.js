@@ -486,4 +486,5 @@ export default {
   advance_date: "Advance Date",
   clocked_in: "Do you want to clocked in the employee",
   clocked_out: "Do you want to clocked out the employee",
+  sure: "Are you sure?",
 };

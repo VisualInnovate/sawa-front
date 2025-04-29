@@ -21,8 +21,8 @@ const createdialog = ref(false)
 const levels = ref({})
 const employee = ref({})
 const updatedialog = ref(false)
-
 const clockeddialog = ref(false)
+const restdialog = ref(false)
 const clocked_s = ref()
 const id = ref('')
 onBeforeMount(() => {
@@ -63,9 +63,11 @@ const restData = (id) => {
     .get(`/api/employees/rest/${id}`, { action: 'delete' })
     .then((res) => {
       console.log('Done', res.data);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful rest the employees', life: 3000 })
     })
     .catch((error) => {
       console.error(error);
+      toast.add({ severity: 'warn', summary: 'Error', detail: "can't rest the employees", life: 3000 })
     });
 };
 
@@ -254,7 +256,7 @@ const initFilters = () => {
                   <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
                     @click="confirmDelete(slotProps.data.id)" v-tooltip.top="'Delete'" />
                   <Button icon="pi pi-wrench" class="p-button-rounded p-button-help"
-                    @click="restData(slotProps.data.id)" v-tooltip.top="'Rest'" />
+                    @click="restdialog = true;id = slotProps.data.id" v-tooltip.top="'Rest'" />
                   <Button v-can="'employees edit'" class="p-button-rounded"
                     :class="slotProps.data.is_clocked_in ? 'p-button-info' : 'p-button-secondary'"
                     :icon="slotProps.data.is_clocked_in ? 'pi pi-sign-in' : 'pi pi-sign-out'"
@@ -329,6 +331,20 @@ const initFilters = () => {
             <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="clockeddialog = false" />
             <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger"
               @click="clockeddialog = false; status($event, id);" />
+          </template>
+        </Dialog>
+        <!-- Rest Dialog -->
+        <Dialog v-model:visible="restdialog" :style="{ width: '450px' }" :header='$t("confirm")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span v-if="user">
+        {{  $t('sure')  }}
+            </span>
+          </div>
+          <template #footer>
+            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="restdialog = false" />
+            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger"
+              @click="restdialog = false; restData($event, id);" />
           </template>
         </Dialog>
       </div>
