@@ -256,12 +256,12 @@ const initFilters = () => {
                   <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
                     @click="confirmDelete(slotProps.data.id)" v-tooltip.top="'Delete'" />
                   <Button icon="pi pi-wrench" class="p-button-rounded p-button-help"
-                    @click="restdialog = true;id = slotProps.data.id" v-tooltip.top="'Rest'" />
+                    @click="restdialog = true;id = slotProps.data.id" v-tooltip.top="'Reset Deposit ID'" />
                   <Button v-can="'employees edit'" class="p-button-rounded"
                     :class="slotProps.data.is_clocked_in ? 'p-button-info' : 'p-button-secondary'"
                     :icon="slotProps.data.is_clocked_in ? 'pi pi-sign-in' : 'pi pi-sign-out'"
                     @click="clockeddialog = true; id = slotProps.data.id; clocked_s = slotProps.data.is_clocked_in"
-                    v-tooltip.top='Status' id="stu" />
+                    v-tooltip.top="'clock in | clock out'" id="stu" />
                 </div>
               </template>
             </Column>

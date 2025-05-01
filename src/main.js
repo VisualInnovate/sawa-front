@@ -64,6 +64,7 @@ import OrganizationChart from 'primevue/organizationchart'
 import Chart from 'primevue/chart'
 import InputSwitch from 'primevue/inputswitch'
 import Paginator from 'primevue/paginator';
+import Tooltip from 'primevue/tooltip';
 
 import Tag from 'primevue/tag';
 
@@ -168,6 +169,7 @@ app.component('Password ', Password )
 
 app.component('Chart', Chart)
 app.component('InputSwitch', InputSwitch)
+app.directive('tooltip', Tooltip);
 app.directive('can', (el, binding, vnode) =>{
   // console.log(JSON.parse(localStorage.getItem('permissions')))
   if (! JSON.parse(localStorage.getItem('userPermissions'))
