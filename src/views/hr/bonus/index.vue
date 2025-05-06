@@ -12,7 +12,6 @@ const loading = ref(true)
 const user = ref({})
 const error = ref('')
 const users = ref(null)
-const productDialog = ref(false)
 const deleteDialog = ref(false)
 const confir_id=ref('')
 const selectedProducts = ref(null)
@@ -21,60 +20,49 @@ const filters = ref({})
 const createdialog=ref(false)
 const bouns=ref({})
 const updatedialog=ref(false)
+const exportLoading = ref(false)
+const printLoading = ref(false)
 
 onBeforeMount(() => {
   initFilters()
 })
 
- const fetchData= ()=>{
-
-
+const fetchData= ()=>{
+  loading.value = true
   axios.get("/api/bonus").then((res)=>{
     loading.value= false
     users.value= res.data.data
-    console.log(users.value)
-
+  }).catch(() => {
+    loading.value = false
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 })
   });
+  
   axios.get("/api/employees").then((res)=>{
-   
     allemployee.value= res.data.data
-    
-
   });
-
-
 }
-
-
 
 onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
-fetchData()
-
+  fetchData()
 })
+
 const edit=(id)=>{
-    axios.get(`/api/bonus/${id}`).then((res)=>{
-    loading.value= false
+  axios.get(`/api/bonus/${id}`).then((res)=>{
     bouns.value= res.data.data
-
-
   });
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
+  confir_id.value=id
+  updatedialog.value=!(updatedialog.value)
 }
 
-
-///// update
-
 const update=()=>{
-    axios
+  bouns.value.date = moment(bouns.value.date).format("YYYY-MM-DD");
+  axios
     .put(`/api/bonus/${confir_id.value}`,bouns.value)
     .then((res) => {
-      console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      payroll.value = ref({})
+      toast.add({severity: 'success', summary: 'Successful', detail: 'Bonus updated successfully', life: 3000})
+      bouns.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -82,51 +70,97 @@ const update=()=>{
 }
 
 const openNew = () => {
-    createdialog.value=!(createdialog.value)
-    bouns.value={}
+  createdialog.value=!(createdialog.value)
+  bouns.value={}
 }
 
 const confirmDelete = (id) => {
-  console.log(id)
   deleteDialog.value = true
   confir_id.value=id
- 
-
 }
 
 const create=()=>{
-  bouns.value.date = moment(bouns.value.dat).format("YYYY-MM-DD" );
-    axios
+  bouns.value.date = moment(bouns.value.date).format("YYYY-MM-DD");
+  axios
     .post('/api/bonus',bouns.value)
     .then((res) => {
-      console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
-      bouns.value = ref({})
+      toast.add({severity: 'success', summary: 'Successful', detail: 'Bonus created successfully', life: 3000})
+      bouns.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
     })
 }
+
 const deleteAction = () => {
   axios
     .delete(`/api/bonus/${confir_id.value}`)
     .then((res) => {
-      console.log(res.data)
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: 'Successful', detail: 'Bonus deleted successfully', life: 3000})
     })
     .catch(() => {})
-
 }
-
 
 const exportCSV = () => {
+  exportLoading.value = true
   dt.value.exportCSV()
+  setTimeout(() => {
+    exportLoading.value = false
+  }, 1000)
 }
 
+const printTable = () => {
+  printLoading.value = true
+  const printContents = document.querySelector('.p-datatable-wrapper').cloneNode(true)
+  const originalContents = document.body.innerHTML
+
+  // Remove action buttons from print
+  const actionButtons = printContents.querySelectorAll('.p-button')
+  actionButtons.forEach(button => button.remove())
+
+  // Create print window
+  const printWindow = window.open('', '_blank')
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Employee Bonus Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h1 { color: #333; text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
+          td { padding: 8px; border: 1px solid #ddd; }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          @page { size: auto; margin: 5mm; }
+          @media print {
+            body { margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Employee Bonus Report</h1>
+        ${printContents.innerHTML}
+        <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+          Generated on ${new Date().toLocaleString()}
+        </div>
+      </body>
+    </html>
+  `)
+
+  printWindow.document.close()
+  printWindow.focus()
+  setTimeout(() => {
+    printWindow.print()
+    printWindow.close()
+    printLoading.value = false
+  }, 500)
+}
 
 const initFilters = () => {
   filters.value = {
@@ -138,178 +172,231 @@ const initFilters = () => {
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
+      <div class="card p-4 shadow-2 border-round">
+        <Toolbar class="mb-4">
           <template #start>
-            <div class="my-2">
-            <Button v-can="'bonus create'" :label='$t("Adding_bonus_employee")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
-            </div>
+            <h2 class="text-2xl font-bold">{{ $t("Employee Bonuses") }}</h2>
           </template>
 
           <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
-            <Button v-can="'bonus list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <div class="flex gap-2">
+              <Button :label='$t("print")' icon="pi pi-print" class="p-button-help no-print" :loading="printLoading"
+                @click="printTable" />
+              <Button v-can="'bonus list'" :label='$t("export")' icon="pi pi-download"
+                class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
+              <Button v-can="'bonus create'" :label='$t("Adding_bonus_employee")' icon="pi pi-plus" 
+                class="p-button-success" @click="openNew" />
+            </div>
           </template>
         </Toolbar>
 
-        <Toast/>
+        <Toast />
 
-
-      <div style="" class="shadow-xl ">
-        <DataTable
-          ref="dt"
-          v-model:selection="selectedProducts"
-          :value="users"
-          :loading="loading"
-          data-key="id"
-          :paginator="true"
-          :rows="10"
-          :filters="filters"
-          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
-          responsive-layout="scroll"
-          v-can="'bonus list'"
-        >
-          <template #header>
-            <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("bonus") }}</h5>
-             <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
-                <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
-              </div>
-            </div>
-          </template>
-
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-         
-
-          <Column field="Employees" :header='$t("Employees")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.employee.name }}
-            </template>
-           </Column>
-         
-           <Column field="amount" :header='$t("bouns_amount")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.amount }}
-            </template>
-           </Column>
-
-        
-           <Column field="date" :header='$t("bouns_date")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.date }}
-            </template>
-           </Column>
-          
-          
-
-
-        
-          <Column header-style="min-width:10rem;">
-            <template #body="slotProps">
-              <div >
-                <Button
-                v-can="'bonus edit'"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
-                <Button
-                v-can="'bonus delete'"
-                icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+        <div class="card shadow-1 surface-0">
+          <DataTable ref="dt" v-model:selection="selectedProducts" :value="users" :loading="loading" data-key="id"
+            :paginator="true" :rows="10" :filters="filters"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[5, 10, 25, 50, 100]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            responsive-layout="scroll" scrollable scroll-height="flex" v-can="'bonus list'" stripedRows
+            showGridlines class="p-datatable-sm">
+            <template #header>
+              <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
+                <div class="flex gap-2">
+                  <span class="p-input-icon-left">
+                    <i class="pi pi-search" />
+                    <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
+                  </span>
+                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
+                    v-tooltip.top="'Refresh data'" />
+                </div>
               </div>
             </template>
-          </Column>
 
+            <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
+            <Column field="employee.name" :header='$t("Employees")' :sortable="true">
+              <template #body="slotProps">
+                <span class="font-medium">{{ slotProps.data.employee?.name || 'N/A' }}</span>
+              </template>
+            </Column>
 
-        </DataTable>
-        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+            <Column field="amount" :header='$t("bouns_amount")' :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.amount }}
+              </template>
+            </Column>
+
+            <Column field="date" :header='$t("bouns_date")' :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.date }}
+              </template>
+            </Column>
+
+            <Column field="reason" :header='$t("bouns_reason")' :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.reason || '--' }}
+              </template>
+            </Column>
+
+            <Column header-style="min-width:10rem;">
+              <template #body="slotProps">
+                <div class="flex gap-2">
+                  <Button
+                    v-can="'bonus edit'"
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-success"
+                    @click="edit(slotProps.data.id)"
+                  />
+                  <Button
+                    v-can="'bonus delete'"
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-danger"
+                    @click="confirmDelete(slotProps.data.id)"
+                  />
+                </div>
+              </template>
+            </Column>
+
+            <template #empty>
+              <div class="text-center py-4">
+                <i class="pi pi-exclamation-circle text-2xl mb-2" />
+                <p class="text-xl">No records found</p>
+              </div>
+            </template>
+
+            <template #loading>
+              <div class="flex justify-content-center align-items-center py-4">
+                <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+              </div>
+            </template>
+          </DataTable>
+        </div>
+
+        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("confirm")' :modal="true">
           <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span>
+              {{ $t('remove_item') }} <b>this bonus record</b>?
+            </span>
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
+            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
           </template>
         </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
 
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_reason') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_amount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('bouns_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="bouns.date" showIcon  :placeholder='$t("holiday_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('Employees') }}</label>
-                  <MultiSelect v-model="bouns.employees"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id" filter :options="allemployee" optionLabel="name" :placeholder='$t("Employees")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />          
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.employees">{{ error.employees[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="create" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("Add Bonus")'
+          :modal="true">
           <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_reason') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('bouns_amount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('bouns_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="bouns.date" showIcon  :placeholder='$t("bouns_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
-            
-           <div class="w-full text-center">
-            <Button @click="update" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
+            <label class="w-full text-right" for="reason">{{ $t('bouns_reason') }}</label>
+            <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
+          </div>
+          
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-right" for="amount">{{ $t('bouns_amount') }}</label>
+            <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' mode="currency" currency="USD" locale="en-US" />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
+          </div>
+          
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-right" for="date">{{ $t('bouns_date') }}</label>
+            <Calendar style="width: 100%" showButtonBar v-model="bouns.date" showIcon :placeholder='$t("bouns_date")' />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
+          </div>
+          
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-right" for="employee">{{ $t('Employees') }}</label>
+            <Dropdown 
+              v-model="bouns.employee_id" 
+              :options="allemployee" 
+              optionLabel="name" 
+              optionValue="id" 
+              :placeholder='$t("Select Employee")'
+              class="w-full"
+            />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.employee_id">{{ error.employee_id[0] }}</div>
+          </div>
+          
+          <div class="w-full text-center mt-4">
+            <Button @click="create" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+          </div>
+        </Dialog>
+
+        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("Update Bonus")'
+          :modal="true">
+          <div class="flex flex-column gap-2">
+            <label class="w-full text-right" for="reason">{{ $t('bouns_reason') }}</label>
+            <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
+          </div>
+          
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-right" for="amount">{{ $t('bouns_amount') }}</label>
+            <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' mode="currency" currency="USD" locale="en-US" />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
+          </div>
+          
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-right" for="date">{{ $t('bouns_date') }}</label>
+            <Calendar style="width: 100%" showButtonBar v-model="bouns.date" showIcon :placeholder='$t("bouns_date")' />
+            <div class="mt-1 mb-3 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
+          </div>
+          
+          <div class="w-full text-center mt-4">
+            <Button @click="update" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+          </div>
         </Dialog>
       </div>
-      </va-card>
     </div>
-   
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+/* Custom styles for better table display */
+:deep(.p-datatable) {
+  font-size: 0.9rem;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: #f0f4f8 !important;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 960px) {
+  :deep(.p-datatable) {
+    overflow-x: auto;
+    display: block;
+  }
+}
+
+/* Print-specific styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  :deep(.p-datatable) {
+    font-size: 10pt;
+    width: 100%;
+  }
+
+  :deep(.p-datatable .p-datatable-thead > tr > th),
+  :deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 4px 6px;
+  }
+}
+</style>
