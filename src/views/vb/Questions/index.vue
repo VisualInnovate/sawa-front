@@ -265,6 +265,11 @@ const initFilters = () => {
             <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
           </template>
         </Dialog>
+        <!-- 
+        نقاط القوة (في حال الاجابة ب صفر)
+        نقاط الضعف (في حال الاجابة ب صفر)
+
+        -->
         <Dialog v-model:visible="createdialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
           <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
@@ -281,6 +286,17 @@ const initFilters = () => {
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('weakness_title') }}</label>
                   <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.weakness_title" ></v-textarea>
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.weakness_title">{{ error.weakness_title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('strength_title_0') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.strength_0_title" ></v-textarea>
+
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.strength_title">{{ error.strength_title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-right" for="username">{{ $t('weakness_title_0') }}</label>
+                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="levels.weakness_0_title" ></v-textarea>
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.weakness_title">{{ error.weakness_title[0] }}</div>
             </div>
           <div class="flex flex-column gap-2">

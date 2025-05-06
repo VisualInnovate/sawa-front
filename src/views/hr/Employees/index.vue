@@ -21,7 +21,10 @@ const createdialog = ref(false)
 const levels = ref({})
 const employee = ref({})
 const updatedialog = ref(false)
-
+const clockeddialog = ref(false)
+const restdialog = ref(false)
+const clocked_s = ref()
+const id = ref('')
 onBeforeMount(() => {
   initFilters()
 })
@@ -60,9 +63,11 @@ const restData = (id) => {
     .get(`/api/employees/rest/${id}`, { action: 'delete' })
     .then((res) => {
       console.log('Done', res.data);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful rest the employees', life: 3000 })
     })
     .catch((error) => {
       console.error(error);
+      toast.add({ severity: 'warn', summary: 'Error', detail: "can't rest the employees", life: 3000 })
     });
 };
 
@@ -81,6 +86,7 @@ const status = (event, id) => {
         }
       })
       let clocked_in = res.data.data[userIndex].is_clocked_in;
+
       let btn;
       if (event.target.id == 'stu') btn = event.target;
       if (event.target.id != 'stu') btn = event.target.parentElement;
@@ -92,11 +98,14 @@ const status = (event, id) => {
             btn.classList.add("p-button-info");
             btn.children[0].classList.remove('pi-sign-out');
             btn.children[0].classList.add('pi-sign-in');
-            console.log("Done clock in");
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful login employees', life: 3000 })
+
           }).catch(err => {
             console.log("cann't clock in", err);
+            toast.add({ severity: 'warn', summary: 'Error', detail: "can't login employees", life: 3000 })
           })
       }
+
       if (clocked_in) {
         axios.post(`/api/attendance/dashboard/clock-out/${id}`)
           .then(res => {
@@ -105,8 +114,10 @@ const status = (event, id) => {
             btn.children[0].classList.remove('pi-sign-in');
             btn.children[0].classList.add('pi-sign-out');
             console.log("Done clock out");
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful logout employees', life: 3000 })
           }).catch(err => {
             console.log("cann't clock out", err);
+            toast.add({ severity: 'warn', summary: 'Error', detail: "can't logout employees", life: 3000 })
           })
       }
 
@@ -245,11 +256,12 @@ const initFilters = () => {
                   <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
                     @click="confirmDelete(slotProps.data.id)" v-tooltip.top="'Delete'" />
                   <Button icon="pi pi-wrench" class="p-button-rounded p-button-help"
-                    @click="restData(slotProps.data.id)" v-tooltip.top="'Rest'" />
+                    @click="restdialog = true;id = slotProps.data.id" v-tooltip.top="'Reset Deposit ID'" />
                   <Button v-can="'employees edit'" class="p-button-rounded"
                     :class="slotProps.data.is_clocked_in ? 'p-button-info' : 'p-button-secondary'"
                     :icon="slotProps.data.is_clocked_in ? 'pi pi-sign-in' : 'pi pi-sign-out'"
-                    @click="status($event, slotProps.data.id)" v-tooltip.top='Status' id="stu" />
+                    @click="clockeddialog = true; id = slotProps.data.id; clocked_s = slotProps.data.is_clocked_in"
+                    v-tooltip.top="'clock in | clock out'" id="stu" />
                 </div>
               </template>
             </Column>
@@ -306,6 +318,34 @@ const initFilters = () => {
           <div class="w-full text-center">
             <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
           </div>
+        </Dialog>
+        <!-- clockin & clockout Dialog -->
+        <Dialog v-model:visible="clockeddialog" :style="{ width: '450px' }" :header='$t("confirm")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span v-if="user">
+              {{ clocked_s ? $t('clocked_out') : $t('clocked_in') }} <b>{{ user.first_name }}</b>?
+            </span>
+          </div>
+          <template #footer>
+            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="clockeddialog = false" />
+            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger"
+              @click="clockeddialog = false; status($event, id);" />
+          </template>
+        </Dialog>
+        <!-- Rest Dialog -->
+        <Dialog v-model:visible="restdialog" :style="{ width: '450px' }" :header='$t("confirm")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span v-if="user">
+        {{  $t('sure')  }}
+            </span>
+          </div>
+          <template #footer>
+            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="restdialog = false" />
+            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger"
+              @click="restdialog = false; restData($event, id);" />
+          </template>
         </Dialog>
       </div>
     </div>

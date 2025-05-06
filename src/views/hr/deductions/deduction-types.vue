@@ -201,12 +201,14 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
+                v-if="slotProps.data.id != '1'"
                 v-can="'skills edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="show(slotProps.data.id)"
               />
                 <Button
+                v-if="slotProps.data.id != '1'"
                 v-can="'skills delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
