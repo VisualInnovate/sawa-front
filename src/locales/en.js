@@ -38,6 +38,7 @@ export default {
   Addroom: "Add Rooms",
   RoomAc: "List Rooms",
   edit: "Edit",
+  delete: "delete",
   question: "question",
   calender: "Calender",
   basal_age: "Basal Age",
@@ -486,5 +487,8 @@ export default {
   advance_date: "Advance Date",
   clocked_in: "Do you want to clocked in the employee",
   clocked_out: "Do you want to clocked out the employee",
+  clockIn: "clocked in",
+  clockOut: "clocked out",
+  Rest: "Reset Device ID",
   sure: "Are you sure?",
 };

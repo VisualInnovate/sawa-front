@@ -5,6 +5,7 @@ import { ref, onMounted, onBeforeMount } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios";
 import { useRouter } from "vue-router";
+import t from 'vue3-print-nb';
 const toast = useToast()
 const router = useRouter()
 const allusers = ref([])
@@ -252,16 +253,16 @@ const initFilters = () => {
               <template #body="slotProps">
                 <div class="flex gap-2">
                   <Button v-can="'employees edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success"
-                    @click="edit(slotProps.data.user.id)" v-tooltip.top="'Edit'" />
+                    @click="edit(slotProps.data.user.id)" v-tooltip.top="$t('edit')" />
                   <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
-                    @click="confirmDelete(slotProps.data.id)" v-tooltip.top="'Delete'" />
+                    @click="confirmDelete(slotProps.data.id)" v-tooltip.top="$t('delete')" />
                   <Button icon="pi pi-wrench" class="p-button-rounded p-button-help"
-                    @click="restdialog = true;id = slotProps.data.id" v-tooltip.top="'Reset Deposit ID'" />
+                    @click="restdialog = true;id = slotProps.data.id" v-tooltip.top="$t('Rest')" />
                   <Button v-can="'employees edit'" class="p-button-rounded"
                     :class="slotProps.data.is_clocked_in ? 'p-button-info' : 'p-button-secondary'"
                     :icon="slotProps.data.is_clocked_in ? 'pi pi-sign-in' : 'pi pi-sign-out'"
                     @click="clockeddialog = true; id = slotProps.data.id; clocked_s = slotProps.data.is_clocked_in"
-                    v-tooltip.top="'clock in | clock out'" id="stu" />
+                    v-tooltip.top="slotProps.data.is_clocked_in ? $t('clockIn') : $t('clockOut') " id="stu" />
                 </div>
               </template>
             </Column>
