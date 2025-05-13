@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from '@/router'
 
 axios.defaults.baseURL = "https://sys.sawa.sawa.academy/";
 
@@ -18,3 +19,15 @@ axios.interceptors.request.use((config) => {
   // config.headers["Content-Type"] = "application/json";
   return config;
 });
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      router.push({ name: 'login' })
+    }
+    return Promise.reject(error)
+  }
+)
+
+export default axios
