@@ -42,6 +42,7 @@ export default {
   question: "question",
   calender: "Calender",
   basal_age: "Basal Age",
+  RatingAdd : "Rating Add",
   start_date: "start date",
   end_date: "end date",
   consulting: "consulting",

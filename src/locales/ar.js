@@ -402,6 +402,7 @@ export default {
   evaluation_name: "اسم التقييم",
   age_range: "الفئة العمرية",
   parent_category: "القسم الرئيسي",
+  RatingAdd : "اضافــــة تقييم",
   date: "موعد التقييم",
   Selected_item: "العنصر المختار",
   send_answer: "ارسل الاجابة",
