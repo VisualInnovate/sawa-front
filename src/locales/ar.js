@@ -398,6 +398,7 @@ export default {
   reinforcers: "المعززات",
   pair: " عرض الازواج",
   sample: "مثال",
+  EvaluateTypes : "انواع التقييم",
   goal: "الهدف",
   evaluation_name: "اسم التقييم",
   age_range: "الفئة العمرية",

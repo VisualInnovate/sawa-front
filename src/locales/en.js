@@ -52,6 +52,7 @@ export default {
   operation: "operations",
   child_age: " child age",
   back: "back",
+  EvaluateTypes : "Evaluation Types",
   print: "print",
   evaluation_type: "Evaluation Type",
   manage_user_roles: "Manage User Roles",
