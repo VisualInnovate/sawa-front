@@ -129,6 +129,7 @@
       </div>
     </Dialog>
   </div>
+  <Toast />
 </template>
 
 <script setup>
@@ -136,7 +137,9 @@ import { data } from "autoprefixer";
 import axios from "axios";
 import { ref, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useToast } from "primevue/usetoast";
 
+const toast = useToast();
 const { t } = useI18n();
 
 const showDialog = ref(false);
@@ -205,9 +208,21 @@ const sendItem = () => {
   axios
     .post("/api/notification-template", formData)
     .then((req) => {
+      toast.add({
+        severity: "success",
+        summary: t("success"),
+        detail: t("successMsg"),
+        life: 3000,
+      });
       console.log("Done send req");
     })
     .catch((e) => {
+      toast.add({
+        severity: "error",
+        summary: t("error"),
+        detail: t("errorMsg"),
+        life: 3000,
+      });
       console.log("Erorr in req : " + e);
     });
   sendDialog.value = false;
