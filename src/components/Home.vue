@@ -157,6 +157,7 @@ onMounted(async () => {
         <v-list density="compact" nav>
           <v-list-item prepend-icon="mdi-home"  :title="$t('dashbored')" 
               :to="{ name: 'dashbord' }"></v-list-item>
+
           <v-list-group v-if="user_permissions.includes('employees list' || 'doctor list' || 'permissions list' || 'roles list' )" prepend-icon="mdi-shield-account" value="Admin">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('Adminstration')"></v-list-item>
@@ -356,6 +357,9 @@ onMounted(async () => {
             
             
           </v-list-group>
+
+            <v-list-item prepend-icon="mdi-bell"  :title="$t('notification')" 
+              :to="{ name: 'notification' }"></v-list-item>
         </v-list>
         
         

@@ -9,6 +9,12 @@ const inputs = [
     component: () => import("../views/home.vue"),
    
   },
+  {
+    path: "/notification",
+    name: "notification",
+    component: () => import("../views/notification/index.vue"),
+   
+  },
 
   //// area
    

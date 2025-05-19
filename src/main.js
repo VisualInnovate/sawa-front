@@ -12,7 +12,7 @@ import vuetify from "@/plugins/vuetify";
 
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
-
+import Textarea from 'primevue/textarea';
 
 
 
@@ -127,6 +127,7 @@ app.use(VueHtmlToPaper);
 app.use(VueCarousel);
 app.use(DialogService)
 app.use(ToastService)
+app.component('Textarea', Textarea)
 app.component('DataTable', DataTable);
 app.component('Toast', Toast)
 app.use(ToastService)
