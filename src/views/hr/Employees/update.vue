@@ -327,20 +327,18 @@ export default {
               this.employee.treatments.push(response.data.data.user.treatments[i].id);
 
                }  
-               this.employee.evaluation = [];
-               for (let i =0 ; i < response.data.data.user?.evaluations.length; i++) {    
-                 this.employee.evaluation.push(response.data.data.user?.evaluations[i].id);
-
-               }  
+              //  this.employee.evaluation = [];
+              //  for (let i =0 ; i < response.data.data.user?.evaluations.length; i++) {    
+              //    this.employee.evaluation.push(response.data.data.user?.evaluations[i].id);
+              //  }
 
                this.employee.department = [];
                for (let i =0 ; i < response.data.data.user.departments.length; i++) {    
               this.employee.department.push(response.data.data.user.departments[i].id);
-        
-          
                }  
-          })
-
+              })
+              
+              console.log("EM",this.employee)
        },
 
 
