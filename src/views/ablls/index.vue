@@ -1,6 +1,6 @@
 <template>
     <Ablls></Ablls>
-    <v-card v-can="'able-mission list'" class="p-[1%]" >
+    <v-card v-can="'able category list'" class="p-[1%]" >
         <Button  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 ">
