@@ -156,7 +156,7 @@ export default {
         } else {
           check = 0
         }
-        if (check == 2) {
+        if (check == 200) {
           let checkHeaderFlag = 0;
 
           for (const item of Object.entries(this.headerAndQuestions)) {
