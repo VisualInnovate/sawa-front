@@ -211,7 +211,7 @@ onMounted(async () => {
               :to="{ name: 'Headers' }"></v-list-item> -->
             <v-list-item v-can="'side-profiles list'" :title="$t('side profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
-              <v-list-item  v-can="'able-mission list'" :title="$t('ablls')" value="ablls"
+              <v-list-item  v-can="'able mission list'" :title="$t('ablls')" value="ablls"
               :to="{ name: 'ablls' }"></v-list-item>
               <v-list-item v-if="user_permissions.includes('carolina test list'||'carolina category list'||'able category list'||'carolina answer list'||'carolina answer type list'||'able category list')" :title="$t('Carolaina')" value="Carolaina"
               :to="{ name: 'agerange' }"></v-list-item>
