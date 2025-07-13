@@ -1,178 +1,219 @@
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
-import {th} from "vuetify/locale";
 
-export default {
+const router = useRouter()
+const route = useRoute()
+const toast = useToast()
 
-  data() {
-    return {
-      search: '',
-      headers: [
+const search = ref('')
+const sideProfile = ref([])
+const alertText = ref(null)
+const loading = ref(true)
+const childName = ref('')
+const dt = ref(null)
 
-        {key: 'evaluation_title', title: 'Evaluation Title'},
-        {title: this.$t('operation')},
-      ],
-      sideProfile: [],
-      alert_text: null,
-      groupBy: [{key: 'side_profile_title'}],
-      loading: true,
-      childName: ''
+const headers = [
+  { field: 'evaluation_title', header: 'Evaluation Title' },
+  { field: 'actions', header: 'Operation', exportable: false }
+]
 
-    }
-  },
-  methods: {
-    showside(id) {
-      // console.log(id)
-      // this.$router.push({ name: 'showChildEvaluation' , params: {id: id} })
-      this.$router.push({name: 'resulte', params: {child_id: this.$route.params.id, sideProfile_id: id}})
-      // this.$router.push({ name: 'resulte' })
-      // this.$router.push({ name: 'resulte' })
-    },
-    goBack() {
-      this.$router.go(-1)
-    },
-    getSideProfile() {
-      axios.get(`api/child/${this.$route.params.id}/show-side-profiles`).then(res => {
-        this.sideProfile = res.data.sideProfile
-        this.loading = false;
-        console.log(res.data.sideProfile)
-
-      })
-    },
-    getChildrenName() {
-      axios.get(`api/child/${this.$route.params.id}`).then(res => {
-        this.childName = res.data.child.name
-        // this.loading = false;
-      })
-    }
-    , editItem(id) {
-      this.$router.push({name: 'EditSideProfiles', params: {id: id}})
-    }
-    , deleteItem(id) {
-      console.log(id)
-      axios.delete(`/api/side-profiles/${id}/delete`).then(res => {
-        if (res.data.status == 200) {
-          this.alert_text = "side profile deleted successfully "
-          this.sideProfile = res.data.sideProfile
-        }
-
-      })
-    },
-
-    showItem(evaluation_id, side_profile_id) {
-      console.log(evaluation_id)
-      this.$router.push({
-        name: 'showChildResult', params: {
-          child_id: this.$route.params.id,
-          sideProfile_id: side_profile_id,
-          evaluation_id: evaluation_id
-        }
-      })
-    }
-  },
-  mounted() {
-    this.getSideProfile()
-    this.getChildrenName()
-  }
+const goBack = () => {
+  router.go(-1)
 }
+
+const getSideProfile = () => {
+  loading.value = true
+  axios.get(`api/child/${route.params.id}/show-side-profiles`).then(res => {
+    sideProfile.value = res.data.sideProfile
+    loading.value = false
+  })
+}
+
+const getChildrenName = () => {
+  axios.get(`api/child/${route.params.id}`).then(res => {
+    childName.value = res.data.child.name
+  })
+}
+
+const showSide = (id) => {
+  router.push({ 
+    name: 'resulte', 
+    params: { child_id: route.params.id, sideProfile_id: id }
+  })
+}
+
+const editItem = (id) => {
+  router.push({ name: 'EditSideProfiles', params: { id } })
+}
+
+const deleteItem = (id) => {
+  axios.delete(`/api/side-profiles/${id}/delete`).then(res => {
+    if (res.data.status === 200) {
+      alertText.value = 'Side profile deleted successfully'
+      sideProfile.value = res.data.sideProfile
+      toast.add({ 
+        severity: 'success', 
+        summary: 'Success', 
+        detail: 'Side profile deleted successfully', 
+        life: 3000 
+      })
+    }
+  })
+}
+
+const showItem = (evaluation_id, side_profile_id) => {
+  router.push({
+    name: 'showChildResult',
+    params: {
+      child_id: route.params.id,
+      sideProfile_id: side_profile_id,
+      evaluation_id: evaluation_id
+    }
+  })
+}
+
+onMounted(() => {
+  getSideProfile()
+  getChildrenName()
+})
 </script>
 
 <template>
-  <div>
-    <v-btn height="45" class="mb-5 text-white" color="#135c65" @click="goBack">
-      <v-icon
-          start
-          icon="mdi-arrow-left"
-      ></v-icon>
-      Back
-    </v-btn>
-    <v-alert
-        type="success"
-        variant="tonal"
-        border="start"
-        elevation="2"
-        closable
-        :close-label="$t('close')"
-        :text="alert_text"
-        v-if="alert_text!= null "
-        class="mb-8"
-    >
+  <div class="grid">
+    <div class="col-12">
+      <div class="card p-4 shadow-2 border-round">
+        <Toolbar class="mb-4">
+          <template #start>
+            <Button 
+              :label="$t('Back')"
+              icon="pi pi-arrow-left"
+              class="p-button-secondary mr-2"
+              @click="goBack"
+            />
+            <h2 class="text-2xl font-bold">{{ childName }}</h2>
+          </template>
+          <template #end>
+            <span class="p-input-icon-left">
+              <i class="pi pi-search" />
+              <InputText 
+                v-model="search" 
+                :placeholder="$t('Search')" 
+                class="w-full"
+              />
+            </span>
+          </template>
+        </Toolbar>
 
-    </v-alert>
+        <Toast />
 
+        <DataTable
+          ref="dt"
+          :value="sideProfile"
+          :loading="loading"
+          data-key="id"
+          :globalFilter="search"
+          :paginator="true"
+          :rows="10"
+          :rowsPerPageOptions="[5, 10, 25, 50]"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} records"
+          responsiveLayout="scroll"
+          scrollable
+          scrollHeight="flex"
+          stripedRows
+          showGridlines
+          class="p-datatable-sm"
+          rowGroupMode="subheader"
+          groupRowsBy="side_profile_title"
+        >
+          <template #groupheader="{ data }">
+            <div class="flex align-items-center gap-2">
+              <span class="font-bold">{{ data.side_profile_title }}</span>
+              <Button
+                icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-primary"
+                @click="showSide(data.side_profile_id)"
+                v-tooltip.top="'View Side Profile'"
+              />
+              <Button
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-text p-button-primary"
+                @click="editItem(data.side_profile_id)"
+                v-tooltip.top="'Edit Side Profile'"
+              />
+              <Button
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-text p-button-danger"
+                @click="deleteItem(data.side_profile_id)"
+                v-tooltip.top="'Delete Side Profile'"
+              />
+            </div>
+          </template>
 
-    <v-card>
-      <v-card-title>
-        {{ childName }}
-        <v-spacer></v-spacer>
+          <Column v-for="col in headers" :key="col.field" :field="col.field" :header="$t(col.header)">
+            <template #body="{ data }" v-if="col.field === 'actions'">
+              <div class="flex gap-1 justify-content-center">
+                <Button 
+                  icon="pi pi-eye" 
+                  class="p-button-rounded p-button-text p-button-primary" 
+                  @click="showItem(data.evaluations_id, data.side_profile_id)"
+                  v-tooltip.top="'View Evaluation'"
+                />
+              </div>
+            </template>
+          </Column>
 
-        <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-        ></v-text-field>
-      </v-card-title>
-      <v-data-table
-          :headers="headers"
-          :items="sideProfile"
-          :search="search"
-          :group-by="groupBy"
-          style="padding:15px;"
-      >
+          <template #empty>
+            <div class="text-center py-4">
+              <i class="pi pi-exclamation-circle text-2xl mb-2" />
+              <p class="text-xl">No records found</p>
+            </div>
+          </template>
 
-        <template #top>
-          <v-progress-linear v-if="loading" slot="progress" style="color:#F6F6F6" indeterminate></v-progress-linear>
-        </template>
-        <template #group-header="{item, isGroupOpen, toggleGroup ,columns , props}">
-
-          <tr>
-            <td @click="toggleGroup(item)" style="cursor: pointer; background-color:#F6F6F6;  ">
-              <v-icon
-              >{{ isGroupOpen(item) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-              </v-icon>
-
-              {{ item.value }}
-
-            </td>
-            <td @click="toggleGroup(item)" style="background-color:#F6F6F6; cursor: pointer;"></td>
-            <td style="background-color:#F6F6F6">
-              <v-icon small color="primary" class="mx-3" @click="showside(item.items[0].raw.side_profile_id)">mdi-eye
-              </v-icon>
-              <!-- <v-icon small color="primary" class="mx-3" @click="editItem(item.items[0].raw.side_profile_id)">mdi-eye</v-icon> -->
-
-            </td>
-          </tr>
-        </template>
-
-        <template #headers="">
-          <tr>
-            <td>{{$t('evaluation_type')}}</td>
-            <td>{{headers[0].title}}</td>
-            <td>{{headers[1].title}}</td>
-
-          </tr>
-
-        </template>
-
-        <template #item="{ item , index }">
-
-
-          <tr>
-            <td>{{ colgroup }}</td>
-            <td>{{ item.columns.evaluation_title }}</td>
-            <td>
-              <v-icon small color="primary" class="mr-2"
-                      @click="showItem(item.raw.evaluations_id,item.raw.side_profile_id)">mdi-eye
-              </v-icon>
-
-            </td>
-          </tr>
-
-        </template>
-
-      </v-data-table>
-    </v-card>
+          <template #loading>
+            <div class="flex justify-content-center align-items-center py-4">
+              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+            </div>
+          </template>
+        </DataTable>
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.p-datatable) {
+  font-size: 0.9rem;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: #f0f4f8 !important;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr.p-rowgroup-header) {
+  background-color: #f6f6f6;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 960px) {
+  :deep(.p-datatable) {
+    overflow-x: auto;
+    display: block;
+  }
+}
+</style>

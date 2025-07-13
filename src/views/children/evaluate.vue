@@ -28,7 +28,7 @@
           </div>
           <div class="text-center" >
           
-              <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id)" class="details m-auto"> نتائج التقييم</Button>     
+              <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" class="details m-auto"> نتائج التقييم</Button>     
               <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="delete m-auto"> </Button>
             
           </div>
@@ -180,7 +180,8 @@
 
 
       },
-      go_evaluate(id,type,child_id){
+      go_evaluate(id,type,child_id,data){
+        
         if(type==2){
           this.$router.push({ name: 'milestone-resulte', params:{'id':child_id,'evla_id':id}});
         } 
@@ -192,6 +193,8 @@
         }
         if(type==5){
           this.$router.push({ name: 'carolina-resulte', params:{'id':id}});
+        }else{
+          this.$router.push({ name: 'showChildResult', params:{'child_id':data.pivot.child_id,sideProfile_id:data.side_profile_id,evaluation_id:id}});
         }
       },
 
