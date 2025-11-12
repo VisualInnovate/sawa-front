@@ -501,4 +501,5 @@ export default {
   clockOut: "clocked out",
   Rest: "Reset Device ID",
   sure: "Are you sure?",
+  In_months: "( months )",
 };

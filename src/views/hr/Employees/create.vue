@@ -329,7 +329,7 @@
           </div>
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("contract_period") }}</label>
+              <label class="text-right">{{ $t("contract_period") + "  " + ( $t("In_months") )}}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"

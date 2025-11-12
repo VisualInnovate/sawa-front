@@ -95,7 +95,7 @@ const status = (event, id) => {
       if (event.target.id == "stu") btn = event.target;
       if (event.target.id != "stu") btn = event.target.parentElement;
 
-      if (!clocked_in) {
+      if (!clocked_in) {  
         axios
           .post(`/api/attendance/dashboard/clock-in/${id}`)
           .then((res) => {
@@ -292,18 +292,18 @@ const initFilters = () => {
                   id = slotProps.data.id;
                   " v-tooltip.top="$t('Rest')" />
                   <Button v-can="'employees edit'" class="p-button-rounded" :class="slotProps.data.is_clocked_in
-                      ? 'p-button-info'
-                      : 'p-button-secondary'
+                      ? 'p-button-secondary'
+                      : 'p-button-info'
                     " :icon="slotProps.data.is_clocked_in
-                        ? 'pi pi-sign-in'
-                        : 'pi pi-sign-out'
+                        ? 'pi pi-sign-out'
+                        : 'pi pi-sign-in'
                       " @click="
                       clockeddialog = true;
                     id = slotProps.data.id;
                     clocked_s = slotProps.data.is_clocked_in;
                     " v-tooltip.top="slotProps.data.is_clocked_in
-                        ? $t('clockIn')
-                        : $t('clockOut')
+                        ? $t('clockOut')
+                        : $t('clockIn')
                       " id="stu" />
                 </div>
               </template>

@@ -508,4 +508,5 @@ export default {
   max_value: "القيمة القصوي",
   advance_date: "تاريخ السلفة",
   Requests: "طلبات",
+  In_months: "( بالاشهر )",
 };
