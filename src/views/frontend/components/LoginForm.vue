@@ -122,9 +122,7 @@ export default {
           
             <div class="mt-4 flex items-center justify-between">
                 <span class="border-b w-1/5 lg:w-1/4"></span>
-                <p class="text-xl py-2">
-                   <router-link :to="{ name: 'SingUp' }" class="text-xl text-[#135C65] uppercase"> {{ $t("Create_an_account") }}</router-link>
-                </p>
+               
                 <span class="border-b w-1/5 lg:w-1/4"></span>
             </div>
             <div class=" flex flex-column gap-2">
@@ -143,12 +141,14 @@ export default {
                   <Button @click="parentStore.login(parent)" class="create m-auto w-full " :label='$t("Register_now")'></Button>
                   <small id="username-help"></small>
               </div>
-            <div class="mt-2 flex items-center justify-between">
+            <div class="mt-2 flex justify-between flex-col">
                 
                 <p class="text-xl">
                    <router-link :to="{ name: 'forgetpassword' }" class="text-xl text-[#135C65]  uppercase"> {{ $t("forgetpass") }}</router-link>
                 </p>
-              
+               <p class="text-xl py-2">
+                   <router-link :to="{ name: 'SingUp' }" class="text-xl text-[#135C65] uppercase"> {{ $t("Create_an_account") }}</router-link>
+                </p>
                
             </div>
         </div>

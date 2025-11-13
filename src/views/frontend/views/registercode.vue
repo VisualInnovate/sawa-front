@@ -6,11 +6,6 @@
       <div class="w-full p-8 lg:w-1/2">
         <p class="text-2xl text-gray-600 text-center">{{ $t("Enter_the_activation_code") }}</p>
         <div class="mt-4 flex items-center justify-between">
-          <span class="border-b w-1/5 lg:w-1/4"></span>
-          <p class="text-xl py-2">
-            <router-link :to="{ name: 'SingUp' }" class="text-xl text-[#135C65] uppercase"> {{ $t("Create_an_account") }}</router-link>
-          </p>
-          <span class="border-b w-1/5 lg:w-1/4"></span>
         </div>
         <div   style="direction: ltr;" class="flex justify-center gap-2 py-6">
           <input

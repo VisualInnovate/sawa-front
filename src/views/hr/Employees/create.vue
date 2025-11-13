@@ -565,7 +565,7 @@
           ></Button>
           <Button
             type="submit"
-            @click="submitted = true"
+            @click="submitted = true; "
             class="create"
             :label="$t('submit')"
           ></Button>
@@ -728,6 +728,8 @@ export default {
             detail: this.$t("element_add_success"),
             life: 3000,
           });
+        }).then(() => {
+          this.$router.push({ name: "Employees" });
         })
         .catch((el) => {
           this.$toast.add({

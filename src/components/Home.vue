@@ -262,7 +262,7 @@ onMounted(async () => {
           
         
 
-          <v-list-group  prepend-icon=" mdi-calendar" value="Calender">
+          <v-list-group v-if="user_permissions.includes('consultations')"  prepend-icon=" mdi-calendar" value="Calender">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('consulting')"></v-list-item>
             </template>
@@ -288,7 +288,7 @@ onMounted(async () => {
           
 
          <!-- student_programe -->
-          <v-list-group v-if="(user_permissions.includes(''))" prepend-icon="mdi-message-question-outline" value="custom-files">
+          <v-list-group v-if="(user_permissions.includes('modules'))" prepend-icon="mdi-message-question-outline" value="custom-files">
             <template #activator="{ props }">
               <v-list-item v-bind="props" :title="$t('custom_files')"></v-list-item>
             </template>
@@ -358,7 +358,7 @@ onMounted(async () => {
             
           </v-list-group>
 
-            <v-list-item prepend-icon="mdi-bell"  :title="$t('notification')" 
+            <v-list-item prepend-icon="mdi-bell" v-if="user_permissions.includes('notifications')"  :title="$t('notification')" 
               :to="{ name: 'notification' }"></v-list-item>
         </v-list>
         
