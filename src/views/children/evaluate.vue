@@ -180,7 +180,7 @@
 
 
       },
-      go_evaluate(id,type,child_id,data){
+      go_evaluate(id,type,child_id,data){a
         
         if(type==2){
           this.$router.push({ name: 'milestone-resulte', params:{'id':child_id,'evla_id':id}});
@@ -194,7 +194,7 @@
         if(type==5){
           this.$router.push({ name: 'carolina-resulte', params:{'id':id}});
         }else{
-          this.$router.push({ name: 'showChildResult', params:{'child_id':data.pivot.child_id,sideProfile_id:data.side_profile_id,evaluation_id:id}});
+          this.$router.push({ name: 'showChildResult', params:{'child_id':data.pivot.child_idz,sideProfile_id:data.side_profile_id,evaluation_id:id}});
         }
       },
 
