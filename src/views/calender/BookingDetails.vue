@@ -285,7 +285,7 @@
     <div class="flex justify-center">
       <div
         v-show="show_answer_modal"
-        class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50"
+        class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 z-50"
       >
         <div class="w-1/2 p-6 bg-white rounded-md shadow-xl">
           <div class="flex items-center justify-between">
