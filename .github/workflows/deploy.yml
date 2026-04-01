@@ -32,8 +32,9 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.PORT || '22' }}
           script: |
-            rm -rf /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist/*
-            echo "✅ تم مسح محتويات dist القديمة"
+            rm -rf /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
+            mkdir -p /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
+            echo "✅ تم مسح مجلد dist القديم وإعادة إنشائه بنجاح"
 
       - name: Upload new dist folder
         uses: appleboy/scp-action@v0.1.7
