@@ -26,21 +26,23 @@ jobs:
       - name: Clear old dist folder on server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.PORT || '22' }}
           script: |
-            rm -rf /home/${{ secrets.SSH_USER }}/public_html/repositories/sawa-front/dist/*
+            rm -rf /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist/*
             echo "✅ تم مسح محتويات dist القديمة"
 
       - name: Upload new dist folder
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.PORT || '22' }}
           source: "dist/*"
-          target: "/home/${{ secrets.SSH_USER }}/public_html/repositories/sawa-front"
+          target: "/home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test"
           strip_components: 0
