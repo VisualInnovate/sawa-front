@@ -31,7 +31,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || '22' }}
           script: |
-            rm -rf /home/${{ secrets.SSH_USER }}/public_html/repositories/sawa-front.test/dist/*
+            rm -rf /home/${{ secrets.SSH_USER }}/public_html/repositories/sawa-front/dist/*
             echo "✅ تم مسح محتويات dist القديمة"
 
       - name: Upload new dist folder
@@ -42,5 +42,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || '22' }}
           source: "dist/*"
-          target: "/home/${{ secrets.SSH_USER }}/public_html/repositories/sawa-front.test"
+          target: "/home/${{ secrets.SSH_USER }}/public_html/repositories/sawa-front"
           strip_components: 0
