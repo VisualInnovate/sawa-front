@@ -1,0 +1,4 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/sawa/public_html/repositories/sawa-front.test
+    - /bin/cp -R dist/* $DEPLOYPATH
