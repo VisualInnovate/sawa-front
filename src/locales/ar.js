@@ -2,6 +2,7 @@ export default {
   export: "تصدير",
   close: "إغلاق",
   roles: "الأدوار",
+  create_role: "إنشاء دور",
   permissions: "الصلاحيات",
   users: "المستخدمين",
   trend: "الاتجاه",
