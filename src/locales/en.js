@@ -6,6 +6,7 @@ export default {
   your_booking_was_successfully_submitted:
     "your booking was successfully submitted",
   permissions: "Permissions",
+  create_role: "Create Role",
   users: "Users",
   trend: "Trend",
   overview: "Overview",
