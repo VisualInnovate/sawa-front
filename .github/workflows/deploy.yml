@@ -23,6 +23,10 @@ jobs:
           npm i
           npm run build
 
+      - name: Test SSH Connection
+        run: |
+          ssh -o ConnectTimeout=10 -p ${{ secrets.PORT || '22' }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo connected"
+
       - name: Clear old dist folder on server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -35,13 +39,30 @@ jobs:
             mkdir -p /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
             echo "✅ تم مسح مجلد dist القديم وإعادة إنشائه بنجاح"
 
-      - name: Upload new dist folder
+      - name: Compress dist
+        run: tar -czf dist.tar.gz dist
+
+      - name: Upload compressed dist
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT || '22' }}
-          source: "dist/*"
+          source: "dist.tar.gz"
           target: "/home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test"
-          strip_components: 0
+          timeout: 120s
+          command_timeout: 10m
+
+      - name: Extract on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT || '22' }}
+          script: |
+            cd /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test
+            tar -xzf dist.tar.gz
+            rm dist.tar.gz
+            echo "✅ تم فك الضغط بنجاح"
