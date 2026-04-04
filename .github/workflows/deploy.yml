@@ -27,6 +27,11 @@ jobs:
           echo "===== DIST ====="
           ls -la dist || echo "dist not found"
 
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.PORT || '22' }} ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
       - name: Test SSH Connection
         run: |
           ssh -o ConnectTimeout=10 -p ${{ secrets.PORT || '22' }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo connected"
