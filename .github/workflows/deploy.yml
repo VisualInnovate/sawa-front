@@ -22,6 +22,10 @@ jobs:
         run: |
           npm i
           npm run build
+          echo "===== CHECK FILES ====="
+          ls -la
+          echo "===== DIST ====="
+          ls -la dist || echo "dist not found"
 
       - name: Test SSH Connection
         run: |
