@@ -12,7 +12,7 @@
             <p class="m-auto text-center w-full py-1 text-white font-semibold text-sm uppercase tracking-wider">
               {{ abll?.category }}
             </p>
-          </div>
+          </div> 
           
           <div class="p-3 space-y-3">
             <div v-for="(count, idx) in abll.missions" :key="idx" class="mb-2 last:mb-0">
