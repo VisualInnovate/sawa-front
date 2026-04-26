@@ -221,7 +221,7 @@
         <div class="w-full lg:w-[40%]">
           <div class="flex justify-center items-center h-full">
             <img
-              src="./images/Map Section.png"
+              src="./images/map-section.png"
               alt=""
               class="w-3/4 lg:w-full rounded-xl"
             />
