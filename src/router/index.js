@@ -8,15 +8,15 @@ import hr from "./hr.routes";
 import parentsRoutes from "./parents.routes";
 import siteRoutes from "./settings.routes";
 import rooms from "./room.routes";
-import reinforcer from './reinforcers.routes'
+import reinforcer from "./reinforcers.routes";
 import childrenRoutes from "./children.routes";
 import QuestionHeadersRoutes from "./question-headers.routes";
 import EvaluationsRoutes from "./evaluation.routes";
 import therapeutic from "./therapeutic.routes";
 import appointment from "./appointment-type.routes";
 import studentprogram from "./studentprogram.routes";
-import treatment_type from './treatment-type.routes';
-import inputs from './inputs.routes';
+import treatment_type from "./treatment-type.routes";
+import inputs from "./inputs.routes";
 import sideProfileRoutes from "./side-profile.routes";
 import calender from "./calender.routes";
 import page_403 from "../views/pages/page_403.vue";
@@ -45,8 +45,8 @@ function guest(to, from, next) {
 }
 
 function authForNormalUser(to, from, next) {
-  localStorage.setItem('lastRoute', to.path);
-  if (!useParentStore().parent_id ) {
+  localStorage.setItem("lastRoute", to.path);
+  if (!useParentStore().parent_id) {
     return next({ name: "parentLogin" });
   }
 
@@ -70,6 +70,54 @@ function guestForNormalUser(to, from, next) {
 const routes = [
   ///////////////Begin Front End Users Routes //////////////////
   {
+    path: "/",
+    name: "root",
+    component: () => import("../layout/landingPage.vue"),
+    beforeEnter: guestForNormalUser,
+    children: [
+      {
+        path: "",
+        name: "home",
+        component: () => import("../views/frontend/views/main/index.vue"),
+      },
+      {
+        path: "/about-us",
+        name: "aboutUs",
+        component: () => import("../views/frontend/views/main/aboutUs.vue"),
+      },
+      {
+        path: "/programs",
+        name: "programs",
+        component: () => import("../views/frontend/views/main/programs.vue"),
+      },
+      {
+        path: "/therapeutic",
+        name: "therapeutic",
+        component: () => import("../views/frontend/views/main/therapeutic.vue"),
+      },
+      {
+        path: "/journey",
+        name: "journey",
+        component: () => import("../views/frontend/views/main/journey.vue"),
+      },
+      {
+        path: "/integration",
+        name: "integration",
+        component: () => import("../views/frontend/views/main/integration.vue"),
+      },
+      {
+        path: "/services",
+        name: "services",
+        component: () => import("../views/frontend/views/main/services.vue"),
+      },
+      {
+        path: "/contact",
+        name: "contact",
+        component: () => import("../views/frontend/views/main/contact.vue"),
+      },
+    ],
+  },
+  {
     path: "/web/parent/register",
     name: "SingUp",
     component: () => import("../views/frontend/views/SingUp.vue"),
@@ -85,20 +133,19 @@ const routes = [
   {
     path: "/web/parent/forgetpassword",
     name: "forgetpassword",
-    component: ()=>import("../views/frontend/views/forgetpassword.vue"),
+    component: () => import("../views/frontend/views/forgetpassword.vue"),
     beforeEnter: guestForNormalUser,
   },
   {
     path: "/web/parent/restepassword",
     name: "restepassword",
-    component: ()=>import("../views/frontend/views/resetpassword.vue"),
+    component: () => import("../views/frontend/views/resetpassword.vue"),
     beforeEnter: guestForNormalUser,
   },
   {
     path: "/web/code",
     name: "code",
     component: code,
-  
   },
   {
     path: "/web/contactus",
@@ -107,7 +154,7 @@ const routes = [
   },
   {
     path: "/web",
-    name: "home",
+    name: "webHome",
     component: HomeView,
   },
   {
@@ -202,17 +249,10 @@ const routes = [
       //  phoneIsVerified
     ],
   },
-  
 
   //start Treatment
 
-
-
-
   //
-
-
-
 
   {
     path: "/web/following",
@@ -275,7 +315,7 @@ const routes = [
     beforeEnter: guest,
     component: () => import("@/components/Register.vue"),
   },
-  
+
   {
     path: "/unauthorized",
     name: "unauthorized",
@@ -306,14 +346,12 @@ const routes = [
     name: "ResultPrint",
     component: () => import("../views/children/ResultPrint.vue"),
   },
-
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
-
 
 // router.beforeEach((to, from, next) => {
 //   let user_permissions = JSON.parse(localStorage.getItem("userPermissions"));

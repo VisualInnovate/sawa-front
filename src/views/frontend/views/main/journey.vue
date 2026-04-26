@@ -1,0 +1,1 @@
+<template>Journey Page</template>
