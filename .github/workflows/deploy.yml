@@ -18,12 +18,13 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Install Dependencies and Build Vue
-        run: |
-          npm i
-          npm run build
+      - name: Install Dependencies
+        run: npm install
 
-      - name: Clear old dist folder on server
+      - name: Build Vue App
+        run: npm run build
+
+      - name: Delete old dist folder on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -33,15 +34,18 @@ jobs:
           script: |
             rm -rf /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
             mkdir -p /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
-            echo "✅ تم مسح مجلد dist القديم وإعادة إنشائه بنجاح"
+            echo "✅ Old dist deleted and recreated"
 
-      - name: Upload new dist folder
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT || '22' }}
-          source: "dist/*"
-          target: "/home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test"
-          strip_components: 0
+      - name: Install rsync
+        run: sudo apt-get update && sudo apt-get install -y rsync
+
+      - name: Upload new dist folder via rsync
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          rsync -avz \
+          -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.PORT || '22' }}" \
+          dist/ \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist/
