@@ -45,14 +45,14 @@ const contacts = ref([
       "../views/frontend/views/main/images/icon-location.svg",
       import.meta.url,
     ).href,
-    text: "شارع التعليم، الرياض، المملكة العربية السعودية",
+    text: "ش.ميسلون - الرابية - عمان - الأردن",
   },
   {
     icon: new URL(
       "../views/frontend/views/main/images/icon-phone.svg",
       import.meta.url,
     ).href,
-    text: "+966 123 456 789",
+    text: "+0096265522688",
     dir: "ltr",
   },
   {
