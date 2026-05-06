@@ -1,5 +1,9 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
 const socialIcons = ref([
   {
     src: new URL(
@@ -32,11 +36,12 @@ const departments = ref([
 ]);
 
 const quickLinks = ref([
-  { label: "من نحن", href: "#" },
-  { label: "برامجنا", href: "#" },
-  { label: "رحلة الطفل", href: "#" },
-  { label: "الخدمات", href: "#" },
-  { label: "سياسة الخصوصية", href: "#" },
+  { label: "من نحن", href: "/about-us" },
+  { label: "البرامج", href: "/programs" },
+  { label: "الاقسام العلاجية", href: "/therapeutic" },
+  { label: "رحلة الطفل", href: "/journey" },
+  { label: "الدمج والتطوير", href: "/integration" },
+  { label: "الخدمات", href: "/services" },
 ]);
 
 const contacts = ref([
@@ -66,6 +71,11 @@ const contacts = ref([
 ]);
 
 const bottomLinks = ref(["الشروط والأحكام", "الأسئلة الشائعة"]);
+
+const navigate = (href) => {
+  router.push(href);
+  isMenuOpen.value = false;
+};
 </script>
 
 <template>
