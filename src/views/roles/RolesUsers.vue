@@ -2,17 +2,20 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUsersStore } from "../../stores/Users";
+import { useI18n } from "vue-i18n";
 
 const usersStore = useUsersStore();
 
 const router = useRouter();
 const items = ref([]);
+const { t } = useI18n();
+
 const headers = ref([
-  { text: "Id", value: "id", sortable: false },
-  { text: "Name", align: "start", sortable: false, value: "name" },
-  { text: "Email", align: "start", sortable: false, value: "email" },
-  { text: "Role", align: "start", sortable: false, value: "roles" },
-  { text: "Actions", value: "actions", sortable: false },
+  { text: t("ID"), value: "id", sortable: false },
+  { text: t("Name"), align: "start", sortable: false, value: "name" },
+  { text: t("email"), align: "start", sortable: false, value: "email" },
+  { text: t("roles"), align: "start", sortable: false, value: "roles" },
+  { text: t("actions"), value: "actions", sortable: false },
 ]);
 
 const pageSizes = ref([5, 10, 20]);
@@ -60,7 +63,7 @@ onMounted(() => {
     <v-col cols="12" sm="8">
       <v-text-field
         v-model="usersStore.params.keyword"
-        label="Search by Name"
+        :label="$t('search_by_name')"
         @keyup="
           page = 1;
           getItems();
@@ -114,7 +117,7 @@ onMounted(() => {
           <v-select
             v-model="usersStore.params.size"
             :items="pageSizes"
-            label="Items per Page"
+            :label="$t('items_per_page')"
             @update:modelValue="handlePageSizeChange"
           ></v-select>
         </v-col>
@@ -135,7 +138,7 @@ onMounted(() => {
 
     <v-col cols="12" sm="12">
       <v-card class="mx-auto" tile>
-        <v-card-title>Users</v-card-title>
+        <v-card-title>{{ $t('users') }}</v-card-title>
 
         <v-table>
           <thead>

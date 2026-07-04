@@ -4,8 +4,10 @@ import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
+import { useI18n } from 'vue-i18n';
 
 const toast = useToast()
+const { t } = useI18n();
 const error=ref({})
 const loading = ref(true)
 const event_update=ref({})
@@ -79,7 +81,7 @@ const onSubmit=()=>{
       fetchData()
       productDialog.value=!(productDialog.value)
       category.value={}
-      toast.add({severity: 'success', summary: 'Successful', detail: 'category create', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('event_created_successfully'), life: 3000})
     })
     .catch((el)=>{
 
@@ -106,7 +108,7 @@ const update =()=>{
       fetchData()
       updateDialog.value=!(updateDialog.value)
       category.value={}
-      toast.add({severity: 'success', summary: 'Successful', detail: 'category create', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('event_created_successfully'), life: 3000})
     })
     .catch((el)=>{
 
@@ -154,7 +156,7 @@ axios.delete(`api/events/${delete_id.value.id}`).then((res)=>{
 
     fetchData()
     deleteProductsDialog.value=false
-    toast.add({severity: 'success', summary: 'Successful', detail: 'category Deleted', life: 3000})
+    toast.add({severity: 'success', summary: t('success_message'), detail: t('event_deleted_successfully'), life: 3000})
 
 });
 
@@ -195,7 +197,7 @@ const initFilters = () => {
         <div class="py-1">
                  <div class=" text-center" >
                   <div onclick="document.getElementById('filr').click()" class=" border-4 h-40 m-auto rounded-full w-40" :style="{ backgroundImage: `url(${ event.image})` }" style="background-position: center;background-repeat: no-repeat;background-size: cover;"></div>
-                    <Button  onclick="document.getElementById('filr').click()" class="create mt-2" icon="pi pi-upload" label="Upload Icon" />
+                    <Button  onclick="document.getElementById('filr').click()" class="create mt-2" icon="pi pi-upload" :label="$t('upload_icon')" />
                   </div>
 
         </div>
@@ -224,7 +226,7 @@ const initFilters = () => {
           :filters="filters"
           paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
+          :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
           responsive-layout="scroll"
           v-can="'events list'"
         >
@@ -298,20 +300,20 @@ const initFilters = () => {
           </Column>
 
         </DataTable>
-        <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+        <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" :header="$t('confirm')" :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="product">Are you sure you want to delete the {{ delete_id.name }} ?</span>
+            <span v-if="product">{{ $t('are_you_sure_delete') }} {{ delete_id.name }} ?</span>
           </div>
           <template #footer>
-            <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteProductsDialog = false"/>
-            <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts"/>
+            <Button :label="$t('no')" icon="pi pi-times" class="p-button-text" @click="deleteProductsDialog = false"/>
+            <Button :label="$t('yes')" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts"/>
           </template>
         </Dialog>
 
 
 
-        <Dialog v-model:visible="updateDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+        <Dialog v-model:visible="updateDialog" :style="{ width: '450px' }" :header="$t('confirm')" :modal="true">
 
 
 
@@ -350,7 +352,7 @@ const initFilters = () => {
 
     </form>
           <template #footer>
-            <Button label="Save" icon="pi pi-check" class="p-button-text" @click="update"/>
+            <Button :label="$t('save')" icon="pi pi-check" class="p-button-text" @click="update"/>
           </template>
         </Dialog>
 

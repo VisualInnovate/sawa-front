@@ -148,17 +148,17 @@ export default {
 >
   <template #header>
     <div>
-      <span class="text-xl text-900 font-bold w-[20%] m-auto">Side Profiles</span>
+      <span class="text-xl text-900 font-bold w-[20%] m-auto">{{ $t('Side Profiles') }}</span>
     </div>
   </template>
 
-  <Column field="title" header="Profile Title" sortable>
+  <Column field="title" :header="$t('Profile Title')" sortable>
     <template #body="{ data }">
       <span class="font-semibold">{{ data.title }}</span>
     </template>
   </Column>
 
-  <Column header="Actions" :exportable="false" style="min-width: 10rem">
+  <Column :header="$t('Actions')" :exportable="false" style="min-width: 10rem">
     <template #body="{ data }">
       <div class="flex gap-2">
         <Button 
@@ -181,7 +181,7 @@ export default {
     <div class="text-center py-5">
       <i class="pi pi-database text-5xl text-400 mb-3" />
       <p class="text-900 font-semibold text-xl">No records found</p>
-      <p class="text-600">Create a new side profile to get started</p>
+      <p class="text-600">{{ $t('Create a new side profile to get started') }}</p>
     </div>
   </template>
 

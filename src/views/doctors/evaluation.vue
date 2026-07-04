@@ -101,7 +101,7 @@
           })
           .then((response) => {
             this.updatedialog=!(this.updatedialog)
-            this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+            this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('successful'), life: 3000 });
            
           })
           .catch((el)=>{

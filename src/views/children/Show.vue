@@ -119,7 +119,7 @@ onMounted(() => {
           :rows="10"
           :rowsPerPageOptions="[5, 10, 25, 50]"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} records"
+          :currentPageReportTemplate="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
           responsiveLayout="scroll"
           scrollable
           scrollHeight="flex"
@@ -169,7 +169,7 @@ onMounted(() => {
           <template #empty>
             <div class="text-center py-4">
               <i class="pi pi-exclamation-circle text-2xl mb-2" />
-              <p class="text-xl">No records found</p>
+              <p class="text-xl">{{ $t('no_records_found') }}</p>
             </div>
           </template>
 

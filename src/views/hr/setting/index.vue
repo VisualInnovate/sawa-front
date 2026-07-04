@@ -82,7 +82,7 @@ const initFilters = () => {
   <div v-can="'hr settings edit'" class="grid">
     <div class="col-12">
       <v-card class="card max-w-3xl p-[2%] m-auto bg-slate-50">
-              <h2 class="text-3xl py-1 font-bold text-center text-[#473e3e]">Hr Settings</h2>
+              <h2 class="text-3xl py-1 font-bold text-center text-[#473e3e]">{{ $t("hr_settings") }}</h2>
         <Toast/>
         <form @submit.prevent="update" class="grid lg:grid-cols-2 grid-cols-1 gap-4">
           <div class="py-3">

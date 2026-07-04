@@ -6,8 +6,10 @@ import {ref, onMounted, onBeforeMount} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n';
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 
 const loading = ref(true)
 const user = ref({})
@@ -69,7 +71,7 @@ const updateitem=()=>{
       console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
       position.value = ref({})
     })
     .catch((el)=>{
@@ -98,7 +100,7 @@ const create=()=>{
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
       holiday.value = ref({})
     })
     .catch((el)=>{
@@ -112,7 +114,7 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
     })
     .catch(() => {})
 
@@ -177,7 +179,7 @@ const initFilters = () => {
           :filters="filters"
           paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
+          :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
           responsive-layout="scroll"
           v-can="'positions list'"
         >

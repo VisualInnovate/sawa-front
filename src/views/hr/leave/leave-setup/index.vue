@@ -5,9 +5,11 @@ import LeavesNave from '../../../../components/LeavesNave.vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios"
 import { useRouter } from "vue-router"
+import { useI18n } from 'vue-i18n'
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n()
 
 const loading = ref(true)
 const users = ref(null)
@@ -41,8 +43,8 @@ const fetchData = () => {
 
 const arr = () => {
   return [
-    { name: 'Daily', value: 'daily' },
-    { name: 'Hourly', value: 'hourly' }
+    { name: t('daily'), value: 'daily' },
+    { name: t('hourly'), value: 'hourly' }
   ]
 }
 
@@ -70,7 +72,7 @@ const editescrud = () => {
     .then((res) => {
       fetchData()
       updatedialog.value = false
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
       leave.value = {
         type: null,
         title: '',
@@ -104,7 +106,7 @@ const createcrude = () => {
     .then((res) => {
       fetchData()
       createdialog.value = false
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
       leave.value = {
         type: null,
         title: '',
@@ -123,7 +125,7 @@ const deleteAction = () => {
     .then((res) => {
       deleteDialog.value = false
       fetchData()
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
     })
     .catch(() => {})
 }
@@ -149,7 +151,7 @@ const printTable = () => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Leave Setup Report</title>
+        <title>${t('leave_setup_report')}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           h1 { color: #333; text-align: center; }
@@ -166,10 +168,10 @@ const printTable = () => {
         </style>
       </head>
       <body>
-        <h1>Leave Setup Report</h1>
+        <h1>${t('leave_setup_report')}</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -211,7 +213,7 @@ const initFilters = () => {
             :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -258,7 +260,7 @@ const initFilters = () => {
                     icon="pi pi-refresh" 
                     class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="'Refresh data'"
+                    v-tooltip.top="$t('refresh_data')"
                   />
                 </div>
               </div>
@@ -300,14 +302,14 @@ const initFilters = () => {
                     icon="pi pi-pencil" 
                     class="p-button-rounded p-button-text p-button-success" 
                     @click="edit(slotProps.data.id)"
-                    v-tooltip.top="'Edit'"
+                    v-tooltip.top="$t('edit')"
                   />
                   <Button 
                     v-can="'leave setup delete'"
                     icon="pi pi-trash" 
                     class="p-button-rounded p-button-text p-button-danger" 
                     @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="'Delete'"
+                    v-tooltip.top="$t('delete')"
                   />
                 </div>
               </template>
@@ -316,7 +318,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t('no_records_found') }}</p>
               </div>
             </template>
 

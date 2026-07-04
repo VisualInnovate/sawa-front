@@ -6,9 +6,11 @@ import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
 import { Button } from 'flowbite-vue';
+import { useI18n } from 'vue-i18n';
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 const submitted = ref(false)
 const loading = ref(true)
 const details = ref({})
@@ -72,7 +74,7 @@ const getOne = () => {
 const submitForm = () => {
   submitted.value = true;
   if (!role.value.name) {
-    toast.add({severity: 'error', summary: 'Validation Error', detail: 'Role name is required', life: 3000});
+    toast.add({severity: 'error', summary: t('validation_error'), detail: t('role_name_required'), life: 3000});
     return;
   }
 
@@ -80,10 +82,10 @@ const submitForm = () => {
     permissions: selectedPermissionIds.value,
     name: role.value.name
   }).then((res) => {
-    toast.add({severity: 'success', summary: 'Success', detail: 'Role updated successfully', life: 3000});
+    toast.add({severity: 'success', summary: t('success_message'), detail: t('role_updated_successfully'), life: 3000});
     router.push({name: 'Roles'})
   }).catch(error => {
-    toast.add({severity: 'error', summary: 'Error', detail: 'Failed to update role', life: 3000});
+    toast.add({severity: 'error', summary: t('error'), detail: t('failed_to_update_role'), life: 3000});
   });
 }
 
@@ -111,7 +113,7 @@ const handleCheckboxClick = (permissionId) => {
 <template>
   <div v-can="'roles list'" class="role-edit-container">
     <div class="header-container">
-      <h1 class="page-title">{{ $t("Edit Role") }}</h1>
+      <h1 class="page-title">{{ $t("edit_role") }}</h1>
       <div class="search-container">
         <span class="p-input-icon-left">
           <i class="pi pi-search"/>
@@ -129,7 +131,7 @@ const handleCheckboxClick = (permissionId) => {
         <form @submit.prevent="submitForm" class="role-form">
           <div class="form-group">
             <div class="flex items-center">
-              <label class="form-label">{{ $t("اسم الرول") }}</label>
+              <label class="form-label">{{ $t("role_name") }}</label>
               <svg class="required-icon" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
               </svg>
@@ -138,9 +140,9 @@ const handleCheckboxClick = (permissionId) => {
               v-model="role.name" 
               class="form-input"
               :class="{ 'input-error': submitted && !role.name}"
-              placeholder="Enter role name"
+              :placeholder="$t('enter_role_name')"
             />
-            <small v-if="submitted && !role.name" class="error-message">Role name is required</small>
+            <small v-if="submitted && !role.name" class="error-message">{{ $t('role_name_required') }}</small>
           </div>
           
           <Button 
@@ -181,7 +183,7 @@ const handleCheckboxClick = (permissionId) => {
                 icon="pi pi-info-circle" 
                 class="p-button-rounded p-button-text info-button"
                 @click="showDirection(permission)"
-                v-tooltip.top="'View description'"
+                v-tooltip.top="$t('view_description')"
               />
             </div>
           </div>
@@ -192,7 +194,7 @@ const handleCheckboxClick = (permissionId) => {
     <Dialog 
       v-model:visible="show" 
       :style="{ width: '550px' }" 
-      :header="'Permission Description'"
+      :header="$t('permission_description')"
       :modal="true"
       class="permission-dialog"
     >
@@ -200,13 +202,13 @@ const handleCheckboxClick = (permissionId) => {
         <div class="description-container">
           <label class="description-label">{{ $t('description') }}</label>
           <div class="description-text">
-            {{ description || 'No description available' }}
+            {{ description || $t('no_description_available') }}
           </div>
         </div>
       </div>
       <template #footer>
         <Button 
-          label="Close" 
+          :label="$t('close')" 
           icon="pi pi-times" 
           class="p-button-text close-button" 
           @click="show = false"

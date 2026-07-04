@@ -195,7 +195,7 @@
           class="results-table"
           stripedRows
           removableSort
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+          :currentPageReportTemplate="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('entries')}`"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         >
           <Column field="id" :header="$t('id')" :sortable="true" class="id-column">

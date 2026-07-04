@@ -172,7 +172,7 @@ export default {
         this.treatments.sessions_number=this.treatments.collective_sessions
       }
       axios.post("/api/program",this.treatments).then((res) => {
-        // this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+        // this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('successful'), life: 3000 });
         this.$router.push({ name: 'AllTherapeutic' });
       }).catch((el)=>{
       

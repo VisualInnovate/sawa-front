@@ -153,7 +153,7 @@
       createtreatment() {
       
         axios.post("/api/milestone-answers",this.answer).then((res) => {
-          this.$toast.add({ severity: 'success', summary: 'Success Message', detail: 'Success', life: 3000 });
+          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('successful'), life: 3000 });
         }).catch((el)=>{
           console.log(el.response.data.errors.name)
        this.error = el.response.data.errors

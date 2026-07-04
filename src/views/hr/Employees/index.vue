@@ -1,11 +1,13 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 import { FilterMatchMode } from "primevue/api";
 import { ref, onMounted, onBeforeMount } from "vue";
 // import ProductService from '@/service/ProductService';
 import { useToast } from "primevue/usetoast";
 import axios from "axios";
 import { useRouter } from "vue-router";
-import t from "vue3-print-nb";
+import printPlugin from "vue3-print-nb";
 const toast = useToast();
 const router = useRouter();
 const allusers = ref([]);
@@ -59,7 +61,7 @@ const restData = (id) => {
       console.log("Done", res.data);
       toast.add({
         severity: "success",
-        summary: "Successful",
+        summary: t('success_message'),
         detail: "Successful rest the employees",
         life: 3000,
       });
@@ -105,7 +107,7 @@ const status = (event, id) => {
             btn.children[0].classList.add("pi-sign-in");
             toast.add({
               severity: "success",
-              summary: "Successful",
+              summary: t('success_message'),
               detail: "Successful login employees",
               life: 3000,
             });
@@ -133,7 +135,7 @@ const status = (event, id) => {
             console.log("Done clock out");
             toast.add({
               severity: "success",
-              summary: "Successful",
+              summary: t('success_message'),
               detail: "Successful logout employees",
               life: 3000,
             });
@@ -174,8 +176,8 @@ const createcrude = () => {
       createdialog.value = !createdialog.value;
       toast.add({
         severity: "success",
-        summary: "Successful",
-        detail: "Successful",
+        summary: t('success_message'),
+        detail: t('successful'),
         life: 3000,
       });
       skill.value = ref({});
@@ -193,8 +195,8 @@ const deleteAction = () => {
       fetchData();
       toast.add({
         severity: "success",
-        summary: "Successful",
-        detail: "Successful",
+        summary: t('success_message'),
+        detail: t('successful'),
         life: 3000,
       });
     })
@@ -238,7 +240,7 @@ const initFilters = () => {
             :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll" scrollable scroll-height="flex" v-can="'employees list'" stripedRows
             showGridlines class="p-datatable-sm">
             <template #header>
@@ -311,7 +313,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t("no_data_found") }}</p>
               </div>
             </template>
 

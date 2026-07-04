@@ -31,7 +31,7 @@
               :filters="filters"
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
               :rowsPerPageOptions="[5, 10, 25]"
-              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+              :currentPageReportTemplate="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('users')}`"
               responsiveLayout="scroll"
               v-can="'official leave list'"
   
@@ -45,7 +45,7 @@
                               </span>
               </div>
             </template>
-            <template #empty> No official leaves found.</template>
+            <template #empty> {{ $t('no_official_leaves_found') }}</template>
             <template #loading>
               <ProgressSpinner/>
             </template>
@@ -114,7 +114,7 @@
               </template> 
             </Column>
           </DataTable> 
-          <Dialog v-model:visible="unsetuserDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+          <Dialog v-model:visible="unsetuserDialog" :style="{ width: '450px' }" :header="$t('confirm')" :modal="true">
             <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
             <span v-if="user"

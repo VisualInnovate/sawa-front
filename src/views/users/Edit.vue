@@ -119,22 +119,22 @@ const endTime=ref("")
 const startTime=ref("")
 const evaluation_type=ref('')
 const evaluate_types =ref( [
-                      { name: 'side profile', id: 1 },
-                      { name: 'milestone', id: 2 },
-                      { name: 'barrier', id: 3 },
-                      { name: 'ablls', id: 4 },
-                      { name: 'carolina', id: 5 },
+                      { name: t('side_profile_eval'), id: 1 },
+                      { name: t('milestone'), id: 2 },
+                      { name: t('barriers'), id: 3 },
+                      { name: t('ablls_eval'), id: 4 },
+                      { name: t('carolaina'), id: 5 },
    
                   ])
 const days = ref([
    
-    { name: 'Sunday', value: 'Sunday' },
-    { name: 'Monday', value: 'Monday' },
-    { name: 'Tuesday', value: 'Tuesday' },
-    { name: 'Thursday', value: 'Thursday' },
-    { name: 'Wednesday', value: 'Wednesday' },
-    { name: 'Friday', value: 'Friday' },
-    { name: 'Saturday', value: 'Saturday' }
+    { name: t('Sunday'), value: 'Sunday' },
+    { name: t('Monday'), value: 'Monday' },
+    { name: t('Tuesday'), value: 'Tuesday' },
+    { name: t('Wednesday'), value: 'Wednesday' },
+    { name: t('Thursday'), value: 'Thursday' },
+    { name: t('Friday'), value: 'Friday' },
+    { name: t('Saturday'), value: 'Saturday' }
    
 ]);
 

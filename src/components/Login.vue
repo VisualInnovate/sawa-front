@@ -58,11 +58,11 @@ const rules = ref({
       </v-alert>
 
       <v-form @submit.prevent="authStore.handleLogin(form)" v-model="valid">
-        <div class="text-subtitle-1 text-medium-emphasis">Account</div>
+        <div class="text-subtitle-1 text-medium-emphasis">{{ $t('account') || 'Account' }}</div>
 
         <v-text-field
           density="compact"
-          placeholder="Email address"
+          :placeholder="$t('email')"
           prepend-inner-icon="mdi-email-outline"
           variant="outlined"
           v-model="form.email"
@@ -72,7 +72,7 @@ const rules = ref({
         <div
           class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
         >
-          Password
+          {{ $t('password') }}
 
           <router-link
             class="text-caption text-decoration-none text-blue"
@@ -80,7 +80,7 @@ const rules = ref({
             rel="noopener noreferrer"
             target="_blank"
           >
-            Forgot login password?</router-link
+            {{ $t('forgot_password') || 'Forgot login password?' }}</router-link
           >
         </div>
 
@@ -88,7 +88,7 @@ const rules = ref({
           :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
           :type="visible ? 'text' : 'password'"
           density="compact"
-          placeholder="Enter your password"
+          :placeholder="$t('enter_password')"
           prepend-inner-icon="mdi-lock-outline"
           variant="outlined"
           @click:append-inner="visible = !visible"
@@ -114,7 +114,7 @@ const rules = ref({
             size="25"
             v-show="authStore.loading"
           ></v-progress-circular>
-          Log In
+          {{ $t('sign_in') }}
         </v-btn>
       </v-form>
       <!-- sign up now link -->
@@ -124,7 +124,7 @@ const rules = ref({
           :to="{ name: 'Register' }"
           rel="noopener noreferrer"
         >
-          Sign up now <v-icon icon="mdi-chevron-right"></v-icon>
+          {{ $t('Create_an_account') }} <v-icon icon="mdi-chevron-right"></v-icon>
         </router-link>
       </v-card-text>
     </v-card>

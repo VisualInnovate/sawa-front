@@ -4,9 +4,11 @@ import { ref, onMounted, onBeforeMount } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 const permissions = ref({})
 const loading = ref(true)
 const user = ref({})
@@ -67,7 +69,7 @@ const editeroles = () => {
       console.log(res.data)
       fetchData()
       updatedialog.value = !(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('successful'), detail: t('successful'), life: 3000})
     })
     .catch((el) => {
       error.value = el.response.data.errors
@@ -81,7 +83,7 @@ const createrole = () => {
       console.log(res.data)
       fetchData()
       createdialog.value = !(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('successful'), detail: t('successful'), life: 3000})
     })
     .catch((el) => {
       error.value = el.response.data.errors
@@ -95,7 +97,7 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value = false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('successful'), detail: t('successful'), life: 3000})
     })
     .catch(() => {})
 }
@@ -130,7 +132,7 @@ const printTable = () => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Roles Report</title>
+        <title>${t('roles_report')}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           h1 { color: #333; text-align: center; }
@@ -147,10 +149,10 @@ const printTable = () => {
         </style>
       </head>
       <body>
-        <h1>Roles Report</h1>
+        <h1>${t('roles_report')}</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -177,7 +179,7 @@ const initFilters = () => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ $t("Roles Management") }}</h2>
+            <h2 class="text-2xl font-bold">{{ $t("Roles_Management") }}</h2>
           </template>
           <template #end>
             <div class="flex gap-2">
@@ -218,7 +220,7 @@ const initFilters = () => {
             :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -229,7 +231,6 @@ const initFilters = () => {
           >
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
-                <h3 class="m-0">{{ $t("Roles List") }}</h3>
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />
@@ -243,7 +244,7 @@ const initFilters = () => {
                     icon="pi pi-refresh" 
                     class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="'Refresh data'"
+                    v-tooltip.top="$t('refresh_data')"
                   />
                 </div>
               </div>
@@ -259,7 +260,7 @@ const initFilters = () => {
                 {{ slotProps.data.name }}
               </template>
             </Column>
-            <Column field="created_at" :header='$t("Created At")' :sortable="true">
+            <Column field="created_at" :header='$t("Created_At")' :sortable="true">
               <template #body="slotProps">
                 {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
               </template>
@@ -272,21 +273,21 @@ const initFilters = () => {
                     icon="pi pi-pencil" 
                     class="p-button-rounded p-button-text p-button-success" 
                     @click="edit(slotProps.data.id)"
-                    v-tooltip.top="'Edit'"
+                    v-tooltip.top="$t('edit')"
                   />
                   <Button 
                     v-can="'roles delete'"
                     icon="pi pi-trash" 
                     class="p-button-rounded p-button-text p-button-danger" 
                     @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="'Delete'"
+                    v-tooltip.top="$t('delete')"
                   />
                   <Button 
                     v-can="'roles create'"
                     icon="pi pi-copy" 
                     class="p-button-rounded p-button-text p-button-info" 
                     @click="copyrole(slotProps.data.id)"
-                    v-tooltip.top="'Copy'"
+                    v-tooltip.top="$t('copy')"
                   />
                 </div>
               </template>
@@ -294,7 +295,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t("no_data_found") }}</p>
               </div>
             </template>
             <template #loading>

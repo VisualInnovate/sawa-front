@@ -130,7 +130,7 @@ const printTable = () => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Holidays Report</title>
+        <title>${t('holidays_report')}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           h1 { color: #333; text-align: center; }
@@ -147,10 +147,10 @@ const printTable = () => {
         </style>
       </head>
       <body>
-        <h1>Holidays Report</h1>
+        <h1>${t('holidays_report')}</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -200,7 +200,7 @@ const initFilters = () => {
             :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll" scrollable scroll-height="flex" v-can="'holidays list'" stripedRows
             showGridlines class="p-datatable-sm">
             <template #header>
@@ -258,7 +258,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t('no_records_found') }}</p>
               </div>
             </template>
 

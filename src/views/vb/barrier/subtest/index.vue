@@ -1,4 +1,6 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 import {FilterMatchMode} from 'primevue/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import Barrier from '../../../../components/Barrier.vue'
@@ -75,7 +77,7 @@ const editescrud=()=>{
       console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
       levels.value = ref({})
     })
     .catch((el)=>{
@@ -103,7 +105,7 @@ const createcrude=()=>{
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
       skill.value = ref({})
     })
     .catch((el)=>{
@@ -117,7 +119,7 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
     })
     .catch(() => {})
 
@@ -158,7 +160,7 @@ const initFilters = () => {
           :filters="filters"
           paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
+          :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
           v-can="'skills list'"
         >

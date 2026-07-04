@@ -63,20 +63,20 @@ const rules = ref({
 
       <v-form @submit.prevent="authStore.handleRegister(form)" v-model="valid">
         <!-- name -->
-        <div class="text-subtitle-1 text-medium-emphasis">Name</div>
+        <div class="text-subtitle-1 text-medium-emphasis">{{ $t('name') }}</div>
         <v-text-field
           density="compact"
-          placeholder="Enter your name"
+          :placeholder="$t('enter_name')"
           prepend-inner-icon="mdi-account"
           variant="outlined"
           v-model="form.name"
           :rules="rules.name"
         ></v-text-field>
         <!-- email -->
-        <div class="text-subtitle-1 text-medium-emphasis">Account</div>
+        <div class="text-subtitle-1 text-medium-emphasis">{{ $t('account') || 'Account' }}</div>
         <v-text-field
           density="compact"
-          placeholder="Email address"
+          :placeholder="$t('email')"
           prepend-inner-icon="mdi-email-outline"
           variant="outlined"
           v-model="form.email"
@@ -87,13 +87,13 @@ const rules = ref({
         <div
           class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
         >
-          Password
+          {{ $t('password') }}
         </div>
 
         <v-text-field
           type="password"
           density="compact"
-          placeholder="Enter your password"
+          :placeholder="$t('enter_password')"
           prepend-inner-icon="mdi-lock-outline"
           variant="outlined"
           @click:append-inner="visible = !visible"
@@ -105,13 +105,13 @@ const rules = ref({
         <div
           class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
         >
-          Confirm Password
+          {{ $t('confirm_password') }}
         </div>
 
         <v-text-field
           type="password"
           density="compact"
-          placeholder="Retype your password"
+          :placeholder="$t('retype_password')"
           prepend-inner-icon="mdi-lock-outline"
           variant="outlined"
           @click:append-inner="visible = !visible"
@@ -134,7 +134,7 @@ const rules = ref({
             size="25"
             v-show="authStore.loading"
           ></v-progress-circular>
-          Sign up
+          {{ $t('Create_an_account') }}
         </v-btn>
       </v-form>
       <!-- Login link -->
@@ -144,7 +144,7 @@ const rules = ref({
           :to="{ name: 'Login' }"
           rel="noopener noreferrer"
         >
-          Login<v-icon icon="mdi-chevron-right"></v-icon>
+          {{ $t('sign_in') }}<v-icon icon="mdi-chevron-right"></v-icon>
         </router-link>
       </v-card-text>
     </v-card>

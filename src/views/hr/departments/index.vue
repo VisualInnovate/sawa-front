@@ -4,8 +4,10 @@ import {ref, onMounted, onBeforeMount} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n';
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 const allemployee=ref({})
 const loading = ref(true)
 const user = ref({})
@@ -33,7 +35,7 @@ const fetchData= ()=>{
     users.value= res.data.data
   }).catch(() => {
     loading.value = false
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load departments', life: 3000 })
+    toast.add({ severity: 'error', summary: t('error'), detail: t('failed_to_load_departments'), life: 3000 })
   });
   
   axios.get("/api/employees").then((res)=>{
@@ -59,7 +61,7 @@ const update=()=>{
     .then((res) => {
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Department updated successfully', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('department_updated_successfully'), life: 3000})
       department.value = {}
     })
     .catch((el)=>{
@@ -83,7 +85,7 @@ const create=()=>{
     .then((res) => {
       fetchData()
       createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Department created successfully', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('department_created_successfully'), life: 3000})
       department.value = {}
     })
     .catch((el)=>{
@@ -97,7 +99,7 @@ const deleteAction = () => {
     .then((res) => {
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Department deleted successfully', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('department_deleted_successfully'), life: 3000})
     })
     .catch(() => {})
 }
@@ -124,7 +126,7 @@ const printTable = () => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Departments Report</title>
+        <title>${t('departments_report')}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           h1 { color: #333; text-align: center; }
@@ -141,10 +143,10 @@ const printTable = () => {
         </style>
       </head>
       <body>
-        <h1>Departments Report</h1>
+        <h1>${t('departments_report')}</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -172,7 +174,7 @@ const initFilters = () => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ $t("Departments") }}</h2>
+            <h2 class="text-2xl font-bold">{{ $t('departments') }}</h2>
           </template>
 
           <template #end>
@@ -194,7 +196,7 @@ const initFilters = () => {
             :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll" scrollable scroll-height="flex" v-can="'department list'" stripedRows
             showGridlines class="p-datatable-sm">
             <template #header>
@@ -205,7 +207,7 @@ const initFilters = () => {
                     <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
                   </span>
                   <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
-                    v-tooltip.top="'Refresh data'" />
+                    v-tooltip.top="$t('refresh_data')" />
                 </div>
               </div>
             </template>
@@ -248,7 +250,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No departments found</p>
+                <p class="text-xl">{{ $t('no_departments_found') }}</p>
               </div>
             </template>
 
@@ -264,7 +266,7 @@ const initFilters = () => {
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
             <span>
-              {{ $t('remove_item') }} <b>this department</b>?
+              {{ $t('remove_item') }} <b>{{ $t('this_department') }}</b>?
             </span>
           </div>
           <template #footer>
