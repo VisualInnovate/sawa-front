@@ -1,53 +1,61 @@
 <template>
   <main>
     <!-- ===== HERO SECTION ===== -->
-    <section
-      class="bg-[#fcf9f8] min-h-[500px] flex items-center overflow-hidden"
-    >
+    <section class="bg-[#fcf9f8] overflow-hidden relative">
       <div
-        class="max-w-[1280px] mx-auto px-4 lg:px-8 py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
+        class="max-w-[1280px] mx-auto px-4 lg:px-8 py-16 lg:py-36 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
       >
         <!-- Text -->
-        <div class="flex flex-col gap-6">
-          <h1
-            class="text-[36px] sm:text-[48px] lg:text-[60px] font-extrabold text-[#1c1b1b] text-right leading-[1.1]"
-          >
-            <span class="block">نحن هنا لدعمك</span>
-            <span class="block text-[#b21553]">في كل خطوة</span>
-          </h1>
+        <div class="flex flex-col gap-4 lg:gap-8">
+          <div class="text-right">
+            <h1
+              class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
+            >
+              <span class="block">نحن هنا لدعمك</span>
+              <span class="block text-[#b21553]">في كل خطوة</span>
+            </h1>
+          </div>
           <p
-            class="text-[#594045] text-base lg:text-xl text-right leading-relaxed"
+            class="text-[#6F6669] text-base lg:text-xl text-right leading-relaxed font-bold"
           >
             فريق أكاديمية سوا جاهز للإجابة على جميع استفساراتك ومساعدتك في
             اختيار المسار الأنسب لطفلك لضمان نتائج ناجحة.
           </p>
           <div class="flex flex-wrap gap-4 items-center">
             <a
-              class="cursor-pointer border-2 border-[#1C6772] text-[#1C6772] font-bold text-base px-6 lg:px-8 py-4 rounded-full shadow-lg"
-              >احجز تقييم</a
-            >
-            <a
-              class="bg-[#25d366] text-white font-bold text-base px-6 lg:px-8 py-4 rounded-[15px] flex items-center gap-2 cursor-pointer"
+              class="bg-[#25d366] cursor-pointer text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(37,211,102,0.25)] flex items-center gap-2"
             >
               <img
                 src="./images/icon-whatsapp.svg"
                 alt=""
                 class="w-5 h-5 mx-1"
               />
-              <span>واتساب مباشر</span>
+              <a :href="'https://wa.me/962791017001'" target="_blank">
+                <span>واتساب مباشر</span>
+              </a>
             </a>
+            <a
+              href="/web/evaluation"
+              class="border-2 cursor-pointer border-[#1C6772] text-[#1C6772] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              >احجز تقييم</a
+            >
           </div>
         </div>
         <!-- Image -->
-        <div class="relative mt-4 lg:mt-0">
+        <div class="relative mt-6 lg:mt-0">
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#b21553]/10 blur-[40px] -top-10 -right-10"
+            class="absolute w-64 h-64 rounded-full bg-[#b21553]/10 blur-[32px] -top-8 -right-10"
           ></div>
-          <div class="rounded-[40px] overflow-hidden shadow-2xl relative z-10">
+          <div
+            class="absolute w-64 h-64 rounded-full bg-[#1c6772]/10 blur-[32px] -bottom-8 -left-8"
+          ></div>
+          <div
+            class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
+          >
             <img
               src="./images/contact-hero.jpg"
               alt="نحن هنا لدعمك"
-              class="w-full h-[280px] sm:h-[360px] lg:h-[440px] object-cover"
+              class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
           </div>
         </div>
@@ -255,7 +263,7 @@
           </p>
           <div class="flex gap-4 items-center justify-center">
             <a
-              href="contact.html"
+              href="/web/evaluation"
               class="bg-[#b21553] text-white font-bold text-base lg:text-xl px-8 lg:px-10 py-4 lg:py-5 rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
               >احجز تقييم الآن</a
             >

@@ -5,9 +5,11 @@ import LeavesNave from '../../../../components/LeavesNave.vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios"
 import { useRouter } from "vue-router"
+import { useI18n } from 'vue-i18n'
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n()
 
 const allusers = ref([])
 const loading = ref(true)
@@ -66,7 +68,7 @@ const confirm_reject = () => {
     .then((res) => {
       fetchData()
       updatedialog.value = !(updatedialog.value)
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
       leave.value = ref({})
     })
     .catch((el) => {
@@ -86,7 +88,7 @@ const accept = (id) => {
     .then((res) => {
       loading.value = false
       fetchData()
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
     })
     .catch(() => {})
 }
@@ -112,7 +114,7 @@ const printTable = () => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Leaves Report</title>
+        <title>${t('leaves_report')}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           h1 { color: #333; text-align: center; }
@@ -129,10 +131,10 @@ const printTable = () => {
         </style>
       </head>
       <body>
-        <h1>Leaves Report</h1>
+        <h1>${t('leaves_report')}</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -175,7 +177,7 @@ const initFilters = () => {
             :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -186,7 +188,7 @@ const initFilters = () => {
           >
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
-                <h3 class="m-0">{{ $t("Leaves List") }}</h3>
+                <h3 class="m-0">{{ $t('leaves_list') }}</h3>
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />
@@ -215,7 +217,7 @@ const initFilters = () => {
                     icon="pi pi-refresh" 
                     class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="'Refresh data'"
+                    v-tooltip.top="$t('refresh_data')"
                   />
               
                 </div>
@@ -224,19 +226,19 @@ const initFilters = () => {
 
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
             
-            <Column field="employee.name" :header='$t("Employee Name")' :sortable="true">
+            <Column field="employee.name" :header="$t('employee_name')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.employee.name }}
               </template>
             </Column>
             
-            <Column field="reason" :header='$t("Request Reason")' :sortable="true">
+            <Column field="reason" :header="$t('request_reason')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.reason }}
               </template>
             </Column>
             
-            <Column field="leave_setup.title" :header='$t("Leave Type")' :sortable="true">
+            <Column field="leave_setup.title" :header="$t('leave_type')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.leave_setup.title }}
               </template>
@@ -245,7 +247,7 @@ const initFilters = () => {
             <Column field="status" :header='$t("Status")' :sortable="true">
               <template #body="slotProps">
                 <Tag 
-                  :value="slotProps.data.status == 0 ? 'Pending' : slotProps.data.status == 1 ? 'Accepted' : 'Rejected'"
+                  :value="slotProps.data.status == 0 ? $t('Pending') : slotProps.data.status == 1 ? $t('Accepted') : $t('Rejected')"
                   :severity="slotProps.data.status == 0 ? 'warning' : slotProps.data.status == 1 ? 'success' : 'danger'"
                 />
               </template>
@@ -260,7 +262,7 @@ const initFilters = () => {
                     icon="pi pi-times" 
                     class="p-button-rounded p-button-text p-button-danger" 
                     @click="reject(slotProps.data.id)"
-                    v-tooltip.top="'Reject'"
+                    v-tooltip.top="$t('reject')"
                   />
                   <Button 
                     v-if="slotProps.data.status == 0"
@@ -268,7 +270,7 @@ const initFilters = () => {
                     icon="pi pi-check" 
                     class="p-button-rounded p-button-text p-button-success" 
                     @click="accept(slotProps.data.id)"
-                    v-tooltip.top="'Accept'"
+                    v-tooltip.top="$t('accept')"
                   />
                 </div>
               </template>
@@ -277,7 +279,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t('no_records_found') }}</p>
               </div>
             </template>
 

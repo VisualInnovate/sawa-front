@@ -224,13 +224,13 @@ const addEvaluation = (id) => {
               </template>
             </Column>
             
-            <Column field="name" :header='$t("Child Name")' :sortable="true">
+            <Column field="name" :header="$t('CHILD_NAME')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name }}
               </template>
             </Column>
             
-            <Column field="birth_date" :header='$t("Birth Date")' :sortable="true">
+            <Column field="birth_date" :header="$t('BIRTH_DATE')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.birth_date }}
               </template>

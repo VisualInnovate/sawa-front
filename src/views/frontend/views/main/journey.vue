@@ -1,63 +1,66 @@
 <template>
-  <main class="w-full overflow-x-hidden bg-white text-[#2B2B2B]" dir="rtl">
+  <main class="w-full overflow-x-hidden bg-white text-[#2B2B2B]">
     <!-- Hero -->
-    <section class="w-full bg-white">
+      <section class="bg-white overflow-hidden relative">
       <div
-        class="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-20"
+        class="max-w-[1280px] mx-auto px-4 lg:px-8 py-16 lg:py-36 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
       >
-        <div class="order-1 text-right lg:order-2">
-          <h1
-            class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
-          >
-            <span class="block text-[#252525]">رحلة طفلك معنا</span>
-            <span class="block text-[#C91F5F]">خطوة بخطوة</span>
-          </h1>
-
+        <!-- Text -->
+        <div class="flex flex-col gap-4 lg:gap-8">
+          <div class="text-right">
+            <h1
+              class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
+            >
+              <span class="block text-[#252525]">رحلة طفلك معنا</span>
+              <span class="block text-[#C91F5F]">خطوة بخطوة</span>
+            </h1>
+          </div>
           <p
-            class="mb-8 max-w-[460px] text-[15px] font-bold leading-[1.9] text-[#6F6669] sm:text-[16px]"
+            class="text-[#6F6669] text-base lg:text-xl text-right leading-relaxed font-bold"
           >
             نرافق طفلك في رحلة التعلم والنمو نحو الاستقلالية والدمج من خلال
             برامج تأهيلية متكاملة وخطط فردية دقيقة.
           </p>
-
-          <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row">
+          <div class="flex flex-wrap gap-4 items-center">
             <a
-              href="#"
-              class="inline-flex h-[50px] items-center justify-center rounded-full bg-[#C91F5F] px-7 text-[13px] font-black text-white shadow-[0_9px_20px_rgba(201,31,95,0.26)]"
+              href="/web/evaluation"
+              class="bg-[#C91F5F] text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(201,31,95,0.25)]"
+              >احجز تقييم الآن</a
             >
-              احجز تقييم الآن
-            </a>
-
             <a
-              href="#"
-              class="inline-flex h-[50px] items-center justify-center rounded-full border-2 border-[#1B7A83] px-7 text-[13px] font-black text-[#1B7A83]"
+              href="/contact"
+              class="border-2 border-[#1B7A83] text-[#1B7A83] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              >تواصل معنا</a
             >
-              تواصل معنا
-            </a>
           </div>
         </div>
-
-        <div class="order-2 lg:order-1">
-          <div class="relative">
-            <div
-              class="absolute inset-0 translate-x-3 translate-y-3 rounded-[22px] bg-[#51BDBB] shadow-[0_25px_70px_rgba(23,126,133,0.18)] sm:translate-x-5 sm:translate-y-5"
-            ></div>
+        <!-- Image -->
+        <div class="relative mt-6 lg:mt-0">
+          <div
+            class="absolute w-64 h-64 rounded-full bg-[#51BDBB]/20 blur-[32px] -top-8 -right-10"
+          ></div>
+          <div
+            class="absolute w-64 h-64 rounded-full bg-[#C91F5F]/10 blur-[32px] -bottom-8 -left-8"
+          ></div>
+          <div
+            class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
+          >
             <img
               src="./images/child-journey-hero.png"
               alt="رحلة الطفل"
-              class="relative h-[260px] w-full rounded-[22px] object-cover sm:h-[380px] lg:h-[500px]"
+              class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
+          </div>
 
-            <div
-              class="relative mx-4 mt-[-54px] max-w-[260px] rounded-[12px] bg-white px-5 py-4 text-right shadow-[0_14px_28px_rgba(0,0,0,0.16)] sm:absolute sm:bottom-[-24px] sm:left-[-24px] sm:mx-0 sm:mt-0"
-            >
-              <h3 class="mb-1 text-[14px] font-black text-[#C91F5F]">
-                دعم متكامل
-              </h3>
-              <p class="text-[12px] font-semibold leading-[1.6] text-[#5F5F5F]">
-                بيئة تعليمية محفزة للنمو والاستقلال
-              </p>
-            </div>
+          <div
+            class="relative z-20 mx-4 mt-[-54px] max-w-[260px] rounded-[12px] bg-white px-5 py-4 text-right shadow-[0_14px_28px_rgba(0,0,0,0.16)] sm:absolute sm:bottom-[-24px] sm:left-[-24px] sm:mx-0 sm:mt-0"
+          >
+            <h3 class="mb-1 text-[14px] font-black text-[#C91F5F]">
+              دعم متكامل
+            </h3>
+            <p class="text-[12px] font-semibold leading-[1.6] text-[#5F5F5F]">
+              بيئة تعليمية محفزة للنمو والاستقلال
+            </p>
           </div>
         </div>
       </div>
@@ -365,14 +368,14 @@
 
       <div class="mx-auto mt-8 flex max-w-[340px] flex-col justify-center gap-3 sm:max-w-none sm:flex-row sm:gap-4">
         <a
-          href="#"
+          href="/web/evaluation"
           class="inline-flex h-[51px] items-center justify-center rounded-full bg-white px-7 text-[13px] font-black text-[#C91F5F]"
         >
           احجز تقييم الآن
         </a>
 
         <a
-          href="#"
+          href="/contact"
           class="inline-flex h-[51px] items-center justify-center rounded-full border-2 border-white bg-transparent px-7 text-[13px] font-black text-white"
         >
           تواصل معنا

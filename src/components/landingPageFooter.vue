@@ -11,6 +11,7 @@ const socialIcons = ref([
       import.meta.url,
     ).href,
     alt: "Website",
+    href: "/web",
   },
   {
     src: new URL(
@@ -18,6 +19,7 @@ const socialIcons = ref([
       import.meta.url,
     ).href,
     alt: "Email",
+    href: "mailto:Info@sawa.academy",
   },
   {
     src: new URL(
@@ -25,6 +27,7 @@ const socialIcons = ref([
       import.meta.url,
     ).href,
     alt: "Phone",
+    href: "https://wa.me/962791017001",
   },
 ]);
 
@@ -57,7 +60,7 @@ const contacts = ref([
       "../views/frontend/views/main/images/icon-phone.svg",
       import.meta.url,
     ).href,
-    text: "+0096265522688",
+    text: "+962791017001",
     dir: "ltr",
   },
   {
@@ -65,7 +68,7 @@ const contacts = ref([
       "../views/frontend/views/main/images/icon-email.svg",
       import.meta.url,
     ).href,
-    text: "info@sawa-academy.com",
+    text: "Info@sawa.academy",
     dir: "ltr",
   },
 ]);
@@ -79,7 +82,7 @@ const navigate = (href) => {
 </script>
 
 <template>
-  <footer class="bg-[#fafafa] border-t border-[#e4e4e7]" dir="rtl">
+  <footer class="bg-[#fafafa] border-t border-[#e4e4e7]">
     <div
       class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-10 lg:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10"
     >
@@ -97,8 +100,12 @@ const navigate = (href) => {
             :key="index"
             class="bg-[#e4e4e7] rounded-full w-10 h-10 flex items-center justify-center shrink-0 hover:bg-[#d1d5db] transition-colors duration-200 cursor-pointer"
           >
-            <img :src="icon.src" :alt="icon.alt" class="w-5 h-5" />
-          </div>
+          <a :href="icon.href" target="_blank">
+            <div>
+              <img :src="icon.src" :alt="icon.alt" class="w-5 h-5" />
+            </div>
+          </a>
+        </div>
         </div>
       </div>
 
@@ -156,7 +163,7 @@ const navigate = (href) => {
         class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-5 flex flex-col sm:flex-row items-center justify-between gap-3"
       >
         <p class="text-[#a1a1aa] text-xs">
-          © 2026 Sawa Academy. All rights reserved.
+          © Sawa Academy. All rights reserved.
         </p>
 
         <div class="flex gap-6">

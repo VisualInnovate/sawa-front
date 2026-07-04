@@ -147,8 +147,8 @@ onMounted(async () => {
           <UserProfileMenu />
         </template>
         <template class="setting" v-else>
-          <v-btn :to="{ name: 'Register' }">Register</v-btn>
-          <v-btn :to="{ name: 'Login' }">Login</v-btn>
+          <v-btn :to="{ name: 'Register' }">{{ $t('Create_an_account') }}</v-btn>
+          <v-btn :to="{ name: 'Login' }">{{ $t('sign_in') }}</v-btn>
         </template>
       </v-app-bar>
 
@@ -189,7 +189,7 @@ onMounted(async () => {
             
             <v-list-item   v-can="'parents list'" :title="$t('parents')" value="parents"
               :to="{ name: 'Parents' }"></v-list-item>
-              <v-list-item   v-can="'parents list'" :title="$t('الاجتماعات')" value="meeting"
+              <v-list-item   v-can="'parents list'" :title="$t('meetings')" value="meeting"
               :to="{ name: 'parent-meeting' }"></v-list-item>
             
 
@@ -211,13 +211,13 @@ onMounted(async () => {
               :to="{ name: 'Headers' }"></v-list-item> -->
             <v-list-item v-can="'side-profiles list'" :title="$t('side profile')" value="SideProfiles"
               :to="{ name: 'SideProfiles' }"></v-list-item>
-              <v-list-item  v-can="'able mission list'" :title="$t('ablls')" value="ablls"
+              <v-list-item  v-can="'able mission list'" :title="$t('ablls_eval')" value="ablls"
               :to="{ name: 'ablls' }"></v-list-item>
-              <v-list-item v-if="user_permissions.includes('carolina test list'||'carolina category list'||'able category list'||'carolina answer list'||'carolina answer type list'||'able category list')" :title="$t('Carolaina')" value="Carolaina"
+              <v-list-item v-if="user_permissions.includes('carolina test list'||'carolina category list'||'able category list'||'carolina answer list'||'carolina answer type list'||'able category list')" :title="$t('carolaina')" value="Carolaina"
               :to="{ name: 'agerange' }"></v-list-item>
               <v-list-group v-if="user_permissions.includes('milestone question list'||'milestone answer list'||'milestone level list')" value="VB">
             <template #activator="{ props }">
-              <v-list-item v-bind="props" :title="$t('VB')"></v-list-item>
+              <v-list-item v-bind="props" :title="$t('vb')"></v-list-item>
             </template>
 
            
@@ -341,7 +341,7 @@ onMounted(async () => {
             
        
             <v-list-item  v-can="'leaves list'"  :title="$t('leaves')" value="leaves" :to="{ name: 'leaves' }"></v-list-item>
-            <v-list-item  v-can="'leaves list'"  :title="$t('تقرير الحضور اليومي')" value="daily-attendance" :to="{ name: 'daily-attendance' }"></v-list-item>
+            <v-list-item  v-can="'leaves list'"  :title="$t('daily_attendance_report')" value="daily-attendance" :to="{ name: 'daily-attendance' }"></v-list-item>
             <v-list-item  v-can="'hr settings edit'" :title="$t('Settings')" value="setting" :to="{ name: 'setting' }"></v-list-item>
             <v-list-item  v-can="'deduction list'" :title="$t('deductions')" value="deduction" :to="{ name: 'deduction' }"></v-list-item>
             <v-list-item  v-can="'holidays list'" :title="$t('holidays')" value="holidays" :to="{ name: 'holidays' }"></v-list-item>
@@ -381,7 +381,7 @@ onMounted(async () => {
       </v-main>
       <!-- footer -->
       <v-footer app id="footer" class="justify-center" border>
-        all right reserved for SAWA Academy
+        {{ $t('footer_text') }}
       </v-footer>
     </v-app>
   </v-locale-provider>

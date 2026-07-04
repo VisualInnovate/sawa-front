@@ -1,43 +1,59 @@
 <template>
     <main class="w-full overflow-x-hidden bg-[#FCF9F8] text-[#242424]" dir="rtl">
         <!-- Hero Section -->
-        <section class="relative w-full overflow-hidden bg-[#F6F3F2]">
-            <div class="pointer-events-none absolute right-[-70px] top-[-90px] hidden h-[260px] w-[260px] rounded-full bg-[#DDE6E4] sm:block"></div>
-            <div class="pointer-events-none absolute left-[-82px] bottom-[-84px] hidden h-[250px] w-[250px] rounded-full bg-[#F3DCE5] sm:block"></div>
-
-            <div
-                class="relative mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:min-h-[820px] lg:flex-row lg:gap-[80px] lg:px-10 lg:py-20">
-                <div class="flex w-full max-w-[560px] flex-col items-start text-right">
-                    <h1 class="mb-6 text-right text-[36px] font-black leading-[1.12] tracking-normal sm:mb-8 sm:text-[48px] lg:text-[64px] lg:leading-[1.08]">
-                        <span class="block text-[#1D7780]">نحو دمج حقيقي</span>
-                        <span class="block text-[#C91F5F]">واستقلالية</span>
-                        <span class="block text-[#C91F5F]">مستدامة</span>
-                    </h1>
-
-                    <p class="mb-8 max-w-[500px] text-[15px] font-medium leading-[1.9] text-[#746064] sm:text-[16px] lg:mb-[38px] lg:text-[17px]">
-                        نعمل في سوا على تأهيل الطفل للوصول إلى أقصى درجات الاستقلالية
-                        ودمجه بثقة وفاعلية في المجتمع والبيئات التعليمية.
-                    </p>
-
-                    <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-[18px]">
-                        <a href="#"
-                            class="inline-flex h-[50px] w-full min-w-[142px] items-center justify-center rounded-full bg-[#C91F5F] px-6 text-[14px] font-extrabold text-white sm:h-[52px] sm:w-auto sm:px-[28px] sm:text-[15px]">
-                            احجز تقييم الآن
-                        </a>
-
-                        <a href="#"
-                            class="inline-flex h-[50px] w-full min-w-[132px] items-center justify-center rounded-full border-2 border-[#1D7780] px-6 text-[14px] font-extrabold text-[#1D7780] sm:h-[52px] sm:w-auto sm:px-[26px] sm:text-[15px]">
-                            تواصل معنا
-                        </a>
-                    </div>
-                </div>
-                <div
-                    class="h-[260px] w-full max-w-[610px] overflow-hidden rounded-[16px] bg-white shadow-[0_10px_30px_rgba(20,20,20,0.04)] sm:h-[380px] sm:rounded-[20px] lg:h-[520px]">
-                    <img src="./images/integration-hero.png" alt="Integration hero"
-                        class="h-full w-full object-cover" />
-                </div>
-            </div>
-        </section>
+            <section class="bg-[#F6F3F2] overflow-hidden relative">
+      <div
+        class="max-w-[1280px] mx-auto px-4 lg:px-8 py-16 lg:py-36 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
+      >
+        <!-- Text -->
+        <div class="flex flex-col gap-4 lg:gap-8">
+          <div class="text-right">
+            <h1
+              class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
+            >
+              <span class="block text-[#1D7780]">نحو دمج حقيقي</span>
+              <span class="block text-[#C91F5F]">واستقلالية مستدامة</span>
+            </h1>
+          </div>
+          <p
+            class="text-[#746064] text-base lg:text-xl text-right leading-relaxed font-bold"
+          >
+            نعمل في سوا على تأهيل الطفل للوصول إلى أقصى درجات الاستقلالية
+            ودمجه بثقة وفاعلية في المجتمع والبيئات التعليمية.
+          </p>
+          <div class="flex flex-wrap gap-4 items-center">
+            <a
+              href="/web/evaluation"
+              class="bg-[#C91F5F] text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(201,31,95,0.25)]"
+              >احجز تقييم الآن</a
+            >
+            <a
+              href="/contact"
+              class="border-2 border-[#1D7780] text-[#1D7780] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              >تواصل معنا</a
+            >
+          </div>
+        </div>
+        <!-- Image -->
+        <div class="relative mt-6 lg:mt-0">
+          <div
+            class="absolute w-64 h-64 rounded-full bg-[#DDE6E4] blur-[32px] -top-8 -right-10"
+          ></div>
+          <div
+            class="absolute w-64 h-64 rounded-full bg-[#F3DCE5] blur-[32px] -bottom-8 -left-8"
+          ></div>
+          <div
+            class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
+          >
+            <img
+              src="./images/integration-hero.png"
+              alt="Integration hero"
+              class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
 
         <!-- Intro Text Section -->
         <section class="w-full bg-white py-12 sm:py-16 lg:py-[92px]">
@@ -399,12 +415,12 @@
                 </p>
 
                 <div class="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-[24px]">
-                    <a href="#"
+                    <a href="/web/evaluation"
                         class="inline-flex h-[52px] w-full min-w-[170px] items-center justify-center rounded-full bg-[#C91F5F] px-7 text-[15px] font-extrabold text-white sm:h-[58px] sm:w-auto sm:px-[34px] sm:text-[16px]">
                         سجل طفلك الآن
                     </a>
 
-                    <a href="#"
+                    <a href="/contact"
                         class="inline-flex h-[52px] w-full min-w-[165px] items-center justify-center rounded-full border-2 border-[#1D7780] px-7 text-[15px] font-extrabold text-[#1D7780] sm:h-[58px] sm:w-auto sm:px-[34px] sm:text-[16px]">
                         تواصل معنا
                     </a>

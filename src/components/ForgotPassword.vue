@@ -29,7 +29,7 @@ onMounted(() => {
     <v-row>
       <v-col class="v-col-sm-12 v-col-md-6 offset-md-3 mx-auto">
         <v-card elevation="4" light tag="section">
-          <v-card-title> Forgot Password </v-card-title>
+          <v-card-title> {{ $t('forgot_password') || 'Forgot Password' }} </v-card-title>
           <v-card-text>
             <v-alert
               class="custom-alert-class"
@@ -71,7 +71,7 @@ onMounted(() => {
             <v-card-text>
               <v-text-field
                 outline
-                label="Email"
+                :label="$t('email')"
                 type="text"
                 v-model="form.email"
                 :rules="rules.email"
@@ -79,7 +79,7 @@ onMounted(() => {
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
-              <v-btn color="info" type="submit"> Send Link </v-btn>
+              <v-btn color="info" type="submit"> {{ $t('send_link') || 'Send Link' }} </v-btn>
             </v-card-actions>
           </v-form>
         </v-card>

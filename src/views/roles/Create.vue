@@ -6,9 +6,11 @@ import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
 import { Button } from 'flowbite-vue';
+import { useI18n } from 'vue-i18n';
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 const submitted = ref(false)
 const loading = ref(true)
 const details = ref({})
@@ -64,10 +66,10 @@ const submitForm = () => {
     permissions: selectedPermissionIds.value,
     name: role.value.name
   }).then((res) => {
-    toast.add({severity: 'success', summary: 'Success', detail: 'Role created successfully', life: 3000});
+    toast.add({severity: 'success', summary: t('success_message'), detail: t('role_created_successfully'), life: 3000});
     router.push({name: 'Roles'})
   }).catch(error => {
-    toast.add({severity: 'error', summary: 'Error', detail: 'Failed to create role', life: 3000});
+    toast.add({severity: 'error', summary: t('error'), detail: t('failed_to_create_role'), life: 3000});
   });
 }
 
@@ -125,7 +127,7 @@ const handleCheckboxClick = (permissionId) => {
         <form class="role-form" @submit.prevent="submitForm">
           <div class="form-group">
             <div class="flex items-center">
-              <label class="form-label">{{ $t("اسم الرول") }}</label>
+              <label class="form-label">{{ $t("role_name") }}</label>
               <svg class="required-icon" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
               </svg>
@@ -136,7 +138,7 @@ const handleCheckboxClick = (permissionId) => {
               required 
               :class="{ 'input-error': submitted && !role.name}" 
             />
-            <small class="error-message" v-if="submitted && !role.name">Role name is required</small>
+            <small class="error-message" v-if="submitted && !role.name">{{ $t('role_name_required') }}</small>
           </div>
           
           <Button 
@@ -174,7 +176,7 @@ const handleCheckboxClick = (permissionId) => {
                 icon="pi pi-info-circle" 
                 class="p-button-rounded p-button-text info-btn"
                 @click="showDirection(permission)"
-                v-tooltip.top="'View description'"
+                v-tooltip.top="$t('view_description')"
               />
             </div>
           </div>

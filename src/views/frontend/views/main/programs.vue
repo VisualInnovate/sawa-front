@@ -1,56 +1,61 @@
 <template>
   <main class="bg-[#fcf9f8] text-[#1c1b1b]" dir="rtl">
     <!-- HERO -->
-    <section class="overflow-hidden bg-[#fcf9f8]">
+    <section class="bg-[#fcf9f8] overflow-hidden relative">
       <div
-        class="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center"
+        class="max-w-[1280px] mx-auto px-4 lg:px-8 py-16 lg:py-36 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
       >
-        <div class="flex flex-col items-start text-right gap-4 lg:gap-5">
-          <span
-            class="inline-flex rounded-full bg-[#a7ebf6]/50 text-[#1c6772] text-xs sm:text-sm font-bold px-4 py-2"
-          >
-            نصنع الفرق في حياة طفلك
-          </span>
-          <h1
-            class="text-[34px] sm:text-[46px] lg:text-[58px] font-extrabold leading-[1.12] text-[#1c1b1b]"
-          >
-            <span class="block">برامج متكاملة</span>
-            <span class="block text-[#b21553]">لدعم نمو طفلك</span>
-          </h1>
+        <!-- Text -->
+        <div class="flex flex-col gap-4 lg:gap-8">
+          <div class="text-right">
+            <span
+              class="mb-5 inline-flex rounded-full bg-[#a7ebf6]/50 text-[#1c6772] text-xs sm:text-sm font-bold px-4 py-2"
+            >
+              نصنع الفرق في حياة طفلك
+            </span>
+            <h1
+              class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
+            >
+              <span class="block text-[#1c1b1b]">برامج متكاملة</span>
+              <span class="block text-[#b21553]">لدعم نمو طفلك</span>
+            </h1>
+          </div>
           <p
-            class="text-[#594045] text-sm sm:text-base lg:text-lg leading-[1.9] max-w-[560px]"
+            class="text-[#594045] text-base lg:text-xl text-right leading-relaxed font-bold"
           >
             نقدم في أكاديمية سوا بيئة تعليمية وعلاجية متخصصة تجمع بين العلم
             والتعاطف، لتمكين الأطفال من مواجهة التحديات وتحقيق أقصى إمكاناتهم.
           </p>
-          <div class="flex flex-wrap gap-3 sm:gap-4 pt-2">
+          <div class="flex flex-wrap gap-4 items-center">
             <a
-              class="bg-[#b21553] cursor-pointer text-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-[0_16px_26px_rgba(178,21,83,0.22)]"
+              href="/web/evaluation"
+              class="bg-[#b21553] cursor-pointer text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
             >
               احجز تقييم الآن
             </a>
             <a
-              class="border-2 cursor-pointer border-[#1c6772] text-[#1c6772] font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-sm"
+              href="/contact"
+              class="border-2 cursor-pointer border-[#1c6772] text-[#1c6772] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
             >
               تواصل معنا
             </a>
           </div>
         </div>
-
-        <div class="relative">
+        <!-- Image -->
+        <div class="relative mt-6 lg:mt-0">
           <div
-            class="absolute -top-6 -left-6 w-44 h-44 rounded-full bg-[#ffd9df] blur-[28px] opacity-80"
+            class="absolute w-64 h-64 rounded-full bg-[#ffd9df] blur-[32px] -top-8 -right-10"
           ></div>
           <div
-            class="absolute -bottom-7 -right-8 w-48 h-48 rounded-full bg-[#a7ebf6] blur-[32px] opacity-70"
+            class="absolute w-64 h-64 rounded-full bg-[#a7ebf6] blur-[32px] -bottom-8 -left-8"
           ></div>
           <div
-            class="relative overflow-hidden rounded-[24px] sm:rounded-[30px] bg-white p-2 shadow-[0_20px_50px_rgba(89,64,69,0.16)] rotate-[-1deg]"
+            class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
               src="./images/programs-hero.png"
               alt="برامج أكاديمية سوا"
-              class="w-full h-[240px] sm:h-[350px] lg:h-[430px] object-cover rounded-[18px] sm:rounded-[24px]"
+              class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
           </div>
         </div>
@@ -650,11 +655,13 @@
               class="flex flex-col sm:flex-row items-center justify-center gap-3"
             >
               <a
+                href="/web/evaluation"
                 class="cursor-pointer w-full sm:w-auto text-[#B21553] bg-[#fff] font-bold text-sm sm:text-base px-8 py-3 rounded-full"
               >
                 احجز الآن
               </a>
               <a
+                href="/contact"
                 class="cursor-pointer w-full sm:w-auto border-2 border-white text-white font-bold text-sm sm:text-base px-8 py-3 rounded-full"
               >
                 تواصل مباشر

@@ -105,7 +105,7 @@ export default {
           <v-col sm="12" md="6">
             <v-text-field
               v-model="permission_name"
-              label="Permission Name"
+              :label="$t('permission_name')"
               style="margin: 2rem 0"
               hide-details="auto"
             ></v-text-field>
@@ -125,6 +125,6 @@ export default {
         </div>
       </v-col>
     </v-row>
-    <v-btn color="success" @click="addPermissions"> Submit </v-btn>
+    <v-btn color="success" @click="addPermissions"> {{ $t('submit') }} </v-btn>
   </div>
 </template>

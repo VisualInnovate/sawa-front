@@ -70,11 +70,11 @@
         <Button style=" background-color: #05505C !important;"  :label='$t("التواصل")' class="w-[170px] pb-2 lg:mb-0 bg focus:ring-0 "/>
         <div class="">
           <h5 class="text-base  pt-2 font-semibold text-[#ffff]"> {{ $t("Mobile_number") }}</h5>
-          <p class="text-sm py-2 font-normal text-[#ffff]"> +0096265522688</p>
+          <p class="text-sm py-2 font-normal text-[#ffff]"> +962791017001</p>
         </div>
         <div class="">
           <h5 class="text-base font-semibold  pt-2 text-[#ffff]"> {{ $t("email") }}</h5>
-          <p class="text-sm py-2 font-normal text-[#ffff]">info@sawa.com </p>
+          <p class="text-sm py-2 font-normal text-[#ffff]">Info@sawa.academy</p>
         </div>
 
       </div>

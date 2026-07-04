@@ -78,7 +78,7 @@ export default {
       @click="syncPermissions"
       :disabled="new_permissions.length == 0"
     >
-      Submit
+      {{ $t('submit') }}
     </v-btn>
   </div>
 </template>

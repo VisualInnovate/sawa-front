@@ -5,9 +5,11 @@ import Editor from 'primevue/editor';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n';
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 
 const loading = ref(true)
 const details = ref({})
@@ -47,7 +49,7 @@ const updateDis = () => {
   }).then((res) => {
     fetchData()
     show.value = !(show.value)
-    toast.add({severity: 'success', summary: 'Success', detail: 'Permission updated', life: 3000});
+    toast.add({severity: 'success', summary: t('success_message'), detail: t('permission_updated'), life: 3000});
   });
 }
 
@@ -100,7 +102,7 @@ const initFilters = () => {
               icon="pi pi-pencil" 
               class="p-button-rounded p-button-text edit-btn"
               @click="showDirection(permission)"
-              v-tooltip.top="'Edit description'"
+              v-tooltip.top="$t('edit_description')"
             />
           </div>
         </div>

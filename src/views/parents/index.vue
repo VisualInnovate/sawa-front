@@ -113,7 +113,7 @@ const printTable = () => {
         <h1>Parents Report</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -141,7 +141,7 @@ const initFilters = () => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ $t('Parents Management') }}</h2>
+            <h2 class="text-2xl font-bold">{{ $t('Parents_Management') }}</h2>
           </template>
 
           <template #end>
@@ -179,7 +179,7 @@ const initFilters = () => {
             :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} parents"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -190,7 +190,6 @@ const initFilters = () => {
           >
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
-                <h3 class="m-0">{{ $t('Parents List') }}</h3>
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />
@@ -218,13 +217,13 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="fname" :header='$t("First Name")' :sortable="true">
+            <Column field="fname" :header='$t("First_Name")' :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.fname || 'N/A' }}
               </template>
             </Column>
 
-            <Column field="lname" :header='$t("Last Name")' :sortable="true">
+            <Column field="lname" :header='$t("Last_Name")' :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.lname || 'N/A' }}
               </template>
@@ -261,7 +260,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No parents found</p>
+                <p class="text-xl">{{ $t("no_data_found") }}</p>
               </div>
             </template>
 
@@ -277,7 +276,7 @@ const initFilters = () => {
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
             <span>
-              {{ $t('Are you sure you want to delete this parent?') }}
+              {{ $t('sure_delete_parent') }}
             </span>
           </div>
           <template #footer>

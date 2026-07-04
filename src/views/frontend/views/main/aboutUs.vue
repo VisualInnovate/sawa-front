@@ -6,19 +6,17 @@
         class="max-w-[1280px] mx-auto px-4 lg:px-8 py-16 lg:py-36 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
       >
         <!-- Text -->
-        <div class="flex flex-col gap-6 lg:gap-8">
+        <div class="flex flex-col gap-4 lg:gap-8">
           <div class="text-right">
             <h1
-              class="text-[36px] sm:text-[48px] lg:text-[60px] font-extrabold leading-[1.1]"
+              class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
-              <span class="block text-[#1c6772]">نرافق طفلك في رحلة</span>
-              <span class="block text-[#1c6772]">النمو نحو</span>
-              <span class="block text-[#b21553]">الاستقلالية</span>
-              <span class="block text-[#b21553]">والدمج</span>
+              <span class="block text-[#1c6772]">نرافق طفلك في رحلة <br>النمو نحو</span>
+              <span class="block text-[#b21553]">الاستقلالية والدمج</span>
             </h1>
           </div>
           <p
-            class="text-[#594045] text-base lg:text-xl text-right leading-relaxed"
+            class="text-[#594045] text-base lg:text-xl text-right leading-relaxed font-bol" 
           >
             في أكاديمية سوا، ندمج بين أحدث المنهجيات العلمية العالمية والخبرة
             المهنية العميقة لتوفير بيئة تعليمية تضمن تمكين كل طفل من الوصول
@@ -31,7 +29,7 @@
               >تعرف على رسالتنا</a
             >
             <a
-              href="contact.html"
+              href="/contact"
               class="border-2 border-[#1c6772] text-[#1c6772] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
               >تواصل معنا</a
             >
@@ -546,12 +544,12 @@
             class="flex flex-wrap gap-4 lg:gap-6 items-center justify-center relative"
           >
             <a
-              href="contact.html"
+              href="/web/evaluation"
               class="bg-[#b21553] text-white font-bold text-base lg:text-xl px-8 lg:px-10 py-4 lg:py-5 rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
               >احجز تقييم الآن</a
             >
             <a
-              href="contact.html"
+              href="/contact"
               class="border-2 border-[#1c6772] text-[#1c6772] font-bold text-base lg:text-xl px-8 lg:px-10 py-4 lg:py-5 rounded-full"
               >تواصل معنا</a
             >

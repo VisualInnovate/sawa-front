@@ -125,7 +125,7 @@ const createuser = () => {
     .then((res) => {
       fetchData()
       createdialog.value = !(createdialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
       skill.value = ref({})
     })
     .catch((el) => {
@@ -160,7 +160,7 @@ const editesuser = () => {
     .then((res) => {
       fetchData()
       updatedialog.value = !(updatedialog.value)
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
       skill.value = ref({})
     })
     .catch((el) => {
@@ -173,7 +173,7 @@ const deleteAction = () => {
     .then((res) => {
       deleteDialog.value = false
       fetchData()
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
     })
     .catch(() => {})
 }
@@ -223,7 +223,7 @@ const initFilters = () => {
             :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -311,7 +311,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t("no_data_found") }}</p>
               </div>
             </template>
 

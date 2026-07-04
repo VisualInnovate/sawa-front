@@ -4,9 +4,11 @@ import { ref, onMounted, onBeforeMount } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
 
 const toast = useToast()
 const router = useRouter()
+const { t } = useI18n();
 const allusers = ref([])
 const loading = ref(true)
 const user = ref({})
@@ -42,7 +44,7 @@ const fetchData = () => {
     console.log(users.value)
   }).catch(() => {
     loading.value = false
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 })
+    toast.add({ severity: 'error', summary: t('error'), detail: t('failed_to_load_data'), life: 3000 })
   });
 }
 
@@ -72,7 +74,7 @@ const createcrude = () => {
       console.log(res.data)
       fetchData()
       createdialog.value = !(createdialog.value)
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
       skill.value = ref({})
     })
     .catch((el) => {
@@ -87,7 +89,7 @@ const deleteAction = () => {
       console.log(res.data)
       deleteDialog.value = false
       fetchData()
-      toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
     })
     .catch(() => { })
 }
@@ -114,7 +116,7 @@ const printTable = () => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Employee Clock-In Report</title>
+        <title>${t('employee_clockin_report')}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           h1 { color: #333; text-align: center; }
@@ -131,10 +133,10 @@ const printTable = () => {
         </style>
       </head>
       <body>
-        <h1>Employee Clock-In Report</h1>
+        <h1>${t('employee_clockin_report')}</h1>
         ${printContents.innerHTML}
         <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-          Generated on ${new Date().toLocaleString()}
+          ${t('generated_on')} ${new Date().toLocaleString()}
         </div>
       </body>
     </html>
@@ -182,7 +184,7 @@ const initFilters = () => {
             :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
             responsive-layout="scroll" scrollable scroll-height="flex" v-can="'employees list'" stripedRows
             showGridlines class="p-datatable-sm">
             <template #header>
@@ -193,39 +195,39 @@ const initFilters = () => {
                     <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
                   </span>
                   <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
-                    v-tooltip.top="'Refresh data'" />
+                    v-tooltip.top="$t('refresh_data')" />
                 </div>
               </div>
             </template>
 
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-            <Column field="employee.name" :header='$t("Employee")' :sortable="true">
+            <Column field="employee.name" :header="$t('Employee')" :sortable="true">
               <template #body="slotProps">
                 <span class="font-medium">{{ slotProps.data.employee?.name || 'N/A' }}</span>
               </template>
             </Column>
 
-            <Column field="date" :header='$t("Date")' :sortable="true">
+            <Column field="date" :header="$t('Date')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.date }}
               </template>
             </Column>
 
-            <Column field="clock_in" :header='$t("Clock In")' :sortable="true">
+            <Column field="clock_in" :header="$t('clock_in')" :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.clock_in" :severity="slotProps.data.late > 0 ? 'danger' : 'success'" />
               </template>
             </Column>
 
-            <Column field="clock_out" :header='$t("Clock Out")' :sortable="true">
+            <Column field="clock_out" :header="$t('clock_out')" :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.clock_out || '--:--:--'"
                   :severity="slotProps.data.clock_out ? (slotProps.data.early_leave > 0 ? 'warning' : 'info') : 'danger'" />
               </template>
             </Column>
 
-            <Column field="status" :header='$t("Status")' :sortable="true">
+            <Column field="status" :header="$t('status')" :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.status" :severity="{
                   'clocked_in': 'info',
@@ -235,7 +237,7 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="working_hours" :header='$t("Hours")' :sortable="true">
+            <Column field="working_hours" :header="$t('hours')" :sortable="true">
               <template #body="slotProps">
                 <span v-if="slotProps.data.working_hours !== null">
                   {{ slotProps.data.working_hours.toFixed(2) }}h
@@ -244,7 +246,7 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="late" :header='$t("Late (h)")' :sortable="true">
+            <Column field="late" :header="$t('late_h')" :sortable="true">
               <template #body="slotProps">
                 <span class="text-red-500 font-medium">
                   {{ !isNaN(Number(slotProps.data.late )) ? Number(slotProps.data.late ).toFixed(2) :
@@ -253,7 +255,7 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="early_leave" :header='$t("Early Leave (h)")' :sortable="true">
+            <Column field="early_leave" :header="$t('early_leave_h')" :sortable="true">
               <template #body="slotProps">
                 <span class="text-red-500 font-medium">
                   {{ !isNaN(Number(slotProps.data.early_leave)) ? Number(slotProps.data.early_leave).toFixed(2) :
@@ -269,7 +271,7 @@ const initFilters = () => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t('no_records_found') }}</p>
               </div>
             </template>
 

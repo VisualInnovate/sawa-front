@@ -5,7 +5,9 @@ import {ref, onMounted, onBeforeMount,computed} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import { get } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
 const toast = useToast()
+const { t } = useI18n();
 const models=ref([])
 const model=ref('')
 const maxSelection=ref(6)
@@ -102,7 +104,7 @@ const getrelation = (id) => {
 
 const exportCSV = () => {
   if (users.value.length === 0) {
-    toast.add({ severity: 'warn', summary: 'No Data', detail: 'There is no data to export.', life: 3000 });
+    toast.add({ severity: 'warn', summary: t('no_data'), detail: t('no_data_to_export'), life: 3000 });
     return;
   }
   if (!dt.value) {
@@ -173,7 +175,7 @@ const initFilters = () => {
           :filters="filters"
           paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rows-per-page-options="[5, 10, 25]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} products"
+          :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
           responsive-layout="scroll"
           v-can="'positions list'"
         >

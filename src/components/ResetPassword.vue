@@ -27,7 +27,7 @@ const rules = ref({
     <v-row>
       <v-col class="v-col-sm-12 v-col-md-6 offset-md-3 mx-auto">
         <v-card elevation="4" light tag="section">
-          <v-card-title> Reset Password </v-card-title>
+          <v-card-title> {{ $t('reset_password') || 'Reset Password' }} </v-card-title>
           <v-card-text>
             <v-alert
               class="custom-alert-class"
@@ -54,14 +54,14 @@ const rules = ref({
             <v-card-text>
               <v-text-field
                 outline
-                label="New Password"
+                :label="$t('new_password')"
                 type="password"
                 v-model="form.password"
                 :rules="rules.password"
               ></v-text-field>
               <v-text-field
                 outline
-                label="Confirm Password"
+                :label="$t('confirm_password')"
                 type="password"
                 v-model="form.password_confirmation"
                 :rules="rules.password_confirmation"
@@ -69,7 +69,7 @@ const rules = ref({
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
-              <v-btn color="info" type="submit"> Reset </v-btn>
+              <v-btn color="info" type="submit"> {{ $t('reset') || 'Reset' }} </v-btn>
             </v-card-actions>
           </v-form>
         </v-card>
