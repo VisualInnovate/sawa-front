@@ -140,7 +140,7 @@ const addEvaluation = (id) => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ $t("Children Management") }}</h2>
+            <h2 class="text-2xl font-bold">{{ $t("Children_Management") }}</h2>
           </template>
 
           <template #end>
@@ -162,7 +162,7 @@ const addEvaluation = (id) => {
               />
               <Button 
                 v-can="'child create'"
-                :label='$t("Add New")' 
+                :label='$t("Add_New")' 
                 icon="pi pi-plus" 
                 class="p-button-success no-print" 
                 @click="openNew"
@@ -185,7 +185,7 @@ const addEvaluation = (id) => {
             :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} records"
+            :current-page-report-template="$t('Showing') + ' {first} ' + $t('to') + ' {last} ' + $t('of') + ' {totalRecords}'"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -196,7 +196,6 @@ const addEvaluation = (id) => {
           >
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
-                <h3 class="m-0">{{ $t("Children List") }}</h3>
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />

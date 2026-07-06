@@ -43,7 +43,7 @@ const executeEnCode = () => {
 </script>
 
 <template>
-  <v-btn @click="changeLocale">
+  <v-btn @click="changeLocale" class="!h-[57.6px]">
     {{ localeBtn }}
     <v-icon icon="mdi-flag" class="mx-2" />
   </v-btn>

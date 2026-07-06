@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4 shadow-lg p-6 rounded-md flex justify-between">
-    <h1 class="px-4 py-2 mx-2 text-2xl font-bold text-end">notification</h1>
+    <h1 class="px-4 py-2 mx-2 text-2xl font-bold text-end">{{ $t("notification") }}</h1>
     <div class="flex justify-end items-center">
       <Button
         type="button"

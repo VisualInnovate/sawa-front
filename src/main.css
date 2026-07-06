@@ -119,3 +119,23 @@ canvas {
           /* width: 100%; */
       }
   }
+
+/* ====================================================
+   RTL (Arabic) DataTable Paginator Fixes
+   ==================================================== */
+
+/* 1. Flip paginator navigation arrows horizontally in RTL mode */
+[dir="rtl"] .p-paginator .p-paginator-first .p-paginator-icon,
+[dir="rtl"] .p-paginator .p-paginator-prev .p-paginator-icon,
+[dir="rtl"] .p-paginator .p-paginator-next .p-paginator-icon,
+[dir="rtl"] .p-paginator .p-paginator-last .p-paginator-icon {
+  transform: scaleX(-1) !important;
+}
+
+/* 2. Center the rows-per-page number inside its dropdown box */
+.p-paginator .p-paginator-rpp-options .p-dropdown-label {
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
