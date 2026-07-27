@@ -1,41 +1,49 @@
 <template>
-  <div class="evaluation-results-container">
+  <div
+    class="min-h-screen bg-gray-50 p-3 md:p-6"
+    :dir="locale === 'ar' ? 'rtl' : 'ltr'"
+  >
     <!-- Header Section -->
-    <header class="header-section">
-      <div class="page-title" v-if="result[0] && sideProfileName">
-        <span class="child-name">{{ result[0].child_name }}</span>
-        <span class="separator" :class="locale">{{ locale === 'en' ? '/' : '\\' }}</span>
-        <span class="profile-name">{{ sideProfileName }}</span>
-        <span class="separator" :class="locale">{{ locale === 'en' ? '/' : '\\' }}</span>
-        <span class="evaluation-title">{{ result[0].evaluation_title }}</span>
+    <header class="mb-6 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+      <div
+        v-if="result[0] && sideProfileName"
+        class="flex flex-wrap items-center gap-2 text-xl font-bold text-gray-800"
+      >
+        <span class="text-blue-500">{{childName }}</span>
+        <span class="text-gray-500">{{ locale === 'en' ? '/' : '\\' }}</span>
+        <span class="text-pink-500">{{ sideProfileName }}</span>
+        <span class="text-gray-500">{{ locale === 'en' ? '/' : '\\' }}</span>
+        <span class="text-cyan-500">{{ result[0].evaluation_title }}</span>
       </div>
 
-      <Button 
-        class="back-button" 
-        severity="primary" 
+      <Button
+        severity="primary"
         @click="goBack"
         rounded
         outlined
+        class="inline-flex items-center gap-2 font-semibold"
       >
         <i class="pi pi-arrow-left"></i>
-        <span class="button-text">{{ $t('back') }}</span>
+        <span>{{ $t('back') }}</span>
       </Button>
     </header>
 
     <!-- Alert Message -->
-    <Message 
-      v-if="alertText" 
-      :severity="alertType" 
-      class="alert-message"
+    <Message
+      v-if="alertText"
+      :severity="alertType"
+      class="mb-6 rounded-lg"
       @close="alertText = null"
     >
       {{ alertText }}
     </Message>
 
     <!-- Controls Container (Chart Controls + Date Filtering) -->
-    <div class="controls-wrapper">
-      <div class="control-group">
-        <label class="control-label">{{ $t('chart_type') }}</label>
+    <div
+      class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 rounded-xl bg-white p-5 shadow-sm"
+    >
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-600">{{ $t('chart_type') }}</label>
         <Dropdown
           v-model="selectedChartType"
           :options="chartTypes"
@@ -46,8 +54,8 @@
         />
       </div>
 
-      <div class="control-group" v-if="!isNonCartesianChart">
-        <label class="control-label">{{ $t('xAxis') }}</label>
+      <div v-if="!isNonCartesianChart" class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-600">{{ $t('xAxis') }}</label>
         <Dropdown
           v-model="selectX"
           :options="firstSelectBoxComputed"
@@ -58,8 +66,8 @@
         />
       </div>
 
-      <div class="control-group" v-if="!isNonCartesianChart">
-        <label class="control-label">{{ $t('yAxis') }}</label>
+      <div v-if="!isNonCartesianChart" class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-600">{{ $t('yAxis') }}</label>
         <Dropdown
           v-model="selectY"
           :options="secondSelectBoxComputed"
@@ -70,10 +78,10 @@
         />
       </div>
 
-      <div class="control-group">
-        <label class="control-label">{{ $t('from') }}</label>
-        <Calendar 
-          v-model="from" 
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-600">{{ $t('from') }}</label>
+        <Calendar
+          v-model="from"
           @update:model-value="filter"
           dateFormat="dd/mm/yy"
           :placeholder="$t('from')"
@@ -82,10 +90,10 @@
         />
       </div>
 
-      <div class="control-group">
-        <label class="control-label">{{ $t('to') }}</label>
-        <Calendar 
-          v-model="to" 
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-semibold text-gray-600">{{ $t('to') }}</label>
+        <Calendar
+          v-model="to"
           @update:model-value="filter"
           dateFormat="dd/mm/yy"
           :placeholder="$t('to')"
@@ -96,25 +104,47 @@
     </div>
 
     <!-- Main Chart -->
-    <Card class="chart-card">
+    <Card class="mb-6 overflow-hidden h-auto rounded-xl border-none shadow-md">
       <template #title>
-        <div class="chart-title">
-          <i class="pi pi-chart-bar"></i>
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <i class="pi pi-chart-bar text-blue-500"></i>
           <span>{{ $t('evaluation_results_visualization') }}</span>
         </div>
       </template>
       <template #content>
-        <div class="chart-wrapper">
-          <Chart 
+        <!-- Custom scrollable legend for pie/doughnut/polarArea charts, which -->
+        <!-- otherwise render one legend swatch per data point and can overflow -->
+        <!-- the card when there are many entries. -->
+        <div
+          v-if="isNonCartesianChart && legendItems.length"
+          class="mb-3 flex max-h-24 flex-wrap gap-x-4 gap-y-2 overflow-y-auto rounded-lg bg-gray-50 p-2.5"
+        >
+          <div
+            v-for="(item, i) in legendItems"
+            :key="i"
+            class="flex items-center gap-1.5 text-xs text-gray-600"
+          >
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
+            <span>{{ item.label }}</span>
+          </div>
+        </div>
+
+        <div
+          class="relative w-full"
+          :class="isNonCartesianChart && legendItems.length
+            ? 'h-72 md:h-[clamp(220px,38vh,420px)]'
+            : 'h-96 md:h-[clamp(300px,50vh,500px)]'"
+        >
+          <Chart
             v-if="result.length > 0"
-            :type="selectedChartType" 
-            :data="chartData" 
-            :options="chartOptions" 
-            class="main-chart"
+            :type="selectedChartType"
+            :data="chartData"
+            :options="chartOptions"
+            class="h-full w-full"
             :aria-label="$t('evaluation_results_chart')"
           />
-          <div v-else class="no-results">
-            <i class="pi pi-info-circle"></i>
+          <div v-else class="flex h-full flex-col items-center justify-center gap-2 text-gray-500">
+            <i class="pi pi-info-circle text-4xl"></i>
             <span>{{ $t('no_data_available') }}</span>
           </div>
         </div>
@@ -122,43 +152,43 @@
     </Card>
 
     <!-- Results Table Section -->
-    <Card class="results-card">
+    <Card class="rounded-xl border-none shadow-md">
       <template #title>
-        <div class="results-header">
-          <div class="results-title">
-            <i class="pi pi-table"></i>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-2 text-lg font-semibold">
+            <i class="pi pi-table text-blue-500"></i>
             <span>{{ $t('evaluation_results') }}</span>
           </div>
-          
-          <div class="results-actions">
-            <span class="p-input-icon-left search-box">
-              <i class="pi pi-search"></i>
-              <InputText 
-                v-model="search" 
+
+          <div class="flex w-full flex-col items-stretch gap-4 md:w-auto md:flex-row md:items-center">
+            <span class="relative">
+              <i class="pi pi-search absolute top-1/2 -translate-y-1/2 rtl:right-3 ltr:left-3 text-gray-400"></i>
+              <InputText
+                v-model="search"
                 :placeholder="$t('search')"
-                class="search-input"
+                class="w-full min-w-[220px] rounded-full ltr:pl-10 rtl:pr-10"
               />
             </span>
-            
-            <Button 
-              severity="success" 
+
+            <Button
+              severity="success"
               @click="print"
-              class="print-button"
               outlined
               rounded
+              class="w-full justify-center md:w-auto"
             >
               <i class="pi pi-print"></i>
-              <span class="button-text">{{ $t('print') }}</span>
+              <span>{{ $t('print') }}</span>
             </Button>
           </div>
         </div>
       </template>
       <template #content>
-        <div v-if="loading" class="loading-overlay">
+        <div v-if="loading" class="flex flex-col items-center justify-center gap-4 p-12">
           <ProgressSpinner />
-          <span class="loading-text">{{ $t('loading') }}</span>
+          <span class="text-gray-500">{{ $t('loading') }}</span>
         </div>
-        
+
         <DataTable
           v-else
           :value="filteredResults"
@@ -166,7 +196,7 @@
           :rows="10"
           :rowsPerPageOptions="[5,10,25,50]"
           :loading="loading"
-          class="results-table"
+          class="w-full"
           responsiveLayout="stack"
           breakpoint="960px"
           stripedRows
@@ -174,72 +204,77 @@
           :currentPageReportTemplate="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('entries')}`"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         >
-          <Column field="id" :header="$t('id')" :sortable="true" class="id-column">
+          <Column field="id" :header="$t('id')" :sortable="true">
             <template #body="{ index }">
-              <span class="index-badge">{{ index + 1 }}</span>
-            </template>
-          </Column>
-          
-          <Column field="therapist_name" :header="$t('therapist_name')" :sortable="true" class="therapist-column"></Column>
-          
-          <Column field="child_age" :header="$t('child_age')" :sortable="true" class="age-column">
-            <template #body="{ data }">
-              <span class="age-value">{{ data.child_age }} <span class="unit">{{ $t('months') }}</span></span>
-            </template>
-          </Column>
-          
-          <Column field="grow_age" :header="$t('grow_age')" :sortable="true" class="grow-column">
-            <template #body="{ data }">
-              <span class="value-badge">{{ data.grow_age }}</span>
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold">
+                {{ index + 1 }}
+              </span>
             </template>
           </Column>
 
-          <Column field="diff_age" :header="$t('diff_age')" :sortable="true" class="diff-column">
+          <Column field="therapist_name" :header="$t('therapist_name')" :sortable="true"></Column>
+
+          <Column field="child_age" :header="$t('child_age')" :sortable="true">
             <template #body="{ data }">
-              <span class="value-badge">{{ data.diff_age }}</span>
+              <span class="font-semibold">
+                {{ data.child_age }} <span class="text-xs text-gray-500">{{ $t('months') }}</span>
+              </span>
             </template>
           </Column>
 
-          <Column field="basal_age" :header="$t('basal_age')" :sortable="true" class="basal-column">
+          <Column field="grow_age" :header="$t('grow_age')" :sortable="true">
             <template #body="{ data }">
-              <span class="age-value">{{ data.basal_age || 'N/A' }} <span class="unit">{{ $t('months') }}</span></span>
+              <span class="inline-block rounded-lg bg-gray-100 px-2.5 py-1 font-semibold">{{ data.grow_age }}</span>
             </template>
           </Column>
 
-          <Column field="late_percentage" :header="$t('late_percentage')" :sortable="true" class="percentage-column">
+          <Column field="diff_age" :header="$t('diff_age')" :sortable="true">
             <template #body="{ data }">
-              <div class="percentage-container">
-                <span 
-                  class="percentage-value" 
-                  :class="Math.round(data.late_percentage) >= 50 ? 'text-green' : 'text-red'"
+              <span class="inline-block rounded-lg bg-gray-100 px-2.5 py-1 font-semibold">{{ data.diff_age }}</span>
+            </template>
+          </Column>
+
+          <Column field="basal_age" :header="$t('basal_age')" :sortable="true">
+            <template #body="{ data }">
+              <span class="font-semibold">
+                {{ data.basal_age || 'N/A' }} <span class="text-xs text-gray-500">{{ $t('months') }}</span>
+              </span>
+            </template>
+          </Column>
+
+          <Column field="late_percentage" :header="$t('late_percentage')" :sortable="true">
+            <template #body="{ data }">
+              <div class="flex min-w-[140px] items-center gap-2">
+                <span
+                  class="w-[45px] font-bold"
+                  :class="Math.round(data.late_percentage) >= 50 ? 'text-green-500' : 'text-red-500'"
                 >
                   {{ Math.round(data.late_percentage) }}%
                 </span>
-                <ProgressBar 
-                  :value="Math.round(data.late_percentage)" 
+                <ProgressBar
+                  :value="Math.round(data.late_percentage)"
                   :showValue="false"
-                  class="percentage-bar"
-                  :class="Math.round(data.late_percentage) >= 50 ? 'above-50' : 'below-50'"
+                  class="h-2 flex-1 rounded"
+                  :class="Math.round(data.late_percentage) >= 50 ? 'progress-green' : 'progress-red'"
                 />
               </div>
             </template>
           </Column>
 
-          <Column field="result_created_at" :header="$t('created_at')" :sortable="true" class="date-column">
+          <Column field="result_created_at" :header="$t('created_at')" :sortable="true">
             <template #body="{ data }">
-              <span class="date-value">{{ formatDate(data.result_created_at) }}</span>
+              <span class="font-mono">{{ formatDate(data.result_created_at) }}</span>
             </template>
           </Column>
 
-          <Column :header="$t('operation')" class="action-column">
+          <Column :header="$t('operation')">
             <template #body="{ data }">
-              <Button 
-                icon="pi pi-pencil" 
-                severity="info" 
-                text 
-                rounded 
+              <Button
+                icon="pi pi-pencil"
+                severity="info"
+                text
+                rounded
                 @click="editItem(data.result_created_at, data.id)"
-                class="edit-button"
                 v-tooltip.top="$t('edit_evaluation')"
               />
             </template>
@@ -249,41 +284,38 @@
     </Card>
 
     <!-- Edit Date Dialog -->
-    <Dialog 
-      v-model:visible="visible" 
-      modal 
-      :header="$t('edit_evaluation_date')" 
-      class="edit-dialog"
-      :style="{ width: '100%', maxWidth: '450px' }"
+    <Dialog
+      v-model:visible="visible"
+      modal
+      :header="$t('edit_evaluation_date')"
+      class="w-full max-w-[450px]"
     >
-      <div class="edit-form">
-        <div class="field">
-          <label class="control-label mb-2 block">{{ $t('evaluation_date') }}</label>
-          <Calendar 
-            v-model="examDate" 
-            dateFormat="dd/mm/yy" 
-            showIcon 
+      <div class="flex flex-col gap-4">
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-gray-600">{{ $t('evaluation_date') }}</label>
+          <Calendar
+            v-model="examDate"
+            dateFormat="dd/mm/yy"
+            showIcon
             class="w-full"
             :class="{ 'p-invalid': formSubmitted && !examDate }"
           />
-          <small v-if="formSubmitted && !examDate" class="p-error block mt-1">
+          <small v-if="formSubmitted && !examDate" class="p-error mt-1 block">
             {{ $t('date_required') }}
           </small>
         </div>
 
-        <div class="form-actions">
-          <Button 
-            :label="$t('cancel')" 
-            severity="secondary" 
-            @click="visible = false" 
-            class="cancel-button"
+        <div class="mt-2 flex justify-end gap-3">
+          <Button
+            :label="$t('cancel')"
+            severity="secondary"
+            @click="visible = false"
             outlined
           />
-          <Button 
-            :label="$t('save')" 
-            severity="primary" 
-            @click="submit" 
-            class="submit-button"
+          <Button
+            :label="$t('save')"
+            severity="primary"
+            @click="submit"
           />
         </div>
       </div>
@@ -340,7 +372,7 @@ const examId = ref('');
 const loading = ref(true);
 const sideProfileName = ref('');
 const formSubmitted = ref(false);
-
+const childName = ref('');
 // Dynamic Chart Select Options
 const chartTypes = computed(() => [
   { label: t('bar_chart'), value: 'bar' },
@@ -358,9 +390,22 @@ const axisOptions = computed(() => [
   { title: t('late_percentage'), value: 'latePercentage' },
 ]);
 
-const isNonCartesianChart = computed(() => 
+const isNonCartesianChart = computed(() =>
   ['pie', 'doughnut', 'polarArea'].includes(selectedChartType.value)
 );
+
+const legendColors = ['#66BB6A', '#EF5350', '#42A5F5', '#FFCA28', '#AB47BC', '#26A69A'];
+
+// Drives the custom scrollable legend rendered above the chart for
+// pie/doughnut/polarArea types, replacing Chart.js's built-in legend
+// (which renders one swatch per data point and can't be constrained).
+const legendItems = computed(() => {
+  if (!isNonCartesianChart.value) return [];
+  return createdAt.value.map((label, i) => ({
+    label,
+    color: legendColors[i % legendColors.length]
+  }));
+});
 
 const firstSelectBoxComputed = computed(() =>
   axisOptions.value.filter(item => item.value !== selectY.value)
@@ -379,6 +424,16 @@ const filteredResults = computed(() => {
     });
   });
 });
+const getchildreen = async () => {
+  try {
+    const response = await axios.get(`/api/child/${route.params.child_id}`);
+    childName.value = response.data.child.name;
+  } catch (error) {
+    console.error('Error fetching child data:', error);
+    showAlert(t('failed_to_fetch_child_data'), 'error');
+    return null;
+  }
+};
 
 // Build Chart Datasets
 const setChartData = () => {
@@ -389,9 +444,7 @@ const setChartData = () => {
       labels: createdAt.value,
       datasets: [{
         data: latePercentages.value.map(val => val ?? 0),
-        backgroundColor: [
-          '#66BB6A', '#EF5350', '#42A5F5', '#FFCA28', '#AB47BC', '#26A69A'
-        ],
+        backgroundColor: legendColors,
         borderColor: documentStyle.getPropertyValue('--surface-border') || '#e5e7eb',
         borderWidth: 1
       }]
@@ -459,6 +512,7 @@ const setChartOptions = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
+        display: !isNonCartesianChart.value,
         position: 'top',
         labels: { color: textColor, font: { weight: '600' } }
       },
@@ -499,12 +553,12 @@ const getResults = async () => {
       }
     );
     result.value = response.data.resultEvaluation || [];
-    
+
     createdAt.value = [];
     latePercentages.value = [];
     growAge.value = [];
     diffAge.value = [];
-    
+
     result.value.forEach((elem) => {
       createdAt.value.push(moment(elem.result_created_at).format('MM-DD-YYYY'));
       latePercentages.value.push(parseFloat(elem.late_percentage) || 0);
@@ -592,7 +646,7 @@ const showAlert = (message, type) => {
 const goBack = () => { router.go(-1); };
 
 onMounted(async () => {
-  await Promise.all([getResults(), getSideProfile()]);
+  await Promise.all([getResults(), getSideProfile(), getchildreen()]);
 });
 
 watch([selectedChartType, selectX, selectY, locale], () => {
@@ -602,271 +656,17 @@ watch([selectedChartType, selectX, selectY, locale], () => {
 </script>
 
 <style scoped>
-/* Main Layout Container */
-.evaluation-results-container {
-  padding: 1.5rem;
-  background-color: var(--surface-ground, #f8f9fa);
-  min-height: 100vh;
-  direction: v-bind('locale === "ar" ? "rtl" : "ltr"');
-}
-
-/* Header Section */
-.header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.page-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-color, #333);
-  flex-wrap: wrap;
-}
-
-.page-title .child-name { color: var(--primary-500, #3B82F6); }
-.page-title .profile-name { color: var(--pink-500, #EC4899); }
-.page-title .evaluation-title { color: var(--cyan-500, #06B6D4); }
-.page-title .separator { color: var(--text-color-secondary, #6c757d); }
-
-.back-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-}
-
-/* Alerts */
-.alert-message {
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-}
-
-/* Dynamic CSS Grid Controls Area */
-.controls-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  background: var(--surface-card, #ffffff);
-  padding: 1.25rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.control-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-color-secondary, #4b5563);
-}
-
-/* Charts Section */
-.chart-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.5rem;
-  border: none;
-}
-
-.chart-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.chart-title .pi { color: var(--primary-500, #3B82F6); }
-
-.chart-wrapper {
-  position: relative;
-  width: 100%;
-  height: clamp(300px, 50vh, 500px);
-}
-
-.main-chart {
-  width: 100%;
-  height: 100%;
-}
-
-.no-results {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-color-secondary, #6c757d);
-  gap: 0.5rem;
-}
-
-.no-results .pi { font-size: 2.5rem; }
-
-/* Table Container & Header */
-.results-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: none;
-}
-
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.results-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.results-title .pi { color: var(--primary-500, #3B82F6); }
-
-.results-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  position: relative;
-}
-
-.search-input {
-  border-radius: 20px;
-  padding-left: 2.5rem;
-  min-width: 220px;
-}
-
-/* Responsive Table Elements */
-.results-table {
-  width: 100%;
-}
-
-.index-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--surface-ground, #f3f4f6);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.value-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 8px;
-  background-color: var(--surface-ground, #f3f4f6);
-  font-weight: 600;
-}
-
-.age-value { font-weight: 600; }
-.age-value .unit {
-  font-size: 0.75rem;
-  color: var(--text-color-secondary, #6c757d);
-}
-
-/* Percentage Styling Rule (<50% Red, >=50% Green) */
-.percentage-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 140px;
-}
-
-.percentage-value {
-  font-weight: 700;
-  width: 45px;
-}
-
-.percentage-value.text-red {
-  color: #ef4444;
-}
-
-.percentage-value.text-green {
-  color: #22c55e;
-}
-
-.percentage-bar {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-}
-
-.percentage-bar.below-50 :deep(.p-progressbar-value) {
+/*
+  Tailwind can't reach into PrimeVue's internal DOM (the ProgressBar's
+  inner ".p-progressbar-value" div), so these two rules are the only
+  CSS left in the component — everything else above uses Tailwind
+  utility classes directly in the template.
+*/
+.progress-red :deep(.p-progressbar-value) {
   background-color: #ef4444;
 }
 
-.percentage-bar.above-50 :deep(.p-progressbar-value) {
+.progress-green :deep(.p-progressbar-value) {
   background-color: #22c55e;
-}
-
-.date-value { font-family: monospace; }
-
-.loading-overlay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  gap: 1rem;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-/* Mobile Responsiveness Rules */
-@media (max-width: 768px) {
-  .evaluation-results-container {
-    padding: 0.75rem;
-  }
-
-  .header-section {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .results-header, .results-actions {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-  }
-
-  .search-input {
-    width: 100%;
-  }
-
-  .print-button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .chart-wrapper {
-    height: 320px;
-  }
 }
 </style>

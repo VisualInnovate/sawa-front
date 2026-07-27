@@ -82,10 +82,7 @@ td{
   color: black !important;
   border-radius: 5px !important;
 }
-canvas {
-  width: 100% !important;
-  height: 60vh !important;
-}
+
 
 .p-inputtext:enabled{
   
