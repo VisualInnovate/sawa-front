@@ -598,8 +598,6 @@ export default {
   sample_heading: "عنوان تجريبي",
   meetings: "الاجتماعات",
   vb: "VB",
-  milestone: "المراحل",
-  barriers: "العوائق",
   carolaina: "كارولينا",
   module: "الوحدة",
   hr: "الموارد البشرية",
