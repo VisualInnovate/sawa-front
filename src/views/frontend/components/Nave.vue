@@ -18,13 +18,13 @@
               <img src="/src/views/frontend/image/header/Group22.png" class="w-[150px] h-[60px] hover:scale-105 transition-transform duration-300">
             </router-link>
           </li>
-          <li v-if="parentStore.parentAuth" class="my-auto text-center py-1 lg:py-0">
+          <li v-if="parentStore.isAuthenticated" class="my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'Booking' }" class="text-base font-bold mx-3 text-black hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("bookings") }}</router-link>
           </li>
-          <li v-if="!parentStore.parentAuth" class="my-auto text-center py-1 lg:py-0">
+          <li v-if="!parentStore.isAuthenticated" class="my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'clidreen_parents' }" class="text-base font-bold mx-3 text-black hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("home") }}</router-link>
           </li>
-          <li v-if="parentStore.parentAuth" class="hidden lg:block my-auto text-center py-1 lg:py-0">
+          <li v-if="parentStore.isAuthenticated" class="hidden lg:block my-auto text-center py-1 lg:py-0">
             <router-link :to="{ name: 'clidreen_parents' }" class="text-base font-bold mx-3 text-black hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("اطفالي") }}</router-link>
           </li>
           <li class="my-auto text-center py-1 lg:py-0">
@@ -34,7 +34,7 @@
       </div>
       <div class="hidden lg:block">
         <p style="display:inline-block; height: 50px;"><LocaleSelect id="local-switcher"></LocaleSelect></p>
-        <div style="display: inline-flex; justify-content: center; align-items: center; height: 100%;" v-if="parentStore.parentAuth">
+        <div style="display: inline-flex; justify-content: center; align-items: center; height: 100%;" v-if="parentStore.isAuthenticated">
        
           <Button
             style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
@@ -54,14 +54,14 @@
         />
       </div>
 
-        <router-link v-if="!parentStore.parentAuth" :to="{ name: 'parentLogin' }" class="items-center hidden lg:block" style="display: inline;">
+        <router-link v-if="!parentStore.isAuthenticated" :to="{ name: 'parentLogin' }" class="items-center hidden lg:block" style="display: inline;">
           <Button
             style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
             :label='$t("sign_in")'
             class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
           />
         </router-link>
-        <router-link v-if="!parentStore.parentAuth" :to="{ name: 'SingUp' }" class="text-lg items-center hidden lg:block" style="display: inline;">
+        <router-link v-if="!parentStore.isAuthenticated" :to="{ name: 'SingUp' }" class="text-lg items-center hidden lg:block" style="display: inline;">
           <Button
             style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
             :label='$t("Create_an_account")'
@@ -99,7 +99,7 @@
   <div style="direction: ltr !important;" class="flex justify-content-center">
     <Sidebar v-model:visible="dashboard" header="Sidebar">
       <div>
-        <img :src="parent_Image" style="width: 100px; height: 100px;" class="rounded-full m-auto hover:scale-105 transition-transform duration-300">
+        <img :src="parentImage" style="width: 100px; height: 100px;" class="rounded-full m-auto hover:scale-105 transition-transform duration-300">
       </div>
       <div class="dash w-[85%] mx-auto py-[5%]">
         <div class="flex justify-between pb-3" style="border-bottom: 1px solid #E0E0E0;">
@@ -127,13 +127,15 @@ import { useParentStore } from "../../../stores/ParentStore";
 import { useI18n } from 'vue-i18n';
 import { useRouter } from "vue-router";
 import Sidebar from 'primevue/sidebar';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import LocaleSelect from "../../../components/LocaleSelect.vue";
 
 const parentStore = useParentStore();
 const scrollContainer = ref(null);
 const { t } = useI18n();
-const parent_Image = ref(localStorage.getItem("parent"));
+const parentImage = computed(
+  () => parentStore.user?.image || "/src/assets/img/Ellipse2.png"
+);
 const dashboard = ref(false);
 const staticDiv = ref(null);
 const router = useRouter();

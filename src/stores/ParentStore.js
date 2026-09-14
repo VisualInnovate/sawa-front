@@ -1,112 +1,187 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import { ref } from "vue";
 import { useStorage } from "@vueuse/core";
 import { useAuthStore } from "../stores/Auth";
-import Code from "../views/frontend/views/code.vue";
+
+const getToken = (payload) =>
+  payload?.token ??
+  payload?.tokens ??
+  payload?.access_token ??
+  payload?.data?.token ??
+  payload?.data?.tokens ??
+  null;
+
+const getUser = (payload) => payload?.user ?? payload?.data?.user ?? {};
+
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
-    parent: useStorage("parent", ''),
-    parent_id: useStorage("parent_id", ''),
-
-    token: useStorage("token", null),
+    // The default must be an object so VueUse serializes the complete user as JSON.
+    parent: useStorage("parent", {}),
+    parent_id: useStorage("parent_id", null),
+    // Keep the parent session separate from the administration session.
+    parentToken: useStorage("parentToken", null),
     parentAuth: useStorage("parentAuth", false),
-
-    showErrors: ref(false),
+    showErrors: false,
     authErrors: {},
+    loading: false,
   }),
   getters: {
-    user: (state) => state.parent,
-    errors: (state) => state.authErrors?.errors,
+    user: (state) => state.parent ?? {},
+    errors: (state) => state.authErrors?.errors ?? {},
     errorMessage: (state) => state.authErrors?.message,
+    isAuthenticated: (state) => Boolean(state.parentAuth && state.parentToken),
   },
   actions: {
+    storeSession(payload) {
+      const token = getToken(payload);
+
+      if (!token) {
+        return false;
+      }
+
+      const user = getUser(payload);
+      this.parent = user && typeof user === "object" ? user : {};
+      this.parent_id =
+        user?.parent_id ??
+        user?.id ??
+        payload?.parent_id ??
+        payload?.data?.parent_id ??
+        null;
+      this.parentToken = token;
+      this.parentAuth = true;
+      return true;
+    },
+
+    async redirectAfterLogin() {
+      const lastRoute = localStorage.getItem("lastRoute");
+      localStorage.removeItem("lastRoute");
+
+      await this.router.replace(lastRoute || { name: "webHome" });
+    },
+
     async login(parent) {
-      this.authErrors = [];
-      this.showErrors = false;
-      await axios
-        .post("api/parent/login", parent)
-        .then((res) => {
-          useAuthStore().resetAuthStore()
-          this.parent = res.data.user.image;
-          this.parent_id=res.data.user.parent_id
-          this.token = res.data.token;
-          this.parentAuth = true;
+      if (this.loading) return;
 
-          // if (res.data.user.phone_verified_at == null) {
-          //   console.log("asdf");
-          //   this.router.push({ name: "code" });
-          // } else {
-          //   console.log(res);
-          if(localStorage.getItem("lastRoute")){
-      
-            this.router.push(localStorage.getItem("lastRoute"));
-          }
-          else{
-            
-          
-              this.router.push({name: 'home' });
-          }
-          // }
-        })
-        .catch((err) => {
-          if (err.response.data.status== 401){
-            localStorage.setItem("email_parent",parent.email)
-            this.router.push({name: 'register-code' });
-            
-          } 
-          this.showErrors = true;
-          this.authErrors = err.response.data;
-          console.log(err);
+      this.authErrors = {};
+      this.showErrors = false;
+      this.loading = true;
+
+      try {
+        const response = await axios.post("/api/parent/login", parent, {
+          skipAuth: true,
+          skipAuthRedirect: true,
         });
+
+        if (!this.storeSession(response.data)) {
+          this.showErrors = true;
+          this.authErrors = {
+            message: "تعذر إتمام تسجيل الدخول: لم يتم استلام رمز الجلسة.",
+          };
+          return;
+        }
+
+        // A parent session and an administration session must not share state.
+        useAuthStore().resetAuthStore();
+        await this.redirectAfterLogin();
+      } catch (error) {
+        const responseData = error.response?.data;
+
+        if (responseData?.status === 401) {
+          localStorage.setItem("email_parent", parent.email ?? "");
+          await this.router.push({ name: "register-code" });
+          return;
+        }
+
+        this.showErrors = true;
+        this.authErrors = responseData ?? {
+          message: "تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
+        };
+      } finally {
+        this.loading = false;
+      }
     },
+
     async register(parent) {
-      console.log(parent);
-      this.authErrors = [];
-      this.showErrors = false;
-      parent.otp=(parent.otp).join('')
-      await axios
-        .post("api/parent/verify-code",{
-          email:localStorage.getItem("email_parent"),
-          code:parent.otp
+      if (this.loading) return;
 
-        } )
-        .then((res) => {
-          this.parent = res.data.user;
-          this.token = res.data.token;
-          this.parentAuth = true;
-          console.log(res);
-          this.router.push("/web");
-        })
-        .catch((err) => {
+      this.authErrors = {};
+      this.showErrors = false;
+      this.loading = true;
+
+      try {
+        const code = Array.isArray(parent.otp)
+          ? parent.otp.join("")
+          : parent.otp;
+        const response = await axios.post(
+          "/api/parent/verify-code",
+          {
+            email: localStorage.getItem("email_parent"),
+            code,
+          },
+          {
+            skipAuth: true,
+            skipAuthRedirect: true,
+          }
+        );
+
+        if (!this.storeSession(response.data)) {
           this.showErrors = true;
-          this.authErrors = err.response.data;
-          console.log(err);
-        });
+          this.authErrors = {
+            message: "تعذر إتمام التحقق: لم يتم استلام رمز الجلسة.",
+          };
+          return;
+        }
+
+        useAuthStore().resetAuthStore();
+        localStorage.removeItem("email_parent");
+        await this.redirectAfterLogin();
+      } catch (error) {
+        this.showErrors = true;
+        this.authErrors =
+          error.response?.data ?? {
+            message: "تعذر التحقق من الرمز. يرجى المحاولة مرة أخرى.",
+          };
+      } finally {
+        this.loading = false;
+      }
     },
-    getUser() {},
-    logout() {
-      axios
-        .post("/api/parent/logout")
-        .then((res) => {
-          this.resetAuthStore();
-          localStorage.removeItem("token");
-          localStorage.removeItem("parent");
-          localStorage.removeItem("parentAuth");
-          this.router.push("/web/parent/login");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+
+    async getUser() {
+      if (!this.isAuthenticated) return null;
+
+      const response = await axios.get("/api/parent/user");
+      const user = getUser(response.data);
+
+      if (user && typeof user === "object") {
+        this.parent = user;
+        this.parent_id = user.parent_id ?? user.id ?? this.parent_id;
+      }
+
+      return user;
+    },
+
+    async logout() {
+      try {
+        await axios.post("/api/parent/logout");
+      } finally {
+        // Local logout must complete even if the server request fails or the token expired.
+        this.resetAuthStore();
+        await this.router.replace({ name: "parentLogin" });
+      }
     },
 
     resetAuthStore() {
-      this.token = null;
-      this.parent = null;
-      this.parent_id=null
-      this.parentAuth = null;
-      this.showErrors = null;
-      this.authErrors = null;
+      this.parent = {};
+      this.parent_id = null;
+      this.parentToken = null;
+      this.parentAuth = false;
+      this.showErrors = false;
+      this.authErrors = {};
+      this.loading = false;
+
+      ["parent", "parent_id", "parentToken", "parentAuth", "lastRoute"].forEach(
+        (key) => localStorage.removeItem(key)
+      );
     },
   },
 });

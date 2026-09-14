@@ -4,7 +4,7 @@
     :class="{ 'fixed translate-x-0 ': sole }"
   >
     <div
-      v-if="parentStore.parentAuth"
+      v-if="parentStore.isAuthenticated"
       class="space-y-2 py-4 border-b-2 border-white border-solid"
     >
       <div class="sid">
