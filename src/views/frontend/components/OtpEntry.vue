@@ -170,21 +170,22 @@ const sendOTP = () => {
     });
 };
 
-const validateOTP = () => {
-  router.push({ name: "home" });
-
-  axios
-    .post("/api/parent/validate-otp", {
-      otp: otpInput.value?.value,
-    })
-    .then((res) => {
-      console.log(res);
-      parentStore.user.phone_verified_at = res.data.phone_verified_at;
-      router.push({ name: "home" });
-    })
-    .catch((err) => {
-      console.log(err);
+const validateOTP = async () => {
+  try {
+    const response = await axios.post("/api/parent/validate-otp", {
+      otp: bindModal.value,
     });
+
+    parentStore.parent = {
+      ...parentStore.user,
+      ...(response.data.user ?? {}),
+      phone_verified_at:
+        response.data.phone_verified_at ?? response.data.user?.phone_verified_at,
+    };
+    await router.replace({ name: "webHome" });
+  } catch (error) {
+    console.error("Unable to validate the phone verification code.", error);
+  }
 };
 </script>
 <style>

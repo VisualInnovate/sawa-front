@@ -45,8 +45,10 @@ function guest(to, from, next) {
 }
 
 function authForNormalUser(to, from, next) {
-  localStorage.setItem("lastRoute", to.path);
-  if (!useParentStore().parent_id) {
+  const parentStore = useParentStore();
+
+  if (!parentStore.isAuthenticated) {
+    localStorage.setItem("lastRoute", to.fullPath);
     return next({ name: "parentLogin" });
   }
 
@@ -54,15 +56,15 @@ function authForNormalUser(to, from, next) {
 }
 
 function phoneIsVerified(to, from, next) {
-  if (useParentStore().user.phone_verified_at == null) {
+  if (useParentStore().user?.phone_verified_at == null) {
     return next({ name: "code" });
   }
   next();
 }
 
 function guestForNormalUser(to, from, next) {
-  if (useParentStore().parentAuth) {
-    return next({ name: "home" });
+  if (useParentStore().isAuthenticated) {
+    return next({ name: "webHome" });
   }
   next();
 }
@@ -156,6 +158,7 @@ const routes = [
     path: "/web",
     name: "webHome",
     component: HomeView,
+    beforeEnter: authForNormalUser,
   },
   {
     path: "/request-meeting/:child_id",

@@ -120,6 +120,7 @@ export default {
         
             <p class="text-2xl text-gray-600 text-center">{{ $t("sign_in") }}</p>
           
+            <form @submit.prevent="parentStore.login(parent)">
             <div class="mt-4 flex items-center justify-between">
                 <span class="border-b w-1/5 lg:w-1/4"></span>
                
@@ -138,9 +139,18 @@ export default {
             </div>
             <div class="flex flex-column gap-2 w-full ">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="parentStore.login(parent)" class="create m-auto w-full " :label='$t("Register_now")'></Button>
+                  <Button
+                    type="submit"
+                    :loading="parentStore.loading"
+                    :disabled="parentStore.loading"
+                    class="create m-auto w-full"
+                    :label='$t("sign_in")'
+                  ></Button>
                   <small id="username-help"></small>
               </div>
+            <div class="mt-3 text-center text-red-500" v-if="parentStore.errorMessage">
+                {{ parentStore.errorMessage }}
+            </div>
             <div class="mt-2 flex justify-between flex-col">
                 
                 <p class="text-xl">
@@ -149,8 +159,9 @@ export default {
                <p class="text-xl py-2">
                    <router-link :to="{ name: 'SingUp' }" class="text-xl text-[#135C65] uppercase"> {{ $t("Create_an_account") }}</router-link>
                 </p>
-               
+
             </div>
+            </form>
         </div>
         <div class="hidden bg-[url('../image/childern.jpg')] lg:block lg:w-1/2 bg-cover" style="background-position: center; background-size: cover" ></div>
     </div>
