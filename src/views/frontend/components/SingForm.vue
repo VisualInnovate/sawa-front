@@ -1,7 +1,7 @@
 
 <script>
 import axios from "axios";
-import { useParentStore } from "../../../stores/ParentStore";
+import { useParentStore, SERVER_ERROR_MESSAGE } from "../../../stores/ParentStore";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import InlineMessage from "primevue/inlinemessage";
@@ -35,9 +35,9 @@ export default {
         this.email_parent=this.parent.email
         this.$router.push({ name: 'register-code' });
       }).catch((el)=>{
-   
-        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail:  `${el.response.data.message}`, life: 3000 });
-
+        const serverError = !el.response || el.response.status >= 500
+        const detail = serverError ? SERVER_ERROR_MESSAGE : el.response.data?.message
+        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail, life: 5000 });
       })
       },
 

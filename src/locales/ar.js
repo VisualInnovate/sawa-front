@@ -851,4 +851,5 @@ export default {
   "Site Cover": "غلاف الموقع",
   "ablls_eval": "تقييم ABLLS",
   "check_booking_failed": "تعذر التحقق من حجز الطفل. حاول مرة أخرى.",
+  "code_sent_to": "أرسلنا رمز التفعيل إلى",
 };

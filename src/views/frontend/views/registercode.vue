@@ -5,6 +5,9 @@
     <div class="flex bg-white rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
       <div class="w-full p-8 lg:w-1/2">
         <p class="text-2xl text-gray-600 text-center">{{ $t("Enter_the_activation_code") }}</p>
+        <p v-if="email_parent" class="mt-3 text-center text-gray-500">
+          {{ $t("code_sent_to") }} <span dir="ltr" class="font-semibold text-gray-700">{{ email_parent }}</span>
+        </p>
         <div class="mt-4 flex items-center justify-between">
         </div>
         <div   style="direction: ltr;" class="flex justify-center gap-2 py-6">
@@ -23,8 +26,10 @@
         </div>
         <div class="flex flex-column gap-2 w-full">
           <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-          <Button @click="parentStore.register(parent)" class="create m-auto w-full" :label='$t("Register_now")'></Button>
-          <small id="username-help"></small>
+          <Button @click="parentStore.register(parent)" :loading="parentStore.loading" class="create m-auto w-full" :label='$t("Register_now")'></Button>
+          <small id="username-help" class="text-center text-red-500" v-if="parentStore.errorMessage">
+            {{ parentStore.errorMessage }}
+          </small>
         </div>
         <!-- <div class="mt-2 flex items-center justify-between">
           <p class="text-xl w-full text-center">

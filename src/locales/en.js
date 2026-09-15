@@ -850,4 +850,5 @@ export default {
   "Site Cover": "Site cover",
   "ablls_eval": "ABLLS evaluation",
   "check_booking_failed": "Could not check the child's booking. Try again.",
+  "code_sent_to": "We sent the activation code to",
 };
