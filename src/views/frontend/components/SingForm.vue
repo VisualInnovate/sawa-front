@@ -11,6 +11,7 @@ export default {
   data() {
     return {
       submitted:false,
+      loading:false,
       email_parent: useStorage("email_parent", ),
       alert: {},
       alert_text: null,
@@ -30,14 +31,28 @@ export default {
   },
   methods:{
     createRow() {
+      // Sending the activation email can take several seconds; ignore repeat submits meanwhile.
+      if (this.loading) return
+      this.loading = true
 
       axios.post("/api/parent/register",this.parent).then((res) => {
         this.email_parent=this.parent.email
-        this.$router.push({ name: 'register-code' });
+        const toast = this.$toast
+        const detail = this.$t("account_created_check_email")
+        const summary = this.$t("success_message")
+        // Show the toast once the activation page (which has its own <Toast>) is mounted.
+        this.$router.push({ name: 'register-code' }).then(() => {
+          setTimeout(() => toast.add({ severity: 'success', summary, detail, life: 5000 }), 50)
+        });
       }).catch((el)=>{
         const serverError = !el.response || el.response.status >= 500
-        const detail = serverError ? SERVER_ERROR_MESSAGE : el.response.data?.message
-        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail, life: 5000 });
+        const validation = el.response?.data?.errors
+        const detail = serverError
+          ? SERVER_ERROR_MESSAGE
+          : (validation ? Object.values(validation).flat().join(" ") : el.response.data?.message)
+        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail, life: 6000 });
+      }).finally(() => {
+        this.loading = false
       })
       },
 
@@ -96,7 +111,7 @@ export default {
               
               <div class="flex flex-column gap-2 w-full ">
                     <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                    <Button @click="submitted = true" type="submit" class="create m-auto w-full " :label='$t("create_button")'></Button>
+                    <Button @click="submitted = true" type="submit" :loading="loading" :disabled="loading" class="create m-auto w-full " :label='$t("create_button")'></Button>
                     <small id="username-help"></small>
                 </div>
                 <div class="mt-2 flex items-center justify-between">

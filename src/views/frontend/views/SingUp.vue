@@ -1,6 +1,5 @@
 <template>
     <div class="grid grid-row-3">
-        <Toast />
         <Map />
         <SingForm />
        

@@ -75,17 +75,15 @@
       </section>
 
       <!-- Intro -->
-      <section class="relative h-[321px] w-full bg-[#F6F3F2] text-center">
-        <div
-          class="absolute left-1/2 top-[80px] h-[4px] w-[80px] -translate-x-1/2 rounded-full bg-[#B21553]"
-        ></div>
+      <section class="w-full bg-[#F6F3F2] px-4 py-16 text-center lg:py-20">
+        <div class="mx-auto h-[4px] w-[80px] rounded-full bg-[#B21553]"></div>
 
-        <h2 class="pt-[125px] text-[28px] font-black text-[#1B7A83]">
+        <h2 class="mt-10 text-[24px] font-black text-[#1B7A83] lg:text-[28px]">
           مرافق صُممت لتكون بيتهم الثاني
         </h2>
 
         <p
-          class="mx-auto mt-[27px] w-[780px] text-[14px] font-bold leading-[1.95] text-[#766C70]"
+          class="mx-auto mt-[27px] w-full max-w-[780px] text-[14px] font-bold leading-[1.95] text-[#766C70]"
         >
           نحن ندرك أن التعلم يبدأ بالشعور بالأمان. لذا، قمنا بتجهيز كافة مرافق
           الأكاديمية لتوفير بيئة تعليمية وعلاجية آمنة تتجاوز المعايير التقليدية،
@@ -94,48 +92,100 @@
       </section>
 
       <!-- Safe Transport -->
-      <section class="relative h-[674px] w-full bg-[#FCF9F8]">
+      <section class="w-full bg-[#FCF9F8] px-4 py-16 lg:px-8 lg:py-[136px]">
         <div
-          class="absolute left-[89px] top-[136px] h-[410px] w-[656px] overflow-hidden rounded-l-[20px] bg-white"
+          class="mx-auto flex max-w-[1262px] flex-col overflow-hidden rounded-[20px] bg-white lg:flex-row"
         >
-          <img
-            src="./images/support-bus.png"
-            alt="حافلة أكاديمية سوا"
-            class="h-full w-full object-fill"
-          />
+          <div
+            class="w-full px-6 py-10 text-right sm:px-10 lg:w-[48%] lg:px-[72px] lg:py-[80px]"
+          >
+            <h2 class="mb-[24px] text-[24px] font-black text-[#1B7A83] lg:text-[29px]">
+              النقل المدرسي الآمن
+            </h2>
+
+            <p
+              class="mb-[33px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
+            >
+              نقدم خدمة نقل ذكية ومريحة تضمن وصول طفلك في الموعد بكل أمان. أسطولنا
+              مجهز خصيصاً لتقليل التوتر وضمان أعلى مستويات الرعاية.
+            </p>
+
+            <div class="space-y-[20px]">
+              <div
+                v-for="feature in transportFeatures"
+                :key="feature.title"
+                class="flex items-start justify-start gap-[14px]"
+              >
+                <div :class="feature.iconBox">
+                  <svg class="h-[20px] w-[20px]" viewBox="0 0 24 24" fill="none">
+                    <path
+                      v-for="(path, index) in getIconPaths(feature.icon)"
+                      :key="index"
+                      :d="path.d"
+                      stroke="currentColor"
+                      :stroke-width="path.width || 2.1"
+                      :stroke-linecap="path.linecap"
+                      :stroke-linejoin="path.linejoin"
+                    />
+                  </svg>
+                </div>
+
+                <div>
+                  <h3 :class="feature.titleClass">{{ feature.title }}</h3>
+                  <p
+                    class="mt-[5px] text-[12px] font-bold leading-[1.65] text-[#766C70]"
+                  >
+                    {{ feature.description }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div
-            class="absolute left-[18px] top-[18px] flex h-[36px] items-center gap-[8px] rounded-full bg-[#E9FBFE] px-[16px] text-[11px] font-black text-[#1B7A83]"
+            class="relative order-[-1] h-[240px] w-full sm:h-[340px] lg:order-[1] lg:h-auto lg:min-h-[410px] lg:w-[52%]"
           >
-            <span class="h-[9px] w-[9px] rounded-full bg-[#C91F5F]"></span>
-            مراقبة بالكاميرات 24/7
+            <img
+              src="./images/support-bus.png"
+              alt="حافلة أكاديمية سوا"
+              class="absolute inset-0 h-full w-full object-cover"
+            />
+
+            <div
+              class="absolute left-[18px] top-[18px] flex h-[36px] items-center gap-[8px] rounded-full bg-[#E9FBFE] px-[16px] text-[11px] font-black text-[#1B7A83]"
+            >
+              <span class="h-[9px] w-[9px] rounded-full bg-[#C91F5F]"></span>
+              مراقبة بالكاميرات 24/7
+            </div>
           </div>
         </div>
+      </section>
 
-        <div
-          class="absolute right-[89px] top-[136px] h-[410px] w-[606px] rounded-r-[20px] bg-white px-[72px] py-[86px] text-right"
-        >
-          <h2 class="mb-[24px] text-[29px] font-black text-[#1B7A83]">
-            النقل المدرسي الآمن
-          </h2>
+      <!-- Tech Infrastructure -->
+      <section class="w-full bg-[#F6F3F2] px-4 py-16 lg:px-8 lg:py-[95px]">
+        <div class="mx-auto max-w-[1188px]">
+          <div class="text-right">
+            <h2 class="text-[26px] font-black text-[#1B7A83] lg:text-[30px]">
+              بنية تحتية متطورة
+            </h2>
+            <p class="mt-[20px] text-[13px] font-bold text-[#766C70]">
+              كل زاوية في أكاديميتنا مدروسة بعناية فائقة لتوفير أفضل تجربة
+              تعليمية.
+            </p>
+          </div>
 
-          <p
-            class="mb-[33px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
+          <div
+            class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-[50px] lg:grid-cols-3 lg:gap-x-[32px] lg:gap-y-[28px]"
           >
-            نقدم خدمة نقل ذكية ومريحة تضمن وصول طفلك في الموعد بكل أمان. أسطولنا
-            مجهز خصيصاً لتقليل التوتر وضمان أعلى مستويات الرعاية.
-          </p>
-
-          <div class="space-y-[20px]">
-            <div
-              v-for="feature in transportFeatures"
-              :key="feature.title"
-              class="flex items-start justify-start gap-[14px]"
+            <article
+              v-for="card in techCards"
+              :key="card.title"
+              class="rounded-[14px] bg-white p-6 text-right shadow-[0_8px_22px_rgba(0,0,0,0.018)] lg:min-h-[182px] lg:p-[32px]"
             >
-              <div :class="feature.iconBox">
-                <svg class="h-[20px] w-[20px]" viewBox="0 0 24 24" fill="none">
+              <div class="mb-[25px] flex">
+                <svg :class="card.iconClass" viewBox="0 0 24 24" fill="none">
                   <path
-                    v-for="(path, index) in getIconPaths(feature.icon)"
+                    v-for="(path, index) in getIconPaths(card.icon)"
                     :key="index"
                     :d="path.d"
                     stroke="currentColor"
@@ -146,71 +196,25 @@
                 </svg>
               </div>
 
-              <div>
-                <h3 :class="feature.titleClass">{{ feature.title }}</h3>
-                <p
-                  class="mt-[5px] text-[12px] font-bold leading-[1.65] text-[#766C70]"
-                >
-                  {{ feature.description }}
-                </p>
-              </div>
-            </div>
+              <h3 class="mb-[13px] text-[17px] font-black text-[#1B7A83]">
+                {{ card.title }}
+              </h3>
+
+              <p class="text-[12px] font-bold leading-[1.75] text-[#71686B]">
+                {{ card.description }}
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      <!-- Tech Infrastructure -->
-      <section class="relative h-[780px] w-full bg-[#F6F3F2]">
-        <div class="absolute right-[110px] top-[95px] text-right">
-          <h2 class="text-[30px] font-black text-[#1B7A83]">
-            بنية تحتية متطورة
-          </h2>
-          <p class="mt-[20px] text-[13px] font-bold text-[#766C70]">
-            كل زاوية في أكاديميتنا مدروسة بعناية فائقة لتوفير أفضل تجربة
-            تعليمية.
-          </p>
-        </div>
-
-        <div
-          class="absolute left-[126px] top-[226px] grid w-[1188px] grid-cols-3 gap-x-[32px] gap-y-[28px]"
-        >
-          <article
-            v-for="card in techCards"
-            :key="card.title"
-            class="h-[182px] rounded-[14px] bg-white px-[32px] py-[32px] text-right shadow-[0_8px_22px_rgba(0,0,0,0.018)]"
-          >
-            <div class="mb-[25px] flex">
-              <svg :class="card.iconClass" viewBox="0 0 24 24" fill="none">
-                <path
-                  v-for="(path, index) in getIconPaths(card.icon)"
-                  :key="index"
-                  :d="path.d"
-                  stroke="currentColor"
-                  :stroke-width="path.width || 2.1"
-                  :stroke-linecap="path.linecap"
-                  :stroke-linejoin="path.linejoin"
-                />
-              </svg>
-            </div>
-
-            <h3 class="mb-[13px] text-[17px] font-black text-[#1B7A83]">
-              {{ card.title }}
-            </h3>
-
-            <p class="text-[12px] font-bold leading-[1.75] text-[#71686B]">
-              {{ card.description }}
-            </p>
-          </article>
-        </div>
-      </section>
-
       <!-- Animal Garden -->
-      <section class="relative h-[682px] w-full bg-[#FCF9F8]">
+      <section class="w-full bg-[#FCF9F8] px-4 py-16 lg:px-8 lg:py-[96px]">
         <div
-          class="absolute left-[145px] top-[96px] flex justify-evenly items-center h-[496px] w-[1150px] overflow-hidden rounded-[42px] bg-[#1F7A83]"
+          class="mx-auto flex max-w-[1150px] flex-col items-center gap-8 overflow-hidden rounded-[28px] bg-[#1F7A83] p-6 sm:p-10 lg:flex-row lg:justify-evenly lg:gap-10 lg:rounded-[42px] lg:py-[75px]"
         >
           <div
-            class="h-[346px] w-[520px] overflow-hidden rounded-[28px] bg-white/10"
+            class="h-[220px] w-full overflow-hidden rounded-[28px] bg-white/10 sm:h-[300px] lg:h-[346px] lg:w-[520px] lg:shrink-0"
           >
             <img
               src="./images/support-animal-garden.png"
@@ -219,8 +223,10 @@
             />
           </div>
 
-          <div class="w-[410px] text-right text-white">
-            <h2 class="mb-[24px] text-[38px] font-black leading-[1.16]">
+          <div class="w-full text-right text-white lg:w-[410px]">
+            <h2
+              class="mb-[24px] text-[28px] font-black leading-[1.16] sm:text-[32px] lg:text-[38px]"
+            >
               حديقة العصافير والحيوانات الأليفة
             </h2>
 
@@ -235,7 +241,7 @@
               <div
                 v-for="item in animalFeatures"
                 :key="item.title"
-                class="flex h-[76px] flex-col justify-center gap-[10px] rounded-[10px] bg-[#FFFFFF1A] px-[15px] text-white"
+                class="flex min-h-[76px] flex-col justify-center gap-[10px] rounded-[10px] bg-[#FFFFFF1A] px-[15px] py-3 text-white"
               >
                 <svg
                   class="h-[22px] w-[22px] shrink-0 text-white/88"
@@ -263,16 +269,18 @@
       </section>
 
       <!-- Activities -->
-      <section class="relative mb-20 w-full bg-[#FCF9F8]">
+      <section class="mb-20 w-full bg-[#FCF9F8] px-4 lg:px-0">
         <div class="text-center">
-          <h2 class="text-[29px] font-black text-[#1B7A83]">
+          <h2 class="text-[26px] font-black text-[#1B7A83] lg:text-[29px]">
             أنشطة تنبض بالحياة
           </h2>
         </div>
 
-        <div class="flex justify-center mt-8 w-[85%] gap-6 mx-auto">
-          <div class="w-1/2">
-            <div class="mb-[34px] flex items-center gap-[9px]">
+        <div
+          class="mx-auto mt-8 flex w-full max-w-[1100px] flex-col gap-10 lg:w-[85%] lg:flex-row lg:gap-6"
+        >
+          <div class="w-full lg:w-1/2">
+            <div class="mb-6 flex items-center gap-[9px] lg:mb-[34px]">
               <h3 class="text-[17px] font-black text-[#C91F5F]">
                 أنشطة داخلية
               </h3>
@@ -299,15 +307,15 @@
             <article
               v-for="activity in indoorActivities"
               :key="activity.title"
-              class="mb-[26px] flex h-[96px] items-center gap-6 rounded-[14px] bg-[#F8F6F5] px-[20px] text-right"
+              class="mb-[20px] flex min-h-[96px] items-center gap-4 rounded-[14px] bg-[#F8F6F5] px-4 py-3 text-right sm:gap-6 sm:px-[20px] lg:mb-[26px]"
             >
               <img
                 :src="activity.image"
                 :alt="activity.title"
-                class="h-[72px] w-[96px] rounded-[10px] object-cover"
+                class="h-[64px] w-[80px] shrink-0 rounded-[10px] object-cover sm:h-[72px] sm:w-[96px]"
               />
 
-              <div class="pr-[18px]">
+              <div class="sm:pr-[18px]">
                 <h4 class="mb-[8px] text-[15px] font-black text-[#1B7A83]">
                   {{ activity.title }}
                 </h4>
@@ -318,8 +326,8 @@
             </article>
           </div>
 
-          <div class="w-1/2">
-            <div class="mb-[34px] flex items-center gap-[9px]">
+          <div class="w-full lg:w-1/2">
+            <div class="mb-6 flex items-center gap-[9px] lg:mb-[34px]">
               <h3 class="text-[17px] font-black text-[#1B7A83]">
                 أنشطة خارجية
               </h3>
@@ -346,15 +354,15 @@
             <article
               v-for="activity in outdoorActivities"
               :key="activity.title"
-              class="mb-[26px] flex h-[96px] items-center gap-6 rounded-[14px] bg-[#F8F6F5] px-[20px] text-right"
+              class="mb-[20px] flex min-h-[96px] items-center gap-4 rounded-[14px] bg-[#F8F6F5] px-4 py-3 text-right sm:gap-6 sm:px-[20px] lg:mb-[26px]"
             >
               <img
                 :src="activity.image"
                 :alt="activity.title"
-                class="h-[72px] w-[96px] rounded-[10px] object-cover"
+                class="h-[64px] w-[80px] shrink-0 rounded-[10px] object-cover sm:h-[72px] sm:w-[96px]"
               />
 
-              <div class="pr-[18px]">
+              <div class="sm:pr-[18px]">
                 <h4 class="mb-[8px] text-[15px] font-black text-[#1B7A83]">
                   {{ activity.title }}
                 </h4>
@@ -368,60 +376,64 @@
       </section>
 
       <!-- Comfort -->
-      <section class="relative h-[612px] w-full bg-[#F0F6F7]">
+      <section class="w-full bg-[#F0F6F7] px-4 py-16 lg:px-8 lg:py-[89px]">
         <div
-          class="absolute left-[121px] top-[89px] h-[512px] w-[512px] overflow-hidden rounded-[24px] shadow-[0_14px_32px_rgba(0,0,0,0.08)]"
+          class="mx-auto flex max-w-[1200px] flex-col items-center gap-10 lg:flex-row lg:justify-between"
         >
-          <img
-            src="./images/comfort-room.png"
-            alt="راحة الأهل"
-            class="h-full w-full object-cover"
-          />
-        </div>
+          <div class="w-full text-right lg:w-[535px]">
+            <h2 class="mb-[27px] text-[26px] font-black text-[#1B7A83] lg:text-[30px]">
+              راحة الأهل أولوية
+            </h2>
 
-        <div class="absolute right-[118px] top-[195px] w-[535px] text-right">
-          <h2 class="mb-[27px] text-[30px] font-black text-[#1B7A83]">
-            راحة الأهل أولوية
-          </h2>
-
-          <p
-            class="mb-[36px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
-          >
-            ندرك أن رحلة الأهل تتطلب الدعم أيضاً. وفرنا مرافق مريحة تجعل وقت
-            انتظاركم وقتاً للاسترخاء والمتابعة.
-          </p>
-
-          <ul class="space-y-[18px]">
-            <li
-              v-for="item in comfortItems"
-              :key="item.text"
-              class="flex items-center justify-start gap-[13px] text-[14px] font-black text-[#1B7A83]"
+            <p
+              class="mb-[36px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
             >
-              <svg
-                class="h-[18px] w-[18px] text-[#C91F5F]"
-                viewBox="0 0 24 24"
-                fill="none"
+              ندرك أن رحلة الأهل تتطلب الدعم أيضاً. وفرنا مرافق مريحة تجعل وقت
+              انتظاركم وقتاً للاسترخاء والمتابعة.
+            </p>
+
+            <ul class="space-y-[18px]">
+              <li
+                v-for="item in comfortItems"
+                :key="item.text"
+                class="flex items-center justify-start gap-[13px] text-[14px] font-black text-[#1B7A83]"
               >
-                <path
-                  v-for="(path, index) in getIconPaths(item.icon)"
-                  :key="index"
-                  :d="path.d"
-                  stroke="currentColor"
-                  :stroke-width="path.width || 2.1"
-                  :stroke-linecap="path.linecap"
-                  :stroke-linejoin="path.linejoin"
-                />
-              </svg>
-              <span>{{ item.text }}</span>
-            </li>
-          </ul>
+                <svg
+                  class="h-[18px] w-[18px] shrink-0 text-[#C91F5F]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    v-for="(path, index) in getIconPaths(item.icon)"
+                    :key="index"
+                    :d="path.d"
+                    stroke="currentColor"
+                    :stroke-width="path.width || 2.1"
+                    :stroke-linecap="path.linecap"
+                    :stroke-linejoin="path.linejoin"
+                  />
+                </svg>
+                <span>{{ item.text }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div
+            class="order-[-1] aspect-square w-full max-w-[512px] overflow-hidden rounded-[24px] shadow-[0_14px_32px_rgba(0,0,0,0.08)] lg:order-[1]"
+          >
+            <img
+              src="./images/comfort-room.png"
+              alt="راحة الأهل"
+              class="h-full w-full object-cover"
+            />
+          </div>
         </div>
       </section>
 
       <!-- Educational Environment -->
-      <section class="relative h-[420px] w-full bg-[#FCF9F8] text-center">
+      <section class="w-full bg-[#FCF9F8] px-4 py-16 text-center lg:py-[88px]">
         <div
-          class="absolute left-1/2 top-[88px] flex h-[58px] w-[58px] -translate-x-1/2 items-center justify-center rounded-full bg-[#F7E7EF] text-[#C91F5F]"
+          class="mx-auto flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[#F7E7EF] text-[#C91F5F]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -437,12 +449,12 @@
           </svg>
         </div>
 
-        <h2 class="pt-[173px] text-[30px] font-black text-[#1B7A83]">
+        <h2 class="mt-8 text-[26px] font-black text-[#1B7A83] lg:mt-[27px] lg:text-[30px]">
           بيئة تعليمية غنية
         </h2>
 
         <p
-          class="mx-auto mt-[25px] w-[850px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
+          class="mx-auto mt-[25px] w-full max-w-[850px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
         >
           نحن لا نبني جدراناً، بل نبني مستقبلاً. إن بيئتنا الثرية والآمنة هي
           المختبر الحقيقي الذي يكتسب فيه طفلك المهارات الحياتية، الاجتماعية،
@@ -451,20 +463,18 @@
       </section>
 
       <!-- CTA -->
-      <section
-        class="relative h-[365px] w-full bg-[#C91F5F] text-center text-white"
-      >
-        <h2 class="pt-[93px] text-[41px] font-black">
+      <section class="w-full bg-[#C91F5F] px-4 py-16 text-center text-white lg:py-[93px]">
+        <h2 class="text-[28px] font-black leading-[1.3] sm:text-[34px] lg:text-[41px]">
           وفّر لطفلك بيئة آمنة تدعم نموه
         </h2>
 
         <p
-          class="mx-auto mt-[26px] w-[590px] text-[15px] font-bold leading-[1.8] text-[#ffffff95]"
+          class="mx-auto mt-[26px] w-full max-w-[590px] text-[15px] font-bold leading-[1.8] text-[#ffffff95]"
         >
           انضم إلى عائلة سوا اليوم، حيث الرعاية تلتقي بالإبداع في كل ركن.
         </p>
 
-        <div class="mt-[36px] flex justify-center gap-[18px]">
+        <div class="mt-[36px] flex flex-wrap justify-center gap-[18px]">
           <a
             href="/web/evaluation"
             class="flex h-[51px] w-[138px] items-center justify-center rounded-[9px] bg-[#fff] text-[13px] font-black text-[#C91F5F]"

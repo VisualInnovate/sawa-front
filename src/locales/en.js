@@ -851,4 +851,13 @@ export default {
   "ablls_eval": "ABLLS evaluation",
   "check_booking_failed": "Could not check the child's booking. Try again.",
   "code_sent_to": "We sent the activation code to",
+  "account_created_check_email": "Account created. We sent the activation code to your email.",
+  "confirm_cancel_booking": "Are you sure you want to cancel this booking?",
+  "confirm_cancel": "Cancel booking",
+  "export_pdf": "Export as PDF",
+  "age_years": "years",
+  "age_months": "months",
+  "no_permission_action": "You do not have permission to do this.",
+  "booking_cancelled": "Booking cancelled.",
+  "booking_cancel_failed": "Could not cancel the booking. Try again.",
 };
