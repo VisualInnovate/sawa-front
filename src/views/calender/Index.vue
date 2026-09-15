@@ -444,8 +444,9 @@ export default {
       });
     },
     deleteEvent() {
-      axios.delete(`api/evaluations/44/delete`).then((response) => {
-        // this.getTimes()
+      axios.delete(`/api/event-calendar/${this.event_id}`).then(() => {
+        this.updateevent = false;
+        this.updateEvents();
       });
     },
     resetModal() {

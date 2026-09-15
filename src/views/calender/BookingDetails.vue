@@ -179,7 +179,7 @@
       </div>
     </div>
   </v-card>
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('evaluation result') && havePermission.includes('accept booking')">
+  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('bookings edit')">
     <form
       @submit.prevent="updateBooking"
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
@@ -406,7 +406,7 @@
   </div>
   <toast></toast>
 
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('evaluation result')">
+  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('consultations edit')">
     <h2 class="text-lg font-semibold text-gray-800 mb-3">
       {{ $t("نتيجة الاستشارة") }}
     </h2>
@@ -499,9 +499,6 @@
           من هذة القائمه يمكنك اضافة مواعيد مسبقة للطفل
         </label>
 
-        <label class="block text-gray-600 text-sm" for="username">{{
-          $t(" ")
-        }}</label>
 
         <MultiSelect
           v-model="pre_evalutions.pre_evalutions"
@@ -538,7 +535,7 @@ export default {
   props: ["id"],
   data() {
     return {
-      havePermission: localStorage.getItem("userPermissions"),
+      havePermission: (() => { try { return JSON.parse(localStorage.getItem("userPermissions")) || []; } catch { return []; } })(),
       filed_value: "",
       comparisonResult: false,
       current_date: moment(new Date()).format("YYYY-MM-DDTHH:mm:ssZ"),

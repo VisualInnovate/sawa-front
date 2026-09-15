@@ -124,7 +124,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-           <Button v-can="'create user'" :label='$t("user_add")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button> 
+           <Button v-can="'user create'" :label='$t("user_add")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button> 
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -144,7 +144,7 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button v-can="'show user'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button v-can="'user list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
           </template>
         </Toolbar>
 
@@ -212,13 +212,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'update user'"
+                v-can="'user edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'create user'"
+                v-can="'user delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

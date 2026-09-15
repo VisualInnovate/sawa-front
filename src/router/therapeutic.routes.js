@@ -4,7 +4,7 @@
 
 const therapeutic = [
         {
-        path: '/therapeutic', // Define the path for your Therapeutic route
+        path: '/therapeutic/create', // must not collide with the public /therapeutic page
         name: 'Therapeutic',
         component: () => import("../views/Treatment/Treatment.vue")
       },

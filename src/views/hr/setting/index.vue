@@ -79,7 +79,7 @@ const initFilters = () => {
 </script>
 
 <template>
-  <div v-can="'hr settings edit'" class="grid">
+  <div v-can="'hr edit'" class="grid">
     <div class="col-12">
       <v-card class="card max-w-3xl p-[2%] m-auto bg-slate-50">
               <h2 class="text-3xl py-1 font-bold text-center text-[#473e3e]">{{ $t("hr_settings") }}</h2>

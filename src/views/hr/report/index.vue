@@ -16,6 +16,7 @@ const relation=ref('')
 const columns=ref([])
 const column=ref([])
 const loading = ref(true)
+const reportLoading = ref(false)
 const users = ref([])
 const productDialog = ref(false)
 const deleteDialog = ref(false)
@@ -31,7 +32,10 @@ onBeforeMount(() => {
   initFilters()
 })
 const filteredColumns = computed(() => {
-  return columns.value.filter(u => column.value.includes(u.column));
+  const all = Array.isArray(columns.value) ? columns.value : []
+  const selected = Array.isArray(column.value) ? column.value : []
+  // No column picked yet: show every column the report returned.
+  return selected.length ? all.filter(u => selected.includes(u.column)) : all
 });
  const fetchData= ()=>{
 
@@ -57,16 +61,20 @@ fetchData()
 const getreport=()=>{
 
     const related=[]
-    relation.value.forEach(item =>{
+    ;(Array.isArray(relation.value) ? relation.value : []).forEach(item =>{
       related.push(item.relation)
     })
+    reportLoading.value = true
     axios.post(`/api/report/generate-report?lang=${localStorage.getItem("appLang")}`,{
         model:model.value,
         columns:columns.value,
         relations:related
     }).then((res)=>{
-    users.value= res.data.data
-
+    users.value= res.data.data ?? []
+  }).catch(() => {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('failed_to_fetch_results'), life: 3000 })
+  }).finally(() => {
+    reportLoading.value = false
   });
 }
 
@@ -84,10 +92,10 @@ const getrelationColum=(data)=>{
   });
 }
 const getrelation = (id) => {
-    relation.value=''
-    column.value=''
-    columns.value=''
-    users.value=''
+    relation.value=[]
+    column.value=[]
+    columns.value=[]
+    users.value=[]
     axios.get(`/api/report/select-relations?lang=${localStorage.getItem("appLang")}&model=${id}`).then((res)=>{
     relations.value= res.data.data
 
@@ -168,7 +176,7 @@ const initFilters = () => {
           ref="dt"
           v-model:selection="selectedProducts"
           :value="users"
-           :loading="column == ''"
+           :loading="reportLoading"
           data-key="id"
           :paginator="true"
           :rows="10"
@@ -177,12 +185,12 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
           responsive-layout="scroll"
-          v-can="'positions list'"
+          v-can="'hr list'"
         >
                   <template #header>
             <div class="flex w-full  justify-between align-items-center">
               <h5 class="m-0 my-auto">{{ $t("reports") }}</h5>
-              <Button v-can="'positions list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+              <Button v-can="'hr list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
 
             
             </div>
