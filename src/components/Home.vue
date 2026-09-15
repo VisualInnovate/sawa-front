@@ -14,7 +14,18 @@ const group = ref(null);
 const authStore = useAuthStore();
 const appLangStore = useAppLangStore();
 const routename = ref("");
-const user_permissions = ref(localStorage.getItem("userPermissions"));
+const readPermissions = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem("userPermissions"));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+const user_permissions = ref(readPermissions());
+// Exact match against the permission names returned by the API; true if the user has any of them.
+const can = (...names) =>
+  names.some((name) => user_permissions.value.includes(name));
 // methods
 // const onClick = () => {
 //     theme.value = theme.value === "light" ? "dark" : "light";
@@ -170,12 +181,7 @@ onMounted(async () => {
 
           <v-list-group
             v-if="
-              user_permissions.includes(
-                'employees list' ||
-                  'doctor list' ||
-                  'permissions list' ||
-                  'roles list',
-              )
+              can('employees list', 'doctor list', 'permissions list', 'roles list')
             "
             prepend-icon="mdi-shield-account"
             value="Admin"
@@ -220,13 +226,12 @@ onMounted(async () => {
           </v-list-group>
 
           <v-list-group
-            v-if="user_permissions.includes('child list' || 'parents list')"
+            v-if="can('child list', 'parents list')"
             prepend-icon="mdi-human-male-boy"
             value="Children"
           >
             <template #activator="{ props }">
               <v-list-item
-                v-can="'child list'"
                 v-bind="props"
                 :title="$t('parents')"
               ></v-list-item>
@@ -255,19 +260,18 @@ onMounted(async () => {
 
           <v-list-group
             v-if="
-              user_permissions.includes(
-                'milestone question list' ||
-                  'milestone answer list' ||
-                  'milestone level list' ||
-                  'side-profiles list' ||
-                  'able category list' ||
-                  'carolina age range list' ||
-                  'carolina test list' ||
-                  'barrier answer list' ||
-                  'barrier question list' ||
-                  'able answer list' ||
-                  'able category list' ||
-                  'able mission list',
+              can(
+                'milestone question list',
+                'milestone answer list',
+                'milestone level list',
+                'side-profiles list',
+                'able category list',
+                'carolina age range list',
+                'carolina test list',
+                'barrier answer list',
+                'barrier question list',
+                'able answer list',
+                'able mission list',
               )
             "
             prepend-icon="mdi-help-box-multiple-outline"
@@ -296,13 +300,12 @@ onMounted(async () => {
             ></v-list-item>
             <v-list-item
               v-if="
-                user_permissions.includes(
-                  'carolina test list' ||
-                    'carolina category list' ||
-                    'able category list' ||
-                    'carolina answer list' ||
-                    'carolina answer type list' ||
-                    'able category list',
+                can(
+                  'carolina test list',
+                  'carolina category list',
+                  'carolina answer list',
+                  'carolina answer type list',
+                  'carolina age range list',
                 )
               "
               title="carolaina"
@@ -311,10 +314,13 @@ onMounted(async () => {
             ></v-list-item>
             <v-list-group
               v-if="
-                user_permissions.includes(
-                  'milestone question list' ||
-                    'milestone answer list' ||
-                    'milestone level list',
+                can(
+                  'milestone question list',
+                  'milestone answer list',
+                  'milestone level list',
+                  'barrier question list',
+                  'barrier answer list',
+                  'barrier answer type list',
                 )
               "
               value="VB"
@@ -325,10 +331,10 @@ onMounted(async () => {
 
               <v-list-item
                 v-if="
-                  user_permissions.includes(
-                    'milestone question list' ||
-                      'milestone answer list' ||
-                      'milestone level list',
+                  can(
+                    'milestone question list',
+                    'milestone answer list',
+                    'milestone level list',
                   )
                 "
                 :title="$t('milestone')"
@@ -337,10 +343,10 @@ onMounted(async () => {
               ></v-list-item>
               <v-list-item
                 v-if="
-                  user_permissions.includes(
-                    'barrier question list' ||
-                      'barrier answer list' ||
-                      'barrier answer type list',
+                  can(
+                    'barrier question list',
+                    'barrier answer list',
+                    'barrier answer type list',
                   )
                 "
                 :title="$t('barriers')"
@@ -351,11 +357,7 @@ onMounted(async () => {
           </v-list-group>
           <!-- edit Last -->
           <v-list-group
-            v-if="
-              user_permissions.includes(
-                'treatment list' || 'student program list',
-              )
-            "
+            v-if="can('treatment list', 'student program list', 'sessions list')"
             prepend-icon="mdi-doctor"
           >
             <template #activator="{ props }" value="Evaluation">
@@ -387,7 +389,7 @@ onMounted(async () => {
           </v-list-group>
 
           <v-list-group
-            v-if="user_permissions.includes('room list')"
+            v-if="can('room list')"
             prepend-icon="mdi-bed"
           >
             <template #activator="{ props }" value="Evaluation">
@@ -403,7 +405,14 @@ onMounted(async () => {
           </v-list-group>
 
           <v-list-group
-            v-if="user_permissions.includes('consultations')"
+            v-if="
+              can(
+                'bookings list',
+                'consultation settings list',
+                'working hours list',
+                'consultations list',
+              )
+            "
             prepend-icon=" mdi-calendar"
             value="Calender"
           >
@@ -421,7 +430,7 @@ onMounted(async () => {
               :to="{ name: 'ShowBooking' }"
             ></v-list-item>
             <v-list-item
-              v-can="'bookings list'"
+              v-can="'consultation settings list'"
               :title="$t('Consultation_Settings')"
               value="consultation_settings"
               :to="{ name: 'recommendations' }"
@@ -435,7 +444,7 @@ onMounted(async () => {
             ></v-list-item>
           </v-list-group>
           <v-list-group
-            v-if="user_permissions.includes('pages list' || 'settings list')"
+            v-if="can('pages list', 'settings list')"
             prepend-icon="mdi-wrench"
             value="Settings"
           >
@@ -458,7 +467,7 @@ onMounted(async () => {
 
           <!-- student_programe -->
           <v-list-group
-            v-if="user_permissions.includes('modules')"
+            v-if="can('modules list')"
             prepend-icon="mdi-message-question-outline"
             value="custom-files"
           >
@@ -483,13 +492,15 @@ onMounted(async () => {
           <!-- edits -->
           <v-list-group
             v-if="
-              user_permissions.includes(
-                'department list' ||
-                  'area list' ||
-                  'vehicle list' ||
-                  'student transportation list' ||
-                  'transportation schedule list' ||
-                  'treatment list',
+              can(
+                'skills list',
+                'department list',
+                'area list',
+                'region list',
+                'vehicle list',
+                'student transportation list',
+                'transportation schedule list',
+                'treatment list',
               )
             "
             prepend-icon="mdi-apps"
@@ -552,16 +563,21 @@ onMounted(async () => {
           </v-list-group>
           <v-list-group
             v-if="
-              user_permissions.includes(
-                'leaves list' ||
-                  'hr settings edit' ||
-                  'holidays list' ||
-                  'payroll list' ||
-                  'bonus list' ||
-                  'department list' ||
-                  'positions list' ||
-                  'events list' ||
-                  'shifts list',
+              can(
+                'hr list',
+                'leaves list',
+                'attendance list',
+                'hr edit',
+                'deduction list',
+                'holidays list',
+                'official leave list',
+                'payroll list',
+                'bonus list',
+                'department list',
+                'positions list',
+                'events list',
+                'shifts list',
+                'financial advance list',
               )
             "
             prepend-icon="mdi-bed"
@@ -577,13 +593,13 @@ onMounted(async () => {
               :to="{ name: 'leaves' }"
             ></v-list-item>
             <v-list-item
-              v-can="'leaves list'"
+              v-can="'attendance list'"
               :title="$t('daily_attendance_report')"
               value="daily-attendance"
               :to="{ name: 'daily-attendance' }"
             ></v-list-item>
             <v-list-item
-              v-can="'hr settings edit'"
+              v-can="'hr edit'"
               :title="$t('Settings')"
               value="setting"
               :to="{ name: 'setting' }"
@@ -601,7 +617,7 @@ onMounted(async () => {
               :to="{ name: 'holidays' }"
             ></v-list-item>
             <v-list-item
-              v-can="'holidays list'"
+              v-can="'official leave list'"
               :title="$t('official_leaves')"
               value="official-leaves"
               :to="{ name: 'official-leaves' }"
@@ -643,13 +659,13 @@ onMounted(async () => {
               :to="{ name: 'shift' }"
             ></v-list-item>
             <v-list-item
-              v-can="'shifts list'"
+              v-can="'financial advance list'"
               :title="$t('advance')"
               value="advance"
               :to="{ name: 'advance' }"
             ></v-list-item>
             <v-list-item
-              v-can="'shifts list'"
+              v-can="'hr list'"
               :title="$t('reports')"
               value="reports"
               :to="{ name: 'reports' }"
@@ -658,7 +674,7 @@ onMounted(async () => {
 
           <v-list-item
             prepend-icon="mdi-bell"
-            v-if="user_permissions.includes('notifications')"
+            v-if="can('notifications list')"
             :title="$t('notification')"
             :to="{ name: 'notification' }"
           ></v-list-item>

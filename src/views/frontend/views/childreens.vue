@@ -1,5 +1,6 @@
 <template>
   <Nave />
+  <Toast />
  <Banner heading="الاطفال" title=" يمكنك اضافة طفل من هنا"></Banner>
   <div class="max-w-[1300px] mx-auto py-[4%]">
   <div class="flex justify-between w-full m-auto px-2">
@@ -73,8 +74,10 @@ export default {
           this.$router.push({ name: "BookingTime", params: { child_id: id, } });
         }else{
           this.$router.push({ name: "request-meeting", params: { child_id: id, } });
-   
+
         }
+      }).catch(() => {
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: this.$t("check_booking_failed"), life: 4000 });
       });
     },
     async getChilds() {
