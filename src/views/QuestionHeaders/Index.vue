@@ -122,7 +122,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
-          v-can="'room show'"
+          v-can="'evaluation headers list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">

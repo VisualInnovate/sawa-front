@@ -29,12 +29,6 @@ const appointment = [
         name: 'TypeTreatment',
         component: () => import("../views/Treatment/Typetreatment.vue")
       },
-
-      {
-        path: '/type-treatment',
-        name: 'TypeTreatment',
-        component: () => import("../views/Treatment/Typetreatment.vue")
-      },
       {
         path: '/type-treatment/:id/edit',
         name: 'EditTreatment',

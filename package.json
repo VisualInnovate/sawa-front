@@ -36,7 +36,6 @@
     "primeicons": "^6.0.1",
     "primevue": "^3.29.2",
     "quill": "^2.0.3",
-    "speakeasy": "^2.0.0",
     "sweetalert2": "^11.10.2",
     "swiper": "^10.1.0",
     "vite-plugin-vuetify": "^1.0.2",
@@ -55,8 +54,7 @@
     "vue3-google-map": "^0.20.0",
     "vue3-otp-input": "^0.4.1",
     "vue3-print-nb": "^0.1.4",
-    "vuetify": "^3.1.2",
-    "your-library-name": "^1.0.0"
+    "vuetify": "^3.1.2"
   },
   "devDependencies": {
     "@mdi/font": "^7.1.96",

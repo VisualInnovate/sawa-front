@@ -171,14 +171,16 @@ app.component('Password ', Password )
 app.component('Chart', Chart)
 app.component('InputSwitch', InputSwitch)
 app.directive('tooltip', Tooltip);
-app.directive('can', (el, binding, vnode) =>{
-  // console.log(JSON.parse(localStorage.getItem('permissions')))
-  if (! JSON.parse(localStorage.getItem('userPermissions'))
-      .includes(binding.value)) {
-      // console.log(vnode)
-      el.style.display = "none";
+app.directive('can', (el, binding) => {
+  let permissions = []
+  try {
+    permissions = JSON.parse(localStorage.getItem('userPermissions')) || []
+  } catch {
+    permissions = []
   }
-
+  if (!Array.isArray(permissions) || !permissions.includes(binding.value)) {
+    el.style.display = "none";
+  }
 })
 
 let k= document.getElementsByClassName("switcher")

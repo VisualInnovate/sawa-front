@@ -207,19 +207,19 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'student-program edit'"            
+                v-can="'student program edit'"            
                 :label='$t("sumi_start")'
                 class="create mt-2"
                 @click="session(slotProps.data.student_id,slotProps.data.id)"
               />
                 <Button
-                v-can="'student-program edit'"  
+                v-can="'student program edit'"  
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'student-program delete'"
+                v-can="'student program delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

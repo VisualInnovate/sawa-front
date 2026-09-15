@@ -61,12 +61,16 @@ export default {
   methods: {
     async getresulte() {
       try {
-        const [response1, response2] = await Promise.all([
+        // allSettled: a failing report request must not hide the flow chart.
+        const [response1, response2] = await Promise.allSettled([
           axios.get(`api/able-category/flow-chart/${this.$route.params.id}`),
-          axios.get(`api/api/evaluations/report/${this.$route.params.id}`)
+          axios.get(`api/evaluations/report/${this.$route.params.id}`)
         ]);
-        
-        this.mainSquares = response1.data.data || response2.data.data;
+
+        this.mainSquares =
+          (response1.status === "fulfilled" && response1.value.data?.data) ||
+          (response2.status === "fulfilled" && response2.value.data?.data) ||
+          [];
       } catch (error) {
         console.error("Error fetching data:", error);
       }
