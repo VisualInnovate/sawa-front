@@ -13,6 +13,18 @@ const getToken = (payload) =>
 
 const getUser = (payload) => payload?.user ?? payload?.data?.user ?? {};
 
+// Server errors (5xx) can carry exception text such as SMTP details; never show it to parents.
+export const SERVER_ERROR_MESSAGE =
+  "تعذر إتمام الطلب بسبب خطأ في الخادم. حاول لاحقاً أو تواصل مع الأكاديمية.";
+
+const toClientError = (error, fallbackMessage) => {
+  const status = error.response?.status;
+  if (!error.response || status >= 500) {
+    return { message: error.response ? SERVER_ERROR_MESSAGE : fallbackMessage };
+  }
+  return error.response.data ?? { message: fallbackMessage };
+};
+
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
     // The default must be an object so VueUse serializes the complete user as JSON.
@@ -93,9 +105,10 @@ export const useParentStore = defineStore("parentStore", {
         }
 
         this.showErrors = true;
-        this.authErrors = responseData ?? {
-          message: "تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
-        };
+        this.authErrors = toClientError(
+          error,
+          "تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى."
+        );
       } finally {
         this.loading = false;
       }
@@ -137,10 +150,10 @@ export const useParentStore = defineStore("parentStore", {
         await this.redirectAfterLogin();
       } catch (error) {
         this.showErrors = true;
-        this.authErrors =
-          error.response?.data ?? {
-            message: "تعذر التحقق من الرمز. يرجى المحاولة مرة أخرى.",
-          };
+        this.authErrors = toClientError(
+          error,
+          "تعذر التحقق من الرمز. يرجى المحاولة مرة أخرى."
+        );
       } finally {
         this.loading = false;
       }
