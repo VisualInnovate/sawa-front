@@ -1,5 +1,6 @@
 <template>
   <Nave />
+  <Toast />
   <Banner heading="الحجوزات" title="يمكنك اضافة حجز من هنا"></Banner>
 
   <div class="max-w-[1300px] mx-auto py-10">
@@ -55,16 +56,16 @@
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <Dialog v-model:visible="deleteDialogVisible" modal header="Confirm Delete" :style="{ width: '400px' }">
-    <p class="text-lg text-gray-700">Are you sure you want to delete this booking?</p>
+  <Dialog v-model:visible="deleteDialogVisible" modal :header="$t('إلغاء الحجز')" :style="{ width: '400px', maxWidth: '92vw' }">
+    <p class="text-lg text-gray-700">{{ $t("confirm_cancel_booking") }}</p>
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="deleteDialogVisible = false" class="p-button-text" />
-      <Button label="Delete" icon="pi pi-check" @click="deleteBooking" class="p-button-danger" />
+      <Button :label="$t('back')" icon="pi pi-times" @click="deleteDialogVisible = false" class="p-button-text" />
+      <Button :label="$t('confirm_cancel')" icon="pi pi-check" @click="deleteBooking" class="p-button-danger" />
     </template>
   </Dialog>
 
   <!-- Consultation Result Modal -->
-  <Dialog v-model:visible="consultationResultDialogVisible" modal header="نتيجة الاستشارة" :style="{ width: '600px' }">
+  <Dialog v-model:visible="consultationResultDialogVisible" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '600px', maxWidth: '92vw' }">
     <div v-if="selectedConsultationResult">
       <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
       <p class="text-sm text-gray-600">{{ removeBracesAndReplace(selectedConsultationResult?.consultation_result?.health, selectedConsultationResult?.child_name) }}</p>
@@ -78,9 +79,9 @@
       </p>
     </div>
     <template #footer>
-      <Button label="Print" icon="pi pi-print" @click="printConsultationResult" class="p-button-text" />
-      <Button label="Export as PDF" icon="pi pi-file-pdf" @click="exportConsultationResultAsPDF" class="p-button-success" />
-      <Button label="Close" icon="pi pi-times" @click="consultationResultDialogVisible = false" class="p-button-text" />
+      <Button :label="$t('print')" icon="pi pi-print" @click="printConsultationResult" class="p-button-text" />
+      <Button :label="$t('export_pdf')" icon="pi pi-file-pdf" @click="exportConsultationResultAsPDF" class="p-button-success" />
+      <Button :label="$t('close')" icon="pi pi-times" @click="consultationResultDialogVisible = false" class="p-button-text" />
     </template>
   </Dialog>
 
@@ -98,8 +99,12 @@ import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import html2pdf from "html2pdf.js";
 import Banner from '../components/Banner.vue';
+import { useToast } from "primevue/usetoast";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const toast = useToast();
+const { t } = useI18n();
 const booking = ref([]);
 const deleteDialogVisible = ref(false);
 const bookingToDelete = ref(null);
@@ -133,9 +138,10 @@ const deleteBooking = () => {
       .then(() => {
         getAllBooking(); // Refresh the list after deletion
         deleteDialogVisible.value = false;
+        toast.add({ severity: "success", summary: t("success_message"), detail: t("booking_cancelled"), life: 3000 });
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
+        toast.add({ severity: "error", summary: t("error"), detail: t("booking_cancel_failed"), life: 4000 });
       });
   }
 };

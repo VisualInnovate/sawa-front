@@ -852,4 +852,13 @@ export default {
   "ablls_eval": "تقييم ABLLS",
   "check_booking_failed": "تعذر التحقق من حجز الطفل. حاول مرة أخرى.",
   "code_sent_to": "أرسلنا رمز التفعيل إلى",
+  "account_created_check_email": "تم إنشاء الحساب، وأرسلنا رمز التفعيل إلى بريدك الإلكتروني.",
+  "confirm_cancel_booking": "هل أنت متأكد من إلغاء هذا الحجز؟",
+  "confirm_cancel": "تأكيد الإلغاء",
+  "export_pdf": "تصدير PDF",
+  "age_years": "سنة",
+  "age_months": "شهر",
+  "no_permission_action": "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
+  "booking_cancelled": "تم إلغاء الحجز.",
+  "booking_cancel_failed": "تعذر إلغاء الحجز. حاول مرة أخرى.",
 };

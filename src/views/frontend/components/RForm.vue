@@ -175,6 +175,7 @@ import Calendar from "primevue/calendar";
 import Textarea from "primevue/textarea";
 import { useParentStore } from "../../../stores/ParentStore";
 import Message from "primevue/message";
+import { toDateOnly } from "../../../utils/childAge";
 export default {
   components: { Calendar, Textarea, Message ,Dropdown },
   data() {
@@ -217,7 +218,8 @@ export default {
     
     addChild() {
       this.child.parent_id =  localStorage.getItem("parent_id");
-      axios.post("/api/parent/child/create",this.child).then((res) => {
+      const payload = { ...this.child, birth_date: toDateOnly(this.child.birth_date) };
+      axios.post("/api/parent/child/create",payload).then((res) => {
         this.$router.push({name:"Following"});
         }).catch((el)=>{
           console.log(el.response.data.errors.name)

@@ -179,7 +179,7 @@
       </div>
     </div>
   </v-card>
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('bookings edit')">
+  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('bookings edit') || havePermission.includes('accept booking')">
     <form
       @submit.prevent="updateBooking"
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
@@ -309,13 +309,14 @@
             </svg>
           </div>
           <div class="mt-4">
-            <div class="flex flex-initial" v-if="booking.child_gender">
+            <!-- Gender codes match the child forms: 0 = male, 1 = female (0 is falsy, so check for null). -->
+            <div class="flex flex-initial" v-if="booking.child_gender != null && booking.child_gender !== ''">
               <i
                 class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
               ></i>
               <p class="text-xl md:text-xl px-1 my-auto">{{ $t("Type") }} :</p>
               <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.child_gender == 1 ? "male" : "female" }}
+                {{ String(booking.child_gender) === "0" ? $t("male") : $t("female") }}
               </p>
             </div>
             <div
@@ -406,7 +407,7 @@
   </div>
   <toast></toast>
 
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('consultations edit')">
+  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('consultations edit') || havePermission.includes('evaluation result')">
     <h2 class="text-lg font-semibold text-gray-800 mb-3">
       {{ $t("نتيجة الاستشارة") }}
     </h2>
@@ -732,11 +733,12 @@ export default {
           });
         })
         .catch((err) => {
+          const forbidden = err.response?.status === 403;
           this.$toast.add({
             severity: "error",
             summary: this.$t("error"),
-            detail: `${this.$t("mission_error")}`,
-            life: 3000,
+            detail: forbidden ? this.$t("no_permission_action") : this.$t("mission_error"),
+            life: 5000,
           });
         });
     },

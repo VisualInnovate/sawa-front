@@ -16,8 +16,8 @@
     <div class="flip-card-front  bg-gradient-to-r from-[#ffff] to-[#ED5586]">
       <img :src="child.image" alt="Child Image" class="w-24 h-24 rounded-full object-cover border-2 border-gray-300" />
       <h2 class="text-lg font-semibold mt-2">{{ child.name }}</h2>
-      <p class="text-base pt-1 text-gray-600">{{ $t("child_age") }}: {{ child.age }}</p>
-      <p class="text-base pt-1 text-gray-600">{{ $t("selectgender") }}: {{ child.gender === '0' ? 'ذكر' : 'أنثى' }}</p>
+      <p class="text-base pt-1 text-gray-600">{{ $t("child_age") }}: {{ childAge(child) }}</p>
+      <p class="text-base pt-1 text-gray-600">{{ $t("selectgender") }}: {{ String(child.gender) === '0' ? $t('male') : $t('female') }}</p>
       <p class="text-base pt-1 text-gray-600">{{ $t("primary_language") }}: {{ child.lang }}</p>
       <p class="text-base pt-1 text-gray-600">{{ $t("Nationality") }}: {{ child.nationalty }}</p>
       <i class="pi pi-arrow-right mt-4 text-xl"></i>
@@ -51,6 +51,7 @@ import Banner from '../components/Banner.vue'
 
 import { useParentStore } from "../../../stores/ParentStore";
 import axios from "axios";
+import { formatChildAge } from "../../../utils/childAge";
 
 export default {
   components: { Map, According, Sidbar, About, Nave ,Banner},
@@ -67,6 +68,9 @@ export default {
   methods: {
     toggle() {
       this.showsider = !this.showsider;
+    },
+    childAge(child) {
+      return formatChildAge(child.birth_date, child.age, this.$t);
     },
     checkChildStatus(id) {
       axios.get(`/api/child/${id}/check-active-booking`).then((res) => {

@@ -48,7 +48,7 @@
               <div class="space-y-4">
                 <div class="flex items-center">
                   <p class="text-lg font-bold text-green-800">{{ $t("child_age") }}:</p>
-                  <p class="ml-3 text-base text-gray-700">{{ booking.child_age }}</p>
+                  <p class="ml-3 text-base text-gray-700">{{ childAge(booking) }}</p>
                 </div>
                 <div class="flex items-center">
                   <p class="text-lg font-bold text-green-800">{{ $t("parent.phone") }}:</p>
@@ -79,6 +79,7 @@
 </template>
 <script>
 import axios from "axios";
+import { formatChildAge } from "@/utils/childAge";
 
 export default {
  
@@ -109,8 +110,11 @@ export default {
       axios
         .get(`/api/calender/bookings?accepted=${this.selectedStatus}&status=${this.selectedFilter}`)
         .then((res) => {
-          this.bookings = res.data.bookings;
-          console.log(res);
+          // The filtered response can contain entries with no child; don't render them as empty rows.
+          const list = res.data.bookings ?? [];
+          this.bookings = Object.values(list).filter(
+            (booking) => booking && String(booking.child_name ?? "").trim() !== ""
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -119,6 +123,9 @@ export default {
 
     bookingDetailes(id) {
       this.$router.push({ name: "BookingDetails", params: { id: id } });
+    },
+    childAge(booking) {
+      return formatChildAge(booking.child_birth_date, booking.child_age, this.$t);
     },
     openModal(booking_id) {
       this.show_result_modal = true;

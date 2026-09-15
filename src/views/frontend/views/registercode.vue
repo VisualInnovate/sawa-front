@@ -1,5 +1,6 @@
 
 <template>
+  <Toast />
   <Map></Map>
   <div class="py-16 animate__animated animate__bounceInRight">
     <div class="flex bg-white rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">

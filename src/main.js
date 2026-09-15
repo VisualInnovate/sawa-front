@@ -38,6 +38,8 @@ import resetStore from "@/plugins/reset-store";
 import "animate.css";
 
 import "./axios";
+import installButtonLoading from "@/plugins/button-loading";
+installButtonLoading();
 import "./style.css";
 import "./views/frontend/assets/main.css";
 ///////////////////////////////////////////////////////////////////////////////////////////

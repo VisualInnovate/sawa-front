@@ -5,6 +5,7 @@ import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import MultiSelect from "primevue/multiselect";
 import { useToast } from 'primevue/usetoast';
+import { toDateOnly } from '@/utils/childAge';
 
 export default {
   components: { InputText, Calendar, Dropdown, MultiSelect },
@@ -47,7 +48,8 @@ export default {
       });
     },
     submit() {
-      axios.post(`/api/child/${this.$route.params.id}/update`, this.child).then(res => {
+      const payload = { ...this.child, birth_date: toDateOnly(this.child.birth_date) };
+      axios.post(`/api/child/${this.$route.params.id}/update`, payload).then(res => {
         this.toast.add({ severity: 'success', summary: this.$t("success_message"), detail: this.$t("element_update_success"), life: 3000 });
       }).catch((err) => {
         this.toast.add({ severity: 'error', summary: this.$t("error"), detail: err.response.data.message, life: 3000 });
