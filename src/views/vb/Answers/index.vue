@@ -57,7 +57,7 @@ const openNew = () => {
   router.push({name:'answer-create'})
 }
 
-const confirmDelete = (id) => {a
+const confirmDelete = (id) => {
   console.log(id)
   deleteDialog.value = true
   confir_id.value=id
@@ -67,7 +67,7 @@ const confirmDelete = (id) => {a
 
 const deleteAction = () => {
   axios
-    .delete(`/api/room/${confir_id.value}`)
+    .delete(`/api/milestone-answers/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -98,7 +98,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button  v-can="'room create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button  v-can="'milestone answer create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -173,13 +173,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'room edit'"
+                v-can="'milestone answer edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'room delete'"
+                v-can="'milestone answer delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"
