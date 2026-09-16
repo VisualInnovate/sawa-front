@@ -8,7 +8,6 @@ import { aliases, mdi } from "vuetify/iconsets/mdi";
 
 // import { useI18n } from "vue-i18n";
 
-import { VDataTable } from 'vuetify/labs/VDataTable'
 
 export default createVuetify({
     icons: {
@@ -21,9 +20,6 @@ export default createVuetify({
     },
     theme: {
         defaultTheme: 'light',
-    },
-    components: {
-        VDataTable,
     },
     defaults: {
         VDataTable: {
