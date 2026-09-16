@@ -326,7 +326,7 @@ onMounted(async () => {
               value="VB"
             >
               <template #activator="{ props }">
-                <v-list-item v-bind="props" title="VB"></v-list-item>
+                <v-list-item v-bind="props" title="VB Mapp"></v-list-item>
               </template>
 
               <v-list-item
