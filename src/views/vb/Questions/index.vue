@@ -192,11 +192,11 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
-          v-can="'skills list'"
+          v-can="'milestone question list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <Button v-can="'skills create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+              <Button v-can="'milestone question create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
               <h5 class="m-0 my-auto">{{ $t("questions") }}</h5>
               <Dropdown  @update:model-value="getdatafilter" required id="pv_id_1" v-model="value" style="direction: ltr !important;"  option-value="id" :options="alllevels" optionLabel="title" :placeholder='$t("level_id")' class=" bg-[#f7f5f5] [&>div>div>span]:bg-black my-auto md:w-14rem h-12" />
 
@@ -236,13 +236,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'skills edit'"
+                v-can="'milestone question edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'skills delete'"
+                v-can="'milestone question delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"
