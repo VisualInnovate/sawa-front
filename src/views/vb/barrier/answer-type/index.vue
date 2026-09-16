@@ -78,7 +78,7 @@ const editescrud=()=>{
       fetchData()
       updatedialog.value=!(updatedialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = ref({})
+      levels.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -86,6 +86,8 @@ const editescrud=()=>{
 }
 
 const openNew = () => {
+    levels.value = {}
+    error.value = ''
     createdialog.value=!(createdialog.value)
 }
 
@@ -106,7 +108,7 @@ const createcrude=()=>{
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      skill.value = ref({})
+      levels.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
