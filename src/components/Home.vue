@@ -288,7 +288,7 @@ onMounted(async () => {
               :to="{ name: 'Headers' }"></v-list-item> -->
             <v-list-item
               v-can="'side-profiles list'"
-              :title="$t('side profile')"
+              title="Side profile"
               value="SideProfiles"
               :to="{ name: 'SideProfiles' }"
             ></v-list-item>
@@ -337,7 +337,7 @@ onMounted(async () => {
                     'milestone level list',
                   )
                 "
-                :title="$t('milestone')"
+                title="Milestones"
                 value="milestone"
                 :to="{ name: 'levels' }"
               ></v-list-item>
@@ -349,7 +349,7 @@ onMounted(async () => {
                     'barrier answer type list',
                   )
                 "
-                :title="$t('barriers')"
+                title="Barriers"
                 value="barriers"
                 :to="{ name: 'barrier-subtest' }"
               ></v-list-item>
