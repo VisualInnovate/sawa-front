@@ -76,7 +76,7 @@ const editescrud=()=>{
       fetchData()
       updatedialog.value=!(updatedialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = ref({})
+      levels.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -84,6 +84,8 @@ const editescrud=()=>{
 }
 
 const openNew = () => {
+    levels.value = {}
+    error.value = ''
     createdialog.value=!(createdialog.value)
 }
 
@@ -103,7 +105,7 @@ const createcrude=()=>{
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      skill.value = ref({})
+      levels.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -224,7 +226,7 @@ const initFilters = () => {
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
              <div class="flex flex-column gap-2">
                 <label class="w-full text-right" for="username">{{ $t('from') }} - {{ $t('to') }}</label>
@@ -239,7 +241,7 @@ const initFilters = () => {
             <div class="flex flex-column gap-2">
                   <label class="w-full text-right" for="username">{{ $t('title') }}</label>
                 <InputText required class="bg-[#f7f5f5] text-center"  v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
                 <label class="w-full text-right" for="username">{{ $t('from') }} - {{ $t('to') }}</label>
