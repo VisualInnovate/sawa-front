@@ -285,14 +285,14 @@ const initFilters = () => {
               <template #body="slotProps">
                 <div class="flex gap-2">
                   <Button
-                    v-can="'user edit'"
+                    v-can="'employees edit'"
                     icon="pi pi-pencil"
                     class="p-button-rounded p-button-success"
                     @click="edit(slotProps.data.id)"
                     v-tooltip.top="'Edit'"
                   />
                   <Button
-                    v-can="'user create'"
+                    v-can="'doctor delete'"
                     icon="pi pi-trash"
                     class="p-button-rounded p-button-danger"
                     @click="confirmDelete(slotProps.data.id)"

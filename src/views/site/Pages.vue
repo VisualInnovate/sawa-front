@@ -19,6 +19,7 @@
           stroke-width="1.5"
           stroke="currentColor"
           class="w-6 h-6"
+          v-can="'pages edit'"
           @click="openModal(page)"
         >
           <path

@@ -22,7 +22,12 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="createtreatment">
+                <div class="flex flex-column gap-2">
+                  <label for="answer-program">{{ $t('milestone_target_program') }}</label>
+                  <Dropdown inputId="answer-program" v-model="answer.student_program_id" :options="programs" optionLabel="name" optionValue="id" filter showClear />
+                  <p v-if="error.student_program_id" class="text-red-600">{{ error.student_program_id[0] }}</p>
+                </div>
           <!-- ... existing code ... -->
             
               
@@ -34,8 +39,8 @@
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('question_id') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="answer.question_id"  option-value="id" :options="qustions" optionLabel="title" :placeholder='$t("question_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label for="username">{{ $t('milestone_sub_goal') }}</label>
+                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="answer.question_id" option-value="id" :options="qustions" optionLabel="title" :placeholder="$t('milestone_sub_goal')" class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.question_id">{{ error.question_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
@@ -110,6 +115,7 @@
         },
        
         childs:{},
+        programs: [],
         qustions:{},
         error: {},
         maxDate: new Date(),
@@ -119,6 +125,14 @@
   
     },
   
+    watch: {
+      'answer.child_id'(id, previous) {
+        if (!id) return;
+        if (previous && id !== previous) this.answer.student_program_id = null;
+        axios.get('/api/milestone-sub-goals', { params: { child_id: id } }).then(({ data }) => { this.qustions = data.data; });
+        axios.get(`/api/milestone-answers/programs/${id}`).then(({ data }) => { this.programs = data; });
+      },
+    },
     methods: {
       // ... existing methods ...
       Therapeutic (){
@@ -148,7 +162,7 @@
            
           })
           axios
-          .get("api/milestone-question")
+          .get("api/milestone-sub-goals")
           .then((response) => {
             console.log(response.data.data)
             this.qustions = response.data.data

@@ -36,10 +36,7 @@ const fetchData = () => {
   loading.value = true
   axios.post("/api/roles").then((res) => {
     users.value = res.data.roles.data
-    console.log(users.value)
-  });
-  axios.get("/api/permissions").then((res) => {
-    permissions.value = res.data.permissions
+  }).finally(() => {
     loading.value = false
   });
 }
@@ -184,6 +181,7 @@ const initFilters = () => {
           <template #end>
             <div class="flex gap-2">
               <Button 
+                v-can="'roles list'"
                 :label='$t("print")' 
                 icon="pi pi-print" 
                 class="p-button-help no-print" 
@@ -199,6 +197,7 @@ const initFilters = () => {
                 @click="exportCSV"
               />
               <Button 
+                v-can="'roles create'"
                 :label='$t("create_role")' 
                 icon="pi pi-plus" 
                 class="p-button-success" 
@@ -268,7 +267,14 @@ const initFilters = () => {
             <Column :exportable="false" header-style="width: 10rem" body-class="text-center">
               <template #body="slotProps">
                 <div class="flex gap-1 justify-content-center">
+                  <i
+                    v-if="slotProps.data.is_locked"
+                    class="pi pi-lock p-2"
+                    style="color: #135c65"
+                    v-tooltip.top="$t('admin_role_locked')"
+                  ></i>
                   <Button 
+                    v-if="!slotProps.data.is_locked"
                     v-can="'roles edit'"
                     icon="pi pi-pencil" 
                     class="p-button-rounded p-button-text p-button-success" 
@@ -276,6 +282,7 @@ const initFilters = () => {
                     v-tooltip.top="$t('edit')"
                   />
                   <Button 
+                    v-if="!slotProps.data.is_locked"
                     v-can="'roles delete'"
                     icon="pi pi-trash" 
                     class="p-button-rounded p-button-text p-button-danger" 

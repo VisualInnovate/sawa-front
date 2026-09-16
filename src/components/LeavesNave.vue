@@ -3,15 +3,18 @@
           <template #end>
 
             <router-link
-                  :to="{ name: 'leaves' }"
+                  v-can="'leaves list'"
+          :to="{ name: 'leaves' }"
                   class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
                 > {{ $t('leaves') }}</router-link>
                 <router-link
-                  :to="{ name: 'leave-setup' }"
+                  v-can="'leave setup list'"
+          :to="{ name: 'leave-setup' }"
                   class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
                 > {{ $t('leave_setup') }}</router-link>
                 <router-link
-                  :to="{ name: 'leave-balance' }"
+                  v-can="'leave balance list'"
+          :to="{ name: 'leave-balance' }"
                   class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
                 > {{ $t('leave_balance') }}</router-link>
           </template>

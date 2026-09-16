@@ -185,12 +185,12 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
           responsive-layout="scroll"
-          v-can="'hr list'"
+          v-can="'reports list'"
         >
                   <template #header>
             <div class="flex w-full  justify-between align-items-center">
               <h5 class="m-0 my-auto">{{ $t("reports") }}</h5>
-              <Button v-can="'hr list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+              <Button v-can="'reports list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
 
             
             </div>

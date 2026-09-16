@@ -7,12 +7,14 @@ const parentsRoutes = [
   {
     path: "parents",
     name: "Parents",
+    meta: { permission: ["parents list"] },
     component: Index,
    
   },
   {
     path: "parent-meeting",
     name: "parent-meeting",
+    meta: { permission: ["parent meetings list"] },
     component: mettins,
    
   },

@@ -31,12 +31,24 @@
         
               <div class=" py-1 relative ">
                   <div class="flex ">
-                  <p class="py-2 font-bold text-[#303843]" for="username">  {{ $t("email") }}</p>
-                  
+                  <label class="py-2 font-bold text-[#303843]" for="profile-phone">{{ $t("Mobile_number") }}</label>
                 </div>
                 <div class="relative ">
-                  <InputText  v-model="parent.email"  type="email" required class="bg-[#303843] w-full "  :placeholder='$t("email")'  />
+                  <InputText id="profile-phone" v-model="parent.phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required class="bg-[#f7f5f5] w-full" :placeholder='$t("Mobile_number")' />
                 </div>
+              </div>
+
+              <div class=" py-1 relative ">
+                  <div class="flex ">
+                  <label class="py-2 font-bold text-[#303843]" for="profile-email">{{ $t("parent_optional_email") }}</label>
+                </div>
+                <div class="relative ">
+                  <InputText id="profile-email" v-model="parent.email" type="email" autocomplete="email" class="bg-[#303843] w-full" :placeholder='$t("email")' />
+                </div>
+              </div>
+
+              <div v-if="profileErrors.length" class="py-1 text-red-600" role="alert">
+                <p v-for="message in profileErrors" :key="message">{{ message }}</p>
               </div>
             
              
@@ -112,6 +124,7 @@ export default {
       image: null,
       parentStore: useParentStore(),
       parent: {},
+      profileErrors: [],
    
     };
   },
@@ -139,23 +152,28 @@ export default {
     },
     updateProfile() {
 
+      // Only send what the parent can change; FormData would turn null/undefined into text.
       const formData = new FormData();
+      formData.append("fname", this.parent.fname ?? "");
+      formData.append("lname", this.parent.lname ?? "");
+      formData.append("phone", this.parent.phone ?? "");
+      formData.append("email", this.parent.email ?? "");
+      if (this.parent.file) formData.append("image", this.parent.file);
+      if (this.parent.Password) formData.append("password", this.parent.Password);
 
-      formData.append("fname", this.parent.fname);
-      formData.append("lname", this.parent.lname);
-      formData.append("email", this.parent.email);
-      formData.append("image", this.parent.file);
-      formData.append("Password", this.parent.Password);
-
-
+      this.profileErrors = [];
       axios
         .post("/api/parent/profile", formData)
         .then((res) => {
+          this.parent = { ...res.data.profile, Password: "" };
+          this.parentStore.parent = res.data.profile;
           this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_update_success")}`, life: 3000 });
-
         })
         .catch((err) => {
-         
+          const errors = err.response?.data?.errors;
+          this.profileErrors = errors
+            ? Object.values(errors).flat()
+            : [this.$t("mission_error")];
         });
     },
   },

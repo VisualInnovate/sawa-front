@@ -266,7 +266,7 @@ const initFilters = () => {
                   />
                   <Button 
                     v-if="slotProps.data.status == 0"
-                    v-can="'leaves delete'"
+                    v-can="'leaves edit'"
                     icon="pi pi-check" 
                     class="p-button-rounded p-button-text p-button-success" 
                     @click="accept(slotProps.data.id)"

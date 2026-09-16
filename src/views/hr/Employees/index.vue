@@ -289,11 +289,11 @@ const initFilters = () => {
                     @click="edit(slotProps.data.user.id)" v-tooltip.top="$t('edit')" />
                   <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
                     @click="confirmDelete(slotProps.data.id)" v-tooltip.top="$t('delete')" />
-                  <Button icon="pi pi-wrench" class="p-button-rounded p-button-help" @click="
+                  <Button v-can="'employees edit'" icon="pi pi-wrench" class="p-button-rounded p-button-help" @click="
                     restdialog = true;
                   id = slotProps.data.id;
                   " v-tooltip.top="$t('Rest')" />
-                  <Button v-can="'employees edit'" class="p-button-rounded" :class="slotProps.data.is_clocked_in
+                  <Button v-can="'attendance edit'" class="p-button-rounded" :class="slotProps.data.is_clocked_in
                       ? 'p-button-secondary'
                       : 'p-button-info'
                     " :icon="slotProps.data.is_clocked_in

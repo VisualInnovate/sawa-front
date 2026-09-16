@@ -28,8 +28,8 @@
           </div>
           <div class="text-center" >
           
-              <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" class="details m-auto"> نتائج التقييم</Button>     
-              <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="delete m-auto"> </Button>
+              <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" class="details m-auto"> نتائج التقييم</Button>     
+              <Button v-can="'evaluations delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="delete m-auto"> </Button>
             
           </div>
             

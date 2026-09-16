@@ -98,8 +98,8 @@ const initFilters = () => {
       <va-card class="card">
         <div class="relative">
           <Sideprofiletap></Sideprofiletap>
-          <Button  v-can="'room create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2 absolute top-3" @click="openNew"></Button>
-          <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" class="export absolute top-3 ltr:left-[15%] rtl:right-[15%] " @click="exportCSV($event)"/>
+          <Button  v-can="'evaluation headers create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2 absolute top-3" @click="openNew"></Button>
+          <Button v-can="'evaluation headers list'" :label='$t("export")' icon="pi pi-upload" class="export absolute top-3 ltr:left-[15%] rtl:right-[15%] " @click="exportCSV($event)"/>
 
         </div>
       
@@ -170,13 +170,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'room edit'"
+                v-can="'evaluation headers edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'room delete'"
+                v-can="'evaluation headers delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

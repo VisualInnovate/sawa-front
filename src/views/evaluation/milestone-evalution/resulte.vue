@@ -94,6 +94,7 @@
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">#</th>
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Strengths</th>
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Weaknesses</th>
+              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t('milestone_plan_goal') }}</th>
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Status</th>
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Target Symbol</th>
             </tr>
@@ -108,13 +109,16 @@
               <td class="px-6 py-4 font-medium print:px-3 print:py-2">{{ result.index }}</td>
               <td class="px-6 py-4 print:px-3 print:py-2">
                 <span v-for="(strength, sIndex) in result.strength" :key="sIndex">
-                  {{ strength }}<span v-if="sIndex < result.strength.length - 1">, </span>
+                  {{ strength.question }}<span v-if="sIndex < result.strength.length - 1">, </span>
                 </span>
               </td>
               <td class="px-6 py-4 print:px-3 print:py-2">
                 <span v-for="(weakness, wIndex) in result.weak" :key="wIndex">
-                  {{ weakness }}<span v-if="wIndex < result.weak.length - 1">, </span>
+                  {{ weakness.question }}<span v-if="wIndex < result.weak.length - 1">, </span>
                 </span>
+              </td>
+              <td class="px-6 py-4 print:px-3 print:py-2">
+                <p v-for="(goal, index) in result.plan_goals" :key="index">{{ goal.question }}</p>
               </td>
               <td class="px-6 py-4 print:px-3 print:py-2">{{ result.status }}</td>
               <td class="px-6 py-4 font-medium print:px-3 print:py-2">{{ result.symbol }}</td>

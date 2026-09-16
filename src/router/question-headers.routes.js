@@ -9,37 +9,29 @@ const headersRoutes = [
   {
     path: "headers",
     name: "Headers",
+    meta: { permission: ["evaluation headers list"] },
     component: Index,
-    meta: {
-      permissions: ["evaluationheaders.index"],
-    },
   },
   // create
   {
     path: "headers/create",
     name: "CreateHeaders",
+    meta: { permission: ["evaluation headers create"] },
     component: Create,
-    meta: {
-      permissions: ["evaluationheaders.create"],
-    },
   },
   // show
   {
     path: "headers/:id",
     name: "ShowHeaders",
+    meta: { permission: ["evaluation headers list"] },
     component: Show,
-    meta: {
-      permissions: ["evaluationheaders.show"],
-    },
   },
   // edit
   {
     path: "headers/:id/edit",
     name: "EditHeaders",
+    meta: { permission: ["evaluation headers edit"] },
     component: Edit,
-    meta: {
-      permissions: ["evaluationheaders.update"],
-    },
   },
 ];
 

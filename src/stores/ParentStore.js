@@ -96,14 +96,6 @@ export const useParentStore = defineStore("parentStore", {
         useAuthStore().resetAuthStore();
         await this.redirectAfterLogin();
       } catch (error) {
-        const responseData = error.response?.data;
-
-        if (responseData?.status === 401) {
-          localStorage.setItem("email_parent", parent.email ?? "");
-          await this.router.push({ name: "register-code" });
-          return;
-        }
-
         this.showErrors = true;
         this.authErrors = toClientError(
           error,
@@ -122,15 +114,9 @@ export const useParentStore = defineStore("parentStore", {
       this.loading = true;
 
       try {
-        const code = Array.isArray(parent.otp)
-          ? parent.otp.join("")
-          : parent.otp;
         const response = await axios.post(
-          "/api/parent/verify-code",
-          {
-            email: localStorage.getItem("email_parent"),
-            code,
-          },
+          "/api/parent/register",
+          parent,
           {
             skipAuth: true,
             skipAuthRedirect: true,
@@ -140,7 +126,7 @@ export const useParentStore = defineStore("parentStore", {
         if (!this.storeSession(response.data)) {
           this.showErrors = true;
           this.authErrors = {
-            message: "تعذر إتمام التحقق: لم يتم استلام رمز الجلسة.",
+            message: "تعذر إتمام التسجيل: لم يتم استلام رمز الجلسة.",
           };
           return;
         }
@@ -152,7 +138,7 @@ export const useParentStore = defineStore("parentStore", {
         this.showErrors = true;
         this.authErrors = toClientError(
           error,
-          "تعذر التحقق من الرمز. يرجى المحاولة مرة أخرى."
+          "تعذر إنشاء الحساب. يرجى المحاولة مرة أخرى."
         );
       } finally {
         this.loading = false;

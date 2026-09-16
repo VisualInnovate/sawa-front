@@ -5,6 +5,7 @@
       <Button
         type="button"
         icon="pi pi-plus"
+        v-can="'notifications create'"
         @click="restform(true)"
         :label="$t('create_button')"
         severity="success"
@@ -24,6 +25,7 @@
               :label="$t('send')"
               icon="pi pi-send"
               severity="info"
+              v-can="'notifications create'"
               @click="viewdialog(slotProps.data)"
               class="text-sm px-3 py-2"
             />
@@ -31,6 +33,7 @@
               :label="$t('edit')"
               icon="pi pi-pencil"
               severity="warning"
+              v-can="'notifications create'"
               @click="editItem(slotProps.data)"
               class="text-sm px-3 py-2"
             />

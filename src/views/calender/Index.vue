@@ -109,7 +109,7 @@
           {{ $t("from") }} {{ event.start_time }} {{ $t("to") }}
           {{ event.end_time }}
         </p>
-        <Button class="delete mt-3" icon="pi pi-trash" @click="deleteEvent" />
+        <Button v-can="'working hours delete'" class="delete mt-3" icon="pi pi-trash" @click="deleteEvent" />
       </form>
     </Dialog>
     <Dialog

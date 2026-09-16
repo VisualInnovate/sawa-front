@@ -3,6 +3,7 @@ import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import { ref } from "vue";
 import { useParentStore } from "../stores/ParentStore";
+import { homeRoute } from "@/utils/permissions";
 export const useAuthStore = defineStore("Auth", {
   state: () => ({
     authUser: useStorage("authUser", {}),
@@ -22,10 +23,17 @@ export const useAuthStore = defineStore("Auth", {
     successMsg: (state) => state.msg,
   },
   actions: {
+    // Refresh the user and their role permissions so role changes apply without signing in again.
     async getUser() {
-      if (this.authenticated == true && this.authUser) {
-        const response = await axios.get("api/get-user");
-      }
+      if (this.authenticated != true) return;
+      const response = await axios.get("api/get-user");
+      this.applyUser(response.data.user);
+    },
+    applyUser(user) {
+      this.authUser = user;
+      this.userPermissions = Array.isArray(user?.roles_permissions) ? user.roles_permissions : [];
+      this.type = user?.type;
+      this.user_id = user?.user_id;
     },
     async handleLogin(data) {
       if (this.loading) return;
@@ -40,37 +48,11 @@ export const useAuthStore = defineStore("Auth", {
         
         this.authenticated = true;
         this.token = response.data.tokens;
-        this.authUser = response.data.user;
-        this.userPermissions = response.data.user.roles_permissions;
-        this.type=response.data.user.type
-        this.user_id=response.data.user.user_id
-        this.router.push({ name: "dashbord" });
+        this.applyUser(response.data.user);
+        this.router.push(homeRoute());
       } catch (error) {
         if (error.response.status === 422) {
           console.log(error);
-          this.authErrors = error.response.data.errors;
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
-    async handleRegister(data) {
-      if (this.loading) return;
-      this.resetAuthStore();
-      this.loading = true;
-      try {
-        const response = await axios.post("/api/register", {
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          password_confirmation: data.password_confirmation,
-        });
-        this.authenticated = true;
-        this.token = response.data.token;
-        this.authUser = response.data.user;
-        this.router.push({ name: "dashbord" });
-      } catch (error) {
-        if (error.response.status === 422) {
           this.authErrors = error.response.data.errors;
         }
       } finally {
@@ -119,7 +101,7 @@ export const useAuthStore = defineStore("Auth", {
       this.authUser = null;
       this.token = null;
       this.authenticated = false;
-      this.userPermissions = null;
+      this.userPermissions = [];
       this.authErrors = [];
       this.msg = "";
       this.loading = false;

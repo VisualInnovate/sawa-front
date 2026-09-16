@@ -5,18 +5,14 @@ const rolesRoutes = [
   {
     path: "settings",
     name: "settings",
+    meta: { permission: ["settings list"] },
     component: SiteSettings,
-    meta: {
-      permissions: ["roles.index"],
-    },
   },
   {
     path: "pages",
     name: "pages",
+    meta: { permission: ["pages list"] },
     component: SitePages,
-    meta: {
-      permissions: ["roles.index"],
-    },
   },
 ];
 

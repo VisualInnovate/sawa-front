@@ -38,6 +38,7 @@ import resetStore from "@/plugins/reset-store";
 import "animate.css";
 
 import "./axios";
+import { can, isAdmin } from "@/utils/permissions";
 import installButtonLoading from "@/plugins/button-loading";
 installButtonLoading();
 import "./style.css";
@@ -173,17 +174,14 @@ app.component('Password ', Password )
 app.component('Chart', Chart)
 app.component('InputSwitch', InputSwitch)
 app.directive('tooltip', Tooltip);
-app.directive('can', (el, binding) => {
-  let permissions = []
-  try {
-    permissions = JSON.parse(localStorage.getItem('userPermissions')) || []
-  } catch {
-    permissions = []
-  }
-  if (!Array.isArray(permissions) || !permissions.includes(binding.value)) {
-    el.style.display = "none";
-  }
-})
+// v-can="'child create'" or v-can="['child create', 'child edit']" (any of them) — hides the element otherwise.
+const applyCan = (el, binding) => {
+  if (el.__canDisplay === undefined) el.__canDisplay = el.style.display
+  el.style.display = can(binding.value) ? el.__canDisplay : "none"
+}
+app.directive('can', { mounted: applyCan, updated: applyCan })
+app.config.globalProperties.$can = can
+app.config.globalProperties.$isAdmin = isAdmin
 
 let k= document.getElementsByClassName("switcher")
 console.log(k)

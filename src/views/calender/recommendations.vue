@@ -11,7 +11,7 @@
 
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
       <p class="text-lg text-gray-600 my-2">{{ $t("توصييات منزلية") }}</p>
-      <button @click="showInput = true" class="w-full create bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
+      <button v-can="'consultation settings edit'" @click="showInput = true" class="w-full create bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
         <i class="pi pi-plus-circle"></i> إضافة عنصر جديد
       </button>
       
@@ -31,14 +31,14 @@
           </div>
           <div class="flex justify-center m-auto text-center items-center gap-2">
             
-            <button @click="removeLabel(index)" class="p-2 m-auto text-red-600 hover:text-red-800 transition-transform transform hover:scale-105">
+            <button v-can="'consultation settings edit'" @click="removeLabel(index)" class="p-2 m-auto text-red-600 hover:text-red-800 transition-transform transform hover:scale-105">
               <i class="pi pi-trash"></i>
             </button>
           </div>
         </div>
       </div>
       
-      <Button v-if="labels.length > 0" @click="updateSettings" label="حفظ" class="w-full create mt-6 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"></Button>
+      <Button v-if="labels.length > 0" v-can="'consultation settings edit'" @click="updateSettings" label="حفظ" class="w-full create mt-6 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"></Button>
     </div>
     
     <Toast />

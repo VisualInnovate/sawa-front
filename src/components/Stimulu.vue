@@ -6,19 +6,23 @@
             class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
             > {{ $t('multiple') }}</router-link> -->
             <router-link
+          v-can="'stimulus test create'"
           :to="{ name: 'pair' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('pair') }}</router-link>
    
         <router-link
+          v-can="'stimulus list'"
           :to="{ name: 'reinforcers' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('reinforcers') }}</router-link>
         <router-link
+          v-can="'stimulus test create'"
           :to="{ name: 'return' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('return') }}</router-link>
         <router-link
+          v-can="'stimulus test create'"
           :to="{ name: 'without' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('without') }}</router-link>

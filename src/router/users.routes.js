@@ -9,10 +9,8 @@ const usersRoutes = [
   {
     path: "users",
     name: "Users",
+    meta: { adminOnly: true },
     component: Index,
-    meta: {
-      permissions: ["users.index"],
-    },
   },
   {
     path: "/profile",
@@ -24,28 +22,22 @@ const usersRoutes = [
   {
     path: "users/create",
     name: "CreateUser",
+    meta: { adminOnly: true },
     component: Create,
-    meta: {
-      permissions: ["users.create"],
-    },
   },
   // show
   {
     path: 'users/:id',
     name: "ShowUser",
+    meta: { adminOnly: true },
     component: Show,
-    meta: {
-      permissions: ["users.show"],
-    },
   },
   // edit
   {
     path: 'user-update/:id',
     name: "user-update",
+    meta: { adminOnly: true },
     component: Edit,
-    meta: {
-      permissions: ["users.create"],
-    },
   },
 ];
 

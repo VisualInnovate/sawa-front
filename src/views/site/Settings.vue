@@ -183,7 +183,7 @@
             <v-textarea rows="2" bg-color="#EAE8E9" v-model="settings.description" ></v-textarea>
          
           </div>
-          <button @click="updateSettings" class="p-4 mt-10 text-center bg-[#148A98] text-white w-full rounded-2xl text-xl" >{{ $t('save_changes') }}</button>
+          <button v-can="'settings edit'" @click="updateSettings"  class="p-4 mt-10 text-center bg-[#148A98] text-white w-full rounded-2xl text-xl" >{{ $t('save_changes') }}</button>
         </v-card>
   </v-card>
   <Toast/>

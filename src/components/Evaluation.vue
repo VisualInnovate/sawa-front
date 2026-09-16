@@ -3,20 +3,20 @@
   <template #end>
     
     <router-link
-          v-can="'question type list'"
-          :to="{ name: 'question-types' }"
+          v-can="'milestone domain list'"
+          :to="{ name: 'milestone-domains' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('question_types') }}</router-link>
+        > {{ $t('milestone_domain') }}</router-link>
         <router-link
-          v-can="'milestone question list'"
-          :to="{ name: 'question' }"
+          v-can="'milestone sub goal list'"
+          :to="{ name: 'milestone-sub-goals' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('questions') }}</router-link>
+        > {{ $t('milestone_sub_goals') }}</router-link>
         <router-link
-          v-can="'milestone subtest list'"
-          :to="{ name: 'milestone-subtest' }"
+          v-can="'milestone general goal list'"
+          :to="{ name: 'milestone-general-goals' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('Subtest') }}</router-link>
+        > {{ $t('milestone_general_goal') }}</router-link>
         <router-link
           v-can="'milestone level list'"
           :to="{ name: 'levels' }"

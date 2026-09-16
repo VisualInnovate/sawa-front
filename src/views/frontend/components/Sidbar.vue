@@ -16,7 +16,7 @@
       <p class="text-white text-center ">
         {{ parentStore.user.fname }} {{ parentStore.user.lname }}
       </p>
-      <p class="sid text-center text-white">{{ parentStore.user.email }}</p>
+      <p class="sid text-center text-white">{{ parentStore.user.email || parentStore.user.phone }}</p>
     </div>
     <div class="space-y-4 py-6">
       <div class="sid ">

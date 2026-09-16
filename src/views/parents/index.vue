@@ -154,7 +154,7 @@ const initFilters = () => {
                 @click="printTable"
               />
               <Button 
-                v-can="'child create'" 
+                v-can="'parents list'" 
                 :label='$t("export")' 
                 icon="pi pi-download" 
                 class="p-button-info no-print" 
@@ -183,7 +183,7 @@ const initFilters = () => {
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
-            v-can="'child list'"
+            v-can="'parents list'"
             stripedRows
             showGridlines
             class="p-datatable-sm"
@@ -248,7 +248,7 @@ const initFilters = () => {
             <Column header-style="width: 8rem; min-width: 8rem;" class="no-print">
               <template #body="slotProps">
                 <Button
-                  v-can="'child delete'"
+                  v-can="'parents delete'"
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-danger p-button-sm"
                   @click="confirmDelete(slotProps.data.id)"

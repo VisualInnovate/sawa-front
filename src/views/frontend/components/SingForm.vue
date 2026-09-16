@@ -1,18 +1,15 @@
 
 <script>
-import axios from "axios";
-import { useParentStore, SERVER_ERROR_MESSAGE } from "../../../stores/ParentStore";
+import { useParentStore } from "../../../stores/ParentStore";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import InlineMessage from "primevue/inlinemessage";
-import { useStorage } from "@vueuse/core";
 export default {
   components: { Button, InputText, InlineMessage },
   data() {
     return {
       submitted:false,
       loading:false,
-      email_parent: useStorage("email_parent", ),
       alert: {},
       alert_text: null,
       alert: {},
@@ -30,31 +27,9 @@ export default {
   
   },
   methods:{
-    createRow() {
-      // Sending the activation email can take several seconds; ignore repeat submits meanwhile.
-      if (this.loading) return
-      this.loading = true
-
-      axios.post("/api/parent/register",this.parent).then((res) => {
-        this.email_parent=this.parent.email
-        const toast = this.$toast
-        const detail = this.$t("account_created_check_email")
-        const summary = this.$t("success_message")
-        // Show the toast once the activation page (which has its own <Toast>) is mounted.
-        this.$router.push({ name: 'register-code' }).then(() => {
-          setTimeout(() => toast.add({ severity: 'success', summary, detail, life: 5000 }), 50)
-        });
-      }).catch((el)=>{
-        const serverError = !el.response || el.response.status >= 500
-        const validation = el.response?.data?.errors
-        const detail = serverError
-          ? SERVER_ERROR_MESSAGE
-          : (validation ? Object.values(validation).flat().join(" ") : el.response.data?.message)
-        this.$toast.add({ severity: 'error', summary: this.$t("error"), detail, life: 6000 });
-      }).finally(() => {
-        this.loading = false
-      })
-      },
+    async createRow() {
+      await this.parentStore.register(this.parent);
+    },
 
 
   }
@@ -73,7 +48,7 @@ export default {
               <div class="my-3 flex items-center justify-between">
                   <span class="border-b w-1/5 lg:w-1/4"></span>
                   <p class="text-xl py-2">
-                    {{ $t("sign_in") }}
+                    {{ $t("Create_an_account") }}
                   </p>
                   <span class="border-b w-1/5 lg:w-1/4"></span>
               </div>
@@ -91,12 +66,13 @@ export default {
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('Mobile_number') }}</label>
-                  <InputText   v-model="parent.phone"     required class="bg-[#f7f5f5] text-center"   />
+                  <InputText v-model="parent.phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required class="bg-[#f7f5f5] text-center" />
 
               </div>
               <div class=" flex flex-column gap-2">
-                    <label class="w-full  " for="username">{{ $t('email') }}</label>
-                  <InputText v-model="parent.email" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="email" required class="bg-[#f7f5f5] text-center"  />
+                    <label class="w-full" for="parent-email">{{ $t('parent_optional_email') }}</label>
+                  <InputText id="parent-email" v-model="parent.email" style="border: 1px solid #ced4da!important; border-radius: 5px !important;" type="email" autocomplete="email" class="bg-[#f7f5f5] text-center" />
+                  <small class="text-gray-600">{{ $t('parent_email_recovery_hint') }}</small>
 
               </div>
               <div class=" flex flex-column gap-2">
@@ -111,8 +87,12 @@ export default {
               
               <div class="flex flex-column gap-2 w-full ">
                     <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                    <Button @click="submitted = true" type="submit" :loading="loading" :disabled="loading" class="create m-auto w-full " :label='$t("create_button")'></Button>
+                    <Button @click="submitted = true" type="submit" :loading="parentStore.loading" :disabled="parentStore.loading" class="create m-auto w-full " :label='$t("create_button")'></Button>
                     <small id="username-help"></small>
+                </div>
+                <div v-if="parentStore.showErrors" class="my-3 text-red-600" role="alert">
+                  <p v-if="parentStore.errorMessage">{{ parentStore.errorMessage }}</p>
+                  <p v-for="(messages, field) in parentStore.errors" :key="field">{{ Array.isArray(messages) ? messages.join(' ') : messages }}</p>
                 </div>
                 <div class="mt-2 flex items-center justify-between">
                   

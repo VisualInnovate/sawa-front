@@ -73,7 +73,7 @@ const edit=(id)=>{
 
 const update=()=>{
     axios
-    .put(`/api/payroll/${confir_id.value}`,payroll.value)
+    .post(`/api/payroll/${confir_id.value}`,payroll.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -232,7 +232,7 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'payroll edit'"
+                v-if="false"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"

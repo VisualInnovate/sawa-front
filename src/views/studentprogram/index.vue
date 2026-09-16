@@ -116,7 +116,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button  v-can="'room create'" :label='$t("add_sp")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button  v-can="'student program create'" :label='$t("add_sp")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -157,7 +157,7 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
-          v-can="'student program details list'"
+          v-can="'student program list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
@@ -187,6 +187,13 @@ const initFilters = () => {
             </template>
            </Column>
          
+           <Column :header="$t('milestone_plan_goals')" header-style="min-width:18rem">
+             <template #body="{ data }">
+               <ul class="list-disc ps-4 space-y-2">
+                 <li v-for="goal in data.milestone_plan_goals" :key="goal.id">{{ goal.body }}</li>
+               </ul>
+             </template>
+           </Column>
            <Column field="price" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.program.price }}
@@ -195,7 +202,7 @@ const initFilters = () => {
           
            <Column field="price" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              <Dropdown  @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#F59E0B' : slotProps.data.status == 0 ? '#EF4444' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+              <Dropdown  :disabled="!$can('student program edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#F59E0B' : slotProps.data.status == 0 ? '#EF4444' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
 
             </template>
            </Column>
