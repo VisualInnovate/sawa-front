@@ -26,8 +26,8 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button @click="go_evaluate(evalu.child_id,evalu.evaluation_type,evalu.id)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
-          <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
+          <Button v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" @click="go_evaluate(evalu.child_id,evalu.evaluation_type,evalu.id)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button v-can="'evaluation request delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
 
           </div>
             

@@ -133,18 +133,21 @@ onMounted(() => {
             <div class="flex align-items-center gap-2">
               <span class="font-bold">{{ data.side_profile_title }}</span>
               <Button
+                v-can="'evaluation results list'"
                 icon="pi pi-eye"
                 class="p-button-rounded p-button-text p-button-primary"
                 @click="showSide(data.side_profile_id)"
                 v-tooltip.top="'View Side Profile'"
               />
               <Button
+                v-can="'side profiles edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-text p-button-primary"
                 @click="editItem(data.side_profile_id)"
                 v-tooltip.top="'Edit Side Profile'"
               />
               <Button
+                v-can="'side profiles delete'"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-text p-button-danger"
                 @click="deleteItem(data.side_profile_id)"
@@ -156,9 +159,10 @@ onMounted(() => {
           <Column v-for="col in headers" :key="col.field" :field="col.field" :header="$t(col.header)">
             <template #body="{ data }" v-if="col.field === 'actions'">
               <div class="flex gap-1 justify-content-center">
-                <Button 
-                  icon="pi pi-eye" 
-                  class="p-button-rounded p-button-text p-button-primary" 
+                <Button
+                  v-can="'evaluation results list'"
+                  icon="pi pi-eye"
+                  class="p-button-rounded p-button-text p-button-primary"
                   @click="showItem(data.evaluations_id, data.side_profile_id)"
                   v-tooltip.top="'View Evaluation'"
                 />

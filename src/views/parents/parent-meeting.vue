@@ -255,6 +255,7 @@ const initFilters = () => {
             <Column field="status" :header="$t('Status')" :sortable="true">
               <template #body="slotProps">
                 <Dropdown
+                  :disabled="!$can('parent meetings edit')"
                   @update:model-value="updateStatus(slotProps.data.id, $event)"
                   :style="{
                     backgroundColor:
@@ -286,6 +287,7 @@ const initFilters = () => {
                   <Button
                     icon="pi pi-trash"
                     class="p-button-rounded p-button-text p-button-danger"
+                    v-can="'parent meetings delete'"
                     @click="confirmDelete(slotProps.data.id)"
                     v-tooltip.top="'Delete'"
                   />

@@ -171,7 +171,7 @@ const initFilters = () => {
             <div class="flex gap-2">
               <Button :label='$t("print")' icon="pi pi-print" class="p-button-help no-print" :loading="printLoading"
                 @click="printTable" />
-              <Button v-can="'employees list'" :label='$t("export")' icon="pi pi-download"
+              <Button v-can="'attendance list'" :label='$t("export")' icon="pi pi-download"
                 class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
             </div>
           </template>
@@ -185,7 +185,7 @@ const initFilters = () => {
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
             :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
-            responsive-layout="scroll" scrollable scroll-height="flex" v-can="'employees list'" stripedRows
+            responsive-layout="scroll" scrollable scroll-height="flex" v-can="'attendance list'" stripedRows
             showGridlines class="p-datatable-sm">
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">

@@ -8,24 +8,17 @@ import { useTheme } from "vuetify";
 const router = useRouter();
 import sawaLogo from "../assets/img/sawa_logo.svg";
 import { useRouter } from "vue-router";
+import { can, canVisit, homeRoute } from "../utils/permissions";
 const theme = useTheme();
 const drawer = ref(true);
 const group = ref(null);
 const authStore = useAuthStore();
 const appLangStore = useAppLangStore();
 const routename = ref("");
-const readPermissions = () => {
-  try {
-    const parsed = JSON.parse(localStorage.getItem("userPermissions"));
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-const user_permissions = ref(readPermissions());
-// Exact match against the permission names returned by the API; true if the user has any of them.
-const can = (...names) =>
-  names.some((name) => user_permissions.value.includes(name));
+const homeLink = computed(() => homeRoute());
+const homeTitle = computed(() =>
+  homeLink.value.name === "dashbord" ? "dashbored" : "home"
+);
 // methods
 // const onClick = () => {
 //     theme.value = theme.value === "light" ? "dark" : "light";
@@ -50,8 +43,12 @@ watch(routename.value, (newValue, oldValue) => {
 });
 onMounted(async () => {
   routename.value = router.currentRoute._rawValue.name;
-  console.log(router.currentRoute._rawValue.name);
   await authStore.getUser();
+  // The role may have changed since sign-in; leave a page it no longer allows.
+  const current = router.currentRoute.value;
+  if (!current.matched.every((record) => canVisit(record))) {
+    router.replace(homeRoute());
+  }
 });
 </script>
 <style lang="scss">
@@ -163,9 +160,6 @@ onMounted(async () => {
           <UserProfileMenu />
         </template>
         <template class="setting" v-else>
-          <v-btn :to="{ name: 'Register' }">{{
-            $t("Create_an_account")
-          }}</v-btn>
           <v-btn :to="{ name: 'Login' }">{{ $t("sign_in") }}</v-btn>
         </template>
       </v-app-bar>
@@ -175,8 +169,8 @@ onMounted(async () => {
         <v-list density="compact" nav>
           <v-list-item
             prepend-icon="mdi-home"
-            :title="$t('dashbored')"
-            :to="{ name: 'dashbord' }"
+            :title="$t(homeTitle)"
+            :to="homeLink"
           ></v-list-item>
 
           <v-list-group
@@ -226,7 +220,7 @@ onMounted(async () => {
           </v-list-group>
 
           <v-list-group
-            v-if="can('child list', 'parents list')"
+            v-if="can('child list', 'parents list', 'parent meetings list')"
             prepend-icon="mdi-human-male-boy"
             value="Children"
           >
@@ -244,7 +238,7 @@ onMounted(async () => {
               :to="{ name: 'Parents' }"
             ></v-list-item>
             <v-list-item
-              v-can="'parents list'"
+              v-can="'parent meetings list'"
               :title="$t('meetings')"
               value="meeting"
               :to="{ name: 'parent-meeting' }"
@@ -261,17 +255,11 @@ onMounted(async () => {
           <v-list-group
             v-if="
               can(
-                'milestone question list',
-                'milestone answer list',
-                'milestone level list',
-                'side-profiles list',
+                'side profiles list',
                 'able category list',
                 'carolina age range list',
-                'carolina test list',
-                'barrier answer list',
-                'barrier question list',
-                'able answer list',
-                'able mission list',
+                'milestone level list',
+                'barrier subtest list',
               )
             "
             prepend-icon="mdi-help-box-multiple-outline"
@@ -287,42 +275,25 @@ onMounted(async () => {
             <!-- <v-list-item  :title="$t('headers')" value="headers"
               :to="{ name: 'Headers' }"></v-list-item> -->
             <v-list-item
-              v-can="'side-profiles list'"
+              v-can="'side profiles list'"
               title="Side profile"
               value="SideProfiles"
               :to="{ name: 'SideProfiles' }"
             ></v-list-item>
             <v-list-item
-              v-can="'able mission list'"
+              v-can="'able category list'"
               title="ablls"
               value="ablls"
               :to="{ name: 'ablls' }"
             ></v-list-item>
             <v-list-item
-              v-if="
-                can(
-                  'carolina test list',
-                  'carolina category list',
-                  'carolina answer list',
-                  'carolina answer type list',
-                  'carolina age range list',
-                )
-              "
+              v-can="'carolina age range list'"
               title="carolaina"
               value="Carolaina"
               :to="{ name: 'agerange' }"
             ></v-list-item>
             <v-list-group
-              v-if="
-                can(
-                  'milestone question list',
-                  'milestone answer list',
-                  'milestone level list',
-                  'barrier question list',
-                  'barrier answer list',
-                  'barrier answer type list',
-                )
-              "
+              v-if="can('milestone level list', 'barrier subtest list')"
               value="VB"
             >
               <template #activator="{ props }">
@@ -330,25 +301,13 @@ onMounted(async () => {
               </template>
 
               <v-list-item
-                v-if="
-                  can(
-                    'milestone question list',
-                    'milestone answer list',
-                    'milestone level list',
-                  )
-                "
+                v-can="'milestone level list'"
                 title="Milestones"
                 value="milestone"
                 :to="{ name: 'levels' }"
               ></v-list-item>
               <v-list-item
-                v-if="
-                  can(
-                    'barrier question list',
-                    'barrier answer list',
-                    'barrier answer type list',
-                  )
-                "
+                v-can="'barrier subtest list'"
                 title="Barriers"
                 value="barriers"
                 :to="{ name: 'barrier-subtest' }"
@@ -357,7 +316,7 @@ onMounted(async () => {
           </v-list-group>
           <!-- edit Last -->
           <v-list-group
-            v-if="can('treatment list', 'student program list', 'sessions list')"
+            v-if="can('program list', 'student program list', 'sessions list')"
             prepend-icon="mdi-doctor"
           >
             <template #activator="{ props }" value="Evaluation">
@@ -369,7 +328,7 @@ onMounted(async () => {
             </template>
 
             <v-list-item
-              v-can="'treatment list'"
+              v-can="'program list'"
               :title="$t('addTherapeutic')"
               value="Categories"
               :to="{ name: 'AllTherapeutic' }"
@@ -410,7 +369,6 @@ onMounted(async () => {
                 'bookings list',
                 'consultation settings list',
                 'working hours list',
-                'consultations list',
               )
             "
             prepend-icon=" mdi-calendar"
@@ -467,7 +425,7 @@ onMounted(async () => {
 
           <!-- student_programe -->
           <v-list-group
-            v-if="can('modules list')"
+            v-if="can('modules list', 'modules create')"
             prepend-icon="mdi-message-question-outline"
             value="custom-files"
           >
@@ -478,11 +436,13 @@ onMounted(async () => {
               ></v-list-item>
             </template>
             <v-list-item
+              v-can="'modules create'"
               :title="$t('custom_files')"
               value="custom-files"
               :to="{ name: 'custom-files' }"
             ></v-list-item>
             <v-list-item
+              v-can="'modules list'"
               :title="$t('module')"
               value="module"
               :to="{ name: 'module' }"
@@ -494,8 +454,6 @@ onMounted(async () => {
             v-if="
               can(
                 'skills list',
-                'department list',
-                'area list',
                 'region list',
                 'vehicle list',
                 'student transportation list',
@@ -516,14 +474,7 @@ onMounted(async () => {
               :to="{ name: 'skills' }"
             ></v-list-item>
             <v-list-item
-              v-can="'department list'"
-              :title="$t('department')"
-              value="department"
-              :to="{ name: 'department' }"
-            ></v-list-item>
-
-            <v-list-item
-              v-can="'area list'"
+              v-can="'region list'"
               :title="$t('area')"
               value="area"
               :to="{ name: 'regin' }"
@@ -564,11 +515,14 @@ onMounted(async () => {
           <v-list-group
             v-if="
               can(
-                'hr list',
+                'reports list',
                 'leaves list',
+                'leave balance list',
+                'leave setup list',
                 'attendance list',
-                'hr edit',
+                'hr settings list',
                 'deduction list',
+                'deduction type list',
                 'holidays list',
                 'official leave list',
                 'payroll list',
@@ -587,10 +541,10 @@ onMounted(async () => {
             </template>
 
             <v-list-item
-              v-can="'leaves list'"
+              v-if="can('leaves list', 'leave balance list', 'leave setup list')"
               :title="$t('leaves')"
               value="leaves"
-              :to="{ name: 'leaves' }"
+              :to="{ name: can('leaves list') ? 'leaves' : can('leave balance list') ? 'leave-balance' : 'leave-setup' }"
             ></v-list-item>
             <v-list-item
               v-can="'attendance list'"
@@ -599,16 +553,16 @@ onMounted(async () => {
               :to="{ name: 'daily-attendance' }"
             ></v-list-item>
             <v-list-item
-              v-can="'hr edit'"
+              v-can="'hr settings list'"
               :title="$t('Settings')"
               value="setting"
               :to="{ name: 'setting' }"
             ></v-list-item>
             <v-list-item
-              v-can="'deduction list'"
+              v-if="can('deduction list', 'deduction type list')"
               :title="$t('deductions')"
               value="deduction"
-              :to="{ name: 'deduction' }"
+              :to="{ name: can('deduction list') ? 'deduction' : 'deduction-types' }"
             ></v-list-item>
             <v-list-item
               v-can="'holidays list'"
@@ -665,7 +619,7 @@ onMounted(async () => {
               :to="{ name: 'advance' }"
             ></v-list-item>
             <v-list-item
-              v-can="'hr list'"
+              v-can="'reports list'"
               :title="$t('reports')"
               value="reports"
               :to="{ name: 'reports' }"

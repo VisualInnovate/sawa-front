@@ -453,7 +453,7 @@ export default {
         this.treatments = response.data.data;
       });
       axios.post("/api/roles").then((res) => {
-        this.roles = res.data.roles.data;
+        this.roles = res.data.roles.data.filter((role) => !role.is_locked || this.$isAdmin());
       });
       axios.get("/api/skills").then((res) => {
         this.skills = res.data.data;

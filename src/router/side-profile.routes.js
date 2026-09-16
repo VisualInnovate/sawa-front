@@ -8,24 +8,28 @@ const sideProfilesRoutes = [
     {
         path: "side-profiles",
         name: "SideProfiles",
+        meta: { permission: ["side profiles list"] },
         component: Index,
     },
     // create
     {
         path: "side-profiles/create",
         name: "CreateSideProfiles",
+        meta: { permission: ["side profiles create"] },
         component: Create,
     },
     // show
     {
         path: "side-profiles/:id",
         name: "ShowSideProfiles",
+        meta: { permission: ["side profiles list"] },
         component: Show,
     },
     // edit
     {
         path: "side-profiles/:id/edit",
         name: "EditSideProfiles",
+        meta: { permission: ["side profiles edit"] },
         component: Edit,
     },
 ];

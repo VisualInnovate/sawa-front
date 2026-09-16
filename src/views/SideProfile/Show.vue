@@ -75,7 +75,7 @@ export default {
 
   </v-alert>
 
-  <v-btn text="Create" color="green" height="45" class="mb-5 mt-5" @click="create">
+  <v-btn v-can="'evaluations create'" text="Create" color="green" height="45" class="mb-5 mt-5" @click="create">
     {{$t('create_button')}}
   </v-btn>
 
@@ -102,9 +102,9 @@ export default {
           <td>{{  index + 1}}</td>
           <td>{{ item.columns.title }}</td>
           <td>
-            <v-icon small color="primary" class="mx-3" @click="showItem(item.raw.id)">mdi-plus-box</v-icon>
-            <v-icon small color="primary" class="mx-3" @click="editItem(item.raw.id)">mdi-pencil</v-icon>
-            <v-icon small color="error mx-3" @click="deleteItem(item.raw.id)">mdi-delete</v-icon>
+            <v-icon v-can="'evaluation results create'" small color="primary" class="mx-3" @click="showItem(item.raw.id)">mdi-plus-box</v-icon>
+            <v-icon v-can="'evaluations edit'" small color="primary" class="mx-3" @click="editItem(item.raw.id)">mdi-pencil</v-icon>
+            <v-icon v-can="'evaluations delete'" small color="error mx-3" @click="deleteItem(item.raw.id)">mdi-delete</v-icon>
           </td>
         </tr>
 

@@ -32,7 +32,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/milestone-subtest").then((res)=>{
+  axios.get("/api/milestone-general-goals").then((res)=>{
     loading.value= false
     users.value= res.data.data
     console.log(users.value)
@@ -57,7 +57,7 @@ alllevel()
 
 })
 const edit=(id)=>{
-    axios.get(`/api/milestone-subtest/${id}`).then((res)=>{
+    axios.get(`/api/milestone-general-goals/${id}`).then((res)=>{
     loading.value= false
     levels.value= res.data.data
     console.log(users.value)
@@ -72,7 +72,7 @@ const edit=(id)=>{
 
 const editescrud=()=>{
     axios
-    .put(`/api/milestone-subtest/${confir_id.value}`,levels.value)
+    .put(`/api/milestone-general-goals/${confir_id.value}`,levels.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -102,7 +102,7 @@ const confirmDelete = (id) => {
 
 const createcrude=()=>{
     axios
-    .post('/api/milestone-subtest',levels.value)
+    .post('/api/milestone-general-goals',levels.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -116,7 +116,7 @@ const createcrude=()=>{
 }
 const deleteAction = () => {
   axios
-    .delete(`/api/milestone-subtest/${confir_id.value}`)
+    .delete(`/api/milestone-general-goals/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -164,13 +164,13 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
-          v-can="'milestone subtest list'"
+          v-can="'milestone general goal list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <Button v-can="'milestone subtest create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+              <Button v-can="'milestone general goal create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 
-              <h5 class="m-0 my-auto">{{ $t("Subtest") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("milestone_general_goal") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
@@ -204,13 +204,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'milestone subtest edit'"
+                v-can="'milestone general goal edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'milestone subtest delete'"
+                v-can="'milestone general goal delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

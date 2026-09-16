@@ -32,7 +32,7 @@ onBeforeMount(() => {
  const fetchData= ()=>{
 
 
-  axios.get("/api/mileston-question-type").then((res)=>{
+  axios.get("/api/milestone-domains").then((res)=>{
     loading.value= false
     users.value= res.data.data
     console.log(users.value)
@@ -50,7 +50,7 @@ fetchData()
 
 })
 const edit=(id)=>{
-    axios.get(`/api/mileston-question-type/${id}`).then((res)=>{
+    axios.get(`/api/milestone-domains/${id}`).then((res)=>{
     loading.value= false
     levels.value= res.data.data
     console.log(users.value)
@@ -65,7 +65,7 @@ const edit=(id)=>{
 
 const editescrud=()=>{
     axios
-    .post(`/api/mileston-question-type/${confir_id.value}`,levels.value)
+    .post(`/api/milestone-domains/${confir_id.value}`,levels.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -95,7 +95,7 @@ const confirmDelete = (id) => {
 
 const createcrude=()=>{
     axios
-    .post('/api/mileston-question-type',levels.value)
+    .post('/api/milestone-domains',levels.value)
     .then((res) => {
       console.log(res.data)
       fetchData()
@@ -109,7 +109,7 @@ const createcrude=()=>{
 }
 const deleteAction = () => {
   axios
-    .delete(`/api/mileston-question-type/${confir_id.value}`)
+    .delete(`/api/milestone-domains/${confir_id.value}`)
     .then((res) => {
       console.log(res.data)
       deleteDialog.value=false
@@ -156,13 +156,13 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
-          v-can="'question type list'"
+          v-can="'milestone domain list'"
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <Button v-can="'question type create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+              <Button v-can="'milestone domain create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 
-              <h5 class="m-0 my-auto">{{ $t("question_types") }}</h5>
+              <h5 class="m-0 my-auto">{{ $t("milestone_domain") }}</h5>
              <div>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search"/>
@@ -191,13 +191,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'question type edit'"
+                v-can="'milestone domain edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'question type delete'"
+                v-can="'milestone domain delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

@@ -12,62 +12,48 @@ const rolesRoutes = [
   {
     path: "roles",
     name: "Roles",
+    meta: { permission: ["roles list"] },
     component: Index,
-    meta: {
-      permissions: ["roles.index"],
-    },
   },
   // create
   {
     path: "roles/create",
     name: "CreateRole",
+    meta: { permission: ["roles create"] },
     component: Create,
-    meta: {
-      permissions: ["roles.create"],
-    },
   },
   // show
   {
     path: "roles/:id",
     name: "ShowRole",
+    meta: { permission: ["roles edit"] },
     component: Show,
-    meta: {
-      permissions: ["roles.show"],
-    },
   },
   // edit
   {
     path: "roles/:id/edit",
     name: "EditRole",
+    meta: { permission: ["roles edit"] },
     component: Edit,
-    meta: {
-      permissions: ["roles.edit"],
-    },
   },
   {
     path: "roles/users",
     name: "RolesUsers",
+    meta: { adminOnly: true },
     component: RolesUsers,
-    meta: {
-      permissions: ["roles.index"],
-    },
   },
   {
     path: "roles/user/:id/roles",
     name: "UserRole",
+    meta: { adminOnly: true },
     component: UserRoles,
-    meta: {
-      permissions: ["roles.create"],
-    },
     props: true,
   },
   {
     path: "roles/user/:id/roles/sync",
     name: "UserRoleDelete",
+    meta: { adminOnly: true },
     component: UserRoleDelete,
-    meta: {
-      permissions: ["roles.create"],
-    },
     props: true,
   },
 ];

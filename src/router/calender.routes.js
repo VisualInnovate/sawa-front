@@ -10,21 +10,25 @@ const calenderRoutes = [
   {
     path: "calender/:id",
     name: "Calender",
+    meta: { permission: ["evaluation request create"] },
     component: Index,
   },
   {
     path: "recommendations",
     name: "recommendations",
+    meta: { permission: ["consultation settings list"] },
     component: Recommendations,
   },
   {
     path: "bookings",
     name: "ShowBooking",
+    meta: { permission: ["bookings list"] },
     component: ShowBooking,
   },
   {
     path: "bookings/:id/details",
     name: "BookingDetails",
+    meta: { permission: ["bookings list", "bookings edit", "consultations edit"] },
     component: BookingDetails,
     props: true,
   },
@@ -32,6 +36,7 @@ const calenderRoutes = [
   {
     path: "working-hours",
     name: "working-hours",
+    meta: { permission: ["working hours list"] },
     component: working,
     props: true,
   },

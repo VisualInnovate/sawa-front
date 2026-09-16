@@ -83,8 +83,8 @@
             </div>
          
            <div class="flex ">
-            <Button type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="updateEvent " />
-            <Button type="submit" class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
+            <Button v-can="'working hours edit'" type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="updateEvent " />
+            <Button v-can="'working hours delete'" type="submit" class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
            </div>
             <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
             <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
@@ -265,7 +265,7 @@
     
     
       handleEventClick(event) {
-        console.log(event)
+        if (!this.$can('working hours edit', 'working hours delete')) return
         this.event_id=event.event.id
         this.event.title = event.event.title
         this.event.color = '#'+event.event.color
@@ -283,7 +283,7 @@
         if(event.view.type == 'dayGridMonth'){
           const calendarApi = this.$refs.fullCalendar.getApi();
           calendarApi.changeView("timeGridDay", event.startStr);
-        }else{
+        }else if (this.$can('working hours create')) {
             this.event.start=event.startStr
             this.event.end=event.endStr
             this.visible = true;

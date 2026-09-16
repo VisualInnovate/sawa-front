@@ -1,7 +1,7 @@
 <template>
     <Stimulu></Stimulu>
     <v-card class="p-[1%]" >
-        <Button  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+        <Button v-can="'stimulus create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 ">
              <div v-for="stimulu,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
@@ -17,8 +17,8 @@
                   
                </div>
                <div class="flex">
-                <Button  icon="pi pi-pencil" class="p-button-rounded p-button-success m-auto" @click="edit(stimulu.id)"/>
-                <Button   icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" @click="confirmDelete(stimulu.id)"/>
+                <Button v-can="'stimulus edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success m-auto" @click="edit(stimulu.id)"/>
+                <Button v-can="'stimulus delete'"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" @click="confirmDelete(stimulu.id)"/>
                </div>
              </div>
 
@@ -59,7 +59,7 @@
 
              <div>
               <v-card class="w-full text-center col-span-2">
-            <Button icon="pi pi-arrow-right" v-if="stimulus_id"  @click="goevalute" class=" m-4 m-auto create  w-44 " :label='$t("مرحله التقييم")'></Button>
+            <Button v-can="'stimulus test create'" icon="pi pi-arrow-right" v-if="stimulus_id"  @click="goevalute" class=" m-4 m-auto create  w-44 " :label='$t("مرحله التقييم")'></Button>
           </v-card>
              </div>
             

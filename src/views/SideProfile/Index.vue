@@ -161,16 +161,18 @@ export default {
   <Column :header="$t('Actions')" :exportable="false" style="min-width: 10rem">
     <template #body="{ data }">
       <div class="flex gap-2">
-        <Button 
-          icon="pi pi-eye" 
+        <Button
+          v-can="'evaluation results create'"
+          icon="pi pi-eye"
           class="p-button-rounded p-button-info p-button-text"
-          @click="showEvaluation(data.id)" 
+          @click="showEvaluation(data.id)"  
           v-tooltip.top="'View Details'" 
         />
-        <Button 
-          icon="pi pi-pencil" 
+        <Button
+          v-can="'evaluations edit'"
+          icon="pi pi-pencil"
           class="p-button-rounded p-button-warning p-button-text"
-          @click="editEvaluation(data.id)" 
+          @click="editEvaluation(data.id)"  
           v-tooltip.top="'Edit Evaluation'" 
         />
       </div>

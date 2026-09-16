@@ -1,7 +1,7 @@
 <template>
     <Ablls></Ablls>
     <v-card v-can="'able category list'" class="p-[1%]" >
-        <Button  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+        <Button v-can="'able category create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 ">
              <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
@@ -20,8 +20,8 @@
                    </div>
                </div>
                <div class="flex">
-                <Button  icon="pi pi-pencil" class="p-button-rounded p-button-success m-auto" @click="edit(data.id)"/>
-                <Button   icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" @click="confirmDelete(data.id)"/>
+                <Button v-can="'able category edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success m-auto" @click="edit(data.id)"/>
+                <Button v-can="'able category delete'"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" @click="confirmDelete(data.id)"/>
                </div>
              </div>
 

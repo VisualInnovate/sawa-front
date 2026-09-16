@@ -179,7 +179,7 @@
       </div>
     </div>
   </v-card>
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('bookings edit') || havePermission.includes('accept booking')">
+  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="$can('bookings edit')">
     <form
       @submit.prevent="updateBooking"
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
@@ -260,6 +260,7 @@
         <!-- Evaluation Button -->
         <div class="text-center mt-4">
           <Button
+            v-can="'evaluation request create'"
             :disabled="comparisonResult"
             @click="AddEvalte(booking?.child_id)"
             class="bg-gradient-to-r create from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-80"
@@ -407,7 +408,7 @@
   </div>
   <toast></toast>
 
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="havePermission.includes('consultations edit') || havePermission.includes('evaluation result')">
+  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="$can('consultations edit')">
     <h2 class="text-lg font-semibold text-gray-800 mb-3">
       {{ $t("نتيجة الاستشارة") }}
     </h2>
@@ -487,7 +488,7 @@
     </form>
   </v-card>
 
-  <v-card class="mt-5 p-[2%] bg-slate-50">
+  <v-card v-can="'bookings edit'" class="mt-5 p-[2%] bg-slate-50">
     <form
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
     >
@@ -536,7 +537,6 @@ export default {
   props: ["id"],
   data() {
     return {
-      havePermission: (() => { try { return JSON.parse(localStorage.getItem("userPermissions")) || []; } catch { return []; } })(),
       filed_value: "",
       comparisonResult: false,
       current_date: moment(new Date()).format("YYYY-MM-DDTHH:mm:ssZ"),

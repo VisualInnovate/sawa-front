@@ -4,16 +4,19 @@
     
    
         <router-link
+          v-can="'doctor list'"
           :to="{ name: 'doctors-show' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('student_details') }}</router-link>
 
         <router-link
+          v-can="'doctor list'"
           :to="{ name: 'doctors-programe' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('evaluation_order') }}</router-link>
 
         <router-link
+          v-can="'doctor list'"
           :to="{ name: 'doctors-evaluation' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('Consultations_evaluations') }}</router-link>

@@ -212,13 +212,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'skills edit'"
+                v-can="'treatment edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'skills delete'"
+                v-can="'treatment delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

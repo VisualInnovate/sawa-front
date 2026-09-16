@@ -117,16 +117,6 @@ const rules = ref({
           {{ $t('sign_in') }}
         </v-btn>
       </v-form>
-      <!-- sign up now link -->
-      <v-card-text class="text-center">
-        <router-link
-          class="text-blue text-decoration-none"
-          :to="{ name: 'Register' }"
-          rel="noopener noreferrer"
-        >
-          {{ $t('Create_an_account') }} <v-icon icon="mdi-chevron-right"></v-icon>
-        </router-link>
-      </v-card-text>
     </v-card>
   </div>
 </template>

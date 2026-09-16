@@ -262,6 +262,7 @@ const addEvaluation = (id) => {
                     icon="pi pi-plus" 
                     class="p-button-rounded p-button-text p-button-help" 
                     @click="addEvaluation(slotProps.data.id)"
+                    v-can="'evaluation request create'"
                     v-tooltip.top="'Add Evaluation'"
                   />
                 </div>

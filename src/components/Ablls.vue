@@ -6,11 +6,13 @@
             class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
             > {{ $t('multiple') }}</router-link> -->
             <router-link
+          v-can="'able category list'"
           :to="{ name: 'ablls' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('ablls') }}</router-link>
    
         <router-link
+          v-can="'able mission list'"
           :to="{ name: 'missions' }"
           class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('missions') }}</router-link>

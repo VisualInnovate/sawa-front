@@ -13,90 +13,78 @@ const childrenRoutes = [
   {
     path: "children/:alert?",
     name: "Children",
+    meta: { permission: ["child list"] },
     component: Index,
-    meta: {
-      permissions: ["child.index"],
-    },
   },
 
   // create
   {
     path: "children/create",
     name: "CreateChildren",
+    meta: { permission: ["child create"] },
     component: Create,
-    meta: {
-      permissions: ["child.create"],
-    },
   },
   // show
   {
     path: "children/:id",
     name: "ShowChildren",
+    meta: { permission: ["child list"] },
     component: Show,
-    meta: {
-      permissions: ["child.show"],
-    },
   },
   // edit
   {
     path: "children/:id/edit",
     name: "EditChildren",
+    meta: { permission: ["child edit"] },
     component: Edit,
-    meta: {
-      permissions: ["child.update"],
-    },
   },
   {
     path: "children/Resultr/:child_id/:sideProfile_id",
     name: "resulte",
+    meta: { permission: ["evaluation results list"] },
     component: res,
-    meta: {
-      permissions: ["child.getChildAndSideProfile"],
-    },
   },
   {
     path: "children/:child_id/:sideProfile_id",
     name: "showChildEvaluation",
+    meta: { permission: ["evaluation results list"] },
     component: evaluation,
-    meta: {
-      permissions: ["child.getChildAndSideProfile"],
-    },
   },
   {
     path: "children/:child_id/:sideProfile_id/:evaluation_id",
     name: "showChildResult",
+    meta: { permission: ["evaluation results list"] },
     component: result,
-    meta: {
-      permissions: ["child.getChildAndSideProfile"],
-    },
   },
   {
     path: 'children-detailes', // Define the path for your addRoom route
     name: 'children-detailes',
+    meta: { permission: ["child list"] },
     component: () => import("../views/children/detailes.vue")
   },
   {
     path: 'children-programe', // Define the path for your addRoom route
     name: 'children-programe',
+    meta: { permission: ["child list"] },
     component: () => import("../views/children/programe.vue")
   },
   {
     path: 'children-evaluate', // Define the path for your addRoom route
     name: 'children-evaluate',
+    meta: { permission: ["child list"] },
     component: () => import("../views/children/evaluate.vue")
   },
   {
     path: 'children-request', // Define the path for your addRoom route
     name: 'children-request',
+    meta: { permission: ["child list"] },
     component: () => import("../views/children/requests.vue")
   },
   {
     path: "children/evaluation/:evaluation_result_id",
     name: "editChildResult",
+    meta: { permission: ["evaluation results edit"] },
     component: editResult,
-    meta: {
-      permissions: ["child.getChildAndSideProfile"],
-    },
   },
 ];
 

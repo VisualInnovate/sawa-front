@@ -1,4 +1,4 @@
-<template v-can="'employees edit'">
+<template>
     <v-card class="p-[1%]">
      
   
@@ -193,7 +193,7 @@
        </div>
        <div class="text-center">
          <Button @click="previousStep" class="create" :label='$t("Back")' ></Button>
-         <Button  type="submit" @click="submitted=true"  class="create" :label='$t("submit")'></Button>
+         <Button v-can="'employees edit'" type="submit" @click="submitted=true"  class="create" :label='$t("submit")'></Button>
        </div>
          
        </div>
@@ -354,7 +354,7 @@
         })
           axios.post("/api/roles").then((res)=>{
   
-          this.roles= res.data.roles.data
+          this.roles= res.data.roles.data.filter((role) => !role.is_locked || this.$isAdmin())
   
   
           });

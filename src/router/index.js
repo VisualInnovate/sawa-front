@@ -25,10 +25,10 @@ import Login from "../views/frontend/views/Login.vue";
 import AboutView from "../views/frontend/views/AboutView.vue";
 import BookingTime from "../views/frontend/components/BookingTime.vue";
 import Cursale from "../views/frontend/components/Cursale.vue";
-import code from "../views/frontend/views/code.vue";
 import contactus from "../views/frontend/views/contactus.vue";
 import { useParentStore } from "../stores/ParentStore";
 import { useAuthStore } from "../stores/Auth";
+import { canVisit, homeRoute } from "../utils/permissions";
 
 function auth(to, from, next) {
   if (!useAuthStore().authenticated) {
@@ -52,13 +52,6 @@ function authForNormalUser(to, from, next) {
     return next({ name: "parentLogin" });
   }
 
-  next();
-}
-
-function phoneIsVerified(to, from, next) {
-  if (useParentStore().user?.phone_verified_at == null) {
-    return next({ name: "code" });
-  }
   next();
 }
 
@@ -147,7 +140,7 @@ const routes = [
   {
     path: "/web/code",
     name: "code",
-    component: code,
+    redirect: { name: "parentLogin" },
   },
   {
     path: "/web/contactus",
@@ -187,13 +180,12 @@ const routes = [
     component: () => import("../views/frontend/views/childreens.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
   {
     path: "/web/register-code",
     name: "register-code",
-    component: () => import("../views/frontend/views/registercode.vue"),
+    redirect: { name: "parentLogin" },
   },
   {
     path: "/web/booking-time/:child_id",
@@ -201,7 +193,6 @@ const routes = [
     component: BookingTime,
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
 
@@ -211,7 +202,6 @@ const routes = [
     component: () => import("../views/frontend/views/New.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
   {
@@ -221,7 +211,6 @@ const routes = [
     component: () => import("../views/frontend/views/more.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
 
@@ -231,7 +220,6 @@ const routes = [
     component: () => import("../views/frontend/views/ReAction.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
   {
@@ -240,7 +228,6 @@ const routes = [
     component: () => import("../views/frontend/views/Edit.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
   {
@@ -249,7 +236,6 @@ const routes = [
     component: () => import("../views/frontend/views/Profile.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
 
@@ -263,7 +249,6 @@ const routes = [
     component: () => import("../views/frontend/views/Following.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
 
@@ -273,7 +258,6 @@ const routes = [
     component: () => import("../views/frontend/views/Booking.vue"),
     beforeEnter: [
       authForNormalUser,
-      //  phoneIsVerified
     ],
   },
   ///////////////End Front End Users Routes //////////////////
@@ -284,7 +268,17 @@ const routes = [
     name: "Home",
     beforeEnter: auth,
     children: [
-      // ...Object.values(permissionsRoutes),
+      // /sawa-admin opens the statistics dashboard or, without "dashboard index", the welcome page.
+      {
+        path: "",
+        name: "adminHome",
+        redirect: () => homeRoute(),
+      },
+      {
+        path: "welcome",
+        name: "welcome",
+        component: () => import("../views/Welcome.vue"),
+      },
       ...Object.values(siteRoutes),
       ...Object.values(rooms),
       ...Object.values(vb),
@@ -312,12 +306,6 @@ const routes = [
     beforeEnter: guest,
     component: () => import("@/components/Login.vue"),
   },
-  {
-    path: "/register",
-    name: "Register",
-    beforeEnter: guest,
-    component: () => import("@/components/Register.vue"),
-  },
 
   {
     path: "/unauthorized",
@@ -337,16 +325,22 @@ const routes = [
   {
     path: "/print-child-result/:child_id/:sideProfile_id/:evaluation_id/:start/:end",
     name: "printChildResult",
+    beforeEnter: auth,
+    meta: { permission: ["evaluation results list"] },
     component: () => import("@/views/children/ChildResultPrint.vue"),
   },
   {
     path: "/print-child-result/:child_id/:sideProfile_id/:evaluation_id",
     name: "printChildResultfilter",
+    beforeEnter: auth,
+    meta: { permission: ["evaluation results list"] },
     component: () => import("@/views/children/ChildResultPrintflter.vue"),
   },
   {
     path: "/ResultPrint/:child_id/:sideProfile_id",
     name: "ResultPrint",
+    beforeEnter: auth,
+    meta: { permission: ["evaluation results list"] },
     component: () => import("../views/children/ResultPrint.vue"),
   },
 ];
@@ -356,23 +350,11 @@ const router = createRouter({
   routes,
 });
 
-// router.beforeEach((to, from, next) => {
-//   let user_permissions = JSON.parse(localStorage.getItem("userPermissions"));
-//   if (to.meta.hasOwnProperty("permissions")) {
-//     if (
-//       to.meta.permissions.some((to_permission) =>
-//         user_permissions.includes(to_permission)
-//       )
-//     ) {
-//       next();
-//     } else {
-//       next({
-//         name: "unauthorized",
-//       });
-//     }
-//   } else {
-//     next();
-//   }
-// });
+// Dashboard pages need their permission; without it the user is sent home quietly.
+router.beforeEach((to) => {
+  if (!useAuthStore().authenticated) return true;
+  if (to.matched.every((record) => canVisit(record))) return true;
+  return homeRoute();
+});
 
 export default router;

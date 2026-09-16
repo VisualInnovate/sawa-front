@@ -194,7 +194,7 @@ const initFilters = () => {
         <Toolbar class="mb-4 shadow-md">
           <template #start>
             <div class="my-2">
-            <Button        v-can="'region list'"  :label='$t("area")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button        v-can="'region create'"  :label='$t("area")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -273,13 +273,13 @@ const initFilters = () => {
             <template #body="slotProps">
               <div >
                 <Button
-                v-can="'roles edit'"
+                v-can="'region edit'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
                 <Button
-                v-can="'roles delete'"
+                v-can="'region delete'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

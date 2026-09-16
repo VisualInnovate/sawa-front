@@ -8,6 +8,12 @@
   </div>
   
   <v-card>
+    <section v-if="student.milestone_plan_goals?.length" class="m-4 p-4 rounded-lg bg-slate-50">
+      <h2 class="font-bold mb-3">{{ $t('milestone_plan_goals') }}</h2>
+      <ul class="list-disc ps-5 space-y-2">
+        <li v-for="goal in student.milestone_plan_goals" :key="goal.id">{{ goal.body }}</li>
+      </ul>
+    </section>
     <form @submit.prevent="updatePrograme">
   
       <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4"  >
@@ -274,6 +280,7 @@ export default {
           this.student.student_id=response.data.data.student_id
           this.student.program_id=response.data.data.program_id
           this.student.recommendations=response.data.data.recommendations
+          this.student.milestone_plan_goals=response.data.data.milestone_plan_goals
           this.maxcapsity=response.data.data.program.individual_sessions
           response.data.data.student_program_details.forEach(element => {
             this.maxcapsity= this.maxcapsity-element.sessions_number

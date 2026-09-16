@@ -4,14 +4,17 @@
     
    
         <router-link
+          v-can="'barrier question list'"
           :to="{ name: 'barrier-question' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('questions') }}</router-link>
         <router-link
+          v-can="'barrier subtest list'"
           :to="{ name: 'barrier-subtest' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('Subtest') }}</router-link>
         <router-link
+          v-can="'barrier answer type list'"
           :to="{ name: 'barrier-answer-type' }"
           class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
         > {{ $t('answer_type') }}</router-link>

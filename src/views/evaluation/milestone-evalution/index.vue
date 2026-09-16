@@ -104,9 +104,15 @@
               
             
               </div> 
+              <div v-if="strart_evaluate" class="flex flex-column gap-2">
+                <label for="milestone-program">{{ $t('milestone_target_program') }}</label>
+                <Dropdown inputId="milestone-program" v-model="answers.student_program_id" :options="programs" optionLabel="name" optionValue="id" filter showClear :placeholder="$t('milestone_target_program')" />
+                <small v-if="!programs.length">{{ $t('milestone_no_programs') }}</small>
+                <p v-if="error.student_program_id" class="text-red-600">{{ error.student_program_id[0] }}</p>
+              </div>
               <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button  type="submit" class="create m-auto w-full " :label='$t("submit")'></Button>
+                <Button type="submit" :loading="saving" :disabled="saving" class="create m-auto w-full" :label="$t('submit')" />
                 <small id="username-help"></small>
               </div>
             
@@ -142,8 +148,11 @@ export default {
       strart_evaluate:false,
      alert_text:"",
       answers:{
+        student_program_id: null,
         answers:[]
       },
+      programs: [],
+      saving: false,
       type:2,
       
          
@@ -210,7 +219,7 @@ export default {
     },
     getquation(id){
       axios
-        .get(`api/milestone-answers/question/${localStorage.getItem("child_id")}`)
+        .get(`api/milestone-answers/sub-goals/${this.answer.child_age}`, { params: { child_id: this.answer.child_id } })
         .then((response) => {
           console.log(response.data[0].subtests)
           this.allquestion = response.data
@@ -227,7 +236,7 @@ export default {
         .then((response) => {
          this.answer.child_age=response.data
          axios
-        .get(`api/milestone-answers/question/${response.data}`)
+        .get(`api/milestone-answers/sub-goals/${response.data}`, { params: { child_id: this.answer.child_id } })
         .then((response) => {
           console.log(response.data[0].subtests)
           this.allquestion = response.data
@@ -244,20 +253,20 @@ export default {
       console.log(this.answers.answers)
     },
 
-    getanswer(event,y,z){
-     
-      
-      axios.post("/api/milestone-answers",this.answers).then((res) => {
-        axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
-        this.$router.push({ name: 'milestone-resulte', params:{'id':this.answer.child_id,'evla_id':this.answer.evaluation_id}});
-      }).catch((el)=>{
-        this.alert_text='please answer all questions'
-          setTimeout(() => {
-      this.alert_text=''
-    }, 2500); 
-    })
-    
-
+    async getanswer(){
+      if (this.saving) return;
+      this.saving = true;
+      this.error = {};
+      try {
+        const answers = this.answers.answers.filter(Boolean).map(answer => ({ ...answer, color: this.answer.color }));
+        await axios.post('/api/milestone-answers', { student_program_id: this.answers.student_program_id, answers });
+        const requestId = localStorage.getItem('eavl_id');
+        if (requestId) await axios.post(`/api/evaluation-request/change-status/${requestId}`, this.change);
+        await this.$router.push({ name: 'milestone-resulte', params: { id: this.answer.child_id, evla_id: this.answer.evaluation_id } });
+      } catch (error) {
+        this.error = error.response?.data?.errors || {};
+        this.alert_text = Object.values(this.error).flat().join(' ') || this.$t('request_failed_retry');
+      } finally { this.saving = false; }
     },
     getusers(){
       
@@ -268,6 +277,9 @@ export default {
          console.log(localStorage.getItem("child_id"))
           this.childs = response.data.children
           this.answer.child_id=parseInt(localStorage.getItem("child_id")) 
+          axios.get(`/api/milestone-answers/programs/${this.answer.child_id}`)
+            .then(({ data }) => { this.programs = data; })
+            .catch(() => { this.alert_text = this.$t('request_failed_retry'); });
           this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
         
         })

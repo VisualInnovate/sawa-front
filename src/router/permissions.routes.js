@@ -7,6 +7,7 @@ const permissionsRoutes = [
   {
     path: "permissions",
     name: "permissions",
+    meta: { permission: ["permissions list"] },
     component: Index,
    
   },

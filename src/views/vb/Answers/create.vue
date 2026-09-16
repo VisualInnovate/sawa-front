@@ -138,7 +138,7 @@
            
           })
           axios
-          .get("api/milestone-question")
+          .get("api/milestone-sub-goals")
           .then((response) => {
             console.log(response.data.data)
             this.qustions = response.data.data
