@@ -291,7 +291,8 @@
               this.employee.title = response.data.user.title 
               this.employee.type = response.data.user.type  
               this.employee.date_of_birth = response.data.user.date_of_birth 
-              this.employee.national_id =parseInt( response.data.user.national_id  )      
+              // Accounts without an employee record (e.g. the admin) have no national id.
+              this.employee.national_id = response.data.user.national_id ? parseInt(response.data.user.national_id) : null
               this.employee.user_id = response.data.user.user_id
               this.employee.position_id = response.data.user.position_id
               this.employee.basic_salary = response.data.user.basic_salary
