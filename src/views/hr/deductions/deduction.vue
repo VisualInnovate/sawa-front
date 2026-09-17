@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import Deduction from '../../../components/hr/Deduction.vue'
 import moment from "moment";
@@ -10,11 +10,11 @@ import { useI18n } from 'vue-i18n'
 const toast = useToast()
 const { t } = useI18n()
 const router = useRouter()
-const deduction_types=ref('')
+const deduction_types=ref([])
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
-const employees=ref('')
+const employees=ref([])
 const deductions = ref(null)
 const productDialog = ref(false)
 const deleteDialog = ref(false)
@@ -164,11 +164,11 @@ const initFilters = () => {
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
+      <div class="page">
         <div class="relative">
           <Deduction ></Deduction>
-          <Button  v-can="'deduction create'" :label='$t("deduction_add")' icon="pi pi-plus" class="p-button-success mr-2 absolute top-3" @click="openNew"></Button>
-          <Button v-can="'deduction list'" :label='$t("export")' icon="pi pi-upload" class="export absolute top-3 ltr:left-[15%] rtl:right-[15%] " @click="exportCSV($event)"/>
+          <Button  v-can="'deduction create'" :label='$t("deduction_add")' icon="pi pi-plus" class="mr-2 absolute top-3" @click="openNew"></Button>
+          <Button v-can="'deduction list'" :label='$t("export")' icon="pi pi-upload" class="absolute top-3 ltr:left-[15%] rtl:right-[15%]" @click="exportCSV($event)" severity="secondary" variant="outlined" />
 
         </div>
         
@@ -178,7 +178,7 @@ const initFilters = () => {
         <Toast/>
 
 
-      <div style="" class="shadow-xl ">
+      <div>
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
@@ -196,12 +196,12 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("deductions") }}</h5>
+              <h5 class="page-title">{{ $t("deductions") }}</h5>
              <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
+              <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
+              </IconField>
               </div>
             </div>
           </template>
@@ -229,7 +229,7 @@ const initFilters = () => {
           
            <Column field="status" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-                <Dropdown  :disabled="!$can('deduction edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+                <Select  :disabled="!$can('deduction edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
 
                
             </template>
@@ -238,19 +238,15 @@ const initFilters = () => {
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
-              <div >
+              <div class="table-actions">
                 <Button
                 v-can="'deduction edit'"
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
+                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
                 v-can="'deduction delete'"
                 icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
               </div>
             </template>
           </Column>
@@ -267,73 +263,73 @@ const initFilters = () => {
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
            
               <div class="flex flex-column gap-2">
                   <label  style="text-align: right !important;" for="username">{{ $t('employee_name') }}</label>
-                  <Dropdown required id="pv_id_1"  v-model="deduction.employee_id"  option-value="id" filter :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Select required  v-model="deduction.employee_id"  option-value="id" filter :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.employee_id">{{ error.employee_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
                   <label style="text-align: right !important;" for="username">{{ $t('deduction_type') }}</label>
-                  <Dropdown required id="pv_id_1"  v-model="deduction.deduction_type_id"  option-value="id" filter :options="deduction_types" optionLabel="title" :placeholder='$t("deduction_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Select required  v-model="deduction.deduction_type_id"  option-value="id" filter :options="deduction_types" optionLabel="title" :placeholder='$t("deduction_type")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.deduction_type_id">{{ error.deduction_type_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" class="w-full " for="username">{{ $t('deduction_mount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="deduction.value" :placeholder='$t("deduction_mount")' />
+                <InputNumber required class="text-center" v-model="deduction.value" :placeholder='$t("deduction_mount")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.value">{{ error.value[0] }}</div>
               </div>
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" for="username">{{ $t('deduction_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="deduction.date" showIcon  :placeholder='$t("deduction_date")'   />   
+                   <DatePicker  style="width: 100%" showButtonBar v-model.number="deduction.date" showIcon  :placeholder='$t("deduction_date")'   />   
                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
                </div> 
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" class="w-full " for="username">{{ $t('deduction_reason') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="deduction.reason" :placeholder='$t("deduction_reason")' />
+                <InputText required class="text-center" v-model="deduction.reason" :placeholder='$t("deduction_reason")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
               </div>
            <div class="w-full text-center">
-            <Button @click="createskill" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createskill" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex flex-column gap-2">
                   <label  style="text-align: right !important;" for="username">{{ $t('employee_name') }}</label>
-                  <Dropdown required id="pv_id_1"  v-model="deduction.employee_id"  option-value="id" filter :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Select required  v-model="deduction.employee_id"  option-value="id" filter :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.employee_id">{{ error.employee_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
                   <label style="text-align: right !important;" for="username">{{ $t('deduction_type') }}</label>
-                  <Dropdown required id="pv_id_1"  v-model="deduction.deduction_type_id"  option-value="id" filter :options="deduction_types" optionLabel="title" :placeholder='$t("deduction_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Select required  v-model="deduction.deduction_type_id"  option-value="id" filter :options="deduction_types" optionLabel="title" :placeholder='$t("deduction_type")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.deduction_type_id">{{ error.deduction_type_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" class="w-full " for="username">{{ $t('deduction_mount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="deduction.value" :placeholder='$t("deduction_mount")' />
+                <InputNumber required class="text-center" v-model="deduction.value" :placeholder='$t("deduction_mount")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.value">{{ error.value[0] }}</div>
               </div>
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" for="username">{{ $t('deduction_date') }}</label>
-                   <Calendar  style="width: 100%" showButtonBar v-model.number="deduction.date" showIcon  :placeholder='$t("deduction_date")'   />   
+                   <DatePicker  style="width: 100%" showButtonBar v-model.number="deduction.date" showIcon  :placeholder='$t("deduction_date")'   />   
                    <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
                </div> 
               <div class="flex flex-column gap-2">
                    <label style="text-align: right !important;" class="w-full " for="username">{{ $t('deduction_reason') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="deduction.reason" :placeholder='$t("deduction_reason")' />
+                <InputText required class="text-center" v-model="deduction.reason" :placeholder='$t("deduction_reason")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
               </div>
            <div class="w-full text-center">
-            <Button @click="edite" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="edite" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
       </div>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

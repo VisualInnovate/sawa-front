@@ -1,30 +1,13 @@
+<script setup>
+import NavTabs from "./common/NavTabs.vue";
+
+const items = [
+  { to: { name: 'leaves' }, label: 'leaves', perm: 'leaves list' },
+  { to: { name: 'leave-setup' }, label: 'leave_setup', perm: 'leave setup list' },
+  { to: { name: 'leave-balance' }, label: 'leave_balance', perm: 'leave balance list' },
+];
+</script>
+
 <template>
-            <Toolbar class="mb-4 shadow-md">
-          <template #end>
-
-            <router-link
-                  v-can="'leaves list'"
-          :to="{ name: 'leaves' }"
-                  class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-                > {{ $t('leaves') }}</router-link>
-                <router-link
-                  v-can="'leave setup list'"
-          :to="{ name: 'leave-setup' }"
-                  class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-                > {{ $t('leave_setup') }}</router-link>
-                <router-link
-                  v-can="'leave balance list'"
-          :to="{ name: 'leave-balance' }"
-                  class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-                > {{ $t('leave_balance') }}</router-link>
-          </template>
-          
-        </Toolbar>
-
+  <NavTabs :items="items" />
 </template>
-<style>
-.router-link-active {
-    background-color: rgb(239, 80, 80) !important
-}
-
-</style>

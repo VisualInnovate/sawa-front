@@ -55,39 +55,39 @@ export default {
               <div class="grid grid-cols-2 gap-4">
                 <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('first_name') }}</label>
-                  <InputText v-model="parent.fname"   required class="bg-[#f7f5f5] text-center"   />
+                  <InputText v-model="parent.fname"   required class="text-center"   />
                   
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('family_name') }}</label>
-                  <InputText      v-model="parent.lname"  required class="bg-[#f7f5f5] text-center"  />
+                  <InputText      v-model="parent.lname"  required class="text-center"  />
 
               </div>
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('Mobile_number') }}</label>
-                  <InputText v-model="parent.phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required class="bg-[#f7f5f5] text-center" />
+                  <InputText v-model="parent.phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required class="text-center" />
 
               </div>
               <div class=" flex flex-column gap-2">
                     <label class="w-full" for="parent-email">{{ $t('parent_optional_email') }}</label>
-                  <InputText id="parent-email" v-model="parent.email" style="border: 1px solid #ced4da!important; border-radius: 5px !important;" type="email" autocomplete="email" class="bg-[#f7f5f5] text-center" />
+                  <InputText id="parent-email" v-model="parent.email" style="border: 1px solid #ced4da!important; border-radius: 5px !important;" type="email" autocomplete="email" class="text-center" />
                   <small class="text-gray-600">{{ $t('parent_email_recovery_hint') }}</small>
 
               </div>
               <div class=" flex flex-column gap-2">
                 <label class="w-full  " for="username">{{ $t('password') }}</label>
-              <InputText v-model="parent.password" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="password" required class="bg-[#f7f5f5] text-center"   />
+              <InputText v-model="parent.password" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="password" required class="text-center"   />
               </div>
               <div class=" flex flex-column gap-2">
                 <label class="w-full  " for="username">{{ $t('password_confirmation') }}</label>
-              <InputText v-model="parent.password_confirmation" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="password" required class="bg-[#f7f5f5] text-center"  :class="{ 'p-invalid': submitted && !parent.password_confirmation}" />
+              <InputText v-model="parent.password_confirmation" style="border:  1px solid #ced4da!important; border-radius: 5px !important;"  type="password" required class="text-center"  :class="{ 'p-invalid': submitted && !parent.password_confirmation}" />
 
               </div>
               
               <div class="flex flex-column gap-2 w-full ">
                     <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                    <Button @click="submitted = true" type="submit" :loading="parentStore.loading" :disabled="parentStore.loading" class="create m-auto w-full " :label='$t("create_button")'></Button>
+                    <Button @click="submitted = true" type="submit" :loading="parentStore.loading" :disabled="parentStore.loading" class="m-auto w-full" :label='$t("create_button")'></Button>
                     <small id="username-help"></small>
                 </div>
                 <div v-if="parentStore.showErrors" class="my-3 text-red-600" role="alert">
@@ -108,6 +108,6 @@ export default {
           
           <div class="hidden bg-[url('../image/childern.jpg')] lg:block lg:w-1/2 bg-cover" style="background-position: center; background-size: cover" ></div>
       </div>
-      <toast></toast>
+      <Toast />
   </div>
   </template>

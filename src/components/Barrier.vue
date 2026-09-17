@@ -1,31 +1,13 @@
+<script setup>
+import NavTabs from "./common/NavTabs.vue";
+
+const items = [
+  { to: { name: 'barrier-subtest' }, label: 'Subtest', perm: 'barrier subtest list' },
+  { to: { name: 'barrier-question' }, label: 'questions', perm: 'barrier question list' },
+  { to: { name: 'barrier-answer-type' }, label: 'answer_type', perm: 'barrier answer type list' },
+];
+</script>
+
 <template>
-    <Toolbar class="mb-4 shadow-md">
-  <template #end>
-    
-   
-        <router-link
-          v-can="'barrier question list'"
-          :to="{ name: 'barrier-question' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('questions') }}</router-link>
-        <router-link
-          v-can="'barrier subtest list'"
-          :to="{ name: 'barrier-subtest' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('Subtest') }}</router-link>
-        <router-link
-          v-can="'barrier answer type list'"
-          :to="{ name: 'barrier-answer-type' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('answer_type') }}</router-link>
-  </template>
-  
-</Toolbar>
-
+  <NavTabs :items="items" />
 </template>
-<style>
-.router-link-active {
-background-color: rgb(239, 80, 80) !important
-}
-
-</style>

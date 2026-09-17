@@ -1,7 +1,7 @@
 <template>
   <div class="relative flex min-h-screen">
     <div class="flex-1">
-      <div class="bg-white shadow p-2 text-right">
+      <div class="bg-white shadow p-2 text-start">
         <button @click="showsider = !showsider">الحجوزات</button>
       </div>
       <div class="p-2 flex flex-wrap text-cyan-700">
@@ -47,12 +47,12 @@
           class="flex flex-col m-auto items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-sm hover:bg-gray-100"
         >
           <div class="flex flex-col justify-between p-4 leading-normal">
-            <p class="text-right">د / عبدالله احمد</p>
+            <p class="text-start">د / عبدالله احمد</p>
             <p class="p-2 border-b-2 border-black border-solid text-[#148A98]">
               اخصائي تربيه طفوله
             </p>
-            <p class="p-2 text-[#FF3765] text-right">اليوم : الاحد</p>
-            <p class="px-2 pb-2 text-[#FF3765] text-right">الساعه :10 م</p>
+            <p class="p-2 text-[#FF3765] text-start">اليوم : الاحد</p>
+            <p class="px-2 pb-2 text-[#FF3765] text-start">الساعه :10 م</p>
             <button class="w-full p-2 rounded-2xl bg-[#48A700] text-white">
               اتصل الان
             </button>

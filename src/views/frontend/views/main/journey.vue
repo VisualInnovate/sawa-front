@@ -7,7 +7,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <h1
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
@@ -16,7 +16,7 @@
             </h1>
           </div>
           <p
-            class="text-[#6F6669] text-base lg:text-xl text-right leading-relaxed font-bold"
+            class="text-[#6F6669] text-base lg:text-xl text-start leading-relaxed font-bold"
           >
             نرافق طفلك في رحلة التعلم والنمو نحو الاستقلالية والدمج من خلال
             برامج تأهيلية متكاملة وخطط فردية دقيقة.
@@ -53,7 +53,7 @@
           </div>
 
           <div
-            class="relative z-20 mx-4 mt-[-54px] max-w-[260px] rounded-[12px] bg-white px-5 py-4 text-right shadow-[0_14px_28px_rgba(0,0,0,0.16)] sm:absolute sm:bottom-[-24px] sm:left-[-24px] sm:mx-0 sm:mt-0"
+            class="relative z-20 mx-4 mt-[-54px] max-w-[260px] rounded-[12px] bg-white px-5 py-4 text-start shadow-[0_14px_28px_rgba(0,0,0,0.16)] sm:absolute sm:bottom-[-24px] sm:left-[-24px] sm:mx-0 sm:mt-0"
           >
             <h3 class="mb-1 text-[14px] font-black text-[#C91F5F]">
               دعم متكامل
@@ -105,7 +105,7 @@
               <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 1
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-right shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
                   <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
                     <path d="M5 4h14v16H5V4Z" stroke="currentColor" stroke-width="2.2" />
@@ -137,7 +137,7 @@
               <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#1B7A83] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 2
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-right shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
+              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
                 <div class="mb-4 flex items-center gap-[10px]">
                   <svg class="h-[22px] w-[22px] text-[#1B7A83]" viewBox="0 0 24 24" fill="none">
                     <path d="M6 4h12v16H6V4Z" stroke="currentColor" stroke-width="2.2" />
@@ -175,7 +175,7 @@
               <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 3
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-right shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
                   <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
                     <path d="M12 3 4 7l8 4 8-4-8-4Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
@@ -204,7 +204,7 @@
               <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#1B7A83] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 4
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-right shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
+              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
                 <div class="mb-4 flex items-center gap-[10px]">
                   <svg class="h-[22px] w-[22px] text-[#1B7A83]" viewBox="0 0 24 24" fill="none">
                     <path d="M3.5 12s3.2-5 8.5-5 8.5 5 8.5 5-3.2 5-8.5 5-8.5-5-8.5-5Z" stroke="currentColor" stroke-width="2.2" />
@@ -227,7 +227,7 @@
               <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 5
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-right shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
                   <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
                     <path d="M5 19V5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -250,7 +250,7 @@
               <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#1B7A83] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 6
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-right shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
+              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
                 <div class="mb-4 flex items-center gap-[10px]">
                   <svg class="h-[22px] w-[22px] text-[#1B7A83]" viewBox="0 0 24 24" fill="none">
                     <path d="M7 4h8l3 3v13H7V4Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
@@ -297,7 +297,7 @@
           </div>
         </div>
 
-        <div class="text-right">
+        <div class="text-start">
           <h2 class="mb-5 text-[26px] font-black leading-tight text-[#1B7A83] sm:text-[31px]">
             شراكة حقيقية مع الأسرة
           </h2>

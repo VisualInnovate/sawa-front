@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount,computed} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
@@ -137,14 +137,14 @@ const initFilters = () => {
   
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
+      <div class="page">
         <Toolbar class="mb-4  shadow-md">
           <template #start>
             <div class="my-2 grid md:grid-cols-5 gap-4 grid-cols-1">
-                <Dropdown @update:model-value="getrelation" v-model="model"  required id="pv_id_1" style="direction: ltr !important;"  option-value="id"  :options="models" optionLabel="model" :placeholder='$t("model_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <MultiSelect    :maxSelectedLabels="maxSelection" :selectionLimit="maxSelection"  @update:model-value="getrelationColum"      :loading="model == ''"  v-model="relation"  required id="pv_id_1" style="direction: ltr !important;"  :options="relations" optionLabel="value" :placeholder='$t("relation_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <MultiSelect   :maxSelectedLabels="maxSelection" :selectionLimit="maxSelection" :loading="relation == ''"   v-model="column"  required id="pv_id_1" style="direction: ltr !important;"  option-value="column"  :options="columns" optionLabel="value" :placeholder='$t("columns_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
-                <Button  :label='$t("search")'  class="create" @click="getreport" />
+                <Select @update:model-value="getrelation" v-model="model"  required  option-value="id"  :options="models" optionLabel="model" :placeholder='$t("model_id")' class="w-full" />
+                <MultiSelect    :maxSelectedLabels="maxSelection" :selectionLimit="maxSelection"  @update:model-value="getrelationColum"      :loading="model == ''"  v-model="relation"  required  :options="relations" optionLabel="value" :placeholder='$t("relation_id")' class="w-full" />
+                <MultiSelect   :maxSelectedLabels="maxSelection" :selectionLimit="maxSelection" :loading="relation == ''"   v-model="column"  required  option-value="column"  :options="columns" optionLabel="value" :placeholder='$t("columns_id")' class="w-full" />
+                <Button  :label='$t("search")'  @click="getreport" />
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -189,8 +189,8 @@ const initFilters = () => {
         >
                   <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("reports") }}</h5>
-              <Button v-can="'reports list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+              <h5 class="page-title">{{ $t("reports") }}</h5>
+              <Button v-can="'reports list'" :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
 
             
             </div>
@@ -221,7 +221,7 @@ const initFilters = () => {
        
       
       </div>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

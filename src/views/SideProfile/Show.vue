@@ -1,116 +1,104 @@
 <script>
-import axios from 'axios'
-import {th} from "vuetify/locale";
+import axios from "axios";
+import { FilterMatchMode } from "@primevue/core/api";
 
 export default {
-
   data() {
     return {
-      search: '',
-      headers: [],
       evaluations: [],
-      alert_text: null
-
-    }
+      loading: true,
+      deleting: null,
+      filters: { global: { value: null, matchMode: FilterMatchMode.CONTAINS } },
+    };
   },
   methods: {
     getEvaluations() {
-      axios.get(`/api/side-profiles/${this.$route.params.id}/evaluations`).then(res => {
-        this.evaluations = res.data.evaluations
-        console.log(res.data.evaluations)
-
-      })
-    }, editItem(id) {
-      this.$router.push({name: 'EditEvaluations', params: {id: id}})
-    }
-    , deleteItem(id) {
-      console.log(id)
-      axios.delete(`/api/evaluations/${id}/delete`).then(res => {
-        if (res.data.status == 200) {
-          this.alert_text = "evaluation deleted successfully "
-          this.evaluations = res.data.evaluations
-        }
-
-      })
+      this.loading = true;
+      axios
+        .get(`/api/side-profiles/${this.$route.params.id}/evaluations`)
+        .then((res) => {
+          this.evaluations = res.data.evaluations ?? [];
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    create() {
-      this.$router.push({name: 'CreateEvaluations',params:{sideProfile_id : this.$route.params.id}})
+    editItem(id) {
+      this.$router.push({ name: "EditEvaluations", params: { id } });
     },
     showItem(id) {
-      this.$router.push({name: 'ShowEvaluations', params: {id: id}})
-    }
-  },
-  computed:{
-    header(){
-      return this.headers=[{ title: this.$t('index')},
-        {key: 'title', title: this.$t('evaluation_title')},]
-    }
+      this.$router.push({ name: "ShowEvaluations", params: { id } });
+    },
+    create() {
+      this.$router.push({ name: "CreateEvaluations", params: { sideProfile_id: this.$route.params.id } });
+    },
+    deleteItem() {
+      const id = this.deleting?.id;
+      if (!id) return;
+      axios.delete(`/api/evaluations/${id}/delete`).then(() => {
+        this.deleting = null;
+        this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: this.$t("successful"), life: 3000 });
+        this.getEvaluations();
+      });
+    },
   },
   mounted() {
-    this.getEvaluations()
-  }
-}
+    this.getEvaluations();
+  },
+};
 </script>
 
 <template>
- <div>
-  <v-btn height="45" class="mb-5 text-white" color="#135C65" @click="goBack">
-    <v-icon
-      start
-      icon="mdi-arrow-left"
-    ></v-icon>
-    {{$t('back')}}
-  </v-btn>
-  <v-alert
-      type="success"
-      variant="tonal"
-      border="start"
-      elevation="2"
-      closable
-      :close-label="$t('close')"
-      :text="alert_text"
-      v-if="alert_text!= null "
-      class="mb-8"
-  >
-
-  </v-alert>
-
-  <v-btn v-can="'evaluations create'" text="Create" color="green" height="45" class="mb-5 mt-5" @click="create">
-    {{$t('create_button')}}
-  </v-btn>
-
-  <v-card>
-    <v-card-title>
-      {{$t('evaluations')}}
-      <v-spacer></v-spacer>
-
-      <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="Search"
-          single-line
-          hide-details
-      ></v-text-field>
-    </v-card-title>
-    <v-data-table
-        :headers="header"
-        :items="evaluations"
-        :search="search"
-    >
-      <template #item="{ item , index}">
-        <tr>
-          <td>{{  index + 1}}</td>
-          <td>{{ item.columns.title }}</td>
-          <td>
-            <v-icon v-can="'evaluation results create'" small color="primary" class="mx-3" @click="showItem(item.raw.id)">mdi-plus-box</v-icon>
-            <v-icon v-can="'evaluations edit'" small color="primary" class="mx-3" @click="editItem(item.raw.id)">mdi-pencil</v-icon>
-            <v-icon v-can="'evaluations delete'" small color="error mx-3" @click="deleteItem(item.raw.id)">mdi-delete</v-icon>
-          </td>
-        </tr>
-
+  <div class="page">
+    <Toast />
+    <Toolbar>
+      <template #start>
+        <Button v-can="'evaluations create'" :label="$t('create_button')" icon="pi pi-plus" @click="create" />
       </template>
+      <template #end>
+        <BackButton />
+      </template>
+    </Toolbar>
 
-    </v-data-table>
-  </v-card>
- </div>
+    <DataTable :value="evaluations" :loading="loading" dataKey="id" paginator :rows="10" :filters="filters"
+      :globalFilterFields="['title']" stripedRows>
+      <template #header>
+        <div class="page-header">
+          <h1 class="page-title">{{ $t("evaluations") }}</h1>
+          <IconField class="table-search">
+            <InputIcon class="pi pi-search" />
+            <InputText v-model="filters.global.value" :placeholder="$t('search')" />
+          </IconField>
+        </div>
+      </template>
+      <template #empty>
+        <div class="empty-state"><i class="pi pi-inbox" />{{ $t("no_data") }}</div>
+      </template>
+      <Column :header="$t('index')" style="width: 4rem">
+        <template #body="{ index }">{{ index + 1 }}</template>
+      </Column>
+      <Column field="title" :header="$t('evaluation_title')" sortable />
+      <Column :header="$t('actions')" style="width: 12rem">
+        <template #body="{ data }">
+          <div class="table-actions">
+            <Button v-can="'evaluation results create'" icon="pi pi-play" rounded variant="outlined" severity="success"
+              v-tooltip.top="$t('start_evaluation')" :aria-label="$t('start_evaluation')" @click="showItem(data.id)" />
+            <Button v-can="'evaluations edit'" icon="pi pi-pencil" rounded variant="outlined" severity="info"
+              v-tooltip.top="$t('edit')" :aria-label="$t('edit')" @click="editItem(data.id)" />
+            <Button v-can="'evaluations delete'" icon="pi pi-trash" rounded variant="outlined" severity="danger"
+              v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="deleting = data" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog :visible="Boolean(deleting)" modal :header="$t('confirmation')" :style="{ width: '420px', maxWidth: '95vw' }"
+      @update:visible="deleting = null">
+      <p class="m-0">{{ $t("remove_item") }} <b>{{ deleting?.title }}</b></p>
+      <template #footer>
+        <Button :label="$t('no')" severity="secondary" variant="text" @click="deleting = null" />
+        <Button :label="$t('yes')" severity="danger" @click="deleteItem" />
+      </template>
+    </Dialog>
+  </div>
 </template>

@@ -1,34 +1,13 @@
+<script setup>
+import NavTabs from "./common/NavTabs.vue";
+
+const items = [
+  { to: { name: 'doctors-show' }, label: 'student_details', perm: 'doctor list' },
+  { to: { name: 'doctors-programe' }, label: 'evaluation_order', perm: 'doctor list' },
+  { to: { name: 'doctors-evaluation' }, label: 'Consultations_evaluations', perm: 'doctor list' },
+];
+</script>
+
 <template>
-    <Toolbar class="mb-4 shadow-md">
-  <template #end>
-    
-   
-        <router-link
-          v-can="'doctor list'"
-          :to="{ name: 'doctors-show' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('student_details') }}</router-link>
-
-        <router-link
-          v-can="'doctor list'"
-          :to="{ name: 'doctors-programe' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('evaluation_order') }}</router-link>
-
-        <router-link
-          v-can="'doctor list'"
-          :to="{ name: 'doctors-evaluation' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('Consultations_evaluations') }}</router-link>
-      
-  </template>
-  
-</Toolbar>
-
+  <NavTabs :items="items" />
 </template>
-<style>
-.router-link-active {
-background-color: rgb(239, 80, 80) !important
-}
-
-</style>

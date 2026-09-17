@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen">
     <ChildTaps></ChildTaps>
-    <v-card class="max-w-4xl mx-auto rounded-lg shadow-lg overflow-hidden">
+    <div class="sawa-card max-w-4xl mx-auto rounded-lg shadow-lg overflow-hidden">
       <div class="p-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
         <h2 class="text-3xl font-bold">{{ $t("معلومات الطفل") }}</h2>
       </div>
@@ -46,7 +46,7 @@
           </div>
         </div>
       </div>
-    </v-card>
+    </div>
   </div>
 </template>
 

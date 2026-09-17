@@ -54,6 +54,14 @@ input[type="url"] {
   display: grid;
   gap: 1rem;
 }
+/* Grid/flex children default to min-width:auto and would stretch the page to the table's width;
+   keep them inside the viewport so wide tables scroll inside their own container. */
+.page > *,
+.p-datatable,
+.p-toolbar {
+  min-width: 0;
+  max-width: 100%;
+}
 
 .page-header {
   display: flex;
@@ -76,6 +84,37 @@ input[type="url"] {
   border-radius: var(--sawa-radius);
   box-shadow: var(--sawa-shadow);
   padding: 1.25rem;
+}
+
+/* Replacement of Vuetify's v-card (and its title/text/actions parts). Zero specificity so
+   the Tailwind classes on the same element (padding, background…) still apply. */
+:where(.sawa-card) {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  box-shadow: var(--sawa-shadow);
+  min-width: 0;
+}
+:where(.sawa-card-title) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--sawa-text);
+}
+:where(.sawa-card-text) {
+  padding: 0.75rem 1.25rem;
+}
+:where(.sawa-card-actions) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 1rem;
 }
 
 /* A labelled form field: label above the control, error text below. */
@@ -285,6 +324,14 @@ a.create:hover,
 .empty-state .pi {
   font-size: 2rem;
   color: #cbd5e1;
+}
+
+.p-datatable-empty-message > td:empty::before {
+  content: var(--sawa-empty-text, "—");
+  display: block;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--sawa-muted);
 }
 
 /* Dialog footers keep their buttons together on one line. */

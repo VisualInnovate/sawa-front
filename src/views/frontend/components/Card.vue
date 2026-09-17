@@ -25,7 +25,7 @@ export default {
 <template>
   <div class="m-auto grid grid-row-3 md:grid-cols-3 gap-3 py-[5%]">
     <div class="animate relative w-full">
-      <v-card class="mx-auto w-full rounded-xl" max-width="75%">
+      <div class="sawa-card mx-auto w-full rounded-xl">
         <div>
           <div class="animte right-0 absolute m-auto h-full w-[50%] bg-white">
             <div class="inner p-[10%] m-auto h-full w-full text-[#A5E9FF]">
@@ -37,30 +37,25 @@ export default {
           <img class="imge" src="../image/sec1/1.png" />
         </div>
 
-        <v-card-actions class="ssc">
+        <div class="sawa-card-actions ssc">
           <router-link
             :to="{ name: 'Edit' }"
             class="text-xl lg:text-2xl p-2 text-[#135C65] z-10"
           >
             {{ $t("evaluation_result") }}
           </router-link>
-          <v-spacer></v-spacer>
+          <span class="flex-1"></span>
           <router-link
             :to="{ name: 'Edit' }"
            
           >
-          <v-btn
-            icon="mdi-arrow-left"
-            size="small"
-            color="#135C65"
-            style="border: 2px solid #135c65"
-          ></v-btn>
+          <span class="card-arrow" aria-hidden="true"><i class="pi pi-arrow-left"></i></span>
           </router-link>
-        </v-card-actions>
-      </v-card>
+        </div>
+      </div>
     </div>
     <div class="animate relative">
-      <v-card class="mx-auto rounded-xl" max-width="75%">
+      <div class="sawa-card mx-auto rounded-xl">
         <div class="">
           <div class="animte right-0 absolute m-auto h-full w-[50%] bg-white">
             <div class="inner p-[10%] m-auto h-full w-full text-[#A5E9FF]">
@@ -72,31 +67,26 @@ export default {
           <img class="imge" src="../image/header/2.png" />
         </div>
 
-        <v-card-actions>
+        <div class="sawa-card-actions">
           <router-link
             :to="{ name: 'clidreen_parents' }"
             class="text-xl lg:text-2xl p-2 text-[#135C65] z-10"
           >
             {{ $t("Book_an_appointment") }}
           </router-link>
-          <v-spacer></v-spacer>
+          <span class="flex-1"></span>
           <router-link
             :to="{ name: 'clidreen_parents' }"
            
           >
-          <v-btn
-            icon="mdi-arrow-left"
-            size="small"
-            color="#135C65"
-            style="border: 2px solid #135c65"
-          ></v-btn>
+          <span class="card-arrow" aria-hidden="true"><i class="pi pi-arrow-left"></i></span>
           </router-link>
          
-        </v-card-actions>
-      </v-card>
+        </div>
+      </div>
     </div>
     <div class="animate relative">
-      <v-card class="mx-auto rounded-xl" max-width="75%">
+      <div class="sawa-card mx-auto rounded-xl">
         <div class="w-full">
           <div class="animte right-0 absolute m-auto h-full w-[50%] bg-white">
             <div class="inner p-[10%] m-auto h-full w-full text-[#A5E9FF]">
@@ -106,27 +96,22 @@ export default {
           <img class="imge w-full" src="../image/header/3.png" />
         </div>
 
-        <v-card-actions>
+        <div class="sawa-card-actions">
           <router-link
             :to="{ name: 'ReAction' }"
             class="lg:text-2xl text-xl p-2 text-[#135C65] z-10"
           >
             {{ $t("Register_your_child") }}
           </router-link>
-          <v-spacer></v-spacer>
+          <span class="flex-1"></span>
           <router-link
             :to="{ name: 'ReAction' }"
            
           >
-          <v-btn
-            icon="mdi-arrow-left"
-            size="small"
-            color="#135C65"
-            style="border: 2px solid #135c65"
-          ></v-btn>
+          <span class="card-arrow" aria-hidden="true"><i class="pi pi-arrow-left"></i></span>
           </router-link>
-        </v-card-actions>
-      </v-card>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -138,6 +123,20 @@ export default {
 };
 </script>
 <style scoped>
+.card-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 2px solid #135c65;
+  color: #135c65;
+  background: #fff;
+}
+[dir="ltr"] .card-arrow .pi {
+  transform: scaleX(-1);
+}
+
 .animte {
   transform: translateX(100%);
   transition: 0.8s;

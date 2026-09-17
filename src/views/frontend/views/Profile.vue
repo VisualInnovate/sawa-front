@@ -1,11 +1,11 @@
 <template>
   <div class="">
     <Nave />
-    <Banner heading=" المف الشخصي" title="  يمكنك روية الملف الشخصي والتعديل عليه"></Banner>
+    <Banner :heading="$t('profile_page_title')" :title="$t('profile_page_hint')"></Banner>
 
 
     <div class="bg-slate-50 auctions px-[2%] py-[3%] pt-[5%] ">
-    <p class="text-3xl font-bold max-w-[1280px]  p-4  m-auto">المعلومات الشخصيه</p>
+    <p class="text-3xl font-bold max-w-[1280px]  p-4  m-auto">{{ $t("personal_information") }}</p>
     <form  @submit.prevent="updateProfile"  class="max-w-[1280px] bg-white shadow-md grid grid-cols-1 p-4 lg:grid-cols-6 gap-4  m-auto">
       <div class="col-span-4">
         <div class=" py-1 relative ">
@@ -14,7 +14,7 @@
              
                 </div>
                 <div class="relative ">
-                  <InputText v-model="parent.fname"  required class="bg-[#f7f5f5] w-full "  :placeholder='$t("first_name")'  />
+                  <InputText v-model="parent.fname"  required class="w-full"  :placeholder='$t("first_name")'  />
                 </div>
 
           </div>
@@ -24,7 +24,7 @@
        
                 </div>
                 <div class="relative ">
-                  <InputText v-model="parent.lname"  required class="bg-[#f7f5f5] w-full "  :placeholder='$t("family_name")'  />
+                  <InputText v-model="parent.lname"  required class="w-full"  :placeholder='$t("family_name")'  />
                 </div>
 
           </div>
@@ -34,7 +34,7 @@
                   <label class="py-2 font-bold text-[#303843]" for="profile-phone">{{ $t("Mobile_number") }}</label>
                 </div>
                 <div class="relative ">
-                  <InputText id="profile-phone" v-model="parent.phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required class="bg-[#f7f5f5] w-full" :placeholder='$t("Mobile_number")' />
+                  <InputText id="profile-phone" v-model="parent.phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required class="w-full" :placeholder='$t("Mobile_number")' />
                 </div>
               </div>
 
@@ -54,11 +54,11 @@
              
               <div class=" py-1 w-full relative ">
                   <div class="flex w-full">
-                  <p class="py-2 font-bold text-[#303843]" for="username">  كلمة المرور</p>
+                  <p class="py-2 font-bold text-[#303843]" for="username">{{ $t("password") }}</p>
                
                 </div>
                 <div class="relative w-full">
-                  <Password  v-model="parent.Password" class="w-full" toggleMask   placeholder="  أكتب كلمة المرور "/>
+                  <Password  v-model="parent.Password" class="w-full" toggleMask   :placeholder="$t('enter_password')"/>
                 </div>
               </div>
               
@@ -70,8 +70,8 @@
 
             </div>
             <div class="flex justify-between ">
-              <Button type="submit" :label='$t("تعديل")'  class="mt-3   w-[40%] mx-auto  lg:mb-0 bg focus:ring-0 create "></Button>
-              <Button @click="parentStore.logout" :label='$t("sign_out")'  class="mt-3   w-[40%] mx-auto  lg:mb-0 bg focus:ring-0 delete "></Button>
+              <Button type="submit" :label='$t("تعديل")'  class="mt-3 w-[40%] mx-auto lg:mb-0 bg focus:ring-0"></Button>
+              <Button @click="parentStore.logout" :label='$t("sign_out")'  class="mt-3 w-[40%] mx-auto lg:mb-0 bg focus:ring-0" severity="danger"></Button>
 
             </div>
       </div>
@@ -87,9 +87,8 @@
          <div class="mx-auto text-center w-full">
           <Button
                 onclick="document.getElementById('filr').click()"
-            
                 :label='$t("تعديل")'
-                class="mt-3   w-[90%] mx-auto  lg:mb-0 bg focus:ring-0 create ">
+                class="mt-3 w-[90%] mx-auto lg:mb-0 bg focus:ring-0">
             </Button>
          </div>
          <div class="mx-auto text-center w-full">

@@ -41,6 +41,6 @@ export default {
 }
 </script>
 <template>
-  <!--  <v-alert v-if="alert_text!= null " color="green" :text="alert_text" class="mb-5"></v-alert>-->
+
  
 </template>

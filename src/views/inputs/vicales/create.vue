@@ -6,23 +6,16 @@
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
     </div>
-    <v-card>
+    <div class="sawa-card">
       <div>
         <!-- ... existing code ... -->
-        <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-          <v-card>
-            <v-card-title>{{ $t("Success!") }}</v-card-title>
-            <v-card-text>
-              {{ $t("Data seeded successfully!") }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="closeSuccessModal" color="success">
-                {{ $t("OK") }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <Dialog v-model:visible="isSuccessModalOpen" modal :header="$t('Success!')" :style="{ width: '400px', maxWidth: '95vw' }">
+          <p class="m-0">{{ $t("Data seeded successfully!") }}</p>
+          <template #footer>
+            <Button :label="$t('OK')" severity="success" @click="closeSuccessModal" />
+          </template>
+        </Dialog>
+        <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
           <!-- ... existing code ... -->
             
               
@@ -30,43 +23,43 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('driver_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="veciles.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="veciles.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.driver_id">{{ error.driver_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('vecile_type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="veciles.type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("vecile_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="veciles.type"  option-value="value" :options="arr()" optionLabel="name" :placeholder='$t("vecile_type")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('Vehicle_ID') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="veciles.plate_number" :placeholder='$t("Vehicle_ID")' />
+                    <InputNumber  required v-model="veciles.plate_number" :placeholder='$t("Vehicle_ID")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.plate_number">{{ error.plate_number[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('Insurance_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="veciles.insurance_exp_date" showIcon  :placeholder='$t("Insurance_date")'  :maxDate="maxDate" />   
+                    <DatePicker  style="width: 100%" showButtonBar v-model.number="veciles.insurance_exp_date" showIcon  :placeholder='$t("Insurance_date")'  :maxDate="maxDate" />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.insurance_exp_date">{{ error.insurance_exp_date[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('License_expiration') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="veciles.license_exp_date" showIcon  :placeholder='$t("License_expiration")'  :minDate="maxDate" />   
+                    <DatePicker  style="width: 100%" showButtonBar v-model.number="veciles.license_exp_date" showIcon  :placeholder='$t("License_expiration")'  :minDate="maxDate" />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.license_exp_date">{{ error.license_exp_date[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('seats_number') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="veciles.seats" :placeholder='$t("seats_number")' />
+                    <InputNumber  required v-model="veciles.seats" :placeholder='$t("seats_number")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
                 </div> 
                 <!-- <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('ProgramName') }}</label>
-                <InputText required class="bg-[#f7f5f5]" v-model="treatments.name" :placeholder='$t("ProgramName")' />
+                <InputText required v-model="treatments.name" :placeholder='$t("ProgramName")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
                 </div>
                   
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('price') }}</label>
-                    <InputNumber inputId="minmaxfraction" :minFractionDigits="2" :maxFractionDigits="5" required class="bg-[#f7f5f5]" v-model="treatments.price" :placeholder='$t("price")' />
+                    <InputNumber inputId="minmaxfraction" :minFractionDigits="2" :maxFractionDigits="5" required v-model="treatments.price" :placeholder='$t("price")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.price">{{ error.price[0] }}</div>
                 </div> -->
 
@@ -77,17 +70,17 @@
              
                 <div class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button @click="createtreatment" class="m-auto w-full" :label='$t("submit")'></Button>
                   <small id="username-help"></small>
                 </div>
                 
   
         
-        </v-form>
-  <toast></toast>
+        </form>
+  <Toast />
         <!-- ... existing code ... -->
       </div>
-    </v-card>
+    </div>
   </template>
   
   <script>
@@ -101,7 +94,7 @@
     data() {
       return {
         veciles:{},
-        drivers:{},
+        drivers:[],
         error: {},
         maxDate: new Date(),
        
@@ -136,9 +129,9 @@
       arr (){
       return this.roomType =[
             
-                { name:'angel car' , value:0 },
-                { name:'bus', value:1},
-                { name:'Minibus' , value:2 },
+                { name: this.$t('vehicle_type.car'), value: 0 },
+                { name: this.$t('vehicle_type.bus'), value: 1 },
+                { name: this.$t('vehicle_type.minibus'), value: 2 },
                
             ]
     },
@@ -175,9 +168,6 @@
   }
   .name-input::-webkit-scrollbar {
     display: none;
-  }
-  #pv_id_1{
-    text-align: center;
   }
   /* Hide scrollbar for IE, Edge and Firefox */
   .name-input {

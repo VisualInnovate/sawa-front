@@ -1,7 +1,7 @@
 <template>
     <CarolianaTab></CarolianaTab>
-    <v-card class="p-[1%]" >
-        <Button v-can="'carolina age range create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+    <div class="sawa-card p-[1%]" >
+        <Button v-can="'carolina age range create'" :label='$t("create_button")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 ">
              <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
@@ -17,8 +17,8 @@
                  
                </div>
                <div class="flex">
-                <Button v-can="'carolina age range edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success m-auto" @click="edit(data.id)"/>
-                <Button v-can="'carolina age range delete'"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" @click="confirmDelete(data.id)"/>
+                <Button v-can="'carolina age range edit'" icon="pi pi-pencil" class="m-auto" @click="edit(data.id)" rounded severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+                <Button v-can="'carolina age range delete'"  icon="pi pi-trash" class="m-auto" @click="confirmDelete(data.id)" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
                </div>
              </div>
 
@@ -32,38 +32,38 @@
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
+                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
+                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
+                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
             </div>
            <div class="w-full text-center">
-            <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
+                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
+                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
+                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
             </div>
            <div class="w-full text-center">
-            <Button @click="editescrud" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
 
@@ -72,13 +72,13 @@
              </div>
             
           </div>
-    </v-card>
+    </div>
   </template>
 
 <script setup>
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import CarolianaTab from '../../components/CarolianaTab.vue'

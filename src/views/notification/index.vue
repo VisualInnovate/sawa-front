@@ -7,36 +7,32 @@
         icon="pi pi-plus"
         v-can="'notifications create'"
         @click="restform(true)"
-        :label="$t('create_button')"
-        severity="success"
-      />
+        :label="$t('create_button')" />
     </div>
   </div>
   <div class="shadow-lg p-6 rounded-md">
-    <DataTable :value="items" class="mt-4" responsiveLayout="scroll">
+    <DataTable :value="items" class="mt-4">
       <Column field="id" header="#" />
       <Column field="name" :header="$t('name')" />
       <Column field="title" :header="$t('address')" />
       <Column field="body" :header="$t('content')" />
       <Column :header="$t('actions')" style="width: 200px">
         <template #body="slotProps">
-          <div class="flex gap-2 justify-center">
+          <div class="table-actions">
             <Button
               :label="$t('send')"
               icon="pi pi-send"
               severity="info"
               v-can="'notifications create'"
               @click="viewdialog(slotProps.data)"
-              class="text-sm px-3 py-2"
-            />
+              class="text-sm px-3 py-2" />
             <Button
               :label="$t('edit')"
               icon="pi pi-pencil"
               severity="warning"
               v-can="'notifications create'"
               @click="editItem(slotProps.data)"
-              class="text-sm px-3 py-2"
-            />
+              class="text-sm px-3 py-2" />
           </div>
         </template>
       </Column>
@@ -79,7 +75,7 @@
             v-model="newItem.body"
             rows="6"
             autoResize
-            class="w-full text-base p-3 rounded-md bg-[#f7f5f5]"
+            class="w-full text-base p-3 rounded-md"
           />
         </div>
       </div>
@@ -93,14 +89,12 @@
               showDialog = false;
               restform();
             "
-            class="p-button-outlined p-button-danger text-base px-5 py-3"
-          />
+            class="text-base px-5 py-3" variant="outlined" severity="danger" />
           <Button
             :label="isEditMode ? $t('update') : $t('add')"
             icon="pi pi-check"
             @click="addOrUpdateItem"
-            class="p-button-success text-base px-5 py-3"
-          />
+            class="text-base px-5 py-3" severity="success" />
         </div>
       </template>
     </Dialog>
@@ -120,14 +114,12 @@
             :label="$t('No')"
             severity="secondary"
             class="!bg-gray-100 !text-gray-700 hover:!bg-gray-200 transition rounded-md px-4 py-2"
-            @click="sendDialog = false"
-          />
+            @click="sendDialog = false" />
           <Button
             :label="$t('yes')"
             severity="success"
             class="!bg-green-600 !text-white hover:!bg-green-700 transition rounded-md px-4 py-2"
-            @click="sendItem()"
-          />
+            @click="sendItem()" />
         </div>
       </div>
     </Dialog>

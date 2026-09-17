@@ -4,7 +4,7 @@
     <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#618990] opacity-40 w-full h-full z-50"></div>
     <img class="w-full absolute h-full" src="../image/112.png">
     <div class="z-50 text-white m-auto w-[80%] ">
-      <H1 class="font-bold text-5xl text-white z-50">{{ $t("The_latest_developments") }}</H1>
+      <h1 class="font-bold text-5xl text-white z-50">{{ $t("The_latest_developments") }}</h1>
      <div class="flex py-8 ">
       <p class="text-2xl font-semibold "> {{ $t("home") }}</p>
       <svg class="my-auto mx-[1%] ltr:rotate-180" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,56 +22,25 @@
            <h3 class="font-bold text-2xl text-[#303843]">{{ $t("The_latest_developments") }}</h3>
         </div>
         
-        <div class="card mt-3">
-        <Accordion v-for="x in 4" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
-            <AccordionTab>
-                <template #header>
-                    <span class="flex align-items-center gap-2 w-full">
-                        <Avatar image="../image/childern.jpg" shape="circle" />
-                        <span class="font-bold white-space-nowrap">Amy Elsner</span>
-                        <Badge value="3" class="ml-auto mr-2" />
-                    </span>
-                </template>
-                <p class="m-0">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </p>
-            </AccordionTab>
-          
-          
-        </Accordion>
+        <div class="mt-3 grid gap-3">
+          <div v-if="loading" class="py-10 text-center"><ProgressSpinner style="width: 40px; height: 40px" /></div>
+          <div v-else-if="!notifications.length" class="empty-state bg-white rounded-xl border">
+            <i class="pi pi-bell" />
+            {{ $t("no_notifications") }}
+          </div>
+          <template v-else>
+          <article v-for="item in notifications" :key="item.id" class="bg-white rounded-xl border p-4 flex gap-3 items-start">
+            <span class="notification-dot" :class="{ unread: !item.read_at }" aria-hidden="true"></span>
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-[#303843]">{{ notificationTitle(item) }}</p>
+              <p v-if="notificationBody(item)" class="text-slate-600 mt-1">{{ notificationBody(item) }}</p>
+              <p class="text-sm text-slate-400 mt-2" dir="ltr">{{ formatDate(item.created_at) }}</p>
+            </div>
+          </article>
+          </template>
+        </div>
       </div>
-      </div>
-      <Accordion v-for="booking in bookings" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
-             <AccordionTab :header="booking.child_name  ">
-              
-                <div class="grid grid-cols-2 gap-2">
-                   <div>
-                      
-                       <div class="flex">
-                          <p class="my-auto text-lg font-bold " > {{ $t("child_age") }} : </p>
-                          <p class="my-auto px-3 text-base text-slate-600  "> {{  booking.child_age }}</p>
-                       </div>
-                       <div class="flex">
-                          <p class="my-auto text-lg font-bold " > {{ $t("parent.phone") }} : </p>
-                          <p class="my-auto px-3 text-base text-slate-600  "> {{ booking.requester_phone }} </p>
-                       </div>
-                     
-                       <div class="flex">
-                          <p class="my-auto text-lg font-bold " > {{ $t("موعد الاستشارة") }} : </p>
-                          <p class="my-auto px-3 text-base text-slate-600  "> {{ booking.event_date }} </p>
-                       </div>
-                   </div>
-                   <div>
-                    <Button @click="bookingDetailes(booking.id)" icon="pi pi-arrow-left"  class="create" :label='$t(" متابعة التفاصيل")'></Button>
-                   </div>
-                </div>
-            </AccordionTab>
-           
-        </Accordion>
-
     </div>
-
 
   <About />
 </template>
@@ -87,21 +56,43 @@ export default {
     return {
       showsider: false,
       notifications: [],
+      loading: true,
     };
   },
   methods: {
     toggle() {
       this.showsider = !this.showsider;
     },
+    payload(item) {
+      if (item.data && typeof item.data === "object") return item.data;
+      try {
+        return JSON.parse(item.data ?? "{}");
+      } catch {
+        return { message: item.data };
+      }
+    },
+    notificationTitle(item) {
+      const data = this.payload(item);
+      return data.title ?? data.subject ?? this.$t("notification");
+    },
+    notificationBody(item) {
+      const data = this.payload(item);
+      return data.message ?? data.body ?? data.text ?? "";
+    },
+    formatDate(value) {
+      return value ? new Date(value).toLocaleString(this.$i18n.locale === "ar" ? "ar-JO" : "en-GB") : "";
+    },
     getNotifications() {
       axios
         .get("/api/parent/notification")
         .then((res) => {
-          this.notifications = res.data.notifications;
-          console.log(res);
+          this.notifications = res.data.notifications ?? [];
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
+          this.notifications = [];
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
   },
@@ -111,6 +102,17 @@ export default {
 };
 </script>
 <style>
+.notification-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 0.45rem;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+.notification-dot.unread {
+  background: #ff2a5b;
+}
 .item:hover {
   background-color: #e6f8f6;
   transition: all linear 300ms;

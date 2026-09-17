@@ -3,7 +3,7 @@
     <div
       class="flex justify-between border-b-2 p-2 border-x-cyan-950 border-solid"
     >
-      <div class="text-right m-auto visible md:invisible" @click="toggle()">
+      <div class="text-start m-auto visible md:invisible" @click="toggle()">
         <svg
           fill="#000000"
           width="54px"
@@ -43,7 +43,7 @@
             style="background-color: #135c65"
             class="p-2 bg-[#135c65] rounded-lg text-center"
           >
-            <v-icon left color="white">mdi-plus</v-icon>
+            <i class="pi pi-plus text-white me-1" aria-hidden="true"></i>
             <router-link
               :to="{ name: 'BookingTime' }"
               class="text-white rounded-lg"

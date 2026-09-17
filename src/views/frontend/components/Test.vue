@@ -32,7 +32,7 @@
     
     
         <button @click="visible = true" data-collapse-toggle="navbar-default" type="button" class="mx-1  inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 " aria-controls="navbar-default" aria-expanded="false">
-            <span class="sr-only">Open main menu</span>
+            <span class="sr-only">{{ $t("main_menu") }}</span>
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
             </svg>
@@ -68,7 +68,7 @@
       
           <p  style="display:inline-block; height: 50px ;"><LocaleSelect  id="local-switcher"></LocaleSelect></p>
           <div style="display: inline-block;" v-if="parentStore.parentAuth">
-    <Dropdown
+    <Select
     
       v-model="selectedItem"
       @update:model-value="action"
@@ -95,7 +95,7 @@
           
         </div>
       </template>
-    </Dropdown>
+    </Select>
 
    
         </div>
@@ -104,7 +104,7 @@
           <Button
           style="border: 0px;height: 45px;"
           :label='$t("sign_in")'
-          class=" relative fed text-lg  primer lg:mb-0 bg focus:ring-0  ">
+          class="relative fed text-lg lg:mb-0 bg focus:ring-0" severity="warn">
           </Button>
     
           </router-link>
@@ -113,7 +113,7 @@
             <Button
             style="border: 0px;height: 45px;"
             :label='$t("Create_an_account")'
-            class=" h-full relative create my-auto    ce lg:mb-0 bg-none shadow-0  focus:ring-0  ">
+            class="h-full relative my-auto ce lg:mb-0 bg-none shadow-0 focus:ring-0">
             </Button>
 
             </router-link>
@@ -122,7 +122,7 @@
       </div>
     </nav>
     <div :class="{'hidden':!visible}" class="card   justify-content-center opacity-0" style="direction: ltr;">
-            <Sidebar  v-model:visible="visible" header="Sidebar">
+            <Drawer  v-model:visible="visible" :header="$t('main_menu')">
              <ul>
               <li class="my-auto text-center py-4 lg:py-0">
               <router-link :to="{ name: 'home' }" class="text-lg font-extrabold px-3 text-[#A5ABB4]" style="line-height: 20px;" > {{ $t("home") }}</router-link>
@@ -145,12 +145,12 @@
               <Button
               style="background-color: #AA1E22 !important;"
               :label='$t("login")'
-              class="mt-1 m-auto h-full relative mb- pl-4 lg:w-[150px]  lg:mb-0 bg focus:ring-0 text-[#AA1E22] ">
+              class="mt-1 m-auto h-full relative mb- pl-4 lg:w-[150px] lg:mb-0 bg focus:ring-0 text-[#AA1E22]">
               </Button>
     
               </a>
              </ul>
-            </Sidebar>
+            </Drawer>
     
         </div>
     </template>

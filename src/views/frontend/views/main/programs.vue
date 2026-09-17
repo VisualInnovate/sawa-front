@@ -7,7 +7,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <span
               class="mb-5 inline-flex rounded-full bg-[#a7ebf6]/50 text-[#1c6772] text-xs sm:text-sm font-bold px-4 py-2"
             >
@@ -21,7 +21,7 @@
             </h1>
           </div>
           <p
-            class="text-[#594045] text-base lg:text-xl text-right leading-relaxed font-bold"
+            class="text-[#594045] text-base lg:text-xl text-start leading-relaxed font-bold"
           >
             نقدم في أكاديمية سوا بيئة تعليمية وعلاجية متخصصة تجمع بين العلم
             والتعاطف، لتمكين الأطفال من مواجهة التحديات وتحقيق أقصى إمكاناتهم.
@@ -70,7 +70,7 @@
             class="bg-white rounded-2xl p-5 items-start flex flex-col gap-4 shadow-[0_8px_24px_rgba(28,27,27,0.04)]"
           >
             <img src="./images/icon-planFull.svg" alt="" class="w-12 h-12" />
-            <div class="text-right">
+            <div class="text-start">
               <h3 class="text-[#1c6772] font-bold text-base mb-1">
                 تقييم شامل
               </h3>
@@ -84,7 +84,7 @@
             class="bg-white rounded-2xl p-5 items-start flex flex-col gap-4 shadow-[0_8px_24px_rgba(28,27,27,0.04)]"
           >
             <img src="./images/icon-planIEP.svg" alt="" class="w-12 h-12" />
-            <div class="text-right">
+            <div class="text-start">
               <h3 class="text-[#1c6772] font-bold text-base mb-1">
                 خطة فردية IEP
               </h3>
@@ -98,7 +98,7 @@
             class="bg-white rounded-2xl p-5 items-start flex flex-col gap-4 shadow-[0_8px_24px_rgba(28,27,27,0.04)]"
           >
             <img src="./images/icon-follow.svg" alt="" class="w-12 h-12" />
-            <div class="text-right">
+            <div class="text-start">
               <h3 class="text-[#1c6772] font-bold text-base mb-1">
                 متابعة مستمرة
               </h3>
@@ -112,7 +112,7 @@
             class="bg-white rounded-2xl p-5 items-start flex flex-col gap-4 shadow-[0_8px_24px_rgba(28,27,27,0.04)]"
           >
             <img src="./images/icon-measure.svg" alt="" class="w-12 h-12" />
-            <div class="text-right">
+            <div class="text-start">
               <h3 class="text-[#1c6772] font-bold text-base mb-1">
                 قياس التقدم
               </h3>
@@ -148,7 +148,7 @@
                 class="w-full h-[230px] sm:h-[310px] object-cover"
               />
             </div>
-            <div class="text-right flex flex-col gap-8">
+            <div class="text-start flex flex-col gap-8">
               <span class="text-[#b21553] font-bold text-sm flex gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -202,7 +202,7 @@
           <article
             class="bg-[#F6F3F2] rounded-[24px] p-4 sm:p-6 lg:p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center"
           >
-            <div class="text-right flex flex-col gap-8 order-1 lg:order-2">
+            <div class="text-start flex flex-col gap-8 order-1 lg:order-2">
               <span
                 class="text-[#1c6772] font-bold text-sm flex items-center gap-2"
               >
@@ -286,7 +286,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div
-            class="bg-[#fcf9f8] rounded-2xl p-5 text-right min-h-[150px] flex flex-col gap-2"
+            class="bg-[#fcf9f8] rounded-2xl p-5 text-start min-h-[150px] flex flex-col gap-2"
           >
             <div
               class="w-11 h-11 rounded-[10px] mb-2 shadow-sm bg-[#fff] flex items-center justify-center"
@@ -303,7 +303,7 @@
             </p>
           </div>
           <div
-            class="bg-[#fcf9f8] rounded-2xl p-5 text-right min-h-[150px] flex flex-col gap-2"
+            class="bg-[#fcf9f8] rounded-2xl p-5 text-start min-h-[150px] flex flex-col gap-2"
           >
             <div
               class="w-11 h-11 rounded-[10px] mb-2 shadow-sm bg-[#fff] flex items-center justify-center"
@@ -320,7 +320,7 @@
             </p>
           </div>
           <div
-            class="bg-[#fcf9f8] rounded-2xl p-5 text-right min-h-[150px] flex flex-col gap-2"
+            class="bg-[#fcf9f8] rounded-2xl p-5 text-start min-h-[150px] flex flex-col gap-2"
           >
             <div
               class="w-11 h-11 rounded-[10px] mb-2 shadow-sm bg-[#fff] flex items-center justify-center"
@@ -337,7 +337,7 @@
             </p>
           </div>
           <div
-            class="bg-[#fcf9f8] rounded-2xl p-5 text-right min-h-[150px] flex flex-col gap-2"
+            class="bg-[#fcf9f8] rounded-2xl p-5 text-start min-h-[150px] flex flex-col gap-2"
           >
             <div
               class="w-11 h-11 rounded-[10px] mb-2 shadow-sm bg-[#fff] flex items-center justify-center"
@@ -354,7 +354,7 @@
             </p>
           </div>
           <div
-            class="bg-[#fcf9f8] rounded-2xl p-5 text-right min-h-[150px] flex flex-col gap-2"
+            class="bg-[#fcf9f8] rounded-2xl p-5 text-start min-h-[150px] flex flex-col gap-2"
           >
             <div
               class="w-11 h-11 rounded-[10px] mb-2 shadow-sm bg-[#fff] flex items-center justify-center"
@@ -525,7 +525,7 @@
           </div>
         </div>
 
-        <div class="order-1 lg:order-1 text-right flex flex-col gap-4">
+        <div class="order-1 lg:order-1 text-start flex flex-col gap-4">
           <h2
             class="text-2xl sm:text-3xl lg:text-[36px] font-extrabold leading-tight"
           >

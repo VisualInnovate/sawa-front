@@ -3,38 +3,38 @@
 
   
   </div>
-  <v-card>
+  <div class="sawa-card">
     <div>
-      <v-alert title="Alert title" :text="alert_text" v-if="alert_text" closable type="error" class="absolute w-full"></v-alert>
+      <Message v-if="alert_text" severity="error" class="mb-3">{{ alert_text }}</Message>
 
 
     
-      <form style="max-height: 80vh; overflow-y: scroll;" fast-fail ref="form" @submit.prevent="getanswer" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
+      <form style="max-height: 80vh; overflow-y: scroll;" ref="form" @submit.prevent="getanswer" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
         <!-- ... existing code ... -->
           
             
            
               <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('evaluation_name') }}</label>
-                  <InputText   required class="bg-[#f7f5f5]" v-model="answer.title" :placeholder='$t("evaluation_name")' />
+                  <InputText   required v-model="answer.title" :placeholder='$t("evaluation_name")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
               </div> 
     
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('child_name') }}</label>
-                  <Dropdown   filter required id="pv_id_1" disabled style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <Select   filter required disabled v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
               </div>
              
               <div  v-if="answer.child_id" class="flex flex-column gap-2">
                 <label for="username">{{ $t('date') }}</label>
-                <Calendar  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
+                <DatePicker  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
 
             </div> 
             <div  v-if="answer.date" class="flex flex-column gap-2">
                   <label for="username">{{ $t('age') }}</label>
-                  <InputNumber readonly  required class="bg-[#f7f5f5]" v-model="answer.child_age" :placeholder='$t("age")' />
+                  <InputNumber readonly  required v-model="answer.child_age" :placeholder='$t("age")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
               </div> 
              
@@ -43,7 +43,7 @@
               <!-- <div  v-if="answer.child_id" class="flex flex-column gap-2">
                   <label for="username">{{ $t('score') }}</label>
                   
-                  <InputNumber  :min="0" :max=".9" required inputId="minmaxfraction" :minFractionDigits="1" :maxFractionDigits="5" class="bg-[#f7f5f5]" v-model="answer.score" :placeholder='$t("score")' />
+                  <InputNumber  :min="0" :max=".9" required inputId="minmaxfraction" :minFractionDigits="1" :maxFractionDigits="5" v-model="answer.score" :placeholder='$t("score")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.score">{{ error.score[0] }}</div>
               </div> 
               -->
@@ -51,7 +51,7 @@
 <!-- 
               <div  v-if="answer.child_id" class="flex flex-column gap-2">
                   <label for="username">{{ $t('notes') }}</label>
-                  <InputText style="width: 100% !important; max-height: 50px !important;;"  class="bg-[#f7f5f5]"  v-model="answer.notes"  :placeholder='$t("notes")' />
+                  <InputText style="width: 100% !important; max-height: 50px !important;;"  v-model="answer.notes"  :placeholder='$t("notes")' />
   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
               </div>  -->
@@ -75,7 +75,7 @@
               </div>
               <div class="bg-[#00B8D9] h-[40%] mt-1" ref="showcolor"></div>
             </div>
-            <Button @click="createevalutae" class="create m-auto  w-full h-[50px] "
+            <Button @click="createevalutae" class="m-auto w-full h-[50px]"
               :label='$t("strart_evaluate")'></Button>
           </div>
           <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
@@ -106,13 +106,13 @@
               </div> 
               <div v-if="strart_evaluate" class="flex flex-column gap-2">
                 <label for="milestone-program">{{ $t('milestone_target_program') }}</label>
-                <Dropdown inputId="milestone-program" v-model="answers.student_program_id" :options="programs" optionLabel="name" optionValue="id" filter showClear :placeholder="$t('milestone_target_program')" />
+                <Select inputId="milestone-program" v-model="answers.student_program_id" :options="programs" optionLabel="name" optionValue="id" filter showClear :placeholder="$t('milestone_target_program')" />
                 <small v-if="!programs.length">{{ $t('milestone_no_programs') }}</small>
                 <p v-if="error.student_program_id" class="text-red-600">{{ error.student_program_id[0] }}</p>
               </div>
               <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button type="submit" :loading="saving" :disabled="saving" class="create m-auto w-full" :label="$t('submit')" />
+                <Button type="submit" :loading="saving" :disabled="saving" class="m-auto w-full" :label="$t('submit')" />
                 <small id="username-help"></small>
               </div>
             
@@ -124,10 +124,10 @@
 
       
       </form>
-<toast></toast>
+<Toast />
       <!-- ... existing code ... -->
     </div>
-  </v-card>
+  </div>
 </template>
 
 
@@ -160,7 +160,7 @@ export default {
           color:"6554C0"
       },
      allquestion:[],
-      childs:{},
+      childs:[],
       qustions:{},
       error: {},
       maxDate: new Date(),
@@ -339,9 +339,6 @@ export default {
 }
 .name-input::-webkit-scrollbar {
   display: none;
-}
-#pv_id_1{
-  text-align: center;
 }
 /* Hide scrollbar for IE, Edge and Firefox */
 .name-input {

@@ -13,9 +13,10 @@ let lastButton = null;
 let lastActionAt = 0;
 const pending = new WeakMap();
 
+// Buttons inside [data-no-request-spinner] (menus, buttons with their own :loading) are skipped,
+// and a click anywhere else forgets the previous button so it doesn't pick up unrelated requests.
 const remember = (button) => {
-  if (!button) return;
-  lastButton = button;
+  lastButton = button && !button.closest("[data-no-request-spinner]") ? button : null;
   lastActionAt = Date.now();
 };
 

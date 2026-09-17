@@ -1,8 +1,8 @@
 <template>
-    <Map></Map>
-    <Nave />
-    <Cons :event_id="event_id" />
-    <About />
+  <Map></Map>
+  <Nave />
+  <Cons :event_id="event_id" :child_id="child_id" />
+  <About />
 </template>
 <script setup(props) { }>
 import Map from "../components/Map.vue";
@@ -12,6 +12,6 @@ import Cons from "../components/Cons.vue";
 
 export default {
   components: { Map, Nave, About, Cons },
-  props: ["event_id"],
+  props: ["event_id", "child_id"],
 };
 </script>

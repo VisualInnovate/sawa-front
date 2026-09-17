@@ -2,7 +2,7 @@
   <div class="p-6 bg-gray-50 min-h-screen container mx-auto print:p-0 print:w-full print:max-w-full print:mx-0">
     <!-- Header with Print Button -->
     <div class="flex justify-between items-center mb-8 print:hidden">
-      <h1 class="text-3xl font-bold text-gray-800">Evaluation Report</h1>
+      <h1 class="text-3xl font-bold text-gray-800">{{ $t("evaluation_report") }}</h1>
       <button 
         @click="printReport"
         class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -10,15 +10,15 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
         </svg>
-        Print Report
+        {{ $t("print_report") }}
       </button>
     </div>
 
     <!-- Print-only header -->
     <div class="hidden print:block py-4 border-b border-gray-200 mb-4">
-      <h1 class="text-3xl font-bold text-gray-800 text-center">Evaluation Report</h1>
+      <h1 class="text-3xl font-bold text-gray-800 text-center">{{ $t("evaluation_report") }}</h1>
       <div class="text-center text-gray-600 mt-2">
-        Generated on: {{ new Date().toLocaleDateString() }}
+        {{ $t("generated_on") }}: {{ new Date().toLocaleDateString() }}
       </div>
     </div>
 
@@ -27,7 +27,7 @@
       <div v-for="(level, index) in mainSquares" :key="index" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:break-inside-avoid">
         <!-- Level Header -->
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
-          <h1 class="w-full py-2 text-2xl font-bold text-center text-white">LEVEL {{ index+1 }}</h1>
+          <h1 class="w-full py-2 text-2xl font-bold text-center text-white">{{ $t("level_n", { n: index + 1 }) }}</h1>
         </div>
         
         <!-- Grid Content -->
@@ -85,18 +85,18 @@
     <!-- Results Table -->
     <div class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:break-inside-avoid print:mt-8">
       <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
-        <h2 class="text-xl font-bold text-white">Evaluation Summary</h2>
+        <h2 class="text-xl font-bold text-white">{{ $t("evaluation_summary") }}</h2>
       </div>
       <div class="relative overflow-x-auto print:overflow-x-visible">
-        <table class="w-full text-sm text-left text-gray-700 print:text-xs">
+        <table class="w-full text-sm text-start text-gray-700 print:text-xs">
           <thead class="text-xs text-white uppercase bg-blue-500 print:bg-blue-600">
             <tr>
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">#</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Strengths</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Weaknesses</th>
+              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("strengths") }}</th>
+              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("weaknesses") }}</th>
               <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t('milestone_plan_goal') }}</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Status</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">Target Symbol</th>
+              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("status") }}</th>
+              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("target_symbol") }}</th>
             </tr>
           </thead>
           <tbody>
@@ -131,8 +131,8 @@
     <!-- Print Footer (only shows when printing) -->
     <div class="hidden print:block mt-8 pt-4 border-t border-gray-200 text-xs text-gray-600">
       <div class="flex justify-between">
-        <div>Evaluation Report - Generated on: {{ new Date().toLocaleDateString() }}</div>
-        <div>Page <span class="pageNumber"></span></div>
+        <div>{{ $t("evaluation_report") }} - {{ $t("generated_on") }}: {{ new Date().toLocaleDateString() }}</div>
+        <div>{{ $t("page") }} <span class="pageNumber"></span></div>
       </div>
     </div>
   </div>

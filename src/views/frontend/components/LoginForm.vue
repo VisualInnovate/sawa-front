@@ -30,13 +30,13 @@ export default {
             </div>
             <div class=" flex flex-column gap-2">
                   <label class="w-full" for="parent-phone">{{ $t('Mobile_number') }}</label>
-                <InputText id="parent-phone" v-model="parent.phone" type="tel" inputmode="tel" autocomplete="username" dir="ltr" required class="bg-[#f7f5f5] text-center" :placeholder="$t('Mobile_number')" />
+                <InputText id="parent-phone" v-model="parent.phone" type="tel" inputmode="tel" autocomplete="username" dir="ltr" required class="text-center" :placeholder="$t('Mobile_number')" />
                 <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.phone">{{ parentStore.errors.phone[0] }}</div>
             </div>
             <div class=" flex flex-column gap-2">
 
                   <label class="w-full  " for="username">{{ $t('password') }}</label>
-                <InputText v-model="parent.password"   type="password" required class="bg-[#f7f5f5] text-center"  :placeholder='$t("password")' />
+                <InputText v-model="parent.password"   type="password" required class="text-center"  :placeholder='$t("password")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="parentStore.errors?.password">{{ parentStore.errors?.password }}</div>
             </div>
             <div class="flex flex-column gap-2 w-full ">
@@ -45,9 +45,8 @@ export default {
                     type="submit"
                     :loading="parentStore.loading"
                     :disabled="parentStore.loading"
-                    class="create m-auto w-full"
-                    :label='$t("sign_in")'
-                  ></Button>
+                    class="m-auto w-full"
+                    :label='$t("sign_in")'></Button>
                   <small id="username-help"></small>
               </div>
             <div class="mt-3 text-center text-red-500" v-if="parentStore.errorMessage">

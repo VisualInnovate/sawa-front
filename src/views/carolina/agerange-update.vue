@@ -1,34 +1,34 @@
 <template>
     <div>
-        <v-card class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-2 bg-slate-100">
+        <div class="sawa-card grid grid-cols-1 lg:grid-cols-2 gap-4 p-2 bg-slate-100">
             <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('from') }} (years)</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="carolina.from" :placeholder='$t("from")' />
+                    <label for="username">{{ $t('from') }} ({{ $t('years_unit') }})</label>
+                    <InputNumber  required v-model="carolina.from" :placeholder='$t("from")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('to') }} (years)</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="carolina.to" :placeholder='$t("to")' />
+                    <label for="username">{{ $t('to') }} ({{ $t('years_unit') }})</label>
+                    <InputNumber  required v-model="carolina.to" :placeholder='$t("to")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
                 </div> 
-       </v-card>
-       <v-card class="bg-slate-100 my-5" >
+       </div>
+       <div class="sawa-card bg-slate-100 my-5" >
         
        <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-2 my-5 " >
         <div  class="flex flex-column gap-2">
-                    <label for="username">{{ $t('from') }} (month)</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="carolina.frommonth" :placeholder='$t("from")' />
+                    <label for="username">{{ $t('from') }} ({{ $t('months_unit') }})</label>
+                    <InputNumber  required v-model="carolina.frommonth" :placeholder='$t("from")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
                 </div> 
                 <div class="flex">
                     <div class="flex w-[86%] flex-column gap-2">
-                    <label for="username">{{ $t('to') }} (month)</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="carolina.tomonth" :placeholder='$t("to")' />
+                    <label for="username">{{ $t('to') }} ({{ $t('months_unit') }})</label>
+                    <InputNumber  required v-model="carolina.tomonth" :placeholder='$t("to")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
                     </div> 
                     <div class="flex flex-column gap-2">
-                    <label class="invisible" for="username">{{ $t('to') }} (month)</label>
-                    <Button   @click="addarry"  class="create m-auto  " icon="pi pi-plus" ></Button>
+                    <label class="invisible" for="username">{{ $t('to') }} ({{ $t('months_unit') }})</label>
+                    <Button   @click="addarry"  class="m-auto" icon="pi pi-plus"></Button>
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.seats">{{ error.seats[0] }}</div>
                     </div> 
                
@@ -41,17 +41,17 @@
                         <p class="px-1 text-green-500 text-xl">{{ mou.from }}</p>
                         <span>{{ $t("to") }}</span>
                         <p class="px-1 text-green-500 text-xl">{{ mou.to }}</p>
-                        <Button   @click="deletearray(index)"  class="delete m-auto absolute top-1 ltr:right-2 rtl:left-2  " icon="pi pi-minus" ></Button>
+                        <Button   @click="deletearray(index)"  class="m-auto absolute top-1 ltr:right-2 rtl:left-2" icon="pi pi-minus" severity="danger"></Button>
                     </div>
                 </div>
      
        <div class="w-full text-center">
-        <Button @click="createtreatment" class="create m-auto w-64 my-4 " :label='$t("submit")'></Button>
+        <Button @click="createtreatment" class="m-auto w-64 my-4" :label='$t("submit")'></Button>
 
        </div>
-       </v-card>
+       </div>
     </div>
-    <toast></toast>
+    <Toast />
 </template>
 
 <script>

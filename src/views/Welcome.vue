@@ -9,12 +9,20 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import sawaLogo from "../assets/img/sawa_logo.svg";
 import { useAuthStore } from "../stores/Auth";
 
 const authStore = useAuthStore();
-const userName = computed(() => authStore.authUser?.name ?? "");
+const userName = computed(() => {
+  const user = authStore.authUser ?? {};
+  return String(user.name ?? "").trim() || String(user.email ?? "").split("@")[0];
+});
+
+// A session saved by an older build may lack the user's name; reload it from the API.
+onMounted(() => {
+  if (!String(authStore.authUser?.name ?? "").trim()) authStore.getUser().catch(() => {});
+});
 </script>
 
 <style scoped>

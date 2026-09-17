@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import moment from "moment";
 import {useToast} from 'primevue/usetoast'
@@ -9,7 +9,7 @@ import { useI18n } from 'vue-i18n';
 const toast = useToast()
 const router = useRouter()
 const { t } = useI18n();
-const allemployee=ref({})
+const allemployee=ref([])
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -137,7 +137,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -182,12 +182,12 @@ const initFilters = () => {
 
           <template #end>
             <div class="flex gap-2">
-              <Button :label='$t("print")' icon="pi pi-print" class="p-button-help no-print" :loading="printLoading"
-                @click="printTable" />
+              <Button :label='$t("print")' icon="pi pi-print" class="no-print" :loading="printLoading"
+                @click="printTable" severity="help" />
               <Button v-can="'bonus list'" :label='$t("export")' icon="pi pi-download"
-                class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
+                class="no-print" :loading="exportLoading" @click="exportCSV" severity="info" />
               <Button v-can="'bonus create'" :label='$t("Adding_bonus_employee")' icon="pi pi-plus" 
-                class="p-button-success" @click="openNew" />
+                @click="openNew" />
             </div>
           </template>
         </Toolbar>
@@ -205,12 +205,12 @@ const initFilters = () => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
-                  </span>
-                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
-                    v-tooltip.top="$t('refresh_data')" />
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
+              </IconField>
+                  <Button icon="pi pi-refresh" @click="fetchData"
+                    v-tooltip.top="$t('refresh_data')" variant="text" />
                 </div>
               </div>
             </template>
@@ -243,19 +243,15 @@ const initFilters = () => {
 
             <Column header-style="min-width:10rem;">
               <template #body="slotProps">
-                <div class="flex gap-2">
+                <div class="table-actions">
                   <Button
                     v-can="'bonus edit'"
                     icon="pi pi-pencil"
-                    class="p-button-rounded p-button-success"
-                    @click="edit(slotProps.data.id)"
-                  />
+                    @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                   <Button
                     v-can="'bonus delete'"
                     icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger"
-                    @click="confirmDelete(slotProps.data.id)"
-                  />
+                    @click="confirmDelete(slotProps.data.id)" rounded severity="danger" variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
                 </div>
               </template>
             </Column>
@@ -283,34 +279,34 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("Add Bonus")'
           :modal="true">
           <div class="flex flex-column gap-2">
-            <label class="w-full text-right" for="reason">{{ $t('bouns_reason') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
+            <label class="w-full text-start" for="reason">{{ $t('bouns_reason') }}</label>
+            <InputText required class="text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-right" for="amount">{{ $t('bouns_amount') }}</label>
-            <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' mode="currency" currency="USD" locale="en-US" />
+            <label class="w-full text-start" for="amount">{{ $t('bouns_amount') }}</label>
+            <InputNumber required class="text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' mode="currency" currency="USD" locale="en-US" />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-right" for="date">{{ $t('bouns_date') }}</label>
-            <Calendar style="width: 100%" showButtonBar v-model="bouns.date" showIcon :placeholder='$t("bouns_date")' />
+            <label class="w-full text-start" for="date">{{ $t('bouns_date') }}</label>
+            <DatePicker style="width: 100%" showButtonBar v-model="bouns.date" showIcon :placeholder='$t("bouns_date")' />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-right" for="employee">{{ $t('Employees') }}</label>
-            <Dropdown 
+            <label class="w-full text-start" for="employee">{{ $t('Employees') }}</label>
+            <Select 
               v-model="bouns.employee_id" 
               :options="allemployee" 
               optionLabel="name" 
@@ -322,32 +318,32 @@ const initFilters = () => {
           </div>
           
           <div class="w-full text-center mt-4">
-            <Button @click="create" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="create" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
           </div>
         </Dialog>
 
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("Update Bonus")'
           :modal="true">
           <div class="flex flex-column gap-2">
-            <label class="w-full text-right" for="reason">{{ $t('bouns_reason') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
+            <label class="w-full text-start" for="reason">{{ $t('bouns_reason') }}</label>
+            <InputText required class="text-center" v-model="bouns.reason" :placeholder='$t("bouns_reason")' />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.reason">{{ error.reason[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-right" for="amount">{{ $t('bouns_amount') }}</label>
-            <InputNumber required class="bg-[#f7f5f5] text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' mode="currency" currency="USD" locale="en-US" />
+            <label class="w-full text-start" for="amount">{{ $t('bouns_amount') }}</label>
+            <InputNumber required class="text-center" v-model="bouns.amount" :placeholder='$t("bouns_amount")' mode="currency" currency="USD" locale="en-US" />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.amount">{{ error.amount[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-right" for="date">{{ $t('bouns_date') }}</label>
-            <Calendar style="width: 100%" showButtonBar v-model="bouns.date" showIcon :placeholder='$t("bouns_date")' />
+            <label class="w-full text-start" for="date">{{ $t('bouns_date') }}</label>
+            <DatePicker style="width: 100%" showButtonBar v-model="bouns.date" showIcon :placeholder='$t("bouns_date")' />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
           </div>
           
           <div class="w-full text-center mt-4">
-            <Button @click="update" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="update" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
           </div>
         </Dialog>
       </div>

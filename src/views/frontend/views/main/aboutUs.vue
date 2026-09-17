@@ -7,7 +7,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <h1
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
@@ -16,7 +16,7 @@
             </h1>
           </div>
           <p
-            class="text-[#594045] text-base lg:text-xl text-right leading-relaxed font-bol" 
+            class="text-[#594045] text-base lg:text-xl text-start leading-relaxed font-bol" 
           >
             في أكاديمية سوا، ندمج بين أحدث المنهجيات العلمية العالمية والخبرة
             المهنية العميقة لتوفير بيئة تعليمية تضمن تمكين كل طفل من الوصول
@@ -70,20 +70,20 @@
             </p>
           </div>
           <h2
-            class="text-2xl lg:text-[36px] font-bold text-[#1c1b1b] text-right leading-tight"
+            class="text-2xl lg:text-[36px] font-bold text-[#1c1b1b] text-start leading-tight"
           >
             استجابة لاحتياجات المجتمع<br />بمعايير إكلينيكية
           </h2>
           <div class="flex flex-col gap-4">
             <p
-              class="text-[#594045] text-base lg:text-lg text-right leading-[2]"
+              class="text-[#594045] text-base lg:text-lg text-start leading-[2]"
             >
               تأسست أكاديمية سوا من رؤية واضحة لسد الفجوة في خدمات التربية
               الخاصة المتميزة. لم تكن مجرد مشروع، بل استجابة حقيقية لاحتياجات
               الأسر الباحثة عن التميز العلمي والاحتواء الإنساني.
             </p>
             <p
-              class="text-[#594045] text-base lg:text-lg text-right leading-[2]"
+              class="text-[#594045] text-base lg:text-lg text-start leading-[2]"
             >
               نحن نؤمن أن كل طفل هو قصة نجاح تنتظر من يقرأها، ولذلك اعتمدنا أعلى
               المعايير المهنية العالمية لضمان رحلة تعلم مثمرة وآمنة.
@@ -133,10 +133,10 @@
         >
           <div class="bg-white rounded-[32px] p-8 lg:p-10 flex flex-col gap-4">
             <img src="./images/icon-iep.svg" alt="" class="w-[52px] h-[55px]" />
-            <h3 class="text-[#1c6772] font-bold text-xl text-right">
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
               استقلالية الطفل
             </h3>
-            <p class="text-[#594045] text-base text-right leading-relaxed">
+            <p class="text-[#594045] text-base text-start leading-relaxed">
               تمكين الطفل من مهارات الاعتماد على الذات في حياته اليومية.
             </p>
           </div>
@@ -150,10 +150,10 @@
                 class="w-[27px] h-[25px]"
               />
             </div>
-            <h3 class="text-[#1c6772] font-bold text-xl text-right">
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
               الدمج المجتمعي
             </h3>
-            <p class="text-[#594045] text-base text-right leading-relaxed">
+            <p class="text-[#594045] text-base text-start leading-relaxed">
               بناء جسور التواصل بين أطفالنا والمجتمع الخارجي بفعالية.
             </p>
           </div>
@@ -163,10 +163,10 @@
               alt=""
               class="w-[45px] h-[45px]"
             />
-            <h3 class="text-[#1c6772] font-bold text-xl text-right">
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
               برامج مثبتة علمياً
             </h3>
-            <p class="text-[#594045] text-base text-right leading-relaxed">
+            <p class="text-[#594045] text-base text-start leading-relaxed">
               تطبيق أحدث البروتوكولات العلاجية المبنية على الأدلة والبراهين.
             </p>
           </div>
@@ -180,10 +180,10 @@
                 class="w-[27px] h-[25px]"
               />
             </div>
-            <h3 class="text-[#1c6772] font-bold text-xl text-right">
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
               شراكة الأسرة
             </h3>
-            <p class="text-[#594045] text-base text-right leading-relaxed">
+            <p class="text-[#594045] text-base text-start leading-relaxed">
               إشراك الوالدين كشركاء أساسيين في كل خطوة من رحلة التطور.
             </p>
           </div>
@@ -231,10 +231,10 @@
               class="w-6 h-8 shrink-0 mt-1"
             />
             <div class="flex-1 flex flex-col gap-2">
-              <h3 class="text-[#1c6772] font-bold text-xl text-right">
+              <h3 class="text-[#1c6772] font-bold text-xl text-start">
                 المهنية
               </h3>
-              <p class="text-[#594045] text-base text-right leading-relaxed">
+              <p class="text-[#594045] text-base text-start leading-relaxed">
                 الالتزام بأعلى معايير الجودة في كل تفاصيل خدماتنا.
               </p>
             </div>
@@ -248,10 +248,10 @@
               class="w-8 h-8 shrink-0 mt-1"
             />
             <div class="flex-1 flex flex-col gap-2">
-              <h3 class="text-[#1c6772] font-bold text-xl text-right">
+              <h3 class="text-[#1c6772] font-bold text-xl text-start">
                 التعاطف
               </h3>
-              <p class="text-[#594045] text-base text-right leading-relaxed">
+              <p class="text-[#594045] text-base text-start leading-relaxed">
                 التعامل بحب وتفهم عميق لاحتياجات الأطفال وأهاليهم.
               </p>
             </div>
@@ -265,10 +265,10 @@
               class="w-7 h-7 shrink-0 mt-1"
             />
             <div class="flex-1 flex flex-col gap-2">
-              <h3 class="text-[#1c6772] font-bold text-xl text-right">
+              <h3 class="text-[#1c6772] font-bold text-xl text-start">
                 الدقة العلمية
               </h3>
-              <p class="text-[#594045] text-base text-right leading-relaxed">
+              <p class="text-[#594045] text-base text-start leading-relaxed">
                 تحليل البيانات والنتائج لضمان مسار علاجي صحيح.
               </p>
             </div>
@@ -282,10 +282,10 @@
               class="w-7 h-7 shrink-0 mt-1"
             />
             <div class="flex-1 flex flex-col gap-2">
-              <h3 class="text-[#1c6772] font-bold text-xl text-right">
+              <h3 class="text-[#1c6772] font-bold text-xl text-start">
                 التطوير المستمر
               </h3>
-              <p class="text-[#594045] text-base text-right leading-relaxed">
+              <p class="text-[#594045] text-base text-start leading-relaxed">
                 مواكبة كل ما هو جديد في عالم التربية الخاصة.
               </p>
             </div>
@@ -299,10 +299,10 @@
               class="w-7 h-8 shrink-0 mt-1"
             />
             <div class="flex-1 flex flex-col gap-2">
-              <h3 class="text-[#1c6772] font-bold text-xl text-right">
+              <h3 class="text-[#1c6772] font-bold text-xl text-start">
                 تركيزنا الطفل
               </h3>
-              <p class="text-[#594045] text-base text-right leading-relaxed">
+              <p class="text-[#594045] text-base text-start leading-relaxed">
                 كل قراراتنا تتمحور حول مصلحة الطفل الفضلى أولاً.
               </p>
             </div>
@@ -316,10 +316,10 @@
               class="w-9 h-[34px] shrink-0 mt-1"
             />
             <div class="flex-1 flex flex-col gap-2">
-              <h3 class="text-[#1c6772] font-bold text-xl text-right">
+              <h3 class="text-[#1c6772] font-bold text-xl text-start">
                 العمل الجماعي
               </h3>
-              <p class="text-[#594045] text-base text-right leading-relaxed">
+              <p class="text-[#594045] text-base text-start leading-relaxed">
                 تكامل التخصصات للوصول إلى أفضل النتائج المرجوة.
               </p>
             </div>
@@ -439,11 +439,11 @@
             class="absolute -bottom-4 -right-4 lg:-bottom-8 lg:-right-8 bg-white p-5 lg:p-8 rounded-3xl shadow-xl"
           >
             <p
-              class="text-[#b21553] font-bold text-2xl lg:text-[30px] text-right leading-[36px]"
+              class="text-[#b21553] font-bold text-2xl lg:text-[30px] text-start leading-[36px]"
             >
               +٥٠٠
             </p>
-            <p class="text-[#1c6772] font-bold text-sm lg:text-base text-right">
+            <p class="text-[#1c6772] font-bold text-sm lg:text-base text-start">
               طفل تم دمجهم بنجاح
             </p>
           </div>
@@ -451,7 +451,7 @@
         <!-- Text -->
         <div class="flex flex-col gap-8 lg:gap-10 mt-4 lg:mt-0">
           <h2
-            class="text-2xl lg:text-[36px] font-bold text-[#1c6772] text-right"
+            class="text-2xl lg:text-[36px] font-bold text-[#1c6772] text-start"
           >
             لماذا يختار الأهالي "سوا"؟
           </h2>
@@ -463,7 +463,7 @@
                 <img src="./images/icon-plan.svg" alt="" class="w-5 h-4" />
               </div>
               <p
-                class="text-[#594045] font-semibold text-base lg:text-lg text-right"
+                class="text-[#594045] font-semibold text-base lg:text-lg text-start"
               >
                 خطط تعليمية فردية (IEP) لكل طفل
               </p>
@@ -479,7 +479,7 @@
                 />
               </div>
               <p
-                class="text-[#594045] font-semibold text-base lg:text-lg text-right"
+                class="text-[#594045] font-semibold text-base lg:text-lg text-start"
               >
                 متابعة مستمرة وتقارير دورية دقيقة
               </p>
@@ -491,7 +491,7 @@
                 <img src="./images/icon-multiteam.svg" alt="" class="w-5 h-5" />
               </div>
               <p
-                class="text-[#594045] font-semibold text-base lg:text-lg text-right"
+                class="text-[#594045] font-semibold text-base lg:text-lg text-start"
               >
                 فريق عمل متعدد التخصصات متكامل
               </p>
@@ -507,7 +507,7 @@
                 />
               </div>
               <p
-                class="text-[#594045] font-semibold text-base lg:text-lg text-right"
+                class="text-[#594045] font-semibold text-base lg:text-lg text-start"
               >
                 برامج مثبتة النتائج مبنية على الـ ABA
               </p>

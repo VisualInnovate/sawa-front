@@ -50,35 +50,29 @@ export default {
 </script>
 
 <template>
-  <div style="margin: 1.5rem 0; padding: auto 0">
-    <v-row style="min-height: 80vh">
-      <v-col sm="12">
-        <v-row>
-          <v-col
-            v-for="per in user_permissions"
-            style="
-              background: gainsboro;
-              margin: 0.3rem 0.5rem;
-              padding: 0.5rem 1rem;
-              border-radius: 99px;
-              cursor: pointer;
-            "
-            :md="4"
-            :sm="6"
-            @click="removePer(per)"
-          >
-            {{ per.name }}
-          </v-col>
-          <v-spacer />
-        </v-row>
-      </v-col>
-    </v-row>
-    <v-btn
-      color="success"
-      @click="syncPermissions"
-      :disabled="new_permissions.length == 0"
-    >
-      {{ $t('submit') }}
-    </v-btn>
+  <div class="page">
+    <div class="surface-card form-stack">
+      <div class="chips">
+        <Button v-for="per in user_permissions" :key="per.id ?? per.name" :label="per.name" icon="pi pi-times"
+          iconPos="right" size="small" severity="secondary" rounded @click="removePer(per)" />
+      </div>
+      <div>
+        <Button :label="$t('submit')" icon="pi pi-check" :disabled="new_permissions.length == 0" @click="syncPermissions" />
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.form-stack {
+  display: grid;
+  gap: 1rem;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 40vh;
+  align-content: flex-start;
+}
+</style>

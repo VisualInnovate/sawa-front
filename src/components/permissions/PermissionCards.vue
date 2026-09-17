@@ -38,10 +38,9 @@
               </label>
               <Button
                 :icon="describeIcon"
-                class="p-button-rounded p-button-text info-btn"
+                class="info-btn"
                 @click="$emit('describe', permission)"
-                v-tooltip.top="$t(describeTooltip)"
-              />
+                v-tooltip.top="$t(describeTooltip)" rounded variant="text" />
             </div>
           </div>
         </div>

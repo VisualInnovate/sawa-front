@@ -1,43 +1,30 @@
 <template>
-<div>
-    <v-btn height="45" class="mb-5 text-white" color="#135c65" @click="goBack">
-        <v-icon
-          start
-          icon="mdi-arrow-left"
-        ></v-icon>
-          {{$t('back')}}
-      </v-btn>
-      <div>
-        <v-btn height="45" class="mb-5 text-white" color="#A9AB7F" @click="goprint">
-          {{$t('print')}}
-      </v-btn>
-      </div>
-      
-  
+  <div class="page">
+    <Toolbar>
+      <template #start>
+        <Button :label="$t('print')" icon="pi pi-print" severity="secondary" @click="goprint" />
+      </template>
+      <template #end>
+        <BackButton />
+      </template>
+    </Toolbar>
 
-
-        <v-data-table 
-          v-model:sort-by="sortBy"
-          :headers="header"
-          :items="desserts"
-          class="elevation-1"
-        >
-        <template v-slot:item="{ item }">
-          <tr>
-            <td>{{ item.columns.id }}</td>
-            <td>{{ item.columns.evaluation_title }}</td>
-            <td>{{ item.columns.side_profile_title }}</td>
-            <td>{{ item.columns.child_age }}</td>
-            <td>{{ item.columns.diff_age}}</td>
-            <td>{{ item.columns.grow_age }}</td>
-            <td>{{ Math.round(item.columns.late_percentage) }} %</td>
-            <td>{{ item.columns.result_created_at}}</td>
-          </tr>
-        </template></v-data-table>
-        
-        
-      
-</div>
+    <DataTable :value="desserts" :loading="loading" sortField="evaluation_title" :sortOrder="1" paginator :rows="10" stripedRows>
+      <template #empty>
+        <div class="empty-state"><i class="pi pi-inbox" />{{ $t("no_data") }}</div>
+      </template>
+      <Column field="id" header="#" sortable />
+      <Column field="side_profile_title" :header="$t('side_profile_title')" sortable />
+      <Column field="evaluation_title" :header="$t('evaluation_title')" sortable />
+      <Column field="child_age" :header="$t('child_age')" sortable />
+      <Column field="diff_age" :header="$t('diff_age')" sortable />
+      <Column field="grow_age" :header="$t('grow_age')" sortable />
+      <Column field="late_percentage" :header="$t('late_percentage')" sortable>
+        <template #body="{ data }">{{ Math.round(data.late_percentage) }} %</template>
+      </Column>
+      <Column field="result_created_at" :header="$t('result_created_at')" sortable />
+    </DataTable>
+  </div>
 </template>
 <script>
 import axios from 'axios'
@@ -46,34 +33,10 @@ import moment from 'moment';
   export default {
     data () {
       return {
-        sortBy: [{ key: 'evaluation_title', order: 'asc' }],
-        headers: [
-         
-        ],
         desserts: [],
+        loading: true,
       }
     },
-    computed: {
-    locale() {
-
-      return this.$i18n.locale;
-    },
-    header() {
-      return this.headers = [
-        {title: this.$t('id') ,key:'id'},
-        { title:this.$t('side_profile_title'), key: 'side_profile_title' },
-        { title:this.$t('evaluation_title'), key: 'evaluation_title'},
-
-          { title: this.$t('child_age'), key: 'child_age' },
-          { title: this.$t('diff_age'), key: 'diff_age' },
-          { title: this.$t('grow_age'), key: 'grow_age' },
-          { title: this.$t('late_percentage'), key: 'late_percentage' },
-          { title: this.$t('result_created_at'), key: 'result_created_at' },
-
-
-      ];
-    },
-  },
     
     methods: {
      async getruslte(){
@@ -83,6 +46,7 @@ import moment from 'moment';
           console.log(res.data.evaluation_results)
        this.desserts=res.data.evaluation_results
       })  
+      this.loading = false
       for(var i=0; i<this.desserts.length;i++){
         this.desserts[i].result_created_at=moment(this.desserts[i].result_created_at).format('DD-MM-yy ')
       }      
@@ -91,7 +55,7 @@ import moment from 'moment';
         this.$router.go(-1)
       },
       goprint(){
-        this.$router.push({name:'ResultPrint'})
+        this.$router.push({name:'ResultPrint', params: this.$route.params})
       }
     },
     mounted() {

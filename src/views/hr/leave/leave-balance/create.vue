@@ -1,9 +1,9 @@
 <template>
-  <v-card class="p-[2%]  bg-slate-50 shadow-xl gap-4" >
+  <div class="sawa-card p-[2%]  bg-slate-50 shadow-xl gap-4" >
   
     <div :class="{'animate__animated animate__bounce animate__delay-0s':error.employee_id}" class="flex flex-column gap-2 md:w-[50%] py-[2%]">
        <label for="username">{{ $t('employee_name') }}</label>
-        <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="employee_id" option-value="id"  :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full bg-[#f7f5f5]  " :class="{ 'p-invalid': submitted && !employee_id}" />
+        <Select required v-model="employee_id" option-value="id"  :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full" :class="{ 'p-invalid': submitted && !employee_id}" />
         <div class="mt-1 mb-5 text-red-500" v-if="error?.shift_id">{{ error.shift_id[0] }}</div>
     </div>
    
@@ -21,19 +21,19 @@
       
         <td>{{ item.title }}</td>
         <td>{{ item.value }}</td>
-        <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" /></td>
+        <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="m-auto" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" /></td>
       </tr>
       <tr >
-        <td><Dropdown @update:model-value="getmaxvalue($event)"  style="direction: ltr !important;" v-model="selectedOption"  :options="filteredDays" optionLabel="title" :placeholder='$t("holiday_type")' class="w-full " :class="{ 'p-invalid': submitted && !selectedOption}"/></td>
+        <td><Select @update:model-value="getmaxvalue($event)" v-model="selectedOption"  :options="filteredDays" optionLabel="title" :placeholder='$t("holiday_type")' class="w-full" :class="{ 'p-invalid': submitted && !selectedOption}"/></td>
         <td><InputNumber   class="w-full" v-model="quantity" :placeholder='$t("max_value")+ "=" + maxvalue' :max="maxvalue" :class="{ 'p-invalid': submitted && !quantity}" /></td>
-        <td> <Button   @click="submitted=true" type="submit" required class="create m-auto s " icon="pi pi-plus" ></Button></td>
+        <td> <Button   @click="submitted=true" type="submit" required class="m-auto s" icon="pi pi-plus"></Button></td>
       </tr>
     </tbody>
     
   </table>
 </form>
-<Button @click="submite" type="submit"  class="create m-auto w-32 my-4" :label='$t("submit")'></Button> 
-</v-card>
+<Button @click="submite" type="submit"  class="m-auto w-32 my-4" :label='$t("submit")'></Button> 
+</div>
 <Toast></Toast>
 </template>
 

@@ -27,8 +27,8 @@
        <div class="grid grid-cols-10 ">
         <div class="col-span-2"></div>
         <div class="col-span-8 w-[80%] py-[3%] text-center">
-            <p class="text-white text-center"> اكادميه سوا للتربيه الخاصه </p>
-            <p class="text-white text-center">هنا سوف تجد جميع الخدمات لطفلك </p>
+            <p class="text-white text-center">{{ $t("academy_name") }}</p>
+            <p class="text-white text-center">{{ $t("all_services_for_child") }}</p>
         </div>
         <div class="col-span-2"></div>
        </div>
