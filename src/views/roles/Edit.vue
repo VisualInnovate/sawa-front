@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import Editor from 'primevue/editor';
 // import ProductService from '@/service/ProductService';
@@ -79,21 +79,21 @@ const handleCheckboxClick = (permissionId) => {
 <template>
   <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
     <div class="col-12">
-      <v-card class="card shadow-md">
+      <div class="sawa-card card shadow-md">
       <form class="flex " @submit.prevent="submitForm">
         <div class="flex flex-column gap-2 py-1 w-[50%]">                
             <div class="flex">
-                    <label class="text-right ">{{ $t("اسم الرول") }}</label>
+                    <label class="text-start ">{{ $t("اسم الرول") }}</label>
                     <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                     </svg>
                 </div>
-            <InputText  class="bg-[#f7f5f5] text-center" v-model="role.name" :class="{ 'p-invalid': submitted && !role.name}" />
+            <InputText  class="text-center" v-model="role.name" :class="{ 'p-invalid': submitted && !role.name}" />
          </div>
          <div class="flex flex-column mx-2 items-stretch">
-          <label class="text-right invisible ">{{ $t("اسم الرول") }}</label>
+          <label class="text-start invisible ">{{ $t("اسم الرول") }}</label>
 
-          <Button  type="submit" @click="submitted=true"  class="create my-auto"  > {{ $t("submit") }}</Button>
+          <Button  type="submit" @click="submitted=true"  class="my-auto"> {{ $t("submit") }}</Button>
           
          </div>
       </form>
@@ -115,13 +115,13 @@ const handleCheckboxClick = (permissionId) => {
         <Dialog v-model:visible="show" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
           <div class="">
             <div class="flex flex-column gap-2">
-              <label class="w-full text-right" for="username">{{ $t('description') }}</label>
-              <v-textarea disabled readonly="true" bg-color="#EAE8E9" rows="3" v-model="description"></v-textarea> 
+              <label class="w-full text-start" for="username">{{ $t('description') }}</label>
+              <Textarea disabled readonly rows="3" v-model="description" autoResize fluid /> 
             </div>
           </div>
          
         </Dialog>
-      </v-card>
+      </div>
     </div>
   </div>
 </template>

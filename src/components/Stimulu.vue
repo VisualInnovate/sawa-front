@@ -1,45 +1,14 @@
+<script setup>
+import NavTabs from "./common/NavTabs.vue";
+
+const items = [
+  { to: { name: 'reinforcers' }, label: 'reinforcers', perm: 'stimulus list' },
+  { to: { name: 'pair' }, label: 'pair', perm: 'stimulus test create' },
+  { to: { name: 'return' }, label: 'return', perm: 'stimulus test create' },
+  { to: { name: 'without' }, label: 'without', perm: 'stimulus test create' },
+];
+</script>
+
 <template>
-    <Toolbar class="mb-4 shadow-md">
-  <template #end>
-        <!-- <router-link
-            :to="{ name: 'children-detailes' }"
-            class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-            > {{ $t('multiple') }}</router-link> -->
-            <router-link
-          v-can="'stimulus test create'"
-          :to="{ name: 'pair' }"
-          class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('pair') }}</router-link>
-   
-        <router-link
-          v-can="'stimulus list'"
-          :to="{ name: 'reinforcers' }"
-          class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('reinforcers') }}</router-link>
-        <router-link
-          v-can="'stimulus test create'"
-          :to="{ name: 'return' }"
-          class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('return') }}</router-link>
-        <router-link
-          v-can="'stimulus test create'"
-          :to="{ name: 'without' }"
-          class="export px-4 py-2 mx-2 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('without') }}</router-link>
-        
-        <!-- <router-link
-          :to="{ name: 'barrier-answer-type' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('tables') }}</router-link> -->
-       
-  </template>
-  
-</Toolbar>
-
+  <NavTabs :items="items" />
 </template>
-<style>
-.router-link-active {
-background-color: rgb(239, 80, 80) !important
-}
-
-</style>

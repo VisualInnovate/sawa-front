@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-import { FilterMatchMode } from "primevue/api";
+import { FilterMatchMode } from '@primevue/core/api';
 import { ref, onMounted, onBeforeMount } from "vue";
 // import ProductService from '@/service/ProductService';
 import { useToast } from "primevue/usetoast";
@@ -62,7 +62,7 @@ const restData = (id) => {
       toast.add({
         severity: "success",
         summary: t('success_message'),
-        detail: "Successful rest the employees",
+        detail: t("employees_reset_done"),
         life: 3000,
       });
     })
@@ -70,7 +70,7 @@ const restData = (id) => {
       console.error(error);
       toast.add({
         severity: "warn",
-        summary: "Error",
+        summary: t("error"),
         detail: "can't rest the employees",
         life: 3000,
       });
@@ -108,7 +108,7 @@ const status = (event, id) => {
             toast.add({
               severity: "success",
               summary: t('success_message'),
-              detail: "Successful login employees",
+              detail: t("employees_clocked_in"),
               life: 3000,
             });
             fetchData();
@@ -117,7 +117,7 @@ const status = (event, id) => {
             console.log("cann't clock in", err);
             toast.add({
               severity: "warn",
-              summary: "Error",
+              summary: t("error"),
               detail: "can't login employees",
               life: 3000,
             });
@@ -136,7 +136,7 @@ const status = (event, id) => {
             toast.add({
               severity: "success",
               summary: t('success_message'),
-              detail: "Successful logout employees",
+              detail: t("employees_clocked_out"),
               life: 3000,
             });
             fetchData();
@@ -145,7 +145,7 @@ const status = (event, id) => {
             console.log("cann't clock out", err);
             toast.add({
               severity: "warn",
-              summary: "Error",
+              summary: t("error"),
               detail: "can't logout employees",
               life: 3000,
             });
@@ -226,9 +226,9 @@ const initFilters = () => {
           <template #end>
             <div class="flex gap-2">
               <Button v-can="'employees create'" :label="$t('create_button')" icon="pi pi-plus"
-                class="p-button-success mr-2 no-print" @click="openNew" />
+                class="mr-2 no-print" @click="openNew" />
               <Button v-can="'employees list'" :label="$t('export')" icon="pi pi-download"
-                class="p-button-info no-print" @click="exportCSV" />
+                class="no-print" @click="exportCSV" severity="info" />
             </div>
           </template>
         </Toolbar>
@@ -246,12 +246,12 @@ const initFilters = () => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText v-model="filters['global'].value" :placeholder="$t('search')" class="w-full" />
-                  </span>
-                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
-                    v-tooltip.top="'Refresh data'" />
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="filters['global'].value" :placeholder="$t('search')" class="w-full" />
+              </IconField>
+                  <Button icon="pi pi-refresh" @click="fetchData"
+                    v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" variant="text" />
                 </div>
               </div>
             </template>
@@ -284,16 +284,16 @@ const initFilters = () => {
 
             <Column header-style="min-width:10rem;" class="no-print">
               <template #body="slotProps">
-                <div class="flex gap-2">
-                  <Button v-can="'employees edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success"
-                    @click="edit(slotProps.data.user.id)" v-tooltip.top="$t('edit')" />
-                  <Button v-can="'employees delete'" icon="pi pi-trash" class="p-button-rounded p-button-danger"
-                    @click="confirmDelete(slotProps.data.id)" v-tooltip.top="$t('delete')" />
-                  <Button v-can="'employees edit'" icon="pi pi-wrench" class="p-button-rounded p-button-help" @click="
+                <div class="table-actions">
+                  <Button v-can="'employees edit'" icon="pi pi-pencil"
+                    @click="edit(slotProps.data.user.id)" v-tooltip.top="$t('edit')" rounded severity="info" variant="outlined" />
+                  <Button v-can="'employees delete'" icon="pi pi-trash"
+                    @click="confirmDelete(slotProps.data.id)" v-tooltip.top="$t('delete')" rounded severity="danger" variant="outlined" />
+                  <Button v-can="'employees edit'" icon="pi pi-wrench" @click="
                     restdialog = true;
                   id = slotProps.data.id;
-                  " v-tooltip.top="$t('Rest')" />
-                  <Button v-can="'attendance edit'" class="p-button-rounded" :class="slotProps.data.is_clocked_in
+                  " v-tooltip.top="$t('Rest')" rounded severity="help" variant="outlined" />
+                  <Button v-can="'attendance edit'" :class="slotProps.data.is_clocked_in
                       ? 'p-button-secondary'
                       : 'p-button-info'
                     " :icon="slotProps.data.is_clocked_in
@@ -306,7 +306,7 @@ const initFilters = () => {
                     " v-tooltip.top="slotProps.data.is_clocked_in
                         ? $t('clockOut')
                         : $t('clockIn')
-                      " id="stu" />
+                      " id="stu" rounded />
                 </div>
               </template>
             </Column>
@@ -334,42 +334,42 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label="$t('no')" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label="$t('yes')" icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label="$t('no')" icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label="$t('yes')" icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header="$t('create_employee')"
           :modal="true">
           <div class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{
+            <label class="w-full text-start" for="username">{{
               $t("users")
             }}</label>
-            <MultiSelect v-model="employee.users_ids" required id="pv_id_1" style="direction: ltr !important"
+            <MultiSelect v-model="employee.users_ids" required
               option-value="id" filter :options="allusers" optionLabel="name" :placeholder="$t('users')"
-              class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
+              class="w-full" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.name">
               {{ error.name[0] }}
             </div>
           </div>
           <div class="w-full text-center">
-            <Button @click="createcrude" class="p-button-success m-auto w-[50%] my-4" :label="$t('submit')"></Button>
+            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label="$t('submit')" severity="success"></Button>
           </div>
         </Dialog>
 
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header="$t('update_employee')"
           :modal="true">
           <div class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{
+            <label class="w-full text-start" for="username">{{
               $t("title")
             }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder="$t('title')" />
+            <InputText required class="text-center" v-model="levels.title" :placeholder="$t('title')" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">
               {{ error.name[0] }}
             </div>
           </div>
           <div class="w-full text-center">
-            <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label="$t('submit')"></Button>
+            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label="$t('submit')" severity="success"></Button>
           </div>
         </Dialog>
         <!-- clockin & clockout Dialog -->
@@ -382,11 +382,11 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label="$t('no')" icon="pi pi-times" class="p-button-text" @click="clockeddialog = false" />
-            <Button :label="$t('yes')" icon="pi pi-check" class="p-button-text p-button-danger" @click="
+            <Button :label="$t('no')" icon="pi pi-times" @click="clockeddialog = false" variant="text" severity="secondary" />
+            <Button :label="$t('yes')" icon="pi pi-check" @click="
               clockeddialog = false;
             status($event, id);
-            " />
+            " severity="danger" />
           </template>
         </Dialog>
         <!-- Rest Dialog -->
@@ -398,11 +398,11 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label="$t('no')" icon="pi pi-times" class="p-button-text" @click="restdialog = false" />
-            <Button :label="$t('yes')" icon="pi pi-check" class="p-button-text p-button-danger" @click="
+            <Button :label="$t('no')" icon="pi pi-times" @click="restdialog = false" variant="text" severity="secondary" />
+            <Button :label="$t('yes')" icon="pi pi-check" @click="
               restdialog = false;
             restData($event, id);
-            " />
+            " severity="danger" />
           </template>
         </Dialog>
       </div>

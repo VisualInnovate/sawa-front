@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 
 // import ProductService from '@/service/ProductService';
@@ -95,11 +95,11 @@ const initFilters = () => {
 <template>
   <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
+      <div class="page">
+        <Toolbar>
           <template #start>
             <div class="my-2">
-            <Button v-can="'transportation schedule create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'transportation schedule create'" :label='$t("create_button")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -119,14 +119,14 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button  v-can="'transportation schedule list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button  v-can="'transportation schedule list'" :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
           </template>
         </Toolbar>
 
         <Toast/>
 
 
-      <div style="" class="shadow-xl ">
+      <div>
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
@@ -144,12 +144,12 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("transportation_schedule") }}</h5>
+              <h5 class="page-title">{{ $t("transportation_schedule") }}</h5>
              <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
+              <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
+              </IconField>
               </div>
             </div>
           </template>
@@ -185,8 +185,8 @@ const initFilters = () => {
            </Column>
            <Column field="is_active" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-                <p class="bg-[green] text-white py-2 rounded-lg w-20 text-center" v-if=" slotProps.data.is_active == 1">Active</p>
-                <p class="bg-[red] text-white py-2 rounded-lg w-20 text-center" v-if=" slotProps.data.is_active == 0 ">In Active</p>
+                <p class="bg-[green] text-white py-2 rounded-lg w-20 text-center" v-if=" slotProps.data.is_active == 1">{{ $t("active") }}</p>
+                <p class="bg-[red] text-white py-2 rounded-lg w-20 text-center" v-if=" slotProps.data.is_active == 0 ">{{ $t("inactive") }}</p>
               
             </template>
            </Column>
@@ -197,19 +197,15 @@ const initFilters = () => {
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
-              <div >
+              <div class="table-actions">
                 <Button
                 v-can="'transportation schedule edit'"
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
+                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
                 v-can="'transportation schedule delete'"
                 icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
               </div>
             </template>
           </Column>
@@ -226,12 +222,12 @@ const initFilters = () => {
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
       </div>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

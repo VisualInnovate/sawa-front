@@ -3,10 +3,10 @@ import axios from "axios";
 import InputText from "primevue/inputtext";
 import moment from "moment";
 import {useToast} from 'primevue/usetoast'
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 import { max } from "date-fns";
 export default {
-  components: { InputText, Calendar },
+  components: { InputText, DatePicker },
   data: () => ({
     pasrents:{},
    
@@ -52,13 +52,13 @@ export default {
 };
 </script>
 <template>
-  <!--  <v-alert v-if="alert_text!= null " color="green" :text="alert_text" class="mb-5"></v-alert>-->
 
-  <v-card class="p-[1%]">
+
+  <div class="sawa-card p-[1%]">
 
     <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('attributable_type') }}</label>
-                    <Dropdown @update:model-value="get_request" filter required id="pv_id_1" style="direction: ltr !important;" v-model="custom.attributable_type"  option-value="name" :options="modules" optionLabel="name"  class="w-full bg-[#f7f5f5]"  />
+                    <Select @update:model-value="get_request" filter required v-model="custom.attributable_type"  option-value="name" :options="modules" optionLabel="name"  class="w-full"  />
 
             </div>
      
@@ -66,5 +66,5 @@ export default {
      
       <Toast/>
     
-  </v-card>
+  </div>
 </template>

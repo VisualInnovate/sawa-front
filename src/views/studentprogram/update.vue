@@ -7,7 +7,7 @@
  
   </div>
   
-  <v-card>
+  <div class="sawa-card">
     <section v-if="student.milestone_plan_goals?.length" class="m-4 p-4 rounded-lg bg-slate-50">
       <h2 class="font-bold mb-3">{{ $t('milestone_plan_goals') }}</h2>
       <ul class="list-disc ps-5 space-y-2">
@@ -22,15 +22,15 @@
              
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('ProgramName') }}</label>
-                  <Dropdown   required id="pv_id_1" style="direction: ltr !important;" v-model="student.program_id" @update:model-value="getprograme"   option-value="id" filter :options="programes" optionLabel="name"  :class="{ 'p-invalid': submitted && !student.program_id}"/>
+                  <Select   required v-model="student.program_id" @update:model-value="getprograme"   option-value="id" filter :options="programes" optionLabel="name"  :class="{ 'p-invalid': submitted && !student.program_id}"/>
               </div> 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('child_name') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_id"  @update:model-value=" getAllDoctor"   option-value="id" filter :options="child" optionLabel="name" :placeholder='$t("child_name")' :class="{ 'p-invalid': submitted && !student.student_id}"  />
+                  <Select required v-model="student.student_id"  @update:model-value=" getAllDoctor"   option-value="id" filter :options="child" optionLabel="name" :placeholder='$t("child_name")' :class="{ 'p-invalid': submitted && !student.student_id}"  />
               </div> 
               <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('recommendations') }}</label>
-                  <v-textarea  bg-color="#EAE8E9" rows="3" v-model="student.recommendations" ></v-textarea> 
+                  <label class="w-full text-start" for="username">{{ $t('recommendations') }}</label>
+                  <Textarea rows="3" v-model="student.recommendations" autoResize fluid /> 
                 </div>
               
       </div>
@@ -39,7 +39,7 @@
             <tr>
               <th>{{ $t("Typetreatment") }}</th>
               <th>{{ $t("number_sessaion") }} </th>
-              <th> عدد الجسات الفردية + الجماعية </th>
+              <th>{{ $t("sessions_count_total") }}</th>
             </tr>
           </thead>
           <tbody  >
@@ -48,13 +48,13 @@
               <td>{{ item.name }}</td>
               <td>{{ item.sessions_number }}</td>
               <td>{{ maxcapsity }}</td>
-              <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" /></td>
+              <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="m-auto" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" /></td>
             </tr>
             <tr v-if="student.program_id && maxcapsity>0 && setiontype != 1 " >
-              <td><Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.Type"  option-value="id" filter :options="treaments" optionLabel="name" :placeholder='$t("Typetreatment")' class="w-full"  :class="{ 'p-invalid': submitted && !student.Type}" /> </td>
-              <td><InputNumber :max="maxcapsity" :min="1"  class="bg-[#f7f5f5] w-full" v-model="student.sessions_number" :placeholder='$t("Sn")' /></td>
+              <td><Select required v-model="student.Type"  option-value="id" filter :options="treaments" optionLabel="name" :placeholder='$t("Typetreatment")' class="w-full"  :class="{ 'p-invalid': submitted && !student.Type}" /> </td>
+              <td><InputNumber :max="maxcapsity" :min="1"  class="w-full" v-model="student.sessions_number" :placeholder='$t("Sn")' /></td>
               <td>{{ maxcapsity }}</td>
-              <td> <Button   @click="addarray" type="submit"  class="create m-auto s " icon="pi pi-plus" ></Button></td>
+              <td> <Button   @click="addarray" type="submit"  class="m-auto s" icon="pi pi-plus"></Button></td>
             </tr>
           </tbody>
           
@@ -81,14 +81,14 @@
     <div class="flex flex-column gap-2 w-full">
        
                 
-                <Button  type="submit "  @click="submitted =true"  class="create m-auto w-full  lg:w-[50%] "  :label='$t("submit")'></Button>
+                <Button  type="submit "  @click="submitted =true"  class="m-auto w-full lg:w-[50%]"  :label='$t("submit")'></Button>
           
               </div>
     </div>
     </form>
 
 
-  </v-card>
+  </div>
 
  
 
@@ -105,7 +105,7 @@ import axios from "axios";
 import { ref } from "vue";
 import moment from "moment";
 import arLocale from "@fullcalendar/core/locales/ar";
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 
 
 import { useAppLangStore } from "../../stores/AppLangStore";
@@ -113,7 +113,7 @@ export default {
 
   components: {
     FullCalendar,
-    Calendar
+    DatePicker
   },
   data() {
     return {
@@ -122,8 +122,8 @@ export default {
       deleteDialog:false,
       submitted:false,
       setiontype:"",
-      programes:{},
-      child:{},
+      programes:[],
+      child:[],
       rooms:{},
       error: {},
       doctors:{},
@@ -136,7 +136,7 @@ export default {
       capasityboj:{},
       capasity:[],
       maxcapsity:"",
-      treaments:{},
+      treaments:[],
       
       time_slotename:[],
       // calender

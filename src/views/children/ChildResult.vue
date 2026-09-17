@@ -21,8 +21,7 @@
         @click="goBack"
         rounded
         outlined
-        class="inline-flex items-center gap-2 font-semibold"
-      >
+        class="inline-flex items-center gap-2 font-semibold">
         <i class="pi pi-arrow-left"></i>
         <span>{{ $t('back') }}</span>
       </Button>
@@ -44,7 +43,7 @@
     >
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-semibold text-gray-600">{{ $t('chart_type') }}</label>
-        <Dropdown
+        <Select
           v-model="selectedChartType"
           :options="chartTypes"
           optionLabel="label"
@@ -56,7 +55,7 @@
 
       <div v-if="!isNonCartesianChart" class="flex flex-col gap-1.5">
         <label class="text-sm font-semibold text-gray-600">{{ $t('xAxis') }}</label>
-        <Dropdown
+        <Select
           v-model="selectX"
           :options="firstSelectBoxComputed"
           optionLabel="title"
@@ -68,7 +67,7 @@
 
       <div v-if="!isNonCartesianChart" class="flex flex-col gap-1.5">
         <label class="text-sm font-semibold text-gray-600">{{ $t('yAxis') }}</label>
-        <Dropdown
+        <Select
           v-model="selectY"
           :options="secondSelectBoxComputed"
           optionLabel="title"
@@ -80,7 +79,7 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-semibold text-gray-600">{{ $t('from') }}</label>
-        <Calendar
+        <DatePicker
           v-model="from"
           @update:model-value="filter"
           dateFormat="dd/mm/yy"
@@ -92,7 +91,7 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-semibold text-gray-600">{{ $t('to') }}</label>
-        <Calendar
+        <DatePicker
           v-model="to"
           @update:model-value="filter"
           dateFormat="dd/mm/yy"
@@ -175,8 +174,7 @@
               @click="print"
               outlined
               rounded
-              class="w-full justify-center md:w-auto"
-            >
+              class="w-full justify-center md:w-auto">
               <i class="pi pi-print"></i>
               <span>{{ $t('print') }}</span>
             </Button>
@@ -197,7 +195,6 @@
           :rowsPerPageOptions="[5,10,25,50]"
           :loading="loading"
           class="w-full"
-          responsiveLayout="stack"
           breakpoint="960px"
           stripedRows
           removableSort
@@ -275,8 +272,7 @@
                 text
                 rounded
                 @click="editItem(data.result_created_at, data.id)"
-                v-tooltip.top="$t('edit_evaluation')"
-              />
+                v-tooltip.top="$t('edit_evaluation')" variant="outlined" />
             </template>
           </Column>
         </DataTable>
@@ -293,7 +289,7 @@
       <div class="flex flex-col gap-4">
         <div>
           <label class="mb-2 block text-sm font-semibold text-gray-600">{{ $t('evaluation_date') }}</label>
-          <Calendar
+          <DatePicker
             v-model="examDate"
             dateFormat="dd/mm/yy"
             showIcon
@@ -310,13 +306,11 @@
             :label="$t('cancel')"
             severity="secondary"
             @click="visible = false"
-            outlined
-          />
+            outlined />
           <Button
             :label="$t('save')"
             severity="primary"
-            @click="submit"
-          />
+            @click="submit" />
         </div>
       </div>
     </Dialog>
@@ -337,8 +331,8 @@ import Chart from 'primevue/chart';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
-import Dropdown from 'primevue/dropdown';
-import Calendar from 'primevue/calendar';
+import Select from 'primevue/select';
+import DatePicker from 'primevue/datepicker';
 import Dialog from 'primevue/dialog';
 import Message from 'primevue/message';
 import ProgressBar from 'primevue/progressbar';

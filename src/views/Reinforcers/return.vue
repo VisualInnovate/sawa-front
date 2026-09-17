@@ -1,13 +1,13 @@
 <template>
     <Stimulu></Stimulu>
      
-      <Button icon="pi pi-angle-left" @click="gosession" class=" my-4  m-auto create  " :label='$t("العودة للجلسة")'></Button>
+      <Button icon="pi pi-angle-left" @click="gosession" class="my-4 m-auto" :label='$t("العودة للجلسة")'></Button>
   
-    <v-card class="p-[2%]">
+    <div class="sawa-card p-[2%]">
         <!-- <div class="m-auto bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="flex  flex-column gap-2">
                 <label for="username">{{ $t('child_name') }}</label>
-                   <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="pair.child_id" disabled option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                   <Select required v-model="pair.child_id" disabled option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                </div>
                
@@ -16,9 +16,9 @@
        <!-- items -->
        <div class="m-auto my-5 bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-2 lg:grid-cols-3">
         <div>
-            <Button   @click="addarray"  class="create m-auto  " icon="pi pi-plus" ></Button>
-            <Button  :disabled="count <= 0"  @click="deletearray"  class="delete m-auto  " icon="pi pi-minus" ></Button>
-            <Dropdown v-model="stimul" class="hover:ring-0 w-52 mx-2" filter option-value="name"  :options="stimulus" optionLabel="name"  placeholder="select item" />
+            <Button   @click="addarray"  class="m-auto" icon="pi pi-plus"></Button>
+            <Button  :disabled="count <= 0"  @click="deletearray"  class="m-auto" icon="pi pi-minus" severity="danger"></Button>
+            <Select v-model="stimul" class="hover:ring-0 w-52 mx-2" filter option-value="name"  :options="stimulus" optionLabel="name"  :placeholder="$t('select_item')" />
       
         </div>
         <div class='bg-white p-2 flex justify-between rounded-sm' v-for="item,index in items" >
@@ -72,7 +72,7 @@
                  
        </div>
     
-       <Button @click="createevalation" class=" mt-4 m-auto create  w-full " :label='$t("submit")'></Button>
+       <Button @click="createevalation" class="mt-4 m-auto w-full" :label='$t("submit")'></Button>
         </div>
       <div>
         <table class="w-full h-full rounded-md shadow-md text-sm text-left m-auto rtl:text-right text-gray-500 dark:text-gray-400">
@@ -125,7 +125,7 @@
       </div>
      
        </div>
-    </v-card>
+    </div>
   
 
   

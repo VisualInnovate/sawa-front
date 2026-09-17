@@ -5,15 +5,15 @@
     <div class="pt-4 font-bold rounded flex justify-between">
       <div class="flex">
         <div><img src="../image/header/Group463.png" /></div>
-        <p class="text-xl m-auto p-2 pb-0 text-right font-semibold">
+        <p class="text-xl m-auto p-2 pb-0 text-start font-semibold">
           {{ $t("Sawa_Academy_for_Special_Education") }}
         </p>
       </div>
-      <div class="my-auto text-right font-semibold text-lg text-[#148A98]">
+      <div class="my-auto text-start font-semibold text-lg text-[#148A98]">
         {{ notification.data.data.event_date }}
       </div>
     </div>
-    <div class="rounded text-right font-semibold text-lg">
+    <div class="rounded text-start font-semibold text-lg">
       <p class="block py-2">{{ notification.data.message }}</p>
       <p class="block py-2">
        

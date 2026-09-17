@@ -5,6 +5,8 @@ import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import moment from "moment";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const name = ref('')
 const x = ref(true)
@@ -32,9 +34,9 @@ const days = ref([
 ]);
 const selectedCity = ref();
 const cities = ref([
-  { name: 'Normal Shift', value: '1' },
-  { name: '24 Shift', value: '2' },
-  { name: 'directorate shift', value: '3' },
+  { name: t('shift_type.normal'), value: '1' },
+  { name: t('shift_type.full_day'), value: '2' },
+  { name: t('shift_type.directorate'), value: '3' },
 ]);
 
 const increasecount = () => {
@@ -51,7 +53,7 @@ const decreasecount = () => {
 const createdirectorate = () => {
   axios.post(`/dashboard/directorate/shift`, directorate.value)
     .then((res) => {
-      toast.add({ severity: 'success', summary: 'Success', detail: 'created Successfully', life: 3000 });
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 });
       router.go(-1)
     })
     .catch((error) => {
@@ -68,7 +70,7 @@ const createshift = () => {
     days: dayspush.value
   })
     .then((res) => {
-      toast.add({ severity: 'success', summary: 'Success', detail: 'created Successfully', life: 3000 });
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 });
       router.go(-1)
     })
     .catch((error) => {
@@ -87,7 +89,7 @@ const submit = () => {
     return
   axios.put(`/api/shifts/${route.params.id}`, shift.value)
     .then((res) => {
-      toast.add({ severity: 'success', summary: 'Success', detail: 'created Successfully', life: 3000 });
+      toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 });
       router.go(-1)
       console.log(shift.value);
     })
@@ -129,7 +131,7 @@ const changeStatus = (index) => {
   <div>
     <Toast />
     <form>
-      <v-card style="overflow-x: scroll;">
+      <div class="sawa-card" style="overflow-x: scroll;">
         <div class="card">
           <div class="w-full m-5">
             <p class="" for="name">{{ $t("title") }}</p>
@@ -144,27 +146,27 @@ const changeStatus = (index) => {
             </div>
 
             <div class="field mx-5" v-if="!day.week_end">
-              <label class="mx-5">Clock In</label>
+              <label class="mx-5">{{ $t("clock_in") }}</label>
               <InputText type="time" v-model.trim="day.clock_in" timeOnly disabled autofocus />
             </div>
 
             <div class="field mr-5" v-else>
-              <label class="mx-5">Clock In</label>
+              <label class="mx-5">{{ $t("clock_in") }}</label>
               <InputText type="time" v-model.trim="day.clock_in" required timeOnly autofocus hourFormat="12" :class="{ 'p-invalid': submitted && !day.clock_out }" />
             </div>
 
             <div class="field" v-if="!day.week_end">
-              <label class="mx-2.5 w-10">Clock Out</label>
+              <label class="mx-2.5 w-10">{{ $t("clock_out") }}</label>
               <InputText class="w-28" type="time" v-model.trim="day.clock_out" timeOnly disabled autofocus />
             </div>
             <div class="field" v-else>
-              <label class="mx-5">Clock Out</label>
+              <label class="mx-5">{{ $t("clock_out") }}</label>
               <InputText type="time" v-model.trim="day.clock_out" timeOnly class="w-28" required hourFormat="12" autofocus :class="{ 'p-invalid': submitted && !day.clock_out }" />
             </div>
           </div>
-          <Button class="create m-5" type="submit" @click.prevent="submit()">Submit</Button>
+          <Button class="m-5" type="submit" @click.prevent="submit()">{{ $t("submit") }}</Button>
         </div>
-      </v-card>
+      </div>
     </form>
 
     <!-- Other parts of the template remain unchanged -->

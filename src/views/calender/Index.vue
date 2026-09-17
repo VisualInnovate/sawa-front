@@ -1,39 +1,38 @@
 <template>
-  <v-card class="p-[1%] bg-slate-50">
-    <Toolbar class="mb-4 shadow-md">
+  <div class="sawa-card p-[1%] bg-slate-50">
+    <Toolbar>
       <template #start>
         <div class="flex">
-          <Dropdown
+          <Select
             @update:model-value="fetchEmployees($event)"
             required
-            id="pv_id_1"
-            style="direction: ltr !important; text-align: center !important"
-            v-model="event.evaluation_type"
+            :modelValue="event.evaluation_type"
+            :disabled="saving"
             option-value="id"
             :options="evaluate_types"
             optionLabel="name"
             class="mx-2"
           />
-          <Dropdown
+          <Select
             @update:model-value="getTimes($event)"
             :placeholder="$t('employee_name')"
-            id="pv_id_1"
-            style="direction: ltr !important; text-align: center !important"
-            v-model="event.employee_id"
+            :modelValue="event.employee_id"
+            required
+            :loading="employeesLoading"
+            :disabled="employeesLoading || !employees.length || saving"
+            :invalid="submitted && !event.employee_id"
             option-value="id"
             filter
             :options="employees"
             optionLabel="name"
             class="mx-2"
           />
-          <Dropdown
+          <Select
             class="invisible"
             :loading="!event.evaluation_type"
             disabled
             @update:model-value="getTimes"
             :placeholder="$t('type_work')"
-            id="pv_id_1"
-            style="direction: ltr !important; text-align: center !important"
             v-model="event.type"
             option-value="id"
             filter
@@ -46,8 +45,14 @@
       <template #end> </template>
     </Toolbar>
 
+    <p role="status" class="calendar-status">
+      <span v-if="employeesLoading || calendarLoading">{{ $t('calendar_loading') }}</span>
+      <span v-else-if="calendarError">{{ calendarError }}</span>
+      <span v-else-if="!employees.length">{{ $t('calendar_no_employees') }}</span>
+      <span v-else-if="!event.employee_id">{{ $t('select_evaluation_employee') }}</span>
+      <span v-else-if="!avalible_day.length">{{ $t('calendar_no_slots') }}</span>
+    </p>
     <FullCalendar
-      v-if="business_hours.length >= 1"
       :options="opts"
       ref="fullCalendar"
     />
@@ -59,23 +64,23 @@
       :style="{ width: '40vw' }"
     >
       <form @submit.prevent="create" class="">
+        <p>{{ $t('employee_name') }}: {{ employees.find(employee => employee.id === event.employee_id)?.name }}</p>
         <div class="flex flex-column">
-          <label class="text-right">{{ $t("title") }}</label>
+          <label class="text-start">{{ $t("title") }}</label>
           <InputText
+            required
             v-model="event.title"
             :class="{ 'p-invalid': submitted && !event.title }"
           />
         </div>
 
         <div class="flex flex-column gap-2 py-1">
-          <label class="w-full text-right" for="username">{{
+          <label class="w-full text-start" for="username">{{
             $t("child_name")
           }}</label>
-          <Dropdown
+          <Select
             disabled
             required
-            id="pv_id_1"
-            style="direction: ltr !important; text-align: center !important"
             v-model="event.child_id"
             option-value="id"
             filter
@@ -89,10 +94,11 @@
         <div class="w-full text-center">
           <Button
             type="submit"
+            :loading="saving"
+            :disabled="!event.employee_id || calendarLoading || saving || !opts.event"
             @click="submitted = true"
-            class="create m-auto w-[50%] my-4"
-            :label="$t('submit')"
-          ></Button>
+            class="m-auto w-[50%] my-4"
+            :label="$t('submit')"></Button>
         </div>
       </form>
     </Dialog>
@@ -109,7 +115,7 @@
           {{ $t("from") }} {{ event.start_time }} {{ $t("to") }}
           {{ event.end_time }}
         </p>
-        <Button v-can="'working hours delete'" class="delete mt-3" icon="pi pi-trash" @click="deleteEvent" />
+        <Button v-if="event_id" v-can="'working hours delete'" class="mt-3" icon="pi pi-trash" @click="deleteEvent" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
       </form>
     </Dialog>
     <Dialog
@@ -123,7 +129,7 @@
         <p>{{ $t("no_open_positions") }}</p>
       </form>
     </Dialog>
-  </v-card>
+  </div>
   <Toast></Toast>
 </template>
 
@@ -136,7 +142,7 @@ import TimeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 import InputText from "primevue/inputtext";
 import { useAppLangStore } from "../../stores/AppLangStore";
 import { Toast } from "flowbite-vue";
@@ -146,7 +152,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
 export default {
   components: {
     FullCalendar,
-    Calendar,
+    DatePicker,
     InputText,
   },
   data() {
@@ -168,7 +174,7 @@ export default {
       ],
       event_types: [
         { name: "تقيممات", id: 1 },
-        { name: "اجتماعات", id: 2 },
+        { name: this.$t('event_type.meetings'), id: 2 },
       ],
       users: [],
       business_hours: [],
@@ -176,11 +182,20 @@ export default {
       visible: false,
       updateevent: false,
       event: {
+        employee_id: null,
         type: 1,
         color: "87ceeb",
         evaluation_type: 2,
       },
       submitted: false,
+      employeesLoading: false,
+      calendarLoading: false,
+      calendarError: '',
+      saving: false,
+      employeesRequest: 0,
+      calendarRequest: 0,
+      slotEmployeeId: null,
+      booked: [],
       employees: [],
       avalible_day: [],
       days: [0, 1, 2, 3, 4, 5, 6],
@@ -195,33 +210,18 @@ export default {
         slotLabelInterval: "00:30:00",
         hiddenDays: [],
         slotMinTime: "00:00:00",
-        slotMaxTime: "00:00:00",
-        selectable: true,
-        editable: true,
+        slotMaxTime: "24:00:00",
+        selectable: false,
+        editable: false,
+        events: [],
+        event: null,
         validRange: { start: new Date() },
         headerToolbar: {
           left: "title",
           center: "prev next today",
           right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
         },
-        selectAllow: (selectInfo) => {
-          const calendarApi = this.$refs.fullCalendar.getApi();
-          const events = calendarApi.getEvents();
-
-          for (let event of events) {
-            // تحقق فقط من التداخل على مستوى الوقت داخل نفس اليوم
-            if (
-              moment(selectInfo.start).isSame(event.start, "day") && // نفس اليوم
-              ((selectInfo.start >= event.start &&
-                selectInfo.start < event.end) || // البداية داخل الحدث
-                (selectInfo.end > event.start && selectInfo.end <= event.end)) // النهاية داخل الحدث
-            ) {
-              return false; // يوجد تداخل، لا تسمح
-            }
-          }
-
-          return true; // لا يوجد تداخل، يمكن الإضافة
-        },
+        selectAllow: this.canSelectSlot.bind(this),
 
         eventClick: this.handleEventClick.bind(this),
         dateClick: this.handleDateClick,
@@ -234,55 +234,63 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
-    fetchEmployees() {
-      axios
-        .get(`api/employees/get/with/${this.event.evaluation_type}`)
-        .then((response) => {
-          this.employees = response.data.data.employees;
-          const daysData = Array.isArray(response.data.data.days[0])
-            ? response.data.data.days[0]
-            : [];
-
-          this.avalible_day = daysData;
-
-          // Map business hours and store them in an array
-          this.business_hours = daysData.map((event) => ({
-            day: new Date(event.start).getDay(),
-            start: moment(event.start).format("HH:mm:ss"),
-            end: moment(event.end).format("HH:mm:ss"),
-          }));
-
-          // Dynamically set hiddenDays in calendar
-          const openDays = this.business_hours.map((item) => item.day);
-          this.opts.hiddenDays = this.days.filter(
-            (day) => !openDays.includes(day)
-          );
-
-          // Map the booked events and add to calendar
-          this.opts.events = response.data.data.booked.map((event) => ({
-            title: event.title,
-            start: `${event.date}T${event.start_time}+02:00`,
-            end: `${event.date}T${event.end_time}+02:00`,
-            backgroundColor: "#" + event.color,
-          }));
-        })
-        .catch((error) => {
-          this.business_hours = [];
-          this.employees = [];
-          this.opts.hiddenDays = [];
-        });
+    asList(value) {
+      return Array.isArray(value) ? value : (value && typeof value === 'object' ? Object.values(value) : []);
     },
-    handleDatesSet(event) {
-      if (this.business_hours.length >= 1) {
-        const clickedDate = new Date(event.startStr);
-
-        this.opts.slotMinTime = this.business_hours.find(
-          (item) => item.day === clickedDate.getDay()
-        ).start;
-        this.opts.slotMaxTime = this.business_hours.find(
-          (item) => item.day === clickedDate.getDay()
-        ).end;
+    clearCalendar() {
+      this.business_hours = [];
+      this.avalible_day = [];
+      this.booked = [];
+      this.opts.events = [];
+      this.opts.event = null;
+      this.opts.selectable = false;
+      this.opts.hiddenDays = [];
+      this.opts.slotMinTime = '00:00:00';
+      this.opts.slotMaxTime = '24:00:00';
+      this.slotEmployeeId = null;
+      this.visible = false;
+      this.updateevent = false;
+      this.calendarError = '';
+    },
+    async fetchEmployees(value = this.event.evaluation_type) {
+      // Assign the emitted value before requesting data; v-model may update after the handler.
+      const evaluationType = Number(value);
+      this.event.evaluation_type = evaluationType;
+      const request = ++this.employeesRequest;
+      ++this.calendarRequest;
+      this.event.employee_id = null;
+      this.employees = [];
+      this.employeesLoading = true;
+      this.calendarLoading = false;
+      this.clearCalendar();
+      try {
+        const { data } = await axios.get(`api/employees/get/with/${evaluationType}`);
+        if (request !== this.employeesRequest) return;
+        this.employees = this.asList(data.data?.employees).map(employee => ({ ...employee, id: Number(employee.id) }));
+      } catch (error) {
+        if (request !== this.employeesRequest) return;
+        if (error.response?.status !== 404) this.calendarError = this.$t('request_failed_retry');
+      } finally {
+        if (request === this.employeesRequest) this.employeesLoading = false;
       }
+    },
+    handleDatesSet() {
+      // Keep usable time bounds even when the visible month starts on a non-working day.
+      if (!this.business_hours.length) return;
+      this.opts.slotMinTime = this.business_hours.map(hours => hours.start).sort()[0];
+      this.opts.slotMaxTime = this.business_hours.map(hours => hours.end).sort().at(-1);
+    },
+    canSelectSlot(slot) {
+      if (!this.event.employee_id || this.calendarLoading || this.employeesLoading || this.saving) return false;
+      if (slot.allDay) return this.avalible_day.some(day => moment(day.start).isSame(slot.start, 'day'));
+      const start = moment(slot.start);
+      const end = moment(slot.end);
+      const available = end.isAfter(start) && this.avalible_day.some(day =>
+        start.isSameOrAfter(moment(day.start)) && end.isSameOrBefore(moment(day.end))
+      );
+      return available && !this.booked.some(booking =>
+        start.isBefore(moment(booking.end)) && end.isAfter(moment(booking.start))
+      );
     },
 
     getClidreen() {
@@ -309,76 +317,87 @@ export default {
           }));
         });
     },
-    create() {
-      axios
-        .post(`api/evaluation-request`, {
+    async create() {
+      this.submitted = true;
+      if (this.saving) return;
+      if (!this.event.employee_id || !this.employees.some(employee => employee.id === this.event.employee_id)) {
+        this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('select_evaluation_employee'), life: 4000 });
+        return;
+      }
+      if (!this.opts.event || this.slotEmployeeId !== this.event.employee_id || !this.canSelectSlot(this.opts.event)) {
+        this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('calendar_select_slot'), life: 4000 });
+        return;
+      }
+      this.saving = true;
+      try {
+        await axios.post(`api/evaluation-request`, {
           employee_id: this.event.employee_id,
           color: this.event.color,
           title: this.event.title,
           evaluation_type: this.event.evaluation_type,
           consultant_id: localStorage.getItem("user_id"),
           child_id: this.event.child_id,
-          date: moment(this.opts.event.end).format(" YYYY-MM-DD"),
+          date: moment(this.opts.event.start).format("YYYY-MM-DD"),
           start_time: moment(this.opts.event.start).format("HH:mm:ss"),
           end_time: moment(this.opts.event.end).format("HH:mm:ss"),
-        })
-        .then((response) => {
-          this.visible = !this.visible;
+        });
+          this.visible = false;
           this.$toast.add({
             severity: "success",
             summary: this.$t("success_message"),
             detail: `${this.$t("element_add_success")}`,
             life: 3000,
           });
-          this.getTimes();
-        })
-        .catch((el) => {
+          await this.getTimes();
+      } catch (el) {
           this.$toast.add({
             severity: "error",
             summary: this.$t("error"),
-            detail: `${this.$t("mission_error")}`,
+            detail: el.response?.data?.message || this.$t("mission_error"),
             life: 3000,
           });
-        });
+      } finally {
+        this.saving = false;
+      }
     },
-    getTimes(id) {
-      axios
-        .get(`api/employees/get/with/calendar/${id}?type=${this.event.type}`)
-        .then((response) => {
-          // Log the response for debugging
-          console.log(response.data.data.days);
-
-          // Ensure days is an array
-          const daysData = Array.isArray(response.data.data.days)
-            ? response.data.data.days
-            : [];
-
-          this.avalible_day = daysData;
-
-          // Map business hours and store them in an array
-          this.business_hours = daysData.map((event) => ({
-            day: new Date(event.start).getDay(),
-            start: moment(event.start).format("HH:mm:ss"),
-            end: moment(event.end).format("HH:mm:ss"),
-          }));
-
-          // Dynamically set hiddenDays in calendar
-          const openDays = this.business_hours.map((item) => item.day);
-          this.opts.hiddenDays = this.days.filter(
-            (day) => !openDays.includes(day)
+    async getTimes(value = this.event.employee_id) {
+      const id = value == null ? null : Number(value);
+      this.event.employee_id = id;
+      const request = ++this.calendarRequest;
+      this.clearCalendar();
+      this.calendarLoading = false;
+      if (!id || !this.employees.some(employee => employee.id === id)) return;
+      this.calendarLoading = true;
+      try {
+          const response = await axios.get(`api/employees/get/with/calendar/${id}?type=${this.event.type}`);
+          if (request !== this.calendarRequest) return;
+          const daysData = this.asList(response.data.data?.days).filter(day =>
+            moment(day.start).isValid() && moment(day.end).isAfter(moment(day.start))
           );
-
-          // Map the booked events and add to calendar
-          this.opts.events = response.data.data.booked.map((event) => ({
+          this.avalible_day = daysData;
+          this.business_hours = daysData.map((event) => ({
+            day: moment(event.start).day(),
+            start: moment(event.start).format("HH:mm:ss"),
+            end: moment(event.end).isSame(moment(event.start), 'day') ? moment(event.end).format("HH:mm:ss") : '24:00:00',
+          }));
+          this.handleDatesSet();
+          this.booked = this.asList(response.data.data?.booked).map((event) => ({
             title: event.title,
-            start: `${event.date}T${event.start_time}+02:00`,
-            end: `${event.date}T${event.end_time}+02:00`,
+            start: `${event.date}T${event.start_time}`,
+            end: `${event.date}T${event.end_time}`,
             backgroundColor: "#" + event.color,
           }));
-        })
-        .catch((error) => {
-          console.error("Error fetching times:", error);
-        });
+          this.opts.events = [
+            ...daysData.map(day => ({ start: day.start, end: day.end, display: 'background', backgroundColor: '#d1fae5' })),
+            ...this.booked,
+          ];
+          this.opts.selectable = daysData.length > 0;
+      } catch (error) {
+        if (request !== this.calendarRequest) return;
+        this.calendarError = error.response?.status === 404 ? this.$t('calendar_no_slots') : this.$t('request_failed_retry');
+      } finally {
+        if (request === this.calendarRequest) this.calendarLoading = false;
+      }
     },
 
     handleEventClick(event) {
@@ -391,28 +410,19 @@ export default {
 
       this.updateevent = true;
     },
+    handleDateClick(info) {
+      if (info.view.type !== 'dayGridMonth' || !this.canSelectSlot({ ...info, start: info.date, allDay: true })) return;
+      this.$refs.fullCalendar.getApi().changeView('timeGridDay', info.date);
+    },
     handleSelect(event) {
-      this.opts.event = event;
-
-      const clickedDate = new Date(event.startStr);
-
-      this.opts.slotMinTime = this.business_hours.find(
-        (item) => item.day === clickedDate.getDay()
-      ).start;
-      this.opts.slotMaxTime = this.business_hours.find(
-        (item) => item.day === clickedDate.getDay()
-      ).end;
-      if (
-        event.view.type == "dayGridMonth" &&
-        this.avalible_day.some((day) => day.start.includes(event.startStr))
-      ) {
-        const calendarApi = this.$refs.fullCalendar.getApi();
-        calendarApi.changeView("timeGridDay", event.startStr);
-      } else if (event.view.type == "timeGridDay") {
-        this.visible = true;
-      } else {
-        this.not_find = true;
+      if (!this.canSelectSlot(event)) return;
+      if (event.allDay) {
+        this.$refs.fullCalendar.getApi().changeView('timeGridDay', event.start);
+        return;
       }
+      this.opts.event = event;
+      this.slotEmployeeId = this.event.employee_id;
+      this.visible = true;
     },
     createEvent() {
       axios
@@ -452,24 +462,8 @@ export default {
     resetModal() {
       this.visible = false;
       this.updateevent = false;
-      this.event = {
-        color: "87ceeb",
-      };
-    },
-  },
-  watch: {
-    // Watch the variable for changes
-    business_hours(newValue, oldValue) {
-      // Extract the `day` values from `business_hours`
-      if (newValue.length >= 1) {
-        const usedDays = newValue.map((entry) => entry.day);
-        // Filter `days` to only include those present in `usedDays`
-        this.opts.hiddenDays = this.days.filter(
-          (day) => !usedDays.includes(day)
-        );
-      } else {
-        this.opts.hiddenDays = [];
-      }
+      this.event.title = '';
+      this.event.color = '87ceeb';
     },
   },
   mounted() {

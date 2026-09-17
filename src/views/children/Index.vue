@@ -1,12 +1,14 @@
 <script setup>
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useStorage } from "@vueuse/core"
 import axios from "axios"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 
 const toast = useToast()
+const { t } = useI18n()
 const router = useRouter()
 
 const loading = ref(true)
@@ -63,7 +65,7 @@ const deleteAction = () => {
   axios.delete(`/api/child/${confir_id.value}/delete`).then((res) => {
     deleteDialog.value = false
     fetchData()
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Successful', life: 3000 })
+    toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
   })
 }
 
@@ -96,7 +98,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -148,25 +150,22 @@ const addEvaluation = (id) => {
               <Button 
                 :label='$t("print")' 
                 icon="pi pi-print" 
-                class="p-button-help no-print" 
+                class="no-print" 
                 :loading="printLoading"
-                @click="printTable"
-              />
+                @click="printTable" severity="help" />
               <Button 
                 v-can="'child list'" 
                 :label='$t("export")' 
                 icon="pi pi-download" 
-                class="p-button-info no-print" 
+                class="no-print" 
                 :loading="exportLoading"
-                @click="exportCSV"
-              />
+                @click="exportCSV" severity="info" />
               <Button 
                 v-can="'child create'"
                 :label='$t("Add_New")' 
                 icon="pi pi-plus" 
-                class="p-button-success no-print" 
-                @click="openNew"
-              />
+                class="no-print" 
+                @click="openNew" />
             </div>
           </template>
         </Toolbar>
@@ -197,20 +196,18 @@ const addEvaluation = (id) => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText 
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText 
                       v-model="filters['global'].value" 
                       :placeholder='$t("search")' 
                       class="w-full"
                     />
-                  </span>
+              </IconField>
                   <Button 
                     icon="pi pi-refresh" 
-                    class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="'Refresh data'"
-                  />
+                    v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" variant="text" />
                 </div>
               </div>
             </template>
@@ -237,34 +234,26 @@ const addEvaluation = (id) => {
             
             <Column :exportable="false" header-style="width: 15rem" body-class="text-center">
               <template #body="slotProps">
-                <div class="flex gap-1 justify-content-center">
+                <div class="table-actions">
                   <Button 
                     v-can="'child edit'"
                     icon="pi pi-pencil" 
-                    class="p-button-rounded p-button-text p-button-success" 
                     @click="edit(slotProps.data.id)"
-                    v-tooltip.top="'Edit'"
-                  />
+                    v-tooltip.top="$t('edit')" :aria-label="$t('edit')" rounded variant="outlined" severity="info" />
                   <Button 
                     v-can="'child delete'"
                     icon="pi pi-trash" 
-                    class="p-button-rounded p-button-text p-button-danger" 
                     @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="'Delete'"
-                  />
+                    v-tooltip.top="$t('delete')" :aria-label="$t('delete')" rounded variant="outlined" severity="danger" />
                   <Button 
                     icon="pi pi-user" 
-                    class="p-button-rounded p-button-text p-button-warning" 
                     @click="detail(slotProps.data.id)"
-                    v-tooltip.top="'Details'"
-                  />
+                    v-tooltip.top="$t('child_profile')" :aria-label="$t('child_profile')" rounded variant="outlined" severity="secondary" />
                   <Button 
                     icon="pi pi-plus" 
-                    class="p-button-rounded p-button-text p-button-help" 
                     @click="addEvaluation(slotProps.data.id)"
                     v-can="'evaluation request create'"
-                    v-tooltip.top="'Add Evaluation'"
-                  />
+                    v-tooltip.top="$t('request_evaluation')" :aria-label="$t('request_evaluation')" rounded variant="outlined" severity="help" />
                 </div>
               </template>
             </Column>
@@ -272,7 +261,7 @@ const addEvaluation = (id) => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">No records found</p>
+                <p class="text-xl">{{ $t("no_data") }}</p>
               </div>
             </template>
 
@@ -292,8 +281,8 @@ const addEvaluation = (id) => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
       </div>

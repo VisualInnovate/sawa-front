@@ -42,9 +42,9 @@
           </svg>
         </div>
         <div class=" ">
-          <p class="text-xs text-right p-2 font-medium">{{ name }}</p>
-          <p class="text-xs text-[#148A98] text-left rtl:text-right">
-            العمر : {{ age }} شهر
+          <p class="text-xs text-start p-2 font-medium">{{ name }}</p>
+          <p class="text-xs text-[#148A98] text-start">
+            {{ $t("child_age") }}: {{ ageText }}
           </p>
         </div>
       </div>
@@ -73,26 +73,27 @@
             ></path>
           </g>
         </svg>
-        <p class="text-xs text-[#148A98]">متابعة التفاصيل</p>
+        <p class="text-xs text-[#148A98]">{{ $t("follow_details") }}</p>
       </button>
     </div>
     <div
-      class="mt-4 border-2 p-2 rounded text-right"
+      class="mt-4 border-2 p-2 rounded text-start"
       :class="isopen ? 'd-block' : 'hidden'"
     >
-      <div class="flex justify-center items-center space-x-3">
+      <div class="flex justify-center items-center gap-3">
         <p class="text-center">{{ report_date_mod }}</p>
-        <p class="text-center text-[#148A98]">تقرير بتاريخ</p>
+        <p class="text-center text-[#148A98]">{{ $t("report_date") }}</p>
       </div>
-      <div class="flex justify-center items-center space-x-3 mt-6">
-        <p>{{ report_text ?? "there is no reports" }}</p>
-        <p class="text-center text-[#148A98]">التقرير</p>
+      <div class="flex justify-center items-center gap-3 mt-6">
+        <p>{{ report_text ?? $t("no_reports") }}</p>
+        <p class="text-center text-[#148A98]">{{ $t("report") }}</p>
       </div>
       <slot></slot>
     </div>
   </div>
 </template>
 <script>
+import { formatChildAge } from "@/utils/childAge";
 import axios from "axios";
 import moment from "moment";
 
@@ -112,11 +113,15 @@ export default {
   },
   methods: {},
   computed: {
+    // `age` is in months.
+    ageText() {
+      return formatChildAge(null, this.age, this.$t);
+    },
     report_date_mod() {
       if (this.report_date) {
         return moment(this.report_date).format("DD/MM/YYYY");
       }
-      return "there is no reports";
+      return this.$t("no_reports");
     },
   },
 };

@@ -6,23 +6,16 @@
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
     </div>
-    <v-card>
+    <div class="sawa-card">
       <div>
         <!-- ... existing code ... -->
-        <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-          <v-card>
-            <v-card-title>{{ $t("Success!") }}</v-card-title>
-            <v-card-text>
-              {{ $t("Data seeded successfully!") }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="closeSuccessModal" color="success">
-                {{ $t("OK") }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <Dialog v-model:visible="isSuccessModalOpen" modal :header="$t('Success!')" :style="{ width: '400px', maxWidth: '95vw' }">
+          <p class="m-0">{{ $t("Data seeded successfully!") }}</p>
+          <template #footer>
+            <Button :label="$t('OK')" severity="success" @click="closeSuccessModal" />
+          </template>
+        </Dialog>
+        <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
           <!-- ... existing code ... -->
             
               
@@ -30,22 +23,22 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('roomdoctor') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="sesion.specialist_id"  option-value="id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="sesion.specialist_id"  option-value="id" :options="doctors" optionLabel="name" :placeholder='$t("roomdoctor")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">{{ error.specialist_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="sesion.child_id"  option-value="id" :options="childreen" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="sesion.child_id"  option-value="id" :options="childreen" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('addTherapeutic') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="sesion.student_program_id"  option-value="id" :options="programs" optionLabel="program.name" :placeholder='$t("addTherapeutic")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="sesion.student_program_id"  option-value="id" :options="programs" optionLabel="program.name" :placeholder='$t("addTherapeutic")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.student_program_id">{{ error.student_program_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('sesion_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="sesion.date" showIcon  :placeholder='$t("sesion_date")'  :minDate="maxDate" />   
+                    <DatePicker  style="width: 100%" showButtonBar v-model.number="sesion.date" showIcon  :placeholder='$t("sesion_date")'  :minDate="maxDate" />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
                 </div> 
                
@@ -59,7 +52,7 @@
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                     <div class="flex">
                       
-                  <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button @click="createtreatment" class="m-auto w-full" :label='$t("submit")'></Button>
                     </div>
                    
                 </div>
@@ -67,11 +60,11 @@
                 
   
         
-        </v-form>
-  <toast></toast>
+        </form>
+  <Toast />
         <!-- ... existing code ... -->
       </div>
-    </v-card>
+    </div>
   </template>
   
   <script>
@@ -85,9 +78,9 @@
     data() {
       return {
         sesion:{},
-        doctors:{},
-        childreen:{},
-        programs:{},
+        doctors:[],
+        childreen:[],
+        programs:[],
         error: {},
         maxDate: new Date(),
        
@@ -168,9 +161,6 @@
   }
   .name-input::-webkit-scrollbar {
     display: none;
-  }
-  #pv_id_1{
-    text-align: center;
   }
   /* Hide scrollbar for IE, Edge and Firefox */
   .name-input {

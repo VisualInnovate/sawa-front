@@ -27,7 +27,7 @@
         </div>
         <div class="flex flex-column gap-2 w-full">
           <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-          <Button @click="parentStore.register(parent)" :loading="parentStore.loading" class="create m-auto w-full" :label='$t("Register_now")'></Button>
+          <Button @click="parentStore.register(parent)" :loading="parentStore.loading" class="m-auto w-full" :label='$t("Register_now")'></Button>
           <small id="username-help" class="text-center text-red-500" v-if="parentStore.errorMessage">
             {{ parentStore.errorMessage }}
           </small>

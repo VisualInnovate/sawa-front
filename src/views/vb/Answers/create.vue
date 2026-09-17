@@ -6,23 +6,16 @@
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
     </div>
-    <v-card>
+    <div class="sawa-card">
       <div>
         <!-- ... existing code ... -->
-        <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-          <v-card>
-            <v-card-title>{{ $t("Success!") }}</v-card-title>
-            <v-card-text>
-              {{ $t("Data seeded successfully!") }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="closeSuccessModal" color="success">
-                {{ $t("OK") }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <Dialog v-model:visible="isSuccessModalOpen" modal :header="$t('Success!')" :style="{ width: '400px', maxWidth: '95vw' }">
+          <p class="m-0">{{ $t("Data seeded successfully!") }}</p>
+          <template #footer>
+            <Button :label="$t('OK')" severity="success" @click="closeSuccessModal" />
+          </template>
+        </Dialog>
+        <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
           <!-- ... existing code ... -->
             
               
@@ -30,23 +23,23 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
-                    <label for="username">{{ $t('question_id') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="answer.question_id"  option-value="id" :options="qustions" optionLabel="title" :placeholder='$t("question_id")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label for="username">{{ $t('milestone_sub_goal') }}</label>
+                    <Select required v-model="answer.question_id" :disabled="!answer.child_id" option-value="id" :options="qustions" optionLabel="title" :placeholder="$t('milestone_sub_goal')" class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.question_id">{{ error.question_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('age') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="answer.child_age" :placeholder='$t("age")' />
+                    <InputNumber  required v-model="answer.child_age" :placeholder='$t("age")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('score') }}</label>
                     
-                    <InputNumber  :min="0" :max=".9" required inputId="minmaxfraction" :minFractionDigits="1" :maxFractionDigits="5" class="bg-[#f7f5f5]" v-model="answer.score" :placeholder='$t("score")' />
+                    <Select required :options="[0, 0.5, 1]" v-model="answer.score" :placeholder="$t('score')" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.score">{{ error.score[0] }}</div>
                 </div> 
                
@@ -59,19 +52,19 @@
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('notes') }}</label>
-                    <InputText style="width: 100% !important; max-height: 50px !important;;"  class="bg-[#f7f5f5]"  v-model="answer.notes"  :placeholder='$t("notes")' />
+                    <InputText style="width: 100% !important; max-height: 50px !important;;"  v-model="answer.notes"  :placeholder='$t("notes")' />
     
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
                 </div> 
                 <!-- <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('ProgramName') }}</label>
-                <InputText required class="bg-[#f7f5f5]" v-model="treatments.name" :placeholder='$t("ProgramName")' />
+                <InputText required v-model="treatments.name" :placeholder='$t("ProgramName")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
                 </div>
                   
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('price') }}</label>
-                    <InputNumber inputId="minmaxfraction" :minFractionDigits="2" :maxFractionDigits="5" required class="bg-[#f7f5f5]" v-model="treatments.price" :placeholder='$t("price")' />
+                    <InputNumber inputId="minmaxfraction" :minFractionDigits="2" :maxFractionDigits="5" required v-model="treatments.price" :placeholder='$t("price")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.price">{{ error.price[0] }}</div>
                 </div> -->
 
@@ -82,17 +75,17 @@
              
                 <div class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="createtreatment" class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button @click="createtreatment" class="m-auto w-full" :label='$t("submit")'></Button>
                   <small id="username-help"></small>
                 </div>
                 
   
         
-        </v-form>
-  <toast></toast>
+        </form>
+  <Toast />
         <!-- ... existing code ... -->
       </div>
-    </v-card>
+    </div>
   </template>
   
   <script>
@@ -109,8 +102,8 @@
             color:"00a2ff"
         },
        
-        childs:{},
-        qustions:{},
+        childs:[],
+        qustions:[],
         error: {},
         maxDate: new Date(),
        
@@ -119,6 +112,19 @@
   
     },
   
+    watch: {
+      async 'answer.child_id'(id) {
+        this.answer.question_id = null;
+        this.qustions = [];
+        if (!id) return;
+        try {
+          const { data } = await axios.get('/api/milestone-sub-goals', { params: { child_id: id } });
+          if (this.answer.child_id === id) this.qustions = data.data;
+        } catch {
+          this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('request_failed_retry'), life: 4000 });
+        }
+      },
+    },
     methods: {
       // ... existing methods ...
       Therapeutic (){
@@ -135,13 +141,6 @@
           .then((response) => {
             console.log(response.data.data)
             this.childs = response.data.children
-           
-          })
-          axios
-          .get("api/milestone-sub-goals")
-          .then((response) => {
-            console.log(response.data.data)
-            this.qustions = response.data.data
            
           })
          
@@ -182,9 +181,6 @@
   }
   .name-input::-webkit-scrollbar {
     display: none;
-  }
-  #pv_id_1{
-    text-align: center;
   }
   /* Hide scrollbar for IE, Edge and Firefox */
   .name-input {

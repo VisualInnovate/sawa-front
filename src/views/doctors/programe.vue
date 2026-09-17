@@ -13,7 +13,7 @@
       
       
       
-    <v-card>
+    <div class="sawa-card">
         
      <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
         <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details">
@@ -40,8 +40,8 @@
           </div>
           </div>
           <div class="text-center" >
-          <Button v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" @click="go_evaluate(evalu.child.id,evalu.evaluation_type,evalu.id)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
-          <Button v-can="'evaluation request delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="delete m-auto"> </Button>
+          <Button v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" @click="go_evaluate(evalu.child.id,evalu.evaluation_type,evalu.id)" class="m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button v-can="'evaluation request delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="m-auto" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')"> </Button>
 
           </div>
             
@@ -52,7 +52,7 @@
         
   
       
-    </v-card>
+    </div>
     <div>
       <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
@@ -63,8 +63,8 @@
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
       <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
@@ -72,18 +72,18 @@
                 
            
             <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-start" for="username">{{ $t('evalute_type') }}</label>
+                  <Select required v-model="evalate.evaluation_type"  option-value="id" filter :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.evaluation_type">{{ error.evaluation_type[0] }}</div>
             </div>
             <div class="flex flex-column gap-2 py-1">
-                  <label class="w-full text-right" for="username">{{ $t('Name_evaluator') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evalate.specialist_id"  option-value="id" filter :options="doctors"  optionLabel="name" :placeholder='$t("Name_evaluator")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                  <label class="w-full text-start" for="username">{{ $t('Name_evaluator') }}</label>
+                  <Select required v-model="evalate.specialist_id"  option-value="id" filter :options="doctors"  optionLabel="name" :placeholder='$t("Name_evaluator")' class="w-full" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">{{ error.specialist_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                    <label  class="w-full text-right" for="username">{{ $t('Evaluation_date') }}</label>
-                    <Calendar  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :placeholder='$t("Evaluation_date")'  :maxDate="maxDate" />   
+                    <label  class="w-full text-start" for="username">{{ $t('Evaluation_date') }}</label>
+                    <DatePicker  style="width: 100%" showButtonBar v-model.number="evalate.date" showIcon  :placeholder='$t("Evaluation_date")'  :maxDate="maxDate" />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
                 </div> 
            
@@ -92,13 +92,13 @@
            
             
            <div class="w-full text-center">
-            <Button @click="createevaluate" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createevaluate" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
 
            
         </Dialog>
     </div>
-    <toast></toast>
+    <Toast />
 
     </div>
   </template>
@@ -122,7 +122,7 @@
            error:{},
            deleteDialog:false,
            delete_id:'',
-           doctors:{},
+           doctors:[],
            updatedialog:false,
           evaluate_types : [
                       { name: 'side profile', id: 1 },

@@ -1,5 +1,5 @@
 <script setup>
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import LeavesNave from '../../../../components/LeavesNave.vue'
 import { useToast } from 'primevue/usetoast'
@@ -122,7 +122,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -190,35 +190,31 @@ const initFilters = () => {
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <h3 class="m-0">{{ $t('leaves_list') }}</h3>
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText 
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText 
                       v-model="filters['global'].value" 
                       :placeholder='$t("search")' 
                       class="w-full"
                     />
-                  </span>
+              </IconField>
                   <Button 
                 v-can="'leaves list'" 
                 :label='$t("export")' 
                 icon="pi pi-download" 
-                class="p-button-info no-print" 
+                class="no-print" 
                 :loading="exportLoading"
-                @click="exportCSV"
-              />
+                @click="exportCSV" severity="info" />
               <Button 
                 :label='$t("print")' 
                 icon="pi pi-print" 
-                class="p-button-help no-print" 
+                class="no-print" 
                 :loading="printLoading"
-                @click="printTable"
-              />
+                @click="printTable" severity="help" />
                   <Button 
                     icon="pi pi-refresh" 
-                    class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="$t('refresh_data')"
-                  />
+                    v-tooltip.top="$t('refresh_data')" variant="text" />
               
                 </div>
               </div>
@@ -255,23 +251,19 @@ const initFilters = () => {
             
             <Column :exportable="false" header-style="width: 10rem" body-class="text-center">
               <template #body="slotProps">
-                <div class="flex gap-1 justify-content-center">
+                <div class="table-actions">
                   <Button 
                     v-if="slotProps.data.status == 0"
                     v-can="'leaves edit'"
                     icon="pi pi-times" 
-                    class="p-button-rounded p-button-text p-button-danger" 
                     @click="reject(slotProps.data.id)"
-                    v-tooltip.top="$t('reject')"
-                  />
+                    v-tooltip.top="$t('reject')" rounded variant="outlined" severity="danger" />
                   <Button 
                     v-if="slotProps.data.status == 0"
                     v-can="'leaves edit'"
                     icon="pi pi-check" 
-                    class="p-button-rounded p-button-text p-button-success" 
                     @click="accept(slotProps.data.id)"
-                    v-tooltip.top="$t('accept')"
-                  />
+                    v-tooltip.top="$t('accept')" rounded variant="outlined" severity="success" />
                 </div>
               </template>
             </Column>
@@ -299,17 +291,17 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("Reject Leave")' :modal="true">
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="rejectReason">{{ $t('Rejection Reason') }}</label>
+            <label class="w-full text-start" for="rejectReason">{{ $t('Rejection Reason') }}</label>
             <InputText 
               required 
-              class="bg-[#f7f5f5] text-center"  
+              class="text-center"  
               v-model="leave.rejected_reason" 
               :placeholder='$t("Enter rejection reason")' 
             />
@@ -318,9 +310,8 @@ const initFilters = () => {
           <div class="w-full text-center">
             <Button 
               @click="confirm_reject" 
-              class="p-button-danger m-auto w-[50%] my-4" 
-              :label='$t("Submit Rejection")'
-            ></Button> 
+              class="m-auto w-[50%] my-4" 
+              :label='$t("Submit Rejection")' severity="danger"></Button> 
           </div>
         </Dialog>
       </div>

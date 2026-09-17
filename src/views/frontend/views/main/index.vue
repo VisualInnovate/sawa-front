@@ -9,7 +9,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <h1
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
@@ -19,7 +19,7 @@
             </h1>
           </div>
           <p
-            class="text-[#6F6669] text-base lg:text-xl text-right leading-relaxed font-bold"
+            class="text-[#6F6669] text-base lg:text-xl text-start leading-relaxed font-bold"
           >
             أكاديمية سوا للتربية الخاصة تقدم برامج تأهيلية متكاملة تجمع بين
             العلم والخبرة والمهنية، لتمكين أطفالنا من الوصول إلى أقصى إمكاناتهم
@@ -116,11 +116,11 @@
             من نحن
           </p>
           <h2
-            class="text-2xl sm:text-3xl lg:text-[36px] font-bold text-dark text-right"
+            class="text-2xl sm:text-3xl lg:text-[36px] font-bold text-dark text-start"
           >
             تأسيس مبني على احتياج حقيقي
           </h2>
-          <p class="text-body text-base lg:text-lg text-right leading-[1.7]">
+          <p class="text-body text-base lg:text-lg text-start leading-[1.7]">
             نشأت أكاديمية سوا من إيمان عميق بأن كل طفل يستحق فرصة عادلة للتعلم
             والاندماج. نحن لا نقدم فقط جلسات علاجية، بل نبني مستقبلاً مستقلاً
             لكل طفل من خلال منهجية علمية حديثة وبيئة تحتضن الاختلاف.
@@ -132,7 +132,7 @@
                 alt=""
                 class="w-8 h-6 sm:w-10 sm:h-7 shrink-0 mt-1"
               />
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   فريق تخصصي
                 </p>
@@ -147,7 +147,7 @@
                 alt=""
                 class="w-8 h-8 sm:w-[38px] sm:h-[38px] shrink-0 mt-1"
               />
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   برامج متكاملة
                 </p>
@@ -162,7 +162,7 @@
                 alt=""
                 class="w-7 h-8 sm:w-8 sm:h-9 shrink-0 mt-1"
               />
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   إشراف مهني
                 </p>
@@ -177,7 +177,7 @@
                 alt=""
                 class="w-8 h-8 sm:w-[34px] sm:h-[34px] shrink-0 mt-1"
               />
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   الاستقلالية والدمج
                 </p>
@@ -315,7 +315,7 @@
         <!-- Text -->
         <div class="flex flex-col gap-6 sm:gap-8 order-2 lg:order-1">
           <h2
-            class="text-2xl sm:text-3xl lg:text-[36px] font-bold text-white text-right"
+            class="text-2xl sm:text-3xl lg:text-[36px] font-bold text-white text-start"
           >
             لماذا تختار أكاديمية سوا؟
           </h2>
@@ -328,7 +328,7 @@
                   class="w-8 h-9 sm:w-[42px] sm:h-[45px]"
                 />
               </div>
-              <div class="text-right flex-1">
+              <div class="text-start flex-1">
                 <h4
                   class="text-white font-bold text-base sm:text-xl mb-1 sm:mb-2"
                 >
@@ -348,7 +348,7 @@
                   class="w-8 h-9 sm:w-[43px] sm:h-[45px]"
                 />
               </div>
-              <div class="text-right flex-1">
+              <div class="text-start flex-1">
                 <h4
                   class="text-white font-bold text-base sm:text-xl mb-1 sm:mb-2"
                 >
@@ -368,7 +368,7 @@
                   class="w-8 h-8 sm:w-[42px] sm:h-[42px]"
                 />
               </div>
-              <div class="text-right flex-1">
+              <div class="text-start flex-1">
                 <h4
                   class="text-white font-bold text-base sm:text-xl mb-1 sm:mb-2"
                 >
@@ -387,7 +387,7 @@
                   class="w-8 h-8 sm:w-[42px] sm:h-[42px]"
                 />
               </div>
-              <div class="text-right flex-1">
+              <div class="text-start flex-1">
                 <h4
                   class="text-white font-bold text-base sm:text-xl mb-1 sm:mb-2"
                 >
@@ -545,12 +545,12 @@
           <!-- Text -->
           <div class="flex flex-col gap-4 sm:gap-6 flex-1 w-full">
             <h2
-              class="text-xl sm:text-2xl lg:text-[30px] font-bold text-dark text-right"
+              class="text-xl sm:text-2xl lg:text-[30px] font-bold text-dark text-start"
             >
               متابعة دقيقة لكل خطوة
             </h2>
             <p
-              class="text-body text-sm sm:text-base text-right leading-relaxed"
+              class="text-body text-sm sm:text-base text-start leading-relaxed"
             >
               نحن ندرك أهمية الشراكة مع الأهل. لذا، نوفر تقارير أسبوعية مفصلة
               ورسوم بيانية توضح تقدم طفلك في مختلف المجالات (لغوية، حركية،
@@ -858,19 +858,19 @@
           <div
             class="absolute -top-4 sm:-top-6 right-0 sm:-right-6 bg-[#1C6772] text-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg"
           >
-            <p class="font-bold text-xl sm:text-2xl text-right">8 أطفال</p>
-            <p class="text-xs text-white text-right">كحد أقصى لكل رحلة</p>
+            <p class="font-bold text-xl sm:text-2xl text-start">8 أطفال</p>
+            <p class="text-xs text-white text-start">كحد أقصى لكل رحلة</p>
           </div>
         </div>
 
         <!-- Text -->
         <div class="flex-1 flex flex-col gap-4 sm:gap-6 w-full">
           <h2
-            class="text-xl sm:text-2xl lg:text-[30px] font-bold text-dark text-right"
+            class="text-xl sm:text-2xl lg:text-[30px] font-bold text-dark text-start"
           >
             نقل آمن.. براحة بال تامة
           </h2>
-          <p class="text-body text-sm sm:text-base text-right leading-relaxed">
+          <p class="text-body text-sm sm:text-base text-start leading-relaxed">
             نوفر أسطولاً من الحافلات الحديثة المجهزة خصيصاً لتناسب احتياجات
             أطفالنا، مع التزام صارم بأعلى معايير الأمان والخصوصية.
           </p>
@@ -885,7 +885,7 @@
                   class="w-10 h-10 sm:w-12 sm:h-12"
                 />
               </div>
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   كاميرات مراقبة داخلية
                 </p>
@@ -904,7 +904,7 @@
                   class="w-10 h-10 sm:w-12 sm:h-12"
                 />
               </div>
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   مرافقة متخصصة
                 </p>
@@ -923,7 +923,7 @@
                   class="w-10 h-10 sm:w-12 sm:h-12"
                 />
               </div>
-              <div class="text-right">
+              <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
                   مقاعد طبية مريحة
                 </p>

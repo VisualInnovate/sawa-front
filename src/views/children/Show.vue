@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -15,9 +17,10 @@ const loading = ref(true)
 const childName = ref('')
 const dt = ref(null)
 
+// `header` is an i18n key (translated in the template).
 const headers = [
-  { field: 'evaluation_title', header: 'Evaluation Title' },
-  { field: 'actions', header: 'Operation', exportable: false }
+  { field: 'evaluation_title', header: 'evaluation_title' },
+  { field: 'actions', header: 'actions', exportable: false }
 ]
 
 const goBack = () => {
@@ -52,12 +55,12 @@ const editItem = (id) => {
 const deleteItem = (id) => {
   axios.delete(`/api/side-profiles/${id}/delete`).then(res => {
     if (res.data.status === 200) {
-      alertText.value = 'Side profile deleted successfully'
+      alertText.value = t('side_profile_deleted_successfully')
       sideProfile.value = res.data.sideProfile
       toast.add({ 
         severity: 'success', 
-        summary: 'Success', 
-        detail: 'Side profile deleted successfully', 
+        summary: t('success_message'), 
+        detail: t('side_profile_deleted_successfully'), 
         life: 3000 
       })
     }
@@ -90,20 +93,19 @@ onMounted(() => {
             <Button 
               :label="$t('Back')"
               icon="pi pi-arrow-left"
-              class="p-button-secondary mr-2"
-              @click="goBack"
-            />
+              class="mr-2"
+              @click="goBack" severity="secondary" />
             <h2 class="text-2xl font-bold">{{ childName }}</h2>
           </template>
           <template #end>
-            <span class="p-input-icon-left">
-              <i class="pi pi-search" />
-              <InputText 
+            <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText 
                 v-model="search" 
                 :placeholder="$t('Search')" 
                 class="w-full"
               />
-            </span>
+              </IconField>
           </template>
         </Toolbar>
 
@@ -120,7 +122,6 @@ onMounted(() => {
           :rowsPerPageOptions="[5, 10, 25, 50]"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :currentPageReportTemplate="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
-          responsiveLayout="scroll"
           scrollable
           scrollHeight="flex"
           stripedRows
@@ -135,24 +136,20 @@ onMounted(() => {
               <Button
                 v-can="'evaluation results list'"
                 icon="pi pi-eye"
-                class="p-button-rounded p-button-text p-button-primary"
+                class="p-button-primary"
                 @click="showSide(data.side_profile_id)"
-                v-tooltip.top="'View Side Profile'"
-              />
+                v-tooltip.top="$t('view')" :aria-label="$t('view')" rounded variant="text" severity="secondary" />
               <Button
                 v-can="'side profiles edit'"
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-text p-button-primary"
+                class="p-button-primary"
                 @click="editItem(data.side_profile_id)"
-                v-tooltip.top="'Edit Side Profile'"
-              />
+                v-tooltip.top="$t('edit')" :aria-label="$t('edit')" rounded variant="text" severity="info" />
               <Button
                 v-can="'side profiles delete'"
                 icon="pi pi-trash"
-                class="p-button-rounded p-button-text p-button-danger"
                 @click="deleteItem(data.side_profile_id)"
-                v-tooltip.top="'Delete Side Profile'"
-              />
+                v-tooltip.top="$t('delete')" :aria-label="$t('delete')" rounded variant="text" severity="danger" />
             </div>
           </template>
 
@@ -162,10 +159,9 @@ onMounted(() => {
                 <Button
                   v-can="'evaluation results list'"
                   icon="pi pi-eye"
-                  class="p-button-rounded p-button-text p-button-primary"
+                  class="p-button-primary"
                   @click="showItem(data.evaluations_id, data.side_profile_id)"
-                  v-tooltip.top="'View Evaluation'"
-                />
+                  v-tooltip.top="$t('view')" :aria-label="$t('view')" rounded variant="text" severity="secondary" />
               </div>
             </template>
           </Column>

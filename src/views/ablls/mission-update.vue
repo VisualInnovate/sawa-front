@@ -6,11 +6,11 @@
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
     </div>
-    <v-card>
+    <div class="sawa-card">
       <div>
         <!-- ... existing code ... -->
        
-        <v-form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
           <!-- ... existing code ... -->
             
               
@@ -18,56 +18,56 @@
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('category') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="mission.category_id"  option-value="id" :options="allcategory" optionLabel="title" :placeholder='$t("category")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <Select required v-model="mission.category_id"  option-value="id" :options="allcategory" optionLabel="title" :placeholder='$t("category")' class="w-full" />
                       <div class="mt-1  text-red-500" v-if="error?.category_id">{{ error.category_id[0] }}</div>
                 </div>
                
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('name') }}</label>
-                    <InputText  required class="bg-[#f7f5f5]" v-model="mission.name" :placeholder='$t("name")' />
+                    <InputText  required v-model="mission.name" :placeholder='$t("name")' />
                     <div class="mt-1  text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
                 </div> 
                 <div class="flex  flex-column gap-2">
                     <label for="username">{{ $t('goal') }}</label>
-                    <v-textarea rows="2" bg-color="#EAE8E9" v-model="mission.goal"  ></v-textarea>
+                    <Textarea rows="2" v-model="mission.goal" autoResize fluid />
                    
                     <div class="mt-1  text-red-500" v-if="error?.goal">{{ error.goal[0] }}</div>
                 </div> 
                 <div class="flex  flex-column gap-2">
                     <label for="username" >{{ $t('question') }}</label>
-                    <v-textarea rows="2" bg-color="#EAE8E9" v-model="mission.question"  ></v-textarea>
+                    <Textarea rows="2" v-model="mission.question" autoResize fluid />
                     
                     <div class="mt-1  text-red-500" v-if="error?.question">{{ error.question[0] }}</div>
                 </div> 
                 <div class="flex  flex-column gap-2">
                     <label for="username">{{ $t('sample') }}</label>
-                    <v-textarea rows="2"  bg-color="#EAE8E9" v-model="mission.sample"  ></v-textarea>
+                    <Textarea rows="2" v-model="mission.sample" autoResize fluid />
              
                     <div class="mt-1  text-red-500" v-if="error?.sample">{{ error.sample[0] }}</div>
                 </div> 
                 <div class="flex  flex-column gap-2">
                     <label for="username">{{ $t('Note') }}</label>
-                    <v-textarea rows="2" bg-color="#EAE8E9" v-model="mission.note"  ></v-textarea>
+                    <Textarea rows="2" v-model="mission.note" autoResize fluid />
                      
                     <div class="mt-1  text-red-500" v-if="error?.note">{{ error.note[0] }}</div>
                 </div> 
                 <div class="flex flex-col gap-2">
                     <label for="username">{{ $t('note') }}</label>
                    <div class="flex">
-                    <InputText  required class="bg-[#f7f5f5] w-[90%] m-auto" v-model="mission.body" :placeholder='$t("name")' />
-                    <Button   @click="addarry"  class="create m-auto  " icon="pi pi-plus" ></Button>
+                    <InputText  required class="w-[90%] m-auto" v-model="mission.body" :placeholder='$t("name")' />
+                    <Button   @click="addarry"  class="m-auto" icon="pi pi-plus"></Button>
                    </div>
                 </div>
                 <div class="flex flex-column gap-2 w-full">
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                  <Button @click="create" class="create m-auto w-full " :label='$t("submit")'></Button>
+                  <Button @click="create" class="m-auto w-full" :label='$t("submit")'></Button>
                   <div class="mt-1  text-red-500" v-if="error?.benchmarks">{{ error.benchmarks[0] }}</div>
                 </div>
                 <div class="flex flex-col col-span-2 gap-2">
                     <div class="flex relative bg-slate-200 rounded-md p-4" v-for="bench,index in mission.benchmarks">
                         <span class="my-auto">{{ index+1 }} - </span>
                         <p class="px-1 text-green-500 text-xl">{{ bench.body }}</p>
-                        <Button   @click="deletearray(index)"  class="delete m-auto absolute top-1 ltr:right-2 rtl:left-2  " icon="pi pi-minus" ></Button>
+                        <Button   @click="deletearray(index)"  class="m-auto absolute top-1 ltr:right-2 rtl:left-2" icon="pi pi-minus" severity="danger"></Button>
                     </div>
                 </div>
            
@@ -76,11 +76,11 @@
                 
   
         
-        </v-form>
-  <toast></toast>
+        </form>
+  <Toast />
         <!-- ... existing code ... -->
       </div>
-    </v-card>
+    </div>
   </template>
   
   <script>
@@ -179,9 +179,6 @@
   }
   .name-input::-webkit-scrollbar {
     display: none;
-  }
-  #pv_id_1{
-    text-align: center;
   }
   /* Hide scrollbar for IE, Edge and Firefox */
   .name-input {

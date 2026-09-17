@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
@@ -171,7 +171,7 @@ const initFilters = () => {
 </script>
 
 <template>
-    <v-card v-can="'events create'" class="card mb-5 p-4 shadow-md bg-slate-50">
+    <div v-can="'events create'" class="sawa-card card mb-5 p-4 shadow-md bg-slate-50">
     <form @submit.prevent="onSubmit" >
      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
        <div>
@@ -197,19 +197,19 @@ const initFilters = () => {
         <div class="py-1">
                  <div class=" text-center" >
                   <div onclick="document.getElementById('filr').click()" class=" border-4 h-40 m-auto rounded-full w-40" :style="{ backgroundImage: `url(${ event.image})` }" style="background-position: center;background-repeat: no-repeat;background-size: cover;"></div>
-                    <Button  onclick="document.getElementById('filr').click()" class="create mt-2" icon="pi pi-upload" :label="$t('upload_icon')" />
+                    <Button  onclick="document.getElementById('filr').click()" class="mt-2" icon="pi pi-upload" :label="$t('upload_icon')" />
                   </div>
 
         </div>
       </div>
-      <Button v-can="'events list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
-      <Button v-can="'events create'"  type="submit"  :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" ></Button>
+      <Button v-can="'events list'" :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
+      <Button v-can="'events create'"  type="submit"  :label='$t("create_button")' icon="pi pi-plus" class="mr-2"></Button>
     </form>
-    </v-card>
+    </div>
   <div class="grid">
 
     <div class="col-12 " style="overflow-y: scroll;">
-      <va-card class="card shadow-md">
+      <div class="card shadow-md">
 
 
         <Toast/>
@@ -232,12 +232,12 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("events") }}</h5>
+              <h5 class="page-title">{{ $t("events") }}</h5>
              <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
+              <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
+              </IconField>
               </div>
             </div>
           </template>
@@ -287,15 +287,11 @@ const initFilters = () => {
               <Button
               v-can="'events edit'"
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
+                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
               <Button
               v-can="'events delete'"
                 icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data)"
-              />
+                @click="confirmDelete(slotProps.data)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
             </template>
           </Column>
 
@@ -306,8 +302,8 @@ const initFilters = () => {
             <span v-if="product">{{ $t('are_you_sure_delete') }} {{ delete_id.name }} ?</span>
           </div>
           <template #footer>
-            <Button :label="$t('no')" icon="pi pi-times" class="p-button-text" @click="deleteProductsDialog = false"/>
-            <Button :label="$t('yes')" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts"/>
+            <Button :label="$t('no')" icon="pi pi-times" @click="deleteProductsDialog = false" variant="text" severity="secondary" />
+            <Button :label="$t('yes')" icon="pi pi-check" @click="deleteSelectedProducts" severity="danger" />
           </template>
         </Dialog>
 
@@ -352,12 +348,12 @@ const initFilters = () => {
 
     </form>
           <template #footer>
-            <Button :label="$t('save')" icon="pi pi-check" class="p-button-text" @click="update"/>
+            <Button :label="$t('save')" icon="pi pi-check" @click="update" variant="text" />
           </template>
         </Dialog>
 
 
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

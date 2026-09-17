@@ -1,7 +1,7 @@
 <template>
   <Nave />
   <Toast />
-  <Banner heading="الحجوزات" title="يمكنك اضافة حجز من هنا"></Banner>
+  <Banner :heading="$t('bookings')" :title="$t('bookings_page_hint')"></Banner>
 
   <div class="max-w-[1300px] mx-auto py-10">
     <div class="flex justify-between px-4">
@@ -59,8 +59,8 @@
   <Dialog v-model:visible="deleteDialogVisible" modal :header="$t('إلغاء الحجز')" :style="{ width: '400px', maxWidth: '92vw' }">
     <p class="text-lg text-gray-700">{{ $t("confirm_cancel_booking") }}</p>
     <template #footer>
-      <Button :label="$t('back')" icon="pi pi-times" @click="deleteDialogVisible = false" class="p-button-text" />
-      <Button :label="$t('confirm_cancel')" icon="pi pi-check" @click="deleteBooking" class="p-button-danger" />
+      <Button :label="$t('back')" icon="pi pi-times" @click="deleteDialogVisible = false" variant="text" />
+      <Button :label="$t('confirm_cancel')" icon="pi pi-check" @click="deleteBooking" severity="danger" />
     </template>
   </Dialog>
 
@@ -79,9 +79,9 @@
       </p>
     </div>
     <template #footer>
-      <Button :label="$t('print')" icon="pi pi-print" @click="printConsultationResult" class="p-button-text" />
-      <Button :label="$t('export_pdf')" icon="pi pi-file-pdf" @click="exportConsultationResultAsPDF" class="p-button-success" />
-      <Button :label="$t('close')" icon="pi pi-times" @click="consultationResultDialogVisible = false" class="p-button-text" />
+      <Button :label="$t('print')" icon="pi pi-print" @click="printConsultationResult" variant="text" />
+      <Button :label="$t('export_pdf')" icon="pi pi-file-pdf" @click="exportConsultationResultAsPDF" severity="success" />
+      <Button :label="$t('close')" icon="pi pi-times" @click="consultationResultDialogVisible = false" variant="text" />
     </template>
   </Dialog>
 

@@ -8,7 +8,7 @@
     <!-- Your existing content goes here -->
   </div>
   
-  <v-card>
+  <div class="sawa-card">
     <div>
     
       <form class=" p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="createtreatment">
@@ -16,32 +16,32 @@
           
               <div class="flex flex-column gap-2">
                 <label for="username">{{ $t('roomnumber') }}</label>
-              <InputText required class="bg-[#f7f5f5]" v-model="rooms.name" :class="{ 'p-invalid': submitted && !rooms.name}" />
+              <InputText required v-model="rooms.name" :class="{ 'p-invalid': submitted && !rooms.name}" />
               <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
               </div>
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('roomdoctor') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.admin_id"  option-value="id" filter :options="doctors" optionLabel="name"   :class="{ 'p-invalid': submitted && !rooms.admin_id}" />
+                  <Select required v-model="rooms.admin_id"  option-value="id" filter :options="doctors" optionLabel="name"   :class="{ 'p-invalid': submitted && !rooms.admin_id}" />
               </div> 
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('typeroom') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type_tow"  option-value="value" :options="arr2()" optionLabel="name" :class="{ 'p-invalid': submitted && !rooms.type_tow}" />
+                  <Select required v-model="rooms.type_tow"  option-value="value" :options="arr2()" optionLabel="name" :class="{ 'p-invalid': submitted && !rooms.type_tow}" />
                  
               </div>
               <div v-if="rooms.type_tow == 2" class="flex flex-column gap-2">
                   <label for="username">{{ $t('typeroom') }}</label>
-                  <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :class="{ 'p-invalid': submitted && !rooms.type}" />
+                  <Select required v-model="rooms.type"  option-value="value" :options="arr()" optionLabel="name" :class="{ 'p-invalid': submitted && !rooms.type}" />
               </div>
                 
               <div  v-if="rooms.type_tow !=0 && rooms.type !=0 && rooms.type_tow  " class="flex flex-column gap-2">
                   <label for="username">{{ $t('roomsnumber') + " "}}</label>
-                  <InputNumber required class="bg-[#f7f5f5]" v-model="rooms.capacity" :class="{ 'p-invalid': submitted && !rooms.capacity}" />
+                  <InputNumber required v-model="rooms.capacity" :class="{ 'p-invalid': submitted && !rooms.capacity}" />
               </div>
          
               <div class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                 
-                <Button type="submit"  @click="submitted=true"  class="create m-auto w-full  lg:w-[50%] " icon="pi pi-plus" :label='$t("Add_appointment")'></Button>
+                <Button type="submit"  @click="submitted=true"  class="m-auto w-full lg:w-[50%]" icon="pi pi-plus" :label='$t("Add_appointment")'></Button>
                 <small id="username-help"></small>
               </div>
              
@@ -67,36 +67,36 @@
           <div>
 
             <div class="flex flex-column ">
-              <label class="text-right ">{{ $t("title") }}</label>
+              <label class="text-start ">{{ $t("title") }}</label>
               <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
             </div>
             <!-- <div class="flex flex-column ">
-              <label class="text-right ">{{ $t("color") }}</label>
+              <label class="text-start ">{{ $t("color") }}</label>
               <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
             </div> -->
            
            
             <div class="flex gap-2 my-2">
-                <InputSwitch v-model="event.sub" /> 
+                <ToggleSwitch v-model="event.sub" /> 
                   <span class="px-2"> {{ $t('هل تريد تكرار الحدث') }}</span>
             </div>
             <div v-if="event.sub" class="flex flex-column gap-2 py-1">
-                      <label class="w-full text-right" for="username">{{ $t('نوع التكرار') }}</label>
-                      <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
+                      <label class="w-full text-start" for="username">{{ $t('نوع التكرار') }}</label>
+                      <Select  required v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
               </div>
               <div v-if="event.repeat_type?.id == 2"  class="flex flex-column gap-2">
-              <label class="text-right ">{{ $t("اختر ايام التكرار") }}</label>
+              <label class="text-start ">{{ $t("اختر ايام التكرار") }}</label>
                  <MultiSelect v-model="event.day"  :options="days_week"   optionLabel="name" optionValue="value" :class="{ 'p-invalid': submitted && !event.days}" />
               </div>
               <div v-if="event.repeat_type "  class="flex flex-column gap-2">
-              <label class="text-right ">{{ $t(" تاريخ نهاية التكرار") }}</label>
-              <Calendar    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
+              <label class="text-start ">{{ $t(" تاريخ نهاية التكرار") }}</label>
+              <DatePicker    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
               </div>
 
             
-            <Button type="submit" class="create mt-3" :label='$t("submit") '  @click="submitted = true "  />
-            <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
-            <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
+            <Button type="submit" class="mt-3" :label='$t("submit") '  @click="submitted = true " />
+            <!-- <Button  label="Update" :loading="loading" @click="updateEvent" />
+            <Button      label="Delete"  :loading="loading"  @click="deleteEvent" severity="danger" />-->
   
           </div>
         </form>
@@ -105,14 +105,14 @@
         <form @submit.prevent="updateevent">
           <div>
             <div class="flex flex-column ">
-              <label class="text-right ">{{ $t("title") }}</label>
+              <label class="text-start ">{{ $t("title") }}</label>
               <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
             </div>
             
          
            <div class="flex ">
-            <Button type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="submitted=true " />
-            <Button type="submit" class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
+            <Button type="submit" class="mt-3"  icon="pi pi-pencil"      @click="submitted=true " severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+            <Button type="submit" class="mt-3"  icon="pi pi-trash"  @click="deleteEvent " severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
            </div>
         
           </div>
@@ -123,9 +123,9 @@
     </div>
 
    <div class="w-full py-3 text-center">
-    <Button class="create w-[90%] m-auto lg:w-[50%] " :label='$t("update")' @click="updateRoom"></Button>
+    <Button class="w-[90%] m-auto lg:w-[50%]" :label='$t("update")' @click="updateRoom"></Button>
    </div>
-  </v-card>
+  </div>
 </template>
 
 <script>
@@ -136,7 +136,7 @@ import TimeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 import axios from "axios";
 import { ref } from "vue";
 import moment from "moment";
@@ -147,30 +147,30 @@ export default {
 
   components: {
     FullCalendar,
-    Calendar
+    DatePicker
   },
   data() {
     return {
       rooms:{},
       days_week :[
           
-          { name: 'Sunday', value: 0 },
-          { name: 'Monday', value: 1 },
-          { name: 'Tuesday', value: 2},
-          { name: 'Thursday', value: 3 },
-          { name: 'Wednesday', value: 4 },
-          { name: 'Friday', value: 5 },
-          { name: 'Saturday', value: 6 }
+          { name: this.$t('weekday.sunday'), value: 0 },
+          { name: this.$t('weekday.monday'), value: 1 },
+          { name: this.$t('weekday.tuesday'), value: 2},
+          { name: this.$t('weekday.thursday'), value: 3 },
+          { name: this.$t('weekday.wednesday'), value: 4 },
+          { name: this.$t('weekday.friday'), value: 5 },
+          { name: this.$t('weekday.saturday'), value: 6 }
         
       ],
       repeat_types:[
-                      { name: 'تكرار ايام ',type:'single','dateFormat':'DD MM yy ', id: 1 },
-                      { name: 'تكرار اسبوعي ',type:'single','dateFormat':'DD MM yy ', id: 2 },
-                      { name: 'تكرار الشهور',type:'month','dateFormat':' MM yy ', id: 3 },
-                      { name: 'تكرار السنوات',type:'year','dateFormat':'  yy ', id: 4 },
+                      { name: this.$t('repeat_type.days'),type:'single','dateFormat':'DD MM yy ', id: 1 },
+                      { name: this.$t('repeat_type.weekly'),type:'single','dateFormat':'DD MM yy ', id: 2 },
+                      { name: this.$t('repeat_type.monthly'),type:'month','dateFormat':' MM yy ', id: 3 },
+                      { name: this.$t('repeat_type.yearly'),type:'year','dateFormat':'  yy ', id: 4 },
         ],
       error: {},
-      doctors:{},
+      doctors:[],
       submitted:false,
       isSubmitting: false,
       updateDialog:false,

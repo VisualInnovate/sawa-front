@@ -8,8 +8,8 @@
           <Toolbar class="mb-4">
             <template v-slot:start>
               <div class="my-2">
-                <Button  v-can="'official leave create'" :label='$t("add_official_leaves")' icon="pi pi-plus" class="p-button-success mr-2"
-                        @click="openNew"/>
+                <Button  v-can="'official leave create'" :label='$t("add_official_leaves")' icon="pi pi-plus" class="mr-2"
+                        @click="openNew" />
               </div>
   
              
@@ -17,8 +17,8 @@
   
             <template v-slot:end>
             
-              <Button  v-can="'official leave list'" :label='$t("export")' icon="pi pi-upload" class="p-button-help"
-                      @click="exportCSV($event)"/>
+              <Button  v-can="'official leave list'" :label='$t("export")' icon="pi pi-upload"
+                      @click="exportCSV($event)" severity="help" />
             </template>
           </Toolbar>
           <DataTable
@@ -32,17 +32,16 @@
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
               :rowsPerPageOptions="[5, 10, 25]"
               :currentPageReportTemplate="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('users')}`"
-              responsiveLayout="scroll"
               v-can="'official leave list'"
   
           >
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                 <h5 class="m-0">{{ $t("official_leaves") }}</h5>
-                <span class="block mt-2 md:mt-0 p-input-icon-left">
-                                  <i class="pi pi-search"/>
-                                  <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-                              </span>
+                <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
+              </IconField>
               </div>
             </template>
             <template #empty> {{ $t('no_official_leaves_found') }}</template>
@@ -91,26 +90,23 @@
                 <router-link :to="{ type: Object, required: true }"
                              @click.native="showUser(slotProps.data)">
   
-                  <!-- <Button icon="pi pi-eye" v-can="'clock in-out user'" class="p-button-rounded p-button-info mr-2"/> -->
+                  <!-- <Button icon="pi pi-eye" v-can="'clock in-out user'" rounded severity="info" variant="outlined" v-tooltip.top="$t('view')" :aria-label="$t('view')" /> -->
                 </router-link>
                 <Button
                  v-can="'official leave edit'"
                  icon="pi pi-pencil"
-                        class="p-button-rounded p-button-success mr-2"
-                        @click="updateleave(slotProps.data.id)"/>
+                        @click="updateleave(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <!-- <Button v-can="'update user'" v-if="myUser == slotProps.data.user_id " icon="pi pi-plus"
-                        class="p-button-rounded p-button-secondary mr-2"
-                        @click="editRequest(slotProps.data)"/> -->
+                        class="mr-2"
+                        @click="editRequest(slotProps.data)" rounded severity="secondary" variant="outlined" /> -->
                
                         <Button
                           v-can="'official leave delete'"
                           icon="pi pi-trash"
-                          class="delete mt-2"
-                          @click="confirmDeleteUser(slotProps.data.id)"
-                        />
+                          @click="confirmDeleteUser(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
                 <!-- <Button v-can="'reset user'" icon="pi pi-replay" style="margin-left: 7%;"
-                        class="p-button-rounded p-button-info mt-2"
-                        @click="confirmUnsetUser(slotProps.data)"/> -->
+                        class="mt-2"
+                        @click="confirmUnsetUser(slotProps.data)" rounded severity="info" variant="outlined" /> -->
               </template> 
             </Column>
           </DataTable> 
@@ -123,51 +119,51 @@
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="unsetuserDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteleave"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="unsetuserDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteleave" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="RequestDialog" :style="{ width: '550px' }" :header='$t("add_official_leaves")' :modal="true"
                 class="p-fluid">
                <form @submit.prevent="create">
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.title"  :class="{ 'p-invalid': submitted && !leave.title}"/>
+                    <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+                    <InputText  class="text-center" v-model="leave.title"  :class="{ 'p-invalid': submitted && !leave.title}"/>
                     <small v-if="submitted && !leave.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
                   </div>
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('location') }}</label>
-                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.location" :class="{ 'p-invalid': submitted && !leave.location}"  />
+                    <label class="w-full text-start" for="username">{{ $t('location') }}</label>
+                    <InputText  class="text-center" v-model="leave.location" :class="{ 'p-invalid': submitted && !leave.location}"  />
                     <small v-if="submitted && !leave.location" class="p-invalid text-red-600 w-full text-center" > {{$t("location") + ' ' + $t("required") }}.</small>  
                 </div>
               
             
             
               <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username ">{{ $t('start_date') }}</label>
-                    <Calendar showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
+                    <label class="w-full text-start" for="username ">{{ $t('start_date') }}</label>
+                    <DatePicker showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
                     <small v-if="submitted && !leave.start" class="p-invalid text-red-600 w-full text-center" > {{$t("start_date") + ' ' + $t("required") }}.</small>  
 
                 </div> 
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('end_date') }}</label>
-                    <Calendar showTime  id="calendar-12h" hourFormat="12"  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
+                    <label class="w-full text-start" for="username">{{ $t('end_date') }}</label>
+                    <DatePicker showTime  id="calendar-12h" hourFormat="12"  style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
                     <small v-if="submitted && !leave.end" class="p-invalid text-red-600 w-full text-center" > {{$t("end_date") + ' ' + $t("required") }}.</small>  
                 </div> 
             
               <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('Employees') }}</label>
-                    <MultiSelect filter  id="pv_id_1" style="direction: ltr !important;" v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name"  :class="{ 'p-invalid': submitted && !leave.assigners}"  class="w-full" />
+                    <label class="w-full text-start" for="username">{{ $t('Employees') }}</label>
+                    <MultiSelect filter v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name"  :class="{ 'p-invalid': submitted && !leave.assigners}"  class="w-full" />
                      <small v-if="submitted && !leave.assigners" class="p-invalid text-red-600 w-full text-center" > {{$t("Employees") + ' ' + $t("required") }}.</small>                  </div>
              
               <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('lat') }}</label>
-                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.lat" :class="{ 'p-invalid': submitted && !leave.lat}" />
+                    <label class="w-full text-start" for="username">{{ $t('lat') }}</label>
+                    <InputNumber v-model="leave.lat" :class="{ 'p-invalid': submitted && !leave.lat}" />
                     <small v-if="submitted && !leave.lat" class="p-invalid text-red-600 w-full text-center" > {{$t("lat") + ' ' + $t("required") }}.</small>  
                 </div> 
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('long') }}</label>
-                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.long" :class="{ 'p-invalid': submitted && !leave.long}" />
+                    <label class="w-full text-start" for="username">{{ $t('long') }}</label>
+                    <InputNumber v-model="leave.long" :class="{ 'p-invalid': submitted && !leave.long}" />
                     <small v-if="submitted && !leave.long" class="p-invalid text-red-600 w-full text-center" > {{$t("long") + ' ' + $t("required") }}.</small>  
                 </div> 
              
@@ -175,14 +171,14 @@
                 <div class="py-3">
                     <GoogleMap api-key="AIzaSyDZnJeq94aaneiA3QWUZdWYV9uKDEjxjas" @click="handleMapClick"
                    style="width: 100%; height: 500px"
-                   :center="{ lat: 		parseFloat(location.latitude), lng: parseFloat(location.longitude)} " :zoom="14">
+                   :center="mapPoint({ latitude: leave.lat, longitude: leave.long })" :zoom="14">
           <Marker
-              :options="{ position: { lat: parseFloat(location.latitude)		, lng: parseFloat(location.longitude) } }"/>
+              :options="{ position: mapPoint({ latitude: leave.lat, longitude: leave.long }) }"/>
          
                  </GoogleMap>
               
                 </div>
-                <Button :label='$t("save")' icon="pi pi-check " type="submit" class="create" @click="submitted=true"/>
+                <Button :label='$t("save")' icon="pi pi-check " type="submit" @click="submitted=true" />
                </form>
         
         </Dialog>     
@@ -191,43 +187,43 @@
                 class="p-fluid">
                 <form @submit.prevent="updatel">
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.title"  :class="{ 'p-invalid': submitted && !leave.title}"/>
+                    <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+                    <InputText  class="text-center" v-model="leave.title"  :class="{ 'p-invalid': submitted && !leave.title}"/>
                     <small v-if="submitted && !leave.title" class="p-invalid text-red-600 w-full text-center" > {{$t("title") + ' ' + $t("required") }}.</small>  
                   </div>
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('location') }}</label>
-                    <InputText  class="bg-[#f7f5f5] text-center" v-model="leave.location" :class="{ 'p-invalid': submitted && !leave.location}"  />
+                    <label class="w-full text-start" for="username">{{ $t('location') }}</label>
+                    <InputText  class="text-center" v-model="leave.location" :class="{ 'p-invalid': submitted && !leave.location}"  />
                     <small v-if="submitted && !leave.location" class="p-invalid text-red-600 w-full text-center" > {{$t("location") + ' ' + $t("required") }}.</small>  
                 </div>
               
             
             
               <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username ">{{ $t('start_date') }}</label>
-                    <Calendar showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
+                    <label class="w-full text-start" for="username ">{{ $t('start_date') }}</label>
+                    <DatePicker showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.start" showIcon  :class="{ 'p-invalid': submitted && !leave.start}" />
                     <small v-if="submitted && !leave.start" class="p-invalid text-red-600 w-full text-center" > {{$t("start_date") + ' ' + $t("required") }}.</small>  
 
                 </div> 
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('end_date') }}</label>
-                    <Calendar showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
+                    <label class="w-full text-start" for="username">{{ $t('end_date') }}</label>
+                    <DatePicker showTime  id="calendar-12h" hourFormat="12" style="width: 100%" showButtonBar v-model.number="leave.end" showIcon  :class="{ 'p-invalid': submitted && !leave.end}"  />
                     <small v-if="submitted && !leave.end" class="p-invalid text-red-600 w-full text-center" > {{$t("end_date") + ' ' + $t("required") }}.</small>  
                 </div> 
             
               <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('Employees') }}</label>
-                    <MultiSelect filter  id="pv_id_1" style="direction: ltr !important;" v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name"  :class="{ 'p-invalid': submitted && !leave.assigners}"  class="w-full" />
+                    <label class="w-full text-start" for="username">{{ $t('Employees') }}</label>
+                    <MultiSelect filter v-model="leave.assigners"  option-value="id" :options="assigner"  optionLabel="name"  :class="{ 'p-invalid': submitted && !leave.assigners}"  class="w-full" />
                      <small v-if="submitted && !leave.assigners" class="p-invalid text-red-600 w-full text-center" > {{$t("Employees") + ' ' + $t("required") }}.</small>                  </div>
              
               <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('lat') }}</label>
-                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.lat" :class="{ 'p-invalid': submitted && !leave.lat}" />
+                    <label class="w-full text-start" for="username">{{ $t('lat') }}</label>
+                    <InputNumber v-model="leave.lat" :class="{ 'p-invalid': submitted && !leave.lat}" />
                     <small v-if="submitted && !leave.lat" class="p-invalid text-red-600 w-full text-center" > {{$t("lat") + ' ' + $t("required") }}.</small>  
                 </div> 
                 <div class="flex flex-column gap-2">
-                    <label class="w-full text-right" for="username">{{ $t('long') }}</label>
-                    <InputNumber   class="bg-[#f7f5f5]" v-model="leave.long" :class="{ 'p-invalid': submitted && !leave.long}" />
+                    <label class="w-full text-start" for="username">{{ $t('long') }}</label>
+                    <InputNumber v-model="leave.long" :class="{ 'p-invalid': submitted && !leave.long}" />
                     <small v-if="submitted && !leave.long" class="p-invalid text-red-600 w-full text-center" > {{$t("long") + ' ' + $t("required") }}.</small>  
                 </div> 
              
@@ -235,14 +231,14 @@
                 <div class="py-3">
                     <GoogleMap api-key="AIzaSyDZnJeq94aaneiA3QWUZdWYV9uKDEjxjas" @click="handleMapClick"
                    style="width: 100%; height: 500px"
-                   :center="{ lat: 		parseFloat(location.latitude), lng: parseFloat(location.longitude)} " :zoom="14">
+                   :center="mapPoint({ latitude: leave.lat, longitude: leave.long })" :zoom="14">
           <Marker
-              :options="{ position: { lat: parseFloat(location.latitude)		, lng: parseFloat(location.longitude) } }"/>
+              :options="{ position: mapPoint({ latitude: leave.lat, longitude: leave.long }) }"/>
          
                  </GoogleMap>
               
                 </div>
-                <Button :label='$t("save")' icon="pi pi-check " type="submit" class="create" @click="submitted=true"/>
+                <Button :label='$t("save")' icon="pi pi-check " type="submit" @click="submitted=true" />
                </form>
         </Dialog>     
         
@@ -257,11 +253,12 @@
     </div>
   </template>
   <script setup>
-  import { FilterMatchMode } from 'primevue/api'
+  import { FilterMatchMode } from '@primevue/core/api'
   import { ref, onMounted, onBeforeMount ,computed} from 'vue'
   // import ProductService from '@/service/ProductService';
   import { useToast } from 'primevue/usetoast'
   import {GoogleMap, Marker, Circle} from "vue3-google-map";
+  import { mapPoint } from "@/utils/mapPoint";
   import axios from 'axios'
   import moment from "moment";
   import { useI18n } from 'vue-i18n'
