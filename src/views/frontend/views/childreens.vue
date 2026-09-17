@@ -26,7 +26,9 @@
     <!-- Back Side -->
     <div class="flip-card-back bg-gradient-to-r from-[#74dbc7] to-[#618990]">
       <h2 class="text-lg font-semibold">{{ $t("evaluation") }}</h2>
-      <p v-if="child.evaluations.length > 0" class="mt-2 text-sm text-center">{{ child.evaluations.join(', ') }}</p>
+      <div v-if="evaluationTitles(child).length" class="evaluation-chips">
+        <span v-for="title in evaluationTitles(child)" :key="title" class="evaluation-chip">{{ title }}</span>
+      </div>
       <p v-else class="mt-2 text-sm">{{ $t("no_evaluations_yet") }}</p>
       <button @click="checkChildStatus(child.id)" class="mt-auto bg-white text-blue-500 px-4 py-2 rounded-lg shadow-md hover:bg-gray-200">{{ $t("Evaluation_stage") }}</button>
     </div>
@@ -72,6 +74,13 @@ export default {
     childAge(child) {
       // `age` from the API is in whole years.
       return formatChildAge(child.birth_date, child.age == null ? child.age : child.age * 12, this.$t);
+    },
+    // Unique evaluation titles; older API responses repeat an evaluation once per answer.
+    evaluationTitles(child) {
+      const titles = (child.evaluations ?? [])
+        .map((evaluation) => (typeof evaluation === "string" ? evaluation : evaluation?.title))
+        .filter(Boolean);
+      return [...new Set(titles)];
     },
     checkChildStatus(id) {
       axios.get(`/api/child/${id}/check-active-booking`).then((res) => {
@@ -173,5 +182,22 @@ export default {
 }
 .rtl {
   direction: rtl;
+}
+.evaluation-chips {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  max-height: 9rem;
+  overflow-y: auto;
+}
+.evaluation-chip {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  color: #135c65;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 </style>

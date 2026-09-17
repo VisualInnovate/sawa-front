@@ -57,7 +57,8 @@ async function resendCode() {
     await axios.post("api/forgot-password", { email: form.value.email.trim() }, { skipAuth: true });
     toast.add({ severity: "info", summary: t("pwreset.code_resent"), life: 4000 });
   } catch (err) {
-    message.value = err.response?.status === 404 ? t("pwreset.email_not_found") : t("request_failed_retry");
+    const status = err.response?.status;
+    message.value = status === 404 ? t("pwreset.email_not_found") : status === 503 ? t("pwreset.send_failed") : t("request_failed_retry");
   } finally {
     resending.value = false;
   }

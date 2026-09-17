@@ -26,6 +26,7 @@ const failed = (err) => {
   if (status === 422) errors.value = err.response.data.errors ?? {};
   else if (status === 404) message.value = t("pwreset.invalid_code");
   else if (status === 403) message.value = t("pwreset.code_expired");
+  else if (status === 503) message.value = t("pwreset.send_failed");
   else message.value = t("request_failed_retry");
 };
 

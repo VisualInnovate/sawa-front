@@ -66,17 +66,33 @@
 
   <!-- Consultation Result Modal -->
   <Dialog v-model:visible="consultationResultDialogVisible" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '600px', maxWidth: '92vw' }">
-    <div v-if="selectedConsultationResult">
-      <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات الصحية والنمائية") }}:</p>
-      <p class="text-sm text-gray-600">{{ removeBracesAndReplace(selectedConsultationResult?.consultation_result?.health, selectedConsultationResult?.child_name) }}</p>
+    <div v-if="selectedConsultationResult" id="consultation-result-content" ref="resultContent" class="consultation-result">
+      <h2 class="result-heading">{{ $t("نتيجة الاستشارة") }} — {{ selectedConsultationResult.child_name }}</h2>
+      <p class="result-meta"><span dir="ltr">{{ moment(selectedConsultationResult.event_date).format("DD-MM-YYYY") }}</span> · {{ selectedConsultationResult.user_name }}</p>
 
-      <p class="mt-2 text-gray-700 font-semibold">{{ $t("توصييات المستشار") }}:</p>
-      <p class="text-sm text-gray-600">{{ removeBracesAndReplace(selectedConsultationResult?.consultation_result?.consultant_recommendations, selectedConsultationResult?.child_name) }}</p>
+      <template v-if="result.health">
+        <p class="result-label">{{ $t("التوصييات الصحية والنمائية") }}:</p>
+        <p class="result-text">{{ fillChildName(result.health) }}</p>
+      </template>
 
-      <p class="mt-2 text-gray-700 font-semibold">{{ $t("التوصييات المزلية") }}:</p>
-      <p class="text-sm text-gray-600" v-for="bok in selectedConsultationResult.consultation_result?.filed_value" :key="bok.id">
-        {{ removeBracesAndReplace(bok?.value, selectedConsultationResult?.child_name) }}
-      </p>
+      <template v-if="result.consultant_recommendations">
+        <p class="result-label">{{ $t("توصييات المستشار") }}:</p>
+        <p class="result-text">{{ fillChildName(result.consultant_recommendations) }}</p>
+      </template>
+
+      <template v-if="homeRecommendations.length">
+        <p class="result-label">{{ $t("التوصييات المزلية") }}:</p>
+        <ul class="result-list">
+          <li v-for="(item, index) in homeRecommendations" :key="item.id ?? index">{{ fillChildName(item.value) }}</li>
+        </ul>
+      </template>
+
+      <template v-if="result.notes">
+        <p class="result-label">{{ $t("ملاحظات المستشار") }}:</p>
+        <p class="result-text">{{ fillChildName(result.notes) }}</p>
+      </template>
+
+      <p v-if="!hasResult" class="result-text">{{ $t("no_records_found") }}</p>
     </div>
     <template #footer>
       <Button :label="$t('print')" icon="pi pi-print" @click="printConsultationResult" variant="text" />
@@ -94,7 +110,7 @@ import About from "../components/About.vue";
 import moment from "moment";
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import html2pdf from "html2pdf.js";
@@ -146,9 +162,11 @@ const deleteBooking = () => {
   }
 };
 
-const removeBracesAndReplace = (text, name) => {
-  if (!text) return ""; // Handle undefined or null text
-  return text.replace(/\{\{.*?\}\}/g, name || "محمد"); // Replace {{}} with the provided name or default to "محمد"
+// Recommendation templates use {{ ... }} as the child's name placeholder.
+const fillChildName = (text) => {
+  if (!text) return "";
+  const name = selectedConsultationResult.value?.child_name || t("your_child");
+  return String(text).replace(/\{\{.*?\}\}/g, name);
 };
 
 const showConsultationResult = (book) => {
@@ -156,19 +174,44 @@ const showConsultationResult = (book) => {
   consultationResultDialogVisible.value = true;
 };
 
+// Print only the result, in a throwaway frame that keeps the page direction.
 const printConsultationResult = () => {
-  window.print();
+  const content = resultContent.value;
+  if (!content) return;
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  Object.assign(frame.style, { position: "fixed", width: "0", height: "0", border: "0", right: "0", bottom: "0" });
+  document.body.appendChild(frame);
+  const doc = frame.contentDocument;
+  doc.open();
+  doc.write(`<!doctype html><html dir="${document.documentElement.dir || "rtl"}" lang="${document.documentElement.lang || "ar"}"><head><meta charset="utf-8"><title>${t("نتيجة الاستشارة")}</title>
+<style>body{font-family:system-ui,"Segoe UI",Tahoma,sans-serif;color:#1f2937;padding:24px;line-height:1.7}
+.result-heading{font-size:20px;margin:0 0 4px}.result-meta{color:#64748b;margin:0 0 16px}
+.result-label{font-weight:700;margin:16px 0 4px}.result-text{margin:0;white-space:pre-line}.result-list{margin:0;padding-inline-start:20px}</style>
+</head><body>${content.innerHTML}</body></html>`);
+  doc.close();
+  frame.contentWindow.focus();
+  frame.contentWindow.print();
+  setTimeout(() => frame.remove(), 1000);
 };
 
 const exportConsultationResultAsPDF = () => {
-  const element = document.getElementById("consultation-result-content");
-  html2pdf(element, {
-    margin: 10,
-    filename: 'consultation_result.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  });
+  const element = resultContent.value;
+  if (!element) return;
+  const childName = (selectedConsultationResult.value?.child_name || "consultation").replace(/\s+/g, "_");
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: `consultation_result_${childName}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    })
+    .from(element)
+    .save()
+    .catch(() => {
+      toast.add({ severity: "error", summary: t("error"), detail: t("request_failed_retry"), life: 4000 });
+    });
 };
 
 onMounted(() => {
