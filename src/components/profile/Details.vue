@@ -1,8 +1,9 @@
 <template>
     <div class="sawa-card p-[1%]">
-     
-  
-     <form class="form-container" ref="myForm" @submit.prevent="update">
+     <div v-if="loading" class="flex justify-center py-8">
+       <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+     </div>
+     <form v-else class="form-container" ref="myForm" @submit.prevent="update">
        <!-- Step 1 -->
   
        <div   v-if="currentStep === 0">
@@ -86,7 +87,10 @@
        <!-- Step 2 -->
        <div v-if="currentStep === 1">
          <h3 class="text-center text-xl font-bold text-blue-950"> {{ $t("job_details") }}</h3>
-         <div class="p-[2%]  bg-[#FDFDFD]  grid grid-cols-1 lg:grid-cols-2 gap-4">
+         <div v-if="lookupsLoading" class="flex justify-center py-8">
+           <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+         </div>
+         <div v-else class="p-[2%]  bg-[#FDFDFD]  grid grid-cols-1 lg:grid-cols-2 gap-4">
   
            <div class="flex flex-column gap-2">
                 <div class="flex">
@@ -207,6 +211,7 @@
   import axios from "axios";
   import InputNumber from "primevue/inputnumber";
   import moment from "moment";
+  import { fetchUserProfile } from "./userProfile";
   
     import {useToast} from 'primevue/usetoast'
   export default {
@@ -222,10 +227,10 @@
           { label: "Additional Details" },
         ],
        employee:{ },
-          users:{},
           submitted:false,
-          childs:{},
-          cities:{},
+          loading:true,
+          lookupsLoading:false,
+          lookupsLoaded:false,
           positions:[],
           shifts:[],
           skills:[],
@@ -258,6 +263,7 @@
             if (this.currentStep < this.steps.length - 1) {
               this.currentStep++;
             }
+            if (this.currentStep === 1) this.getLookups();
           },
           previousStep() {
             if (this.currentStep > 0) {
@@ -281,9 +287,10 @@
         };
       },
       getoneanswer(){
-          axios
-            .get(`api/users/${this.employee_id}`)
-            .then((response) => {
+          this.loading = true
+          fetchUserProfile()
+            .then((data) => {
+              const response = { data }
              
               this.employee.name = response.data.user.name
               this.employee.email = response.data.user.email
@@ -327,55 +334,32 @@
                  }  
               
             })
+            .finally(() => {
+              this.loading = false
+            })
   
          },
   
   
-      getusers(){
-  
-          axios
-          .post("api/users")
-          .then((response) => {
-            this.users=response.data.users.data
-            this.getoneanswer()
-          })
-          axios
-          .get("api/shifts")
-          .then((response) => {
-            this.shifts=response.data.data
-          })
-          axios
-          .get("api/position")
-          .then((response) => {
-            this.positions=response.data.data
-          })
-          axios.get("api/treatment/all")
-        .then((response) => {
-          this.treatments=response.data.data
-        })
-          axios.post("/api/roles").then((res)=>{
-  
-          this.roles= res.data.roles.data.filter((role) => !role.is_locked || this.$isAdmin())
-  
-  
-          });
-          axios.get("/api/skills").then((res)=>{
-                this.skills=res.data.data
-              
-  
-              });
-          axios
-          .get("api/department")
-          .then((response) => {
-            this.departments=response.data.data
-          })
-          axios
-          .get(`/api/countries/${localStorage.getItem("appLang")}`)
-        .then((res) => {
-         
-          this.cities = res.data.countries
-         
-        })
+      // Job-details dropdowns are only needed on step 2, so load them when it is first opened.
+      getLookups(){
+          if (this.lookupsLoaded || this.lookupsLoading) return
+          this.lookupsLoading = true
+          Promise.all([
+            axios.get("api/shifts").then((response) => { this.shifts = response.data.data }),
+            axios.get("api/position").then((response) => { this.positions = response.data.data }),
+            axios.get("api/treatment/all").then((response) => { this.treatments = response.data.data }),
+            axios.post("/api/roles").then((res) => {
+              this.roles = res.data.roles.data.filter((role) => !role.is_locked || this.$isAdmin())
+            }),
+            axios.get("/api/skills").then((res) => { this.skills = res.data.data }),
+            axios.get("api/department").then((response) => { this.departments = response.data.data }),
+          ])
+            .then(() => { this.lookupsLoaded = true })
+            .catch(() => {
+              this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: this.$t("request_failed_retry"), life: 5000 });
+            })
+            .finally(() => { this.lookupsLoading = false })
       },
      
       
@@ -410,7 +394,7 @@
     },
     mounted() {
         this.employee_id=localStorage.getItem("user_id")
-     this.getusers()
+     this.getoneanswer()
     },
   };
   </script>

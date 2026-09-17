@@ -2,10 +2,15 @@
   <div>
     
   <div class="sawa-card">
-    
-  
-   <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-      <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details">
+      <div v-if="loading" class="flex justify-center py-8">
+        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+      </div>
+      <div v-else-if="!details.length" class="text-center py-8 text-gray-500">
+        <i class="pi pi-inbox text-2xl mb-2" />
+        <p>{{ $t('no_records_found') }}</p>
+      </div>
+   <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+      <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details" :key="evalu.id">
         <div>
           <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
@@ -94,6 +99,7 @@ import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from '../../components/ChildTaps.vue'
 import moment from "moment";
+import { fetchUserProfile } from "./userProfile";
 export default {
    components:{ChildTaps},
 
@@ -102,6 +108,7 @@ export default {
         child_id: useStorage("child_id", Number),
          maxDate: new Date(),
          details:[],
+         loading:true,
          evalate:{},
          error:{},
          days:[0,1,2,3,4,5,6],
@@ -111,8 +118,6 @@ export default {
          delete_id:0,
          doctors:[],
          deleteDialog:false,
-         total_pages:0,
-         current_page:0,
          updatedialog:false,
         evaluate_types : [
                     { name: 'side profile', id: 1 },
@@ -207,19 +212,15 @@ export default {
     },
 
 
-    getusers(){
-      axios
-        .get(`api/users/${localStorage.getItem("user_id")}`)
-        .then((response) => {
-
-       
-          this.details = response.data.other_evaluations
-         
+    getusers(refresh = false){
+      this.loading = true
+      fetchUserProfile({ refresh })
+        .then((data) => {
+          this.details = data.other_evaluations ?? []
         })
-        .catch((error) => {
-            
-        });
-
+        .finally(() => {
+          this.loading = false
+        })
     },
     deleteevalution(id){
       this.delete_id=id
@@ -230,25 +231,10 @@ export default {
       axios.delete(`api/evaluations/${this.delete_id}/delete`)
         .then((response) => {
 
-         this.getusers()
+         this.getusers(true)
          this.deleteDialog=!(this.deleteDialog)
         })
     },
-
-    getdoctors(){
-      axios
-        .get(`api/doctors`)
-        .then((response) => {
-         
-          this.doctors = response.data.doctors
-         
-        })
-        .catch((error) => {
-            
-        });
-
-    },
-
 
    
   },
@@ -260,24 +246,8 @@ export default {
     return this.days.filter(day => !usedDays.includes(day));
   },
 },
-  watch: {
-    current_page(newVal, oldVal) {
-    console.log(`Counter changed from ${oldVal} to ${newVal}`);
-     
-    axios
-        .get(`api/child/${localStorage.getItem("child_id")}/get/evaluations?page=${newVal}`)
-        .then((response) => {
-          
-          this.details = response.data.evaluations
-          
-         
-      })
-    // Perform any additional actions here
-  }
-},
   mounted() {
    this.getusers()
-   this.getdoctors()
 
 
    

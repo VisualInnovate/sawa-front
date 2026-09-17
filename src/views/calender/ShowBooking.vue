@@ -1,8 +1,7 @@
 <template>
   <div class="page">
     <DataTable :value="bookings" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
-      stripedRows :globalFilterFields="['child_name', 'details.requester_phone', 'details.requester_name']"
-      :filters="filters">
+      stripedRows>
       <template #header>
         <div class="bookings-header">
           <h1 class="page-title">{{ $t("bookings") }}</h1>
@@ -16,13 +15,6 @@
               <label for="consultation-status">{{ $t("consultation_status_filter") }}</label>
               <Select inputId="consultation-status" v-model="selectedFilter" :options="filter" optionLabel="name"
                 optionValue="code" @update:modelValue="getBookings" />
-            </div>
-            <div class="field">
-              <label for="booking-search">{{ $t("search") }}</label>
-              <IconField class="table-search">
-                <InputIcon class="pi pi-search" />
-                <InputText id="booking-search" v-model="filters.global.value" :placeholder="$t('booking_search_hint')" />
-              </IconField>
             </div>
           </div>
         </div>
@@ -70,7 +62,6 @@
 </template>
 <script>
 import axios from "axios";
-import { FilterMatchMode } from "@primevue/core/api";
 import { formatChildAge } from "@/utils/childAge";
 
 export default {
@@ -80,7 +71,6 @@ export default {
       loading: true,
       selectedStatus: -1,
       selectedFilter: -1,
-      filters: { global: { value: null, matchMode: FilterMatchMode.CONTAINS } },
     };
   },
   computed: {
@@ -152,8 +142,7 @@ export default {
 .bookings-filters .field {
   margin: 0;
 }
-.bookings-filters .p-select,
-.bookings-filters .table-search {
+.bookings-filters .p-select {
   width: 100%;
 }
 </style>

@@ -227,6 +227,7 @@ export default {
         dateClick: this.handleDateClick,
         datesSet: this.handleDatesSet.bind(this),
         select: this.handleSelect.bind(this),
+        dayCellClassNames: () => [],
       },
     };
   },
@@ -245,6 +246,8 @@ export default {
       this.opts.event = null;
       this.opts.selectable = false;
       this.opts.hiddenDays = [];
+      this.opts.validRange = { start: moment().startOf('day').toDate() };
+      this.opts.dayCellClassNames = this.dayCellClassNames.bind(this);
       this.opts.slotMinTime = '00:00:00';
       this.opts.slotMaxTime = '24:00:00';
       this.slotEmployeeId = null;
@@ -280,9 +283,16 @@ export default {
       this.opts.slotMinTime = this.business_hours.map(hours => hours.start).sort()[0];
       this.opts.slotMaxTime = this.business_hours.map(hours => hours.end).sort().at(-1);
     },
+    isAvailableDate(date) {
+      return this.avalible_day.some(day => moment(day.start).isSame(date, 'day'));
+    },
+    dayCellClassNames({ date }) {
+      if (!this.event.employee_id || !this.avalible_day.length) return [];
+      return this.isAvailableDate(date) ? ['fc-day-available'] : ['fc-day-unavailable'];
+    },
     canSelectSlot(slot) {
       if (!this.event.employee_id || this.calendarLoading || this.employeesLoading || this.saving) return false;
-      if (slot.allDay) return this.avalible_day.some(day => moment(day.start).isSame(slot.start, 'day'));
+      if (slot.allDay) return this.isAvailableDate(slot.start);
       const start = moment(slot.start);
       const end = moment(slot.end);
       const available = end.isAfter(start) && this.avalible_day.some(day =>
@@ -381,6 +391,19 @@ export default {
             end: moment(event.end).isSame(moment(event.start), 'day') ? moment(event.end).format("HH:mm:ss") : '24:00:00',
           }));
           this.handleDatesSet();
+          if (daysData.length) {
+            // Only show the employee's working weekdays, from today until their last open date.
+            const workDays = new Set(this.business_hours.map(hours => hours.day));
+            this.opts.hiddenDays = this.days.filter(day => !workDays.has(day));
+            const lastDay = moment.max(daysData.map(day => moment(day.start)));
+            this.opts.validRange = {
+              start: moment().startOf('day').toDate(),
+              end: lastDay.clone().add(1, 'day').startOf('day').toDate(),
+            };
+            const firstDay = moment.min(daysData.map(day => moment(day.start))).toDate();
+            this.$nextTick(() => this.$refs.fullCalendar?.getApi().gotoDate(firstDay));
+          }
+          this.opts.dayCellClassNames = this.dayCellClassNames.bind(this);
           this.booked = this.asList(response.data.data?.booked).map((event) => ({
             title: event.title,
             start: `${event.date}T${event.start_time}`,
@@ -477,6 +500,15 @@ export default {
 };
 </script>
 <style scoped>
+:deep(.fc-day-unavailable) {
+  background: repeating-linear-gradient(135deg, #f3f4f6, #f3f4f6 6px, #e5e7eb 6px, #e5e7eb 12px);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+:deep(.fc-daygrid-day.fc-day-available) {
+  background: #ecfdf5;
+  cursor: pointer;
+}
 input {
   width: 100%;
   font-size: 20px;

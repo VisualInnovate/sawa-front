@@ -28,7 +28,7 @@
             </div> -->
             <div  class="flex flex-column gap-2">
               <label class="w-full text-start" for="username">{{ $t('evalute_type') }}</label>
-              <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
+              <MultiSelect v-model="event.type" :options="event_types" optionLabel="name" optionValue="id" display="chip" class="w-full" :class="{ 'p-invalid': submitted && !event.type?.length}" />
             </div>
            
             <div class="flex gap-2 my-2">
@@ -74,7 +74,7 @@
             
             <div  class="flex flex-column gap-2">
               <label class="text-start ">{{ $t("doctor") }}</label>
-              <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
+              <MultiSelect v-model="event.type" :options="event_types" optionLabel="name" optionValue="id" display="chip" class="w-full" :class="{ 'p-invalid': submitted && !event.type?.length}" />
             </div>
             
             <div class="flex gap-2 my-2">
@@ -122,17 +122,18 @@
       return {
         filter:{},
         repeat:false,
-         days_week :[
+         all_days_week :[
           
             { name: this.$t('weekday.sunday'), value: 0 },
             { name: this.$t('weekday.monday'), value: 1 },
             { name: this.$t('weekday.tuesday'), value: 2},
-            { name: this.$t('weekday.thursday'), value: 4 },
             { name: this.$t('weekday.wednesday'), value: 3 },
+            { name: this.$t('weekday.thursday'), value: 4 },
             { name: this.$t('weekday.friday'), value: 5 },
             { name: this.$t('weekday.saturday'), value: 6 }
           
         ],
+        days_week: [],
         event_types : [
                       { name: this.$t('event_type.evaluations'), id: 1 },
                       { name: this.$t('event_type.meetings'), id: 2 },
@@ -357,7 +358,7 @@
                 const usedDays = newValue.map(entry => entry.day);
                 // Filter `days` to only include those present in `usedDays`
                 this.opts.hiddenDays=this.days.filter(day => !usedDays.includes(day));
-                  this.days_week = this.days_week.filter(day => !this.opts.hiddenDays.includes(day.value));
+                this.days_week = this.all_days_week.filter(day => !this.opts.hiddenDays.includes(day.value));
                 
             },
 

@@ -3,9 +3,15 @@
     <div>
          
     <div class="sawa-card">
-       
-     <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class=" bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details">
+      <div v-if="loading" class="flex justify-center py-8">
+        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+      </div>
+      <div v-else-if="!details.length" class="text-center py-8 text-gray-500">
+        <i class="pi pi-inbox text-2xl mb-2" />
+        <p>{{ $t('no_records_found') }}</p>
+      </div>
+     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+        <div class=" bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details" :key="evalu.id">
           <div class="col-span-2">
             <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
@@ -22,7 +28,7 @@
         
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.child.name }}</p>
+            <p class="text-xl  px-1 my-auto">{{ evalu.child?.name }}</p>
           </div>
           </div>
           <div class="text-center" >
@@ -93,7 +99,7 @@
   import { useStorage } from "@vueuse/core";
   import EvaluationType from '../../components/EvaluationType.vue'
   import moment from "moment";
-    import {useToast} from 'primevue/usetoast'
+  import { fetchUserProfile } from "./userProfile";
   export default {
      components:{EvaluationType},
   
@@ -103,6 +109,7 @@
           eavl_id: useStorage("eavl_id", Number),
            maxDate: new Date(),
            details:[],
+           loading:true,
            evalate:{},
            evalate_type: useStorage("evalate_type", ''),
            error:{},
@@ -131,7 +138,7 @@
         axios.delete(`api/evaluation-request/${this.delete_id}`)
           .then((response) => {
 
-           this.getusers()
+           this.getusers(true)
            this.deleteDialog=!(this.deleteDialog)
           })
       },
@@ -172,16 +179,6 @@
        
        
       },
-      serchdata(e){
-
-        axios
-          .get(`api/users/${localStorage.getItem("user_id")}`)
-          .then((response) => {
-            this.details = response.data.evaluation_requests
-           
-          })
-      },
-
       createevaluate(){
         axios
           .post(`api/evaluation-request`,{
@@ -206,37 +203,20 @@
   
   
 
-      getusers(){
-        axios
-          .get(`api/users/${localStorage.getItem("user_id")}`)
-          .then((response) => {
-          
-            this.details = response.data.evaluation_requests
-           
+      getusers(refresh = false){
+        this.loading = true
+        fetchUserProfile({ refresh })
+          .then((data) => {
+            this.details = data.evaluation_requests ?? []
           })
-        
-      },
-      
-      getdoctors(){
-        axios
-          .get(`api/doctors`)
-          .then((response) => {
-           
-            this.doctors = response.data.doctors
-           
+          .finally(() => {
+            this.loading = false
           })
-          .catch((error) => {
-              
-          });
-  
       },
-  
-  
      
     },
     mounted() {
      this.getusers()
-     this.getdoctors()
      this.child_id=localStorage.getItem("child_id") 
     },
   };

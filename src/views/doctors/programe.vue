@@ -1,22 +1,24 @@
-
   <template>
     <div>
-      <div class=" relative">
-        <EvaluationType></EvaluationType>
-        <div class="absolute  top-4 ltr:left-2 rtl:right-4 flex flex-column gap-2">
-                    
-          <InputText @update:model-value="serchdata($event)"  :placeholder='$t("search")'/>                      <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
-                </div>
-      </div>
-     
-        
-      
-      
-      
+      <EvaluationType></EvaluationType>
+
     <div class="sawa-card">
-        
-     <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details">
+      <div class="requests-toolbar">
+        <IconField class="requests-search">
+          <InputIcon class="pi pi-search" />
+          <InputText v-model="search" :placeholder="$t('search')" :aria-label="$t('search')" class="w-full" />
+        </IconField>
+      </div>
+
+      <div v-if="loading" class="flex justify-center py-8">
+        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+      </div>
+      <div v-else-if="!filteredDetails.length" class="text-center py-8 text-gray-500">
+        <i class="pi pi-inbox text-2xl mb-2" />
+        <p>{{ $t('no_records_found') }}</p>
+      </div>
+     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in filteredDetails" :key="evalu.id">
           <div class="col-span-2">
             <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
@@ -117,6 +119,8 @@
           eavl_id: useStorage("eavl_id", Number),
            maxDate: new Date(),
            details:[],
+           search:'',
+           loading:true,
            evalate:{},
            evalate_type: useStorage("evalate_type", ''),
            error:{},
@@ -186,15 +190,6 @@
        
        
       },
-      serchdata(e){
-
-        axios
-          .get(`api/users/${localStorage.getItem("doctor_id")}/search/evaluations?search=${e}`)
-          .then((response) => {
-            this.details = response.data.evaluation_requests
-           
-          })
-      },
 
       createevaluate(){
         axios
@@ -221,37 +216,40 @@
   
 
       getusers(){
+        this.loading = true
         axios
           .get(`api/users/${localStorage.getItem("doctor_id")}/get/evaluations`)
           .then((response) => {
-            console.log(response.data.evaluation_requests)
-            this.details = response.data.evaluation_requests
-           
+            this.details = response.data.evaluation_requests ?? []
           })
-        
-      },
-      
-      getdoctors(){
-        axios
-          .get(`api/doctors`)
-          .then((response) => {
-           
-            this.doctors = response.data.doctors
-           
+          .finally(() => {
+            this.loading = false
           })
-          .catch((error) => {
-              
-          });
-  
       },
   
   
      
     },
+    computed: {
+      filteredDetails() {
+        const term = this.search.trim().toLowerCase()
+        if (!term) return this.details
+        return this.details.filter(evalu => (evalu.child?.name ?? '').toLowerCase().includes(term))
+      },
+    },
     mounted() {
      this.getusers()
-     this.getdoctors()
      this.child_id=localStorage.getItem("child_id") 
     },
   };
   </script>
+  <style scoped>
+  .requests-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1rem 0;
+  }
+  .requests-search {
+    width: min(100%, 20rem);
+  }
+  </style>
