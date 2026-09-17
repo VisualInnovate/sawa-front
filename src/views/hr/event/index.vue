@@ -80,7 +80,6 @@ const onSubmit=()=>{
     .then((res) => {
       fetchData()
       productDialog.value=!(productDialog.value)
-      category.value={}
       toast.add({severity: 'success', summary: t('success_message'), detail: t('event_created_successfully'), life: 3000})
     })
     .catch((el)=>{
@@ -107,7 +106,6 @@ const update =()=>{
     .then((res) => {
       fetchData()
       updateDialog.value=!(updateDialog.value)
-      category.value={}
       toast.add({severity: 'success', summary: t('success_message'), detail: t('event_created_successfully'), life: 3000})
     })
     .catch((el)=>{
@@ -338,7 +336,7 @@ const initFilters = () => {
         <div class="py-1">
                  <div class=" text-center" >
                   <img onclick="document.getElementById('filr').click()" v-if="event.image"  :src=" event.image" alt="Image"  class="m-auto w-[70%] "  preview />
-                  <img onclick="document.getElementById('filr').click()" v-else="event.image"  :src="  event_update.image" alt="Image"  class="m-auto w-[70%] "  preview />
+                  <img onclick="document.getElementById('filr').click()" v-else  :src="  event_update.image" alt="Image"  class="m-auto w-[70%] "  preview />
 
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
                   </div>

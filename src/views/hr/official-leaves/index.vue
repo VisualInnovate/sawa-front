@@ -410,8 +410,8 @@ const { t } = useI18n()
 
    const getmap=(e)=>{
     console.log(e)
- long.value= e.fi.x
-lat.value =e.fi.y
+ leave.value.long = e.fi.x
+ leave.value.lat = e.fi.y
 console.log(e)
 }
 

@@ -2,7 +2,7 @@
   <div class="p-4 relative bg-gradient-to-r from-blue-50 to-[#035B65] min-h-screen">
     <div class="py-8">
       <div class="max-w-lg m-auto">
-        <p class="flex items-center text-3xl font-bold text-gray-800">
+        <div class="flex items-center text-3xl font-bold text-gray-800">
           <div class="flex m-auto">
             <p class="text-[#ffff]">
               {{ event_day(event) }}
@@ -11,7 +11,7 @@
               {{ event_hour(event) }}
             </p>
           </div>
-        </p>
+        </div>
       </div>
     </div>
     <div class="m-auto p-8 rounded-2xl max-w-5xl mb-4 shadow-2xl bg-white transform transition-all  duration-300">
@@ -150,24 +150,25 @@ export default {
       return Number(storeId ?? localId ?? 0) || null;
     },
     buildBookingPayload() {
-      const details = this.booking?.details ?? {};
-      const payload = { ...details };
+      // The API validates the form answers as a nested `details` object (StoreBookingRequest).
+      const { doctor_code, ...details } = this.booking?.details ?? {};
 
-      payload.user_id = this.getParentId();
-      payload.event_id = Number(this.$route.params.event_id ?? this.event_id ?? 0);
-      payload.child_id = Number(this.$route.params.child_id ?? this.child_id ?? 0);
-
-      if (payload.child_problem && typeof payload.child_problem === "object") {
-        payload.child_problem = payload.child_problem.code ?? payload.child_problem.id ?? payload.child_problem;
+      if (details.child_problem && typeof details.child_problem === "object") {
+        details.child_problem = details.child_problem.code ?? details.child_problem.id ?? details.child_problem;
       }
-      if (payload.child_aids && typeof payload.child_aids === "object") {
-        payload.child_aids = payload.child_aids.id ?? payload.child_aids.code ?? payload.child_aids;
-      }
-      if (payload.doctor_code == null || payload.doctor_code === "") {
-        delete payload.doctor_code;
+      if (details.child_aids && typeof details.child_aids === "object") {
+        details.child_aids = details.child_aids.id ?? details.child_aids.code ?? details.child_aids;
       }
 
-      delete payload.details;
+      const payload = {
+        user_id: this.getParentId(),
+        event_id: Number(this.$route.params.event_id ?? this.event_id ?? 0),
+        child_id: Number(this.$route.params.child_id ?? this.child_id ?? 0),
+        details,
+      };
+      if (doctor_code != null && doctor_code !== "") {
+        payload.doctor_code = doctor_code;
+      }
       return payload;
     },
     async bookTime() {
@@ -184,16 +185,17 @@ export default {
         this.booking = { details: {} };
         this.$router.push({ name: 'Booking' });
       } catch (err) {
-        const errorMessage = err.response?.data?.message || err.response?.data?.errors?.[0] || this.$t("mission_error");
+        const firstError = Object.values(err.response?.data?.errors ?? {}).flat()[0];
+        const errorMessage = firstError || err.response?.data?.message || this.$t("mission_error");
         this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: errorMessage, life: 3000 });
       }
     },
     async getEvent() {
       await axios
-        .get(`/api/calender/booking/${this.event_id}`)
+        // Slots come from event_calendars, not the legacy calenders table.
+        .get(`/api/event-calendar/front/slot/${this.event_id}`)
         .then((res) => {
-          this.event = res.data.calender.start;
-          console.log(res);
+          this.event = res.data.data?.start;
         })
         .catch((err) => {
           console.log(err);

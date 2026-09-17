@@ -9,6 +9,7 @@ import axios from "axios";
 import InputNumber from 'primevue/inputnumber';
 import { useI18n } from 'vue-i18n';
 const router = useRouter()
+const toast = useToast()
 const { t } = useI18n();
 const allusers=ref([])
 const loading = ref(true)
@@ -97,7 +98,6 @@ const createcrude=()=>{
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      skill.value = ref({})
     })
     .catch((el)=>{
       error.value = el.response.data.errors

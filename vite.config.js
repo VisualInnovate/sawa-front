@@ -15,6 +15,9 @@ export default defineConfig({
     vue(),
     // added this vueI18nPlugin to define locales
     VueI18nPlugin({
+      // The locale files are plain JS objects that this plugin version does not precompile, so the
+      // production build must keep vue-i18n's message compiler (otherwise "{name}" is never filled in).
+      runtimeOnly: false,
       include: resolve(
         dirname(fileURLToPath(import.meta.url)),
         "./src/locales/*.js"

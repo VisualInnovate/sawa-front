@@ -102,7 +102,6 @@ const update=()=>{
 const openNew = () => {
     submitted.value=!(submitted.value)
     createdialog.value=!(createdialog.value)
-    skill.value={}
 }
 
 const confirmDelete = (id) => {

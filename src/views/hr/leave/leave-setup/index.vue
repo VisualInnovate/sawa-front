@@ -11,6 +11,7 @@ const toast = useToast()
 const router = useRouter()
 const { t } = useI18n()
 
+const error = ref({})
 const loading = ref(true)
 const users = ref(null)
 const deleteDialog = ref(false)

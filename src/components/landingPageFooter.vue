@@ -77,7 +77,6 @@ const bottomLinks = ref(["الشروط والأحكام", "الأسئلة الش
 
 const navigate = (href) => {
   router.push(href);
-  isMenuOpen.value = false;
 };
 </script>
 
