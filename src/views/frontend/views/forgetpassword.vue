@@ -22,6 +22,7 @@ async function sendCode() {
     const status = err.response?.status;
     if (status === 422) error.value = err.response.data.errors?.email?.[0] ?? t("pwreset.invalid_email");
     else if (status === 404) error.value = t("pwreset.email_not_found");
+    else if (status === 503) error.value = t("pwreset.send_failed");
     else error.value = t("request_failed_retry");
   } finally {
     loading.value = false;
