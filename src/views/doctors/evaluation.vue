@@ -4,9 +4,15 @@
       <EvaluationType></EvaluationType>
       
     <div class="sawa-card">
-        
-     <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details">
+      <div v-if="loading" class="flex justify-center py-8">
+        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+      </div>
+      <div v-else-if="!details.length" class="text-center py-8 text-gray-500">
+        <i class="pi pi-inbox text-2xl mb-2" />
+        <p>{{ $t('no_records_found') }}</p>
+      </div>
+     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details" :key="evalu.id">
           <div class="col-span-2">
         <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("اسم المقييم") }} :</h3>
@@ -51,9 +57,9 @@
     data() {
       return {
           child_id: useStorage("child_id", Number),
-          child_id: useStorage("child_id", Number),
            maxDate: new Date(),
            details:[],
+           loading:true,
            evalate:{},
            error:{},
            doctors:{},
@@ -114,38 +120,22 @@
   
 
       getusers(){
+        this.loading = true
         axios
           .get(`api/users/${localStorage.getItem("doctor_id")}/get/evaluations`)
           .then((response) => {
-            console.log(response.data.evaluation_requests)
-            this.details = response.data.evaluations
-           
+            this.details = response.data.evaluations ?? []
           })
           .catch((error) => {
-            console.error("Error retrieving Appointment Types:", error);
-          });
-  
-      },
-      getdoctors(){
-        axios
-          .get(`api/doctors`)
-          .then((response) => {
-           
-            this.doctors = response.data.doctors
-           
+            console.error("Error retrieving evaluations:", error);
           })
-          .catch((error) => {
-              
+          .finally(() => {
+            this.loading = false
           });
-  
       },
-  
-  
-     
     },
     mounted() {
      this.getusers()
-     this.getdoctors()
      this.child_id=localStorage.getItem("child_id") 
     },
   };

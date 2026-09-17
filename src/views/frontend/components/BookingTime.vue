@@ -29,115 +29,134 @@
           </p>
         </div>
       </div>
-      <div class="px-[5%]">
-        <p class="pb-4 text-3xl font-bold">{{ $t("Book_an_appointment_with_the_specialist") }}</p>
-        <p class="sec1 text-xl">{{ $t("You_can_choose_the_appropriate") }}</p>
-      </div>
-      <div class="px-4 py-[4%] lg:p-[5%] overflow-x-auto">
-        <table class="min-w-full border-2 border-[#967a80]">
-          <thead>
-            <tr class="details border-b-2 border-[#474042]">
-              <th class="text-white w-52 text-center" v-for="day in Object.keys(tableEvent)" :key="day">
-                {{ $t(day) }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="i in max" :key="i">
-              <td
-                v-for="(events, day) in tableEvent"
-                :key="day"
-                class="w-60 relative p-[0_0.3rem]"
-              >
-              <div 
-                  @click="getSolts(events[i - 1].start)" 
-                  v-if="events[i - 1]" 
-                  class="group rounded-full border-2 border-gray-500 w-full py-2  hover:bg-slate-700 cursor-pointer" 
-                >
-                  <p 
-                    class="m-auto  text-center text-red-700 duration-300 delay-200 transition-opacity w-full px-1 text-[11px] font-medium group-hover:hidden"
-                  >
-                    {{ events[i - 1].start }}
-                  </p>
-                  <label 
-                    class="m-auto text-center cursor-pointer text-white duration-300 delay-200 transition-opacity w-full px-1 text-[13px]  font-medium hidden group-hover:block"
-                  >
-                    {{ $t("show_details") }}
-                  </label>
-                    </div>
-                <div v-else class="rounded-full w-full bg-gray-300 py-4 text-center"></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div class="booking-wrap">
+        <div class="booking-intro">
+          <h2>{{ $t("Book_an_appointment_with_the_specialist") }}</h2>
+          <p>{{ $t("booking_pick_day") }}</p>
+        </div>
+
+        <div v-if="loading" class="booking-days">
+          <Skeleton v-for="i in 6" :key="i" height="9rem" borderRadius="1rem" />
+        </div>
+        <Message v-else-if="!availableDays.length" severity="info" :closable="false" class="booking-empty">
+          {{ $t("booking_no_days") }}
+        </Message>
+        <div v-else class="booking-days">
+          <button
+            v-for="day in availableDays"
+            :key="day.date"
+            type="button"
+            class="booking-day"
+            @click="openDay(day)"
+          >
+            <span class="booking-day__weekday">{{ $t(day.weekday) }}</span>
+            <span class="booking-day__number">{{ day.dayNumber }}</span>
+            <span class="booking-day__month">{{ day.monthLabel }}</span>
+            <span class="booking-day__cta">
+              {{ $t("booking_view_times") }}
+              <i class="pi pi-arrow-left ltr:rotate-180" />
+            </span>
+          </button>
+        </div>
       </div>
 
-      <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("المواعيد المتاحة")' :modal="true">
-          <div v-for="time in  solts" class="text-center flex">
-            <button @click="submit(time.id)" class="text-[red]">{{ $t("Book_now") }}</button>
-            <p class="font-bold p-1">{{ time.end }}</p>
-            <p class="font-bold p-1">{{ $t("to") }}</p>
-            <p class="font-bold p-1">{{ time.start }}</p>
-            <p class="font-bold p-1">{{ $t("from") }}</p>
-           <p class="font-bold p-1">{{ time.title }}</p>
-
-         
-       
-      
-            
+      <Dialog
+        v-model:visible="slotsDialog"
+        :header="selectedDay ? `${$t('المواعيد المتاحة')} — ${$t(selectedDay.weekday)} ${selectedDay.fullLabel}` : $t('المواعيد المتاحة')"
+        modal
+        :style="{ width: '32rem' }"
+        :breakpoints="{ '640px': '94vw' }"
+      >
+        <div v-if="slotsLoading" class="booking-slots">
+          <Skeleton v-for="i in 4" :key="i" height="3.5rem" borderRadius="0.75rem" />
+        </div>
+        <Message v-else-if="!slots.length" severity="warn" :closable="false">
+          {{ $t("booking_no_slots_day") }}
+        </Message>
+        <div v-else class="booking-slots">
+          <div v-for="time in slots" :key="time.id" class="booking-slot">
+            <div class="booking-slot__info">
+              <i class="pi pi-clock" />
+              <div>
+                <p class="booking-slot__time" dir="ltr">{{ time.start }} – {{ time.end }}</p>
+                <p v-if="time.title" class="booking-slot__title">{{ time.title }}</p>
+              </div>
+            </div>
+            <Button :label="$t('Book_now')" size="small" @click="submit(time.id)" />
           </div>
-        
-        </Dialog>
+        </div>
+      </Dialog>
     </section>
     <About />
   </div>
 </template>
 <script>
 import axios from "axios";
+import moment from "moment";
 import Map from "../components/Map.vue";
 import About from "../components/About.vue";
 import Nave from "./Nave.vue";
 
 export default {
+  components: { Map, About, Nave },
   data() {
     return {
-      events: {}, // Stores the API response directly
-      tableEvent: {},
-      solts:{}, // Normalized events grouped by day
-      max: 0,
-      deleteDialog:false // Maximum number of events in any day
+      availableDays: [],
+      loading: true,
+      slots: [],
+      slotsLoading: false,
+      slotsDialog: false,
+      selectedDay: null,
+      slotsRequest: 0,
     };
   },
-  components: { Map, About,Nave },
   methods: {
     async getEvents() {
+      this.loading = true;
       try {
         const res = await axios.get("/api/event-calendar/get/front");
-        this.events = res.data.data;
-
-        // Ensure `null` days are replaced with empty arrays
-        this.tableEvent = Object.keys(this.events).reduce((acc, day) => {
-          acc[day] = this.events[day] || [];
-          return acc;
-        }, {});
-
-        // Calculate the maximum number of rows
-        this.max = Math.max(...Object.values(this.tableEvent).map((day) => day.length));
+        // The API groups dates by weekday name; show them as one chronological list.
+        const locale = localStorage.getItem("appLang") === "en" ? "en" : "ar";
+        const dates = Object.values(res.data.data || {})
+          .flatMap((events) => events || [])
+          .map((event) => event.start);
+        this.availableDays = [...new Set(dates)].sort().map((date) => {
+          const day = moment(date, "YYYY-MM-DD");
+          return {
+            date,
+            weekday: day.clone().locale("en").format("dddd"),
+            dayNumber: day.format("D"),
+            monthLabel: new Intl.DateTimeFormat(locale, { month: "long" }).format(day.toDate()),
+            fullLabel: new Intl.DateTimeFormat(locale, { day: "numeric", month: "long" }).format(day.toDate()),
+          };
+        });
       } catch (err) {
+        this.availableDays = [];
         console.error("Error fetching events:", err);
+      } finally {
+        this.loading = false;
       }
     },
-    getSolts(date){
-      this.deleteDialog=!(this.deleteDialog)
-     axios.get(`/api/event-calendar/get/${date}/slots`) .then((response) => {
-          this.solts = response.data.data;
-          
-        });
-      
-    
+    async openDay(day) {
+      const request = ++this.slotsRequest;
+      this.selectedDay = day;
+      this.slots = [];
+      this.slotsLoading = true;
+      this.slotsDialog = true;
+      try {
+        const response = await axios.get(`/api/event-calendar/get/${day.date}/slots`);
+        if (request !== this.slotsRequest) return;
+        this.slots = [...(response.data.data || [])].sort((a, b) => a.start.localeCompare(b.start));
+      } catch (err) {
+        // The API answers 404 when the day has no free slot left.
+        if (request === this.slotsRequest) this.slots = [];
+      } finally {
+        if (request === this.slotsRequest) this.slotsLoading = false;
+      }
     },
     submit(id) {
-      this.$router.push({ name: "more", params: { event_id: id ,child_id:this.$route.params.child_id} });
+      this.$router.push({ name: "more", params: { event_id: id, child_id: this.$route.params.child_id } });
     },
   },
   mounted() {
@@ -146,39 +165,107 @@ export default {
 };
 </script>
 
-<style >
-.no-scrollbar {
-  overflow: hidden;
-  scrollbar-width: none; /* Firefox */
+<style scoped>
+.booking-wrap {
+  padding: 1rem clamp(1rem, 5vw, 4rem) 3rem;
 }
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+.booking-intro h2 {
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  font-weight: 700;
+  color: #1e293b;
 }
-
-.trans {
-  color: red;
-  transform: translateX(-100%);
-  transition: transform 200ms linear;
+.booking-intro p {
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 1.05rem;
 }
-
-td:hover button {
-  transform: translateX(20%);
+.booking-days {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 1rem;
 }
-.hover-div {
-  position: relative;
+.booking-empty {
+  margin-top: 1.5rem;
+}
+.booking-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 1rem 0.75rem;
+  border: 1px solid #d5e5e7;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
   cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
-.hover-content {
-  transition: opacity 0.9s ease;
+.booking-day:hover,
+.booking-day:focus-visible {
+  transform: translateY(-2px);
+  border-color: #135c65;
+  box-shadow: 0 8px 20px rgb(19 92 101 / 0.15);
+  outline: none;
 }
-.hidden-label {
-  display: none;
+.booking-day__weekday {
+  font-weight: 600;
+  color: #135c65;
 }
-.hover-div:hover .hover-content {
-  display: none;
+.booking-day__number {
+  font-size: 2.25rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: #0f172a;
 }
-.hover-div:hover .hidden-label {
-  display: block;
+.booking-day__month {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+.booking-day__cta {
+  margin-top: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: #e6f1f2;
+  color: #135c65;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.booking-day__cta .pi {
+  font-size: 0.7rem;
+}
+.booking-slots {
+  display: grid;
+  gap: 0.75rem;
+}
+.booking-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+}
+.booking-slot__info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.booking-slot__info .pi {
+  color: #135c65;
+  font-size: 1.1rem;
+}
+.booking-slot__time {
+  font-weight: 700;
+  color: #0f172a;
+}
+.booking-slot__title {
+  color: #64748b;
+  font-size: 0.85rem;
 }
 </style>

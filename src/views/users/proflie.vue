@@ -1,65 +1,32 @@
-
 <template>
   <div class="sawa-card profile-page">
-    <Tabs value="details">
+    <Tabs v-model:value="activeTab">
       <TabList>
         <Tab value="details">{{ $t("student_details") }}</Tab>
         <Tab value="requests">{{ $t("evaluation_order") }}</Tab>
         <Tab value="evaluations">{{ $t("Consultations_evaluations") }}</Tab>
       </TabList>
       <TabPanels>
-        <TabPanel value="details"><Details /></TabPanel>
-        <TabPanel value="requests"><Requests /></TabPanel>
-        <TabPanel value="evaluations"><Evaluation /></TabPanel>
+        <!-- Each tab loads its data the first time it is opened, then stays mounted. -->
+        <TabPanel value="details"><Details v-if="opened.has('details')" /></TabPanel>
+        <TabPanel value="requests"><Requests v-if="opened.has('requests')" /></TabPanel>
+        <TabPanel value="evaluations"><Evaluation v-if="opened.has('evaluations')" /></TabPanel>
       </TabPanels>
     </Tabs>
   </div>
 </template>
 
-<script>
-import axios from "axios";
-import { useStorage } from "@vueuse/core";
-import EvaluationType from '../../components/EvaluationType.vue'
-import Details from '../../components/profile/Details.vue'
-import Evaluation from '../../components/profile/Evaluation.vue'
-import Requests from '../../components/profile/Requests.vue'
-import moment from "moment";
-  import {useToast} from 'primevue/usetoast'
-export default {
-   components:{EvaluationType,Details,Evaluation,Requests},
+<script setup>
+import { reactive, ref, watch } from "vue";
+import Details from "../../components/profile/Details.vue";
+import Evaluation from "../../components/profile/Evaluation.vue";
+import Requests from "../../components/profile/Requests.vue";
+import { resetUserProfile } from "../../components/profile/userProfile";
 
-  data() {
-    return {
-        child_id: useStorage("child_id", Number),
-         maxDate: new Date(),
-         user:{
-          skills:[],
-          department:[]
-         },
-         skills:[],
-         roles:[],
-         departments:[],
-         evalate:{},
-         error:{},
-         deleteDialog:false,
-         delete_id:'',
-         doctors:{},
-         updatedialog:false,
-        evaluate_types : [
-                    { name: 'side profile', id: 1 },
-                    { name: 'milestone', id: 2 },
-                    { name: 'barrier', id: 3 },
-                   
-                ]
-     
-      // Add other validation rules for the title field
-    };
+resetUserProfile();
 
-  },
+const activeTab = ref("details");
+const opened = reactive(new Set(["details"]));
 
- 
-  mounted() {
- 
-  },
-};
+watch(activeTab, (tab) => opened.add(tab));
 </script>
