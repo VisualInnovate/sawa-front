@@ -28,10 +28,26 @@ export const ageParts = (birthDate, today = new Date()) => {
   return { years: Math.floor(months / 12), months: months % 12 };
 };
 
-// "4 سنوات 3 أشهر" from the birth date; falls back to the value the API sent.
-export const formatChildAge = (birthDate, fallback, t) => {
+const countLabel = (n, unit, t) => {
+  const key = n === 0 ? "zero" : n === 1 ? "one" : n === 2 ? "two" : n >= 3 && n <= 10 ? "few" : "many";
+  return t(`age_count.${unit}_${key}`, { n });
+};
+
+const partsText = ({ years, months }, t) => {
+  if (!years) return countLabel(months, "month", t);
+  const yearsText = countLabel(years, "year", t);
+  return months ? t("age_count.join", { a: yearsText, b: countLabel(months, "month", t) }) : yearsText;
+};
+
+// "4 سنوات و3 أشهر" from the birth date. Without it, the API's age in whole months is shown the same way
+// (the bookings list used to print that number alone, which read like years).
+export const formatChildAge = (birthDate, fallbackMonths, t) => {
   const parts = ageParts(birthDate);
-  if (!parts) return fallback ?? "";
-  const years = `${parts.years} ${t("age_years")}`;
-  return parts.months ? `${years} ${parts.months} ${t("age_months")}` : years;
+  if (parts) return partsText(parts, t);
+  const months = Number(fallbackMonths);
+  if (fallbackMonths === null || fallbackMonths === undefined || fallbackMonths === "" || !Number.isFinite(months)) {
+    return fallbackMonths ?? "";
+  }
+  const whole = Math.max(0, Math.floor(months));
+  return partsText({ years: Math.floor(whole / 12), months: whole % 12 }, t);
 };

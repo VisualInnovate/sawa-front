@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import moment from "moment";
 import {ref, onMounted, onBeforeMount} from 'vue'
 import {useToast} from 'primevue/usetoast'
@@ -138,7 +138,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -183,12 +183,12 @@ const initFilters = () => {
 
           <template #end>
             <div class="flex gap-2">
-              <Button :label='$t("print")' icon="pi pi-print" class="p-button-help no-print" :loading="printLoading"
-                @click="printTable" />
+              <Button :label='$t("print")' icon="pi pi-print" class="no-print" :loading="printLoading"
+                @click="printTable" severity="help" />
               <Button v-can="'holidays list'" :label='$t("export")' icon="pi pi-download"
-                class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
+                class="no-print" :loading="exportLoading" @click="exportCSV" severity="info" />
               <Button v-can="'holidays create'" :label='$t("holiday_add")' icon="pi pi-plus" 
-                class="p-button-success" @click="openNew" />
+                @click="openNew" />
             </div>
           </template>
         </Toolbar>
@@ -206,12 +206,12 @@ const initFilters = () => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
-                  </span>
-                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
-                    v-tooltip.top="'Refresh data'" />
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
+              </IconField>
+                  <Button icon="pi pi-refresh" @click="fetchData"
+                    v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" variant="text" />
                 </div>
               </div>
             </template>
@@ -238,19 +238,15 @@ const initFilters = () => {
 
             <Column header-style="min-width:10rem;">
               <template #body="slotProps">
-                <div class="flex gap-2">
+                <div class="table-actions">
                   <Button
                     v-can="'holidays edit'"
                     icon="pi pi-pencil"
-                    class="p-button-rounded p-button-success"
-                    @click="edit(slotProps.data.id)"
-                  />
+                    @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                   <Button
                     v-can="'holidays delete'"
                     icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger"
-                    @click="confirmDelete(slotProps.data.id)"
-                  />
+                    @click="confirmDelete(slotProps.data.id)" rounded severity="danger" variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
                 </div>
               </template>
             </Column>
@@ -278,8 +274,8 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
@@ -287,19 +283,19 @@ const initFilters = () => {
           :modal="true">
           <form @submit.prevent="create">
             <div class="flex flex-column gap-2">
-              <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-              <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
+              <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+              <InputText required class="text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
             </div>
             <div class="flex flex-column gap-2 mt-3">
               <label style="text-align: right !important;" for="username">{{ $t('start_date') }}</label>
-              <Calendar style="width: 100%" showButtonBar v-model="holiday.start_date" showIcon :class="{ 'p-invalid': submitted && !holiday.start_date}" />
+              <DatePicker style="width: 100%" showButtonBar v-model="holiday.start_date" showIcon :class="{ 'p-invalid': submitted && !holiday.start_date}" />
             </div> 
             <div class="flex flex-column gap-2 mt-3">
               <label style="text-align: right !important;" for="username">{{ $t('end_date') }}</label>
-              <Calendar style="width: 100%" showButtonBar v-model="holiday.end_date" showIcon :class="{ 'p-invalid': submitted && !holiday.end_date}" />
+              <DatePicker style="width: 100%" showButtonBar v-model="holiday.end_date" showIcon :class="{ 'p-invalid': submitted && !holiday.end_date}" />
             </div> 
             <div class="w-full text-center mt-4">
-              <Button type="submit" @click="submitted=true" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+              <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
             </div>  
           </form>
         </Dialog>
@@ -308,19 +304,19 @@ const initFilters = () => {
           :modal="true">
           <form @submit.prevent="update">
             <div class="flex flex-column gap-2">
-              <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-              <InputText required class="bg-[#f7f5f5] text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
+              <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+              <InputText required class="text-center" v-model="holiday.title"  :class="{ 'p-invalid': submitted && !holiday.title}"/>
             </div>
             <div class="flex flex-column gap-2 mt-3">
               <label style="text-align: right !important;" for="username">{{ $t('start_date') }}</label>
-              <Calendar style="width: 100%" showButtonBar v-model="holiday.start_date" showIcon :class="{ 'p-invalid': submitted && !holiday.start_date}" />
+              <DatePicker style="width: 100%" showButtonBar v-model="holiday.start_date" showIcon :class="{ 'p-invalid': submitted && !holiday.start_date}" />
             </div> 
             <div class="flex flex-column gap-2 mt-3">
               <label style="text-align: right !important;" for="username">{{ $t('end_date') }}</label>
-              <Calendar style="width: 100%" showButtonBar v-model="holiday.end_date" showIcon :class="{ 'p-invalid': submitted && !holiday.end_date}" />
+              <DatePicker style="width: 100%" showButtonBar v-model="holiday.end_date" showIcon :class="{ 'p-invalid': submitted && !holiday.end_date}" />
             </div> 
             <div class="w-full text-center mt-4">
-              <Button type="submit" @click="submitted=true" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+              <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
             </div>  
           </form>
         </Dialog>

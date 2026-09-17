@@ -1,6 +1,6 @@
 
 <template>
-  <v-card class="mx-auto pa-12 pb-8 bg-slate-50" elevation="8">
+  <div class="sawa-card mx-auto p-12 pb-8 bg-slate-50">
    
      
   
@@ -16,11 +16,11 @@
             <div class="flex flex-column gap-2 py-1">
                  
                   <label class="w-full " for="username">{{ $t('name') }}</label>
-                <InputText  class="bg-[#f7f5f5] text-center" v-model="usersdata.name" :class="{ 'p-invalid': submitted && !usersdata.name}" />
+                <InputText  class="text-center" v-model="usersdata.name" :class="{ 'p-invalid': submitted && !usersdata.name}" />
             </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full t" for="username">{{ $t('type') }}</label>
-                  <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type"  option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
+                  <Select v-model="usersdata.type"  option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.name}"  />
             </div>
             <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full " for="username">{{ $t('skill_name') }}</label>
@@ -32,24 +32,24 @@
             </div>
             <div v-if="usersdata.type == 0 || usersdata.type ==2 " class="flex flex-column gap-2">
                   <label class="w-full " for="username">{{ $t('Spotter') }}</label>
-                  <InputText  class="bg-[#f7f5f5] text-center" v-model="usersdata.spotter" :class="{ 'p-invalid': submitted && !usersdata.spotter}" />
+                  <InputText  class="text-center" v-model="usersdata.spotter" :class="{ 'p-invalid': submitted && !usersdata.spotter}" />
 
             </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full " for="username">{{ $t('email') }}</label>
-                <InputText type="email"  class="bg-[#f7f5f5] text-center" v-model="usersdata.email" :class="{ 'p-invalid': submitted && !usersdata.email}"  />            </div>
+                <InputText type="email"  class="text-center" v-model="usersdata.email" :class="{ 'p-invalid': submitted && !usersdata.email}"  />            </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full " for="username">{{ $t('title') }}</label>
-                <InputText  class="bg-[#f7f5f5] text-center" v-model="usersdata.title" :class="{ 'p-invalid': submitted && !usersdata.title}" />
+                <InputText  class="text-center" v-model="usersdata.title" :class="{ 'p-invalid': submitted && !usersdata.title}" />
             </div>
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full " for="username">{{ $t('password') }}</label>
-                <InputText   class="bg-[#f7f5f5] text-center" v-model="usersdata.password" :class="{ 'p-invalid': submitted && !usersdata.password}" />
+                <InputText   class="text-center" v-model="usersdata.password" :class="{ 'p-invalid': submitted && !usersdata.password}" />
             </div>
             
             <div class="flex flex-column gap-2 py-1">
                   <label class="w-full " for="username">{{ $t('roles') }}</label>
-                  <Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.role"  option-value="id" filter :options="roles" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.role}" />
+                  <Select v-model="usersdata.role"  option-value="id" filter :options="roles" optionLabel="name" :class="{ 'p-invalid': submitted && !usersdata.role}" />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.role">{{ error.role[0] }}</div>
             </div>
             <div class=" flex-column gap-2 py-1 hidden">
@@ -78,22 +78,22 @@
                 <td>{{ evaluate_types.find(item => item.id === time?.evaluation_type).name  }}</td>
                 <td>{{ time.start }}</td>
                 <td>{{ time.end }}</td>
-                <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" /></td>
+                <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="m-auto" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" /></td>
               </tr>
               <tr>
-                <td><Dropdown   class="w-full" style="direction: ltr !important;" v-model="day" option-value="value" :options="filteredDays" optionLabel="name" :placeholder='$t("day")' :class="{ 'p-invalid': submitted && !day}" /></td>
-                <td><Dropdown  id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="evaluation_type"  option-value="id"  :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full " :class="{ 'p-invalid': submitted && !evaluation_type}"  /></td>
+                <td><Select   class="w-full" v-model="day" option-value="value" :options="filteredDays" optionLabel="name" :placeholder='$t("day")' :class="{ 'p-invalid': submitted && !day}" /></td>
+                <td><Select v-model="evaluation_type"  option-value="id"  :options="evaluate_types"  optionLabel="name" :placeholder='$t("evalute_type")' class="w-full" :class="{ 'p-invalid': submitted && !evaluation_type}"  /></td>
                 <td> <InputText  type="time" timeOnly  v-model="startTime"  class="w-full" autofocus  :placeholder='$t("from")' format="12" :class="{ 'p-invalid': submitted && !startTime}"/></td>
                 <td> <InputText  type="time" timeOnly  v-model="endTime"   class="w-full" autofocus  :placeholder='$t("to")' :class="{ 'p-invalid': submitted && !endTime}"/></td>
                
-                <td> <Button   @click="addItem"  class="create m-auto s " icon="pi pi-plus" ></Button></td>
+                <td> <Button   @click="addItem"  class="m-auto s" icon="pi pi-plus"></Button></td>
               </tr>
             </tbody>
           </table> -->
-          <Button @click="submitted=true" type="submit" class=" mt-4 m-auto create  w-full " :label='$t("submit")'></Button>
+          <Button @click="submitted=true" type="submit" class="mt-4 m-auto w-full" :label='$t("submit")'></Button>
     </form>
     <Toast/>
-  </v-card>
+  </div>
 </template>
 
 

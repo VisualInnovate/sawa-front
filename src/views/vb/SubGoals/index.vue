@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { FilterMatchMode } from 'primevue/api';
+import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import axios from 'axios';
 import Evaluation from '@/components/Evaluation.vue';
@@ -11,7 +11,7 @@ import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Toast from 'primevue/toast';
 
@@ -88,12 +88,12 @@ onMounted(async () => {
     <Toast />
     <DataTable :value="rows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[5, 10, 25]"
       :filters="filters" :globalFilterFields="['wording.male.title', 'wording.female.title', 'question_type.title', 'subtest.title']"
-      v-can="'milestone sub goal list'" responsiveLayout="scroll">
+      v-can="'milestone sub goal list'">
       <template #header>
         <div class="flex flex-wrap items-center gap-3 justify-between">
           <h1 class="text-lg font-semibold">{{ $t('milestone_sub_goals') }}</h1>
-          <Button v-can="'milestone sub goal create'" :label="$t('create_button')" icon="pi pi-plus" class="p-button-success" @click="openNew" />
-          <Dropdown v-model="selectedLevel" :options="levels" optionLabel="title" optionValue="id" showClear
+          <Button v-can="'milestone sub goal create'" :label="$t('create_button')" icon="pi pi-plus" @click="openNew" />
+          <Select v-model="selectedLevel" :options="levels" optionLabel="title" optionValue="id" showClear
             :placeholder="$t('level_id')" @update:modelValue="fetchRows" />
           <InputText v-model="filters.global.value" :placeholder="$t('search')" />
         </div>
@@ -105,9 +105,9 @@ onMounted(async () => {
       <Column field="subtest.level.title" :header="$t('level_id')" sortable />
       <Column>
         <template #body="{ data }">
-          <div class="flex gap-2">
-            <Button v-can="'milestone sub goal edit'" icon="pi pi-pencil" :aria-label="$t('edit')" class="p-button-rounded p-button-success" @click="edit(data.id)" />
-            <Button v-can="'milestone sub goal delete'" icon="pi pi-trash" :aria-label="$t('delete')" class="p-button-rounded p-button-danger" @click="deleting = data" />
+          <div class="table-actions">
+            <Button v-can="'milestone sub goal edit'" icon="pi pi-pencil" :aria-label="$t('edit')" @click="edit(data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" />
+            <Button v-can="'milestone sub goal delete'" icon="pi pi-trash" :aria-label="$t('delete')" @click="deleting = data" rounded severity="danger" variant="outlined" v-tooltip.top="$t('delete')" />
           </div>
         </template>
       </Column>
@@ -119,8 +119,8 @@ onMounted(async () => {
     <Dialog :visible="Boolean(deleting)" @update:visible="deleting = null" :style="{ width: '450px', maxWidth: '95vw' }" :header="$t('submit')" modal>
       <p>{{ $t('remove_item') }}</p>
       <template #footer>
-        <Button :label="$t('no')" :disabled="saving" class="p-button-text" @click="deleting = null" />
-        <Button :label="$t('yes')" :loading="saving" class="p-button-danger" @click="remove" />
+        <Button :label="$t('no')" :disabled="saving" @click="deleting = null" variant="text" severity="secondary" />
+        <Button :label="$t('yes')" :loading="saving" @click="remove" severity="danger" />
       </template>
     </Dialog>
   </section>

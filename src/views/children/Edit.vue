@@ -1,18 +1,18 @@
 <script>
 import axios from "axios";
 import InputText from 'primevue/inputtext';
-import Calendar from "primevue/calendar";
-import Dropdown from "primevue/dropdown";
+import DatePicker from 'primevue/datepicker';
+import Select from 'primevue/select';
 import MultiSelect from "primevue/multiselect";
 import { useToast } from 'primevue/usetoast';
 import { toDateOnly } from '@/utils/childAge';
 
 export default {
-  components: { InputText, Calendar, Dropdown, MultiSelect },
+  components: { InputText, DatePicker, Select, MultiSelect },
   data: () => ({
     skills: [],
     maxDate: new Date(),
-    pasrents: {},
+    pasrents: [],
     submitted: false,
     toast: useToast(),
     child: {},
@@ -71,10 +71,7 @@ export default {
 </script>
 <template>
   <div class="container mx-auto p-6">
-    <button @click="goBack" class="mb-5 flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
-      <span class="mdi mdi-arrow-left mr-2"></span>
-      {{ $t("back") }}
-    </button>
+    <div class="mb-5"><BackButton /></div>
     
     <div class="bg-white p-8 rounded-xl shadow-xl max-w-4xl mx-auto">
       <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ $t("  اضافة طفل جديد") }}</h2>
@@ -87,17 +84,17 @@ export default {
         
         <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('birth_date') }}</label>
-          <Calendar v-model.number="child.birth_date" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" showIcon placeholder="dd/mm/yy" :maxDate="maxDate" />
+          <DatePicker v-model.number="child.birth_date" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" showIcon placeholder="dd/mm/yy" :maxDate="maxDate" />
         </div>
         
         <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('primary_language') }}</label>
-          <Dropdown v-model="child.lang" :options="lan"   option-value="lang" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Select v-model="child.lang" :options="lan"   option-value="lang" optionLabel="lang" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('parent_name') }}</label>
-          <Dropdown v-model="child.parent_id" :options="pasrents" optionLabel="fname"  option-value="id" optiona class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Select v-model="child.parent_id" :options="pasrents" optionLabel="fname"  option-value="id" optiona class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col required-field">
@@ -117,12 +114,12 @@ export default {
         
         <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('Type') }}</label>
-          <Dropdown v-model="child.gender" :options="arr()"  option-value="value" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Select v-model="child.gender" :options="arr()"  option-value="value" optionLabel="name" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col required-field">
           <label class="text-gray-700 font-medium mb-2">{{ $t('Nationality') }}</label>
-          <Dropdown v-model="child.nationalty"   option-value="country" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
+          <Select v-model="child.nationalty"   option-value="country" :options="cities" optionLabel="country" class="border rounded-md focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-colors" />
         </div>
         
         <div class="flex flex-col required-field">
@@ -138,7 +135,7 @@ export default {
       </form>
     </div>
   </div>
-  <toast></toast>
+  <Toast />
 </template>
 <style scoped>
 button:hover {

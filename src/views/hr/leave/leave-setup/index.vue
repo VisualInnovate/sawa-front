@@ -1,5 +1,5 @@
 <script setup>
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import LeavesNave from '../../../../components/LeavesNave.vue'
 import { useToast } from 'primevue/usetoast'
@@ -159,7 +159,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -226,42 +226,37 @@ const initFilters = () => {
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <h3 class="m-0">{{ $t("Leave Setup List") }}</h3>
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText 
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText 
                       v-model="filters['global'].value" 
                       :placeholder='$t("search")' 
                       class="w-full"
                     />
-                  </span>
+              </IconField>
                   <Button 
                 :label='$t("print")' 
                 icon="pi pi-print" 
-                class="p-button-help no-print" 
+                class="no-print" 
                 :loading="printLoading"
-                @click="printTable"
-              />
+                @click="printTable" severity="help" />
               <Button 
                 v-can="'leave setup list'" 
                 :label='$t("export")' 
                 icon="pi pi-download" 
-                class="p-button-info no-print" 
+                class="no-print" 
                 :loading="exportLoading"
-                @click="exportCSV"
-              />
+                @click="exportCSV" severity="info" />
               <Button 
                 v-can="'leave setup create'"
                 :label='$t("Add New")' 
                 icon="pi pi-plus" 
-                class="p-button-success no-print" 
-                @click="openNew"
-              />
+                class="no-print" 
+                @click="openNew" />
                   <Button 
                     icon="pi pi-refresh" 
-                    class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="$t('refresh_data')"
-                  />
+                    v-tooltip.top="$t('refresh_data')" variant="text" />
                 </div>
               </div>
             </template>
@@ -296,21 +291,17 @@ const initFilters = () => {
             
             <Column :exportable="false" header-style="width: 10rem" body-class="text-center">
               <template #body="slotProps">
-                <div class="flex gap-1 justify-content-center">
+                <div class="table-actions">
                   <Button 
                     v-can="'leave setup edit'"
                     icon="pi pi-pencil" 
-                    class="p-button-rounded p-button-text p-button-success" 
                     @click="edit(slotProps.data.id)"
-                    v-tooltip.top="$t('edit')"
-                  />
+                    v-tooltip.top="$t('edit')" rounded variant="outlined" severity="info" />
                   <Button 
                     v-can="'leave setup delete'"
                     icon="pi pi-trash" 
-                    class="p-button-rounded p-button-text p-button-danger" 
                     @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="$t('delete')"
-                  />
+                    v-tooltip.top="$t('delete')" rounded variant="outlined" severity="danger" />
                 </div>
               </template>
             </Column>
@@ -338,15 +329,15 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("Create Leave Setup")' :modal="true">
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Type') }}</label>
-            <Dropdown 
+            <label class="w-full text-start">{{ $t('Type') }}</label>
+            <Select 
               v-model="leave.type" 
               required 
               option-value="value"  
@@ -358,7 +349,7 @@ const initFilters = () => {
             <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
           </div>
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Title') }}</label>
+            <label class="w-full text-start">{{ $t('Title') }}</label>
             <InputText 
               required 
               class="w-full" 
@@ -368,7 +359,7 @@ const initFilters = () => {
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
           </div>
           <div v-show="leave.type === 'daily'" class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Days') }}</label>
+            <label class="w-full text-start">{{ $t('Days') }}</label>
             <InputNumber  
               required 
               class="w-full" 
@@ -378,7 +369,7 @@ const initFilters = () => {
             <div class="mt-1 mb-5 text-red-500" v-if="error?.days">{{ error.days[0] }}</div>
           </div>
           <div v-show="leave.type === 'hourly'" class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Hours') }}</label>
+            <label class="w-full text-start">{{ $t('Hours') }}</label>
             <InputNumber  
               required 
               class="w-full" 
@@ -390,16 +381,15 @@ const initFilters = () => {
           <div class="w-full text-center">
             <Button 
               @click="createcrude" 
-              class="p-button-success m-auto w-[50%] my-4" 
-              :label='$t("submit")'
-            ></Button> 
+              class="m-auto w-[50%] my-4" 
+              :label='$t("submit")' severity="success"></Button> 
           </div>
         </Dialog>
 
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("Update Leave Setup")' :modal="true">
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Type') }}</label>
-            <Dropdown 
+            <label class="w-full text-start">{{ $t('Type') }}</label>
+            <Select 
               v-model="leave.type" 
               @update:model-value="defult_type"
               required 
@@ -412,7 +402,7 @@ const initFilters = () => {
             <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
           </div>
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Title') }}</label>
+            <label class="w-full text-start">{{ $t('Title') }}</label>
             <InputText 
               required 
               class="w-full" 
@@ -422,7 +412,7 @@ const initFilters = () => {
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
           </div>
           <div v-if="leave.type === 'daily'" class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Days') }}</label>
+            <label class="w-full text-start">{{ $t('Days') }}</label>
             <InputNumber  
               required 
               class="w-full" 
@@ -432,7 +422,7 @@ const initFilters = () => {
             <div class="mt-1 mb-5 text-red-500" v-if="error?.days">{{ error.days[0] }}</div>
           </div>
           <div v-if="leave.type === 'hourly'" class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right">{{ $t('Hours') }}</label>
+            <label class="w-full text-start">{{ $t('Hours') }}</label>
             <InputNumber  
               required 
               class="w-full" 
@@ -444,9 +434,8 @@ const initFilters = () => {
           <div class="w-full text-center">
             <Button 
               @click="editescrud" 
-              class="p-button-success m-auto w-[50%] my-4" 
-              :label='$t("submit")'
-            ></Button> 
+              class="m-auto w-[50%] my-4" 
+              :label='$t("submit")' severity="success"></Button> 
           </div>
         </Dialog>
       </div>

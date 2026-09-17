@@ -17,12 +17,7 @@
         </h3>
       </div>
       <div class="w-1/4 flex justify-center">
-        <v-icon
-          @click="goback"
-          class="bg-[#135C65] text-white p-4 rounded-full cursor-pointer hover:bg-[#0f4a52] transition-colors"
-          start
-          icon="mdi-arrow-left"
-        ></v-icon>
+        <button type="button" @click="goback" class="bg-[#135C65] text-white p-4 rounded-full cursor-pointer hover:bg-[#0f4a52] transition-colors" :aria-label="$t('back')"><i class="pi pi-arrow-right back-arrow" aria-hidden="true"></i></button>
       </div>
     </div>
 
@@ -53,7 +48,7 @@
             <label class="block font-bold text-gray-700 mb-2 ">
               {{ $t('date_of_birth') }}
             </label>
-            <Calendar
+            <DatePicker
               v-model="child.birth_date"
               class="w-full"
               :class="{ 'border-red-500': submitted && !child.birth_date }"
@@ -108,7 +103,7 @@
             <label class="block font-bold text-gray-700 mb-2 required-field">
               {{ $t('Type') }}
             </label>
-            <Dropdown
+            <Select
               v-model="child.gender"
               :options="arr()"
               optionLabel="name"
@@ -124,7 +119,7 @@
             <label class="block font-bold text-gray-700 mb-2 required-field">
               {{ $t('Nationality') }}
             </label>
-            <Dropdown
+            <Select
               v-model="child.nationalty"
               :options="cities"
               optionLabel="country"
@@ -141,7 +136,7 @@
             <label class="block font-bold text-gray-700 mb-2 required-field">
               {{ $t('primary_language') }}
             </label>
-            <Dropdown
+            <Select
               v-model="child.lang"
               :options="lan"
               optionLabel="lang"
@@ -160,24 +155,23 @@
           <Button
             type="submit"
             class="bg-[#135C65] text-white px-8 py-3 rounded-lg hover:bg-[#0f4a52] transition-colors"
-            :label='$t("سجل طفلك معنا")'
-          />
+            :label='$t("سجل طفلك معنا")' />
         </div>
       </form>
     </div>
   </div>
 </template>
 <script>
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import axios from "axios";
 import moment from "moment";
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 import Textarea from "primevue/textarea";
 import { useParentStore } from "../../../stores/ParentStore";
 import Message from "primevue/message";
 import { toDateOnly } from "../../../utils/childAge";
 export default {
-  components: { Calendar, Textarea, Message ,Dropdown },
+  components: { DatePicker, Textarea, Message ,Select },
   data() {
     return {
       show: false,
@@ -186,7 +180,7 @@ export default {
       ],
 
       selectedCity: null,
-            cities: {},
+            cities: [],
             type:[ ],
       maxDate: new Date(),
       parentStore: useParentStore(),
@@ -294,23 +288,7 @@ export default {
   color: red;
   font-weight: bold;
 }
-/* #pv_id_3  {
-  border: none;
-  border-bottom: 2px solid #818080;
-  text-align: center;
-  font-family: "Cairo", sans-serif;
-  font-size: 20px;
-  border-radius: 0;
-}
-#pv_id_2 {
-  
-  border: none;
-  border-bottom: 2px solid rgb(194, 188, 188);
-  text-align: center;
-  font-family: "Cairo", sans-serif;
-  font-size: 20px;
-  border-radius: 0;
-}
+/*
 #pv_id_2:focus {
   border: none;
 
@@ -320,4 +298,7 @@ export default {
   opacity: 50%;
   color: black;
 } */
+[dir="ltr"] .back-arrow {
+  transform: scaleX(-1);
+}
 </style>

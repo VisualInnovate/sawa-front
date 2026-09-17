@@ -7,7 +7,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <h1
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
@@ -16,7 +16,7 @@
             </h1>
           </div>
           <p
-            class="text-[#746064] text-base lg:text-xl text-right leading-relaxed font-bold"
+            class="text-[#746064] text-base lg:text-xl text-start leading-relaxed font-bold"
           >
             نعمل في سوا على تأهيل الطفل للوصول إلى أقصى درجات الاستقلالية
             ودمجه بثقة وفاعلية في المجتمع والبيئات التعليمية.
@@ -85,7 +85,7 @@
         <!-- Program Section -->
         <section class="w-full bg-[#FCF9F8] py-12 sm:py-16 lg:py-[96px]">
             <div class="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-                <div class="mb-8 text-right sm:mb-10 lg:mb-[56px]">
+                <div class="mb-8 text-start sm:mb-10 lg:mb-[56px]">
                     <h2 class="mb-[12px] text-[26px] font-black leading-tight text-[#1D7780] sm:text-[30px] lg:text-[34px]">
                         برنامج الدمج في الروضات والمدارس
                     </h2>
@@ -335,7 +335,7 @@
                     </div>
                 </div>
 
-                <div dir="rtl" class="w-full max-w-[520px] text-right">
+                <div dir="rtl" class="w-full max-w-[520px] text-start">
                     <h2 class="mb-5 text-[26px] font-black leading-tight text-[#1D7780] sm:text-[30px] lg:mb-[28px] lg:text-[34px]">
                         قياس التطور والتقدم
                     </h2>

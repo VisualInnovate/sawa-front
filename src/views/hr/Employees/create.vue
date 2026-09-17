@@ -1,5 +1,5 @@
 <template>
-  <v-card class="p-[1%]">
+  <div class="sawa-card p-[1%]">
     <form class="form-container" ref="myForm" @submit.prevent="submitForm">
       <!-- Step 1 -->
 
@@ -30,7 +30,7 @@
           </div>
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("employee_name") }}</label>
+              <label class="text-start">{{ $t("employee_name") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -47,7 +47,7 @@
               </svg>
             </div>
             <InputText
-              class="bg-[#f7f5f5] text-center"
+              class="text-center"
               v-model="employee.name"
               :class="{ 'p-invalid': submitted && !employee.name }"
             />
@@ -55,7 +55,7 @@
 
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("email") }}</label>
+              <label class="text-start">{{ $t("email") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -73,14 +73,14 @@
             </div>
             <InputText
               type="email"
-              class="bg-[#f7f5f5] text-center"
+              class="text-center"
               v-model="employee.email"
               :class="{ 'p-invalid': submitted && !employee.email }"
             />
           </div>
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("password") }}</label>
+              <label class="text-start">{{ $t("password") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -98,14 +98,14 @@
             </div>
             <InputText
               type="password"
-              class="bg-[#f7f5f5] text-center"
+              class="text-center"
               v-model="employee.password"
               :class="{ 'p-invalid': submitted && !employee.password }"
             />
           </div>
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("title") }}</label>
+              <label class="text-start">{{ $t("title") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -122,14 +122,14 @@
               </svg>
             </div>
             <InputText
-              class="bg-[#f7f5f5] text-center"
+              class="text-center"
               v-model="employee.title"
               :class="{ 'p-invalid': submitted && !employee.title }"
             />
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("national_id") }}</label>
+              <label class="text-start">{{ $t("national_id") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -150,14 +150,13 @@
               :useGrouping="false"
               fluid
               required
-              class="bg-[#f7f5f5]"
               v-model="employee.national_id"
               :class="{ 'p-invalid': submitted && !employee.national_id }"
             />
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("date_of_birth") }}</label>
+              <label class="text-start">{{ $t("date_of_birth") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -173,7 +172,7 @@
                 />
               </svg>
             </div>
-            <Calendar
+            <DatePicker
               showButtonBar
               v-model.number="employee.date_of_birth"
               showIcon
@@ -201,10 +200,9 @@
         </div>
         <div class="w-full text-center">
           <Button
-            class="create w-[50%]"
+            class="w-[50%]"
             :label="$t('next')"
-            @click="nextStep"
-          ></Button>
+            @click="nextStep"></Button>
         </div>
       </div>
       <!-- Step 2 -->
@@ -215,7 +213,7 @@
         <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("position_name") }}</label>
+              <label class="text-start">{{ $t("position_name") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -231,10 +229,8 @@
                 />
               </svg>
             </div>
-            <Dropdown
+            <Select
               required
-              id="pv_id_1"
-              style="direction: ltr !important"
               v-model="employee.position_id"
               option-value="id"
               :options="positions"
@@ -246,7 +242,7 @@
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("shift_name") }}</label>
+              <label class="text-start">{{ $t("shift_name") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -262,10 +258,8 @@
                 />
               </svg>
             </div>
-            <Dropdown
+            <Select
               required
-              id="pv_id_1"
-              style="direction: ltr !important"
               v-model="employee.shift_id"
               option-value="id"
               :options="shifts"
@@ -277,7 +271,7 @@
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("basic_salary") }}</label>
+              <label class="text-start">{{ $t("basic_salary") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -295,7 +289,6 @@
             </div>
             <InputNumber
               required
-              class="bg-[#f7f5f5]"
               v-model="employee.basic_salary"
               :placeholder="$t('basic_salary')"
               :class="{ 'p-invalid': submitted && !employee.basic_salary }"
@@ -303,7 +296,7 @@
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("Spotter") }}</label>
+              <label class="text-start">{{ $t("Spotter") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -321,7 +314,6 @@
             </div>
             <InputNumber
               required
-              class="bg-[#f7f5f5]"
               v-model="employee.Spotter"
               :placeholder="$t('Spotter')"
               :class="{ 'p-invalid': submitted && !employee.Spotter }"
@@ -329,7 +321,7 @@
           </div>
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("contract_period") + "  " + ( $t("In_months") )}}</label>
+              <label class="text-start">{{ $t("contract_period") + "  " + ( $t("In_months") )}}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -346,14 +338,14 @@
               </svg>
             </div>
             <InputText
-              class="bg-[#f7f5f5] text-center"
+              class="text-center"
               v-model="employee.contract_period"
               :class="{ 'p-invalid': submitted && !employee.contract_period }"
             />
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("date_of_enrollment") }}</label>
+              <label class="text-start">{{ $t("date_of_enrollment") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -369,18 +361,16 @@
                 />
               </svg>
             </div>
-            <Calendar
+            <DatePicker
               showButtonBar
               v-model.number="employee.date_of_enrollment"
               showIcon
-              :class="{
-                'p-invalid': submitted && !employee.date_of_enrollment,
-              }"
+              :class="{ 'p-invalid': submitted && !employee.date_of_enrollment, }"
             />
           </div>
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("type") }}</label>
+              <label class="text-start">{{ $t("type") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -396,9 +386,7 @@
                 />
               </svg>
             </div>
-            <Dropdown
-              id="pv_id_1"
-              style="direction: ltr !important; text-align: center !important"
+            <Select
               v-model="employee.type"
               option-value="id"
               filter
@@ -412,7 +400,7 @@
             class="flex flex-column gap-2"
           >
             <div class="flex">
-              <label class="text-right">{{ $t("skill_name") }}</label>
+              <label class="text-start">{{ $t("skill_name") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -442,7 +430,7 @@
             class="flex flex-column gap-2"
           >
             <div class="flex">
-              <label class="text-right">{{ $t("EvaluateTypes") }}</label>
+              <label class="text-start">{{ $t("EvaluateTypes") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -474,7 +462,7 @@
             class="flex flex-column gap-2"
           >
             <div class="flex">
-              <label class="text-right">{{ $t("Typetreatment") }}</label>
+              <label class="text-start">{{ $t("Typetreatment") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -501,7 +489,7 @@
           </div>
           <div class="flex flex-column gap-2">
             <div class="flex">
-              <label class="text-right">{{ $t("department") }}</label>
+              <label class="text-start">{{ $t("department") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -529,7 +517,7 @@
 
           <div class="flex flex-column gap-2 py-1">
             <div class="flex">
-              <label class="text-right">{{ $t("roles") }}</label>
+              <label class="text-start">{{ $t("roles") }}</label>
               <svg
                 class="my-auto mx-1"
                 width="7"
@@ -545,9 +533,7 @@
                 />
               </svg>
             </div>
-            <Dropdown
-              id="pv_id_1"
-              style="direction: ltr !important; text-align: center !important"
+            <Select
               v-model="employee.role"
               option-value="id"
               filter
@@ -560,21 +546,17 @@
         <div class="text-center">
           <Button
             @click="previousStep"
-            class="create"
-            :label="$t('Back')"
-          ></Button>
+            :label="$t('Back')"></Button>
           <Button
             type="submit"
             @click="submitted = true; "
-            class="create"
-            :label="$t('submit')"
-          ></Button>
+            :label="$t('submit')"></Button>
         </div>
       </div>
 
-      <toast></toast>
+      <Toast />
     </form>
-  </v-card>
+  </div>
 </template>
 
 <script>
@@ -596,7 +578,7 @@ export default {
           ],
         },
         {
-          label: "Other Types",
+          label: this.$t('other_evaluation_types'),
           items: [
             { name: "milestone", id: 2 },
             { name: "barrier", id: 3 },

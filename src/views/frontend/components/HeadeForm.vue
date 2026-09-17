@@ -31,7 +31,7 @@
           />
           <i class="fa-solid fa-magnifying-glass"></i>
           <button class="m-auto text-2xl">
-            <v-icon small>mdi-magnify</v-icon>
+            <i class="pi pi-search" aria-hidden="true"></i>
           </button>
         </div>
       </div>

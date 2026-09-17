@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
@@ -133,11 +133,11 @@ const initFilters = () => {
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
+      <div class="page">
+        <Toolbar>
           <template #start>
             <div class="my-2">
-            <Button v-can="'skills create'" :label='$t("skill_add")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'skills create'" :label='$t("skill_add")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -157,14 +157,14 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button v-can="'skills list'" :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
           </template>
         </Toolbar>
 
         <Toast/>
 
 
-      <div style="" class="shadow-xl ">
+      <div>
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
@@ -182,12 +182,12 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("skills") }}</h5>
+              <h5 class="page-title">{{ $t("skills") }}</h5>
              <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
+              <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
+              </IconField>
               </div>
             </div>
           </template>
@@ -210,19 +210,15 @@ const initFilters = () => {
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
-              <div >
+              <div class="table-actions">
                 <Button
                 v-can="'skills edit'"
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
+                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
                 v-can="'skills delete'"
                 icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
               </div>
             </template>
           </Column>
@@ -239,32 +235,32 @@ const initFilters = () => {
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="skill.name" :placeholder='$t("skill_name")' />
+                  <label class="w-full text-start" for="username">{{ $t('skill_name') }}</label>
+                <InputText required class="text-center" v-model="skill.name" :placeholder='$t("skill_name")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
            <div class="w-full text-center">
-            <Button @click="createskill" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createskill" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center"  v-model="skill.name" :placeholder='$t("skill_name")' />
+                  <label class="w-full text-start" for="username">{{ $t('skill_name') }}</label>
+                <InputText required class="text-center"  v-model="skill.name" :placeholder='$t("skill_name")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
             </div>
            <div class="w-full text-center">
-            <Button @click="editeskills" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="editeskills" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
       </div>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

@@ -5,6 +5,8 @@ import {onMounted, reactive, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {useToast} from "primevue/usetoast";
 import moment from "moment";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const name=ref('')
 const x=ref(true)
 const countaire=ref(1)
@@ -38,9 +40,9 @@ const days = ref([
 ]);
 const selectedCity = ref();
 const cities = ref([
-    { name: 'Normal Shift', value: '1' },
-    { name: '24 Shift', value: '2' },
-    { name: 'directorate shift', value: '3' },
+    { name: t('shift_type.normal'), value: '1' },
+    { name: t('shift_type.full_day'), value: '2' },
+    { name: t('shift_type.directorate'), value: '3' },
 ]);
 
 const increasecount=()=>{
@@ -58,7 +60,7 @@ const decreasecount=()=>{
 const createdirectorate=()=>{
   axios.post(`/dashboard/directorate/shift`,directorate.value)
       .then((res) => {
-        toast.add({severity: 'success', summary: 'Success', detail: 'created Successfully', life: 3000});
+        toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000});
         router.go(-1)
       })
       .catch((error) => {
@@ -76,7 +78,7 @@ const createshift = () => {
      days:dayspush.value
   })
       .then((res) => {
-        toast.add({severity: 'success', summary: 'Success', detail: 'created Successfully', life: 3000});
+        toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000});
         router.go(-1)
       })
       .catch((error) => {
@@ -97,12 +99,12 @@ const submit = ()=>{
     return
   axios.post(`/api/shifts`,shift.value)
       .then((res) => {
-        toast.add({severity: 'success', summary: 'Success', detail: 'created Successfully', life: 3000});
+        toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000});
         router.go(-1)
         console.log(shift.value);
       })
       .catch((error) => {
-        toast.add({severity: 'error', summary: 'Success', detail: error, life: 3000});
+        toast.add({severity: 'error', summary: t('error'), detail: error, life: 3000});
       });
 
   console.log(shift);
@@ -122,7 +124,7 @@ const changeStatus= (index)=>{
   
 
 
-    <v-card style="overflow-x: scroll;"  class="bg-slate-50">
+    <div style="overflow-x: scroll;"  class="sawa-card bg-slate-50">
         <div class="card " >
         <div class="w-full  m-5">
 
@@ -139,35 +141,35 @@ const changeStatus= (index)=>{
           </div>
 
           <div class="field mx-5 "  v-if="!day.week_end"  >
-            <label class="mx-5"  >Clock In</label>
+            <label class="mx-5"  >{{ $t("clock_in") }}</label>
             <InputText type="time"  v-model.trim="day.clock_in" timeOnly  disabled autofocus  />
 
           </div>
 
 
           <div class="field mr-5 " v-else>
-            <label class="mx-5">Clock In</label>
+            <label class="mx-5">{{ $t("clock_in") }}</label>
             <InputText type="time" v-model.trim="day.clock_in" required timeOnly autofocus  hourFormat="12" :class="{ 'p-invalid': submitted && !day.clock_out}"/>
             
 
           </div>
 
           <div class="field" v-if="!day.week_end" >
-            <label class="mx-2.5 w-10"  >Clock Out</label>
+            <label class="mx-2.5 w-10"  >{{ $t("clock_out") }}</label>
             <InputText  type="time" v-model.trim="day.clock_out" timeOnly   disabled autofocus  />
 
           </div>
           <div class="field" v-else>
-            <label class="mx-5">Clock Out</label>
+            <label class="mx-5">{{ $t("clock_out") }}</label>
             <InputText type="time" v-model.trim="day.clock_out" timeOnly  required hourFormat="12" autofocus :class="{ 'p-invalid': submitted && !day.clock_out}"/>
             
           </div>
 
         </div>
-        <Button class="create m-5" type="submit" @click.prevent="submit()" >Submit</Button>
+        <Button class="m-5" type="submit" @click.prevent="submit()">{{ $t("submit") }}</Button>
 
       </div>
-    </v-card>
+    </div>
       
     
     </form>
@@ -175,12 +177,12 @@ const changeStatus= (index)=>{
     <div class="card mt-4" v-if="selectedCity == 2">
       <div style="display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) ; gap: 8px;padding: 10px;">
         <div class="flex flex-column gap-2">
-          <label for="username">Name</label>
+          <label for="username">{{ $t("name") }}</label>
           <InputText id="username" v-model="name" aria-describedby="username-help" />
           
       </div>
       <div style="visibility: hidden;" class="flex flex-column gap-2">
-          <label for="username">Name</label>
+          <label for="username">{{ $t("name") }}</label>
           <InputText id="username" v-model="name" aria-describedby="username-help" />
           
       </div>
@@ -188,25 +190,25 @@ const changeStatus= (index)=>{
       <div v-if="dayspush" v-for="(day, index) in dayspush" style="display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) ; gap: 8px;padding-bottom: 10px !important;padding: 10px !important; border-bottom: 2px solid black;" class=" m-auto   w-[90%]">
        
       <div class="flex flex-column gap-2 ">
-        <label for="username">start Day</label>
-        <Dropdown required v-model="day.start_day" editable :options="days" optionLabel="name"
+        <label for="username">{{ $t("start_day") }}</label>
+        <Select required v-model="day.start_day" editable :options="days" optionLabel="name"
                         option-value="value"
                        />
        </div>
           <div class="flex flex-column gap-2 ">
-        <label for="username">Start Time</label>
+        <label for="username">{{ $t("start_time") }}</label>
         <InputText type="time" timeOnly  v-model="day.start_time"   autofocus  />
           </div>
 
 
           <div class="flex flex-column gap-2 ">
-        <label for="username">End Day</label>
-        <Dropdown required v-model="day.end_day" editable :options="days" optionLabel="name"
+        <label for="username">{{ $t("end_day") }}</label>
+        <Select required v-model="day.end_day" editable :options="days" optionLabel="name"
                         option-value="value"
                       />
           </div>
           <div class="flex flex-column gap-2 ">
-        <label for="username">End Time</label>
+        <label for="username">{{ $t("end_time") }}</label>
         <InputText type="time" timeOnly  v-model="day.end_time"  autofocus  />
           </div>
        
@@ -216,25 +218,25 @@ const changeStatus= (index)=>{
      <div v-if="x" style="display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) ; gap: 8px;padding-bottom: 10px !important;padding: 10px !important; border-bottom: 2px solid black;" class=" m-auto   w-[90%]">
       
       <div class="flex flex-column gap-2 ">
-        <label for="username">start Day</label>
-        <Dropdown required v-model="shift24.start_day" editable :options="days" optionLabel="name"
+        <label for="username">{{ $t("start_day") }}</label>
+        <Select required v-model="shift24.start_day" editable :options="days" optionLabel="name"
                         option-value="value"
                        />
        </div>
           <div class="flex flex-column gap-2 ">
-        <label for="username">Start Time</label>
+        <label for="username">{{ $t("start_time") }}</label>
         <InputText type="time" timeOnly  v-model="shift24.start_time"   autofocus  />
           </div>
 
 
           <div class="flex flex-column gap-2 ">
-        <label for="username">End Day</label>
-        <Dropdown required v-model="shift24.end_day" editable :options="days" optionLabel="name"
+        <label for="username">{{ $t("end_day") }}</label>
+        <Select required v-model="shift24.end_day" editable :options="days" optionLabel="name"
                         option-value="value"
                       />
           </div>
           <div class="flex flex-column gap-2 ">
-        <label for="username">End Time</label>
+        <label for="username">{{ $t("end_time") }}</label>
         <InputText type="time" timeOnly  v-model="shift24.end_time"  autofocus  />
           </div>
        
@@ -245,11 +247,11 @@ const changeStatus= (index)=>{
      
         <div>
         <Button style="background-color: #22C55E;" icon="pi pi-plus"  @click="increasecount"></Button>
-         <Button v-if="dayspush.length !=0" severity="danger" icon="pi pi-minus" class=" mx-4" @click="decreasecount"></Button>  
+         <Button v-if="dayspush.length !=0" severity="danger" icon="pi pi-minus" class="mx-4" @click="decreasecount"></Button>  
         </div>
      <div class="flex flex-column gap-2 ">
         
-        <Button  label="create shift" class="w-full" @click="createshift"></Button>
+        <Button  :label="$t('create_shift')" class="w-full" @click="createshift"></Button>
         </div>
      </div>
       
@@ -258,19 +260,19 @@ const changeStatus= (index)=>{
       
      <div class="lg:w-6 w-full">
       <div class="flex flex-column gap-2">
-          <label for="username">Name</label>
+          <label for="username">{{ $t("name") }}</label>
           <InputText id="username" v-model="directorate.name" aria-describedby="username-help" />
           
       </div> 
       <div class="flex flex-column gap-2 ">
-        <label for="username">Clock In</label>
+        <label for="username">{{ $t("clock_in") }}</label>
         <InputText type="time" timeOnly  v-model="directorate.clock_in"   autofocus  />
       </div>
       <div class="flex flex-column gap-2 ">
-        <label for="username">Clock Out</label>
+        <label for="username">{{ $t("clock_out") }}</label>
         <InputText type="time" timeOnly  v-model="directorate.clock_out"   autofocus  />
       </div>
-      <Button  label="create shift" class="w-full my-4" @click="createdirectorate"></Button>
+      <Button  :label="$t('create_shift')" class="w-full my-4" @click="createdirectorate"></Button>
      </div>
      
  

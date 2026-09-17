@@ -96,7 +96,7 @@ export default {
     },
     header() {
       return this.headers = [
-        {title: 'id'},
+        {title: '#'},
 
         {key: 'therapist_name', title: this.$t('therapist_name')},
         {key: 'child_age', title: this.$t('child_age')},
@@ -119,58 +119,38 @@ export default {
 </script>
 
 <template>
-  <v-alert
-      type="success"
-      variant="tonal"
-      border="start"
-      elevation="2"
-      closable
-      :close-label="$t('close')"
-      :text="alert_text"
-      v-if="alert_text!= null "
-      class="mb-8"
-  >
-
-  </v-alert>
+  <Message v-if="alert_text != null" severity="success" class="no-print">{{ alert_text }}</Message>
   <div class="back-back">
     <div class="back">
       <div class="text-center"><img src="../../assets/img/sawa_logo.svg" style="width:130px; "></div>
       <div><p class="w-[100%] text-h4 text-center ma-4">{{ print_results[0]?.evaluation_title }}</p></div>
       <div>
-        <p class="w-[100%] text-right ma-4">{{ print_results[0]?.child_name }}</p>
-        <p class="w-[100%] text-right ma-4">{{ print_results[0]?.birth_date }}</p>
+        <p class="w-[100%] text-start ma-4">{{ print_results[0]?.child_name }}</p>
+        <p class="w-[100%] text-start ma-4">{{ print_results[0]?.birth_date }}</p>
 
 
       </div>
       <canvas id="myChart" style="height: 70vh !important; margin-bottom : 30px"></canvas>
 
-      <v-card>
-        <v-data-table
-            class="hidden-table"
-            :headers="header"
-            :items="print_results"
-            :search="search"
-        >
-
-
-          <template #item="{ item ,index}">
-            <tr>
+      <div class="sawa-card">
+        <table class="print-table">
+          <thead>
+            <tr><th v-for="column in header" :key="column.key ?? column.title">{{ column.title }}</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in print_results" :key="item.id ?? index">
               <td>{{ index + 1 }}</td>
-              <td>{{ item.columns.therapist_name }}</td>
-              <td>{{ item.columns.child_age }} months</td>
-              <td>{{ item.columns.grow_age }}</td>
-              <td>{{ item.columns.diff_age }}</td>
-              <td>{{ item.columns.basal_age }} months</td>
-              <td>{{ Math.round(item.columns.late_percentage) }} %</td>
-              <td>{{ formateDate(item.columns.result_created_at) }}</td>
+              <td>{{ item.therapist_name }}</td>
+              <td>{{ item.child_age }} {{ $t('months') }}</td>
+              <td>{{ item.grow_age }}</td>
+              <td>{{ item.diff_age }}</td>
+              <td>{{ item.basal_age }} {{ $t('months') }}</td>
+              <td>{{ Math.round(item.late_percentage) }} %</td>
+              <td>{{ formateDate(item.result_created_at) }}</td>
             </tr>
-          </template>
-          <template #bottom>
-
-          </template>
-
-        </v-data-table>
-      </v-card>
+          </tbody>
+        </table>
+      </div>
 
 
     </div>
@@ -230,4 +210,19 @@ td {
 }
 
 
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.print-table th,
+.print-table td {
+  border: 1px solid #cbd5e1;
+  padding: 0.4em 0.5em;
+  text-align: start;
+}
+.print-table th {
+  background: #eef8f9;
+  color: #135c65;
+}
 </style>

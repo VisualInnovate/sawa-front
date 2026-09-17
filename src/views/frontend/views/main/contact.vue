@@ -7,7 +7,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <h1
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
@@ -16,7 +16,7 @@
             </h1>
           </div>
           <p
-            class="text-[#6F6669] text-base lg:text-xl text-right leading-relaxed font-bold"
+            class="text-[#6F6669] text-base lg:text-xl text-start leading-relaxed font-bold"
           >
             فريق أكاديمية سوا جاهز للإجابة على جميع استفساراتك ومساعدتك في
             اختيار المسار الأنسب لطفلك لضمان نتائج ناجحة.
@@ -98,7 +98,7 @@
             >
               <img src="./images/icon-location.svg" alt="" class="w-6 h-7" />
             </div>
-            <h3 class="text-xl font-bold text-[#1c1b1b] text-right">موقعنا</h3>
+            <h3 class="text-xl font-bold text-[#1c1b1b] text-start">موقعنا</h3>
             <p class="text-[#594045] text-sm text-center leading-relaxed">
               عمان - الرابية - شارع ميسلون
             </p>
@@ -112,7 +112,7 @@
             >
               <img src="./images/icon-phone.svg" alt="" class="w-6 h-6" />
             </div>
-            <h3 class="text-xl font-bold text-[#1c1b1b] text-right">
+            <h3 class="text-xl font-bold text-[#1c1b1b] text-start">
               اتصل بنا
             </h3>
             <div class="flex flex-col gap-1 text-center">
@@ -129,10 +129,10 @@
             >
               <img src="./images/icon-email.svg" alt="" class="w-6 h-5" />
             </div>
-            <h3 class="text-xl font-bold text-[#1c1b1b] text-right">
+            <h3 class="text-xl font-bold text-[#1c1b1b] text-start">
               البريد الإلكتروني
             </h3>
-            <p class="text-[#594045] text-sm text-right" dir="ltr">
+            <p class="text-[#594045] text-sm text-start" dir="ltr">
               info@sawa.academy
             </p>
           </div>
@@ -148,11 +148,11 @@
             >
               <img src="./images/icon-support.svg" alt="" class="w-7 h-7" />
             </div>
-            <h3 class="text-xl font-bold text-white text-right relative">
+            <h3 class="text-xl font-bold text-white text-start relative">
               دعم متواصل
             </h3>
             <p
-              class="text-white/80 text-sm text-right leading-relaxed relative"
+              class="text-white/80 text-sm text-start leading-relaxed relative"
             >
               "We Are Always Happy To Help"
             </p>
@@ -171,7 +171,7 @@
           <h1 class="text-[#1C6772] text-2xl font-extrabold">
             أرسل استفسارك الآن
           </h1>
-          <form class="w-full mt-6 flex flex-col gap-4">
+          <form class="w-full mt-6 flex flex-col gap-4" novalidate data-no-request-spinner @submit.prevent="submitForm">
             <div
               class="flex flex-col sm:flex-row justify-center items-center gap-4"
             >
@@ -181,6 +181,8 @@
                 >
                 <input
                   id="name"
+                  v-model="form.name"
+                  required
                   type="text"
                   class="rounded-lg bg-[#EAE7E7] placeholder:text-start placeholder:font-normal"
                   placeholder="ادخل اسمك هنا"
@@ -192,7 +194,10 @@
                 >
                 <input
                   id="phone"
-                  type="text"
+                  v-model="form.phone"
+                  required
+                  dir="ltr"
+                  type="tel"
                   class="rounded-lg bg-[#EAE7E7] placeholder:text-start placeholder:font-normal"
                   placeholder="07xxxxxxxx"
                 />
@@ -204,7 +209,9 @@
               >
               <input
                 id="email"
-                type="text"
+                v-model="form.email"
+                required
+                type="email"
                 class="rounded-lg bg-[#EAE7E7] placeholder:text-start placeholder:font-normal"
                 placeholder="example@mail.com"
               />
@@ -213,15 +220,23 @@
               <label for="message" class="text-[#594045] text-xs">رسالتك</label>
               <textarea
                 id="message"
+                v-model="form.message"
+                required
+                maxlength="255"
                 class="rounded-lg bg-[#EAE7E7] placeholder:text-start placeholder:font-normal text-xs min-h-[80px]"
                 placeholder="كيف يمكننا مساعدتك؟"
               ></textarea>
             </div>
-            <input
+            <p v-if="feedback" :class="feedback.type === 'success' ? 'text-green-700' : 'text-red-600'" class="text-sm" role="status">
+              {{ feedback.text }}
+            </p>
+            <button
               type="submit"
-              class="bg-[#B21553] text-white py-2 rounded-xl cursor-pointer"
-              value="إرسال الرسالة"
-            />
+              class="bg-[#B21553] text-white py-2 rounded-xl cursor-pointer disabled:opacity-60"
+              :disabled="sending"
+            >
+              {{ sending ? "..." : "إرسال الرسالة" }}
+            </button>
           </form>
         </div>
 
@@ -273,3 +288,30 @@
     </section>
   </main>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { contactErrorText, sendContactMessage, splitFullName } from "@/utils/contact";
+
+const { t } = useI18n();
+const form = ref({ name: "", phone: "", email: "", message: "" });
+const sending = ref(false);
+const feedback = ref(null);
+
+async function submitForm() {
+  if (sending.value) return;
+  feedback.value = null;
+  sending.value = true;
+  try {
+    const { firstName, lastName } = splitFullName(form.value.name);
+    await sendContactMessage({ firstName, lastName, email: form.value.email, phone: form.value.phone, message: form.value.message });
+    feedback.value = { type: "success", text: t("message_sent") };
+    form.value = { name: "", phone: "", email: "", message: "" };
+  } catch (error) {
+    feedback.value = { type: "error", text: contactErrorText(error, t) };
+  } finally {
+    sending.value = false;
+  }
+}
+</script>

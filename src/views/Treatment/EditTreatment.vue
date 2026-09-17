@@ -6,72 +6,65 @@
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
     </div>
-    <v-card>
+    <div class="sawa-card">
       <div>
         <!-- ... existing code ... -->
-        <v-dialog v-model="isSuccessModalOpen" max-width="400px">
-          <v-card>
-            <v-card-title>{{ $t("Success!") }}</v-card-title>
-            <v-card-text>
-              {{ $t("Data seeded successfully!") }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="closeSuccessModal" color="success">
-                {{ $t("OK") }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-form class="py-[2%]" ref="myForm" @submit.prevent="seedData">
+        <Dialog v-model:visible="isSuccessModalOpen" modal :header="$t('Success!')" :style="{ width: '400px', maxWidth: '95vw' }">
+          <p class="m-0">{{ $t("Data seeded successfully!") }}</p>
+          <template #footer>
+            <Button :label="$t('OK')" severity="success" @click="closeSuccessModal" />
+          </template>
+        </Dialog>
+        <form class="py-[2%]" ref="myForm" @submit.prevent="seedData">
           <!-- ... existing code ... -->
           <div class="name-input">
             <div class="py-4">      
-            <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.title"  :placeholder='$t("ProgramName")'  class="w-full "  type="text"   />
+            <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.title"  :placeholder='$t("ProgramName")'  class="w-full"  type="text"   />
           </div>
           <div class="py-4">      
-            <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.price"  :placeholder='$t("price")'  class="w-full "  type="number"   />
+            <InputText style="margin: auto ; text-align: center;background-color:#e7e7e7; border: none; border-bottom: 2px solid black; " v-model="formData.price"  :placeholder='$t("price")'  class="w-full"  type="number"   />
           </div>   
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.session_type_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.session_type_id"  option-value="id" :options="sessionTypes" optionLabel="title" :placeholder='$t("typesessaion")' class="w-full" />
           </div>
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.program_type_id"  option-value="id" :options="programtypes" optionLabel="title" :placeholder='$t("ProgramType")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.program_type_id"  option-value="id" :options="programtypes" optionLabel="title" :placeholder='$t("ProgramType")' class="w-full" />
           </div>
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.program_system_id"  option-value="id" :options="programsystems" optionLabel="title" :placeholder='$t("SystemProgram")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.program_system_id"  option-value="id" :options="programsystems" optionLabel="title" :placeholder='$t("SystemProgram")' class="w-full" />
           </div>
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.appointment_type_id"  option-value="id" :options="appointmentTypes" optionLabel="title" :placeholder='$t("AppointmentType")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.appointment_type_id"  option-value="id" :options="appointmentTypes" optionLabel="title" :placeholder='$t("AppointmentType")' class="w-full" />
           </div>
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.treatment_type_id"  option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.treatment_type_id"  option-value="id" :options="treatmentTypes" optionLabel="title" :placeholder='$t("Typetreatment")' class="w-full" />
           </div>
         
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.user_id"  option-value="id" :options="doctors" optionLabel="title" :placeholder='$t("roomdoctor")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.user_id"  option-value="id" :options="doctors" optionLabel="title" :placeholder='$t("roomdoctor")' class="w-full" />
           </div>
           <div class="card py-4 flex justify-content-center">
-             <Dropdown  id="pv_id_1" style="direction: ltr !important;" v-model="formData.room_id"  option-value="id" :options="rooms" optionLabel="title" :placeholder='$t("room")' class="w-full [&>div>div>span]:bg-black md:w-14rem " />
+             <Select v-model="formData.room_id"  option-value="id" :options="rooms" optionLabel="title" :placeholder='$t("room")' class="w-full" />
           </div>
         
           </div>
             <div style="height: 5px ; background-color: rgb(94, 80, 80);width: 5%; margin: auto; border-radius: 10%;" class="my-2"></div>
-          <v-btn @click="updateData()" class="mt-2 seed" >
+          <Button @click="updateData()" class="mt-2 seed" >
             {{ $t("submit") }}
-          </v-btn>
-        </v-form>
+          </Button>
+        </form>
   
         <!-- ... existing code ... -->
       </div>
-    </v-card>
+    </div>
   </template>
   
 <script>
 import axios from "axios";
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 export default {
-    components: {Dropdown,InputText},
+    components: {Select,InputText},
     data() {
     return {
       // ... existing data properties ...
@@ -349,15 +342,6 @@ export default {
 #input-1{
   text-align: center !important;
   background-color:#E4E4E4 !important;
-}
-#pv_id_1{
-  border: none;
-  text-align: center;
-  background-color:#E7E7E7 !important;
-  border-bottom: 2px solid black;
-  border-radius: 0 ;
- font-size: 20px;
- padding-top: 3%;
 }
 #pv_id_1:focus {
   border: none !important;

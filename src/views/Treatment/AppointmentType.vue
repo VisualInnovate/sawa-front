@@ -1,40 +1,40 @@
 <template>
   <div class=" lg:w-[80%] m-auto">
     <!-- Header Section -->
-    <v-dialog v-model="showDialog" class="form-adds" max-width="600">
-      <v-card class="form-all" style="border-radius: 15px; ">
-        <v-card-title>
+    <Dialog v-model:visible="showDialog" modal :style="{ width: '600px', maxWidth: '95vw' }">
+      <div class="sawa-card form-all" style="border-radius: 15px; ">
+        <div class="sawa-card-title">
           <h2 class="mb-1">{{ $t("AppointmentType") }}</h2>
-        </v-card-title>
+        </div>
         <InputText class="w-[90%] m-auto" type="text" v-model="formData.title" :placeholder='$t("title")' />
       
-        <v-card-actions>
-          <v-btn @click="saveItem" class="submit-button" elevation="2">
+        <div class="sawa-card-actions">
+          <Button @click="saveItem" class="submit-button">
             {{ $t("submit") }}
-          </v-btn>
-          <v-btn @click="closeForm" class="" elevation="2">
+          </Button>
+          <Button @click="closeForm">
             {{ $t("Cancel") }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog v-model="showModal" class="form-adds" max-width="600">
-      <v-card class="form-all" style="border-radius: 15px; ">
-        <v-card-title>
+          </Button>
+        </div>
+      </div>
+    </Dialog>
+    <Dialog v-model:visible="showModal" modal :style="{ width: '600px', maxWidth: '95vw' }">
+      <div class="sawa-card form-all" style="border-radius: 15px; ">
+        <div class="sawa-card-title">
           <h2 class="mb-1">{{ $t("AppointmentType") }}</h2>
-        </v-card-title>
+        </div>
         <InputText class="w-[90%] m-auto" type="text" v-model="formData.title" :placeholder='$t("title")' />
       
-        <v-card-actions>
-          <v-btn @click="update" class="submit-button" elevation="2">
+        <div class="sawa-card-actions">
+          <Button @click="update" class="submit-button">
             {{ $t("submit") }}
-          </v-btn>
-          <v-btn @click="showModal = false" class="" elevation="2">
+          </Button>
+          <Button @click="showModal = false">
             {{ $t("Cancel") }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+          </Button>
+        </div>
+      </div>
+    </Dialog>
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3 shadow mb-4 p-4">
       <div class="paragraph text-2xl">
         <h2>{{ $t("Appointment_type") }}</h2>
@@ -42,7 +42,7 @@
       </div>
     <div class="relative ">
        <i class="pi pi-search absolute top-[20%] right-[5%] font-bold cursor-pointer"  @click="performSearch()"/>
-       <InputText style="text-align: center;" class="lg:w-full" v-model="searchQuery" placeholder="Search" />
+       <InputText style="text-align: center;" class="lg:w-full" v-model="searchQuery" :placeholder="$t('search')" />
     </div>
      
 
@@ -78,16 +78,8 @@
 </div>
 
 <div class="m-auto ">
-  <v-icon small color="error" @click="deleteItem(room.id)"
-              >mdi-delete</v-icon
-            >
-            <v-icon
-              small
-              color="primary"
-              class="mr-2"
-              @click="editItem(room.id)"
-              >mdi-pencil</v-icon
-    >
+  <Button icon="pi pi-trash" rounded variant="outlined" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="deleteItem(room.id)" />
+            <Button icon="pi pi-pencil" rounded variant="outlined" severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" @click="editItem(room.id)" />
 </div>
 </div>
   </div>
@@ -142,8 +134,8 @@ export default {
         .then(response => {
           console.log('Item deleted successfully:', response.data);
           Swal.fire(
-            'تم الحذف بنجاح!',
-            'Your treatment has been deleted.',
+            this.$t('deleted_successfully'),
+            '',
             'success'
           );
 
@@ -159,8 +151,8 @@ export default {
           // Handle any errors here
           console.error("There was an error deleting the treatment: ", error);
           Swal.fire(
-            'Error!',
-            'There was a problem deleting your treatment.',
+            this.$t('error'),
+            this.$t('request_failed_retry'),
             'error'
           );
         });
@@ -235,7 +227,7 @@ export default {
           // Optionally, show a success message to the user
           this.showAlert({
             type: "success",
-            message: "Item saved successfully.",
+            message: this.$t("successful"),
           });
         })
         .catch((error) => {
@@ -248,7 +240,7 @@ export default {
             // Optionally, show an error message to the user
             this.showAlert({
               type: "error",
-              message: "Failed to save item. Please try again.",
+              message: this.$t("request_failed_retry"),
             });
           }
         });

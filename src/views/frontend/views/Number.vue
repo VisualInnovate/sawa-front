@@ -26,7 +26,7 @@
                             <div>
                                 <input class=" backdrop-blur-md bg-white/30 w-full p-2 m-2 mb-0 text-center border-0 border-b-2 border-black border-solid  " type="tel" name="email"  placeholder="  " required="">
                             </div>
-                            <p class="text-right underline underline-offset-1"><a>اعاده ارسال الكود</a></p>
+                            <p class="text-start underline underline-offset-1"><a>اعاده ارسال الكود</a></p>
                             
                             <button class=" w-full p-2 my-4  lg:m-0 rounded-3xl bg-[#23D1E6]">تاكيد </button>
                             <p>اذا كنت تمتلك حساب اضغط هنا <router-link to="/Login" class="px-2 text-[#649297] ">تسجيل الدخول</router-link></p>

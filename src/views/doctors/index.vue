@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import { useI18n } from 'vue-i18n';
 import { useStorage } from "@vueuse/core";
@@ -26,7 +26,7 @@ const tpes = () => {
 }
 
 const doctor_id = useStorage("doctor_id", Number)
-const departments = ref({})
+const departments = ref([])
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -203,9 +203,8 @@ const initFilters = () => {
               v-can="'doctor list'" 
               :label='$t("export")' 
               icon="pi pi-download" 
-              class="p-button-info no-print" 
-              @click="exportCSV"
-            />
+              class="no-print" 
+              @click="exportCSV" severity="info" />
           </template>
         </Toolbar>
 
@@ -235,20 +234,18 @@ const initFilters = () => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText 
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText 
                       v-model="filters['global'].value" 
                       :placeholder='$t("search")' 
                       class="w-full"
                     />
-                  </span>
+              </IconField>
                   <Button 
                     icon="pi pi-refresh" 
-                    class="p-button-text" 
                     @click="fetchData()" 
-                    v-tooltip.top="'Refresh data'"
-                  />
+                    v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" variant="text" />
                 </div>
               </div>
             </template>
@@ -283,27 +280,21 @@ const initFilters = () => {
             
             <Column header-style="min-width:10rem;" class="no-print">
               <template #body="slotProps">
-                <div class="flex gap-2">
+                <div class="table-actions">
                   <Button
                     v-can="'employees edit'"
                     icon="pi pi-pencil"
-                    class="p-button-rounded p-button-success"
                     @click="edit(slotProps.data.id)"
-                    v-tooltip.top="'Edit'"
-                  />
+                    v-tooltip.top="$t('edit')" :aria-label="$t('edit')" rounded severity="info" variant="outlined" />
                   <Button
                     v-can="'doctor delete'"
                     icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger"
                     @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="'Delete'"
-                  />
+                    v-tooltip.top="$t('delete')" :aria-label="$t('delete')" rounded severity="danger" variant="outlined" />
                   <Button
                     icon="pi pi-user"
-                    class="p-button-rounded p-button-info"
                     @click="detail(slotProps.data.id)"
-                    v-tooltip.top="'View Details'"
-                  />
+                    v-tooltip.top="$t('view')" :aria-label="$t('view')" rounded severity="secondary" variant="outlined" />
                 </div>
               </template>
             </Column>
@@ -331,8 +322,8 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
@@ -346,67 +337,67 @@ const initFilters = () => {
           </div>
           
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="username">{{ $t('name') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.name" :placeholder='$t("name")' />
+            <label class="w-full text-start" for="username">{{ $t('name') }}</label>
+            <InputText required class="text-center" v-model="usersdata.name" :placeholder='$t("name")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="username">{{ $t('type') }}</label>
-            <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.type" option-value="id" filter :options="tpes()" optionLabel="name" :placeholder='$t("type")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
+            <label class="w-full text-start" for="username">{{ $t('type') }}</label>
+            <Select required v-model="usersdata.type" option-value="id" filter :options="tpes()" optionLabel="name" :placeholder='$t("type")' class="w-full" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.type">{{ error.type[0] }}</div>
           </div>
           
           <div v-if="usersdata.type == 0 || usersdata.type ==2" class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{ $t('skill_name') }}</label>
-            <MultiSelect v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")' class="w-full bg-[#f7f5f5] md:w-20rem" />
+            <label class="w-full text-start" for="username">{{ $t('skill_name') }}</label>
+            <MultiSelect v-model="usersdata.skills" filter option-value="id" :options="skills" optionLabel="name" :placeholder='$t("skill_name")' class="w-full md:w-20rem" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
           </div>
           
           <div v-if="usersdata.type == 0 || usersdata.type ==2" class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{ $t('department') }}</label>
-            <MultiSelect v-model="usersdata.department" filter option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department")' class="w-full bg-[#f7f5f5] md:w-20rem" />
+            <label class="w-full text-start" for="username">{{ $t('department') }}</label>
+            <MultiSelect v-model="usersdata.department" filter option-value="id" :options="departments" optionLabel="title" :placeholder='$t("department")' class="w-full md:w-20rem" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
           </div>
           
           <div v-if="usersdata.type == 0 || usersdata.type ==2" class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{ $t('Spotter') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.spotter" :placeholder='$t("Spotter")' />
+            <label class="w-full text-start" for="username">{{ $t('Spotter') }}</label>
+            <InputText required class="text-center" v-model="usersdata.spotter" :placeholder='$t("Spotter")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="username">{{ $t('email') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.email" :placeholder='$t("email")' />
+            <label class="w-full text-start" for="username">{{ $t('email') }}</label>
+            <InputText required class="text-center" v-model="usersdata.email" :placeholder='$t("email")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.title" :placeholder='$t("title")' />
+            <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+            <InputText required class="text-center" v-model="usersdata.title" :placeholder='$t("title")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="username">{{ $t('password') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="usersdata.password" :placeholder='$t("password")' />
+            <label class="w-full text-start" for="username">{{ $t('password') }}</label>
+            <InputText required class="text-center" v-model="usersdata.password" :placeholder='$t("password")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.password">{{ error.password[0] }}</div>
           </div>
           
           <div class="flex flex-column gap-2 py-1">
-            <label class="w-full text-right" for="username">{{ $t('roles') }}</label>
-            <Dropdown required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="usersdata.role" option-value="id" filter :options="roles" optionLabel="name" :placeholder='$t("roles")' class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
+            <label class="w-full text-start" for="username">{{ $t('roles') }}</label>
+            <Select required v-model="usersdata.role" option-value="id" filter :options="roles" optionLabel="name" :placeholder='$t("roles")' class="w-full" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.role">{{ error.role[0] }}</div>
           </div>
           
           <div class="flex-column gap-2 py-1 hidden">
-            <label class="w-full text-right" for="username">{{ $t('personal_image') }}</label>
+            <label class="w-full text-start" for="username">{{ $t('personal_image') }}</label>
             <InputText name="file" ref="file" @change="uploadFile" accept="image/*" id="filr" type="file" class="w-full" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
           </div>
 
           <div class="w-full text-center">
-            <Button @click="createuser" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createuser" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
           </div>
         </Dialog>
 

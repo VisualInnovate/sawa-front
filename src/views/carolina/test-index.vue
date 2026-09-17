@@ -1,7 +1,7 @@
 <template>
     <CarolianaTab></CarolianaTab>
-    <v-card class="p-[1%]" >
-        <Button v-can="'carolina test create'" :label='$t("create_button")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+    <div class="sawa-card p-[1%]" >
+        <Button v-can="'carolina test create'" :label='$t("create_button")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 ">
              <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
@@ -24,8 +24,8 @@
                    </div>
                </div>
                <div class="flex">
-                <Button v-can="'carolina test edit'" icon="pi pi-pencil" class="p-button-rounded p-button-success m-auto" @click="edit(data.id)"/>
-                <Button v-can="'carolina test delete'"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" @click="confirmDelete(data.id)"/>
+                <Button v-can="'carolina test edit'" icon="pi pi-pencil" class="m-auto" @click="edit(data.id)" rounded severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+                <Button v-can="'carolina test delete'"  icon="pi pi-trash" class="m-auto" @click="confirmDelete(data.id)" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
                </div>
              </div>
 
@@ -39,42 +39,42 @@
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
                
                 <div class="flex flex-column gap-2">
-                    <label class="text-right" for="username">{{ $t('parent_category') }}</label>
-                    <Dropdown @update:model-value="getage_range"  required id="pv_id_1" style="direction: ltr !important;" v-model="levels.category_id"  option-value="id" :options="allcat" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label class="text-start" for="username">{{ $t('parent_category') }}</label>
+                    <Select @update:model-value="getage_range"  required v-model="levels.category_id"  option-value="id" :options="allcat" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.category_id">{{ error.category_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
-                    <label class="text-right" for="username">{{ $t('age_range') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.age_group_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label class="text-start" for="username">{{ $t('age_range') }}</label>
+                    <Select required v-model="levels.age_group_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.age_group_id">{{ error.age_group_id[0] }}</div>
                 </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('skills') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.skill" :placeholder='$t("skills")' />
+                  <label class="w-full text-start" for="username">{{ $t('skills') }}</label>
+                <InputText required class="text-center" v-model="levels.skill" :placeholder='$t("skills")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
             </div>
 
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
+                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
+                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
             </div>
             <div class="flex">
                 <div class="flex flex-column gap-2 ">
-                  <label  class="invisible w-full text-right" for="username">{{ $t('goal') }}</label>
-                  <Button   @click="addarry"  class="create my-auto  mx-2" icon="pi pi-plus" ></Button>
+                  <label  class="invisible w-full text-start" for="username">{{ $t('goal') }}</label>
+                  <Button   @click="addarry"  class="my-auto mx-2" icon="pi pi-plus"></Button>
                 </div>
 
                 <div class="flex flex-column gap-2 w-[89%]">
-                    <label class="w-full text-right" for="username">{{ $t('goal') }}</label>
-                    <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.goal" :placeholder='$t("goal")' />
+                    <label class="w-full text-start" for="username">{{ $t('goal') }}</label>
+                    <InputText required class="text-center" v-model="levels.goal" :placeholder='$t("goal")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
                 </div>
             </div>
@@ -84,45 +84,45 @@
                         <span class="my-auto ">{{ index+1 }} - </span>
                         <span>{{ $t("from") }}</span>
                         <p class="px-1 text-green-500 text-xl  w-full" style="text-align: center;">{{ index+1 }} - {{ mou.body }}</p>
-                        <Button   @click="deletearray(index)"  class="delete m-auto absolute top-1 ltr:right-2 rtl:left-2  " icon="pi pi-minus" ></Button>
+                        <Button   @click="deletearray(index)"  class="m-auto absolute top-1 ltr:right-2 rtl:left-2" icon="pi pi-minus" severity="danger"></Button>
                     </div>
             </div>
            <div class="w-full text-center">
-            <Button @click="createcrude" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
            
             <div class="flex flex-column gap-2">
-                    <label class="text-right" for="username">{{ $t('parent_category') }}</label>
-                    <Dropdown @update:model-value="getage_range"  required id="pv_id_1" style="direction: ltr !important;" v-model="levels.category_id"  option-value="id" :options="allcat" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label class="text-start" for="username">{{ $t('parent_category') }}</label>
+                    <Select @update:model-value="getage_range"  required v-model="levels.category_id"  option-value="id" :options="allcat" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.category_id">{{ error.category_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
-                    <label class="text-right" for="username">{{ $t('age_range') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="levels.age_group_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem " />
+                    <label class="text-start" for="username">{{ $t('age_range') }}</label>
+                    <Select required v-model="levels.age_group_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.age_group_id">{{ error.age_group_id[0] }}</div>
                 </div>
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('skills') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.skill" :placeholder='$t("skills")' />
+                  <label class="w-full text-start" for="username">{{ $t('skills') }}</label>
+                <InputText required class="text-center" v-model="levels.skill" :placeholder='$t("skills")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
             </div>
 
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
+                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
+                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
             </div>
             <div class="flex">
                 <div class="flex flex-column gap-2 ">
-                  <label  class="invisible w-full text-right" for="username">{{ $t('goal') }}</label>
-                  <Button   @click="addarry"  class="create my-auto  mx-2" icon="pi pi-plus" ></Button>
+                  <label  class="invisible w-full text-start" for="username">{{ $t('goal') }}</label>
+                  <Button   @click="addarry"  class="my-auto mx-2" icon="pi pi-plus"></Button>
                 </div>
 
                 <div class="flex flex-column gap-2 w-[89%]">
-                    <label class="w-full text-right" for="username">{{ $t('goal') }}</label>
-                    <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.goal" :placeholder='$t("goal")' />
+                    <label class="w-full text-start" for="username">{{ $t('goal') }}</label>
+                    <InputText required class="text-center" v-model="levels.goal" :placeholder='$t("goal")' />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
                 </div>
             </div>
@@ -132,11 +132,11 @@
                         <span class="my-auto ">{{ index+1 }} - </span>
                         <span>{{ $t("from") }}</span>
                         <p class="px-1 text-green-500 text-xl  w-full" style="text-align: center;">{{ index+1 }} - {{ mou.body }}</p>
-                        <Button   @click="deletearray(index)"  class="delete m-auto absolute top-1 ltr:right-2 rtl:left-2  " icon="pi pi-minus" ></Button>
+                        <Button   @click="deletearray(index)"  class="m-auto absolute top-1 ltr:right-2 rtl:left-2" icon="pi pi-minus" severity="danger"></Button>
                     </div>
             </div>
            <div class="w-full text-center">
-            <Button @click="editescrud" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
 
@@ -145,13 +145,13 @@
              </div>
             
           </div>
-    </v-card>
+    </div>
   </template>
 
 <script setup>
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import CarolianaTab from '../../components/CarolianaTab.vue'
@@ -160,12 +160,12 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 const toast = useToast()
 const router = useRouter()
-const allcat=ref({})
+const allcat=ref([])
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
 const users = ref(null)
-const age_range=ref({})
+const age_range=ref([])
 const productDialog = ref(false)
 const deleteDialog = ref(false)
 const confir_id=ref('')

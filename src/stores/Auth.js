@@ -4,6 +4,7 @@ import { useStorage } from "@vueuse/core";
 import { ref } from "vue";
 import { useParentStore } from "../stores/ParentStore";
 import { homeRoute } from "@/utils/permissions";
+import i18n from "@/plugins/i18n";
 export const useAuthStore = defineStore("Auth", {
   state: () => ({
     authUser: useStorage("authUser", {}),
@@ -51,9 +52,14 @@ export const useAuthStore = defineStore("Auth", {
         this.applyUser(response.data.user);
         this.router.push(homeRoute());
       } catch (error) {
-        if (error.response.status === 422) {
-          console.log(error);
-          this.authErrors = error.response.data.errors;
+        const errors = error.response?.data?.errors;
+        if (error.response?.status === 422 && Array.isArray(errors)) {
+          this.authErrors = errors;
+        } else if (error.response?.status === 422) {
+          // "Password mismatch" / "User doesn't exist": one message that doesn't reveal which.
+          this.authErrors = [i18n.global.t("invalid_credentials")];
+        } else {
+          this.authErrors = [i18n.global.t("request_failed_retry")];
         }
       } finally {
         this.loading = false;
@@ -65,37 +71,6 @@ export const useAuthStore = defineStore("Auth", {
        axios.post("/api/logout");
       
     
-    },
-    async forgotPassword(data) {
-      try {
-        this.resetAuthStore();
-        const response = await axios.post("/api/forgot-password", {
-          email: data.email,
-        });
-        this.msg = response.data.status;
-        this.router.push({ name: "ResetPassword" });
-      } catch (error) {
-        if (error.response.status === 422) {
-          this.authErrors = error.response.data.errors;
-        } else {
-          // handling exceptions from frontend prespective only
-          let errors = [];
-          let exceptionArr = [];
-          exceptionArr.push(error.response.data.message);
-          errors.push(exceptionArr);
-          this.authErrors = errors;
-        }
-      }
-    },
-    async resetPassword(data) {
-      try {
-        await axios.post("/api/reset-password", data);
-        this.router.push({ name: "Login" });
-      } catch (error) {
-        if (error.response.status === 422) {
-          this.authErrors = error.response.data.errors;
-        }
-      }
     },
     resetAuthStore() {
       this.authUser = null;

@@ -7,7 +7,7 @@
       >
         <!-- Text -->
         <div class="flex flex-col gap-4 lg:gap-8">
-          <div class="text-right">
+          <div class="text-start">
             <span
               class="mb-5 inline-flex rounded-full bg-[#A7EBF6] text-[#1C6772] text-xs sm:text-sm font-bold px-4 py-2"
             >
@@ -21,7 +21,7 @@
             </h1>
           </div>
           <p
-            class="text-[#6F5A5D] text-base lg:text-xl text-right leading-relaxed font-bold"
+            class="text-[#6F5A5D] text-base lg:text-xl text-start leading-relaxed font-bold"
           >
             نحن نؤمن بأن لكل طفل قدراته الكامنة. في أكاديمية سوا، نصمم برامجنا
             العلاجية وفق أحدث المعايير العلمية لنضمن لطفلكم مستقبلاً أكثر
@@ -78,7 +78,7 @@
         <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-8">
           <!-- Speech Card -->
           <article
-            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-right shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:min-h-[406px]"
+            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-start shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:min-h-[406px]"
           >
             <div
               class="mb-7 flex h-[48px] w-[48px] items-center justify-center rounded-[16px] bg-[#1C6772]/10 text-[#1C6772]"
@@ -115,7 +115,7 @@
 
           <!-- ABA Wide Card -->
           <article
-            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-right shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:col-span-2 lg:min-h-[406px]"
+            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-start shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:col-span-2 lg:min-h-[406px]"
           >
             <div
               class="grid grid-cols-1 gap-6 md:grid-cols-[minmax(220px,340px)_1fr] md:items-center"
@@ -230,7 +230,7 @@
 
           <!-- Academic Card -->
           <article
-            class="relative overflow-hidden rounded-[22px] bg-[#1C6772] p-5 text-right text-white sm:p-8 lg:min-h-[314px]"
+            class="relative overflow-hidden rounded-[22px] bg-[#1C6772] p-5 text-start text-white sm:p-8 lg:min-h-[314px]"
           >
             <div
               class="pointer-events-none absolute bottom-[-40px] left-[-40px] h-[128px] w-[128px] rounded-full bg-white/10"
@@ -259,7 +259,7 @@
 
           <!-- Physical Therapy -->
           <article
-            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-right shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:min-h-[318px]"
+            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-start shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:min-h-[318px]"
           >
             <div
               class="mb-7 flex h-[48px] w-[48px] items-center justify-center rounded-[16px] bg-[#B21553]/10 text-[#B21553]"
@@ -294,7 +294,7 @@
 
           <!-- Occupational Therapy -->
           <article
-            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-right shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:min-h-[318px]"
+            class="rounded-[22px] border border-[#E5DCDA] bg-white p-5 text-start shadow-[0_8px_22px_rgba(40,40,40,0.018)] sm:p-8 lg:min-h-[318px]"
           >
             <div
               class="mb-7 flex h-[48px] w-[48px] items-center justify-center rounded-[16px] bg-[#006B24]/10 text-[#006B24]"
@@ -344,7 +344,7 @@
       <div
         class="mx-auto grid max-w-[1180px] grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:gap-14 lg:px-8"
       >
-        <div class="text-right">
+        <div class="text-start">
           <h2
             class="mb-8 text-[26px] font-black leading-tight text-[#242424] sm:text-[30px] lg:text-[34px]"
           >
@@ -419,7 +419,7 @@
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <article
-            class="rounded-[22px] bg-white p-6 text-right shadow-[0_8px_20px_rgba(40,40,40,0.018)]"
+            class="rounded-[22px] bg-white p-6 text-start shadow-[0_8px_20px_rgba(40,40,40,0.018)]"
           >
             <div class="mb-5 text-[#1C6772]">
               <img src="./images/icon-planIEP.svg" alt="" class="h-8 w-8" />
@@ -431,7 +431,7 @@
           </article>
 
           <article
-            class="rounded-[22px] bg-white p-6 text-right shadow-[0_8px_20px_rgba(40,40,40,0.018)]"
+            class="rounded-[22px] bg-white p-6 text-start shadow-[0_8px_20px_rgba(40,40,40,0.018)]"
           >
             <div class="mb-5 text-[#B21553]">
               <img src="./images/icon-measure.svg" alt="" class="h-8 w-8" />
@@ -450,7 +450,7 @@
           </article>
 
           <article
-            class="relative overflow-hidden rounded-[22px] bg-[#1C6772] p-6 text-right text-white sm:col-span-2"
+            class="relative overflow-hidden rounded-[22px] bg-[#1C6772] p-6 text-start text-white sm:col-span-2"
           >
             <div class="pointer-events-none absolute left-8 top-8 opacity-20">
               <svg

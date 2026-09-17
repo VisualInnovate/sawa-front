@@ -49,7 +49,7 @@
         </div>
       </div>
       <div>
-        <Button style=" background-color: #05505C !important;"  :label='$t("Quick_links")' class=" w-[170px] pb-2 lg:mb-0 bg focus:ring-0 "/>
+        <Button style=" background-color: #05505C !important;"  :label='$t("Quick_links")' class="w-[170px] pb-2 lg:mb-0 bg focus:ring-0" />
         <div class="pt-4 px-1"><a href="/" class="text-base py-2 pt-4 text-[#ffff]">{{ $t("home") }}</a></div>
         <div class="px-1 py-1"><a href="/about" class="text-base py-2 pt-4 text-[#ffff]"> {{ $t("about us") }}</a></div>
         <!-- <div class="px-1 py-1"><a href="/auctions" class="text-base py-2 pt-4 text-[#ffff]"> {{ $t("auctions us") }}</a></div> -->
@@ -58,7 +58,7 @@
         <div class="px-1 py-1"><a href="/contact-us" class="text-base py-2 pt-4 text-[#ffff]"> {{ $t("Contact_us") }} </a></div>
       </div>
       <div>
-        <Button style=" background-color: #05505C !important;"  :label='$t("Branches")'  class="w-[170px] pb-2 lg:mb-0 bg focus:ring-0 "/>
+        <Button style=" background-color: #05505C !important;"  :label='$t("Branches")'  class="w-[170px] pb-2 lg:mb-0 bg focus:ring-0" />
         <div v-for="bran in branchs" class="">
           <h5 class="text-base  py-2 font-semibold text-[#ffff]">{{ bran?.name }}</h5>
           <a :href="bran?.location_url" target="_blank" class="text-sm  font-normal text-[#ffff]"> {{ bran?.address.country +' - '+ bran?.address.city+' - '+ bran?.address.street   }} </a>
@@ -67,7 +67,7 @@
 
       </div>
       <div>
-        <Button style=" background-color: #05505C !important;"  :label='$t("التواصل")' class="w-[170px] pb-2 lg:mb-0 bg focus:ring-0 "/>
+        <Button style=" background-color: #05505C !important;"  :label='$t("التواصل")' class="w-[170px] pb-2 lg:mb-0 bg focus:ring-0" />
         <div class="">
           <h5 class="text-base  pt-2 font-semibold text-[#ffff]"> {{ $t("Mobile_number") }}</h5>
           <p class="text-sm py-2 font-normal text-[#ffff]"> +962791017001</p>

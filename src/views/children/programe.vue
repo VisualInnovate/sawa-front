@@ -1,7 +1,13 @@
 <template>
   <div>
     <ChildTaps></ChildTaps>
-    <v-card>
+    <div class="sawa-card">
+      <section v-if="details?.student_program?.milestone_plan_goals?.length" class="p-4">
+        <h2 class="font-bold mb-3">{{ $t('milestone_plan_goals') }}</h2>
+        <ul class="list-disc ps-5 space-y-2">
+          <li v-for="goal in details.student_program.milestone_plan_goals" :key="goal.id">{{ goal.body }}</li>
+        </ul>
+      </section>
        
      <div  class="grid grid-cols-1 lg:grid-cols-1 gap-4 p-4">
         <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-1" >
@@ -42,7 +48,7 @@
         
   
       
-    </v-card>
+    </div>
          
   </div>
 </template>

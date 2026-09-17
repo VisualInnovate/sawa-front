@@ -3,137 +3,121 @@
     <div>
       <!-- Your existing template code here -->
     </div>
-    <v-snackbar v-model="alert.show" :color="alert.type" :style="{ top: '0' }">
-      {{ alert.message }}
-    </v-snackbar>
-    <v-card>
+    <Message v-if="alert.show" :severity="alert.type === 'error' ? 'error' : 'success'" class="mb-3">{{ alert.message }}</Message>
+    <div class="sawa-card">
       <confirm-dialog @confirmed="deleteItem" ref="confirmDialog" />
-      <v-card-title>
+      <div class="sawa-card-title">
         <h2 class="mb-1">{{ $t("ProgramType") }}</h2>
 
-        <v-row class="mb-3">
-          <v-col cols="12" sm="6" md="4">
-            <v-text-field v-model="search" label="Search" outlined hide-details></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
-            <v-btn @click="openForm" style="background-color: #4caf50; color: white; font-weight: bold">{{
-              $t("addProgramType") }}</v-btn>
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+        <div class="flex flex-wrap gap-4 w-full mb-3">
+          <div class="flex-1 min-w-0">
+            <InputText v-model="search" :placeholder="$t('search')" fluid />
+          </div>
+          <div class="flex-1 min-w-0">
+            <Button icon="pi pi-plus" :label="$t('addProgramType')" @click="openForm" />
+          </div>
+          <div class="flex-1 min-w-0">
             <router-link :to="{ name: 'CreateUser' }">
-              <v-icon color="success">mdi-plus</v-icon>
+              <i class="pi pi-plus" aria-hidden="true"></i>
             </router-link>
-          </v-col>
-        </v-row>
-      </v-card-title>
-      <v-dialog v-model="showDialog" class="form-adds" max-width="600">
-        <v-card class="form-all" style="border-radius: 15px; ">
-          <v-card-title>
+          </div>
+        </div>
+      </div>
+      <Dialog v-model:visible="showDialog" modal :style="{ width: '600px', maxWidth: '95vw' }">
+        <div class="sawa-card form-all" style="border-radius: 15px; ">
+          <div class="sawa-card-title">
 
             <h2 class="mb-1">{{ $t("addProgramType") }}</h2>
-          </v-card-title>
-          <v-card-text>
-            <v-text-field v-model="formData.title" :label="$t('title')" outlined required></v-text-field>
+          </div>
+          <div class="sawa-card-text">
+            <InputText v-model="formData.title" required :placeholder="$t('title')" fluid />
             <!-- Add other form fields as needed -->
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="saveItem" class="submit-button" elevation="2">
+          </div>
+          <div class="sawa-card-actions">
+            <Button @click="saveItem" class="submit-button">
               {{ $t("submit") }}
-            </v-btn>
-            <v-btn @click="closeForm" class="" elevation="2">
+            </Button>
+            <Button @click="closeForm">
               {{ $t("Cancel") }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-data-table :headers="header" :items="programtype" :search="search">
-        <template #item="{ item }">
-          <tr v-if="item.columns">
-            <td>{{ item.columns.id }}</td>
-            <td>{{ item.columns.title }}</td>
-            <td>
-
-              <v-icon small color="primary" class="mx-3" @click="showItem(item.columns.id)">
-                mdi-plus-box
-              </v-icon>
-              <v-icon small color="primary" class="mx-3" @click="editItem(item.columns.id)">mdi-pencil</v-icon>
-              <v-icon small color="error mx-3" @click="detailsItem(item.columns.id)">mdi-delete</v-icon>
-            </td>
-          </tr>
-        </template>
-      </v-data-table>
-    </v-card>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+      <DataTable :value="programtype" :globalFilterFields="['title']"
+        :filters="{ global: { value: search, matchMode: 'contains' } }" paginator :rows="10" stripedRows>
+        <Column field="id" header="#" />
+        <Column field="title" :header="$t('title')" />
+        <Column :header="$t('actions')">
+          <template #body="{ data }">
+            <div class="table-actions">
+              <Button icon="pi pi-eye" rounded variant="outlined" severity="secondary" v-tooltip.top="$t('view')" :aria-label="$t('view')" @click="showItem(data.id)" />
+              <Button icon="pi pi-pencil" rounded variant="outlined" severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" @click="editItem(data.id)" />
+              <Button icon="pi pi-trash" rounded variant="outlined" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="detailsItem(data.id)" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
     <template>
-      <v-dialog v-model="dialog" max-width="400">
-        <v-card>
-          <v-card-title class="headline">Confirmation</v-card-title>
-          <v-card-text>
-            Are you sure you want to delete this item?
-            {{ showdata }}
+      <Dialog v-model:visible="dialog" modal :header="$t('confirmation')" :style="{ width: '400px', maxWidth: '95vw' }">
+          <p class="m-0">{{ $t('remove_item') }}
+            {{ showdata }}</p>
+          <template #footer>
+            <Button :label="$t('cancel')" severity="secondary" variant="text" @click="dialog = false" />
+            <Button :label="$t('confirm')" severity="danger" @click="deleteItem(showdata)" />
+          </template>
+        </Dialog>
+      <Dialog v-model:visible="editdialog" modal :header="$t('confirmation')" :style="{ width: '400px', maxWidth: '95vw' }">
+          <p class="m-0">{{ $t('confirm_edit_item') }}
+            {{ editdata }}</p>
+          <template #footer>
+            <Button :label="$t('cancel')" severity="secondary" variant="text" @click="editdialog = false" />
+            <Button :label="$t('confirm')" @click="editItem(editdata)" />
+          </template>
+        </Dialog>
+      <Dialog v-model:visible="readDate" modal :style="{ width: '600px', maxWidth: '95vw' }">
 
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="dialog = false" color="primary"> Cancel </v-btn>
-            <v-btn @click="deleteItem(showdata)" color="error"> Confirm </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="editdialog" max-width="400">
-        <v-card>
-          <v-card-title class="headline">Confirmation</v-card-title>
-          <v-card-text>
-            Are you sure you want to edit this item?
-            {{ editdata }}
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="editdialog = false" color="primary"> Cancel </v-btn>
-            <v-btn @click="editItem(editdata)" color="error"> Confirm </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="readDate" max-width="600" max-height="400">
-
-        <v-card>
-          <v-card-title>
+        <div class="sawa-card">
+          <div class="sawa-card-title">
             <h2 class="mb-1">{{ $t("editProgramType") }}</h2>
-          </v-card-title>
-          <v-card-text>
+          </div>
+          <div class="sawa-card-text">
             <h2> {{ $t("title") }} : {{ editFormData.title }}</h2>
             <h3>{{ editFormData.created_at }}</h3>
 
             <!-- Add other form fields as needed -->
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="updateItem(editFormData.id)" class="submit-button" elevation="2">
+          </div>
+          <div class="sawa-card-actions">
+            <Button @click="updateItem(editFormData.id)" class="submit-button">
               {{ $t("update") }}
-            </v-btn>
-            <v-btn @click="closeEditFormedit" class="cancel-button" elevation="2">
+            </Button>
+            <Button @click="closeEditFormedit" class="cancel-button">
               {{ $t("Cancel") }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
-      <v-dialog v-model="isEditing" max-width="600">
+      <Dialog v-model:visible="isEditing" modal :style="{ width: '600px', maxWidth: '95vw' }">
 
-        <v-card>
-          <v-card-title>
+        <div class="sawa-card">
+          <div class="sawa-card-title">
             <h2 class="mb-1">{{ $t("editProgramType") }}</h2>
-          </v-card-title>
-          <v-card-text>
-            <v-text-field v-model="editFormData.title" :label="$t('title')" outlined required></v-text-field>
+          </div>
+          <div class="sawa-card-text">
+            <InputText v-model="editFormData.title" required :placeholder="$t('title')" fluid />
             <!-- Add other form fields as needed -->
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="updateItem(editFormData.id)" class="submit-button" elevation="2">
+          </div>
+          <div class="sawa-card-actions">
+            <Button @click="updateItem(editFormData.id)" class="submit-button">
               {{ $t("update") }}
-            </v-btn>
-            <v-btn @click="closeEditForm" class="cancel-button" elevation="2">
+            </Button>
+            <Button @click="closeEditForm" class="cancel-button">
               {{ $t("Cancel") }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </template>
   </div>
 </template>
@@ -212,7 +196,7 @@ export default {
           console.log("Item saved successfully");
           // Close the form dialog
           this.closeForm();
-          this.setSuccessMessage('Item deleted successfully!');
+          this.setSuccessMessage(this.$t('deleted_successfully'));
           // Refresh the program types list
           this.getprogramtype();
         })
@@ -234,7 +218,7 @@ export default {
         if (this.showdata) {
           this.showAlert({
             type: "warning", // Alert type can be "success", "info", "warning", "error"
-            message: "Your custom alert message here",
+            message: this.$t("successful"),
           });
           this.dialog = false;
         }

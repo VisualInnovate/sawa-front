@@ -2,7 +2,7 @@
     <div>
       <ChildTaps></ChildTaps>
       
-    <v-card>
+    <div class="sawa-card">
        
         
      <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
@@ -19,14 +19,14 @@
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t(" حالة التقييم") }} :</h3>
-            <p v-if="evalu.status == 1" class="text-xl py-1 text-white rounded-md my-auto bg-[#f36464] px-3 mx-2"> منتهي</p>
-            <p v-if="evalu.status == 0"  class="text-xl py-1 text-white rounded-md my-auto bg-[#f1f164] px-3 mx-2">  انتظار </p>
+            <p v-if="evalu.status == 1" class="text-xl py-1 text-white rounded-md my-auto bg-[#f36464] px-3 mx-2">{{ $t("status_finished") }}</p>
+            <p v-if="evalu.status == 0"  class="text-xl py-1 text-white rounded-md my-auto bg-[#f1f164] px-3 mx-2">{{ $t("status_waiting") }}</p>
           </div>
           </div>
           <!-- <div class="text-center" >
           
-              <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id)" class="details m-auto"> نتائج التقييم</Button>     
-              <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="delete m-auto"> </Button>
+              <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id)" class="m-auto">{{ $t("evaluation_results") }}</Button>     
+              <Button   icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="m-auto" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')"> </Button>
             
           </div> -->
             
@@ -48,7 +48,7 @@
      
       </div>
       
-    </v-card>
+    </div>
     <div>
       <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
@@ -59,12 +59,12 @@
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
     </div>
-    <toast></toast>
+    <Toast />
 
     </div>
   </template>

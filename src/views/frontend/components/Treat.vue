@@ -1,5 +1,5 @@
 <template>
-    <va-card class="card">
+    <div class="page">
       
       <div>
       
@@ -23,17 +23,17 @@
       
        
      </div>
-    </va-card>
+    </div>
   
    </template>
    <script>
    import axios from "axios";
-   import Dropdown from 'primevue/dropdown';
+   import Select from 'primevue/select';
    
    import InputText from 'primevue/inputtext';
    
    export default {
-     components:{Dropdown,InputText},
+     components:{Select,InputText},
      data() {
        return {
          // ... existing data properties ...

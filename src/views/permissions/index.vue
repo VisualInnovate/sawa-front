@@ -2,10 +2,10 @@
   <div class="permissions-container">
     <div class="header-container">
       <h1 class="page-title">{{ $t("permissions") }}</h1>
-      <span class="p-input-icon-left">
-        <i class="pi pi-search" />
-        <InputText v-model="search" :placeholder="$t('search')" class="search-input" />
-      </span>
+      <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="search" :placeholder="$t('search')" class="search-input" />
+              </IconField>
     </div>
 
     <p v-if="loading" class="loading">{{ $t("loading") }}</p>
@@ -37,15 +37,13 @@
         <p v-else class="description-text">{{ description || $t("no_description") }}</p>
       </div>
       <template #footer>
-        <Button :label="$t('cancel')" icon="pi pi-times" class="p-button-text p-button-danger" @click="show = false" />
+        <Button :label="$t('cancel')" icon="pi pi-times" @click="show = false" variant="text" severity="danger" />
         <Button
           v-can="'permissions edit'"
           :label="$t('save')"
           icon="pi pi-check"
-          class="p-button-text p-button-success"
           :loading="saving"
-          @click="updateDescription"
-        />
+          @click="updateDescription" variant="text" severity="success" />
       </template>
     </Dialog>
     <Toast />

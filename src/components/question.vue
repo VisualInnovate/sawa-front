@@ -1,92 +1,91 @@
-<template>
-  <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-minus">
-    <div class="pa-4 header-question">
-      {{header.title}}
-    </div>
-
-  </v-expansion-panel-title>
-  <v-expansion-panel-text>
-    <!-- here  questions -->
-    <v-text-field
-        :rules="NameRules"
-        :label="$t('question')"
-        v-for="(question , index) in questionsNumbers"
-        v-model="questionInputs[index]"
-        v-on:keyup="returnparent"
-        aria-required="true"
-    ></v-text-field>
-
-
-    <div class="d-flex justify-end">
-      <v-btn class="btn-question"
-          :icon="icon"
-          :color="color"
-          @click="addQuestion"
-      ></v-btn>
-    </div>
-
-  </v-expansion-panel-text>
-
-</template>
-
 <script>
+// One evaluation header (category) with its 2 or 3 questions, as an accordion panel.
+// Emits `question-inputs(headerId, questions)` whenever the questions change.
 export default {
   name: "question",
-  props: ['header'],
-  emits:['question-inputs'],
+  props: {
+    header: { type: Object, required: true },
+    questionsAndHeader: { type: Array, default: undefined },
+    showErrors: Boolean,
+  },
+  emits: ["question-inputs"],
   data: () => ({
-
-    NameRules: [
-      value => {
-        if (value) return true
-
-        return ' Field is required.'
-      },
-    ],
-
-    headers: [],
-    questionsNumbers: [1,2],
-    questionCounter:2,
-    questionInputs: [],
-    color:'success',
-    icon:"mdi-plus"
+    questionInputs: ["", ""],
   }),
-  methods:{
-    addQuestion(){
-      if(this.questionCounter<3)
-      {
-        this.questionsNumbers.push(++this.questionCounter)
-        this.color="red"
-        this.icon="mdi-minus"
-      }
-
-      else{
-        --this.questionCounter
-        this.questionsNumbers.splice(-1)
-        this.questionInputs.splice(-1,1)
-        this.color="success"
-        this.icon="mdi-plus"
-      }
-
-      // console.log(this.questionInputs)
-
-
+  computed: {
+    canAdd() {
+      return this.questionInputs.length < 3;
     },
-    returnparent(){
-      this.$emit('question-inputs',this.header.id,this.questionInputs)
+    // Only a partly written header is incomplete; an untouched one is simply skipped.
+    missing() {
+      const blanks = this.questionInputs.filter((value) => !String(value ?? "").trim()).length;
+      return blanks === this.questionInputs.length ? 0 : blanks;
+    },
+  },
+  methods: {
+    toggleThird() {
+      if (this.canAdd) this.questionInputs.push("");
+      else this.questionInputs.splice(-1, 1);
+      this.returnparent();
+    },
+    returnparent() {
+      this.$emit("question-inputs", this.header.id, [...this.questionInputs]);
+    },
+  },
+  created() {
+    if (this.questionsAndHeader?.length) {
+      this.questionInputs = this.questionsAndHeader.map((value) => value.questions?.title ?? "");
     }
-  },mounted() {
-
-  }
-
-}
+    this.returnparent();
+  },
+};
 </script>
 
+<template>
+  <AccordionPanel :value="header.id">
+    <AccordionHeader>
+      <span class="header-title">{{ header.title }}</span>
+      <Tag v-if="showErrors && missing" severity="danger" :value="$t('questions_missing', { count: missing })" class="ms-2" />
+    </AccordionHeader>
+    <AccordionContent>
+      <div class="questions">
+        <div v-for="(question, index) in questionInputs" :key="index" class="field">
+          <label :for="`q-${header.id}-${index}`">{{ $t("question") }} {{ index + 1 }}</label>
+          <InputText
+            :id="`q-${header.id}-${index}`"
+            v-model="questionInputs[index]"
+            fluid
+            :invalid="showErrors && missing > 0 && !String(questionInputs[index] ?? '').trim()"
+            @update:modelValue="returnparent"
+          />
+        </div>
+        <div class="questions-actions">
+          <Button
+            type="button"
+            size="small"
+            variant="outlined"
+            :severity="canAdd ? 'success' : 'danger'"
+            :icon="canAdd ? 'pi pi-plus' : 'pi pi-minus'"
+            :label="canAdd ? $t('add_third_question') : $t('remove_third_question')"
+            @click="toggleThird"
+          />
+        </div>
+      </div>
+    </AccordionContent>
+  </AccordionPanel>
+</template>
+
 <style scoped>
-.header-question{
-  font-size: 25px;
+.header-title {
+  font-size: 1.05rem;
+  font-weight: 700;
 }
-.btn-question i{
-  transition:.3s all ease-in-out;
+.questions {
+  display: grid;
+  gap: 0.75rem;
+}
+.questions-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

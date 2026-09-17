@@ -2,25 +2,25 @@
 
 
 <div class="relative py-[4%] overflow-x-auto">
- <table class="w-full  text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+ <table class="w-full  text-sm text-start text-gray-500 dark:text-gray-400">
      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
          <tr>
             <th scope="col" class="px-6 py-3">
-                 الفئة الرئيسية
+                 {{ $t("main_category") }}
              </th>
              <th scope="col" class="px-6 py-3 " style="    display: flex; justify-content: space-around;">
                   
                   <th style="margin-left: 10px !important;">
-                    العمر
+                    {{ $t("age") }}
                   </th>
                   <th style="margin-left: 10px !important;">
-                    الرمز
+                    {{ $t("code_symbol") }}
                   </th>
                   <th style="margin-left: 10px !important;">
-                    المهاره
+                    {{ $t("skill") }}
                 </th>
                 <th style="margin-left: 10px !important;">
-                    الاستجابة
+                    {{ $t("response") }}
                 </th>
              </th>
            

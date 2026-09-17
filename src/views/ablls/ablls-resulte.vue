@@ -1,5 +1,5 @@
 <template>
-  <v-card class="p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg">
+  <div class="sawa-card p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg">
     <div class="grid md:grid-cols-3 grid-cols-2 lg:grid-cols-5 gap-6">
       <transition-group name="fade" tag="div" class="contents">
         <div 
@@ -45,7 +45,7 @@
         </div>
       </transition-group>
     </div>
-  </v-card>
+  </div>
 </template>
 
 <script>
