@@ -180,7 +180,6 @@ const createcrude = () => {
         detail: t('successful'),
         life: 3000,
       });
-      skill.value = ref({});
     })
     .catch((el) => {
       error.value = el.response.data.errors;

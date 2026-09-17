@@ -63,7 +63,7 @@ export default {
     },
 
     Newchilde(){
-      router.push({name:'BookingTime' })
+      this.$router.push({ name: 'BookingTime' })
     }
   },
 

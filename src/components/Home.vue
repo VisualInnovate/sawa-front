@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import "@mdi/font/css/materialdesignicons.css";
 import sawaLogo from "../assets/img/sawa_logo.svg";
 import { useAuthStore } from "../stores/Auth";
 import { canVisit, homeRoute } from "../utils/permissions";
@@ -89,7 +90,7 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
 <style scoped>
 .admin-shell {
   --header-h: 64px;
-  --sidebar-w: 272px;
+  --sidebar-w: 256px;
   min-height: 100vh;
   background: var(--sawa-page-bg);
 }
@@ -127,11 +128,15 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
   width: var(--sidebar-w);
   max-width: 85vw;
   overflow-y: auto;
-  padding: 1rem 0.75rem 2rem;
+  /* Original drawer: 46px top space, 8px list padding, hidden scrollbar. */
+  padding: 54px 8px 8px;
   background: var(--sawa-primary);
+  border-inline-end: 1px solid rgba(0, 0, 0, 0.12);
   transition: transform 0.2s ease;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  scrollbar-width: none;
+}
+.admin-sidebar::-webkit-scrollbar {
+  display: none;
 }
 .admin-sidebar:not(.open) {
   transform: translateX(-100%);
@@ -144,7 +149,7 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.2rem;
+  gap: 19px;
 }
 
 .admin-backdrop {

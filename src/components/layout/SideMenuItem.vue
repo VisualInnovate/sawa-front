@@ -35,42 +35,58 @@ watch(active, (value) => {
 });
 
 const panelId = computed(() => `side-menu-${props.item.key ?? props.item.label ?? props.item.text}`);
+
+// Opening a group slides its panel from 0 to its content height; closing is instant.
+const expand = (el) => {
+  el.style.height = "0px";
+  void el.offsetHeight;
+  el.style.height = `${el.scrollHeight}px`;
+};
+const clearHeight = (el) => {
+  el.style.height = "";
+};
 </script>
 
+<!-- Same look as the original Vuetify drawer: every entry is a white rounded card with dark text,
+     an open group becomes one card holding its entries, and sub entries have no icon. -->
 <template>
-  <li class="side-item" :class="[`depth-${depth}`, { 'is-active': active }]">
+  <li class="side-item" :class="{ 'side-card': item.children, 'is-open': item.children && open }">
     <template v-if="item.children">
       <button
         type="button"
-        class="side-link side-group"
+        class="side-link"
+        :class="{ 'is-sub': depth > 0 }"
         :aria-expanded="open"
         :aria-controls="panelId"
         @click="open = !open"
       >
-        <i v-if="item.icon" :class="item.icon" class="side-icon" aria-hidden="true" />
-        <span class="side-label">{{ item.text ?? $t(item.label) }}</span>
-        <i class="pi pi-chevron-down side-caret" :class="{ open }" aria-hidden="true" />
+        <i v-if="item.icon" :class="['mdi', item.icon]" class="side-icon" aria-hidden="true" />
+        <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{ item.text ?? $t(item.label) }}</span>
+        <i :class="['mdi', open ? 'mdi-chevron-up' : 'mdi-chevron-down']" class="side-caret" aria-hidden="true" />
       </button>
-      <ul v-show="open" :id="panelId" class="side-children">
-        <SideMenuItem
-          v-for="child in item.children"
-          :key="child.key ?? child.label ?? child.text"
-          :item="child"
-          :depth="depth + 1"
-          @navigate="emit('navigate')"
-        />
-      </ul>
+      <Transition name="side-expand" @enter="expand" @after-enter="clearHeight">
+        <div v-show="open" :id="panelId" class="side-collapse">
+          <ul class="side-children">
+            <SideMenuItem
+              v-for="child in item.children"
+              :key="child.key ?? child.label ?? child.text"
+              :item="child"
+              :depth="depth + 1"
+              @navigate="emit('navigate')"
+            />
+          </ul>
+        </div>
+      </Transition>
     </template>
     <router-link
       v-else
       :to="item.to"
       class="side-link"
-      :class="{ 'is-current': active }"
+      :class="{ 'is-sub': depth > 0, 'is-current': active }"
       :aria-current="active ? 'page' : undefined"
       @click="emit('navigate')"
     >
-      <i v-if="item.icon" :class="item.icon" class="side-icon" aria-hidden="true" />
-      <span v-else-if="depth > 0" class="side-dot" aria-hidden="true" />
+      <i v-if="item.icon" :class="['mdi', item.icon]" class="side-icon" aria-hidden="true" />
       <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{ item.text ?? $t(item.label) }}</span>
     </router-link>
   </li>
@@ -80,48 +96,70 @@ const panelId = computed(() => `side-menu-${props.item.key ?? props.item.label ?
 .side-item {
   list-style: none;
 }
+/* An open group is a single white card. */
+.side-card {
+  background: #fff;
+  border-radius: 5px;
+}
 .side-link {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   width: 100%;
-  padding: 0.65rem 0.85rem;
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.95rem;
-  font-weight: 600;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: #fff;
+  color: #000;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 110%;
   text-align: start;
   text-decoration: none;
-  background: transparent;
-  border: 0;
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
 }
-.side-link:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+/* Hover/active tint drawn over the card, as Vuetify's list overlay did. */
+.side-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+.side-link:hover::before {
+  opacity: 0.04;
 }
 .side-link:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: -2px;
+  outline: none;
 }
-.side-item.is-active > .side-group {
-  color: #fff;
+.side-link:focus-visible::before,
+.side-link.is-current::before {
+  opacity: 0.12;
 }
-.side-link.is-current {
-  background: #fff;
-  color: #135c65;
+.side-link.is-sub {
+  padding-inline: 20px;
 }
 .side-icon {
-  font-size: 1.05rem;
-  width: 1.25rem;
-  text-align: center;
   flex-shrink: 0;
+  margin-inline-end: 32px;
+  font-size: 24px;
+  line-height: 1;
+  opacity: 0.6;
+}
+.side-link.is-current .side-icon {
+  opacity: 1;
 }
 .side-label {
   flex: 1;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* Latin evaluation names keep their own direction but stay aligned with the menu. */
 .side-label[dir="ltr"] {
@@ -131,33 +169,23 @@ const panelId = computed(() => `side-menu-${props.item.key ?? props.item.label ?
   text-align: start;
 }
 .side-caret {
-  font-size: 0.75rem;
-  transition: transform 0.2s;
+  flex-shrink: 0;
+  margin-inline-start: 32px;
+  font-size: 24px;
+  line-height: 1;
+  opacity: 0.6;
 }
-.side-caret.open {
-  transform: rotate(180deg);
+.side-collapse {
+  overflow: hidden;
+}
+/* Kept even with "reduce motion": a short height slide, and Windows with animations off reports that setting. */
+.side-expand-enter-active {
+  transition: height 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
 }
 .side-children {
-  margin: 0.15rem 0 0.35rem;
-  padding: 0;
-  padding-inline-start: 1.1rem;
-  border-inline-start: 1px solid rgba(255, 255, 255, 0.18);
-  margin-inline-start: 1.3rem;
+  margin: 0;
+  padding: 19px 0 0;
   display: grid;
-  gap: 0.1rem;
-}
-.depth-1 > .side-link,
-.depth-2 > .side-link {
-  font-weight: 500;
-  font-size: 0.9rem;
-  padding-block: 0.5rem;
-}
-.side-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.6;
-  flex-shrink: 0;
+  gap: 19px;
 }
 </style>

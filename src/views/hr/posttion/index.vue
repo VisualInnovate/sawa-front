@@ -52,7 +52,8 @@ fetchData()
 const edit=(id)=>{
     axios.get(`/api/position/${id}`).then((res)=>{
 
-    holiday.value= res.data.data
+    const item = res.data.data ?? {}
+    position.value = { parent_id: item.parent_id, title: item.title, description: item.description }
     
 
   });
@@ -64,7 +65,6 @@ const edit=(id)=>{
 ///// update
 
 const updateitem=()=>{
-  position.value.date = moment(position.value.dat).format("YYYY-MM-DD" );
     axios
     .put(`/api/position/${confir_id.value}`,position.value)
     .then((res) => {
@@ -72,7 +72,7 @@ const updateitem=()=>{
       fetchData()
       updatedialog.value=!(updatedialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      position.value = ref({})
+      position.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -93,7 +93,6 @@ const confirmDelete = (id) => {
 }
 
 const create=()=>{
-  position.value.date = moment(position.value.dat).format("YYYY-MM-DD" );
     axios
     .post('/api/position',position.value)
     .then((res) => {
@@ -101,7 +100,7 @@ const create=()=>{
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      holiday.value = ref({})
+      position.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -270,16 +269,21 @@ const initFilters = () => {
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="holiday.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+          <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-parent">{{ $t('posttion_dgree') }}</label>
+                  <Select inputId="position-parent" v-model="position.parent_id" option-value="id" filter :options="users" optionLabel="title" :placeholder='$t("posttion_dgree")' class="w-full" />
+                  <div class="mt-1 mb-5 text-red-500" v-if="error?.parent_id">{{ error.parent_id[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
-                   <label style="text-align: right !important;" for="username">{{ $t('holiday_date') }}</label>
-                   <DatePicker  style="width: 100%" showButtonBar v-model.number="holiday.date" showIcon  :placeholder='$t("holiday_date")'   />   
-                   <div class="mt-1 mb-5 text-red-500" v-if="error?.date">{{ error.date[0] }}</div>
-               </div> 
+                  <label class="w-full text-start" for="position-title">{{ $t('title') }}</label>
+                <InputText id="position-title" required v-model="position.title" :placeholder='$t("title")' />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-description">{{ $t('posttion_description') }}</label>
+                  <Textarea id="position-description" rows="3" v-model="position.description" autoResize fluid />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.description">{{ error.description[0] }}</div>
+            </div>
            <div class="w-full text-center">
             <Button @click="updateitem" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>

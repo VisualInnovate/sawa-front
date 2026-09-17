@@ -1,325 +1,423 @@
 <template>
-  <div>
-
-  
-  </div>
+  <div></div>
   <div class="sawa-card">
     <div>
-      <Message v-if="alert_text" severity="error" class="mb-3">{{ alert_text }}</Message>
+      <Message v-if="alert_text" severity="error" class="mb-3">{{
+        alert_text
+      }}</Message>
 
-
-    
-      <form style="max-height: 80vh; overflow-y: scroll;" ref="form" @submit.prevent="getanswer" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
+      <form
+        style="max-height: 80vh; overflow-y: scroll"
+        ref="form"
+        @submit.prevent="getanswer"
+        class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4"
+      >
         <!-- ... existing code ... -->
-          
-            
-           
-              <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('evaluation_name') }}</label>
-                  <InputText   required v-model="answer.title" :placeholder='$t("evaluation_name")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-              </div> 
-    
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('child_name') }}</label>
-                  <Select   filter required disabled v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
-              </div>
-             
-              <div  v-if="answer.child_id" class="flex flex-column gap-2">
-                <label for="username">{{ $t('date') }}</label>
-                <DatePicker  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
 
-            </div> 
-            <div  v-if="answer.date" class="flex flex-column gap-2">
-                  <label for="username">{{ $t('age') }}</label>
-                  <InputNumber readonly  required v-model="answer.child_age" :placeholder='$t("age")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
-              </div> 
-             
-            
-            
-              <!-- <div  v-if="answer.child_id" class="flex flex-column gap-2">
+        <div class="flex flex-column gap-2">
+          <label for="username">{{ $t("evaluation_name") }}</label>
+          <InputText
+            required
+            v-model="answer.title"
+            :placeholder="$t('evaluation_name')"
+          />
+          <div class="mt-1 mb-5 text-red-500" v-if="error?.title">
+            {{ error.title[0] }}
+          </div>
+        </div>
+
+        <div class="flex flex-column gap-2">
+          <label for="username">{{ $t("child_name") }}</label>
+          <Select
+            filter
+            required
+            disabled
+            v-model="answer.child_id"
+            option-value="id"
+            :options="childs"
+            optionLabel="name"
+            :placeholder="$t('child_name')"
+            class="w-full"
+          />
+          <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">
+            {{ error.child_id[0] }}
+          </div>
+        </div>
+
+        <div v-if="answer.child_id" class="flex flex-column gap-2">
+          <label for="username">{{ $t("date") }}</label>
+          <DatePicker
+            @update:model-value="getage"
+            style="width: 100%"
+            showButtonBar
+            v-model.number="answer.date"
+            showIcon
+            :placeholder="$t('date')"
+            :minDate="maxDate"
+          />
+          <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">
+            {{ error.child_age[0] }}
+          </div>
+        </div>
+        <div v-if="answer.date" class="flex flex-column gap-2">
+          <label for="username">{{ $t("age") }}</label>
+          <InputNumber
+            readonly
+            required
+            v-model="answer.child_age"
+            :placeholder="$t('age')"
+          />
+          <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">
+            {{ error.child_age[0] }}
+          </div>
+        </div>
+
+        <!-- <div  v-if="answer.child_id" class="flex flex-column gap-2">
                   <label for="username">{{ $t('score') }}</label>
                   
                   <InputNumber  :min="0" :max=".9" required inputId="minmaxfraction" :minFractionDigits="1" :maxFractionDigits="5" v-model="answer.score" :placeholder='$t("score")' />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.score">{{ error.score[0] }}</div>
               </div> 
               -->
-        
-<!-- 
+
+        <!-- 
               <div  v-if="answer.child_id" class="flex flex-column gap-2">
                   <label for="username">{{ $t('notes') }}</label>
                   <InputText style="width: 100% !important; max-height: 50px !important;;"  v-model="answer.notes"  :placeholder='$t("notes")' />
   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
               </div>  -->
-             <div v-if="answer.child_id && answer.child_age" class=" flex flex-column gap-2">
-          <label for="username">{{ $t('color') }}</label>
+        <div
+          v-if="answer.child_id && answer.child_age"
+          class="flex flex-column gap-2"
+        >
+          <label for="username">{{ $t("color") }}</label>
 
           <div class="flex">
             <!-- <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" /> -->
             <div>
-              <div class="flex gap-1" >
-                <span @click="addcolor('00B8D9')"
-                  class="w-[30px] h-[30px] bg-[#00B8D9] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
-                <span @click="addcolor('36B37E')"
-                  class="w-[30px] h-[30px] bg-[#36B37E] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
-                <span @click="addcolor('FFAB00')"
-                  class="w-[30px] h-[30px] bg-[#FFAB00] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
-                <span @click="addcolor('FF5630')"
-                  class="w-[30px] h-[30px] bg-[#FF5630] cursor-pointer hover:border-2 hover:border-[#333] transition"></span>
-                <span @click="addcolor('6554C0')"
-                  class="w-[30px] h-[30px] bg-[#6554C0] cursor-pointer hover:border-2 hover:border-[#333] transition" ></span>
+              <div class="flex gap-1">
+                <span
+                  @click="addcolor('00B8D9')"
+                  class="w-[30px] h-[30px] bg-[#00B8D9] cursor-pointer hover:border-2 hover:border-[#333] transition"
+                ></span>
+                <span
+                  @click="addcolor('36B37E')"
+                  class="w-[30px] h-[30px] bg-[#36B37E] cursor-pointer hover:border-2 hover:border-[#333] transition"
+                ></span>
+                <span
+                  @click="addcolor('FFAB00')"
+                  class="w-[30px] h-[30px] bg-[#FFAB00] cursor-pointer hover:border-2 hover:border-[#333] transition"
+                ></span>
+                <span
+                  @click="addcolor('FF5630')"
+                  class="w-[30px] h-[30px] bg-[#FF5630] cursor-pointer hover:border-2 hover:border-[#333] transition"
+                ></span>
+                <span
+                  @click="addcolor('6554C0')"
+                  class="w-[30px] h-[30px] bg-[#6554C0] cursor-pointer hover:border-2 hover:border-[#333] transition"
+                ></span>
               </div>
               <div class="bg-[#00B8D9] h-[40%] mt-1" ref="showcolor"></div>
             </div>
-            <Button @click="createevalutae" class="m-auto w-full h-[50px]"
-              :label='$t("strart_evaluate")'></Button>
+            <Button
+              @click="createevalutae"
+              class="m-auto w-full h-[50px]"
+              :label="$t('strart_evaluate')"
+            ></Button>
           </div>
-          <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
+          <div class="mt-1 mb-5 text-red-500" v-if="error?.color">
+            {{ error.color[0] }}
+          </div>
         </div>
- 
-              
-              <div  v-if="strart_evaluate" v-for="head in allquestion" class="col-span-2 flex flex-column gap-2">
-                
-               <div style="border: 1px solid black; border-radius: 5px;padding: 1%;">
-                <h1  class="text-[black] font-bold" >{{head.title }}</h1>
-                <div>
-                        
-                        <input required @change="collectanswer($event, head.id)" style="border: 1px solid black " class="mx-2" type="radio"  :name="head.id" value="0">
-                        <label for="html">0</label><br>
-                        <input required @change="collectanswer($event, head.id)" style="border: 1px solid black " type="radio"  :name="head.id" value=".5">
-                        <label for="css">0.5</label><br>
-                        <input required @change="collectanswer($event, head.id)" style="border: 1px solid black "   type="radio"  :name="head.id" value="1">
-                        <label for="javascript">1</label>
-                      </div>
-                
-                      
-               
-               </div>
-                      
-                         
-              
-            
-              </div> 
-              <div v-if="strart_evaluate" class="flex flex-column gap-2">
-                <label for="milestone-program">{{ $t('milestone_target_program') }}</label>
-                <Select inputId="milestone-program" v-model="answers.student_program_id" :options="programs" optionLabel="name" optionValue="id" filter showClear :placeholder="$t('milestone_target_program')" />
-                <small v-if="!programs.length">{{ $t('milestone_no_programs') }}</small>
-                <p v-if="error.student_program_id" class="text-red-600">{{ error.student_program_id[0] }}</p>
-              </div>
-              <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
-                <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button type="submit" :loading="saving" :disabled="saving" class="m-auto w-full" :label="$t('submit')" />
-                <small id="username-help"></small>
-              </div>
-            
-       
-       
-           
-              
-              
 
-      
+        <div
+          v-if="strart_evaluate"
+          v-for="head in allquestion"
+          class="col-span-2 flex flex-column gap-2"
+        >
+          <div style="border: 1px solid black; border-radius: 5px; padding: 1%">
+            <h1 class="text-[black] font-bold">{{ head.title }}</h1>
+            <div>
+              <input
+                required
+                @change="collectanswer($event, head.id)"
+                style="border: 1px solid black"
+                class="mx-2"
+                type="radio"
+                :name="head.id"
+                value="0"
+              />
+                <label for="html">0</label><br />
+               
+              <input
+                required
+                @change="collectanswer($event, head.id)"
+                style="border: 1px solid black"
+                type="radio"
+                :name="head.id"
+                value=".5"
+              />
+                <label for="css">0.5</label><br />
+               
+              <input
+                required
+                @change="collectanswer($event, head.id)"
+                style="border: 1px solid black"
+                type="radio"
+                :name="head.id"
+                value="1"
+              />
+                <label for="javascript">1</label>
+            </div>
+          </div>
+        </div>
+        <div v-if="strart_evaluate" class="flex flex-column gap-2">
+          <label for="milestone-program">{{
+            $t("milestone_target_program")
+          }}</label>
+          <Select
+            inputId="milestone-program"
+            v-model="answers.student_program_id"
+            :options="programs"
+            :optionLabel="programLabel"
+            optionValue="id"
+            filter
+            showClear
+            :placeholder="$t('milestone_target_program')"
+          />
+          <small v-if="!programs.length">{{
+            $t("milestone_no_programs")
+          }}</small>
+          <p v-if="error.student_program_id" class="text-red-600">
+            {{ error.student_program_id[0] }}
+          </p>
+        </div>
+        <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
+          <label style="visibility: hidden" for="username">{{
+            $t("gruop_sessaion")
+          }}</label>
+          <Button
+            type="submit"
+            :loading="saving"
+            :disabled="saving"
+            class="m-auto w-full"
+            :label="$t('submit')"
+          />
+          <small id="username-help"></small>
+        </div>
       </form>
-<Toast />
+      <Toast />
       <!-- ... existing code ... -->
     </div>
   </div>
 </template>
 
-
 <script>
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
-import EvaluationType from '../../../components/EvaluationType.vue'
-  import {useToast} from 'primevue/usetoast'
+import EvaluationType from "../../../components/EvaluationType.vue";
+import { useToast } from "primevue/usetoast";
 export default {
-  components:{EvaluationType},
-
+  components: { EvaluationType },
 
   data() {
     return {
-      change:{
-      status:"1"
-    },
-      strart_evaluate:false,
-     alert_text:"",
-      answers:{
+      change: {
+        status: "1",
+      },
+      strart_evaluate: false,
+      alert_text: "",
+      answers: {
         student_program_id: null,
-        answers:[]
+        answers: [],
       },
       programs: [],
       saving: false,
-      type:2,
-      
-         
-      answer:{ 
-          color:"6554C0"
+      type: 2,
+
+      answer: {
+        color: "6554C0",
       },
-     allquestion:[],
-      childs:[],
-      qustions:{},
+      allquestion: [],
+      childs: [],
+      qustions: {},
       error: {},
       maxDate: new Date(),
-      notanswer:[],
-     
+      notanswer: [],
+
       // Add other validation rules for the title field
     };
-
   },
-
 
   methods: {
     // ... existing methods ...
-    Therapeutic (){
-      this.$router.push({ name: 'answer' });
+    Therapeutic() {
+      this.$router.push({ name: "answer" });
     },
 
+    programLabel(option) {
+      if (!option) return "";
+      return option.program?.name || option.name || "";
+    },
     addcolor(color) {
-      this.answer.color = color
-      this.$refs.showcolor.style.background = '#' + color;
+      this.answer.color = color;
+      this.$refs.showcolor.style.background = "#" + color;
     },
-    submit(){
-      
-      
-    },
-    createevalutae(id){
-      console.log(id)
-      
+    submit() {},
+    createevalutae(id) {
+      console.log(id);
+
       axios
-        .post(`api/evaluations/create`,{
-          type:this.type,
-          title:this.answer.title,
-          child_id:this.answer.child_id,
-          specialist_id:localStorage.getItem("user_id"),
-          date:this.answer.date,
-        
-        
+        .post(`api/evaluations/create`, {
+          type: this.type,
+          title: this.answer.title,
+          child_id: this.answer.child_id,
+          specialist_id: localStorage.getItem("user_id"),
+          date: this.answer.date,
         })
         .then((response) => {
-        
-          this.answer.evaluation_id=response.data.evaluation.id
-         this.strart_evaluate=!(this.strart_evaluate)
-         
-         
-        }).catch((el)=>{
-        console.log(el.response.data.errors.name)
-     this.error = el.response.data.errors
-    })
+          this.answer.evaluation_id = response.data.evaluation.id;
+          this.strart_evaluate = !this.strart_evaluate;
+        })
+        .catch((el) => {
+          console.log(el.response.data.errors.name);
+          this.error = el.response.data.errors;
+        });
     },
-    anserdata(id,val){
-      console.log(id)
-      console.log(val)
+    anserdata(id, val) {
+      console.log(id);
+      console.log(val);
     },
-    getcolor(id){
-      this.answer.color=id.target.value
+    getcolor(id) {
+      this.answer.color = id.target.value;
     },
-    getquation(id){
+    getquation(id) {
       axios
-        .get(`api/milestone-answers/sub-goals/${this.answer.child_age}`, { params: { child_id: this.answer.child_id } })
-        .then((response) => {
-          console.log(response.data[0].subtests)
-          this.allquestion = response.data
-         
-         
+        .get(`api/milestone-answers/sub-goals/${this.answer.child_age}`, {
+          params: { child_id: this.answer.child_id },
         })
+        .then((response) => {
+          console.log(response.data[0].subtests);
+          this.allquestion = response.data;
+        });
     },
-    getage(){
+    getage() {
       axios
-        .post("api/milestone-answers/get-age-child",{
-          date:this.answer.date,
-          child_id:this.answer.child_id
+        .post("api/milestone-answers/get-age-child", {
+          date: this.answer.date,
+          child_id: this.answer.child_id,
         })
         .then((response) => {
-         this.answer.child_age=response.data
-         axios
-        .get(`api/milestone-answers/sub-goals/${response.data}`, { params: { child_id: this.answer.child_id } })
-        .then((response) => {
-          console.log(response.data[0].subtests)
-          this.allquestion = response.data
-         
-         
-        })
-         
-        })
+          this.answer.child_age = response.data;
+          axios
+            .get(`api/milestone-answers/sub-goals/${response.data}`, {
+              params: { child_id: this.answer.child_id },
+            })
+            .then((response) => {
+              console.log(response.data[0].subtests);
+              this.allquestion = response.data;
+            });
+        });
     },
 
-    collectanswer(e,id){
-      
-      this.answers.answers[id]=({question_id:id,score:e.target.value,color:this.answer.color,child_id:this.answer.child_id,date:this.answer.date,child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
-      console.log(this.answers.answers)
+    collectanswer(e, id) {
+      this.answers.answers[id] = {
+        question_id: id,
+        score: e.target.value,
+        color: this.answer.color,
+        child_id: this.answer.child_id,
+        date: this.answer.date,
+        child_age: this.answer.child_age,
+        evaluation_id: this.answer.evaluation_id,
+      };
+      console.log(this.answers.answers);
     },
 
-    async getanswer(){
+    async getanswer() {
       if (this.saving) return;
       this.saving = true;
       this.error = {};
       try {
-        const answers = this.answers.answers.filter(Boolean).map(answer => ({ ...answer, color: this.answer.color }));
-        await axios.post('/api/milestone-answers', { student_program_id: this.answers.student_program_id, answers });
-        const requestId = localStorage.getItem('eavl_id');
-        if (requestId) await axios.post(`/api/evaluation-request/change-status/${requestId}`, this.change);
-        await this.$router.push({ name: 'milestone-resulte', params: { id: this.answer.child_id, evla_id: this.answer.evaluation_id } });
+        const answers = this.answers.answers
+          .filter(Boolean)
+          .map((answer) => ({ ...answer, color: this.answer.color }));
+        await axios.post("/api/milestone-answers", {
+          student_program_id: this.answers.student_program_id,
+          answers,
+        });
+        const requestId = localStorage.getItem("eavl_id");
+        if (requestId)
+          await axios.post(
+            `/api/evaluation-request/change-status/${requestId}`,
+            this.change,
+          );
+        await this.$router.push({
+          name: "milestone-resulte",
+          params: {
+            id: this.answer.child_id,
+            evla_id: this.answer.evaluation_id,
+          },
+        });
       } catch (error) {
         this.error = error.response?.data?.errors || {};
-        this.alert_text = Object.values(this.error).flat().join(' ') || this.$t('request_failed_retry');
-      } finally { this.saving = false; }
+        this.alert_text =
+          Object.values(this.error).flat().join(" ") ||
+          this.$t("request_failed_retry");
+      } finally {
+        this.saving = false;
+      }
     },
-    getusers(){
-      
-     
-      axios
-        .get("api/child")
-        .then((response) => {
-         console.log(localStorage.getItem("child_id"))
-          this.childs = response.data.children
-          this.answer.child_id=parseInt(localStorage.getItem("child_id")) 
-          axios.get(`/api/milestone-answers/programs/${this.answer.child_id}`)
-            .then(({ data }) => { this.programs = data; })
-            .catch(() => { this.alert_text = this.$t('request_failed_retry'); });
-          this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
-        
-        })
+    getusers() {
+      axios.get("api/child").then((response) => {
+        console.log(localStorage.getItem("child_id"));
+        this.childs = response.data.children;
+        this.answer.child_id = parseInt(localStorage.getItem("child_id"));
         axios
-        .get("api/mileston-levels")
-        .then((response) => {
-          console.log(response.data.data)
-          this.qustions = response.data.data
-         
-        })
-      
-       
-
+          .get(`/api/milestone-answers/programs/${this.answer.child_id}`)
+          .then(({ data }) => {
+            const nextPrograms = Array.isArray(data)
+              ? data
+              : data?.data ?? data?.programs ?? [];
+            this.programs = Array.isArray(nextPrograms) ? nextPrograms : [];
+          })
+          .catch(() => {
+            this.alert_text = this.$t("request_failed_retry");
+          });
+        this.answer.evaluation_id = parseInt(this.$route.params.evaluation);
+      });
+      axios.get("api/mileston-levels").then((response) => {
+        console.log(response.data.data);
+        this.qustions = response.data.data;
+      });
     },
-   
-    
-  
+
     createtreatment() {
-    
-      axios.post("/api/milestone-answers/check/answers",{
-        child_id:this.answer.child_id,
-        level_id:this.answer.level_id,
-
-      }).then((res) => {
-        console.log(res.data.data)
-        this.notanswer=res.data.data
-        if(this.notanswer == ''){
-          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('successful'), life: 3000 });
-        }
-      }).catch((el)=>{
-        console.log(el.response.data.errors.name)
-     this.error = el.response.data.errors
-    })
+      axios
+        .post("/api/milestone-answers/check/answers", {
+          child_id: this.answer.child_id,
+          level_id: this.answer.level_id,
+        })
+        .then((res) => {
+          console.log(res.data.data);
+          this.notanswer = res.data.data;
+          if (this.notanswer == "") {
+            this.$toast.add({
+              severity: "success",
+              summary: this.$t("success_message"),
+              detail: this.$t("successful"),
+              life: 3000,
+            });
+          }
+        })
+        .catch((el) => {
+          console.log(el.response.data.errors.name);
+          this.error = el.response.data.errors;
+        });
     },
-   
   },
   mounted() {
-  this.getusers()
- 
-   
+    this.getusers();
   },
 };
 </script>
@@ -329,7 +427,7 @@ export default {
 .name-input {
   height: 70vh;
   margin: auto !important;
-   overflow-y: scroll;
+  overflow-y: scroll;
   width: 100%;
   position: relative;
   background-color: #e7e7e7;
@@ -342,14 +440,12 @@ export default {
 }
 /* Hide scrollbar for IE, Edge and Firefox */
 .name-input {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 .name-input {
   width: 606px;
 }
-
-
 
 .seed {
   width: 600px;
@@ -358,9 +454,7 @@ export default {
   background-color: #135c65;
   display: block;
   color: white;
- 
 
- 
   /* Set the width to 606px */
 }
 
@@ -379,9 +473,6 @@ export default {
   cursor: pointer;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-
-
-
 
 .loader {
   border: 5px solid #f3f3f3;
@@ -419,7 +510,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-
   .name-input,
   .custom-select,
   .error-message {

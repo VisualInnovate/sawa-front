@@ -126,7 +126,6 @@ const createuser = () => {
       fetchData()
       createdialog.value = !(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      skill.value = ref({})
     })
     .catch((el) => {
       error.value = el.response.data.errors
@@ -161,7 +160,6 @@ const editesuser = () => {
       fetchData()
       updatedialog.value = !(updatedialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      skill.value = ref({})
     })
     .catch((el) => {
       error.value = el.response.data.errors
