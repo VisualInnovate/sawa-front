@@ -1,0 +1,338 @@
+/* ==========================================================================
+   Sawa — global look shared by the dashboard and the parent site.
+   PrimeVue (theme in plugins/primevue) draws the components; this file only
+   sets the brand tokens, page-level helpers and a few consistent patterns.
+   ========================================================================== */
+
+:root {
+  --sawa-primary: #135c65;
+  --sawa-primary-dark: #0e464d;
+  --sawa-primary-soft: #eef8f9;
+  --sawa-accent: #a9ab7f;
+  --sawa-page-bg: #f4f7f8;
+  --sawa-border: #e2e8f0;
+  --sawa-text: #1e293b;
+  --sawa-muted: #64748b;
+  --sawa-radius: 12px;
+  --sawa-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --sawa-font: "Cairo", "Segoe UI", Tahoma, system-ui, sans-serif;
+}
+
+html,
+body {
+  font-family: var(--sawa-font);
+  color: var(--sawa-text);
+}
+
+/* Form controls, PrimeVue overlays and tooltips use the same font as the page. */
+button,
+input,
+select,
+textarea,
+.p-component,
+.p-inputtext,
+.p-tooltip-text {
+  font-family: var(--sawa-font);
+}
+
+/* E-mails and phone numbers keep their own order inside Arabic text. */
+input[type="email"],
+input[type="tel"],
+input[type="url"] {
+  unicode-bidi: plaintext;
+}
+.ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* --------------------------------------------------------------------------
+   Page building blocks
+   -------------------------------------------------------------------------- */
+
+.page {
+  display: grid;
+  gap: 1rem;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--sawa-primary);
+}
+
+.surface-card {
+  background: #fff;
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  box-shadow: var(--sawa-shadow);
+  padding: 1.25rem;
+}
+
+/* A labelled form field: label above the control, error text below. */
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+.field,
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+.field > label,
+.form-field > label {
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: #334155;
+  text-align: start;
+}
+.field-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+/* PrimeVue v3 made every control inside .p-fluid full width; keep that behaviour. */
+.p-fluid .p-inputtext,
+.p-fluid .p-select,
+.p-fluid .p-multiselect,
+.p-fluid .p-datepicker,
+.p-fluid .p-inputnumber,
+.p-fluid .p-password,
+.p-fluid .p-textarea,
+.p-fluid .p-autocomplete,
+.p-fluid .p-colorpicker,
+.p-fluid .p-fileupload-basic,
+.p-fluid .p-button:not(.p-button-icon-only) {
+  width: 100%;
+}
+.p-inputnumber > .p-inputtext,
+.p-datepicker > .p-inputtext,
+.p-password > .p-inputtext {
+  min-width: 0;
+  width: 100%;
+}
+.p-select,
+.p-multiselect {
+  min-width: 10rem;
+}
+
+/* --------------------------------------------------------------------------
+   Tables, toolbars and row actions
+   -------------------------------------------------------------------------- */
+
+.p-toolbar {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  border-radius: var(--sawa-radius);
+  background: #fff;
+  border-color: var(--sawa-border);
+}
+.p-toolbar-start,
+.p-toolbar-center,
+.p-toolbar-end {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.p-datatable {
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  overflow: hidden;
+  background: #fff;
+}
+.p-datatable .p-datatable-header {
+  background: #fff;
+  border-width: 0 0 1px 0;
+  padding: 0.9rem 1rem;
+}
+.p-datatable .p-datatable-thead > tr > th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.p-datatable .p-datatable-tbody > tr > td {
+  text-align: start;
+  vertical-align: middle;
+}
+.p-datatable .p-paginator {
+  border-width: 1px 0 0 0;
+  border-radius: 0;
+}
+
+/* Row actions: one compact, clearly coloured icon button per action. */
+.table-actions,
+.actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.p-datatable .p-button.p-button-icon-only,
+.table-actions .p-button.p-button-icon-only {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  margin: 0;
+}
+
+/* Search box with an icon inside (IconField) takes the full width on phones. */
+.table-search {
+  min-width: min(100%, 16rem);
+}
+.table-search .p-inputtext {
+  width: 100%;
+}
+
+.p-paginator {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Legacy colour classes still used on some buttons/links
+   (mapped to the theme instead of ad-hoc colours)
+   -------------------------------------------------------------------------- */
+
+.p-button.create,
+a.create,
+.details {
+  background: var(--sawa-primary);
+  border-color: var(--sawa-primary);
+  color: #fff;
+}
+.p-button.create:not(:disabled):hover,
+a.create:hover,
+.details:hover {
+  background: var(--sawa-primary-dark);
+  border-color: var(--sawa-primary-dark);
+  color: #fff;
+}
+.p-button.delete {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+.p-button.delete:not(:disabled):hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+.export,
+.show {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+.primer {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+}
+
+/* Tab-like navigation links at the top of the evaluation pages. */
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--sawa-border);
+  background: #fff;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.925rem;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-tab:hover {
+  border-color: var(--sawa-primary);
+  color: var(--sawa-primary);
+}
+.nav-tab.router-link-active,
+.nav-tab.is-active {
+  background: var(--sawa-primary);
+  border-color: var(--sawa-primary);
+  color: #fff;
+}
+
+/* Empty state inside tables and lists. */
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 2rem 1rem;
+  color: var(--sawa-muted);
+  text-align: center;
+}
+.empty-state .pi {
+  font-size: 2rem;
+  color: #cbd5e1;
+}
+
+/* Dialog footers keep their buttons together on one line. */
+.p-dialog-footer {
+  flex-wrap: wrap;
+}
+
+/* FullCalendar buttons match the theme. */
+.fc .fc-button-primary {
+  background: var(--sawa-primary);
+  border-color: var(--sawa-primary);
+}
+.fc .fc-button-primary:not(:disabled):hover,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: var(--sawa-primary-dark);
+  border-color: var(--sawa-primary-dark);
+}
+
+/* --------------------------------------------------------------------------
+   Utility classes the templates use from Vuetify / PrimeFlex
+   (neither library's utilities are loaded any more)
+   -------------------------------------------------------------------------- */
+
+.d-flex { display: flex; }
+.d-block { display: block; }
+.d-none { display: none; }
+.flex-column { flex-direction: column; }
+.align-center, .align-items-center { align-items: center; }
+.align-start, .align-items-start { align-items: flex-start; }
+.align-end, .align-items-end { align-items: flex-end; }
+.justify-center, .justify-content-center { justify-content: center; }
+.justify-start, .justify-content-start { justify-content: flex-start; }
+.justify-end, .justify-content-end { justify-content: flex-end; }
+.justify-space-between, .justify-content-between { justify-content: space-between; }
+.justify-space-around, .justify-content-around { justify-content: space-around; }
+.text-caption { font-size: 0.8rem; }
+.text-subtitle-1 { font-size: 1rem; }
+.text-medium-emphasis { color: var(--sawa-muted); }
+.text-decoration-none { text-decoration: none; }
+.text-h4 { font-size: 1.75rem; font-weight: 600; }
+.text-h5 { font-size: 1.4rem; font-weight: 600; }
+.text-h6 { font-size: 1.15rem; font-weight: 600; }
+.ma-4 { margin: 1rem; }
+.pa-4 { padding: 1rem; }
+.pa-6 { padding: 1.5rem; }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
