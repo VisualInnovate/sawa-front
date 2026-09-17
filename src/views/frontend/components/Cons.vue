@@ -147,7 +147,7 @@ export default {
     getParentId() {
       const storeId = this.parentStore?.user?.id ?? this.parentStore?.parent_id ?? this.parentStore?.user?.parent_id;
       const localId = Number(localStorage.getItem("parent_id") ?? localStorage.getItem("user_id") ?? 0);
-      return Number(storeId ?? localId || 0) || null;
+      return Number(storeId ?? localId ?? 0) || null;
     },
     buildBookingPayload() {
       const details = this.booking?.details ?? {};
