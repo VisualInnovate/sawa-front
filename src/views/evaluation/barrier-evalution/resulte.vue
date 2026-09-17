@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3  lg:grid-cols-3 gap-y-4">
       <div class="" v-for="x,top in mainSquares">
-          <P class="font-bold w-full h-20 text-center py-1">{{ x.subtest }}</P>
+          <p class="font-bold w-full h-20 text-center py-1">{{ x.subtest }}</p>
           <div v-if="mainSquares" class=" flex "  style="border: 1px 1px 0px 0px solid black;">
          
          <div  class="grid grid-cols-1">

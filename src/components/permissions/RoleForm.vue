@@ -3,10 +3,10 @@
     <div class="header-container">
       <h1 class="page-title">{{ roleId ? $t("edit_role") : $t("create_role") }}</h1>
       <div class="search-container">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search" />
-          <InputText v-model="search" :placeholder="$t('search')" class="search-input" />
-        </span>
+        <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="search" :placeholder="$t('search')" class="search-input" />
+              </IconField>
       </div>
     </div>
 
@@ -52,7 +52,7 @@
     >
       <p class="description-text">{{ description || $t("no_description") }}</p>
       <template #footer>
-        <Button :label="$t('close')" icon="pi pi-times" class="p-button-text" @click="descriptionVisible = false" />
+        <Button :label="$t('close')" icon="pi pi-times" @click="descriptionVisible = false" variant="text" />
       </template>
     </Dialog>
     <Toast />

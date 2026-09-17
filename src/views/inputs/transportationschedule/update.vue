@@ -5,7 +5,7 @@
       </div>
     
     </div>
-    <v-card>
+    <div class="sawa-card">
       <div>
        
         <form  class="p-[2%] c shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="submitForm">
@@ -13,31 +13,31 @@
             
           <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('driver_name') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' :class="{ 'p-invalid': submitted && !student.driver_id}" />
+                    <Select required v-model="student.driver_id"  option-value="id" :options="drivers" optionLabel="name" :placeholder='$t("driver_name")' :class="{ 'p-invalid': submitted && !student.driver_id}" />
                 </div>
 
             
       
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('vecile_type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.vehicle_id"  option-value="id" :options="vehicle" optionLabel="plate_number" :placeholder='$t("vecile_type")' :class="{ 'p-invalid': submitted && !student.vehicle_id}" />
+                    <Select required v-model="student.vehicle_id"  option-value="id" :options="vehicle" optionLabel="plate_number" :placeholder='$t("vecile_type")' :class="{ 'p-invalid': submitted && !student.vehicle_id}" />
                 </div>
 
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('student_tans') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="student.student_transportation_id"  option-value="id" :options="studenttransportation" optionLabel="location_url" :placeholder='$t("student_tans")' :class="{ 'p-invalid': submitted && !student.student_transportation_id}" />
+                    <Select required v-model="student.student_transportation_id"  option-value="id" :options="studenttransportation" optionLabel="location_url" :placeholder='$t("student_tans")' :class="{ 'p-invalid': submitted && !student.student_transportation_id}" />
                 </div>
 
 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('start_date') }}</label>
-                    <Calendar required style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate"  :class="{ 'p-invalid': submitted && !student.date}"/>
+                    <DatePicker required style="width: 100%" showButtonBar v-model.number="student.date" showIcon  :placeholder='$t("start_date")'  :minDate="maxDate"  :class="{ 'p-invalid': submitted && !student.date}"/>
 
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('seats_number') }}</label>
-                    <InputNumber  required class="bg-[#f7f5f5]" v-model="student.available_seats" :placeholder='$t("seats_number")' :class="{ 'p-invalid': submitted && !student.available_seats}" />
+                    <InputNumber  required v-model="student.available_seats" :placeholder='$t("seats_number")' :class="{ 'p-invalid': submitted && !student.available_seats}" />
                 </div> 
         
                 <div class="flex flex-column gap-2">
@@ -58,18 +58,18 @@
                 <div class="flex flex-column w-[70%]">
                   <label for="username">{{ $t('Active') }}</label>
                     <div class="flex">
-                        <InputSwitch required class="m-auto px-3" v-model="student.is_active"/>
-                      <Button type="submit" class="create m-auto w-full " @click="submitted = true" :label='$t("submit")'></Button>
+                        <ToggleSwitch required class="m-auto px-3" v-model="student.is_active"/>
+                      <Button type="submit" class="m-auto w-full" @click="submitted = true" :label='$t("submit")'></Button>
                     </div>
                 </div>
            
               
         
         </form>
-  <toast></toast>
+  <Toast />
         <!-- ... existing code ... -->
       </div>
-    </v-card>
+    </div>
   </template>
   
   <script>
@@ -97,11 +97,11 @@
       student:{
        is_active:true
       },
-      drivers:{},
-      vehicle:{},
+      drivers:[],
+      vehicle:[],
         areas:{},
         error: {},
-        studenttransportation:{},
+        studenttransportation:[],
         maxDate: new Date(),
        
         // Add other validation rules for the title field
@@ -223,9 +223,9 @@
       arr (){
       return this.roomType =[
             
-                { name:'angel car' , value:0 },
-                { name:'bus', value:1},
-                { name:'Minibus' , value:2 },
+                { name: this.$t('vehicle_type.car'), value: 0 },
+                { name: this.$t('vehicle_type.bus'), value: 1 },
+                { name: this.$t('vehicle_type.minibus'), value: 2 },
                
             ]
     },
@@ -279,9 +279,6 @@
   }
   .name-input::-webkit-scrollbar {
     display: none;
-  }
-  #pv_id_1{
-    text-align: center;
   }
   /* Hide scrollbar for IE, Edge and Firefox */
   .name-input {

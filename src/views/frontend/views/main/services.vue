@@ -8,7 +8,7 @@
         >
           <!-- Text -->
           <div class="flex flex-col gap-4 lg:gap-8">
-            <div class="text-right">
+            <div class="text-start">
               <span
                 class="mb-5 inline-flex items-center rounded-full bg-[#E7FBFE] text-[#1B7A83] text-xs sm:text-sm font-bold px-4 py-2"
               >
@@ -34,7 +34,7 @@
               </h1>
             </div>
             <p
-              class="text-[#70676A] text-base lg:text-xl text-right leading-relaxed font-bold"
+              class="text-[#70676A] text-base lg:text-xl text-start leading-relaxed font-bold"
             >
               في أكاديمية سوا، نؤمن أن البيئة المحيطة هي المحرك الأول للنمو.
               نوفر فضاءات آمنة، مريحة، ومحفزة صُممت خصيصاً لتلبية احتياجات
@@ -97,7 +97,7 @@
           class="mx-auto flex max-w-[1262px] flex-col overflow-hidden rounded-[20px] bg-white lg:flex-row"
         >
           <div
-            class="w-full px-6 py-10 text-right sm:px-10 lg:w-[48%] lg:px-[72px] lg:py-[80px]"
+            class="w-full px-6 py-10 text-start sm:px-10 lg:w-[48%] lg:px-[72px] lg:py-[80px]"
           >
             <h2 class="mb-[24px] text-[24px] font-black text-[#1B7A83] lg:text-[29px]">
               النقل المدرسي الآمن
@@ -164,7 +164,7 @@
       <!-- Tech Infrastructure -->
       <section class="w-full bg-[#F6F3F2] px-4 py-16 lg:px-8 lg:py-[95px]">
         <div class="mx-auto max-w-[1188px]">
-          <div class="text-right">
+          <div class="text-start">
             <h2 class="text-[26px] font-black text-[#1B7A83] lg:text-[30px]">
               بنية تحتية متطورة
             </h2>
@@ -180,7 +180,7 @@
             <article
               v-for="card in techCards"
               :key="card.title"
-              class="rounded-[14px] bg-white p-6 text-right shadow-[0_8px_22px_rgba(0,0,0,0.018)] lg:min-h-[182px] lg:p-[32px]"
+              class="rounded-[14px] bg-white p-6 text-start shadow-[0_8px_22px_rgba(0,0,0,0.018)] lg:min-h-[182px] lg:p-[32px]"
             >
               <div class="mb-[25px] flex">
                 <svg :class="card.iconClass" viewBox="0 0 24 24" fill="none">
@@ -223,7 +223,7 @@
             />
           </div>
 
-          <div class="w-full text-right text-white lg:w-[410px]">
+          <div class="w-full text-start text-white lg:w-[410px]">
             <h2
               class="mb-[24px] text-[28px] font-black leading-[1.16] sm:text-[32px] lg:text-[38px]"
             >
@@ -307,7 +307,7 @@
             <article
               v-for="activity in indoorActivities"
               :key="activity.title"
-              class="mb-[20px] flex min-h-[96px] items-center gap-4 rounded-[14px] bg-[#F8F6F5] px-4 py-3 text-right sm:gap-6 sm:px-[20px] lg:mb-[26px]"
+              class="mb-[20px] flex min-h-[96px] items-center gap-4 rounded-[14px] bg-[#F8F6F5] px-4 py-3 text-start sm:gap-6 sm:px-[20px] lg:mb-[26px]"
             >
               <img
                 :src="activity.image"
@@ -354,7 +354,7 @@
             <article
               v-for="activity in outdoorActivities"
               :key="activity.title"
-              class="mb-[20px] flex min-h-[96px] items-center gap-4 rounded-[14px] bg-[#F8F6F5] px-4 py-3 text-right sm:gap-6 sm:px-[20px] lg:mb-[26px]"
+              class="mb-[20px] flex min-h-[96px] items-center gap-4 rounded-[14px] bg-[#F8F6F5] px-4 py-3 text-start sm:gap-6 sm:px-[20px] lg:mb-[26px]"
             >
               <img
                 :src="activity.image"
@@ -380,7 +380,7 @@
         <div
           class="mx-auto flex max-w-[1200px] flex-col items-center gap-10 lg:flex-row lg:justify-between"
         >
-          <div class="w-full text-right lg:w-[535px]">
+          <div class="w-full text-start lg:w-[535px]">
             <h2 class="mb-[27px] text-[26px] font-black text-[#1B7A83] lg:text-[30px]">
               راحة الأهل أولوية
             </h2>

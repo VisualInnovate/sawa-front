@@ -3,7 +3,7 @@
     <div>
       <EvaluationType></EvaluationType>
       
-    <v-card>
+    <div class="sawa-card">
         
      <div  class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
         <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details">
@@ -23,7 +23,7 @@
           </div>
           </div>
           <!-- <div class="text-center" >
-          <Button @click="go_evaluate(evalu.child_id,evalu.type)" class="details m-auto"> {{ $t("strart_evaluate") }}</Button>
+          <Button @click="go_evaluate(evalu.child_id,evalu.type)" class="m-auto"> {{ $t("strart_evaluate") }}</Button>
           </div> -->
             
         </div>
@@ -33,9 +33,9 @@
         
   
       
-    </v-card>
+    </div>
   
-    <toast></toast>
+    <Toast />
 
     </div>
   </template>

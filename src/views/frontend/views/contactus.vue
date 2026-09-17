@@ -2,35 +2,36 @@
   <template>
     <nave />
       <!-- banner -->
-      <Banner heading="تواصل معنا" title=" يمكنك التواصل مع فريق العمل  "></Banner>
+      <Banner :heading="$t('contact_us')" :title="$t('contact_page_hint')"></Banner>
 
     <div >
       <div class="max-w-[1300px] mx-auto grid grid-cols-1 gap-4 lg:grid-cols-2 py-[4%] ">
         <div class="bg-[#C82F60] p-5 rounded-xl m-1 animate__animated animate__backInRight animate__delay-1s">
-          <p class="text-[#F8F8F8] text-lg font-bold">تواصل معنا</p>
-          <p class="text-[#F8F8F8] text-base pt-1">اشعر بالراحه فالتواصل معنا في اي وقت</p>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 py-4">
+          <p class="text-[#F8F8F8] text-lg font-bold">{{ $t("contact_us") }}</p>
+          <p class="text-[#F8F8F8] text-base pt-1">{{ $t("contact_anytime") }}</p>
+          <form class="grid grid-cols-1 lg:grid-cols-2 gap-4 py-4" novalidate data-no-request-spinner @submit.prevent="submitForm">
             <div>
-              <InputText required class="bg-[#f7f5f5] text-center w-full"  v-model="fname" :placeholder='$t("first_name")' />
+              <InputText v-model="fname" required class="w-full" :placeholder="$t('first_name')" :aria-label="$t('first_name')" />
             </div>
             <div>
-              <InputText required class="bg-[#f7f5f5] text-center w-full"  v-model="fname" :placeholder='$t("family_name")' />
+              <InputText v-model="lname" required class="w-full" :placeholder="$t('family_name')" :aria-label="$t('family_name')" />
             </div>
             <div>
-              <InputText required class="bg-[#f7f5f5] text-center w-full" type="email" v-model="fname" :placeholder='$t("email")' />
+              <InputText v-model="email" required class="w-full" type="email" :placeholder="$t('email')" :aria-label="$t('email')" />
             </div>
             <div>
-              <InputText required class="bg-[#f7f5f5] text-center w-full"  v-model="fname" :placeholder='$t("Mobile_number")' />
+              <InputText v-model="number" required class="w-full" type="tel" dir="ltr" :placeholder="$t('Mobile_number')" :aria-label="$t('Mobile_number')" />
             </div>
-            <div class="lg:col-span-2"  >
-              <textarea v-model="message" id="message" name="message" rows="7" class="mt-1 p-2 block w-full bg-[#f7f5f5] border rounded-md shadow-sm focus:ring focus:ring-indigo-300 focus:border-indigo-300"></textarea>
-
+            <div class="lg:col-span-2">
+              <Textarea v-model="message" rows="6" maxlength="255" autoResize fluid :placeholder="$t('your_message')" :aria-label="$t('your_message')" />
+            </div>
+            <div v-if="feedback" class="lg:col-span-2">
+              <Message :severity="feedback.type" :closable="false">{{ feedback.text }}</Message>
             </div>
             <div class="lg:col-span-2 text-center">
-              <Button label="ارسل رسالتك"  class="create w-[50%] m-auto"></Button>
+              <Button type="submit" :label="$t('send_message')" icon="pi pi-send" :loading="sending" class="w-full lg:w-1/2" />
             </div>
-           
-          </div>
+          </form>
         </div>
 
         <div  class=" py-2 px-5 animate__animated animate__backInLeft animate__delay-1s">
@@ -46,8 +47,8 @@
                 </svg>
             </div>
             <div class="w-[80%] mx-2">
-              <p class="text-2xl font-bold">معلومات الشركة :</p>
-              <p class="py-1 text-[#989898] text-xl"> فريق اكاديميه سوا</p>
+              <p class="text-2xl font-bold">{{ $t("company_info") }}</p>
+              <p class="py-1 text-[#989898] text-xl">{{ $t("sawa_team") }}</p>
               <p class=" text-[#135C65] text-xl">+962-65522688</p>
             </div>
             <p></p>
@@ -60,8 +61,8 @@
               </svg>
             </div>
             <div class="w-[80%] mx-2">
-              <p class="text-2xl font-bold"> العنوان :</p>
-              <p class="py-1 text-[#989898] text-xl"> أكاديمية سوا للتربية الخاصة عمان-الرابيه-شارع ميسلون</p>
+              <p class="text-2xl font-bold">{{ $t("address") }}</p>
+              <p class="py-1 text-[#989898] text-xl">{{ $t("academy_address") }}</p>
             </div>
             <p></p>
           </div>
@@ -75,9 +76,9 @@
               </svg>
             </div>
             <div class="w-[80%] mx-2">
-              <p class="text-2xl font-bold"> تواصل الان : </p>
-              <p class="py-1 text-[#989898] text-xl"> We Always Happy To Help </p>
-              <p class=" text-[#135C65] text-xl">  0791017001-065522688  </p>
+              <p class="text-2xl font-bold">{{ $t("call_now") }}</p>
+              <p class="py-1 text-[#989898] text-xl">{{ $t("happy_to_help") }}</p>
+              <p class=" text-[#135C65] text-xl" dir="ltr">0791017001 - 065522688</p>
             </div>
             <p></p>
           </div>
@@ -91,9 +92,9 @@
 
             </div>
             <div class="w-[80%] mx-2">
-              <p class=" text-2xl font-bold">الدعم :  </p>
-              <p class="py-1 text-[#989898] text-xl">Email us for general queries, including marketing and partnership opportunities. </p>
-              <p class=" text-[#135C65] text-xl">info@sawa.acadey</p>
+              <p class=" text-2xl font-bold">{{ $t("support") }}</p>
+              <p class="py-1 text-[#989898] text-xl">{{ $t("support_hint") }}</p>
+              <p class=" text-[#135C65] text-xl" dir="ltr">info@sawa.academy</p>
             </div>
             <p></p>
           </div>
@@ -113,11 +114,12 @@
 
 
 </template>
-<script setup(props) { }>
+<script>
 import Nave from "../components/Nave.vue";
 import About from "../components/About.vue";
 import Nave1 from "../components/Nave1.vue";
 import Banner from '../components/Banner.vue'
+import { sendContactMessage, contactErrorText } from "@/utils/contact";
 
 export default {
 components: {
@@ -132,17 +134,25 @@ data() {
        lname: '',
        number: '',
         email: '',
-        message: ''
+        message: '',
+        sending: false,
+        feedback: null,
       };
     },
     methods: {
-      submitForm() {
-        // Here you can implement the logic to submit the form data to your backend or perform any other desired actions.
-        console.log('Form submitted:', this.name, this.email, this.message);
-        // Reset the form fields after submission
-        this.name = '';
-        this.email = '';
-        this.message = '';
+      async submitForm() {
+        if (this.sending) return;
+        this.feedback = null;
+        this.sending = true;
+        try {
+          await sendContactMessage({ firstName: this.fname, lastName: this.lname, email: this.email, phone: this.number, message: this.message });
+          this.feedback = { type: "success", text: this.$t("message_sent") };
+          this.fname = this.lname = this.number = this.email = this.message = "";
+        } catch (error) {
+          this.feedback = { type: "error", text: contactErrorText(error, this.$t) };
+        } finally {
+          this.sending = false;
+        }
       }
     }
 };

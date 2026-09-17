@@ -5,8 +5,8 @@
       {{ $t("settings_menu") }}
     </p>
   </div>
-  <v-card>
-    <v-card class=" bg-slate-50 m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2">
+  <div class="sawa-card">
+    <div class="sawa-card  bg-slate-50 m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2">
 
     <div class="">
     
@@ -52,8 +52,8 @@
     
 
 
-</v-card>
-<v-card class=" bg-slate-50  m-[2%] p-[2%] ">
+</div>
+<div class="sawa-card  bg-slate-50  m-[2%] p-[2%] ">
   <div
           class="text-center font-bold  grid grid-cols-2"
         
@@ -148,44 +148,44 @@
 
 
 
-</v-card>
-    <v-card  class="m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2 bg-slate-50 ">
+</div>
+    <div  class="sawa-card m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2 bg-slate-50 ">
         <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('Site_Name') }}</label>
-                  <InputText required class="bg-[#f7f5f5]" v-model="settings.name" :placeholder="$t('Site_Name')" />
+                  <InputText required v-model="settings.name" :placeholder="$t('Site_Name')" />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
            </div>
           
           <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('Site_Phone') }}</label>
-                  <InputText required class="bg-[#f7f5f5]" v-model="settings.number_1" :placeholder="$t('Site_Phone')" />
+                  <InputText required v-model="settings.number_1" :placeholder="$t('Site_Phone')" />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.number_1">{{ error.number_1[0] }}</div>
            </div>
            <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('Site_Phone') }}</label>
-                  <InputText required class="bg-[#f7f5f5]" v-model="settings.number_2" :placeholder="$t('Site_Phone')" />
+                  <InputText required v-model="settings.number_2" :placeholder="$t('Site_Phone')" />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.number_2">{{ error.number_2[0] }}</div>
            </div>
            <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('address') }}</label>
-                  <InputText required class="bg-[#f7f5f5]" v-model="settings.address" :placeholder="$t('address')" />
+                  <InputText required v-model="settings.address" :placeholder="$t('address')" />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.address">{{ error.address[0] }}</div>
            </div>
            <div   class="flex flex-column gap-2">
                   <label for="username">{{ $t('Site_Email') }}</label>
-                  <InputText required class="bg-[#f7f5f5]" v-model="settings.email" :placeholder="$t('Site_Email')" />
+                  <InputText required v-model="settings.email" :placeholder="$t('Site_Email')" />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
            </div>
      
        
           <div class=" ">
             <label for="username">{{ $t('Site_description') }}</label>
-            <v-textarea rows="2" bg-color="#EAE8E9" v-model="settings.description" ></v-textarea>
+            <Textarea rows="2" v-model="settings.description" autoResize fluid />
          
           </div>
           <button v-can="'settings edit'" @click="updateSettings"  class="p-4 mt-10 text-center bg-[#148A98] text-white w-full rounded-2xl text-xl" >{{ $t('save_changes') }}</button>
-        </v-card>
-  </v-card>
+        </div>
+  </div>
   <Toast/>
 </template>
 <script>

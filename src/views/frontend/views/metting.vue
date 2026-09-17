@@ -2,39 +2,39 @@
     <Nave />
     <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-[#ffff] to-[#035b65] p-5">
       <form @submit.prevent="submitForm" class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-lg w-full animate-fadeIn">
-         <p class="font-semibold text-lg mb-2 text-slate-700">يمكنك حجز اجتماع لطفلك من هنا</p>
+         <p class="font-semibold text-lg mb-2 text-slate-700">{{ $t("meeting_request_hint") }}</p>
         <div class="mb-6 required-field">
-          <label for="meeting_time" class="block text-sm font-medium text-gray-700 mb-2"> الموعد المقترح للاجتماع </label>
-          <Calendar
+          <label for="meeting_time" class="block text-sm font-medium text-gray-700 mb-2">{{ $t("meeting_suggested_time") }}</label>
+          <DatePicker
             id="meeting_time"
             v-model="formData.meeting_time"
             showTime
             hourFormat="24"
             dateFormat="yy-mm-dd"
             :timeOnly="false"
-            placeholder=" اختر موعد الاجتماع "
-            class="w-full  border border-gray-300 rounded-lg focus:border-[#6a11cb] focus:ring-2 focus:ring-[#6a11cb] transition duration-300"
+            :placeholder="$t('meeting_pick_time')"
+            class="w-full border border-gray-300 rounded-lg focus:border-[#6a11cb] focus:ring-2 focus:ring-[#6a11cb] transition duration-300"
           />
         </div>
   
         <div class="mb-6 required-field">
-          <label for="location" class="block text-sm font-medium text-gray-700 mb-2"> عنوان الطلب </label>
+          <label for="location" class="block text-sm font-medium text-gray-700 mb-2">{{ $t("meeting_location") }}</label>
           <InputText
             id="location"
             required
             v-model="formData.location"
-            placeholder=" ادخل مكان الاجتماع"
+            :placeholder="$t('meeting_location_hint')"
             class="w-full p-3 border border-gray-300 rounded-lg focus:border-[#6a11cb] focus:ring-2 focus:ring-[#6a11cb] transition duration-300"
           />
         </div>
   
         <div class="mb-6">
-          <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">ملاحظات</label>
-          <v-textarea  bg-color="#EAE8E9" rows="3"  v-model="formData.notes" ></v-textarea>
+          <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">{{ $t("notes") }}</label>
+          <Textarea rows="3"  v-model="formData.notes" autoResize fluid />
          
         </div>
   
-        <Button type="submit" label="Submit" class="w-full p-3 bg-gradient-to-br from-[#035B65] to-[#037B65] text-white rounded-lg hover:from-[#045B65] hover:to-[#039B65] transform hover:-translate-y-1 transition duration-300" />
+        <Button type="submit" :label="$t('submit')" class="w-full p-3 bg-gradient-to-br from-[#035B65] to-[#037B65] text-white rounded-lg hover:from-[#045B65] hover:to-[#039B65] transform hover:-translate-y-1 transition duration-300" />
       </form>
     </div>
     <Toast/>

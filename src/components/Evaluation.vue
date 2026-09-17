@@ -1,35 +1,14 @@
+<script setup>
+import NavTabs from "./common/NavTabs.vue";
+
+const items = [
+  { to: { name: 'levels' }, label: 'levels', perm: 'milestone level list' },
+  { to: { name: 'milestone-domains' }, label: 'milestone_domain', perm: 'milestone domain list' },
+  { to: { name: 'milestone-general-goals' }, label: 'milestone_general_goal', perm: 'milestone general goal list' },
+  { to: { name: 'milestone-sub-goals' }, label: 'milestone_sub_goals', perm: 'milestone sub goal list' },
+];
+</script>
+
 <template>
-    <Toolbar class="mb-4 shadow-md">
-  <template #end>
-    
-    <router-link
-          v-can="'milestone domain list'"
-          :to="{ name: 'milestone-domains' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('milestone_domain') }}</router-link>
-        <router-link
-          v-can="'milestone sub goal list'"
-          :to="{ name: 'milestone-sub-goals' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('milestone_sub_goals') }}</router-link>
-        <router-link
-          v-can="'milestone general goal list'"
-          :to="{ name: 'milestone-general-goals' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('milestone_general_goal') }}</router-link>
-        <router-link
-          v-can="'milestone level list'"
-          :to="{ name: 'levels' }"
-          class="export px-4 py-2 mx-4 rounded-md text-sm text-white bg-indigo-400  border-b-2"
-        > {{ $t('levels') }}</router-link>
-  </template>
-  
-</Toolbar>
-
+  <NavTabs :items="items" />
 </template>
-<style>
-.router-link-active {
-background-color: rgb(239, 80, 80) !important
-}
-
-</style>

@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
@@ -112,11 +112,11 @@ const initFilters = () => {
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
+      <div class="page">
+        <Toolbar>
           <template #start>
             <div class="my-2">
-            <Button  v-can="'student program create'" :label='$t("add_sp")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button  v-can="'student program create'" :label='$t("add_sp")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -136,14 +136,14 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
           </template>
         </Toolbar>
 
         <Toast/>
 
 
-      <div style="" class="shadow-xl ">
+      <div>
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
@@ -161,12 +161,12 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("room") }}</h5>
+              <h5 class="page-title">{{ $t("room") }}</h5>
              <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
+              <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
+              </IconField>
               </div>
             </div>
           </template>
@@ -202,7 +202,7 @@ const initFilters = () => {
           
            <Column field="price" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              <Dropdown  :disabled="!$can('student program edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#F59E0B' : slotProps.data.status == 0 ? '#EF4444' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+              <Select  :disabled="!$can('student program edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#F59E0B' : slotProps.data.status == 0 ? '#EF4444' : 'transparent' }" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
 
             </template>
            </Column>
@@ -212,25 +212,20 @@ const initFilters = () => {
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
-              <div >
+              <div class="table-actions">
                 <Button
                 v-can="'student program edit'"            
                 :label='$t("sumi_start")'
-                class="create mt-2"
-                @click="session(slotProps.data.student_id,slotProps.data.id)"
-              />
+                class="mt-2"
+                @click="session(slotProps.data.student_id,slotProps.data.id)" />
                 <Button
                 v-can="'student program edit'"  
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
+                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
                 v-can="'student program delete'"
                 icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
             
               </div>
             </template>
@@ -248,12 +243,12 @@ const initFilters = () => {
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
       </div>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

@@ -1,13 +1,12 @@
 <script>
 import axios from "axios";
-import { th } from "vuetify/locale";
 import { format, formatDistance, formatRelative, subDays, differenceInMonths } from 'date-fns'
 import moment from "moment";
 import InputText from 'primevue/inputtext';
-import Calendar from 'primevue/calendar';
+import DatePicker from 'primevue/datepicker';
 
 export default {
-  components: { InputText, Calendar },
+  components: { InputText, DatePicker },
   data: () => ({
     valu: "",
 
@@ -35,9 +34,27 @@ export default {
     child: '',
     numberOfMonth: '',
     skip: [],
-    headerAndQuestions: [],
+    headerAndQuestions: {},
     examDate: '',
+    submitted: false,
+    alert_text: '',
+    answerOptions: [
+      { value: '1', label: 'yes' },
+      { value: '0', label: 'no' },
+    ],
   }),
+  computed: {
+    examDateText() {
+      return moment(this.examDate || new Date()).format("YYYY-MM-DD HH:mm")
+    },
+    unansweredCount() {
+      if (!this.child || this.child.childInMonths === undefined) return 0
+      return Object.values(this.headerAndQuestions)
+        .filter((questions) => questions[0].min_age <= this.child.childInMonths)
+        .flat()
+        .filter((question) => this.selected[question.questions.id] === undefined).length
+    },
+  },
   methods: {
     fomate() {
       // this.examDate =  moment(new Date()).format("YYYY-MM-DD HH:mm")
@@ -45,22 +62,17 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
+    // The dimension's questions hang off evaluations.id, grouped by header (age band).
     getQuestions() {
-      axios.get(`/api/side-profile-types/${this.$route.params.id}`).then(res => {
-        const data = res.data.data.evaluation_header
-        this.title = res.data.data.title
-        data.forEach(item => {
-          const headerId = item.id;
-
-          if (!this.headerAndQuestions[headerId]) {
-            this.headerAndQuestions[headerId] = [];
-          }
-
-          this.headerAndQuestions[headerId].push(item);
-        });
-
+      const id = this.$route.params.id
+      axios.get(`/api/evaluations/${id}/show`).then(res => {
+        this.title = res.data.evaluation?.title ?? ''
       })
-      console.log(this.headerAndQuestions)
+      axios.get(`/api/evaluations/${id}`).then(res => {
+        this.headerAndQuestions = res.data.evaluation ?? {}
+      }).catch(() => {
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: this.$t("evaluation_not_found"), life: 5000 })
+      })
     },
 
     /*
@@ -71,18 +83,19 @@ export default {
       setTimeout(() => {
         this.load = false
       }, 3000);
-      const { valid } = await this.$refs.form.validate()
-      if (!valid)
+      this.submitted = true
+      if (!this.child_id || this.unansweredCount) {
+        this.load = false
         return
+      }
       this.answers = []
       this.selected.forEach((value, question_id) => {
         this.answers.push({ question_id, value })
       })
-      this.examDate = moment(new Date()).format("YYYY-MM-DD HH:mm")
       axios.post(`/api/evaluations/${this.$route.params.id}/submit`, {
         'answers': this.answers,
         'child_id': this.child_id,
-        'date': this.examDate,
+        'date': this.examDateText,
         skills: this.skills
       }).then(res => {
         if (res.data.status == 200) {
@@ -91,9 +104,9 @@ export default {
           this.type = "success"
         }
       }).catch((error) => {
-
-        this.error = error.data
+        this.error = error.response?.data ?? {}
         this.type = "error"
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: error.response?.data?.message ?? this.$t("request_failed_retry"), life: 5000 })
       })
 
 
@@ -176,7 +189,7 @@ export default {
           axios.post(`/api/evaluations/${this.$route.params.id}/${prev}/basalAge`, {
             answers: this.answers,
             child_id: this.child_id,
-            date: this.examDate,
+            date: this.examDateText,
             skills: this.skills
           }).then(res => {
             console.log(res.data.resultEvaluation)
@@ -203,7 +216,7 @@ export default {
       axios.get(`/api/child/${this.child_id}/${this.$route.params.id}`).then(res => {
         console.log(res.data.child)
         if (!res.data.child.canDoExam) {
-          this.alert_text = "sorry this child has this evaluate lass than 6 months"
+          this.alert_text = this.$t("evaluation_too_soon")
           this.type = "error"
           this.child = res.data.child
           this.child.childInMonths = -1 //reset child in months to -1 to not show any question header
@@ -221,9 +234,7 @@ export default {
     this.getQuestions()
     this.getChildren()
     this.getallskills()
-    this.examDate = moment(new Date()).format("YYYY-MM-DD HH:mm")
-
-    console.log(this.examDate)
+    this.examDate = new Date()
   },
 
 
@@ -234,65 +245,110 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="page">
+    <Toast />
+    <div class="page-header">
+      <h1 class="page-title">{{ title }}</h1>
+      <BackButton />
+    </div>
 
-    <v-btn height="45" class="mb-5 text-white" color="#A9AB7F" @click="goBack">
-      <v-icon start icon="mdi-arrow-left"></v-icon>
-      {{ $t('back') }}
-    </v-btn>
-    <v-sheet max-width="1200" class="mx-auto">
-
-      <h1 class="text-center"> {{ title }}</h1>
-
-
-      <v-form fast-fail ref="form" @submit.prevent="submit" class="shadow-lg lg:p-[2%]">
-
-        <v-select label="Child" v-model="child_id" @update:modelValue="getSpecificChildren"
-          :items="selectBox"></v-select>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-          <div class="flex flex-column gap-2 py-2">
-            <label class="w-full text-right" for="username">{{ $t('created_at') }}</label>
-            <Calendar style="width: 100%;" v-model="examDate" @change="fomate()" date-format="dd-mm-yy" showIcon
-              :rules="NameRules" :show-time="true" />
-            <div class="mt-1 mb-5 text-red-500" v-if="error?.permissions">{{ error.permissions[0] }}</div>
-          </div>
-
+    <form class="surface-card form-stack" novalidate @submit.prevent="submit">
+      <div class="form-grid">
+        <div class="field">
+          <label for="evaluation-child">{{ $t("child") }}</label>
+          <Select inputId="evaluation-child" v-model="child_id" :options="selectBox" optionLabel="title" optionValue="value"
+            filter fluid :placeholder="$t('select_child')" :invalid="submitted && !child_id"
+            @update:modelValue="getSpecificChildren" />
+          <small v-if="submitted && !child_id" class="field-error">{{ $t("field_required") }}</small>
         </div>
+        <div class="field">
+          <label for="evaluation-date">{{ $t("created_at") }}</label>
+          <DatePicker inputId="evaluation-date" v-model="examDate" dateFormat="yy-mm-dd" showIcon showTime hourFormat="24" fluid />
+        </div>
+      </div>
 
-        <div v-for="questions in Object.values(headerAndQuestions).reverse()">
+      <Message v-if="alert_text" :severity="type === 'error' ? 'warn' : 'success'" :closable="false">{{ alert_text }}</Message>
+      <Message v-if="type === 'success' && child.childInMonths === -1 && !alert_text" severity="success" :closable="false">
+        {{ $t("evaluation_saved") }}
+      </Message>
 
-          <div v-if="questions[0].min_age <= this.child.childInMonths">
-            <ul>
-              <li class="font-weight-bold mb-3 mx-7">{{ questions[0].title }}</li>
-            </ul>
-
-            <div v-for="question in questions" class="border border-1 rounded pa-5">
-
-              <div class="mb-3">
-                {{ question.questions.title }}
-              </div>
-              <v-radio-group v-model="selected[question.questions.id]"
-                @change="radioChange(selected[question.questions.id], question.questions.evaluation_header_id, question.questions.id)"
-                :rules="NameRules">
-                <v-radio label="True" value="1"></v-radio>
-                <v-radio label="False" value="0"></v-radio>
-              </v-radio-group>
-
+      <template v-for="questions in Object.values(headerAndQuestions).reverse()" :key="questions[0].id">
+        <section v-if="questions[0].min_age <= child.childInMonths" class="question-group">
+          <h2 class="question-group-title">{{ questions[0].title }}</h2>
+          <div v-for="question in questions" :key="question.questions.id" class="question-row"
+            :class="{ unanswered: submitted && selected[question.questions.id] === undefined }">
+            <p class="question-text">{{ question.questions.title }}</p>
+            <div class="answer-options">
+              <label v-for="option in answerOptions" :key="option.value" class="answer-option">
+                <RadioButton v-model="selected[question.questions.id]" :value="option.value"
+                  :name="`question-${question.questions.id}`"
+                  @update:modelValue="radioChange($event, question.questions.evaluation_header_id, question.questions.id)" />
+                <span>{{ $t(option.label) }}</span>
+              </label>
             </div>
           </div>
-          <div class="mb-7">
+        </section>
+      </template>
 
-          </div>
+      <Message v-if="submitted && unansweredCount" severity="error" :closable="false">
+        {{ $t("questions_missing", { count: unansweredCount }) }}
+      </Message>
 
-        </div>
-        <Button :loading="load" type="submit" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button>
-        <!-- <v-btn :loading="load" type="submit" block class="create text-white lg:w-[50%] mt-2">{{ $t('submit') }}</v-btn> -->
-
-      </v-form>
-
-    </v-sheet>
-
+      <div class="form-actions">
+        <Button :loading="load" type="submit" icon="pi pi-check" :label="$t('submit')" />
+      </div>
+    </form>
   </div>
 </template>
+
+<style scoped>
+.form-stack {
+  display: grid;
+  gap: 1rem;
+}
+.question-group {
+  display: grid;
+  gap: 0.5rem;
+}
+.question-group-title {
+  margin: 0.5rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sawa-primary);
+}
+.question-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+}
+.question-row.unanswered {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+.question-text {
+  margin: 0;
+  flex: 1 1 18rem;
+}
+.answer-options {
+  display: flex;
+  gap: 1.25rem;
+}
+.answer-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+.form-actions {
+  display: flex;
+  justify-content: center;
+}
+.form-actions .p-button {
+  min-width: 12rem;
+}
+</style>

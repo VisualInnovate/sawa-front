@@ -1,15 +1,15 @@
 <template>
      <Stimulu></Stimulu>
-     <Button icon="pi pi-angle-left" @click="gosession" class=" my-4  m-auto create  " :label='$t("العودة للجلسة")'></Button>
+     <Button icon="pi pi-angle-left" @click="gosession" class="my-4 m-auto" :label='$t("العودة للجلسة")'></Button>
 
-     <v-card class="p-[2%]">
+     <div class="sawa-card p-[2%]">
        
          <!-- items -->
          <div class="m-auto my-5 bg-slate-50 p-[2%] shadow-md grid grid-cols-1 gap-2 lg:grid-cols-3">
         <div>
-            <Button   @click="addarray"  class="create m-auto  " icon="pi pi-plus" ></Button>
-            <Button  :disabled="count <= 0"  @click="deletearray"  class="delete m-auto  " icon="pi pi-minus" ></Button>
-            <Dropdown v-model="stimul" class="hover:ring-0 w-52 mx-2"  option-value="name" filter :options="stimulus" optionLabel="name"  placeholder="select item" />
+            <Button   @click="addarray"  class="m-auto" icon="pi pi-plus"></Button>
+            <Button  :disabled="count <= 0"  @click="deletearray"  class="m-auto" icon="pi pi-minus" severity="danger"></Button>
+            <Select v-model="stimul" class="hover:ring-0 w-52 mx-2"  option-value="name" filter :options="stimulus" optionLabel="name"  :placeholder="$t('select_item')" />
       
         </div>
         <div class='bg-white p-2 flex justify-between rounded-sm' v-for="item,index in items" >
@@ -63,7 +63,7 @@
                  
        </div>
     
-       <Button @click="createevalation" class=" mt-4 m-auto create  w-full " :label='$t("submit")'></Button>
+       <Button @click="createevalation" class="mt-4 m-auto w-full" :label='$t("submit")'></Button>
         </div>
      
        <div>
@@ -118,7 +118,7 @@
        </div>
     </div>
 
-     </v-card>
+     </div>
 
 
    

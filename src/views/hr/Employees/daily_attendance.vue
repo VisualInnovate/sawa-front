@@ -1,5 +1,5 @@
 <script setup>
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios";
@@ -124,7 +124,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -169,10 +169,10 @@ const initFilters = () => {
 
           <template #end>
             <div class="flex gap-2">
-              <Button :label='$t("print")' icon="pi pi-print" class="p-button-help no-print" :loading="printLoading"
-                @click="printTable" />
+              <Button :label='$t("print")' icon="pi pi-print" class="no-print" :loading="printLoading"
+                @click="printTable" severity="help" />
               <Button v-can="'attendance list'" :label='$t("export")' icon="pi pi-download"
-                class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
+                class="no-print" :loading="exportLoading" @click="exportCSV" severity="info" />
             </div>
           </template>
         </Toolbar>
@@ -190,12 +190,12 @@ const initFilters = () => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
-                  </span>
-                  <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData"
-                    v-tooltip.top="$t('refresh_data')" />
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="filters['global'].value" :placeholder='$t("search")' class="w-full" />
+              </IconField>
+                  <Button icon="pi pi-refresh" @click="fetchData"
+                    v-tooltip.top="$t('refresh_data')" variant="text" />
                 </div>
               </div>
             </template>
@@ -291,34 +291,34 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
 
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("create_employee")'
           :modal="true">
           <div class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{ $t('users') }}</label>
-            <MultiSelect v-model="employee.users_ids" required id="pv_id_1" style="direction: ltr !important;"
+            <label class="w-full text-start" for="username">{{ $t('users') }}</label>
+            <MultiSelect v-model="employee.users_ids" required
               option-value="id" filter :options="allusers" optionLabel="name" :placeholder='$t("users")'
-              class="w-full bg-[#f7f5f5] [&>div>div>span]:bg-black md:w-14rem" />
+              class="w-full" />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
           </div>
           <div class="w-full text-center">
-            <Button @click="createcrude" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
+            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button>
           </div>
         </Dialog>
 
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("update_employee")'
           :modal="true">
           <div class="flex flex-column gap-2">
-            <label class="w-full text-right" for="username">{{ $t('title') }}</label>
-            <InputText required class="bg-[#f7f5f5] text-center" v-model="levels.title" :placeholder='$t("title")' />
+            <label class="w-full text-start" for="username">{{ $t('title') }}</label>
+            <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.name[0] }}</div>
           </div>
           <div class="w-full text-center">
-            <Button @click="editescrud" class="p-button-success m-auto w-[50%] my-4" :label='$t("submit")'></Button>
+            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button>
           </div>
         </Dialog>
       </div>

@@ -5,7 +5,7 @@
     <div class="absolute bg-gradient-to-r from-[#74dbc7] to-[#618990] opacity-40 w-full h-full z-50"></div>
     <img class="w-full absolute h-full" src="../image/112.png">
     <div class="z-50 text-white m-auto w-[80%] ">
-      <H1 class="font-bold text-5xl text-white z-50">{{ $t(" نتيجه التقييم") }}</H1>
+      <h1 class="font-bold text-5xl text-white z-50">{{ $t(" نتيجه التقييم") }}</h1>
      <div class="flex py-8 ">
       <p class="text-2xl font-semibold "> {{ $t("home") }}</p>
       <svg class="my-auto mx-[1%] ltr:rotate-180" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,7 +20,7 @@
       <div class="max-w-[1300px] mx-auto  py-[4%] ">
         <div class="flex justify-between w-full m-auto px-2">
            <h3 class="font-bold text-2xl text-[#303843]">{{ $t("evaluation_result") }}</h3>
-           <Button @click="AddBooking" class="create" :label='$t("اضافه طفل جديد")'></Button>
+           <Button @click="AddBooking" :label='$t("اضافه طفل جديد")'></Button>
         </div>
       
       </div>

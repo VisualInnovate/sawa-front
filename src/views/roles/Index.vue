@@ -1,5 +1,5 @@
 <script setup>
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios";
@@ -137,7 +137,7 @@ const printTable = () => {
           th { background-color: #f5f5f5; text-align: left; padding: 8px; border: 1px solid #ddd; }
           td { padding: 8px; border: 1px solid #ddd; }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .text-start { text-align: right; }
           @page { size: auto; margin: 5mm; }
           @media print {
             body { margin: 0; padding: 0; }
@@ -184,25 +184,21 @@ const initFilters = () => {
                 v-can="'roles list'"
                 :label='$t("print")' 
                 icon="pi pi-print" 
-                class="p-button-help no-print" 
+                class="no-print" 
                 :loading="printLoading"
-                @click="printTable"
-              />
+                @click="printTable" severity="help" />
               <Button 
                 v-can="'roles list'" 
                 :label='$t("export")' 
                 icon="pi pi-download" 
-                class="p-button-info no-print" 
+                class="no-print" 
                 :loading="exportLoading"
-                @click="exportCSV"
-              />
+                @click="exportCSV" severity="info" />
               <Button 
                 v-can="'roles create'"
                 :label='$t("create_role")' 
                 icon="pi pi-plus" 
-                class="p-button-success" 
-                @click="openNew"
-              />
+                @click="openNew" />
             </div>
           </template>
         </Toolbar>
@@ -231,20 +227,18 @@ const initFilters = () => {
             <template #header>
               <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
                 <div class="flex gap-2">
-                  <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
-                    <InputText 
+                  <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText 
                       v-model="filters['global'].value" 
                       :placeholder='$t("search")' 
                       class="w-full"
                     />
-                  </span>
+              </IconField>
                   <Button 
                     icon="pi pi-refresh" 
-                    class="p-button-text" 
                     @click="fetchData" 
-                    v-tooltip.top="$t('refresh_data')"
-                  />
+                    v-tooltip.top="$t('refresh_data')" variant="text" />
                 </div>
               </div>
             </template>
@@ -266,7 +260,7 @@ const initFilters = () => {
             </Column>
             <Column :exportable="false" header-style="width: 10rem" body-class="text-center">
               <template #body="slotProps">
-                <div class="flex gap-1 justify-content-center">
+                <div class="table-actions">
                   <i
                     v-if="slotProps.data.is_locked"
                     class="pi pi-lock p-2"
@@ -277,25 +271,19 @@ const initFilters = () => {
                     v-if="!slotProps.data.is_locked"
                     v-can="'roles edit'"
                     icon="pi pi-pencil" 
-                    class="p-button-rounded p-button-text p-button-success" 
                     @click="edit(slotProps.data.id)"
-                    v-tooltip.top="$t('edit')"
-                  />
+                    v-tooltip.top="$t('edit')" rounded variant="outlined" severity="info" />
                   <Button 
                     v-if="!slotProps.data.is_locked"
                     v-can="'roles delete'"
                     icon="pi pi-trash" 
-                    class="p-button-rounded p-button-text p-button-danger" 
                     @click="confirmDelete(slotProps.data.id)"
-                    v-tooltip.top="$t('delete')"
-                  />
+                    v-tooltip.top="$t('delete')" rounded variant="outlined" severity="danger" />
                   <Button 
                     v-can="'roles create'"
                     icon="pi pi-copy" 
-                    class="p-button-rounded p-button-text p-button-info" 
                     @click="copyrole(slotProps.data.id)"
-                    v-tooltip.top="$t('copy')"
-                  />
+                    v-tooltip.top="$t('copy')" rounded variant="text" severity="info" />
                 </div>
               </template>
             </Column>
@@ -320,8 +308,8 @@ const initFilters = () => {
             </span>
           </div>
           <template #footer>
-            <Button :label='$t("no")' icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label='$t("yes")' icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteAction" />
+            <Button :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
      

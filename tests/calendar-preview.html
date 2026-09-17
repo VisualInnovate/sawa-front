@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<meta charset="UTF-8">
+<title>Calendar regression preview</title>
+<body>
+<p style="text-align:center">اختبار محلي ببيانات تجريبية — لا يتم إرسال حجوزات</p>
+<div id="app"></div><pre id="test-result"></pre>
+<script type="module">
+  import { createApp } from 'vue';
+  import { createPinia } from 'pinia';
+  import axios from 'axios';
+  import moment from 'moment';
+  import Calendar from '/src/views/calender/Index.vue';
+  import installPrimeVue from '/src/plugins/primevue/index.js';
+  import i18n from '/src/plugins/i18n/index.js';
+  import '/src/main.css';
+  import '/src/styles/app.css';
+  import 'primeicons/primeicons.css';
+  const date = moment().add(1, 'day').format('YYYY-MM-DD');
+  const therapists = [{ id: 45, name: 'معالج تجريبي أ' }, { id: 46, name: 'معالج تجريبي ب' }];
+  axios.get = async url => {
+    if (url === '/api/child') return { data: { children: [{ id: 236, name: 'طفل تجريبي' }] } };
+    if (url.includes('/calendar/')) return { data: { data: {
+      days: [{ start: `${date}T09:00:00`, end: `${date}T17:00:00` }], booked: [],
+    } } };
+    if (url.includes('/get/with/')) return { data: { data: { employees: therapists } } };
+    throw new Error(`Unexpected test request: ${url}`);
+  };
+  axios.post = async (url, data) => {
+    document.getElementById('test-result').textContent = JSON.stringify({ url, employee_id: data.employee_id, date: data.date, start_time: data.start_time });
+    return { data: {} };
+  };
+  const app = createApp(Calendar);
+  app.use(createPinia());
+  app.use(i18n);
+  installPrimeVue(app, 'ar');
+  app.directive('can', { mounted: el => { el.style.display = 'none'; } });
+  app.config.globalProperties.$route = { params: { id: '236' } };
+  app.config.globalProperties.$router = { go() {} };
+  app.mount('#app');
+</script>
+</body>
+</html>

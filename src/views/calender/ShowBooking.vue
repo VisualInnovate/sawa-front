@@ -1,112 +1,108 @@
 <template>
-  <div class="mt-6 p-6">
-    <!-- Page Title -->
-    <div class="flex flex-row lg:flex-col justify-between">
-      <h1 class="border-b-2 border-green-800 text-3xl w-full md:w-1/2 uppercase text-green-800 py-4 font-bold">
-      {{ $t("bookings") }}
-    </h1>
-
-    <!-- Filter Dropdown -->
-    <div class="mt-6 flex justify-end flex-col">
-      <label for="filter-by-status-2" class="mb-2">  اختر حاله الحجز</label>
-  <Dropdown
-    id="filter-by-status"
-    v-model="selectedStatus"
-    :options="status"
-    optionLabel="name"
-    optionValue="code"
-    placeholder="Filter by Status"
-    class="w-48"
-    @update:model-value="getBookings"
-  />
-    </div>
-
-    <div class="mt-6 flex justify-end flex-col">
-      <label for="filter-by-status" class="mb-2"> اختر حاله الاستشارة </label>
-      <Dropdown
-        id="filter-by-status-2"
-        v-model="selectedFilter"
-        :options="filter"
-        optionLabel="name"
-        optionValue="code"
-        placeholder="Filter by Status"
-        class="w-48"
-        @update:model-value="getBookings"
-      />
-    </div>
-    
-    </div>
-
-    <!-- Bookings List -->
-    <v-card class="mt-6 shadow-lg rounded-lg overflow-hidden">
-      <div class="p-6">
-        <Accordion v-for="booking in bookings" :key="booking.id" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
-          <AccordionTab :header="booking.child_name" class="mb-4">
-            <!-- Booking Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Left Column: Booking Information -->
-              <div class="space-y-4">
-                <div class="flex items-center">
-                  <p class="text-lg font-bold text-green-800">{{ $t("child_age") }}:</p>
-                  <p class="ml-3 text-base text-gray-700">{{ childAge(booking) }}</p>
-                </div>
-                <div class="flex items-center">
-                  <p class="text-lg font-bold text-green-800">{{ $t("parent.phone") }}:</p>
-                  <p class="ml-3 text-base text-gray-700">{{ booking.details.requester_phone }}</p>
-                </div>
-                <div class="flex items-center">
-                  <p class="text-lg font-bold text-green-800">{{ $t("موعد الاستشارة") }}:</p>
-                  <p class="ml-3 text-base text-gray-700">{{ booking.event_date || "N/A" }}</p>
-                </div>
-                
-              </div>
-
-              <!-- Right Column: Action Button -->
-              <div class="flex justify-end items-center">
-                <Button
-                  @click="bookingDetailes(booking.id)"
-                  icon="pi pi-arrow-right"
-                  class="p-button-success p-button-outlined"
-                  :label='$t("متابعة التفاصيل")'
-                />
-              </div>
+  <div class="page">
+    <DataTable :value="bookings" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
+      stripedRows :globalFilterFields="['child_name', 'details.requester_phone', 'details.requester_name']"
+      :filters="filters">
+      <template #header>
+        <div class="bookings-header">
+          <h1 class="page-title">{{ $t("bookings") }}</h1>
+          <div class="bookings-filters">
+            <div class="field">
+              <label for="booking-status">{{ $t("booking_status_filter") }}</label>
+              <Select inputId="booking-status" v-model="selectedStatus" :options="status" optionLabel="name"
+                optionValue="code" @update:modelValue="getBookings" />
             </div>
-          </AccordionTab>
-        </Accordion>
-      </div>
-    </v-card>
+            <div class="field">
+              <label for="consultation-status">{{ $t("consultation_status_filter") }}</label>
+              <Select inputId="consultation-status" v-model="selectedFilter" :options="filter" optionLabel="name"
+                optionValue="code" @update:modelValue="getBookings" />
+            </div>
+            <div class="field">
+              <label for="booking-search">{{ $t("search") }}</label>
+              <IconField class="table-search">
+                <InputIcon class="pi pi-search" />
+                <InputText id="booking-search" v-model="filters.global.value" :placeholder="$t('booking_search_hint')" />
+              </IconField>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #empty>
+        <div class="empty-state"><i class="pi pi-calendar-times" />{{ $t("no_bookings") }}</div>
+      </template>
+
+      <Column field="child_name" :header="$t('child_name')" sortable>
+        <template #body="{ data }">
+          <span class="font-semibold">{{ data.child_name }}</span>
+        </template>
+      </Column>
+      <Column :header="$t('child_age')">
+        <template #body="{ data }">{{ childAge(data) }}</template>
+      </Column>
+      <Column :header="$t('parent.phone')">
+        <template #body="{ data }">
+          <span dir="ltr">{{ data.details?.requester_phone || "—" }}</span>
+        </template>
+      </Column>
+      <Column field="event_date" :header="$t('consultation_date')" sortable>
+        <template #body="{ data }">
+          <span dir="ltr">{{ data.event_date || "—" }}</span>
+        </template>
+      </Column>
+      <Column :header="$t('booking_status_filter')">
+        <template #body="{ data }">
+          <Tag :value="labelOf(status, data.accepted)" :severity="severityOf(data.accepted)" />
+        </template>
+      </Column>
+      <Column :header="$t('consultation_status_filter')">
+        <template #body="{ data }">
+          <Tag :value="labelOf(filter, data.status)" :severity="severityOf(data.status)" />
+        </template>
+      </Column>
+      <Column :header="$t('actions')" style="width: 6rem">
+        <template #body="{ data }">
+          <Button icon="pi pi-eye" rounded variant="outlined" severity="secondary"
+            v-tooltip.top="$t('follow_details')" :aria-label="$t('follow_details')" @click="bookingDetailes(data.id)" />
+        </template>
+      </Column>
+    </DataTable>
   </div>
 </template>
 <script>
 import axios from "axios";
+import { FilterMatchMode } from "@primevue/core/api";
 import { formatChildAge } from "@/utils/childAge";
 
 export default {
- 
   data() {
     return {
       bookings: [],
-      booking_result: "",
-      booking_id: null,
-      selectedStatus:-1,
-      selectedFilter:-1,
-      show_result_modal: false,
-      status:[
+      loading: true,
+      selectedStatus: -1,
+      selectedFilter: -1,
+      filters: { global: { value: null, matchMode: FilterMatchMode.CONTAINS } },
+    };
+  },
+  computed: {
+    // accepted: -1 waiting, 1 accepted, 0 rejected — status: -1 in progress, 1 done, 0 cancelled
+    status() {
+      return [
         { name: this.$t("Pending"), code: -1 },
         { name: this.$t("Accept"), code: 1 },
         { name: this.$t("Cancell"), code: 0 },
-      
-      ],
-      filter:[
-        { name: this.$t("  تحت التنفيذ"), code: -1 },
-        { name: this.$t("تم التنفيذ "), code: 1 },
-        { name: this.$t("تم الغائها"), code: 0 },
-      
-      ],
-    };
+      ];
+    },
+    filter() {
+      return [
+        { name: this.$t("consultation_in_progress"), code: -1 },
+        { name: this.$t("consultation_done"), code: 1 },
+        { name: this.$t("consultation_cancelled"), code: 0 },
+      ];
+    },
   },
   methods: {
     getBookings() {
+      this.loading = true;
       axios
         .get(`/api/calender/bookings?accepted=${this.selectedStatus}&status=${this.selectedFilter}`)
         .then((res) => {
@@ -116,106 +112,48 @@ export default {
             (booking) => booking && String(booking.child_name ?? "").trim() !== ""
           );
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
+          this.$toast.add({ severity: "error", summary: this.$t("error"), detail: this.$t("request_failed_retry"), life: 5000 });
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
-
     bookingDetailes(id) {
-      this.$router.push({ name: "BookingDetails", params: { id: id } });
+      this.$router.push({ name: "BookingDetails", params: { id } });
     },
     childAge(booking) {
       return formatChildAge(booking.child_birth_date, booking.child_age, this.$t);
     },
-    openModal(booking_id) {
-      this.show_result_modal = true;
-      this.booking_id = booking_id;
+    labelOf(options, code) {
+      return options.find((option) => option.code === Number(code))?.name ?? "—";
     },
-    
-    addNote() {
-      axios
-        .patch(`/api/calender/bookings/${this.booking_id}`, {
-          booking_result: this.booking_result,
-        })
-        .then((res) => {
-          this.show_result_modal = false;
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    severityOf(code) {
+      return { "-1": "warn", 1: "success", 0: "danger" }[Number(code)] ?? "secondary";
     },
-    updateStatus(bookingId, status) {
-      axios
-        .patch(`/api/calender/bookings/${bookingId}`, { status })
-        .then((res) => {
-          console.log("Status updated successfully", res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
   },
   mounted() {
     this.getBookings();
   },
 };
 </script>
+
 <style scoped>
-/* Custom Styles */
-.v-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.bookings-header {
+  display: grid;
+  gap: 1rem;
 }
-
-.v-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+.bookings-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+  align-items: end;
 }
-
-.p-accordion-tab {
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.3s ease;
+.bookings-filters .field {
+  margin: 0;
 }
-
-.p-accordion-tab:hover {
-  background-color: #f0fdf4;
-}
-
-.p-button-success {
-  border-color: #10b981;
-  color: #10b981;
-}
-
-.p-button-success:hover {
-  background-color: #10b981;
-  color: white;
-}
-
-/* Fancy Dropdown Styles */
-.p-dropdown {
-  border: 1px solid #10b981;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.p-dropdown:hover {
-  border-color: #059669;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-}
-
-.p-dropdown-panel {
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.p-dropdown-item {
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s ease;
-}
-
-.p-dropdown-item:hover {
-  background-color: #f0fdf4;
+.bookings-filters .p-select,
+.bookings-filters .table-search {
+  width: 100%;
 }
 </style>

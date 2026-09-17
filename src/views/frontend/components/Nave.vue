@@ -6,7 +6,7 @@
       </p>
 
       <button @click="visible = true" data-collapse-toggle="navbar-default" type="button" class="mx-1 inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200" aria-controls="navbar-default" aria-expanded="false">
-        <span class="sr-only">Open main menu</span>
+        <span class="sr-only">{{ $t("main_menu") }}</span>
         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
         </svg>
@@ -38,41 +38,36 @@
        
           <Button
             style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
-            class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
+            class="relative fed text-lg lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
             icon="pi pi-user"
             :label='$t(" الملف الشخصي")'
-
-            @click="goToProfile"
-          />
+            @click="goToProfile" severity="warn" />
       
         <Button
           style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
-          class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
+          class="relative fed text-lg lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
           icon="pi pi-sign-out"
           :label='$t("تسجيل خروج")'
-          @click="logout"
-        />
+          @click="logout" severity="warn" />
       </div>
 
         <router-link v-if="!parentStore.isAuthenticated" :to="{ name: 'parentLogin' }" class="items-center hidden lg:block" style="display: inline;">
           <Button
             style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
             :label='$t("sign_in")'
-            class="relative fed text-lg primer lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
-          />
+            class="relative fed text-lg lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300" severity="warn" />
         </router-link>
         <router-link v-if="!parentStore.isAuthenticated" :to="{ name: 'SingUp' }" class="text-lg items-center hidden lg:block" style="display: inline;">
           <Button
             style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
             :label='$t("Create_an_account")'
-            class="h-full relative create my-auto ce lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
-          />
+            class="h-full relative my-auto ce lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300" />
         </router-link>
       </div>
     </div>
   </nav>
   <div :class="{'hidden':!visible}" class="card justify-content-center opacity-0" style="direction: ltr;">
-    <Sidebar v-model:visible="visible" header="Sidebar">
+    <Drawer v-model:visible="visible" :header="$t('main_menu')">
       <ul>
         <li class="my-auto text-center py-4 lg:py-0">
           <router-link :to="{ name: 'home' }" class="text-base font-extrabold px-3 text-[#A5ABB4] hover:text-[#FF2A5B] transition-colors duration-300" style="line-height: 20px;">{{ $t("home") }}</router-link>
@@ -90,14 +85,13 @@
           <Button
             style="background: linear-gradient(45deg, #FF2A5B, #FF6B8E); color: white; border: none;"
             :label='$t("login")'
-            class="mt-1 m-auto h-full relative mb- pl-4 lg:w-[150px] lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
-          />
+            class="mt-1 m-auto h-full relative mb- pl-4 lg:w-[150px] lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300" />
         </a>
       </ul>
-    </Sidebar>
+    </Drawer>
   </div>
   <div style="direction: ltr !important;" class="flex justify-content-center">
-    <Sidebar v-model:visible="dashboard" header="Sidebar">
+    <Drawer v-model:visible="dashboard" :header="$t('main_menu')">
       <div>
         <img :src="parentImage" style="width: 100px; height: 100px;" class="rounded-full m-auto hover:scale-105 transition-transform duration-300">
       </div>
@@ -119,14 +113,14 @@
           <router-link :to="{ name: 'Booking' }" class="font-bold text-lg text-[#2F3843] hover:text-[#FF2A5B] transition-colors duration-300">{{ $t("bookings") }}</router-link>
         </div>
       </div>
-    </Sidebar>
+    </Drawer>
   </div>
 </template>
 <script setup>
 import { useParentStore } from "../../../stores/ParentStore";
 import { useI18n } from 'vue-i18n';
 import { useRouter } from "vue-router";
-import Sidebar from 'primevue/sidebar';
+import Drawer from 'primevue/drawer';
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import LocaleSelect from "../../../components/LocaleSelect.vue";
 

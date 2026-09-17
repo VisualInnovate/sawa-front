@@ -3,7 +3,7 @@
     <!-- Evaluation Component -->
     <EvaluationType />
 
-    <v-card class="bg-white shadow-lg rounded-xl p-6 max-w-2xl w-full">
+    <div class="sawa-card bg-white shadow-lg rounded-xl p-6 max-w-2xl w-full">
       <!-- User Image -->
       <div class="flex justify-center mb-4">
         <Image 
@@ -60,7 +60,7 @@
           </div>
         </div>
       </div>
-    </v-card>
+    </div>
   </div>
 </template>
 

@@ -126,6 +126,8 @@ const SawaPreset = definePreset(Aura, {
         formField: {
           hoverBorderColor: "{primary.400}",
           color: "{surface.800}",
+          disabledBackground: "{surface.100}",
+          disabledColor: "{surface.400}",
         },
       },
     },

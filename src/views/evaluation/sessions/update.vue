@@ -1,5 +1,5 @@
 <template>
-  <v-card class="p-[1%] bg-slate-50">
+  <div class="sawa-card p-[1%] bg-slate-50">
       
 
       <FullCalendar  :options="opts" ref="fullCalendar" />
@@ -8,39 +8,39 @@
         <div>
 
           <div class="flex flex-column ">
-            <label class="text-right ">{{ $t("title") }}</label>
+            <label class="text-start ">{{ $t("title") }}</label>
             <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
           </div>
           <!-- <div class="flex flex-column ">
-            <label class="text-right ">{{ $t("color") }}</label>
+            <label class="text-start ">{{ $t("color") }}</label>
             <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
           </div> -->
           <div  class="flex flex-column gap-2">
-            <label class="text-right ">{{ $t("نوع التكرار") }}</label>
+            <label class="text-start ">{{ $t("نوع التكرار") }}</label>
             <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
           </div>
          
           <div class="flex gap-2 my-2">
-              <InputSwitch v-model="event.sub" /> 
+              <ToggleSwitch v-model="event.sub" /> 
                 <span class="px-2"> {{ $t('هل تريد تكرار الحدث') }}</span>
           </div>
           <div v-if="event.sub" class="flex flex-column gap-2 py-1">
-                    <label class="w-full text-right" for="username">{{ $t('evalute_type') }}</label>
-                    <Dropdown  required id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
+                    <label class="w-full text-start" for="username">{{ $t('evalute_type') }}</label>
+                    <Select  required v-model="event.repeat_type"    :options="repeat_types"  optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !event.repeat_type}" />
             </div>
             <div v-if="event.repeat_type?.id == 2"  class="flex flex-column gap-2">
-            <label class="text-right ">{{ $t("اختر ايام التكرار") }}</label>
+            <label class="text-start ">{{ $t("اختر ايام التكرار") }}</label>
                <MultiSelect v-model="event.day"  :options="days_week"   optionLabel="name" optionValue="value" :class="{ 'p-invalid': submitted && !event.days}" />
             </div>
             <div v-if="event.repeat_type "  class="flex flex-column gap-2">
-            <label class="text-right ">{{ $t(" تاريخ نهاية التكرار") }}</label>
-            <Calendar    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
+            <label class="text-start ">{{ $t(" تاريخ نهاية التكرار") }}</label>
+            <DatePicker    showButtonBar v-model.number="event.end_of_repeat" showIcon     />   
             </div>
 
           
-          <Button type="submit" class="create mt-3" :label='$t("submit") '  @click="submitted = true "  />
-          <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
-          <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
+          <Button type="submit" class="mt-3" :label='$t("submit") '  @click="submitted = true " />
+          <!-- <Button  label="Update" :loading="loading" @click="updateEvent" />
+          <Button      label="Delete"  :loading="loading"  @click="deleteEvent" severity="danger" />-->
 
         </div>
       </form>
@@ -49,31 +49,31 @@
       <form @submit.prevent="updateEvent">
         <div>
           <div class="flex flex-column ">
-            <label class="text-right ">{{ $t("title") }}</label>
+            <label class="text-start ">{{ $t("title") }}</label>
             <InputText  v-model="event.title" :class="{ 'p-invalid': submitted && !event.title}" />
           </div>
           <!-- <div class="flex flex-column ">
-            <label class="text-right ">{{ $t("color") }}</label>
+            <label class="text-start ">{{ $t("color") }}</label>
             <ColorPicker   :style="{ 'background-color':'#' +event.color  }"  class="w-full h-[50px] mb-2" v-model="event.color" />
           </div> -->
           <div  class="flex flex-column gap-2">
-            <label class="text-right ">{{ $t("doctor") }}</label>
+            <label class="text-start ">{{ $t("doctor") }}</label>
             <MultiSelect v-model="event.type"  :options="event_types" optionLabel="name" optionValue="id" :class="{ 'p-invalid': submitted && !event.user_id}" />
           </div>
           
          
        
          <div class="flex ">
-          <Button type="submit" class="bg-[green] mt-3"  icon="pi pi-pencil"      @click="updateEvent " />
-          <Button type="submit" class="delete mt-3"  icon="pi pi-trash"  @click="deleteEvent "  />
+          <Button type="submit" class="mt-3"  icon="pi pi-pencil"      @click="updateEvent " severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+          <Button type="submit" class="mt-3"  icon="pi pi-trash"  @click="deleteEvent " severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
          </div>
-          <!-- <Button  label="Update" :loading="loading" @click="updateEvent"  />
-          <Button   class="delete"    label="Delete"  :loading="loading"  @click="deleteEvent" />-->
+          <!-- <Button  label="Update" :loading="loading" @click="updateEvent" />
+          <Button      label="Delete"  :loading="loading"  @click="deleteEvent" severity="danger" />-->
 
         </div>
       </form>
     </Dialog>
-  </v-card>
+  </div>
   <Toast></Toast>
 </template>
 
@@ -86,7 +86,7 @@ import TimeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 import InputText from "primevue/inputtext";
 import { useAppLangStore } from "../../../stores/AppLangStore";
 import { Toast } from "flowbite-vue";
@@ -96,7 +96,7 @@ import { text } from "@fortawesome/fontawesome-svg-core";
 export default {
   components: {
     FullCalendar,
-    Calendar,
+    DatePicker,
     InputText,
   },
   data() {
@@ -105,27 +105,27 @@ export default {
 
        days_week :[
         
-          { name: 'Sunday', value: 0 },
-          { name: 'Monday', value: 1 },
-          { name: 'Tuesday', value: 2},
-          { name: 'Thursday', value: 3 },
-          { name: 'Wednesday', value: 4 },
-          { name: 'Friday', value: 5 },
-          { name: 'Saturday', value: 6 }
+          { name: this.$t('weekday.sunday'), value: 0 },
+          { name: this.$t('weekday.monday'), value: 1 },
+          { name: this.$t('weekday.tuesday'), value: 2},
+          { name: this.$t('weekday.thursday'), value: 3 },
+          { name: this.$t('weekday.wednesday'), value: 4 },
+          { name: this.$t('weekday.friday'), value: 5 },
+          { name: this.$t('weekday.saturday'), value: 6 }
         
       ],
       event_types : [
                     { name: 'تقيممات', id: 1 },
-                    { name: 'اجتماعات', id: 2 },
-                    { name: 'استشارات', id: 3 },
+                    { name: this.$t('event_type.meetings'), id: 2 },
+                    { name: this.$t('event_type.consultations'), id: 3 },
                    
  
       ],
       repeat_types:[
-                    { name: 'تكرار ايام ',type:'single','dateFormat':'DD MM yy ', id: 1 },
-                    { name: 'تكرار اسبوعي ',type:'single','dateFormat':'DD MM yy ', id: 2 },
-                    { name: 'تكرار الشهور',type:'month','dateFormat':' MM yy ', id: 3 },
-                    { name: 'تكرار السنوات',type:'year','dateFormat':'  yy ', id: 4 },
+                    { name: this.$t('repeat_type.days'),type:'single','dateFormat':'DD MM yy ', id: 1 },
+                    { name: this.$t('repeat_type.weekly'),type:'single','dateFormat':'DD MM yy ', id: 2 },
+                    { name: this.$t('repeat_type.monthly'),type:'month','dateFormat':' MM yy ', id: 3 },
+                    { name: this.$t('repeat_type.yearly'),type:'year','dateFormat':'  yy ', id: 4 },
       ],
       users:[],
       business_hours:[],

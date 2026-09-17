@@ -12,14 +12,14 @@
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
       <p class="text-lg text-gray-600 my-2">{{ $t("توصييات منزلية") }}</p>
       <button v-can="'consultation settings edit'" @click="showInput = true" class="w-full create bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
-        <i class="pi pi-plus-circle"></i> إضافة عنصر جديد
+        <i class="pi pi-plus-circle"></i> {{ $t("add_new_item") }}
       </button>
       
       <transition name="fade">
         <div v-if="showInput" class="mt-5 bg-gray-100 p-4 rounded-lg shadow-md">
-          <input v-model="newValue" placeholder="قم بادخال التوصية" class="w-full p-3 border border-gray-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input v-model="newValue" :placeholder="$t('enter_recommendation')" class="w-full p-3 border border-gray-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <button @click="addLabel" class="w-full create bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 mt-3 rounded-lg transition-all duration-300">
-            حفظ
+            {{ $t("save") }}
           </button>
         </div>
       </transition>
@@ -38,7 +38,7 @@
         </div>
       </div>
       
-      <Button v-if="labels.length > 0" v-can="'consultation settings edit'" @click="updateSettings" label="حفظ" class="w-full create mt-6 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"></Button>
+      <Button v-if="labels.length > 0" v-can="'consultation settings edit'" @click="updateSettings" :label="$t('save')" class="w-full mt-6 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"></Button>
     </div>
     
     <Toast />
@@ -76,8 +76,8 @@ export default {
         .then(() => {
           this.toast.add({
             severity: "success",
-            summary: "تم الحفظ",
-            detail: "تم تحديث التوصيات بنجاح",
+            summary: this.$t("saved"),
+            detail: this.$t("recommendations_updated"),
             life: 3000,
           });
         })

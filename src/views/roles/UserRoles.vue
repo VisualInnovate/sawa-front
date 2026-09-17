@@ -92,39 +92,40 @@ export default {
 </script>
 
 <template>
-  <div style="margin: 1.5rem 0; padding: auto 0">
-    <v-alert
-      :type="alert.color"
-      :text="alert.text"
-      v-show="alert.show"
-    ></v-alert>
-    <v-row>
-      <v-col sm="12">
-        <div>
-          <!-- Search Permission -->
-          <v-col sm="12" md="6">
-            <v-text-field
-              v-model="permission_name"
-              :label="$t('permission_name')"
-              style="margin: 2rem 0"
-              hide-details="auto"
-            ></v-text-field>
-          </v-col>
-          <!-- End Search Permission -->
-
-          <div class="d-flex flex-row flex-wrap">
-            <v-checkbox
-              v-for="(per, index) in permissions"
-              v-model="checked_permissions[per.id]"
-              :label="per.name"
-              color="success"
-              :value="per.id"
-              @change="onCheckboxChange(per.id, $event.target.checked)"
-            ></v-checkbox>
-          </div>
-        </div>
-      </v-col>
-    </v-row>
-    <v-btn color="success" @click="addPermissions"> {{ $t('submit') }} </v-btn>
+  <div class="page">
+    <Message v-if="alert.show" :severity="alert.color === 'error' ? 'error' : 'success'">{{ alert.text }}</Message>
+    <div class="surface-card form-stack">
+      <IconField class="table-search">
+        <InputIcon class="pi pi-search" />
+        <InputText v-model="permission_name" :placeholder="$t('permission_name')" />
+      </IconField>
+      <div class="check-list">
+        <label v-for="per in permissions" :key="per.id" class="check-item">
+          <Checkbox v-model="checked_permissions[per.id]" binary :trueValue="per.id" :falseValue="undefined"
+            @update:modelValue="onCheckboxChange(per.id, $event !== undefined)" />
+          <span>{{ per.name }}</span>
+        </label>
+      </div>
+      <div>
+        <Button :label="$t('submit')" icon="pi pi-check" @click="addPermissions" />
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.form-stack {
+  display: grid;
+  gap: 1rem;
+}
+.check-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+.check-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+</style>

@@ -9,15 +9,17 @@
       
         <div class="card mt-3 px-4">
 
-          <Accordion v-for="child in childs" :activeIndex="1" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
-             <AccordionTab :header="child.name  ">
-              
-                <div class="grid grid-cols-2 gap-2">
-                 
-                </div>
-          </AccordionTab>
-           
-        </Accordion>
+          <div v-if="!childs.length" class="empty-state bg-white rounded-xl border">
+            <i class="pi pi-users" />
+            {{ $t("no_children_yet") }}
+          </div>
+          <div v-else class="grid gap-3">
+            <router-link v-for="child in childs" :key="child.id" :to="{ name: 'clidreen_parents' }"
+              class="bg-white rounded-xl border p-4 flex items-center justify-between hover:border-[#135c65]">
+              <span class="font-bold text-[#303843]">{{ child.name }}</span>
+              <i class="pi pi-angle-left follow-arrow" aria-hidden="true"></i>
+            </router-link>
+          </div>
 
 
       </div>
@@ -53,8 +55,7 @@ export default {
       await axios
         .get("/api/parent/child/all")
         .then((res) => {
-          this.childs = res.data.childs;
-          console.log(res);
+          this.childs = res.data.childs ?? [];
         })
         .catch((err) => {
           console.log(err);
@@ -71,3 +72,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+[dir="ltr"] .follow-arrow {
+  transform: scaleX(-1);
+}
+</style>

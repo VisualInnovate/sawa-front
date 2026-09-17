@@ -5,40 +5,30 @@
         <div class="text-center"><img src="../../assets/img/sawa_logo.svg" style="width:130px; "></div>
       <div> <p class="w-[100%] text-h4 text-center ma-4" >{{title }}</p></div>
      <div>
-      <p class="w-[100%] text-right ma-4">{{child_Name}}</p>
-      <p class="w-[100%] text-right ma-4">{{birth_date}}</p>
+      <p class="w-[100%] text-start ma-4">{{child_Name}}</p>
+      <p class="w-[100%] text-start ma-4">{{birth_date}}</p>
      </div>
-        <v-card>
+        <div class="sawa-card">
          
           
-          <v-data-table
-              class="hidden-table"
-              :headers="header"
-              :items="desserts"
-              :search="search"
-              
-          >
-          
-          <template v-slot:item="{ item }">
-            <tr>
-              <td>{{ item.columns.id }}</td>
-              <td>{{ item.columns.evaluation_title }}</td>
-              <td>{{ item.columns.side_profile_title }}</td>
-              <td>{{ item.columns.child_age }}</td>
-              <td>{{ item.columns.diff_age}}</td>
-              <td>{{ item.columns.grow_age }}</td>
-              <td>{{Math.round(item.columns.late_percentage)}} %</td>
-              <td>{{ item.columns.result_created_at}}</td>
+          <table class="print-table">
+          <thead>
+            <tr><th v-for="column in header" :key="column.key ?? column.title">{{ column.title }}</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in desserts" :key="item.id ?? index">
+              <td>{{ item.id }}</td>
+              <td>{{ item.evaluation_title }}</td>
+              <td>{{ item.side_profile_title }}</td>
+              <td>{{ item.child_age }}</td>
+              <td>{{ item.diff_age }}</td>
+              <td>{{ item.grow_age }}</td>
+              <td>{{ Math.round(item.late_percentage) }} %</td>
+              <td>{{ item.result_created_at }}</td>
             </tr>
-          </template>
-         
-           
-            <template #bottom>
-  
-            </template>
-  
-          </v-data-table>
-        </v-card>
+          </tbody>
+        </table>
+        </div>
   
   
       </div>
@@ -69,7 +59,7 @@ import axios from 'axios'
     },
     header() {
       return this.headers = [
-        {title: this.$t('id') ,key:'id'},
+        {title: '#', key: 'id'},
 
         { title:this.$t('evaluation_title'), key: 'evaluation_title'},
           { title:this.$t('side_profile_title'), key: 'side_profile_title' },
@@ -156,4 +146,19 @@ import axios from 'axios'
    
     border: 1px solid rgb(239, 239, 239)
   }
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.print-table th,
+.print-table td {
+  border: 1px solid #cbd5e1;
+  padding: 0.4em 0.5em;
+  text-align: start;
+}
+.print-table th {
+  background: #eef8f9;
+  color: #135c65;
+}
 </style>

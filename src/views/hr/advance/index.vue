@@ -1,5 +1,5 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import moment from "moment";
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
@@ -159,11 +159,11 @@ const initFilters = () => {
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
-        <Toolbar class="mb-4 shadow-md">
+      <div class="page">
+        <Toolbar>
           <template #start>
             <div class="my-2">
-            <Button v-can="'financial advance create'" :label='$t("advance")' icon="pi pi-plus" class="p-button-success mr-2" @click="openNew"></Button>
+            <Button v-can="'financial advance create'" :label='$t("advance")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
 <!--              <Button-->
 <!--                label="Delete"-->
 <!--                icon="pi pi-trash"-->
@@ -183,14 +183,14 @@ const initFilters = () => {
 <!--              choose-label="Import"-->
 <!--              class="mr-2 inline-block"-->
 <!--            />-->
-            <Button v-can="'financial advance list'" :label='$t("export")' icon="pi pi-upload" class="export" @click="exportCSV($event)"/>
+            <Button v-can="'financial advance list'" :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
           </template>
         </Toolbar>
 
         <Toast/>
 
 
-      <div style="" class="shadow-xl ">
+      <div>
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
@@ -208,12 +208,12 @@ const initFilters = () => {
         >
           <template #header>
             <div class="flex w-full  justify-between align-items-center">
-              <h5 class="m-0 my-auto">{{ $t("advances") }}</h5>
+              <h5 class="page-title">{{ $t("advances") }}</h5>
              <div>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
+              <IconField class="table-search mt-2 md:mt-0">
+                <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </span>
+              </IconField>
               </div>
             </div>
           </template>
@@ -239,7 +239,7 @@ const initFilters = () => {
            </Column>
            <Column field="status" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-                <Dropdown  :disabled="!$can('financial advance edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }"     id="pv_id_1" style="direction: ltr !important; text-align: center !important;" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+                <Select  :disabled="!$can('financial advance edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
 
                
             </template>
@@ -252,19 +252,15 @@ const initFilters = () => {
         
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
-              <div >
+              <div class="table-actions">
                 <Button
                 v-can="'financial advance edit'"
                 icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
+                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
                 v-can="'financial advance delete'"
                 icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
               </div>
             </template>
           </Column>
@@ -281,45 +277,45 @@ const initFilters = () => {
             >
           </div>
           <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" class=" p-button-text" @click="deleteDialog = false"/>
-            <Button  :label='$t("yes")' icon="pi pi-check" class="p-button-text" @click="deleteAction"/>
+            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <form @submit.prevent="create">
             <div class="flex flex-column gap-2">
-                    <label class="text-right ">{{ $t("employee_name") }}</label>     
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="advance.employee_id"  option-value="id" :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full "  :class="{ 'p-invalid': submitted && !advance.employee_id }"/>
+                    <label class="text-start ">{{ $t("employee_name") }}</label>     
+                    <Select required v-model="advance.employee_id"  option-value="id" :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full"  :class="{ 'p-invalid': submitted && !advance.employee_id }"/>
                 </div>
           
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('advance_mount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="advance.amount"  :class="{ 'p-invalid': submitted && !advance.amount}"/>
+                  <label class="w-full text-start" for="username">{{ $t('advance_mount') }}</label>
+                <InputNumber required class="text-center" v-model="advance.amount"  :class="{ 'p-invalid': submitted && !advance.amount}"/>
             </div>
            
            <div class="w-full text-center">
-            <Button type="submit" @click="submitted=true" class="create m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>  
           </form>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <form @submit.prevent="update">
             <div class="flex flex-column gap-2">
-                    <label class="text-right ">{{ $t("employee_name") }}</label>     
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="advance.employee_id"  option-value="id" :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full "  :class="{ 'p-invalid': submitted && !advance.employee_id }"/>
+                    <label class="text-start ">{{ $t("employee_name") }}</label>     
+                    <Select required v-model="advance.employee_id"  option-value="id" :options="employees" optionLabel="name" :placeholder='$t("employee_name")' class="w-full"  :class="{ 'p-invalid': submitted && !advance.employee_id }"/>
                 </div>
           
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-right" for="username">{{ $t('advance_mount') }}</label>
-                <InputNumber required class="bg-[#f7f5f5] text-center" v-model="advance.amount"  :class="{ 'p-invalid': submitted && !advance.amount}"/>
+                  <label class="w-full text-start" for="username">{{ $t('advance_mount') }}</label>
+                <InputNumber required class="text-center" v-model="advance.amount"  :class="{ 'p-invalid': submitted && !advance.amount}"/>
             </div>
            <div class="w-full text-center">
-            <Button type="submit" @click="submitted=true" class="bg-[green] m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
            </div>  
           </form>
         </Dialog>
       </div>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>

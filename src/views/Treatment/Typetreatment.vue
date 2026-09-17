@@ -2,45 +2,45 @@
   <div class="container">
     <Treat></Treat>
     <!-- Header Section -->
-    <v-dialog v-model="isEditing"   class="form-adds" max-width="600">
+    <Dialog v-model:visible="isEditing" modal :style="{ width: '600px', maxWidth: '95vw' }">
 
-      <v-card>
-        <v-card-title>
+      <div class="sawa-card">
+        <div class="sawa-card-title">
           <h2 class="mb-1">{{ $t("editTypetreatment") }}</h2>
-        </v-card-title>
-        <v-card-text>
-          <v-text-field v-model="editFormData.title" :label="$t('title')" outlined required></v-text-field>
+        </div>
+        <div class="sawa-card-text">
+          <InputText v-model="editFormData.title" required :placeholder="$t('title')" fluid />
           <!-- Add other form fields as needed -->
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="updateItem(editFormData.id)" class="submit-button" elevation="2">
+        </div>
+        <div class="sawa-card-actions">
+          <Button @click="updateItem(editFormData.id)" class="submit-button">
             {{ $t("edit") }}
-          </v-btn>
-          <v-btn @click="closeEditForm" class="cancel-button" elevation="2">
+          </Button>
+          <Button @click="closeEditForm" class="cancel-button">
             {{ $t("Cancel") }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog v-model="showDialog" class="form-adds" max-width="600">
-      <v-card class="form-all" style="border-radius: 15px; ">
-        <v-card-title>
+          </Button>
+        </div>
+      </div>
+    </Dialog>
+    <Dialog v-model:visible="showDialog" modal :style="{ width: '600px', maxWidth: '95vw' }">
+      <div class="sawa-card form-all" style="border-radius: 15px; ">
+        <div class="sawa-card-title">
           <h2 class="mb-1">{{ $t("addtype") }}</h2>
-        </v-card-title>
-        <v-card-text>
-          <v-text-field v-model="formData.title" :label="$t('title')" outlined required></v-text-field>
+        </div>
+        <div class="sawa-card-text">
+          <InputText v-model="formData.title" required :placeholder="$t('title')" fluid />
           <!-- Add other form fields as needed -->
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="saveItem" class="submit-button" elevation="2">
+        </div>
+        <div class="sawa-card-actions">
+          <Button @click="saveItem" class="submit-button">
             {{ $t("submit") }}
-          </v-btn>
-          <v-btn @click="closeForm" class="" elevation="2">
+          </Button>
+          <Button @click="closeForm">
             {{ $t("Cancel") }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+          </Button>
+        </div>
+      </div>
+    </Dialog>
     <div class="header">
 
       <div class="paragraph">
@@ -48,15 +48,15 @@
         <p>{{ $t("addtypelist") }}</p>
       </div>
       <div class="search-section">
-        <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
-        <v-icon color="success" size="40" @click="performSearch()" class="icon-border">mdi-magnify</v-icon>
+        <input type="text" v-model="searchQuery" :placeholder="$t('search')" class="search-input" />
+        <Button icon="pi pi-search" rounded variant="outlined" severity="success" @click="performSearch()" />
       </div>
 
       <div class="add-data">
-        <v-col cols="12" sm="6" md="4" class="create-user-link" @click="openForm">
-          <v-icon color="success" size="40" class="icon-border">mdi-plus</v-icon>
+        <div cols="12" sm="6" md="4" class="flex-1 min-w-0 create-user-link" @click="openForm">
+          <i class="pi pi-plus" aria-hidden="true"></i>
           <p>{{ $t("addtype") }}</p>
-        </v-col>
+        </div>
       </div>
     </div>
     <div class="content" v-for="(treatment, index) in roomssearchQuery" :key="index">
@@ -69,19 +69,19 @@
 
       <div class="third-div">
         <!-- Content for the third div -->
-        <v-icon small color="primary" class="mx-3" @click="editData(treatment.id)">mdi-pencil</v-icon>
-        <v-icon small color="error mx-3" @click.prevent="deleteItem(treatment.id)">mdi-delete</v-icon>
+        <Button icon="pi pi-pencil" rounded variant="outlined" severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" @click="editData(treatment.id)" />
+        <Button icon="pi pi-trash" rounded variant="outlined" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="deleteItem(treatment.id)" />
       </div>
 
     </div>
-    <v-container>
+    <div class="w-full">
       <!-- Your data display section -->
 
       <!-- Pagination Controls -->
-      <v-row justify="center">
-        <v-pagination v-model="page" length="5" color="blue"></v-pagination>
-      </v-row>
-    </v-container>
+      <div class="flex flex-wrap gap-4 w-full" justify="center">
+        <Paginator :rows="1" :totalRecords="Number(5)" :first="page - 1" @page="page = $event.page + 1" />
+      </div>
+    </div>
 
 
     <!-- Rest of your component -->
@@ -159,8 +159,8 @@ export default {
         .then(response => {
           console.log('Item deleted successfully:', response.data);
           Swal.fire(
-            'تم الحذف بنجاح!',
-            'Your treatment has been deleted.',
+            this.$t('deleted_successfully'),
+            '',
             'success'
           );
 
@@ -176,8 +176,8 @@ export default {
           // Handle any errors here
           console.error("There was an error deleting the treatment: ", error);
           Swal.fire(
-            'Error!',
-            'There was a problem deleting your treatment.',
+            this.$t('error'),
+            this.$t('request_failed_retry'),
             'error'
           );
         });
@@ -241,7 +241,7 @@ export default {
           // Optionally, show a success message to the user
           this.showAlert({
             type: "success",
-            message: "Item saved successfully.",
+            message: this.$t("successful"),
           });
         })
         .catch((error) => {
@@ -254,7 +254,7 @@ export default {
             // Optionally, show an error message to the user
             this.showAlert({
               type: "error",
-              message: "Failed to save item. Please try again.",
+              message: this.$t("request_failed_retry"),
             });
           }
         });

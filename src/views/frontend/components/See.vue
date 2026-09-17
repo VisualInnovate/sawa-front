@@ -15,7 +15,7 @@
           <div class="">
             <p class="p-4 pt-14 text-[#FB6E8F]">يونيو 2021</p>
           </div>
-          <div class="text-right w-[75%]">
+          <div class="text-start w-[75%]">
             <p class="p-3">عبدالله احمد</p>
             <p class="text-[#8A8B8B] p-2">لكم جزيل الشكر طفلي اصبح مهاره</p>
           </div>
@@ -25,7 +25,7 @@
           <div class="">
             <p class="p-4 pt-14 text-[#FB6E8F]">يونيو 2021</p>
           </div>
-          <div class="text-right w-[75%]">
+          <div class="text-start w-[75%]">
             <p class="p-3">عبدالله احمد</p>
             <p class="text-[#8A8B8B] p-2">لكم جزيل الشكر طفلي اصبح مهاره</p>
           </div>
@@ -35,7 +35,7 @@
           <div class="">
             <p class="p-4 pt-14 text-[#FB6E8F]">يونيو 2021</p>
           </div>
-          <div class="text-right w-[75%]">
+          <div class="text-start w-[75%]">
             <p class="p-3">عبدالله احمد</p>
             <p class="p-2 text-[#8A8B8B]">لكم جزيل الشكر طفلي اصبح مهاره</p>
           </div>
@@ -45,7 +45,7 @@
           <div class="">
             <p class="p-4 pt-14 text-[#FB6E8F]">يونيو 2021</p>
           </div>
-          <div class="text-right w-[75%]">
+          <div class="text-start w-[75%]">
             <p class="p-3">عبدالله احمد</p>
             <p class="text-[#8A8B8B] p-2">لكم جزيل الشكر طفلي اصبح مهاره</p>
           </div>

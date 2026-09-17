@@ -1,7 +1,8 @@
 <script setup>
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import {GoogleMap, Marker, Circle} from "vue3-google-map";
+import { mapPoint } from "@/utils/mapPoint";
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -81,16 +82,16 @@ const initFilters = () => {
 <template>
   <div v-can="'hr settings list'" class="grid">
     <div class="col-12">
-      <v-card class="card max-w-3xl p-[2%] m-auto bg-slate-50">
+      <div class="sawa-card card max-w-3xl p-[2%] m-auto bg-slate-50">
               <h2 class="text-3xl py-1 font-bold text-center text-[#473e3e]">{{ $t("hr_settings") }}</h2>
         <Toast/>
         <form @submit.prevent="update" class="grid lg:grid-cols-2 grid-cols-1 gap-4">
           <div class="py-3">
                   <GoogleMap api-key="AIzaSyDZnJeq94aaneiA3QWUZdWYV9uKDEjxjas" @click="handleMapClick"
                   style="width: 100%; height: 400px;"
-                  :center="{ lat: 		parseFloat(location.latitude), lng: parseFloat(location.longitude)} " :zoom="14">
+                  :center="mapPoint({ latitude: settings.company_lat, longitude: settings.company_long })" :zoom="14">
                   <Marker
-                  :options="{ position: { lat: parseFloat(location.latitude)		, lng: parseFloat(location.longitude) } }"/>
+                  :options="{ position: mapPoint({ latitude: settings.company_lat, longitude: settings.company_long }) }"/>
                 
                  </GoogleMap>
 
@@ -110,14 +111,14 @@ const initFilters = () => {
           <div class="field mb-5">
             <p for="last">{{ $t("company_lat") }} </p>
             <div class="flex">
-              <InputText readonly   class="mt-3 mx-1 w-full" v-model="settings.company_lat" required="true"  :class="{ 'p-invalid': submitted && !settings.company_lat } " />
+              <InputText readonly   class="mt-3 mx-1 w-full" v-model="settings.company_lat" required="true"  :class="{ 'p-invalid': submitted && !settings.company_lat }" />
             </div>
             <small v-if="submitted && !settings?.company_lat" class="p-invalid text-red-600" > {{$t("company_lat") + ' ' + $t("required") }}.</small>
 
 
           </div>
           <div class="flex ">
-            <Button v-can="'hr settings edit'" @click="submitted=true"  type="submit" :label='$t("save")' icon="pi pi-check" class=" create " />
+            <Button v-can="'hr settings edit'" @click="submitted=true"  type="submit" :label='$t("save")' icon="pi pi-check" />
 
           </div>
 
@@ -125,7 +126,7 @@ const initFilters = () => {
 
         </form>
 
-      </v-card>
+      </div>
     </div>
   </div>
 </template>

@@ -1,25 +1,19 @@
 
 <template>
-  <v-card class="card relative ">
-         
-<div class="absolute z-50 top-1 ltr:right-0-4 rtl:left-4 flex flex-column gap-2">
-                        
-                </div>
-      <TabView  v-model:activeIndex="active">
-            
-          <TabPanel :header="$t('student_details')">
-        
-            <Details></Details>
-          </TabPanel>
-          <TabPanel :header="$t('evaluation_order')">
-            <Requests></Requests>
-            
-          </TabPanel>
-          <TabPanel :header="$t('Consultations_evaluations')">
-            <Evaluation></Evaluation>
-          </TabPanel>
-      </TabView>
-  </v-card>
+  <div class="sawa-card profile-page">
+    <Tabs value="details">
+      <TabList>
+        <Tab value="details">{{ $t("student_details") }}</Tab>
+        <Tab value="requests">{{ $t("evaluation_order") }}</Tab>
+        <Tab value="evaluations">{{ $t("Consultations_evaluations") }}</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel value="details"><Details /></TabPanel>
+        <TabPanel value="requests"><Requests /></TabPanel>
+        <TabPanel value="evaluations"><Evaluation /></TabPanel>
+      </TabPanels>
+    </Tabs>
+  </div>
 </template>
 
 <script>

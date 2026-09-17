@@ -1,11 +1,11 @@
 <template>
   <Nave />
   <Toast />
- <Banner heading="الاطفال" title=" يمكنك اضافة طفل من هنا"></Banner>
+ <Banner :heading="$t('children')" :title="$t('children_page_hint')"></Banner>
   <div class="max-w-[1300px] mx-auto py-[4%]">
   <div class="flex justify-between w-full m-auto px-2">
         <h3 class="font-bold text-2xl text-[#303843]">{{ $t("children") }}</h3>
-        <Button @click="Newchilde" class="create h-11" :label='$t("Add_new_child")'></Button>
+        <Button @click="Newchilde" class="h-11" :label='$t("Add_new_child")'></Button>
    </div>
   <!-- Double-Faced Cards for Each Child -->
  <div class="w-full grid grid-cols-1 lg:grid-cols-4 py-5  ">
@@ -25,9 +25,9 @@
     
     <!-- Back Side -->
     <div class="flip-card-back bg-gradient-to-r from-[#74dbc7] to-[#618990]">
-      <h2 class="text-lg font-semibold">التقييم</h2>
+      <h2 class="text-lg font-semibold">{{ $t("evaluation") }}</h2>
       <p v-if="child.evaluations.length > 0" class="mt-2 text-sm text-center">{{ child.evaluations.join(', ') }}</p>
-      <p v-else class="mt-2 text-sm">لا توجد تقييمات متاحة</p>
+      <p v-else class="mt-2 text-sm">{{ $t("no_evaluations_yet") }}</p>
       <button @click="checkChildStatus(child.id)" class="mt-auto bg-white text-blue-500 px-4 py-2 rounded-lg shadow-md hover:bg-gray-200">{{ $t("Evaluation_stage") }}</button>
     </div>
   </div>
@@ -70,7 +70,8 @@ export default {
       this.showsider = !this.showsider;
     },
     childAge(child) {
-      return formatChildAge(child.birth_date, child.age, this.$t);
+      // `age` from the API is in whole years.
+      return formatChildAge(child.birth_date, child.age == null ? child.age : child.age * 12, this.$t);
     },
     checkChildStatus(id) {
       axios.get(`/api/child/${id}/check-active-booking`).then((res) => {

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="p-[1%]">
+  <div class="sawa-card p-[1%]">
     <h1 class="border-b text-3xl w-full md:w-1/2 uppercase text-green-800 py-4">
       {{ $t("bookings") }} / {{ booking.requester_name }}
     </h1>
@@ -171,15 +171,13 @@
         <div class="flex">
           <Button
             @click="show_answer_modal = true"
-            class="create"
             icon="pi pi-arrow-left"
-            :label="$t('Answer_the_questions')"
-          ></Button>
+            :label="$t('Answer_the_questions')"></Button>
         </div>
       </div>
     </div>
-  </v-card>
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="$can('bookings edit')">
+  </div>
+  <div class="sawa-card mt-5 p-[2%] bg-slate-50" v-if="$can('bookings edit')">
     <form
       @submit.prevent="updateBooking"
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
@@ -235,7 +233,7 @@
           <label class="text-gray-700 font-medium" for="status">{{
             $t("status")
           }}</label>
-          <Dropdown
+          <Select
             :style="{
               backgroundColor:
                 new_status == 1
@@ -247,7 +245,6 @@
                   : 'transparent',
               color: 'white',
             }"
-            id="pv_id_1"
             class="rounded-lg shadow-sm text-center"
             v-model="new_status"
             option-value="code"
@@ -263,10 +260,9 @@
             v-can="'evaluation request create'"
             :disabled="comparisonResult"
             @click="AddEvalte(booking?.child_id)"
-            class="bg-gradient-to-r create from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-80"
+            class="bg-gradient-to-r from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-80"
             icon="pi pi-plus"
-            :label="$t('RatingAdd')"
-          ></Button>
+            :label="$t('RatingAdd')"></Button>
         </div>
 
         <!-- Submit Button -->
@@ -274,13 +270,12 @@
           <Button
             :label="$t('submit')"
             type="submit"
-            class="bg-gradient-to-r create from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-60"
-            icon="pi pi-check"
-          ></Button>
+            class="bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-60"
+            icon="pi pi-check"></Button>
         </div>
       </div>
     </form>
-  </v-card>
+  </div>
 
   <div class="w-full mx-auto">
     <div class="flex justify-center">
@@ -406,9 +401,9 @@
       </div>
     </div>
   </div>
-  <toast></toast>
+  <Toast />
 
-  <v-card class="mt-5 p-[2%] bg-slate-50" v-if="$can('consultations edit')">
+  <div class="sawa-card mt-5 p-[2%] bg-slate-50" v-if="$can('consultations edit')">
     <h2 class="text-lg font-semibold text-gray-800 mb-3">
       {{ $t("نتيجة الاستشارة") }}
     </h2>
@@ -418,7 +413,7 @@
     >
       <div class="flex flex-col">
         <label class="text-gray-600 font-medium text-sm"
-          >السيرة الصحية والنمائية</label
+          >{{ $t("health_development_history") }}</label
         >
         <textarea
           v-model="student_massage.health"
@@ -430,7 +425,7 @@
       </div>
 
       <div class="flex flex-col">
-        <label class="text-gray-600 font-medium text-sm">توصيات المستشار</label>
+        <label class="text-gray-600 font-medium text-sm">{{ $t("consultant_recommendations") }}</label>
         <textarea
           v-model="student_massage.consultant_recommendations"
           required
@@ -442,7 +437,7 @@
 
       <div class="flex flex-col">
         <label class="text-gray-600 font-medium text-sm"
-          >اختر التوصيات المنزلية</label
+          >{{ $t("choose_home_recommendations") }}</label
         >
         <MultiSelect
           v-model="student_massage.filed_value"
@@ -467,7 +462,7 @@
       </div>
       <div class="flex flex-col">
         <label class="text-gray-600 font-medium text-sm">
-          ملاحظات اضافية
+          {{ $t("additional_notes") }}
         </label>
         <textarea
           v-model="student_massage.notes"
@@ -481,14 +476,13 @@
       <Button
         @click="studentMassage"
         :label="$t('submit')"
-        class="w-full py-1.5 mt-3 create bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-200"
-        icon="pi pi-check"
-      >
+        class="w-full py-1.5 mt-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-200"
+        icon="pi pi-check">
       </Button>
     </form>
-  </v-card>
+  </div>
 
-  <v-card v-can="'bookings edit'" class="mt-5 p-[2%] bg-slate-50">
+  <div v-can="'bookings edit'" class="sawa-card mt-5 p-[2%] bg-slate-50">
     <form
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
     >
@@ -498,7 +492,7 @@
         </p>
 
         <label class="block text-gray-700 font-semibold text-lg" for="username">
-          من هذة القائمه يمكنك اضافة مواعيد مسبقة للطفل
+          {{ $t("pre_appointments_hint") }}
         </label>
 
 
@@ -523,11 +517,10 @@
       <Button
         @click="SenPrEvalutions(booking.id)"
         :label="$t('submit')"
-        class="w-full create text-white py-2 px-4 rounded-md font-semibold transition-all duration-300 ease-in-out shadow-md flex items-center justify-center"
-        icon="pi pi-check"
-      />
+        class="w-full text-white py-2 px-4 rounded-md font-semibold transition-all duration-300 ease-in-out shadow-md flex items-center justify-center"
+        icon="pi pi-check" />
     </form>
-  </v-card>
+  </div>
 </template>
 <script>
 import axios from "axios";
@@ -674,7 +667,7 @@ export default {
           consultant_id: localStorage.getItem("user_id"),
           evaluation_type: this.evalate.evaluation_type,
           date: moment(this.evalate.date).format("Y-MM-DD"),
-          specialist_id: this.evalate?.specialist_id,
+          employee_id: this.evalate?.specialist_id,
           start_time: this.evalate?.Session_time?.start,
           end_time: this.evalate?.Session_time?.end,
         })

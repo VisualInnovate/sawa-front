@@ -3,11 +3,12 @@ import axios from "axios";
 import InputText from "primevue/inputtext";
 import moment from "moment";
 import {useToast} from 'primevue/usetoast'
-import Calendar from "primevue/calendar";
+import DatePicker from 'primevue/datepicker';
 import { max } from "date-fns";
 export default {
-  components: { InputText, Calendar },
-  data: () => ({
+  components: { InputText, DatePicker },
+  data() {
+    return {
     pasrents:{},
    
     submitted:false,
@@ -16,11 +17,11 @@ export default {
      option_en:'',
      option_ar:'',
      field_types:[
-     { name:"text" , value:"text" },
-     { name:"number" , value:'number' },
-     { name:"date" , value:'date' },
-     { name:"select" , value:'select' },
-     { name:"File" , value:'File' },
+     { name: this.$t("input_type.text"), value: "text" },
+     { name: this.$t("input_type.number"), value: "number" },
+     { name: this.$t("input_type.date"), value: "date" },
+     { name: this.$t("input_type.select"), value: "select" },
+     { name: this.$t("input_type.file"), value: "File" },
      ],
     cities:{},
     error:{},
@@ -30,7 +31,8 @@ export default {
     },
     lan:[],
     snackbar: true,
-  }),
+  };
+  },
   methods: {
     goBack() {
       this.$router.go(-1);
@@ -79,9 +81,9 @@ export default {
 };
 </script>
 <template>
-  <!--  <v-alert v-if="alert_text!= null " color="green" :text="alert_text" class="mb-5"></v-alert>-->
 
-  <v-card class="p-[1%]">
+
+  <div class="sawa-card p-[1%]">
 
 
      
@@ -91,41 +93,41 @@ export default {
         
            <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('attributable_type') }}</label>
-                    <Dropdown filter required id="pv_id_1" style="direction: ltr !important;" v-model="custom.attributable_type"  option-value="value" :options="modules" optionLabel="name"  class="w-full bg-[#f7f5f5]" :class="{ 'p-invalid': submitted && !custom.attributable_type }" />
+                    <Select filter required v-model="custom.attributable_type"  option-value="value" :options="modules" optionLabel="name"  class="w-full" :class="{ 'p-invalid': submitted && !custom.attributable_type }" />
 
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('field_type') }}</label>
-                    <Dropdown required id="pv_id_1" style="direction: ltr !important;" v-model="custom.field_type"  option-value="value" :options="field_types" optionLabel="name" class="w-full bg-[#f7f5f5] " :class="{ 'p-invalid': submitted && !custom.field_type }" />
+                    <Select required v-model="custom.field_type"  option-value="value" :options="field_types" optionLabel="name" class="w-full" :class="{ 'p-invalid': submitted && !custom.field_type }" />
             </div>
            
           <div class="flex flex-row gap-4 w-full">
             <div class="flex flex-column gap-2 w-full">
                 <div class="flex">
                     <label class="px-1"  for="username">{{ $t('field_name')}} </label>
-                    <label for="username"> ( En ) </label>
+                    <label for="username">{{ $t("in_english") }}</label>
                 </div>
-                    <InputText  required class="bg-[#f7f5f5]" v-model="custom.key.en"  />
+                    <InputText  required v-model="custom.key.en"  />
             </div> 
             <div class="flex flex-column gap-2 w-full">
                 <div class="flex">
                     <label class="px-1" for="username">{{ $t('field_name')}} </label>
-                    <label for="username"> ( Ar ) </label>
+                    <label for="username">{{ $t("in_arabic") }}</label>
                 </div>
-                    <InputText  required class="bg-[#f7f5f5]" v-model="custom.key.ar"  />
+                    <InputText  required v-model="custom.key.ar"  />
             </div> 
           </div>
            <div class="flex flex-row gap-8">
             <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('required') }}</label>
-                    <InputSwitch required class=" px-3" v-model="custom.is_required"/>   
+                    <ToggleSwitch required class=" px-3" v-model="custom.is_required"/>   
             </div>
             <div class="flex flex-column gap-2">
                     <label class="w-full  " for="username">{{ $t('show_in_table') }}</label>
-                    <InputSwitch required class=" px-3" v-model="custom.show_in_table"/>   
+                    <ToggleSwitch required class=" px-3" v-model="custom.show_in_table"/>   
             </div>
            </div>
-           <p>الاختيارات</p>
+           <p>{{ $t("choices") }}</p>
            <table   class="item-table col-span-2 w-[70%]">
             
                 <thead>
@@ -133,13 +135,13 @@ export default {
                     <th>
                         <div class="flex">
                             <label class="px-1"  for="username">{{ $t('option')}} </label>
-                            <label for="username"> ( Ar ) </label>
+                            <label for="username">{{ $t("in_arabic") }}</label>
                         </div>
                     </th>
                     <th>
                         <div class="flex">
                             <label class="px-1"  for="username">{{ $t('option')}} </label>
-                            <label for="username"> ( En ) </label>
+                            <label for="username">{{ $t("in_english") }}</label>
                         </div>
                     </th>
                     
@@ -152,13 +154,13 @@ export default {
                 
                     <td>{{ item.ar }}</td>
                     <td>{{ item.en }}</td>
-                    <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="p-button-rounded delete p-button-success m-auto" /></td>
+                    <td><Button @click="deleteitem(index)"  icon="pi pi-trash" class="m-auto" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" /></td>
                 </tr>
                 <tr >
 
                     <td><InputText   class="w-full" v-model="option_ar"  :class="{ 'p-invalid': submitted && !option_ar}" /></td>
                     <td><InputText   class="w-full" v-model="option_en"  :class="{ 'p-invalid': submitted && !option_ar}" /></td>
-                    <td> <Button   @click="addItem"  required class="create m-auto s " icon="pi pi-plus" ></Button></td>
+                    <td> <Button   @click="addItem"  required class="m-auto s" icon="pi pi-plus"></Button></td>
                 </tr>
                 </tbody>
                 
@@ -166,12 +168,12 @@ export default {
           
           
        <div class="card text-center py-3">
-        <Button type="submit" @click="submitted =true" :label='$t("submit")' class="create w-[90%] lg:w-[50%]"/>
+        <Button type="submit" @click="submitted =true" :label='$t("submit")' class="w-[90%] lg:w-[50%]" />
       </div>   
       </form>
       <Toast/>
     
-  </v-card>
+  </div>
 </template>
 <style>
 
