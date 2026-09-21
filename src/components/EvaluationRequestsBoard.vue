@@ -2,7 +2,13 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getEvaluationTypeLabel } from "../utils/evaluationTypes";
-const props = defineProps({ requests: { type: Array, default: () => [] }, loading: Boolean });
+const props = defineProps({
+  requests: { type: Array, default: () => [] },
+  loading: Boolean,
+  allowDelete: { type: Boolean, default: true },
+  titleKey: { type: String, default: "evaluation_order" },
+  hintKey: { type: String, default: "requests_grouped_hint" },
+});
 defineEmits(["start", "delete"]);
 const { t } = useI18n();
 const search = ref("");
@@ -27,7 +33,7 @@ const name = row => getEvaluationTypeLabel(row.evaluation_type, t, row.title || 
 <template>
   <div class="request-board">
     <header class="request-toolbar">
-      <div><h2>{{ t('evaluation_order') }}</h2><p>{{ t('requests_grouped_hint') }}</p></div>
+      <div><h2>{{ t(titleKey) }}</h2><p>{{ t(hintKey) }}</p></div>
       <div class="request-tools">
         <Tag :value="t('requests_pending_count', { count: pending })" severity="info" />
         <IconField><InputIcon class="pi pi-search" /><InputText v-model="search" :placeholder="t('child_name')" :aria-label="t('search')" /></IconField>
@@ -50,7 +56,7 @@ const name = row => getEvaluationTypeLabel(row.evaluation_type, t, row.title || 
           <Tag :severity="Number(row.status) === 1 ? 'success' : 'warn'" :value="t(Number(row.status) === 1 ? 'status_finished' : 'status_under_evaluation')" />
           <div class="request-actions">
             <Button v-if="Number(row.status) !== 1" v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" icon="pi pi-play" :label="t('start_evaluation')" @click="$emit('start', row)" />
-            <Button v-can="'evaluation request delete'" icon="pi pi-trash" severity="danger" variant="text" :aria-label="t('delete')" @click="$emit('delete', row.id)" />
+            <Button v-if="allowDelete" v-can="'evaluation request delete'" icon="pi pi-trash" severity="danger" variant="text" :aria-label="t('delete')" @click="$emit('delete', row.id)" />
           </div>
         </div>
       </section>

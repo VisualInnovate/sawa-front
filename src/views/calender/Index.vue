@@ -44,7 +44,7 @@
 
       <template #end> </template>
     </Toolbar>
-
+<h2 class="text-xl text-center">{{ childreen.find(child => child.id === event.child_id)?.name }}</h2>
     <p role="status" class="calendar-status">
       <span v-if="employeesLoading || calendarLoading">{{ $t('calendar_loading') }}</span>
       <span v-else-if="calendarError">{{ calendarError }}</span>

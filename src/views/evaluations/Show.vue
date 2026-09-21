@@ -93,10 +93,11 @@ export default {
       try {
         const answers = this.selected.flatMap((value, question_id) => value === undefined ? [] : [{ question_id, value }])
         const endpoint = basalHeader ? `${basalHeader}/basalAge` : 'submit'
-        await axios.post(`/api/evaluations/${this.$route.params.id}/${endpoint}`, {
+        const response = await axios.post(`/api/evaluations/${this.$route.params.id}/${endpoint}`, {
           answers, child_id: this.child_id, date: this.examDateText,
           request_id: this.$route.query.requestId || null, skills: this.skills,
         })
+        this.sideProfileId = response.data.result?.side_profile_id ?? this.sideProfileId
         this.saved = true
         this.child.childInMonths = -1
         this.type = "success"

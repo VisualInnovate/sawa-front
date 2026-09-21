@@ -13,7 +13,7 @@
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
             <span 
             >{{ $t('هل انت متاكد من ازالة هذا العنصر') }} 
-            >?</span
+            </span
             >
           </div>
           <template #footer>
@@ -62,7 +62,7 @@
   import { useStorage } from "@vueuse/core";
   import EvaluationType from '../../components/EvaluationType.vue'
   import moment from "moment";
-  import { fetchUserProfile } from "./userProfile";
+  import { fetchUserProfile, USER_PROFILE_INVALIDATED_EVENT } from "./userProfile";
   import { getEvaluationStartRoute, getEvaluationTypeLabel } from "../../utils/evaluationTypes";
   export default {
      components:{EvaluationType, EvaluationRequestsBoard},
@@ -94,6 +94,9 @@
     },
   
     methods: {
+      refreshProfile() {
+        this.getusers(true)
+      },
       opennew(){
         this.updatedialog=!(this.updatedialog)
       },
@@ -169,6 +172,13 @@
     mounted() {
      this.getusers()
      this.child_id=localStorage.getItem("child_id") 
+     window.addEventListener(USER_PROFILE_INVALIDATED_EVENT, this.refreshProfile)
+    },
+    activated() {
+      this.getusers(true)
+    },
+    beforeUnmount() {
+      window.removeEventListener(USER_PROFILE_INVALIDATED_EVENT, this.refreshProfile)
     },
   };
   </script>

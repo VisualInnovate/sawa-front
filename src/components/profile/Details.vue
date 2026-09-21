@@ -4,6 +4,9 @@
        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
      </div>
      <form v-else class="form-container" ref="myForm" @submit.prevent="update">
+       <Message v-if="!canEditProfile" severity="info" :closable="false" class="mb-4">
+         {{ $t('profile_read_only_hint') }}
+       </Message>
        <!-- Step 1 -->
   
        <div   v-if="currentStep === 0">
@@ -11,8 +14,8 @@
         <div class="p-[2%]  bg-[#FDFDFD]  grid grid-cols-1 lg:grid-cols-2 gap-4">
   
          <div class="col-span-2">
-                  <div ><img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :class="{ 'p-invalid': submitted && !employee.image}" v-if="employee.image" :src=" employee.image" >
-                   <img  onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px ;height: 150px;" :class="{ 'p-invalid': submitted && !employee.image}" v-else src="https://sys.sawa.sawa.academy/public/default.jpg">
+         <div ><img @click="chooseImage" class="m-auto rounded-full" :class="{ 'profile-image-editable': canEditProfile, 'p-invalid': submitted && !employee.image}" style="width: 150px ;height: 150px;" v-if="employee.image" :src=" employee.image" >
+                   <img @click="chooseImage" class="m-auto rounded-full" :class="{ 'profile-image-editable': canEditProfile, 'p-invalid': submitted && !employee.image}" style="width: 150px ;height: 150px;" v-else src="https://sys.sawa.sawa.academy/public/default.jpg">
                   
                    </div>
             
@@ -24,7 +27,7 @@
                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                      </svg>
                  </div>
-             <InputText  class="text-center" v-model="employee.name" :class="{ 'p-invalid': submitted && !employee.name}" />
+             <InputText :disabled="!canEditProfile" class="text-center" v-model="employee.name" :class="{ 'p-invalid': submitted && !employee.name}" />
           </div>
         
           <div class="flex flex-column gap-2 py-1">
@@ -34,17 +37,8 @@
                           <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                           </svg>
                       </div>
-                    <InputText  type="email" class="text-center" v-model="employee.email" :class="{ 'p-invalid': submitted && !employee.email}" />
+                    <InputText :disabled="!canEditProfile" type="email" class="text-center" v-model="employee.email" :class="{ 'p-invalid': submitted && !employee.email}" />
            </div>
-           <div class="flex flex-column gap-2 py-1">                
-                 <div class="flex">
-                         <label class="text-start ">{{ $t("password") }}</label>
-                         <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                         <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
-                         </svg>
-                     </div>
-                   <InputText type="password" class="text-center" v-model="employee.password" :class="{ 'p-invalid': submitted && !employee.password}" />
-             </div>
              <div class="flex flex-column gap-2 py-1">                
                  <div class="flex">
                          <label class="text-start ">{{ $t("title") }}</label>
@@ -52,7 +46,7 @@
                          <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                          </svg>
                      </div>
-                   <InputText  class="text-center" v-model="employee.title" :class="{ 'p-invalid': submitted && !employee.title}" />
+                   <InputText :disabled="!canEditProfile" class="text-center" v-model="employee.title" :class="{ 'p-invalid': submitted && !employee.title}" />
                </div>  
                <div class="flex flex-column gap-2">
                    <div class="flex">
@@ -61,7 +55,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid  required v-model="employee.national_id"  :class="{ 'p-invalid': submitted && !employee.national_id }" />
+                     <InputNumber :disabled="!canEditProfile" inputId="withoutgrouping" :useGrouping="false" fluid required v-model="employee.national_id" :class="{ 'p-invalid': submitted && !employee.national_id }" />
                  </div>  
                  <div class="flex flex-column gap-2">
                    <div class="flex">
@@ -70,12 +64,12 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <DatePicker    showButtonBar v-model.number="employee.date_of_birth" showIcon    :class="{ 'p-invalid': submitted && !employee.date_of_birth }" /> 
+                     <DatePicker :disabled="!canEditProfile" showButtonBar v-model.number="employee.date_of_birth" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_birth }" /> 
                  </div> 
                <div class=" flex-column gap-2 py-1 hidden">
                    <label class="w-full " for="username">{{ $t('personal_image') }}</label>
             
-                   <InputText name="file"  ref="file" @change="uploadFile" accept="image/*" id="filr"   type="file" class="w-full" />
+                   <InputText :disabled="!canEditProfile" name="file" ref="file" @change="uploadFile" accept="image/*" id="filr" type="file" class="w-full" />
                  <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
                </div>
         </div>
@@ -99,7 +93,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-              <Select required v-model="employee.position_id"  option-value="id" :options="positions" optionLabel="title" :placeholder='$t("position_name")' class="w-full"  :class="{ 'p-invalid': submitted && !employee.position_id }"/>
+              <Select :disabled="!canEditProfile" required v-model="employee.position_id" option-value="id" :options="positions" optionLabel="title" :placeholder='$t("position_name")' class="w-full" :class="{ 'p-invalid': submitted && !employee.position_id }"/>
           </div>
           <div class="flex flex-column gap-2">
                     <div class="flex">
@@ -108,7 +102,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <Select required v-model="employee.shift_id"  option-value="id" :options="shifts" optionLabel="title" :placeholder='$t("shift_name")' class="w-full"  :class="{ 'p-invalid': submitted && !employee.shift_id }"/>
+                     <Select :disabled="!canEditProfile" required v-model="employee.shift_id" option-value="id" :options="shifts" optionLabel="title" :placeholder='$t("shift_name")' class="w-full" :class="{ 'p-invalid': submitted && !employee.shift_id }"/>
   
            </div>
            <div class="flex flex-column gap-2">
@@ -118,7 +112,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid   required v-model="employee.basic_salary" :placeholder='$t("basic_salary")' :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
+                     <InputNumber :disabled="!canEditProfile" inputId="withoutgrouping" :useGrouping="false" fluid required v-model="employee.basic_salary" :placeholder='$t("basic_salary")' :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
              </div>
              <div class="flex flex-column gap-2">
                    <div class="flex">
@@ -127,7 +121,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <InputNumber  required v-model="employee.spotter" :placeholder='$t("Spotter")' :class="{ 'p-invalid': submitted && !employee.Spotter }" />
+                     <InputNumber :disabled="!canEditProfile" required v-model="employee.spotter" :placeholder='$t("Spotter")' :class="{ 'p-invalid': submitted && !employee.Spotter }" />
              </div>
              <div class="flex flex-column gap-2 py-1">                
                  <div class="flex">
@@ -136,7 +130,7 @@
                          <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                          </svg>
                      </div>
-                   <InputText  class="text-center" v-model="employee.contract_period" :class="{ 'p-invalid': submitted && !employee.contract_period}" />
+                   <InputText :disabled="!canEditProfile" class="text-center" v-model="employee.contract_period" :class="{ 'p-invalid': submitted && !employee.contract_period}" />
                </div>  
              <div class="flex flex-column gap-2">
                    <div class="flex">
@@ -145,7 +139,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <DatePicker    showButtonBar v-model.number="employee.date_of_enrollment" showIcon    :class="{ 'p-invalid': submitted && !employee.date_of_enrollment }" /> 
+                     <DatePicker :disabled="!canEditProfile" showButtonBar v-model.number="employee.date_of_enrollment" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_enrollment }" /> 
                  </div> 
            <div class="flex flex-column gap-2 py-1">
                    <div class="flex">
@@ -154,7 +148,7 @@
                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                      </svg>
                    </div>
-                   <Select v-model="employee.type"  option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.type}"  />
+                   <Select :disabled="!canEditProfile" v-model="employee.type" option-value="id" filter :options="tpes()" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.type}" />
            </div>
             <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
                    <div class="flex">
@@ -163,7 +157,7 @@
                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                      </svg>
                    </div>
-                   <MultiSelect  v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
+                   <MultiSelect :disabled="!canEditProfile" v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills}" />
                </div>
                <div v-if="employee.type == 0 || employee.type ==2 " class="flex flex-column gap-2">
                    <div class="flex">
@@ -172,7 +166,7 @@
                      <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                      </svg>
                    </div>
-                   <MultiSelect  v-model="employee.treatments" filter option-value="id" :options="treatments" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.treatments}" />
+                   <MultiSelect :disabled="!canEditProfile" v-model="employee.treatments" filter option-value="id" :options="treatments" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.treatments}" />
                </div>
                <div  class="flex flex-column gap-2">
                      <div class="flex">
@@ -181,7 +175,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <MultiSelect  v-model="employee.department" filter option-value="id" :options="departments" optionLabel="title" :class="{ 'p-invalid': submitted && !employee.department}" />
+                     <MultiSelect :disabled="!canEditProfile" v-model="employee.department" filter option-value="id" :options="departments" optionLabel="title" :class="{ 'p-invalid': submitted && !employee.department}" />
                </div>
                
                <div class="flex flex-column gap-2 py-1">
@@ -191,7 +185,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                   <Select v-model="employee.role"  option-value="id" filter :options="roles" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.role}" />
+                   <Select :disabled="!canEditProfile" v-model="employee.role" option-value="id" filter :options="roles" optionLabel="name" :class="{ 'p-invalid': submitted && !employee.role}" />
                  </div>
      
        </div>
@@ -204,6 +198,36 @@
   
        <Toast />
      </form>
+
+     <section v-if="!loading" class="password-section">
+       <div>
+         <h3>{{ $t('change_password') }}</h3>
+         <p>{{ $t('change_own_password_hint') }}</p>
+       </div>
+       <form class="password-form" @submit.prevent="updatePassword">
+         <div class="flex flex-column gap-2">
+           <label for="profile-current-password">{{ $t('current_password') }}</label>
+           <Password inputId="profile-current-password" v-model="passwordForm.current_password" toggleMask
+             :feedback="false" autocomplete="current-password" fluid
+             :invalid="Boolean(passwordErrors.current_password)" />
+           <small v-if="passwordErrors.current_password" class="field-error">{{ passwordErrors.current_password[0] }}</small>
+         </div>
+         <div class="flex flex-column gap-2">
+           <label for="profile-new-password">{{ $t('new_password') }}</label>
+           <Password inputId="profile-new-password" v-model="passwordForm.password" toggleMask
+             autocomplete="new-password" fluid :invalid="Boolean(passwordErrors.password)" />
+           <small v-if="passwordErrors.password" class="field-error">{{ passwordErrors.password[0] }}</small>
+         </div>
+         <div class="flex flex-column gap-2">
+           <label for="profile-password-confirmation">{{ $t('confirm_password') }}</label>
+           <Password inputId="profile-password-confirmation" v-model="passwordForm.password_confirmation" toggleMask
+             :feedback="false" autocomplete="new-password" fluid :invalid="passwordMismatch" />
+           <small v-if="passwordMismatch" class="field-error">{{ $t('passwords_do_not_match') }}</small>
+         </div>
+         <Button type="submit" icon="pi pi-lock" :label="$t('change_password')" :loading="passwordLoading"
+           :disabled="!passwordForm.current_password || !passwordForm.password || passwordMismatch" />
+       </form>
+     </section>
    </div>
   </template>
   
@@ -212,6 +236,7 @@
   import InputNumber from "primevue/inputnumber";
   import moment from "moment";
   import { fetchUserProfile } from "./userProfile";
+  import { can } from "../../utils/permissions";
   
     import {useToast} from 'primevue/usetoast'
   export default {
@@ -240,11 +265,24 @@
           error: {},
           maxDate: new Date(),
           treatments:[]
+          ,passwordForm: { current_password: '', password: '', password_confirmation: '' }
+          ,passwordErrors: {}
+          ,passwordLoading: false
         // Add other validation rules for the title field
       };
   
     },
   
+    computed: {
+      canEditProfile() {
+        return can('employees edit')
+      },
+      passwordMismatch() {
+        return Boolean(this.passwordForm.password_confirmation) &&
+          this.passwordForm.password !== this.passwordForm.password_confirmation
+      },
+    },
+
     methods: {
       // ... existing methods ...
     
@@ -258,6 +296,9 @@
           { name:this.$t('أداري'), id: 6 },
         ]
         },
+      chooseImage() {
+        if (this.canEditProfile) document.getElementById('filr')?.click()
+      },
   
           nextStep() {
             if (this.currentStep < this.steps.length - 1) {
@@ -311,6 +352,14 @@
           
       
               this.employee.image = response.data.user.image          
+              if (!this.canEditProfile) {
+                this.positions = response.data.user.position ? [response.data.user.position] : []
+                this.shifts = response.data.user.shift ? [response.data.user.shift] : []
+                this.roles = response.data.user.roles ?? []
+                this.skills = response.data.user.skills ?? []
+                this.departments = response.data.user.departments ?? []
+                this.treatments = response.data.user.treatments ?? []
+              }
          
            
                
@@ -343,6 +392,7 @@
   
       // Job-details dropdowns are only needed on step 2, so load them when it is first opened.
       getLookups(){
+          if (!this.canEditProfile) return
           if (this.lookupsLoaded || this.lookupsLoading) return
           this.lookupsLoading = true
           Promise.all([
@@ -365,11 +415,11 @@
       
     
       update() {
+        if (!this.canEditProfile) return
         const body = new FormData();
           if (this.employee.name) body.append("name", this.employee.name);
           if (this.employee.title) body.append("title", this.employee.title);
           if (this.employee.email) body.append("email", this.employee.email);
-          if (this.employee.password) body.append("password", this.employee.password);
           if (this.employee.shift_id) body.append("shift_id", this.employee.shift_id);
           if (this.employee.spotter) body.append("spotter", this.employee.spotter);
           if (this.employee.position_id) body.append("position_id", this.employee.position_id);
@@ -390,6 +440,23 @@
             this.$toast.add({ severity: 'error', summary: this.$t("error"), detail:  `${el.response.data.message}`, life: 3000 });
       })
       },
+      async updatePassword() {
+        if (this.passwordLoading || this.passwordMismatch) return
+        this.passwordLoading = true
+        this.passwordErrors = {}
+        try {
+          await axios.post('/api/users/profile/password', this.passwordForm)
+          this.passwordForm = { current_password: '', password: '', password_confirmation: '' }
+          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('password_changed_successfully'), life: 3000 })
+        } catch (error) {
+          this.passwordErrors = error.response?.data?.errors ?? {}
+          if (!Object.keys(this.passwordErrors).length) {
+            this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('request_failed_retry'), life: 4000 })
+          }
+        } finally {
+          this.passwordLoading = false
+        }
+      },
      
     },
     mounted() {
@@ -400,6 +467,47 @@
   </script>
   
   <style scoped>
+  .profile-image-editable {
+    cursor: pointer;
+  }
+
+  .password-section {
+    margin-top: 1.25rem;
+    padding: 1.25rem;
+    border: 1px solid var(--sawa-border, #dce8e8);
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .password-section h3 {
+    margin: 0;
+    color: var(--sawa-primary, #135c65);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .password-section p {
+    margin: 0.35rem 0 1rem;
+    color: var(--sawa-muted, #64748b);
+  }
+
+  .password-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .password-form .p-button {
+    width: fit-content;
+  }
+
+  @media (max-width: 900px) {
+    .password-form {
+      grid-template-columns: 1fr;
+    }
+  }
+
   /* Add custom styles for the name input field */
   .name-input {
     height: 70vh;
