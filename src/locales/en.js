@@ -1,4 +1,9 @@
 export default {
+  requests_grouped_hint: "Each child's evaluations grouped by day and ordered by appointment time",
+  requests_pending_count: "{count} pending",
+  requests_count: "{count} evaluations",
+  milestone_domains: "Domain",
+  milestone_general_goals: "General goal",
   export: "Export",
   close: "Close",
   roles: "Roles",

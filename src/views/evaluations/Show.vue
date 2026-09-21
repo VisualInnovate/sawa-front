@@ -1,5 +1,6 @@
 <script>
 import axios from "axios";
+import { resetUserProfile } from "../../components/profile/userProfile";
 import { format, formatDistance, formatRelative, subDays, differenceInMonths } from 'date-fns'
 import moment from "moment";
 import InputText from 'primevue/inputtext';
@@ -19,6 +20,8 @@ export default {
     ],
 
     title: "",
+    saved: false,
+    sideProfileId: null,
     skills: [],
     skill: {},
     answers: [],
@@ -67,6 +70,7 @@ export default {
       const id = this.$route.params.id
       axios.get(`/api/evaluations/${id}/show`).then(res => {
         this.title = res.data.evaluation?.title ?? ''
+        this.sideProfileId = res.data.evaluation?.side_profile_id
       })
       axios.get(`/api/evaluations/${id}`).then(res => {
         this.headerAndQuestions = res.data.evaluation ?? {}
@@ -79,41 +83,35 @@ export default {
     
     */
     async submit() {
-      this.load = true
-      setTimeout(() => {
-        this.load = false
-      }, 3000);
       this.submitted = true
-      if (!this.child_id || this.unansweredCount) {
-        this.load = false
-        return
-      }
-      this.answers = []
-      this.selected.forEach((value, question_id) => {
-        this.answers.push({ question_id, value })
-      })
-      axios.post(`/api/evaluations/${this.$route.params.id}/submit`, {
-        'answers': this.answers,
-        'child_id': this.child_id,
-        'date': this.examDateText,
-        skills: this.skills
-      }).then(async res => {
-        if (res.data.status == 200) {
-          const requestId = this.$route.query.requestId
-          if (requestId) {
-            await axios.post(`/api/evaluation-request/change-status/${requestId}`, { status: 1 })
-          }
-          this.child.childInMonths = -1 //reset child in months to -1 to not show any question header
-
-          this.type = "success"
-        }
-      }).catch((error) => {
-        this.error = error.response?.data ?? {}
+      if (!this.child_id || this.unansweredCount || !this.child?.canDoExam) return
+      await this.saveResult()
+    },
+    async saveResult(basalHeader = null) {
+      if (this.load || this.saved) return
+      this.load = true
+      try {
+        const answers = this.selected.flatMap((value, question_id) => value === undefined ? [] : [{ question_id, value }])
+        const endpoint = basalHeader ? `${basalHeader}/basalAge` : 'submit'
+        await axios.post(`/api/evaluations/${this.$route.params.id}/${endpoint}`, {
+          answers, child_id: this.child_id, date: this.examDateText,
+          request_id: this.$route.query.requestId || null, skills: this.skills,
+        })
+        this.saved = true
+        this.child.childInMonths = -1
+        this.type = "success"
+        resetUserProfile()
+      } catch (error) {
         this.type = "error"
-        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: error.response?.data?.message ?? this.$t("request_failed_retry"), life: 5000 })
-      })
-
-
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: error.response?.data?.message || this.$t("request_failed_retry"), life: 5000 })
+      } finally {
+        this.load = false
+      }
+    },
+    showResult() {
+      this.$router.push({ name: 'showChildResult', params: {
+        child_id: this.child_id, sideProfile_id: this.sideProfileId, evaluation_id: this.$route.params.id,
+      } })
     },
     getChildren() {
       axios.get("/api/child").then(res => {
@@ -128,85 +126,19 @@ export default {
 
       })
     },
-    radioChange(selected, evaluation_header_id, question_id) {
-      // console.log(this.selected)
-      // console.log(evaluation_header_id)
-      let flag = 0
-      if (this.skip[evaluation_header_id] == undefined) {
-        this.skip[evaluation_header_id] = [{ id: question_id, answer: selected }]
-      } else {
-        let answer = this.skip[evaluation_header_id]
-        answer.forEach((elem) => {
-          // console.log(elem)
-          if (elem.id == question_id) {
-            flag++
-            elem.answer = selected
-          }
-
-        })
-        if (!flag) {
-          answer.push({ id: question_id, answer: selected })
-          this.skip[evaluation_header_id] = answer
+    radioChange() {
+      if (this.load || this.saved) return
+      const groups = Object.values(this.headerAndQuestions)
+        .filter(group => group.length && group[0].min_age <= this.child.childInMonths)
+        .sort((a, b) => Number(b[0].min_age) - Number(a[0].min_age))
+      for (let index = 0; index < groups.length - 1; index++) {
+        const higher = groups[index], lower = groups[index + 1]
+        if ([higher, lower].every(group => group.every(row => Number(this.selected[row.questions.id]) === 1))) {
+          groups.slice(index + 2).flat().forEach(row => { this.selected[row.questions.id] = '1' })
+          this.saveResult(higher[0].id)
+          return
         }
       }
-      // console.log(this.skip)
-
-      let count = 0;
-      let check = 0.
-      let prev = -1
-      let current = -1
-      Object.entries(this.skip).reverse().forEach((elem) => {
-        const [key, value] = elem;
-        prev = current
-        current = key
-
-
-        for (const item of value) {
-          if (item.answer == 1)
-            count++
-          else {
-            count = 0
-            break
-          }
-        }
-        if (count) {
-
-          if (this.headerAndQuestions[key].length == count)
-            check++;
-          count = 0
-        } else {
-          check = 0
-        }
-        if (check == 2) {
-          let checkHeaderFlag = 0;
-
-          for (const item of Object.entries(this.headerAndQuestions)) {
-            const [headerKey, valueKey] = item;
-            if (key == headerKey) {
-              break;
-            }
-            valueKey.forEach((elem) => {
-              this.selected[elem.questions.id] = 1
-            })
-          }
-
-          this.answers = []
-          this.selected.forEach((value, question_id) => {
-            this.answers.push({ question_id, value })
-          })
-          axios.post(`/api/evaluations/${this.$route.params.id}/${prev}/basalAge`, {
-            answers: this.answers,
-            child_id: this.child_id,
-            date: this.examDateText,
-            skills: this.skills
-          }).then(res => {
-            console.log(res.data.resultEvaluation)
-          })
-
-          this.$router.push({ name: 'Children', params: { alert: 1 } })
-        }
-
-      })
     },
 
     getallskills() {
@@ -219,6 +151,8 @@ export default {
 
 
     getSpecificChildren() {
+      this.selected = []
+      this.saved = false
 
 
       axios.get(`/api/child/${this.child_id}/${this.$route.params.id}`).then(res => {
@@ -265,6 +199,7 @@ export default {
         <div class="field">
           <label for="evaluation-child">{{ $t("child") }}</label>
           <Select inputId="evaluation-child" v-model="child_id" :options="selectBox" optionLabel="title" optionValue="value"
+:disabled="Boolean($route.query.requestId) || load || saved"
             filter fluid :placeholder="$t('select_child')" :invalid="submitted && !child_id"
             @update:modelValue="getSpecificChildren" />
           <small v-if="submitted && !child_id" class="field-error">{{ $t("field_required") }}</small>
@@ -288,7 +223,7 @@ export default {
             <p class="question-text">{{ question.questions.title }}</p>
             <div class="answer-options">
               <label v-for="option in answerOptions" :key="option.value" class="answer-option">
-                <RadioButton v-model="selected[question.questions.id]" :value="option.value"
+                <RadioButton :disabled="load || saved" v-model="selected[question.questions.id]" :value="option.value"
                   :name="`question-${question.questions.id}`"
                   @update:modelValue="radioChange($event, question.questions.evaluation_header_id, question.questions.id)" />
                 <span>{{ $t(option.label) }}</span>
@@ -303,7 +238,8 @@ export default {
       </Message>
 
       <div class="form-actions">
-        <Button :loading="load" type="submit" icon="pi pi-check" :label="$t('submit')" />
+        <Button v-if="saved && sideProfileId" v-can="'evaluation results list'" @click="showResult" :label="$t('evaluation_results')" icon="pi pi-chart-bar" />
+        <Button v-if="!saved" :disabled="!child?.canDoExam || !Object.keys(headerAndQuestions).length" :loading="load" type="submit" icon="pi pi-check" :label="$t('submit')" />
       </div>
     </form>
   </div>

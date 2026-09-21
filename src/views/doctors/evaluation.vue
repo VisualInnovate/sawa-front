@@ -12,7 +12,7 @@
         <p>{{ $t('no_records_found') }}</p>
       </div>
      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details" :key="evalu.id">
+        <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details" :key="evalu.result_id ? 'result-' + evalu.result_id : evalu.id">
           <div class="col-span-2">
         <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("اسم المقييم") }} :</h3>
@@ -28,6 +28,8 @@
             <p class="text-xl  px-1 my-auto">{{ evalu.kid?.name }}</p>
           </div>
           </div>
+          <Button v-if="evalu.result_id && evalu.side_profile_id" v-can="'evaluation results list'"
+            :label="$t('evaluation_results')" @click="$router.push({ name: 'showChildResult', params: { child_id: evalu.child_id, sideProfile_id: evalu.side_profile_id, evaluation_id: evalu.id } })" />
           <!-- <div class="text-center" >
           <Button @click="go_evaluate(evalu.child_id,evalu.type)" class="m-auto"> {{ $t("strart_evaluate") }}</Button>
           </div> -->
