@@ -15,7 +15,7 @@
             <Button :label="$t('OK')" severity="success" @click="closeSuccessModal" />
           </template>
         </Dialog>
-        <form class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="seedData">
+        <form class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" ref="myForm" @submit.prevent="createtreatment">
           <!-- ... existing code ... -->
             
               
@@ -28,13 +28,16 @@
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('child_name') }}</label>
-                    <Select required v-model="sesion.child_id"  option-value="id" :options="childreen" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
+                    <Select required v-model="sesion.child_id" option-value="id" :options="childreen" optionLabel="name" :placeholder='$t("child_name")' class="w-full" @update:model-value="onChildChange" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('addTherapeutic') }}</label>
-                    <Select required v-model="sesion.student_program_id"  option-value="id" :options="programs" optionLabel="program.name" :placeholder='$t("addTherapeutic")' class="w-full" />
+                    <Select required v-model="sesion.student_program_id" option-value="id" :options="availablePrograms" optionLabel="display_name" :placeholder='$t("addTherapeutic")' class="w-full" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.student_program_id">{{ error.student_program_id[0] }}</div>
+                      <small v-if="sesion.child_id && !availablePrograms.length" class="text-amber-700">
+                        {{ $t('session_no_student_programs') }}
+                      </small>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('sesion_date') }}</label>
@@ -52,7 +55,7 @@
                   <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                     <div class="flex">
                       
-                  <Button @click="createtreatment" class="m-auto w-full" :label='$t("submit")'></Button>
+                  <Button type="submit" class="m-auto w-full" :loading="submitting" :disabled="submitting" :label='$t("submit")'></Button>
                     </div>
                    
                 </div>
@@ -69,20 +72,18 @@
   
   <script>
   import axios from "axios";
-  import InputNumber from "primevue/inputnumber";
-  
-    import {useToast} from 'primevue/usetoast'
   export default {
   
   
     data() {
       return {
-        sesion:{},
+        sesion:{ status: 1 },
         doctors:[],
         childreen:[],
         programs:[],
         error: {},
         maxDate: new Date(),
+        submitting: false,
        
         // Add other validation rules for the title field
       };
@@ -91,6 +92,12 @@
   
     methods: {
       // ... existing methods ...
+      onChildChange() {
+        const selectedProgram = this.programs.find((program) => program.id === this.sesion.student_program_id);
+        if (selectedProgram && selectedProgram.student_id !== this.sesion.child_id) {
+          this.sesion.student_program_id = null;
+        }
+      },
       Therapeutic (){
         this.$router.push({ name: 'transportation' });
       },
@@ -103,45 +110,66 @@
         axios
           .get("api/doctors")
           .then((response) => {
-            console.log(response.data.data)
             this.doctors = response.data.doctors
            
           })
           axios
           .get("api/child")
           .then((response) => {
-            console.log(response.data.data)
             this.childreen = response.data.children
            
           })
           axios
           .get("api/student-program")
           .then((response) => {
-            console.log(response.data.data)
-            this.programs = response.data.data
+            this.programs = (response.data.data || []).map((studentProgram) => ({
+              ...studentProgram,
+              display_name: studentProgram.program?.name || `#${studentProgram.id}`,
+            }))
            
+          })
+          .catch((requestError) => {
+            this.error = requestError.response?.data?.errors || {};
+            this.$toast.add({
+              severity: 'error',
+              summary: this.$t('error'),
+              detail: requestError.response?.data?.message || this.$t('error'),
+              life: 4000,
+            });
           })
         
   
       },
 
       createtreatment() {
-      
-            this.sesion.status="1"
-     
-        
-        
-        axios.post("/api/session",this.sesion).then((res) => {
+        if (this.submitting) return;
+
+        this.error = {};
+        this.submitting = true;
+        axios.post("/api/session", { ...this.sesion, status: 1 }).then((res) => {
             this.$router.push({name:'reinforcers',params:{'id':res.data.data.id} });
         }).catch((el)=>{
-          console.log(el.response.data.errors.name)
-       this.error = el.response.data.errors
-      })
+          this.error = el.response?.data?.errors || {}
+          this.$toast.add({
+            severity: 'error',
+            summary: this.$t('error'),
+            detail: el.response?.data?.message || this.$t('error'),
+            life: 4000,
+          });
+        }).finally(() => {
+          this.submitting = false;
+        })
       },
      
     },
     mounted() {
      this.getusers()
+    },
+    computed: {
+      availablePrograms() {
+        if (!this.sesion.child_id) return this.programs;
+        return this.programs.filter((program) => program.student_id === this.sesion.child_id);
+      },
     },
   };
   </script>
@@ -266,4 +294,3 @@
   
   /* Add any other custom styles here */
   </style>
-  

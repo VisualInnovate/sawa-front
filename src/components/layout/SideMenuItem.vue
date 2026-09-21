@@ -7,8 +7,9 @@ defineOptions({ name: "SideMenuItem" });
 const props = defineProps({
   item: { type: Object, required: true },
   depth: { type: Number, default: 0 },
+  compact: Boolean,
 });
-const emit = defineEmits(["navigate"]);
+const emit = defineEmits(["navigate", "expand"]);
 
 const route = useRoute();
 const router = useRouter();
@@ -25,7 +26,10 @@ const matches = (item) => {
   if (item.children) return item.children.some(matches);
   const href = item.to && hrefOf(item.to);
   if (!href) return false;
-  return route.path === href || (href !== "/sawa-admin" && route.path.startsWith(`${href}/`));
+  return (
+    route.path === href ||
+    (href !== "/sawa-admin" && route.path.startsWith(`${href}/`))
+  );
 };
 
 const active = computed(() => matches(props.item));
@@ -34,7 +38,15 @@ watch(active, (value) => {
   if (value) open.value = true;
 });
 
-const panelId = computed(() => `side-menu-${props.item.key ?? props.item.label ?? props.item.text}`);
+const panelId = computed(
+  () => `side-menu-${props.item.key ?? props.item.label ?? props.item.text}`,
+);
+function toggleGroup() {
+  if (props.compact) {
+    open.value = true;
+    emit("expand");
+  } else open.value = !open.value;
+}
 
 // Opening a group slides its panel from 0 to its content height; closing is instant.
 const expand = (el) => {
@@ -47,25 +59,43 @@ const clearHeight = (el) => {
 };
 </script>
 
-<!-- Same look as the original Vuetify drawer: every entry is a white rounded card with dark text,
-     an open group becomes one card holding its entries, and sub entries have no icon. -->
 <template>
-  <li class="side-item" :class="{ 'side-card': item.children, 'is-open': item.children && open }">
+  <li
+    class="side-item"
+    :class="{ 'is-open': item.children && open, 'is-compact': compact }"
+  >
     <template v-if="item.children">
       <button
         type="button"
         class="side-link"
-        :class="{ 'is-sub': depth > 0 }"
-        :aria-expanded="open"
+        :class="{
+          'is-sub': depth > 0,
+          'has-current': active,
+          'is-expanded': open && !compact,
+        }"
+        :aria-label="item.text ?? $t(item.label)"
+        :title="compact ? item.text ?? $t(item.label) : undefined"
+        :aria-expanded="open && !compact"
         :aria-controls="panelId"
-        @click="open = !open"
+        @click="toggleGroup"
       >
-        <i v-if="item.icon" :class="['mdi', item.icon]" class="side-icon" aria-hidden="true" />
-        <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{ item.text ?? $t(item.label) }}</span>
-        <i :class="['mdi', open ? 'mdi-chevron-up' : 'mdi-chevron-down']" class="side-caret" aria-hidden="true" />
+        <i
+          v-if="item.icon"
+          :class="['mdi', item.icon]"
+          class="side-icon"
+          aria-hidden="true"
+        />
+        <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{
+          item.text ?? $t(item.label)
+        }}</span>
+        <i
+          :class="['mdi', open ? 'mdi-chevron-up' : 'mdi-chevron-down']"
+          class="side-caret"
+          aria-hidden="true"
+        />
       </button>
       <Transition name="side-expand" @enter="expand" @after-enter="clearHeight">
-        <div v-show="open" :id="panelId" class="side-collapse">
+        <div v-show="open && !compact" :id="panelId" class="side-collapse">
           <ul class="side-children">
             <SideMenuItem
               v-for="child in item.children"
@@ -84,10 +114,19 @@ const clearHeight = (el) => {
       class="side-link"
       :class="{ 'is-sub': depth > 0, 'is-current': active }"
       :aria-current="active ? 'page' : undefined"
+      :aria-label="item.text ?? $t(item.label)"
+      :title="compact ? item.text ?? $t(item.label) : undefined"
       @click="emit('navigate')"
     >
-      <i v-if="item.icon" :class="['mdi', item.icon]" class="side-icon" aria-hidden="true" />
-      <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{ item.text ?? $t(item.label) }}</span>
+      <i
+        v-if="item.icon"
+        :class="['mdi', item.icon]"
+        class="side-icon"
+        aria-hidden="true"
+      />
+      <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{
+        item.text ?? $t(item.label)
+      }}</span>
     </router-link>
   </li>
 </template>
@@ -95,64 +134,88 @@ const clearHeight = (el) => {
 <style scoped>
 .side-item {
   list-style: none;
-}
-/* An open group is a single white card. */
-.side-card {
-  background: #fff;
-  border-radius: 5px;
+  min-width: 0;
 }
 .side-link {
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 40px;
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 5px;
-  background: #fff;
-  color: #000;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  color: #3d565a;
   font-family: inherit;
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 110%;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.65;
   text-align: start;
   text-decoration: none;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s,
+    box-shadow 0.15s;
 }
-/* Hover/active tint drawn over the card, as Vuetify's list overlay did. */
-.side-link::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: #000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-}
-.side-link:hover::before {
-  opacity: 0.04;
+.side-link:hover {
+  color: #0b6462;
+  background: #effaf5;
+  border-color: rgba(15, 122, 115, 0.12);
 }
 .side-link:focus-visible {
-  outline: none;
+  outline: 2px solid #0f7a73;
+  outline-offset: -2px;
 }
-.side-link:focus-visible::before,
-.side-link.is-current::before {
-  opacity: 0.12;
+.side-link.has-current,
+.side-link.is-expanded {
+  background: #edf9f5;
+  color: #0f6462;
+  border-color: rgba(15, 122, 115, 0.14);
+}
+.side-link.is-current {
+  color: #fff;
+  background: linear-gradient(135deg, #0f7a73 0%, #0b5f5d 100%);
+  box-shadow: 0 8px 16px -10px rgba(15, 122, 115, 0.7);
 }
 .side-link.is-sub {
-  padding-inline: 20px;
+  min-height: 37px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 8px;
+}
+.side-link.is-sub::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a9c5b9;
+  flex-shrink: 0;
+}
+.side-link.is-sub.is-current::before {
+  background: #dfeec0;
 }
 .side-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
-  margin-inline-end: 32px;
-  font-size: 24px;
+  border-radius: 9px;
+  background: #eef7f3;
+  color: #4a7b73;
+  font-size: 20px;
   line-height: 1;
-  opacity: 0.6;
+}
+.has-current .side-icon,
+.is-expanded .side-icon {
+  color: #0f7a73;
+  background: #dff5ee;
 }
 .side-link.is-current .side-icon {
-  opacity: 1;
+  color: #edf9d5;
+  background: rgba(255, 255, 255, 0.18);
 }
 .side-label {
   flex: 1;
@@ -161,7 +224,6 @@ const clearHeight = (el) => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Latin evaluation names keep their own direction but stay aligned with the menu. */
 .side-label[dir="ltr"] {
   text-align: end;
 }
@@ -170,22 +232,49 @@ const clearHeight = (el) => {
 }
 .side-caret {
   flex-shrink: 0;
-  margin-inline-start: 32px;
-  font-size: 24px;
+  margin-inline-start: auto;
+  font-size: 18px;
   line-height: 1;
-  opacity: 0.6;
+  color: #8b9e96;
 }
 .side-collapse {
   overflow: hidden;
 }
-/* Kept even with "reduce motion": a short height slide, and Windows with animations off reports that setting. */
 .side-expand-enter-active {
-  transition: height 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+  transition: height 0.2s ease;
 }
 .side-children {
-  margin: 0;
-  padding: 19px 0 0;
+  margin: 7px 0 7px;
+  margin-inline-start: 24px;
+  padding: 0;
+  padding-inline-start: 10px;
+  border-inline-start: 1px solid #dce8e1;
   display: grid;
-  gap: 19px;
+  gap: 3px;
+}
+.side-children .side-children {
+  margin-inline-start: 10px;
+}
+.is-compact > .side-link {
+  justify-content: center;
+  padding: 7px;
+  min-height: 46px;
+}
+.is-compact > .side-link .side-icon {
+  margin: 0;
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  background: transparent;
+}
+.is-compact > .side-link .side-label,
+.is-compact > .side-link .side-caret {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .side-expand-enter-active,
+  .side-link {
+    transition: none;
+  }
 }
 </style>

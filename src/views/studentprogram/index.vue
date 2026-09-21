@@ -12,7 +12,7 @@ const { t } = useI18n()
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
-const users = ref(null)
+const users = ref([])
 const productDialog = ref(false)
 const deleteDialog = ref(false)
 const confir_id=ref('')
@@ -32,17 +32,15 @@ onBeforeMount(() => {
   initFilters()
 })
 
- const fetchData= ()=>{
-
-
-  axios.get("/api/student-program").then((res)=>{
-    loading.value= false
-    users.value= res.data.data
-    console.log(users.value)
-
-  });
-
-
+const fetchData = () => {
+  loading.value = true
+  axios.get("/api/student-program").then((res) => {
+    users.value = res.data.data || []
+  }).catch(() => {
+    toast.add({severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 4000})
+  }).finally(() => {
+    loading.value = false
+  })
 }
 
 
@@ -101,6 +99,19 @@ const exportCSV = () => {
   dt.value.exportCSV()
 }
 
+const statusClass = (value) => ({
+  1: 'status-accepted',
+  0: 'status-cancelled',
+  '-1': 'status-pending',
+}[value] || 'status-pending')
+
+const statusLabel = (value) => status.value.find((item) => item.code === value)?.name || '—'
+
+const formatPrice = (value) => new Intl.NumberFormat(
+  localStorage.appLang === 'en' ? 'en-US' : 'ar-JO',
+  { maximumFractionDigits: 2 }
+).format(Number(value || 0))
+
 
 const initFilters = () => {
   filters.value = {
@@ -113,7 +124,7 @@ const initFilters = () => {
   <div class="grid">
     <div class="col-12">
       <div class="page">
-        <Toolbar>
+        <Toolbar class="student-program-toolbar">
           <template #start>
             <div class="my-2">
             <Button  v-can="'student program create'" :label='$t("add_sp")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
@@ -143,7 +154,7 @@ const initFilters = () => {
         <Toast/>
 
 
-      <div>
+      <div class="student-program-table-wrap">
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
@@ -157,12 +168,18 @@ const initFilters = () => {
           :rows-per-page-options="[5, 10, 25]"
           :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
           responsive-layout="scroll"
+          stripedRows
+          rowHover
+          class="student-program-table"
           v-can="'student program list'"
         >
           <template #header>
-            <div class="flex w-full  justify-between align-items-center">
-              <h5 class="page-title">{{ $t("room") }}</h5>
-             <div>
+            <div class="table-heading">
+              <div>
+                <h5 class="page-title">{{ $t("student_programe") }}</h5>
+                <p class="table-subtitle">{{ users.length }} {{ $t("student_programe") }}</p>
+              </div>
+             <div class="search-wrap">
               <IconField class="table-search mt-2 md:mt-0">
                 <InputIcon class="pi pi-search" />
                 <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
@@ -171,38 +188,52 @@ const initFilters = () => {
             </div>
           </template>
 
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-         
-
-        
-         
-           <Column field="name" :header='$t("child_name")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+           <Column field="student.name" :header='$t("child_name")' :sortable="true" header-style="min-width:13rem;">
             <template #body="slotProps">
-              {{ slotProps.data.student.name }}
+              <div class="student-cell">
+                <span class="student-avatar"><i class="pi pi-user" /></span>
+                <strong>{{ slotProps.data.student?.name || '—' }}</strong>
+              </div>
             </template>
            </Column>
-           <Column field="name" :header='$t("ProgramName")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+           <Column field="program.name" :header='$t("ProgramName")' :sortable="true" header-style="min-width:13rem;">
             <template #body="slotProps">
-              {{ slotProps.data.program.name }}
+              <span class="program-name">{{ slotProps.data.program?.name || '—' }}</span>
             </template>
            </Column>
          
            <Column :header="$t('milestone_plan_goals')" header-style="min-width:18rem">
              <template #body="{ data }">
-               <ul class="list-disc ps-4 space-y-2">
-                 <li v-for="goal in data.milestone_plan_goals" :key="goal.id">{{ goal.body }}</li>
-               </ul>
+               <div v-if="data.milestone_plan_goals?.length" class="goals-list">
+                 <span v-for="goal in data.milestone_plan_goals" :key="goal.id" class="goal-chip">{{ goal.body }}</span>
+               </div>
+               <span v-else class="empty-value">—</span>
              </template>
            </Column>
-           <Column field="price" :header='$t("price")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+           <Column field="program.price" :header='$t("price")' :sortable="true" header-style="min-width:8rem;">
             <template #body="slotProps">
-              {{ slotProps.data.program.price }}
+              <strong class="price-value">{{ formatPrice(slotProps.data.program?.price) }}</strong>
             </template>
            </Column>
           
-           <Column field="price" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
+           <Column field="status" :header='$t("status")' :sortable="true" header-style="width:9rem; min-width:9rem;">
             <template #body="slotProps">
-              <Select  :disabled="!$can('student program edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#F59E0B' : slotProps.data.status == 0 ? '#EF4444' : 'transparent' }" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+              <Select
+                :disabled="!$can('student program edit')"
+                @update:model-value="updateStatus(slotProps.data.id, $event)"
+                v-model="slotProps.data.status"
+                option-value="code"
+                :options="status"
+                optionLabel="name"
+                :class="['status-select', statusClass(slotProps.data.status)]"
+              >
+                <template #value>
+                  <span class="status-value">
+                    <span class="status-dot" />
+                    {{ statusLabel(slotProps.data.status) }}
+                  </span>
+                </template>
+              </Select>
 
             </template>
            </Column>
@@ -210,22 +241,26 @@ const initFilters = () => {
 
 
         
-          <Column header-style="min-width:10rem;">
+          <Column :header="$t('actions')" header-style="width:14rem; min-width:14rem;">
             <template #body="slotProps">
-              <div class="table-actions">
+              <div class="student-program-actions">
                 <Button
                 v-can="'student program edit'"            
                 :label='$t("sumi_start")'
-                class="mt-2"
+                class="start-session-button"
+                icon="pi pi-play"
+                size="small"
                 @click="session(slotProps.data.student_id,slotProps.data.id)" />
                 <Button
                 v-can="'student program edit'"  
                 icon="pi pi-pencil"
-                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+                class="row-action-button edit-action"
+                @click="edit(slotProps.data.id)" rounded variant="text" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
                 v-can="'student program delete'"
                 icon="pi pi-trash"
-                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
+                class="row-action-button delete-action"
+                @click="confirmDelete(slotProps.data.id)" rounded variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
             
               </div>
             </template>
@@ -253,4 +288,165 @@ const initFilters = () => {
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.student-program-toolbar {
+  margin-bottom: 1rem;
+  border: 1px solid #dce8e8;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.student-program-table-wrap {
+  overflow: hidden;
+  border: 1px solid #dce8e8;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 92, 101, 0.06);
+}
+
+.table-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.table-subtitle {
+  margin: .25rem 0 0;
+  color: #718096;
+  font-size: .82rem;
+}
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.student-avatar {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 2.35rem;
+  place-items: center;
+  border-radius: 12px;
+  background: #e8f5f4;
+  color: #126b73;
+}
+
+.program-name,
+.price-value { color: #22334d; }
+
+.goals-list {
+  display: flex;
+  max-width: 28rem;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.goal-chip {
+  display: inline-block;
+  max-width: 100%;
+  padding: .35rem .65rem;
+  overflow: hidden;
+  border: 1px solid #dbe8e8;
+  border-radius: 999px;
+  background: #f4f9f9;
+  color: #425466;
+  font-size: .8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-value { color: #94a3b8; }
+
+:deep(.student-program-table .p-datatable-thead > tr > th) {
+  padding-block: 1rem;
+  border-color: #e5eeee;
+  background: #f5f9f9;
+  color: #31545a;
+}
+
+:deep(.student-program-table .p-datatable-tbody > tr > td) {
+  padding-block: 1rem;
+  border-color: #edf2f2;
+}
+
+:deep(.status-select) {
+  width: 8.25rem;
+  min-width: 8.25rem;
+  min-height: 2.4rem;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+:deep(.status-select .p-select-label) {
+  display: flex;
+  align-items: center;
+  padding: .5rem .75rem;
+  color: inherit;
+}
+
+:deep(.status-select .p-select-dropdown) {
+  width: 2rem;
+  color: inherit;
+}
+
+.status-value {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: .48rem;
+  height: .48rem;
+  flex: 0 0 .48rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+:deep(.status-accepted) { background: #dcfce7; color: #167443; }
+:deep(.status-pending) { background: #fff3cd; color: #946200; }
+:deep(.status-cancelled) { background: #fee2e2; color: #b42318; }
+
+.student-program-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-width: max-content;
+  padding: .25rem;
+  border: 1px solid #e1ebeb;
+  border-radius: 12px;
+  background: #f8fbfb;
+  white-space: nowrap;
+}
+
+.start-session-button {
+  height: 2.4rem;
+  margin: 0;
+  border-color: #126b73;
+  border-radius: 9px;
+  background: #126b73;
+  white-space: nowrap;
+}
+
+.row-action-button {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: 0;
+}
+
+.edit-action { color: #087f8c; }
+.edit-action:hover { background: #dff5f5; }
+.delete-action { color: #dc3545; }
+.delete-action:hover { background: #feecec; }
+
+@media (max-width: 700px) {
+  .table-heading { align-items: stretch; flex-direction: column; }
+  .search-wrap, .table-search { width: 100%; }
+}
+</style>

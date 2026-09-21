@@ -229,29 +229,36 @@
         </div>
 
         <!-- Status Dropdown -->
-        <div class="flex flex-col">
-          <label class="text-gray-700 font-medium" for="status">{{
+        <div class="booking-status-field">
+          <label class="booking-status-label" for="booking-status">{{
             $t("status")
           }}</label>
           <Select
-            :style="{
-              backgroundColor:
-                new_status == 1
-                  ? '#10B981'
-                  : new_status == 0
-                  ? '#EF4444'
-                  : new_status == -1
-                  ? '#F59E0B'
-                  : 'transparent',
-              color: 'white',
-            }"
-            class="rounded-lg shadow-sm text-center"
+            inputId="booking-status"
+            :class="['booking-status-select', `status-${bookingStatusTone}`]"
             v-model="new_status"
             option-value="code"
-            filter
             :options="status"
             optionLabel="name"
-          />
+          >
+            <template #value>
+              <div v-if="selectedStatusOption" class="booking-status-value">
+                <span class="status-icon" aria-hidden="true">
+                  <i :class="selectedStatusOption.icon" />
+                </span>
+                <span>{{ selectedStatusOption.name }}</span>
+              </div>
+              <span v-else class="booking-status-placeholder">{{ $t("status") }}</span>
+            </template>
+            <template #option="{ option }">
+              <div class="booking-status-option" :class="`option-${option.tone}`">
+                <span class="status-icon" aria-hidden="true">
+                  <i :class="option.icon" />
+                </span>
+                <span>{{ option.name }}</span>
+              </div>
+            </template>
+          </Select>
         </div>
 
         <!-- Evaluation Button -->
@@ -539,9 +546,9 @@ export default {
       },
       student_massage: {},
       status: [
-        { name: this.$t("Pending"), code: "-1" },
-        { name: this.$t("Accept"), code: "1" },
-        { name: this.$t("Cancell"), code: "0" },
+        { name: this.$t("Pending"), code: -1, tone: "pending", icon: "pi pi-clock" },
+        { name: this.$t("Accept"), code: 1, tone: "accepted", icon: "pi pi-check" },
+        { name: this.$t("Cancell"), code: 0, tone: "cancelled", icon: "pi pi-times" },
       ],
       fileds: [],
       evaluate_types: [
@@ -748,6 +755,12 @@ export default {
     },
   },
   computed: {
+    selectedStatusOption() {
+      return this.status.find((option) => option.code === Number(this.new_status)) ?? null;
+    },
+    bookingStatusTone() {
+      return this.selectedStatusOption?.tone ?? "empty";
+    },
     filteredDays() {
       // Extract the `day` values from `business_hours`
       const usedDays = this.business_hours.map((entry) => entry.day);
@@ -776,4 +789,113 @@ export default {
 [v-cloak] {
   display: none;
 }
+
+.booking-status-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.booking-status-label {
+  color: #334155;
+  font-weight: 700;
+}
+
+.booking-status-select {
+  width: 100%;
+  min-height: 3.5rem;
+  border-width: 1px;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.booking-status-select.status-accepted {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.booking-status-select.status-pending {
+  border-color: #fcd34d;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.booking-status-select.status-cancelled {
+  border-color: #fda4af;
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.booking-status-select.status-empty {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #475569;
+}
+
+.booking-status-select:hover {
+  border-color: #5fbec7;
+}
+
+.booking-status-select:deep(.p-select-label) {
+  display: flex;
+  align-items: center;
+  padding-block: 0.75rem;
+  padding-inline: 1rem 0.5rem;
+  color: inherit;
+  font-weight: 700;
+}
+
+.booking-status-select:deep(.p-select-dropdown) {
+  width: 3rem;
+  color: currentColor;
+}
+
+.booking-status-select:deep(.p-select-dropdown-icon) {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.booking-status-select:deep(.p-focus) {
+  box-shadow: none;
+}
+
+.booking-status-select.p-focus {
+  border-color: #168694;
+  box-shadow: 0 0 0 3px rgb(22 134 148 / 0.15);
+}
+
+.booking-status-value,
+.booking-status-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  text-align: start;
+}
+
+.booking-status-option {
+  padding-block: 0.15rem;
+  font-weight: 600;
+}
+
+.status-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.status-icon i {
+  font-size: 0.75rem;
+}
+
+.option-accepted { color: #166534; }
+.option-pending { color: #92400e; }
+.option-cancelled { color: #9f1239; }
+.booking-status-placeholder { color: #64748b; font-weight: 500; }
 </style>

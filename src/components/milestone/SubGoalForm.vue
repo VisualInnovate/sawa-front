@@ -92,6 +92,13 @@ onBeforeUnmount(() => {
           :placeholder="$t('milestone_general_goal')" @update:modelValue="update('subtest_id', $event)" />
         <small v-if="errors.subtest_id" class="field-error">{{ firstError('subtest_id') }}</small>
       </div>
+      <div class="form-field">
+        <label for="sub-goal-display-order">{{ $t('display_order') }}</label>
+        <InputNumber inputId="sub-goal-display-order" :modelValue="modelValue.display_order" :min="0"
+          :useGrouping="false" fluid :disabled="saving" :invalid="Boolean(errors.display_order)"
+          :placeholder="$t('display_order')" @update:modelValue="update('display_order', $event)" />
+        <small v-if="errors.display_order" class="field-error">{{ firstError('display_order') }}</small>
+      </div>
     </div>
 
     <div class="name-hint">
@@ -142,7 +149,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .sub-goal-form { display: grid; gap: 1rem; }
-.selection-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.selection-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .name-hint {
   display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
   padding: .45rem .75rem; border-radius: .5rem;

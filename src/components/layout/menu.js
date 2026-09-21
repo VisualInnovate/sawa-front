@@ -1,4 +1,4 @@
-// Dashboard side menu (same groups, icons and titles as the original Vuetify drawer).
+// Dashboard navigation. Sections in AdminSidebar group these permitted entries.
 // `label` is an i18n key; `text` is shown as-is (evaluation names stay English).
 // `perm` is one permission or a list (any of them); `to` may depend on the permissions the user has.
 import { can, homeRoute } from "@/utils/permissions";
@@ -12,7 +12,7 @@ export const buildMenu = () => [
   },
   {
     key: "admin",
-    icon: "mdi-shield-account",
+    icon: "mdi-shield-account-outline",
     label: "Adminstration",
     children: [
       { label: "Employees", to: { name: "Employees" }, perm: "employees list" },
@@ -61,7 +61,7 @@ export const buildMenu = () => [
   },
   {
     key: "rooms",
-    icon: "mdi-bed",
+    icon: "mdi-door-open",
     label: "room",
     children: [{ label: "room", to: { name: "Rooms" }, perm: "room list" }],
   },
@@ -77,7 +77,7 @@ export const buildMenu = () => [
   },
   {
     key: "site",
-    icon: "mdi-wrench",
+    icon: "mdi-cog-outline",
     label: "Settings",
     children: [
       { label: "Pages", to: { name: "pages" }, perm: "pages list" },
@@ -108,7 +108,7 @@ export const buildMenu = () => [
   },
   {
     key: "hr",
-    icon: "mdi-bed",
+    icon: "mdi-account-group-outline",
     label: "hr",
     children: [
       {

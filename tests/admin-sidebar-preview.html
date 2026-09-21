@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sawa sidebar preview</title><body><div id="app"></div>
+<script type="module">
+  import { createApp, h, watch } from 'vue';
+  import { createPinia, setActivePinia } from 'pinia';
+  import { createRouter, createWebHashHistory, RouterView } from 'vue-router';
+  import axios from 'axios';
+  import Home from '/src/components/Home.vue';
+  import { useAuthStore } from '/src/stores/Auth.js';
+  import { buildMenu } from '/src/components/layout/menu.js';
+  import installPrimeVue, { setPrimeLocale } from '/src/plugins/primevue/index.js';
+  import i18n from '/src/plugins/i18n/index.js';
+  import '/src/main.css';
+  import '/src/style.css';
+  import '/src/views/frontend/assets/main.css';
+  import '/src/styles/app.css';
+  import 'primeicons/primeicons.css';
+  const pinia = createPinia();
+  setActivePinia(pinia);
+  const auth = useAuthStore();
+  // Isolated preview, using fixture data only. No application authentication or API requests.
+  const nodes = [];
+  const collect = list => list.forEach(item => { nodes.push(item); if (item.children) collect(item.children); });
+  collect(buildMenu());
+  auth.userPermissions = ['dashboard index', ...nodes.flatMap(item => item.perm ? [item.perm].flat() : [])];
+  auth.authenticated = true;
+  auth.authUser = { name: 'حساب تجريبي' };
+  auth.getUser = async () => {};
+  axios.post = async () => ({ data: {} });
+  const panel = { setup: () => () => h('div', { class: 'surface-card', style: 'min-height:420px;padding:32px' }, [
+    h('span', { style: 'font-size:12px;color:#8b9c94' }, 'معاينة التصميم'),
+    h('h1', { style: 'font-size:26px;margin:12px 0;color:#164f55' }, 'مساحة العمل في سوا'),
+    h('p', { style: 'color:#758984' }, 'الوصول إلى ملفات الأطفال والتقييمات والبرامج العلاجية من مكان واحد.'),
+    h('div', { style: 'margin-top:40px;height:1px;background:#edf1ef' }),
+  ]) };
+  const names = new Set(nodes.filter(item => item.to).map(item => (typeof item.to === 'function' ? item.to() : item.to).name));
+  names.add('dashbord'); names.add('welcome'); names.add('profile-deltails');
+  const router = createRouter({ history: createWebHashHistory(), routes: [
+    { path: '/', component: Home, children: [...names].map(name => ({ path: name, name, component: panel })) },
+    { path: '/website', name: 'webHome', component: panel },
+    { path: '/login', name: 'Login', component: panel },
+  ] });
+  const app = createApp({ render: () => h(RouterView) });
+  app.use(pinia); app.use(i18n); app.use(router); installPrimeVue(app, 'ar');
+  watch(i18n.global.locale, lang => { document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; setPrimeLocale(app, lang); }, { immediate: true });
+  await router.push({ name: 'Children' });
+  app.mount('#app');
+</script></body></html>
