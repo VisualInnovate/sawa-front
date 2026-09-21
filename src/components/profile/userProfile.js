@@ -2,6 +2,7 @@ import axios from "axios";
 
 // The three profile tabs read the same `api/users/{id}` payload; share one request between them.
 let cached = null;
+export const USER_PROFILE_INVALIDATED_EVENT = "sawa:user-profile-invalidated";
 
 export function fetchUserProfile({ refresh = false } = {}) {
   const id = localStorage.getItem("user_id");
@@ -17,4 +18,7 @@ export function fetchUserProfile({ refresh = false } = {}) {
 
 export function resetUserProfile() {
   cached = null;
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(USER_PROFILE_INVALIDATED_EVENT));
+  }
 }

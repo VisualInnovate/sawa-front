@@ -134,6 +134,11 @@ const initFilters = () => {
 const addEvaluation = (id) => {
   router.push({ name: 'Calender', params: { 'id': id } })
 }
+
+const hasPendingRequests = (child) =>
+  Number(child.pending_evaluations_count) > 0 || Number(child.pending_consultations_count) > 0
+
+const childRowClass = (child) => hasPendingRequests(child) ? 'has-pending-request' : ''
 </script>
 
 <template>
@@ -185,6 +190,7 @@ const addEvaluation = (id) => {
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
             :current-page-report-template="$t('Showing') + ' {first} ' + $t('to') + ' {last} ' + $t('of') + ' {totalRecords}'"
+            :rowClass="childRowClass"
             responsive-layout="scroll"
             scrollable
             scroll-height="flex"
@@ -229,6 +235,26 @@ const addEvaluation = (id) => {
             <Column field="birth_date" :header="$t('BIRTH_DATE')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.birth_date }}
+              </template>
+            </Column>
+
+            <Column :header="$t('active_child_requests')" header-style="min-width: 13rem">
+              <template #body="slotProps">
+                <div v-if="hasPendingRequests(slotProps.data)" class="pending-indicators">
+                  <Tag
+                    v-if="Number(slotProps.data.pending_evaluations_count) > 0"
+                    icon="pi pi-clipboard"
+                    severity="warn"
+                    :value="$t('child_pending_evaluation', { count: slotProps.data.pending_evaluations_count })"
+                  />
+                  <Tag
+                    v-if="Number(slotProps.data.pending_consultations_count) > 0"
+                    icon="pi pi-calendar"
+                    severity="info"
+                    :value="$t('child_pending_consultation', { count: slotProps.data.pending_consultations_count })"
+                  />
+                </div>
+                <span v-else class="text-color-secondary">—</span>
               </template>
             </Column>
             
@@ -310,6 +336,16 @@ const addEvaluation = (id) => {
 
 :deep(.p-datatable .p-datatable-tbody > tr:hover) {
   background-color: #f0f4f8 !important;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr.has-pending-request > td) {
+  background: #fffdf2;
+}
+
+.pending-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 /* Responsive adjustments */

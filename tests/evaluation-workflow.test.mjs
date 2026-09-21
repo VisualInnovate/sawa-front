@@ -50,7 +50,11 @@ test('milestone groups interleaved questions by domain and goal', () => {
 test('side profile waits for basal persistence and submits the exact request context', async () => {
   let release, submitted;
   const view = component('../src/views/evaluations/Show.vue', {
-    post: async (url, payload) => { submitted = { url, payload }; await new Promise(resolve => { release = resolve; }); },
+    post: async (url, payload) => {
+      submitted = { url, payload };
+      await new Promise(resolve => { release = resolve; });
+      return { data: { request: { id: 186, status: 1 }, result: { id: 44, side_profile_id: 5 } } };
+    },
   });
   const state = { ...view.data(), selected: [undefined, '1'], child: { childInMonths: 36 }, child_id: 7,
     $route: { params: { id: 15 }, query: { requestId: 186 } }, examDateText: '2026-09-21',
@@ -63,6 +67,7 @@ test('side profile waits for basal persistence and submits the exact request con
   release();
   await saving;
   assert.equal(state.saved, true);
+  assert.equal(state.sideProfileId, 5);
   assert.equal(state.load, false);
 });
 

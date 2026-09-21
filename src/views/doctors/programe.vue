@@ -182,6 +182,9 @@
      this.getusers()
      this.child_id=localStorage.getItem("child_id") 
     },
+    activated() {
+      this.getusers()
+    },
   };
   </script>
   <style scoped>
