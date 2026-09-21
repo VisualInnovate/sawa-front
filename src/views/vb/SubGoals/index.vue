@@ -20,7 +20,7 @@ const toast = useToast();
 const rows = ref([]), domains = ref([]), generalGoals = ref([]), levels = ref([]);
 const selectedLevel = ref(null), loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
 const errors = ref({});
-const form = ref({ wording: emptyMilestoneWording() });
+const form = ref({ display_order: 0, wording: emptyMilestoneWording() });
 const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
 const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
 
@@ -33,7 +33,7 @@ async function fetchRows() {
   finally { loading.value = false; }
 }
 function openNew() {
-  form.value = { question_type_id: null, subtest_id: null, wording: emptyMilestoneWording() };
+  form.value = { question_type_id: null, subtest_id: null, display_order: 0, wording: emptyMilestoneWording() };
   errors.value = {};
   dialog.value = true;
 }
@@ -42,7 +42,13 @@ async function edit(id) {
     const { data } = await axios.get(`/api/milestone-sub-goals/${id}`);
     const item = data.data, wording = emptyMilestoneWording();
     for (const gender of ['male', 'female']) Object.assign(wording[gender], item.wording?.[gender] || {});
-    form.value = { id: item.id, question_type_id: item.question_type_id, subtest_id: item.subtest_id, wording };
+    form.value = {
+      id: item.id,
+      question_type_id: item.question_type_id,
+      subtest_id: item.subtest_id,
+      display_order: item.display_order ?? 0,
+      wording,
+    };
     errors.value = {};
     dialog.value = true;
   } catch { notifyError(); }
@@ -87,7 +93,7 @@ onMounted(async () => {
     <Evaluation />
     <Toast />
     <DataTable :value="rows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[5, 10, 25]"
-      :filters="filters" :globalFilterFields="['wording.male.title', 'wording.female.title', 'question_type.title', 'subtest.title']"
+      :filters="filters" :globalFilterFields="['wording.male.title', 'wording.female.title', 'question_type.title', 'subtest.title', 'display_order']"
       v-can="'milestone sub goal list'">
       <template #header>
         <div class="flex flex-wrap items-center gap-3 justify-between">
@@ -103,6 +109,7 @@ onMounted(async () => {
       <Column field="question_type.title" :header="$t('milestone_domain')" sortable />
       <Column field="subtest.title" :header="$t('milestone_general_goal')" sortable />
       <Column field="subtest.level.title" :header="$t('level_id')" sortable />
+      <Column field="display_order" :header="$t('display_order')" sortable />
       <Column>
         <template #body="{ data }">
           <div class="table-actions">

@@ -7,7 +7,7 @@ import { useAuthStore } from "../stores/Auth";
 import { canVisit, homeRoute } from "../utils/permissions";
 import LocaleSelect from "./LocaleSelect.vue";
 import UserProfileMenu from "./UserProfileMenu.vue";
-import SideMenuItem from "./layout/SideMenuItem.vue";
+import AdminSidebar from "./layout/AdminSidebar.vue";
 import { buildMenu, visibleMenu } from "./layout/menu";
 
 const router = useRouter();
@@ -23,6 +23,11 @@ const menu = computed(() => {
 const desktopQuery = window.matchMedia("(min-width: 1024px)");
 const isDesktop = ref(desktopQuery.matches);
 const sidebarOpen = ref(isDesktop.value);
+const menuToggle = ref(null);
+const closeSidebar = () => {
+  sidebarOpen.value = false;
+  menuToggle.value?.$el?.focus();
+};
 const onMediaChange = (event) => {
   isDesktop.value = event.matches;
   sidebarOpen.value = event.matches;
@@ -49,6 +54,7 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
   <div class="admin-shell" :class="{ 'sidebar-collapsed': !sidebarOpen }">
     <header class="admin-header" data-no-request-spinner>
       <Button
+        ref="menuToggle"
         type="button"
         icon="pi pi-bars"
         severity="secondary"
@@ -68,15 +74,10 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
       </div>
     </header>
 
-    <div v-if="sidebarOpen && !isDesktop" class="admin-backdrop" @click="sidebarOpen = false" />
-
-    <aside id="admin-sidebar" data-no-request-spinner class="admin-sidebar" :class="{ open: sidebarOpen }" :aria-hidden="!sidebarOpen">
-      <nav :aria-label="$t('main_menu')">
-        <ul class="side-menu">
-          <SideMenuItem v-for="item in menu" :key="item.key" :item="item" @navigate="closeOnMobile" />
-        </ul>
-      </nav>
-    </aside>
+    <div v-if="sidebarOpen && !isDesktop" class="admin-backdrop" @click="closeSidebar" />
+    <AdminSidebar :items="menu" :compact="isDesktop && !sidebarOpen" :desktop="isDesktop"
+      :visible="isDesktop || sidebarOpen" @toggle="sidebarOpen = !sidebarOpen"
+      @close="closeSidebar" @expand="sidebarOpen = true" @navigate="closeOnMobile" />
 
     <main class="admin-main">
       <div class="admin-content">
@@ -90,7 +91,8 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
 <style scoped>
 .admin-shell {
   --header-h: 64px;
-  --sidebar-w: 256px;
+  --sidebar-w: 272px;
+  --sidebar-gap: 16px;
   min-height: 100vh;
   background: var(--sawa-page-bg);
 }
@@ -120,56 +122,24 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
   gap: 0.5rem;
 }
 
-.admin-sidebar {
-  position: fixed;
-  inset-block: var(--header-h) 0;
-  inset-inline-start: 0;
-  z-index: 25;
-  width: var(--sidebar-w);
-  max-width: 85vw;
-  overflow-y: auto;
-  /* Original drawer: 46px top space, 8px list padding, hidden scrollbar. */
-  padding: 54px 8px 8px;
-  background: var(--sawa-primary);
-  border-inline-end: 1px solid rgba(0, 0, 0, 0.12);
-  transition: transform 0.2s ease;
-  scrollbar-width: none;
-}
-.admin-sidebar::-webkit-scrollbar {
-  display: none;
-}
-.admin-sidebar:not(.open) {
-  transform: translateX(-100%);
-  visibility: hidden;
-}
-[dir="rtl"] .admin-sidebar:not(.open) {
-  transform: translateX(100%);
-}
-.side-menu {
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 19px;
-}
+.sidebar-collapsed { --sidebar-w: 80px; }
 
 .admin-backdrop {
   position: fixed;
-  inset: var(--header-h) 0 0 0;
-  z-index: 24;
-  background: rgba(15, 23, 42, 0.4);
+  inset: 0;
+  z-index: 35;
+  background: rgba(17, 47, 51, 0.38);
+  backdrop-filter: blur(3px);
 }
 
 .admin-main {
   min-width: 0;
   padding-block-start: var(--header-h);
-  padding-inline-start: var(--sidebar-w);
+  padding-inline-start: calc(var(--sidebar-w) + var(--sidebar-gap));
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   transition: padding 0.2s ease;
-}
-.sidebar-collapsed .admin-main {
-  padding-inline-start: 0;
 }
 .admin-content {
   flex: 1;
@@ -209,4 +179,5 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
     padding: 0;
   }
 }
+@media (prefers-reduced-motion: reduce) { .admin-main { transition: none; } }
 </style>

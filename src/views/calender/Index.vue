@@ -211,6 +211,7 @@ export default {
         hiddenDays: [],
         slotMinTime: "00:00:00",
         slotMaxTime: "24:00:00",
+        nowIndicator: true,
         selectable: false,
         editable: false,
         events: [],
@@ -286,6 +287,12 @@ export default {
     isAvailableDate(date) {
       return this.avalible_day.some(day => moment(day.start).isSame(date, 'day'));
     },
+    nextBookableSlot(reference = moment()) {
+      const slot = reference.clone().seconds(0).milliseconds(0);
+      const remainder = slot.minute() % 30;
+      slot.add(remainder === 0 ? 30 : 30 - remainder, 'minutes');
+      return slot;
+    },
     dayCellClassNames({ date }) {
       if (!this.event.employee_id || !this.avalible_day.length) return [];
       return this.isAvailableDate(date) ? ['fc-day-available'] : ['fc-day-unavailable'];
@@ -295,6 +302,7 @@ export default {
       if (slot.allDay) return this.isAvailableDate(slot.start);
       const start = moment(slot.start);
       const end = moment(slot.end);
+      if (!start.isAfter(moment())) return false;
       const available = end.isAfter(start) && this.avalible_day.some(day =>
         start.isSameOrAfter(moment(day.start)) && end.isSameOrBefore(moment(day.end))
       );
@@ -360,10 +368,11 @@ export default {
           });
           await this.getTimes();
       } catch (el) {
+          const pastSlot = Boolean(el.response?.data?.errors?.start_time);
           this.$toast.add({
             severity: "error",
             summary: this.$t("error"),
-            detail: el.response?.data?.message || this.$t("mission_error"),
+            detail: pastSlot ? this.$t('calendar_past_slot') : (el.response?.data?.message || this.$t("mission_error")),
             life: 3000,
           });
       } finally {
@@ -381,9 +390,20 @@ export default {
       try {
           const response = await axios.get(`api/employees/get/with/calendar/${id}?type=${this.event.type}`);
           if (request !== this.calendarRequest) return;
-          const daysData = this.asList(response.data.data?.days).filter(day =>
-            moment(day.start).isValid() && moment(day.end).isAfter(moment(day.start))
-          );
+          const now = moment();
+          const nextSlot = this.nextBookableSlot(now);
+          const daysData = this.asList(response.data.data?.days).map(day => {
+            const start = moment(day.start);
+            const end = moment(day.end);
+            if (!start.isValid() || !end.isAfter(start) || !end.isAfter(now)) return null;
+            const visibleStart = start.isSame(now, 'day') && start.isBefore(nextSlot) ? nextSlot.clone() : start;
+            if (!end.isAfter(visibleStart)) return null;
+            return {
+              ...day,
+              start: visibleStart.format('YYYY-MM-DDTHH:mm:ss'),
+              end: end.format('YYYY-MM-DDTHH:mm:ss'),
+            };
+          }).filter(Boolean);
           this.avalible_day = daysData;
           this.business_hours = daysData.map((event) => ({
             day: moment(event.start).day(),
@@ -412,6 +432,13 @@ export default {
           }));
           this.opts.events = [
             ...daysData.map(day => ({ start: day.start, end: day.end, display: 'background', backgroundColor: '#d1fae5' })),
+            ...(daysData.some(day => moment(day.start).isSame(now, 'day')) ? [{
+              start: now.clone().startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+              end: nextSlot.format('YYYY-MM-DDTHH:mm:ss'),
+              display: 'background',
+              classNames: ['fc-past-time-block'],
+              backgroundColor: '#e2e8f0',
+            }] : []),
             ...this.booked,
           ];
           this.opts.selectable = daysData.length > 0;
@@ -508,6 +535,10 @@ export default {
 :deep(.fc-daygrid-day.fc-day-available) {
   background: #ecfdf5;
   cursor: pointer;
+}
+:deep(.fc-past-time-block) {
+  background: repeating-linear-gradient(135deg, #e2e8f0, #e2e8f0 7px, #cbd5e1 7px, #cbd5e1 14px) !important;
+  opacity: 0.8;
 }
 input {
   width: 100%;
