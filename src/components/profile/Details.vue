@@ -64,7 +64,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <DatePicker :disabled="!canEditProfile" showButtonBar v-model.number="employee.date_of_birth" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_birth }" /> 
+                     <DatePicker :disabled="!canEditProfile" showButtonBar v-model.number="employee.date_of_birth" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_birth }" />
                  </div> 
                <div class=" flex-column gap-2 py-1 hidden">
                    <label class="w-full " for="username">{{ $t('personal_image') }}</label>
@@ -139,7 +139,7 @@
                        <path opacity="0.8" d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z" fill="#DA1414"/>
                        </svg>
                      </div>
-                     <DatePicker :disabled="!canEditProfile" showButtonBar v-model.number="employee.date_of_enrollment" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_enrollment }" /> 
+                     <DatePicker :disabled="!canEditProfile" showButtonBar v-model.number="employee.date_of_enrollment" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_enrollment }" />
                  </div> 
            <div class="flex flex-column gap-2 py-1">
                    <div class="flex">
@@ -628,4 +628,3 @@
   
   /* Add any other custom styles here */
   </style>
-  
