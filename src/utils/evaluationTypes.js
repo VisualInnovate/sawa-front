@@ -15,6 +15,19 @@ export function getEvaluationType(type) {
   return evaluationTypes[Number(type)] ?? null;
 }
 
+// Booking codes describe a dimension, never its position in the API response.
+export function resolveSideProfileDimension(rows, dimension) {
+  const terms = [
+    ['معرف', 'cognitive'], ['عناي', 'ذات', 'self care', 'self-care'],
+    ['حرك', 'motor'], ['اجتماع', 'social'], ['اتصال', 'تواصل', 'communication'],
+  ][Number(dimension)];
+  if (!terms) return null;
+  const normalize = value => String(value || '').toLowerCase()
+    .replace(/[أإآ]/g, 'ا').replace(/[\u064b-\u065f]/g, '');
+  const matches = rows.filter(row => terms.some(term => normalize(row.title).includes(term)));
+  return matches.length === 1 ? matches[0] : null;
+}
+
 export function getEvaluationTypeLabel(type, translate, fallback = "") {
   const definition = getEvaluationType(type);
   return definition ? translate(definition.translationKey) : fallback;
@@ -35,5 +48,5 @@ export function getEvaluationStartRoute(type, childId, requestId) {
     return { name: definition.routeName, query: { childId, requestId } };
   }
 
-  return { name: definition.routeName, params: { id: childId } };
+  return { name: definition.routeName, params: { id: childId }, query: { requestId } };
 }

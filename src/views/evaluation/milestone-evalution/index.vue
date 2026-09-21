@@ -47,6 +47,7 @@
         <div v-if="answer.child_id" class="flex flex-column gap-2">
           <label for="username">{{ $t("date") }}</label>
           <DatePicker
+            :disabled="strart_evaluate"
             @update:model-value="getage"
             style="width: 100%"
             showButtonBar
@@ -88,7 +89,7 @@
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
               </div>  -->
         <div
-          v-if="answer.child_id && answer.child_age"
+          v-if="answer.child_id && answer.child_age != null"
           class="flex flex-column gap-2"
         >
           <label for="username">{{ $t("color") }}</label>
@@ -122,6 +123,8 @@
             </div>
             <Button
               @click="createevalutae"
+              :loading="starting"
+              :disabled="questionsLoading || !allquestion.length || strart_evaluate"
               class="m-auto w-full h-[50px]"
               :label="$t('strart_evaluate')"
             ></Button>
@@ -131,47 +134,26 @@
           </div>
         </div>
 
-        <div
-          v-if="strart_evaluate"
-          v-for="head in allquestion"
-          class="col-span-2 flex flex-column gap-2"
-        >
-          <div style="border: 1px solid black; border-radius: 5px; padding: 1%">
-            <h1 class="text-[black] font-bold">{{ head.title }}</h1>
-            <div>
-              <input
-                required
-                @change="collectanswer($event, head.id)"
-                style="border: 1px solid black"
-                class="mx-2"
-                type="radio"
-                :name="head.id"
-                value="0"
-              />
-                <label for="html">0</label><br />
-               
-              <input
-                required
-                @change="collectanswer($event, head.id)"
-                style="border: 1px solid black"
-                type="radio"
-                :name="head.id"
-                value=".5"
-              />
-                <label for="css">0.5</label><br />
-               
-              <input
-                required
-                @change="collectanswer($event, head.id)"
-                style="border: 1px solid black"
-                type="radio"
-                :name="head.id"
-                value="1"
-              />
-                <label for="javascript">1</label>
-            </div>
-          </div>
-        </div>
+        <Message v-if="questionsLoading" class="lg:col-span-2">{{ $t('loading') }}</Message>
+        <Message v-else-if="answer.child_age != null && !allquestion.length" severity="warn" class="lg:col-span-2">{{ $t('no_records_found') }}</Message>
+        <template v-if="strart_evaluate">
+          <section v-for="domain in questionGroups" :key="domain.id" class="milestone-domain lg:col-span-2">
+            <h2>{{ domain.title }}</h2>
+            <section v-for="goal in domain.goals" :key="goal.id" class="milestone-goal">
+              <h3>{{ goal.title }}</h3>
+              <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
+                <p>{{ question.title }}</p>
+                <div class="milestone-scores">
+                  <label v-for="score in [0, 0.5, 1]" :key="score">
+                    <input type="radio" required :name="'question-' + question.id" :value="score"
+                      @change="collectanswer($event, question.id)" />
+                    <span>{{ score }}</span>
+                  </label>
+                </div>
+              </div>
+            </section>
+          </section>
+        </template>
         <div v-if="strart_evaluate" class="flex flex-column gap-2">
           <label for="milestone-program">{{
             $t("milestone_target_program")
@@ -215,6 +197,8 @@
 
 <script>
 import axios from "axios";
+import moment from "moment";
+import { resetUserProfile } from "../../../components/profile/userProfile";
 import InputNumber from "primevue/inputnumber";
 import EvaluationType from "../../../components/EvaluationType.vue";
 import { useToast } from "primevue/usetoast";
@@ -234,6 +218,8 @@ export default {
       },
       programs: [],
       saving: false,
+      questionsLoading: false,
+      starting: false,
       type: 2,
 
       answer: {
@@ -250,6 +236,20 @@ export default {
     };
   },
 
+  computed: {
+    questionGroups() {
+      const domains = new Map()
+      for (const question of this.allquestion) {
+        const domainId = question.question_type_id ?? 'other'
+        if (!domains.has(domainId)) domains.set(domainId, { id: domainId, title: question.question_type?.title || this.$t('milestone_domains'), goals: new Map() })
+        const domain = domains.get(domainId)
+        const goalId = question.subtest_id
+        if (!domain.goals.has(goalId)) domain.goals.set(goalId, { id: goalId, title: question.subtest?.title || this.$t('milestone_general_goals'), questions: [] })
+        domain.goals.get(goalId).questions.push(question)
+      }
+      return [...domains.values()].map(domain => ({ ...domain, goals: [...domain.goals.values()] }))
+    },
+  },
   methods: {
     // ... existing methods ...
     Therapeutic() {
@@ -265,25 +265,22 @@ export default {
       this.$refs.showcolor.style.background = "#" + color;
     },
     submit() {},
-    createevalutae(id) {
-      console.log(id);
-
-      axios
-        .post(`api/evaluations/create`, {
-          type: this.type,
-          title: this.answer.title,
-          child_id: this.answer.child_id,
-          specialist_id: localStorage.getItem("user_id"),
-          date: this.answer.date,
+    async createevalutae() {
+      if (this.starting || this.strart_evaluate || this.questionsLoading || !this.allquestion.length) return
+      this.starting = true
+      this.error = {}
+      try {
+        const { data } = await axios.post('api/evaluations/create', {
+          type: this.type, title: this.answer.title, child_id: this.answer.child_id,
+          specialist_id: localStorage.getItem('user_id'),
+          date: moment(this.answer.date).format('YYYY-MM-DD'),
         })
-        .then((response) => {
-          this.answer.evaluation_id = response.data.evaluation.id;
-          this.strart_evaluate = !this.strart_evaluate;
-        })
-        .catch((el) => {
-          console.log(el.response.data.errors.name);
-          this.error = el.response.data.errors;
-        });
+        this.answer.evaluation_id = data.evaluation.id
+        this.strart_evaluate = true
+      } catch (error) {
+        this.error = error.response?.data?.errors || {}
+        this.alert_text = error.response?.data?.message || this.$t('request_failed_retry')
+      } finally { this.starting = false }
     },
     anserdata(id, val) {
       console.log(id);
@@ -292,33 +289,21 @@ export default {
     getcolor(id) {
       this.answer.color = id.target.value;
     },
-    getquation(id) {
-      axios
-        .get(`api/milestone-answers/sub-goals/${this.answer.child_age}`, {
-          params: { child_id: this.answer.child_id },
+    async getage() {
+      if (!this.answer.date || this.strart_evaluate) return
+      this.questionsLoading = true
+      this.allquestion = []
+      this.alert_text = ''
+      try {
+        const { data: age } = await axios.post('api/milestone-answers/get-age-child', {
+          date: moment(this.answer.date).format('YYYY-MM-DD'), child_id: this.answer.child_id,
         })
-        .then((response) => {
-          console.log(response.data[0].subtests);
-          this.allquestion = response.data;
-        });
-    },
-    getage() {
-      axios
-        .post("api/milestone-answers/get-age-child", {
-          date: this.answer.date,
-          child_id: this.answer.child_id,
-        })
-        .then((response) => {
-          this.answer.child_age = response.data;
-          axios
-            .get(`api/milestone-answers/sub-goals/${response.data}`, {
-              params: { child_id: this.answer.child_id },
-            })
-            .then((response) => {
-              console.log(response.data[0].subtests);
-              this.allquestion = response.data;
-            });
-        });
+        this.answer.child_age = Number(age)
+        const { data } = await axios.get(`api/milestone-answers/sub-goals/${age}`, { params: { child_id: this.answer.child_id } })
+        this.allquestion = Array.isArray(data) ? data : (data.data || [])
+      } catch (error) {
+        this.alert_text = error.response?.data?.message || this.$t('request_failed_retry')
+      } finally { this.questionsLoading = false }
     },
 
     collectanswer(e, id) {
@@ -327,7 +312,7 @@ export default {
         score: e.target.value,
         color: this.answer.color,
         child_id: this.answer.child_id,
-        date: this.answer.date,
+        date: moment(this.answer.date).format("YYYY-MM-DD"),
         child_age: this.answer.child_age,
         evaluation_id: this.answer.evaluation_id,
       };
@@ -344,14 +329,10 @@ export default {
           .map((answer) => ({ ...answer, color: this.answer.color }));
         await axios.post("/api/milestone-answers", {
           student_program_id: this.answers.student_program_id,
+          request_id: this.$route.query.requestId || null,
           answers,
         });
-        const requestId = localStorage.getItem("eavl_id");
-        if (requestId)
-          await axios.post(
-            `/api/evaluation-request/change-status/${requestId}`,
-            this.change,
-          );
+        resetUserProfile();
         await this.$router.push({
           name: "milestone-resulte",
           params: {
@@ -372,7 +353,9 @@ export default {
       axios.get("api/child").then((response) => {
         console.log(localStorage.getItem("child_id"));
         this.childs = response.data.children;
-        this.answer.child_id = parseInt(localStorage.getItem("child_id"));
+        this.answer.child_id = Number(this.$route.params.id || localStorage.getItem("child_id"));
+        this.answer.date = new Date();
+        this.getage();
         axios
           .get(`/api/milestone-answers/programs/${this.answer.child_id}`)
           .then(({ data }) => {
@@ -385,10 +368,6 @@ export default {
             this.alert_text = this.$t("request_failed_retry");
           });
         this.answer.evaluation_id = parseInt(this.$route.params.evaluation);
-      });
-      axios.get("api/mileston-levels").then((response) => {
-        console.log(response.data.data);
-        this.qustions = response.data.data;
       });
     },
 
@@ -423,6 +402,15 @@ export default {
 </script>
 
 <style scoped>
+.milestone-domain { border: 1px solid var(--sawa-border); border-radius: 16px; overflow: hidden; }
+.milestone-domain h2 { margin: 0; padding: 1rem 1.25rem; color: var(--sawa-primary); background: #edf7f5; font-weight: 700; font-size: 1.15rem; }
+.milestone-goal { padding: 1rem 1.25rem; }
+.milestone-goal h3 { margin-bottom: .75rem; font-weight: 700; }
+.milestone-question { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--sawa-border); padding: 1rem 0; }
+.milestone-question p { flex: 1 1 20rem; }
+.milestone-scores { display: flex; gap: .6rem; }
+.milestone-scores label { display: flex; gap: .4rem; padding: .5rem .8rem; border: 1px solid var(--sawa-border); border-radius: 8px; cursor: pointer; }
+
 /* Add custom styles for the name input field */
 .name-input {
   height: 70vh;

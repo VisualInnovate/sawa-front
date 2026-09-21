@@ -1,4 +1,9 @@
 export default {
+  requests_grouped_hint: "تقييمات كل طفل مجمّعة حسب اليوم ومرتبة بوقت الموعد",
+  requests_pending_count: "{count} بانتظار التقييم",
+  requests_count: "{count} تقييمات",
+  milestone_domains: "المجال",
+  milestone_general_goals: "الهدف العام",
   export: "تصدير",
   close: "إغلاق",
   roles: "الأدوار",

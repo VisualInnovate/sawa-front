@@ -10,11 +10,12 @@
         <p>{{ $t('no_records_found') }}</p>
       </div>
    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-      <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details" :key="evalu.id">
+      <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details" :key="evalu.result_id ? 'result-' + evalu.result_id : evalu.id">
         <div>
           <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
-          <p class="text-xl  px-1 my-auto">{{ evalu.title }}</p>
+          <p class="text-xl px-1 my-auto">{{ evalu.title }}</p>
+          <p class="text-sm text-gray-500">{{ evalu.child_name || evalu.kid?.name }}</p>
         </div>
         <div class="flex py-2 ">
           <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
@@ -29,8 +30,8 @@
         </div>
         <div class="text-center" >
         
-            <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id)" class="m-auto">{{ $t("evaluation_results") }}</Button>     
-            <Button v-can="'evaluations delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="m-auto" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')"> </Button>
+            <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" class="m-auto">{{ $t("evaluation_results") }}</Button>
+            <Button v-if="!evalu.result_id" v-can="'evaluations delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="m-auto" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')"> </Button>
           
         </div>
           
@@ -170,7 +171,10 @@ export default {
 
 
     },
-    go_evaluate(id,type,child_id){
+    go_evaluate(id,type,child_id,data){
+      if (Number(type) === 1 && data.side_profile_id) {
+        return this.$router.push({ name: 'showChildResult', params: { child_id, sideProfile_id: data.side_profile_id, evaluation_id: id } });
+      }
       if(type==2){
         this.$router.push({ name: 'milestone-resulte', params:{'id':child_id,'evla_id':id}});
       } 

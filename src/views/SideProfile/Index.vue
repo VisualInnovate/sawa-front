@@ -1,6 +1,7 @@
 <script>
 import axios from "axios";
 import Sideprofiletap from "../../components/Sideprofiletap.vue";
+import { resolveSideProfileDimension } from "../../utils/evaluationTypes";
 
 // The side profile dimensions are the rows of the `evaluations` table (their questions hang off
 // evaluations.id). `side_profile_types` is not used: it lacks the communication dimension and has no questions.
@@ -21,9 +22,9 @@ export default {
         .get("/api/evaluations")
         .then((res) => {
           this.dimensions = (res.data.evaluations ?? []).filter((row) => row.type == null || Number(row.type) === 1);
-          const requestedDimension = Number(this.$route.query.dimension);
-          if (Number.isInteger(requestedDimension) && this.dimensions[requestedDimension]) {
-            this.startEvaluation(this.dimensions[requestedDimension].id);
+          if (this.$route.query.dimension != null) {
+            const dimension = resolveSideProfileDimension(this.dimensions, this.$route.query.dimension);
+            if (dimension) this.startEvaluation(dimension.id);
           }
         })
         .catch(() => {

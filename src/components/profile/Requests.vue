@@ -3,43 +3,9 @@
     <div>
          
     <div class="sawa-card">
-      <div v-if="loading" class="flex justify-center py-8">
-        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
-      </div>
-      <div v-else-if="!details.length" class="text-center py-8 text-gray-500">
-        <i class="pi pi-inbox text-2xl mb-2" />
-        <p>{{ $t('no_records_found') }}</p>
-      </div>
-     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-        <div class=" bg-slate-100 rounded-sm p-4 grid grid-cols-3" v-for="evalu in details" :key="evalu.id">
-          <div class="col-span-2">
-            <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
-            <p class="text-xl px-1 my-auto">{{ evaluationName(evalu) }}</p>
-          </div>
-          <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.date }}</p>
-          </div>
-        
-          <div class="flex py-2 ">
-            <h3 class="my-auto font-bold">{{ $t("child_name") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.child?.name }}</p>
-          </div>
-          </div>
-          <div class="text-center" >
-          <Button v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" @click="go_evaluate(evalu.child_id,evalu.evaluation_type,evalu.id)" class="m-auto"> {{ $t("strart_evaluate") }}</Button>
-          <Button v-can="'evaluation request delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id)" class="m-auto" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')"> </Button>
-
-          </div>
-            
-        </div>
-        
-
-     </div>
-        
-  
-      
+      <EvaluationRequestsBoard :requests="details" :loading="loading"
+        @start="row => go_evaluate(row.child_id ?? row.child?.id, row.evaluation_type, row.id)"
+        @delete="deleteevalution" />
     </div>
     <div>
       <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
@@ -92,13 +58,14 @@
   </template>
   <script>
   import axios from "axios";
+  import EvaluationRequestsBoard from "../../components/EvaluationRequestsBoard.vue";
   import { useStorage } from "@vueuse/core";
   import EvaluationType from '../../components/EvaluationType.vue'
   import moment from "moment";
   import { fetchUserProfile } from "./userProfile";
   import { getEvaluationStartRoute, getEvaluationTypeLabel } from "../../utils/evaluationTypes";
   export default {
-     components:{EvaluationType},
+     components:{EvaluationType, EvaluationRequestsBoard},
   
     data() {
       return {
