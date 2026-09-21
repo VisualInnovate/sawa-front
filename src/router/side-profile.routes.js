@@ -8,7 +8,8 @@ const sideProfilesRoutes = [
     {
         path: "side-profiles",
         name: "SideProfiles",
-        meta: { permission: ["side profiles list"] },
+        // Evaluators reach this list from an evaluation request to choose/start a Side Profile dimension.
+        meta: { permission: ["side profiles list", "evaluation results create"] },
         component: Index,
     },
     // create

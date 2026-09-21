@@ -21,6 +21,10 @@ export default {
         .get("/api/evaluations")
         .then((res) => {
           this.dimensions = (res.data.evaluations ?? []).filter((row) => row.type == null || Number(row.type) === 1);
+          const requestedDimension = Number(this.$route.query.dimension);
+          if (Number.isInteger(requestedDimension) && this.dimensions[requestedDimension]) {
+            this.startEvaluation(this.dimensions[requestedDimension].id);
+          }
         })
         .catch(() => {
           this.loadError = true;
@@ -30,7 +34,8 @@ export default {
         });
     },
     startEvaluation(id) {
-      this.$router.push({ name: "ShowEvaluations", params: { id } });
+      const { dimension, ...requestQuery } = this.$route.query;
+      this.$router.push({ name: "ShowEvaluations", params: { id }, query: requestQuery });
     },
     editEvaluation(id) {
       this.$router.push({ name: "EditEvaluations", params: { id } });

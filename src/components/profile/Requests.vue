@@ -15,11 +15,7 @@
           <div class="col-span-2">
             <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==2">milestone</p>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==1">side profile</p>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==3">Barrier</p>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==4">ablls</p>
-            <p class="text-xl  px-1 my-auto" v-if="evalu.evaluation_type ==5">carolina</p>
+            <p class="text-xl px-1 my-auto">{{ evaluationName(evalu) }}</p>
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
@@ -100,6 +96,7 @@
   import EvaluationType from '../../components/EvaluationType.vue'
   import moment from "moment";
   import { fetchUserProfile } from "./userProfile";
+  import { getEvaluationStartRoute, getEvaluationTypeLabel } from "../../utils/evaluationTypes";
   export default {
      components:{EvaluationType},
   
@@ -147,37 +144,24 @@
         this.deleteDialog=!(this.deleteDialog)
       
       },
+      evaluationName(evaluation) {
+        return getEvaluationTypeLabel(
+          evaluation.evaluation_type,
+          (key) => this.$t(key),
+          evaluation.title || this.$t("unknown_evaluation_type"),
+        );
+      },
       go_evaluate(id,evalu_id,eva_id){
-        console.log(id,evalu_id)
+        const route = getEvaluationStartRoute(evalu_id, id, eva_id);
+        if (!route) {
+          this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('unknown_evaluation_type'), life: 4000 });
+          return;
+        }
 
-
-
-        if(evalu_id == 1){
-          this.$router.push({ name: 'ShowSideProfiles', params:{'id':id}});
-        }
-        if(evalu_id == 2){
-          this.$router.push({ name: 'milestone-evaluation',  params:{'id':id}});
-        }
-        if(evalu_id == 3){
-          this.$router.push({ name: 'barrier-evaluation',  params:{'id':id}});
-        }
-        if(evalu_id == 4){
-          this.$router.push({ name: 'mission-test',  params:{'id':id}});
-        }
-        if(evalu_id == 5){
-          this.$router.push({ name: 'carolina-test',  params:{'id':id}});
-        }
-        
- 
-         localStorage.setItem("child_id",id)
-         localStorage.setItem("eavl_id",eva_id)
-        
-         this.evalate_type=evalu_id
-     
-       
-       
-       
-       
+        localStorage.setItem("child_id", id);
+        localStorage.setItem("eavl_id", eva_id);
+        this.evalate_type = evalu_id;
+        this.$router.push(route);
       },
       createevaluate(){
         axios

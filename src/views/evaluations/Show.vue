@@ -97,8 +97,12 @@ export default {
         'child_id': this.child_id,
         'date': this.examDateText,
         skills: this.skills
-      }).then(res => {
+      }).then(async res => {
         if (res.data.status == 200) {
+          const requestId = this.$route.query.requestId
+          if (requestId) {
+            await axios.post(`/api/evaluation-request/change-status/${requestId}`, { status: 1 })
+          }
           this.child.childInMonths = -1 //reset child in months to -1 to not show any question header
 
           this.type = "success"
@@ -116,7 +120,11 @@ export default {
         this.children = res.data.children.forEach((item) => {
           this.selectBox.push({ 'title': item.name, 'value': item.id })
         })
-        // console.log(this.selectBox)
+        const requestedChildId = Number(this.$route.query.childId)
+        if (requestedChildId && this.selectBox.some((item) => item.value === requestedChildId)) {
+          this.child_id = requestedChildId
+          this.getSpecificChildren()
+        }
 
       })
     },
