@@ -408,7 +408,7 @@ export default {
   color: "اللون",
   Answers: "الاجابات",
   question_id: "اسم السؤال",
-  level_id: "اسم المستوي",
+  level_id: "اسم المستوى",
   Subtest_id: "اسم الاختبار الفرعي",
   Subtest: " الاختبار الفرعي",
   head_question: "السؤال الرئيسي",

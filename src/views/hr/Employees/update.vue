@@ -238,8 +238,18 @@
                   fill="#DA1414" />
               </svg>
             </div>
-            <MultiSelect v-model="employee.evaluation" filter option-value="id" :options="evaluate_types"
-              optionLabel="name" :class="{ 'p-invalid': submitted && !employee.skills }" />
+            <MultiSelect
+              v-model="employee.evaluation"
+              filter
+              option-value="id"
+              :options="evaluate_types"
+              optionLabel="name"
+              optionGroupLabel="label"
+              optionGroupChildren="items"
+              :placeholder="$t('evalute_type')"
+              :class="{ 'p-invalid': submitted && !employee.evaluation?.length }"
+            />
+            <div class="mt-1 text-red-500" v-if="error?.evaluations">{{ error.evaluations[0] }}</div>
           </div>
           <div v-if="employee.type == 0 || employee.type == 2" class="flex flex-column gap-2">
             <div class="flex">
@@ -304,11 +314,25 @@ export default {
   data() {
     return {
       evaluate_types: [
-        { name: "side profile", id: 1 },
-        { name: "milestone", id: 2 },
-        { name: "barrier", id: 3 },
-        { name: "ablls", id: 4 },
-        { name: "carolina", id: 5 },
+        {
+          label: "Side Profile",
+          items: [
+            { name: "البعد المعرفي", id: 101 },
+            { name: "البعد العنايه الذاتيه", id: 102 },
+            { name: "البعد الحركي", id: 103 },
+            { name: "البعد الاجتماعي", id: 104 },
+            { name: "البعد الاتصالي", id: 105 },
+          ],
+        },
+        {
+          label: this.$t('other_evaluation_types'),
+          items: [
+            { name: "milestone", id: 2 },
+            { name: "barrier", id: 3 },
+            { name: "ablls", id: 4 },
+            { name: "carolina", id: 5 },
+          ],
+        },
       ],
       currentStep: 0,
       steps: [
@@ -405,10 +429,9 @@ export default {
             response.data.data.user.treatments[i].id
           );
         }
-        //  this.employee.evaluation = [];
-        //  for (let i =0 ; i < response.data.data.user?.evaluations.length; i++) {
-        //    this.employee.evaluation.push(response.data.data.user?.evaluations[i].id);
-        //  }
+        this.employee.evaluation = (response.data.data.user?.evaluations || [])
+          .map((evaluation) => Number(typeof evaluation === "object" ? evaluation.id : evaluation))
+          .filter((evaluation) => Number.isInteger(evaluation));
 
         this.employee.department = [];
         for (let i = 0; i < response.data.data.user.departments.length; i++) {
