@@ -7,6 +7,7 @@ export default {
   export: "Export",
   close: "Close",
   roles: "Roles",
+  'نوع التقييم': 'Evaluation type',
   Nationality_choose: "Choose the nationality name",
   your_booking_was_successfully_submitted:
     "your booking was successfully submitted",
@@ -599,6 +600,7 @@ export default {
   parents_report: "Parents Report",
   parent_meetings_report: "Parent Meetings Report",
   evaluation_report: "Evaluation Report",
+
   print_report: "Print Report",
   generated_on: "Generated on",
   export_as_pdf: "Export as PDF",
