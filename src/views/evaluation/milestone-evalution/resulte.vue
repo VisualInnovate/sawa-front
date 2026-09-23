@@ -279,13 +279,13 @@ th, td {
 .level-heading-spacer,
 .level-subtest-title {
   width: 5rem;
-  height: 15rem;
-  min-height: 15rem;
+  height: 7.5rem;
+  min-height: 7.5rem;
 }
 
 .level-subtest-title {
-  align-items: flex-start;
-  padding: 1rem 0.5rem;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
   overflow: hidden;
   font-size: 0.75rem;
   line-height: 1.75;
@@ -594,8 +594,8 @@ th, td {
   .level-heading-spacer,
   .level-subtest-title {
     width: 4rem;
-    height: 10rem;
-    min-height: 10rem;
+    height: 6.5rem;
+    min-height: 6.5rem;
   }
 
   .level-subtest-title {
