@@ -277,6 +277,8 @@
           <Button
             :label="$t('submit')"
             type="submit"
+            :loading="submittingBooking"
+            :disabled="submittingBooking"
             class="bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-60"
             icon="pi pi-check"></Button>
         </div>
@@ -576,6 +578,7 @@ export default {
       days: [0, 1, 2, 3, 4, 5, 6],
       sendMassage: false,
       submitted: false,
+      submittingBooking: false,
     };
   },
 
@@ -697,50 +700,67 @@ export default {
         });
     },
 
-    getBooking() {
-      axios.get(`/api/calender/bookings/${this.id}`).then((res) => {
-        this.booking = res.data.booking.booking;
-        this.new_status = res.data.booking.booking.accepted;
-        this.accept_notes = res.data.booking.booking.accepted_notes;
-        if (res.data.booking.booking.consultation_result)
-          this.student_massage = res.data.booking?.booking?.consultation_result;
-        if (res.data.booking.booking.pre_evaluations.pre_evalutions)
-          this.pre_evalutions.pre_evalutions =
-            res.data.booking?.booking?.pre_evaluations.pre_evalutions;
-        this.doctor = res.data.booking.doctor;
-        this.compareDates();
+    async getBooking() {
+      const res = await axios.get(`/api/calender/bookings/${this.id}`, {
+        params: { _ts: Date.now() },
       });
+
+      this.booking = res.data.booking.booking;
+      this.new_status = Number(res.data.booking.booking.accepted);
+      this.accept_notes = res.data.booking.booking.accepted_notes;
+      if (res.data.booking.booking.consultation_result)
+        this.student_massage = res.data.booking?.booking?.consultation_result;
+      if (res.data.booking.booking.pre_evaluations?.pre_evalutions)
+        this.pre_evalutions.pre_evalutions =
+          res.data.booking?.booking?.pre_evaluations.pre_evalutions;
+      this.doctor = res.data.booking.doctor;
+      this.compareDates();
+    },
+    getConsultationSettings() {
       axios.get("api/consultation-settings").then((res) => {
         this.fileds = res.data.data.recommendations;
       });
     },
-    updateBooking() {
-      axios
-        .post(`/api/calender/bookings/${this.id}/accept`, {
-          status: this.new_status,
+    async updateBooking() {
+      if (this.submittingBooking) return;
+
+      this.submittingBooking = true;
+      try {
+        const res = await axios.post(`/api/calender/bookings/${this.id}/accept`, {
+          status: Number(this.new_status),
           accepted_notes: this.accept_notes,
           user_id: this.booking.user_id,
           event_id: this.booking.event_id,
           doctor_name: this.doctor?.name,
           doctor_title: this.doctor?.title,
-        })
-        .then((res) => {
-          this.$toast.add({
-            severity: "success",
-            summary: this.$t("success_message"),
-            detail: `${this.$t("element_update_success")}`,
-            life: 3000,
-          });
-        })
-        .catch((err) => {
-          const forbidden = err.response?.status === 403;
-          this.$toast.add({
-            severity: "error",
-            summary: this.$t("error"),
-            detail: forbidden ? this.$t("no_permission_action") : this.$t("mission_error"),
-            life: 5000,
-          });
         });
+
+        const savedBooking = res.data?.booking;
+        if (savedBooking) {
+          this.booking = { ...this.booking, ...savedBooking };
+          this.new_status = Number(savedBooking.accepted);
+          this.accept_notes = savedBooking.accepted_notes ?? "";
+        }
+
+        // Read the canonical row again so the status displayed to the user can never remain stale.
+        await this.getBooking();
+        this.$toast.add({
+          severity: "success",
+          summary: this.$t("success_message"),
+          detail: `${this.$t("element_update_success")}`,
+          life: 3000,
+        });
+      } catch (err) {
+        const forbidden = err.response?.status === 403;
+        this.$toast.add({
+          severity: "error",
+          summary: this.$t("error"),
+          detail: forbidden ? this.$t("no_permission_action") : this.$t("mission_error"),
+          life: 5000,
+        });
+      } finally {
+        this.submittingBooking = false;
+      }
     },
     changeDoctor() {
       axios
@@ -770,6 +790,7 @@ export default {
   },
   mounted() {
     this.getBooking();
+    this.getConsultationSettings();
     this.changeDoctor();
   },
 };

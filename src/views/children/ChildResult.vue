@@ -6,13 +6,15 @@
     <!-- Header Section -->
     <header class="mb-6 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
       <div
-        v-if="result[0] && sideProfileName"
+        v-if="result[0]"
         class="flex flex-wrap items-center gap-2 text-xl font-bold text-gray-800"
       >
         <span class="text-blue-500">{{childName }}</span>
         <span class="text-gray-500">{{ locale === 'en' ? '/' : '\\' }}</span>
-        <span class="text-pink-500">{{ sideProfileName }}</span>
-        <span class="text-gray-500">{{ locale === 'en' ? '/' : '\\' }}</span>
+        <template v-if="sideProfileName">
+          <span class="text-pink-500">{{ sideProfileName }}</span>
+          <span class="text-gray-500">{{ locale === 'en' ? '/' : '\\' }}</span>
+        </template>
         <span class="text-cyan-500">{{ result[0].evaluation_title }}</span>
       </div>
 
@@ -571,6 +573,8 @@ const getResults = async () => {
 };
 
 const getSideProfile = async () => {
+  // 0 stands for an evaluation that is not linked to a side profile.
+  if (!Number(route.params.sideProfile_id)) return;
   try {
     const response = await axios.get(`/api/side-profiles/${route.params.sideProfile_id}`);
     sideProfileName.value = response.data.sideProfile.title;

@@ -274,7 +274,7 @@ export default {
     },
 
     go_evaluate(id, type, child_id, data) {
-      if (!data?.pivot?.child_id || !data?.side_profile_id || !id) {
+      if (!data?.pivot?.child_id || !id) {
         this.$toast.add({
           severity: "error",
           summary: this.$t("error"),
@@ -306,7 +306,7 @@ export default {
           name: "showChildResult",
           params: {
             child_id: data.pivot.child_id,
-            sideProfile_id: data.side_profile_id,
+            sideProfile_id: data.side_profile_id || 0,
             evaluation_id: id,
           },
         });

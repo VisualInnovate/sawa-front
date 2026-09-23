@@ -38,17 +38,17 @@
               <div class="w-20 h-16 text-center flex items-center justify-center bg-gray-200 font-medium print:w-16 print:h-12"></div>
               <div 
                 class="w-20 h-16 m-auto text-center flex items-center justify-center border-t border-gray-200 font-medium print:w-16 print:h-12" 
-                v-for="(question, qIndex) in level?.subtests[0].questions" 
+                v-for="(question, qIndex) in level?.subtests?.[0]?.questions || []" 
                 :key="qIndex"
               >
-                {{ qIndex+1 }}
+                {{ 5 - (qIndex % 5) }}
               </div>
             </div>
             
             <!-- Test Columns -->
             <div 
               class="grid grid-cols-1" 
-              v-for="(subtest, subIndex) in mainSquares[0]?.subtests"
+              v-for="(subtest, subIndex) in mainSquares[0]?.subtests || []"
             >
               <!-- Subtest Name -->
               <div class="w-20 h-20 text-center flex items-center justify-center bg-gray-100 border-l border-gray-200 p-2 text-sm font-medium print:w-16 print:h-16 print:text-xs">
@@ -58,7 +58,7 @@
               <!-- Answer Cells -->
               <div 
                 class="w-20 h-16 border-t border-l border-gray-200 flex flex-col justify-between print:w-16 print:h-12"
-                v-for="(question, qIndex) in level?.subtests[subIndex].questions" 
+                v-for="(question, qIndex) in level?.subtests?.[subIndex]?.questions || []" 
                 :key="qIndex"
               >
                 <div 
@@ -100,6 +100,11 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="!table_resulte.length">
+              <td colspan="6" class="px-6 py-10 text-gray-500">
+                {{ loading ? $t("loading") : loadError ? $t("request_failed_retry") : $t("no_data_available") }}
+              </td>
+            </tr>
             <tr 
               v-for="(result, rIndex) in table_resulte" 
               :key="rIndex"
@@ -145,28 +150,38 @@ export default {
   data() {
     return {
       mainSquares: [],
-      table_resulte: []
+      table_resulte: [],
+      loading: true,
+      loadError: false,
     };
   },
   methods: {
-    getresulte() {
-      axios
-        .get(`api/mileston-levels/flow-chart/${this.$route.params.id}`)
-        .then((response) => {
-          this.mainSquares = response.data.data;
-        })
-        .catch((error) => {
-          console.error("Error retrieving data:", error);
-        });
-      
-      axios
-        .get(`api/evaluations/report/${this.$route.params.evla_id}`)
-        .then((response) => {
-          this.table_resulte = response.data;
-        })
-        .catch((error) => {
-          console.error("Error retrieving evaluation data:", error);
-        });
+    async getresulte() {
+      this.loading = true;
+      this.loadError = false;
+
+      const [levelsResult, reportResult] = await Promise.allSettled([
+        axios.get(`api/mileston-levels/flow-chart/${this.$route.params.evla_id}`),
+        axios.get(`api/evaluations/report/${this.$route.params.evla_id}`),
+      ]);
+
+      if (levelsResult.status === "fulfilled") {
+        this.mainSquares = levelsResult.value.data?.data || [];
+      } else {
+        this.mainSquares = [];
+        this.loadError = true;
+        console.error("Error retrieving data:", levelsResult.reason);
+      }
+
+      if (reportResult.status === "fulfilled") {
+        this.table_resulte = Array.isArray(reportResult.value.data) ? reportResult.value.data : [];
+      } else {
+        this.table_resulte = [];
+        this.loadError = true;
+        console.error("Error retrieving evaluation data:", reportResult.reason);
+      }
+
+      this.loading = false;
     },
     printReport() {
       // Add print-specific styles
