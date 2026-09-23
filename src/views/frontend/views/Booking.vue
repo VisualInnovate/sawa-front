@@ -67,32 +67,38 @@
   <!-- Consultation Result Modal -->
   <Dialog v-model:visible="consultationResultDialogVisible" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '600px', maxWidth: '92vw' }">
     <div v-if="selectedConsultationResult" id="consultation-result-content" ref="resultContent" class="consultation-result">
-      <h2 class="result-heading">{{ $t("نتيجة الاستشارة") }} — {{ selectedConsultationResult.child_name }}</h2>
-      <p class="result-meta"><span dir="ltr">{{ moment(selectedConsultationResult.event_date).format("DD-MM-YYYY") }}</span> · {{ selectedConsultationResult.user_name }}</p>
+      <header class="cr-header">
+        <p class="cr-caption">{{ $t("نتيجة الاستشارة") }}</p>
+        <h2 class="cr-child">{{ selectedConsultationResult.child_name }}</h2>
+        <div class="cr-meta">
+          <span class="cr-chip"><span class="cr-chip-label">{{ $t("consultation_date") }}</span><span dir="ltr">{{ moment(selectedConsultationResult.event_date).format("DD-MM-YYYY") }}</span></span>
+          <span v-if="selectedConsultationResult.user_name" class="cr-chip"><span class="cr-chip-label">{{ $t("consultant_label") }}</span>{{ selectedConsultationResult.user_name }}</span>
+        </div>
+      </header>
 
-      <template v-if="result.health">
-        <p class="result-label">{{ $t("التوصييات الصحية والنمائية") }}:</p>
-        <p class="result-text">{{ fillChildName(result.health) }}</p>
-      </template>
+      <section v-if="result.health" class="cr-section">
+        <h3 class="cr-label">{{ $t("التوصييات الصحية والنمائية") }}</h3>
+        <p class="cr-text">{{ fillChildName(result.health) }}</p>
+      </section>
 
-      <template v-if="result.consultant_recommendations">
-        <p class="result-label">{{ $t("توصييات المستشار") }}:</p>
-        <p class="result-text">{{ fillChildName(result.consultant_recommendations) }}</p>
-      </template>
+      <section v-if="result.consultant_recommendations" class="cr-section">
+        <h3 class="cr-label">{{ $t("توصييات المستشار") }}</h3>
+        <p class="cr-text">{{ fillChildName(result.consultant_recommendations) }}</p>
+      </section>
 
-      <template v-if="homeRecommendations.length">
-        <p class="result-label">{{ $t("التوصييات المزلية") }}:</p>
-        <ul class="result-list">
+      <section v-if="homeRecommendations.length" class="cr-section">
+        <h3 class="cr-label">{{ $t("التوصييات المزلية") }}</h3>
+        <ol class="cr-list">
           <li v-for="(item, index) in homeRecommendations" :key="item.id ?? index">{{ fillChildName(item.value) }}</li>
-        </ul>
-      </template>
+        </ol>
+      </section>
 
-      <template v-if="result.notes">
-        <p class="result-label">{{ $t("ملاحظات المستشار") }}:</p>
-        <p class="result-text">{{ fillChildName(result.notes) }}</p>
-      </template>
+      <section v-if="result.notes" class="cr-section">
+        <h3 class="cr-label">{{ $t("ملاحظات المستشار") }}</h3>
+        <p class="cr-text">{{ fillChildName(result.notes) }}</p>
+      </section>
 
-      <p v-if="!hasResult" class="result-text">{{ $t("no_records_found") }}</p>
+      <p v-if="!hasResult" class="cr-empty">{{ $t("no_records_found") }}</p>
     </div>
     <template #footer>
       <Button :label="$t('print')" icon="pi pi-print" @click="printConsultationResult" variant="text" />
@@ -117,6 +123,7 @@ import html2pdf from "html2pdf.js";
 import Banner from '../components/Banner.vue';
 import { useToast } from "primevue/usetoast";
 import { useI18n } from "vue-i18n";
+import { useStyleTag } from "@vueuse/core";
 
 const router = useRouter();
 const toast = useToast();
@@ -126,6 +133,40 @@ const deleteDialogVisible = ref(false);
 const bookingToDelete = ref(null);
 const consultationResultDialogVisible = ref(false);
 const selectedConsultationResult = ref(null);
+const resultContent = ref(null);
+
+// Shared by the dialog and the print frame, so the printed copy matches the screen. Literal colours
+// because the print frame and html2pdf do not see the site's CSS variables.
+const resultStyles = `
+.consultation-result{color:#1e293b;line-height:1.8;display:grid;gap:14px}
+.cr-header{background:#eef8f9;border-radius:14px;padding:16px 18px}
+.cr-caption{margin:0;color:#135c65;font-size:13px;font-weight:600}
+.cr-child{margin:2px 0 10px;font-size:20px;font-weight:700;color:#0e464d}
+.cr-meta{display:flex;flex-wrap:wrap;gap:8px}
+.cr-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d5e7e9;border-radius:999px;padding:3px 12px;font-size:13px}
+.cr-chip-label{color:#64748b}
+.cr-section{border:1px solid #e2e8f0;border-inline-start:4px solid #135c65;border-radius:12px;padding:12px 16px;break-inside:avoid}
+.cr-label{margin:0 0 6px;font-size:15px;font-weight:700;color:#135c65}
+.cr-text{margin:0;white-space:pre-line}
+.cr-list{margin:0;padding-inline-start:22px;display:grid;gap:6px}
+.cr-list li::marker{color:#135c65;font-weight:700}
+.cr-empty{margin:0;text-align:center;color:#64748b;padding:24px}
+`;
+useStyleTag(resultStyles);
+
+// Older rows hold the result as JSON text, some encoded twice; decode until it is an object.
+const parseResult = (value) => {
+  let parsed = value;
+  for (let i = 0; i < 3 && typeof parsed === "string"; i++) {
+    try { parsed = JSON.parse(parsed); } catch { return {}; }
+  }
+  return parsed && typeof parsed === "object" ? parsed : {};
+};
+const result = computed(() => parseResult(selectedConsultationResult.value?.consultation_result));
+const homeRecommendations = computed(() => (Array.isArray(result.value.filed_value) ? result.value.filed_value : [])
+  .filter((item) => item?.value));
+const hasResult = computed(() => Boolean(result.value.health || result.value.consultant_recommendations
+  || result.value.notes || homeRecommendations.value.length));
 
 const getAllBooking = () => {
   axios
@@ -185,9 +226,7 @@ const printConsultationResult = () => {
   const doc = frame.contentDocument;
   doc.open();
   doc.write(`<!doctype html><html dir="${document.documentElement.dir || "rtl"}" lang="${document.documentElement.lang || "ar"}"><head><meta charset="utf-8"><title>${t("نتيجة الاستشارة")}</title>
-<style>body{font-family:system-ui,"Segoe UI",Tahoma,sans-serif;color:#1f2937;padding:24px;line-height:1.7}
-.result-heading{font-size:20px;margin:0 0 4px}.result-meta{color:#64748b;margin:0 0 16px}
-.result-label{font-weight:700;margin:16px 0 4px}.result-text{margin:0;white-space:pre-line}.result-list{margin:0;padding-inline-start:20px}</style>
+<style>body{font-family:system-ui,"Segoe UI",Tahoma,sans-serif;padding:24px}${resultStyles}</style>
 </head><body>${content.innerHTML}</body></html>`);
   doc.close();
   frame.contentWindow.focus();

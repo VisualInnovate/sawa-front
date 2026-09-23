@@ -1,6 +1,7 @@
 <script>
 import axios from "axios";
 import { resetUserProfile } from "../../components/profile/userProfile";
+import { titleForChild } from "../../utils/sideProfileWording";
 import { format, formatDistance, formatRelative, subDays, differenceInMonths } from 'date-fns'
 import moment from "moment";
 import InputText from 'primevue/inputtext';
@@ -59,6 +60,8 @@ export default {
     },
   },
   methods: {
+    // The question in the child's gender; the yes/no wording is picked and kept by the server.
+    titleForChild,
     fomate() {
       // this.examDate =  moment(new Date()).format("YYYY-MM-DD HH:mm")
     },
@@ -221,7 +224,7 @@ export default {
           <h2 class="question-group-title">{{ questions[0].title }}</h2>
           <div v-for="question in questions" :key="question.questions.id" class="question-row"
             :class="{ unanswered: submitted && selected[question.questions.id] === undefined }">
-            <p class="question-text">{{ question.questions.title }}</p>
+            <p class="question-text">{{ titleForChild(question.questions, child) }}</p>
             <div class="answer-options">
               <label v-for="option in answerOptions" :key="option.value" class="answer-option">
                 <RadioButton :disabled="load || saved" v-model="selected[question.questions.id]" :value="option.value"
