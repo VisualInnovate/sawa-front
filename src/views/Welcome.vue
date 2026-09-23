@@ -13,6 +13,7 @@
         :allow-delete="false"
         title-key="pending_evaluations_title"
         hint-key="pending_evaluations_hint"
+        :starting="startingId"
         @start="startEvaluation"
       />
     </div>
@@ -23,14 +24,20 @@
 import axios from "axios";
 import { computed, onActivated, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
+import { useI18n } from "vue-i18n";
 import sawaLogo from "../assets/img/sawa_logo.svg";
 import EvaluationRequestsBoard from "../components/EvaluationRequestsBoard.vue";
 import { useAuthStore } from "../stores/Auth";
 import { getEvaluationStartRoute } from "../utils/evaluationTypes";
+import { isRequestOpen, startEvaluationRequest } from "../utils/evaluationRequestStatus";
 
 const authStore = useAuthStore();
 const router = useRouter();
+const toast = useToast();
+const { t } = useI18n();
 const pendingRequests = ref([]);
+const startingId = ref(null);
 const loadingRequests = ref(false);
 const userName = computed(() => {
   const user = authStore.authUser ?? {};
@@ -45,7 +52,7 @@ const loadPendingRequests = async () => {
   try {
     const response = await axios.get(`/api/users/${userId}/get/evaluations`);
     pendingRequests.value = (response.data.evaluation_requests ?? [])
-      .filter((request) => Number(request.status) !== 1);
+      .filter(isRequestOpen);
   } catch {
     pendingRequests.value = [];
   } finally {
@@ -53,10 +60,20 @@ const loadPendingRequests = async () => {
   }
 };
 
-const startEvaluation = (request) => {
+const startEvaluation = async (request) => {
   const childId = request.child_id ?? request.child?.id;
   const route = getEvaluationStartRoute(request.evaluation_type, childId, request.id);
   if (!route) return;
+
+  startingId.value = request.id;
+  try {
+    await startEvaluationRequest(request.id);
+  } catch {
+    toast.add({ severity: "error", summary: t("error"), detail: t("start_evaluation_failed"), life: 4000 });
+    return;
+  } finally {
+    startingId.value = null;
+  }
 
   localStorage.setItem("child_id", childId);
   localStorage.setItem("eavl_id", request.id);

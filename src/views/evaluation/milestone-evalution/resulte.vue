@@ -35,7 +35,7 @@
           <div class="grid grid-cols-10 border border-gray-200 rounded-lg overflow-hidden print:text-sm">
             <!-- Question Numbers Column -->
             <div class="grid grid-cols-1 bg-gray-100">
-              <div class="w-20 h-16 text-center flex items-center justify-center bg-gray-200 font-medium print:w-16 print:h-12"></div>
+              <div class="level-heading-spacer text-center flex items-center justify-center bg-gray-200 font-medium"></div>
               <div 
                 class="w-20 h-16 m-auto text-center flex items-center justify-center border-t border-gray-200 font-medium print:w-16 print:h-12" 
                 v-for="(question, qIndex) in level?.subtests?.[0]?.questions || []" 
@@ -51,7 +51,7 @@
               v-for="(subtest, subIndex) in mainSquares[0]?.subtests || []"
             >
               <!-- Subtest Name -->
-              <div class="w-20 h-20 text-center flex items-center justify-center bg-gray-100 border-l border-gray-200 p-2 text-sm font-medium print:w-16 print:h-16 print:text-xs">
+              <div class="level-subtest-title text-center flex justify-center bg-gray-100 border-l border-gray-200 font-medium">
                 {{ level?.subtests[subIndex]?.subtest_name }}
               </div>
               
@@ -82,54 +82,94 @@
       </div>
     </div>
 
-    <!-- Results Table -->
-    <div class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:break-inside-avoid print:mt-8">
+    <!-- Evaluation Summary -->
+    <div class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:mt-8">
       <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
         <h2 class="text-xl font-bold text-white">{{ $t("evaluation_summary") }}</h2>
       </div>
-      <div class="relative overflow-x-auto print:overflow-x-visible">
-        <table class="w-full text-sm text-start text-gray-700 print:text-xs">
-          <thead class="text-xs text-white uppercase bg-blue-500 print:bg-blue-600">
-            <tr>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">#</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("strengths") }}</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("weaknesses") }}</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t('milestone_plan_goal') }}</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("status") }}</th>
-              <th scope="col" class="px-6 py-3 print:px-3 print:py-2">{{ $t("target_symbol") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="!table_resulte.length">
-              <td colspan="6" class="px-6 py-10 text-gray-500">
-                {{ loading ? $t("loading") : loadError ? $t("request_failed_retry") : $t("no_data_available") }}
-              </td>
-            </tr>
-            <tr 
-              v-for="(result, rIndex) in table_resulte" 
-              :key="rIndex"
-              class="border-b border-gray-200 hover:bg-gray-50 print:hover:bg-transparent"
-              :class="{ 'bg-gray-50': rIndex % 2 === 0 }"
-            >
-              <td class="px-6 py-4 font-medium print:px-3 print:py-2">{{ result.index }}</td>
-              <td class="px-6 py-4 print:px-3 print:py-2">
-                <span v-for="(strength, sIndex) in result.strength" :key="sIndex">
-                  {{ strength.question }}<span v-if="sIndex < result.strength.length - 1">, </span>
-                </span>
-              </td>
-              <td class="px-6 py-4 print:px-3 print:py-2">
-                <span v-for="(weakness, wIndex) in result.weak" :key="wIndex">
-                  {{ weakness.question }}<span v-if="wIndex < result.weak.length - 1">, </span>
-                </span>
-              </td>
-              <td class="px-6 py-4 print:px-3 print:py-2">
-                <p v-for="(goal, index) in result.plan_goals" :key="index">{{ goal.question }}</p>
-              </td>
-              <td class="px-6 py-4 print:px-3 print:py-2">{{ result.status }}</td>
-              <td class="px-6 py-4 font-medium print:px-3 print:py-2">{{ result.symbol }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-if="!table_resulte.length" class="px-6 py-10 text-center text-gray-500">
+        {{ loading ? $t("loading") : loadError ? $t("request_failed_retry") : $t("no_data_available") }}
+      </div>
+
+      <div v-else class="evaluation-summary-list">
+        <article
+          v-for="(result, rIndex) in table_resulte"
+          :key="result.index || rIndex"
+          class="evaluation-summary-card print:break-inside-avoid"
+        >
+          <header class="summary-card-header">
+            <div class="summary-goal-identity">
+              <span class="summary-index">{{ result.index }}</span>
+
+              <div class="summary-meta-block">
+                <span class="summary-meta-label">{{ $t("target_symbol") }}</span>
+                <strong class="summary-symbol">{{ result.symbol || '—' }}</strong>
+              </div>
+
+              <div class="summary-header-divider"></div>
+
+              <div class="summary-meta-block summary-general-goal">
+                <span class="summary-meta-label">{{ $t("milestone_general_goal") }}</span>
+                <strong>{{ result.general_goal || '—' }}</strong>
+              </div>
+            </div>
+
+            <div class="summary-status">
+              <span class="summary-meta-label">{{ $t("status") }}</span>
+              <span class="summary-status-badge">{{ result.status || '—' }}</span>
+            </div>
+          </header>
+
+          <div class="summary-columns">
+            <section class="summary-column summary-strengths">
+              <div class="summary-column-heading">
+                <span class="summary-heading-icon" aria-hidden="true">✓</span>
+                <div>
+                  <h3>{{ $t("strengths") }}</h3>
+                  <span>{{ (result.strength || []).length }}</span>
+                </div>
+              </div>
+              <ul v-if="result.strength?.length" class="summary-points">
+                <li v-for="(strength, sIndex) in result.strength" :key="sIndex">
+                  {{ strength.question }}
+                </li>
+              </ul>
+              <p v-else class="summary-empty">{{ $t("no_data_available") }}</p>
+            </section>
+
+            <section class="summary-column summary-weaknesses">
+              <div class="summary-column-heading">
+                <span class="summary-heading-icon" aria-hidden="true">!</span>
+                <div>
+                  <h3>{{ $t("weaknesses") }}</h3>
+                  <span>{{ (result.weak || []).length }}</span>
+                </div>
+              </div>
+              <ul v-if="result.weak?.length" class="summary-points">
+                <li v-for="(weakness, wIndex) in result.weak" :key="wIndex">
+                  {{ weakness.question }}
+                </li>
+              </ul>
+              <p v-else class="summary-empty">{{ $t("no_data_available") }}</p>
+            </section>
+
+            <section class="summary-column summary-plan-goals">
+              <div class="summary-column-heading">
+                <span class="summary-heading-icon summary-goal-icon" aria-hidden="true">▣</span>
+                <div>
+                  <h3>{{ $t("milestone_plan_goal") }}</h3>
+                  <span>{{ (result.plan_goals || []).length }}</span>
+                </div>
+              </div>
+              <ul v-if="result.plan_goals?.length" class="summary-points">
+                <li v-for="(goal, goalIndex) in result.plan_goals" :key="goalIndex">
+                  {{ goal.question }}
+                </li>
+              </ul>
+              <p v-else class="summary-empty">{{ $t("no_data_available") }}</p>
+            </section>
+          </div>
+        </article>
       </div>
     </div>
 
@@ -235,6 +275,288 @@ th, td {
   vertical-align: middle !important;
 }
 
+/* Keep long Arabic subtest titles inside their own columns without changing the table design. */
+.level-heading-spacer,
+.level-subtest-title {
+  width: 5rem;
+  height: 15rem;
+  min-height: 15rem;
+}
+
+.level-subtest-title {
+  align-items: flex-start;
+  padding: 1rem 0.5rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1.75;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.evaluation-summary-list {
+  padding: 1.5rem;
+  background: #f8fafc;
+}
+
+.evaluation-summary-card {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.evaluation-summary-card + .evaluation-summary-card {
+  margin-top: 1.5rem;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 6.25rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.summary-goal-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.summary-index {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #ffffff;
+  font-size: 1.125rem;
+  font-weight: 700;
+  box-shadow: 0 0.375rem 0.75rem rgba(37, 99, 235, 0.18);
+}
+
+.summary-meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-meta-label {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.summary-symbol {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.summary-header-divider {
+  align-self: stretch;
+  width: 1px;
+  min-height: 2.75rem;
+  background: #e2e8f0;
+}
+
+.summary-general-goal {
+  min-width: 0;
+  max-width: 42rem;
+}
+
+.summary-general-goal strong {
+  color: #1e293b;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.summary-status {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.summary-status-badge {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.summary-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.summary-column {
+  min-width: 0;
+  min-height: 20rem;
+  padding: 1.5rem;
+}
+
+.summary-column + .summary-column {
+  border-inline-start: 1px solid #dbe3ec;
+}
+
+.summary-strengths {
+  background: #f4fbf7;
+  color: #166534;
+}
+
+.summary-weaknesses {
+  background: #fff9f4;
+  color: #c2410c;
+}
+
+.summary-plan-goals {
+  background: #faf7ff;
+  color: #7e22ce;
+}
+
+.summary-column-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-column-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.summary-column-heading div > span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.summary-heading-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid currentColor;
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+}
+
+.summary-goal-icon {
+  font-size: 0.8rem;
+}
+
+.summary-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #334155;
+}
+
+.summary-points li {
+  position: relative;
+  padding-block: 0 0.75rem;
+  padding-inline: 1rem 0;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+.summary-points li + li {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.summary-points li::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.75rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.summary-points li:first-child::before {
+  top: 0.75rem;
+}
+
+.summary-points li + li::before {
+  top: 1.5rem;
+}
+
+.summary-strengths .summary-points li::before {
+  color: #16a34a;
+}
+
+.summary-weaknesses .summary-points li::before {
+  color: #ea580c;
+}
+
+.summary-plan-goals .summary-points li::before {
+  color: #9333ea;
+}
+
+.summary-empty {
+  margin-top: 2rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .summary-card-header,
+  .summary-goal-identity {
+    align-items: flex-start;
+  }
+
+  .summary-card-header {
+    flex-direction: column;
+  }
+
+  .summary-goal-identity {
+    flex-wrap: wrap;
+  }
+
+  .summary-header-divider {
+    display: none;
+  }
+
+  .summary-general-goal {
+    flex-basis: 100%;
+  }
+
+  .summary-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-column {
+    min-height: auto;
+  }
+
+  .summary-column + .summary-column {
+    border-inline-start: 0;
+    border-top: 1px solid #dbe3ec;
+  }
+}
+
 /* Print-specific styles */
 @media print {
   body {
@@ -267,6 +589,60 @@ th, td {
   
   .border, .border-t, .border-b, .border-l, .border-r {
     border-color: #e5e7eb !important;
+  }
+
+  .level-heading-spacer,
+  .level-subtest-title {
+    width: 4rem;
+    height: 10rem;
+    min-height: 10rem;
+  }
+
+  .level-subtest-title {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.625rem;
+    line-height: 1.45;
+  }
+
+  .evaluation-summary-list {
+    padding: 0.5rem;
+  }
+
+  .evaluation-summary-card + .evaluation-summary-card {
+    margin-top: 0.75rem;
+  }
+
+  .summary-card-header {
+    min-height: auto;
+    padding: 0.75rem;
+  }
+
+  .summary-index {
+    width: 2.25rem;
+    height: 2.25rem;
+    box-shadow: none;
+  }
+
+  .summary-column {
+    min-height: 12rem;
+    padding: 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .summary-column-heading {
+    margin-bottom: 0.5rem;
+  }
+
+  .summary-points li {
+    line-height: 1.55;
+  }
+
+  .summary-points li + li {
+    padding-top: 0.5rem;
+  }
+
+  .summary-points li + li::before {
+    top: 1.1rem;
   }
   
   /* Ensure table headers are visible */

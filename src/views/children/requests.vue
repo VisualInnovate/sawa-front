@@ -23,8 +23,7 @@
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t(" حالة التقييم") }} :</h3>
-            <p v-if="evalu.status == 1" class="text-xl py-1 text-white rounded-md my-auto bg-[#f36464] px-3 mx-2">{{ $t("status_finished") }}</p>
-            <p v-if="evalu.status == 0"  class="text-xl py-1 text-white rounded-md my-auto bg-[#f1f164] px-3 mx-2">{{ $t("status_waiting") }}</p>
+            <Tag class="my-auto mx-2" :severity="requestStatus(evalu.status).severity" :value="$t(requestStatus(evalu.status).key)" />
           </div>
           </div>
           <!-- <div class="text-center" >
@@ -76,6 +75,7 @@
   import axios from "axios";
   import { useStorage } from "@vueuse/core";
   import ChildTaps from '../../components/ChildTaps.vue'
+  import { requestStatus } from "../../utils/evaluationRequestStatus";
   
     import {useToast} from 'primevue/usetoast'
   export default {
@@ -93,6 +93,7 @@
     },
   
     methods: {
+      requestStatus,
   
   
   
