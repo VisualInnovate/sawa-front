@@ -1,4 +1,5 @@
 import axios from "axios";
+import { resetUserProfile } from "../components/profile/userProfile";
 
 // Evaluation request lifecycle: awaiting → in progress (specialist presses start) → finished (results saved).
 export const REQUEST_STATUS = { AWAITING: 0, FINISHED: 1, IN_PROGRESS: 2 };
@@ -17,6 +18,9 @@ export function isRequestOpen(request) {
   return Number(request?.status) !== REQUEST_STATUS.FINISHED;
 }
 
-export function startEvaluationRequest(id) {
-  return axios.post(`api/evaluation-request/${id}/start`);
+export async function startEvaluationRequest(id) {
+  const response = await axios.post(`api/evaluation-request/${id}/start`);
+  // The profile tabs cache their payload; reload it so the request shows as in progress.
+  resetUserProfile();
+  return response;
 }
