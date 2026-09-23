@@ -28,8 +28,8 @@
             <p class="text-xl  px-1 my-auto">{{ evalu.kid?.name }}</p>
           </div>
           </div>
-          <Button v-if="evalu.result_id && evalu.side_profile_id" v-can="'evaluation results list'"
-            :label="$t('evaluation_results')" @click="$router.push({ name: 'showChildResult', params: { child_id: evalu.child_id, sideProfile_id: evalu.side_profile_id, evaluation_id: evalu.id } })" />
+          <Button v-if="evalu.result_id" v-can="'evaluation results list'"
+            :label="$t('evaluation_results')" @click="$router.push({ name: 'showChildResult', params: { child_id: evalu.child_id, sideProfile_id: evalu.side_profile_id || 0, evaluation_id: evalu.id } })" />
           <!-- <div class="text-center" >
           <Button @click="go_evaluate(evalu.child_id,evalu.type)" class="m-auto"> {{ $t("strart_evaluate") }}</Button>
           </div> -->

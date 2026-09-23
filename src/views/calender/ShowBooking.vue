@@ -94,7 +94,13 @@ export default {
     getBookings() {
       this.loading = true;
       axios
-        .get(`/api/calender/bookings?accepted=${this.selectedStatus}&status=${this.selectedFilter}`)
+        .get("/api/calender/bookings", {
+          params: {
+            accepted: this.selectedStatus,
+            status: this.selectedFilter,
+            _ts: Date.now(),
+          },
+        })
         .then((res) => {
           // The filtered response can contain entries with no child; don't render them as empty rows.
           const list = res.data.bookings ?? [];
@@ -123,6 +129,9 @@ export default {
     },
   },
   mounted() {
+    this.getBookings();
+  },
+  activated() {
     this.getBookings();
   },
 };

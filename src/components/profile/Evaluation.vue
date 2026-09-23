@@ -175,8 +175,9 @@ export default {
 
     },
     go_evaluate(id,type,child_id,data){
-      if (Number(type) === 1 && data.side_profile_id) {
-        return this.$router.push({ name: 'showChildResult', params: { child_id, sideProfile_id: data.side_profile_id, evaluation_id: id } });
+      if (Number(type) === 1) {
+        // Evaluations without a side profile open with 0 in its place.
+        return this.$router.push({ name: 'showChildResult', params: { child_id, sideProfile_id: data.side_profile_id || 0, evaluation_id: id } });
       }
       if(type==2){
         this.$router.push({ name: 'milestone-resulte', params:{'id':child_id,'evla_id':id}});

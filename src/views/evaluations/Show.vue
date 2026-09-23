@@ -111,7 +111,7 @@ export default {
     },
     showResult() {
       this.$router.push({ name: 'showChildResult', params: {
-        child_id: this.child_id, sideProfile_id: this.sideProfileId, evaluation_id: this.$route.params.id,
+        child_id: this.child_id, sideProfile_id: this.sideProfileId || 0, evaluation_id: this.$route.params.id,
       } })
     },
     getChildren() {
@@ -239,7 +239,7 @@ export default {
       </Message>
 
       <div class="form-actions">
-        <Button v-if="saved && sideProfileId" v-can="'evaluation results list'" @click="showResult" :label="$t('evaluation_results')" icon="pi pi-chart-bar" />
+        <Button v-if="saved" v-can="'evaluation results list'" @click="showResult" :label="$t('evaluation_results')" icon="pi pi-chart-bar" />
         <Button v-if="!saved" :disabled="!child?.canDoExam || !Object.keys(headerAndQuestions).length" :loading="load" type="submit" icon="pi pi-check" :label="$t('submit')" />
       </div>
     </form>
