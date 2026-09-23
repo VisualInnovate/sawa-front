@@ -2,12 +2,15 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getEvaluationTypeLabel } from "../utils/evaluationTypes";
+import { REQUEST_STATUS, isRequestOpen, requestStatus } from "../utils/evaluationRequestStatus";
 const props = defineProps({
   requests: { type: Array, default: () => [] },
   loading: Boolean,
   allowDelete: { type: Boolean, default: true },
   titleKey: { type: String, default: "evaluation_order" },
   hintKey: { type: String, default: "requests_grouped_hint" },
+  // Id of the request whose start call is in flight.
+  starting: { type: Number, default: null },
 });
 defineEmits(["start", "delete"]);
 const { t } = useI18n();
@@ -26,7 +29,8 @@ const groups = computed(() => {
   }
   return [...result.values()];
 });
-const pending = computed(() => props.requests.filter(row => Number(row.status) !== 1).length);
+const pending = computed(() => props.requests.filter(isRequestOpen).length);
+const inProgress = row => Number(row.status) === REQUEST_STATUS.IN_PROGRESS;
 const name = row => getEvaluationTypeLabel(row.evaluation_type, t, row.title || t("unknown_evaluation_type"));
 </script>
 
@@ -53,9 +57,9 @@ const name = row => getEvaluationTypeLabel(row.evaluation_type, t, row.title || 
             <h4>{{ name(row) }}</h4>
             <span v-if="row.start_time" class="request-date"><i class="pi pi-clock" /><span dir="ltr">{{ row.start_time.slice(0, 5) }} – {{ row.end_time?.slice(0, 5) }}</span></span>
           </div>
-          <Tag :severity="Number(row.status) === 1 ? 'success' : 'warn'" :value="t(Number(row.status) === 1 ? 'status_finished' : 'status_under_evaluation')" />
+          <Tag :severity="requestStatus(row.status).severity" :value="t(requestStatus(row.status).key)" />
           <div class="request-actions">
-            <Button v-if="Number(row.status) !== 1" v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" icon="pi pi-play" :label="t('start_evaluation')" @click="$emit('start', row)" />
+            <Button v-if="isRequestOpen(row)" v-can="['evaluation results create', 'able answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create']" :icon="inProgress(row) ? 'pi pi-forward' : 'pi pi-play'" :label="t(inProgress(row) ? 'continue_evaluation' : 'start_evaluation')" :loading="starting === row.id" :disabled="starting !== null" @click="$emit('start', row)" />
             <Button v-if="allowDelete" v-can="'evaluation request delete'" icon="pi pi-trash" severity="danger" variant="text" :aria-label="t('delete')" @click="$emit('delete', row.id)" />
           </div>
         </div>

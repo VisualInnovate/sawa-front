@@ -3,7 +3,7 @@
     <div>
          
     <div class="sawa-card">
-      <EvaluationRequestsBoard :requests="details" :loading="loading"
+      <EvaluationRequestsBoard :requests="openRequests" :loading="loading" :starting="startingId"
         @start="row => go_evaluate(row.child_id ?? row.child?.id, row.evaluation_type, row.id)"
         @delete="deleteevalution" />
     </div>
@@ -64,6 +64,7 @@
   import moment from "moment";
   import { fetchUserProfile, USER_PROFILE_INVALIDATED_EVENT } from "./userProfile";
   import { getEvaluationStartRoute, getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+  import { isRequestOpen, startEvaluationRequest } from "../../utils/evaluationRequestStatus";
   export default {
      components:{EvaluationType, EvaluationRequestsBoard},
   
@@ -71,6 +72,7 @@
       return {
           child_id: useStorage("child_id", Number),
           eavl_id: useStorage("eavl_id", Number),
+          startingId: null,
            maxDate: new Date(),
            details:[],
            loading:true,
@@ -121,11 +123,21 @@
           evaluation.title || this.$t("unknown_evaluation_type"),
         );
       },
-      go_evaluate(id,evalu_id,eva_id){
+      async go_evaluate(id,evalu_id,eva_id){
         const route = getEvaluationStartRoute(evalu_id, id, eva_id);
         if (!route) {
           this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('unknown_evaluation_type'), life: 4000 });
           return;
+        }
+
+        this.startingId = eva_id;
+        try {
+          await startEvaluationRequest(eva_id);
+        } catch {
+          this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('start_evaluation_failed'), life: 4000 });
+          return;
+        } finally {
+          this.startingId = null;
         }
 
         localStorage.setItem("child_id", id);
@@ -167,7 +179,13 @@
             this.loading = false
           })
       },
-     
+
+    },
+    computed: {
+      // Finished requests are listed under the consultations and evaluations tab instead.
+      openRequests() {
+        return this.details.filter(isRequestOpen)
+      },
     },
     mounted() {
      this.getusers()

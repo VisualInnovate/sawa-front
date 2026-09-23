@@ -1,47 +1,50 @@
 <template>
   <div>
     
-  <div class="sawa-card">
-      <div v-if="loading" class="flex justify-center py-8">
-        <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+  <div class="sawa-card evaluation-board">
+      <header class="evaluation-toolbar">
+        <div><h2>{{ $t("Consultations_evaluations") }}</h2><p>{{ $t("completed_evaluations_hint") }}</p></div>
+        <div class="evaluation-tools">
+          <Tag :value="$t('requests_count', { count: details.length })" severity="secondary" />
+          <IconField><InputIcon class="pi pi-search" /><InputText v-model="search" :placeholder="$t('child_name')" :aria-label="$t('search')" /></IconField>
+        </div>
+      </header>
+      <div v-if="loading" class="evaluation-empty">
+        <ProgressSpinner style="width: 42px; height: 42px" strokeWidth="4" />
       </div>
-      <div v-else-if="!details.length" class="text-center py-8 text-gray-500">
-        <i class="pi pi-inbox text-2xl mb-2" />
+      <div v-else-if="!filteredDetails.length" class="evaluation-empty">
+        <i class="pi pi-inbox" />
         <p>{{ $t('no_records_found') }}</p>
       </div>
-   <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-      <div class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2" v-for="evalu in details" :key="evalu.result_id ? 'result-' + evalu.result_id : evalu.id">
-        <div>
-          <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
-          <p class="text-xl px-1 my-auto">{{ evalu.title }}</p>
-          <p class="text-sm text-gray-500">{{ evalu.child_name || evalu.kid?.name }}</p>
-        </div>
-        <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
-          <p class="text-xl  px-1 my-auto">{{ evalu.date }}</p>
-        </div>
-       
-        <div class="flex py-2 ">
-          <h3 class="my-auto font-bold">{{ $t(" حالة التقييم") }} :</h3>
-          <p v-if="evalu.status == 1" class="text-xl  px-1 my-auto">{{ $t("status_finished") }}</p>
-          <p v-if="evalu.status == 0"  class="text-xl  px-1 my-auto">{{ $t("status_under_evaluation") }}</p>
-        </div>
-        </div>
-        <div class="text-center" >
-        
-            <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" class="m-auto">{{ $t("evaluation_results") }}</Button>
-            <Button v-if="!evalu.result_id" v-can="'evaluations delete'"  icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" class="m-auto" severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')"> </Button>
-          
-        </div>
-          
+      <div v-else class="evaluation-grid">
+        <article class="evaluation-card" v-for="evalu in filteredDetails" :key="evalu.result_id ? 'result-' + evalu.result_id : evalu.id">
+          <header class="evaluation-heading">
+            <span class="evaluation-symbol"><i class="pi pi-chart-line" /></span>
+            <div class="evaluation-title">
+              <h3>{{ evalu.title }}</h3>
+              <span>{{ typeLabel(evalu.type) }}</span>
+            </div>
+            <Tag :severity="evalu.status == 1 ? 'success' : 'warn'" :value="$t(evalu.status == 1 ? 'status_finished' : 'status_under_evaluation')" />
+          </header>
+          <dl class="evaluation-meta">
+            <div v-if="evalu.child_name || evalu.kid?.name">
+              <dt><i class="pi pi-user" /> {{ $t("child_name") }}</dt>
+              <dd>{{ evalu.child_name || evalu.kid?.name }}</dd>
+            </div>
+            <div>
+              <dt><i class="pi pi-calendar" /> {{ $t("evaluation_date") }}</dt>
+              <dd>
+                <time>{{ datePart(evalu.date) }}</time>
+                <span v-if="timePart(evalu.date)" class="evaluation-time" dir="ltr"><i class="pi pi-clock" /> {{ timePart(evalu.date) }}</span>
+              </dd>
+            </div>
+          </dl>
+          <footer class="evaluation-actions">
+            <Button v-if="!evalu.result_id" v-can="'evaluations delete'" icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" severity="danger" variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
+            <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
+          </footer>
+        </article>
       </div>
-      
-
-   </div>
-      
-   
-    
   </div>
   <div>
     <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
@@ -101,6 +104,7 @@ import { useStorage } from "@vueuse/core";
 import ChildTaps from '../../components/ChildTaps.vue'
 import moment from "moment";
 import { fetchUserProfile, USER_PROFILE_INVALIDATED_EVENT } from "./userProfile";
+import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
 export default {
    components:{ChildTaps},
 
@@ -109,6 +113,7 @@ export default {
         child_id: useStorage("child_id", Number),
          maxDate: new Date(),
          details:[],
+         search:"",
          loading:true,
          evalate:{},
          error:{},
@@ -135,6 +140,16 @@ export default {
   },
 
   methods: {
+    typeLabel(type) {
+      return getEvaluationTypeLabel(type, this.$t)
+    },
+    // Side profile results carry a time ("2026-09-23 12:38:00"); other evaluations only a date.
+    datePart(value) {
+      return String(value || '').split(/[ T]/)[0]
+    },
+    timePart(value) {
+      return String(value || '').split(/[ T]/)[1]?.slice(0, 5) || ''
+    },
     refreshProfile() {
       this.getusers(true)
     },
@@ -247,6 +262,11 @@ export default {
    
   },
   computed: {
+  filteredDetails() {
+    const term = this.search.trim().toLocaleLowerCase();
+    if (!term) return this.details;
+    return this.details.filter(item => String(item.child_name || item.kid?.name || '').toLocaleLowerCase().includes(term));
+  },
   filteredDays() {
     // Extract the `day` values from `business_hours`
     const usedDays = this.business_hours.map(entry => entry.day);
@@ -266,3 +286,27 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.evaluation-board { padding: clamp(.75rem, 2vw, 1.5rem); }
+.evaluation-toolbar, .evaluation-tools, .evaluation-heading, .evaluation-actions { display: flex; align-items: center; gap: 1rem; }
+.evaluation-toolbar { justify-content: space-between; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.evaluation-toolbar h2 { font-size: 1.3rem; font-weight: 700; color: var(--sawa-primary); margin: 0; }
+.evaluation-toolbar p { color: var(--sawa-muted); font-size: .9rem; margin-top: .4rem; }
+.evaluation-tools { flex-wrap: wrap; }
+.evaluation-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+.evaluation-card { display: flex; flex-direction: column; border: 1px solid var(--sawa-border); border-radius: 18px; overflow: hidden; background: white; }
+.evaluation-heading { background: #f0f8f7; padding: 1rem 1.15rem; gap: .75rem; }
+.evaluation-symbol { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: white; color: var(--sawa-primary); }
+.evaluation-title { flex: 1; min-width: 0; }
+.evaluation-title h3 { margin: 0 0 .2rem; font-size: 1.05rem; font-weight: 700; overflow-wrap: anywhere; }
+.evaluation-title span { color: var(--sawa-muted); font-size: .85rem; }
+.evaluation-meta { display: grid; gap: .85rem; padding: 1rem 1.15rem; margin: 0; flex: 1; }
+.evaluation-meta > div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.evaluation-meta dt { display: inline-flex; align-items: center; gap: .5rem; color: var(--sawa-muted); font-size: .9rem; white-space: nowrap; }
+.evaluation-meta dd { margin: 0; font-weight: 600; text-align: end; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .25rem .75rem; }
+.evaluation-time { display: inline-flex; align-items: center; gap: .35rem; color: var(--sawa-muted); font-weight: 500; }
+.evaluation-actions { justify-content: flex-end; padding: .75rem 1.15rem; border-top: 1px solid var(--sawa-border); gap: .5rem; }
+.evaluation-empty { text-align: center; padding: 3rem; color: var(--sawa-muted); }
+@media (max-width: 600px) { .evaluation-tools { width: 100%; } .evaluation-tools .p-iconfield { flex: 1; } }
+</style>
