@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { resolveSideProfileDimension } from '../src/utils/evaluationTypes.js';
+import { questionWording, titleForChild } from '../src/utils/sideProfileWording.js';
 
 function component(path, axios) {
   const source = readFileSync(new URL(path, import.meta.url), 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
   const context = { module: { exports: {} }, axios, InputText: {}, DatePicker: {}, EvaluationType: {},
-    resetUserProfile() {}, moment: () => ({ format: () => '2026-09-21' }) };
+    resetUserProfile() {}, titleForChild, moment: () => ({ format: () => '2026-09-21' }) };
   vm.runInNewContext(source.replace(/^import .*;?\s*$/gm, '').replace('export default', 'module.exports ='), context);
   return context.module.exports;
 }
@@ -87,4 +88,16 @@ test('booking dimension resolution is independent of database IDs and response o
   assert.equal(resolveSideProfileDimension(rows, 0).id, 97);
   assert.equal(resolveSideProfileDimension(rows, 4).id, 15);
   assert.equal(resolveSideProfileDimension(rows, 1), null);
+});
+
+test('side profile questions read in the child gender and fall back to the shared title', () => {
+  const saved = { id: 1, title: 'Shared', wording: {
+    male: { title: 'Does he talk?', yes: '{{name}} talks', no: '' },
+    female: { title: 'Does she talk?', yes: '', no: '{{name}} does not talk' },
+  } };
+  assert.equal(titleForChild(saved, { gender: '0' }), 'Does he talk?');
+  assert.equal(titleForChild(saved, { gender: 1 }), 'Does she talk?');
+  // A question saved before the wording existed reads its single title for both genders.
+  assert.equal(titleForChild({ id: 2, title: 'Old question', wording: null }, { gender: '1' }), 'Old question');
+  assert.deepEqual(questionWording({ id: 2, title: 'Old', wording: null }).female, { title: 'Old', yes: '', no: '' });
 });
