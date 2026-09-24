@@ -4,11 +4,12 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { resolveSideProfileDimension } from '../src/utils/evaluationTypes.js';
 import { questionWording, titleForChild } from '../src/utils/sideProfileWording.js';
+import { EESA_GROUPS, eesaInvalidKeys, eesaScores, eesaTotals, eesaValue } from '../src/utils/eesa.js';
 
 function component(path, axios) {
   const source = readFileSync(new URL(path, import.meta.url), 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
   const context = { module: { exports: {} }, axios, InputText: {}, DatePicker: {}, EvaluationType: {},
-    resetUserProfile() {}, titleForChild, moment: () => ({ format: () => '2026-09-21' }) };
+    resetUserProfile() {}, titleForChild, eesaInvalidKeys, eesaScores, EesaForm: {}, moment: () => ({ format: () => '2026-09-21' }) };
   vm.runInNewContext(source.replace(/^import .*;?\s*$/gm, '').replace('export default', 'module.exports ='), context);
   return context.module.exports;
 }
@@ -100,4 +101,24 @@ test('side profile questions read in the child gender and fall back to the share
   // A question saved before the wording existed reads its single title for both genders.
   assert.equal(titleForChild({ id: 2, title: 'Old question', wording: null }, { gender: '1' }), 'Old question');
   assert.deepEqual(questionWording({ id: 2, title: 'Old', wording: null }).female, { title: 'Old', yes: '', no: '' });
+});
+
+test('EESA keys match the server and boxes score 1, 0.5 or blank (group 5: 1 or blank)', () => {
+  const sizes = EESA_GROUPS.map((group) => (group.columns ? group.columns.flat() : group.sections.flatMap((section) => section.items)).length);
+  assert.deepEqual(sizes, [25, 30, 30, 10, 5]);
+  const keys = EESA_GROUPS.flatMap((group) => (group.columns ? group.columns.flat() : group.sections.flatMap((section) => section.items)).map((item) => item.key));
+  assert.equal(new Set(keys).size, 100);
+  assert.equal(keys[0], 'g1_1');
+  assert.equal(EESA_GROUPS[0].columns[1][0].key, 'g1_6');
+
+  assert.equal(eesaValue('1', true), 1);
+  assert.equal(eesaValue(' .5 ', true), 0.5);
+  assert.equal(eesaValue('', true), null);
+  assert.equal(eesaValue('0.5', false), undefined);
+  assert.equal(eesaValue('2', true), undefined);
+
+  const boxes = { g1_1: '1', g1_2: '0.5', g2_30: '1', g4_10: '½', g5_5: '1', g5_1: '0.5', g3_1: 'x' };
+  assert.deepEqual(eesaInvalidKeys(boxes), ['g3_1', 'g5_1']);
+  assert.deepEqual(eesaTotals(boxes), { groups: { 1: 1.5, 2: 1, 3: 0, 4: 0.5, 5: 1 }, total: 4 });
+  assert.deepEqual(eesaScores(boxes), { g1_1: 1, g1_2: 0.5, g2_30: 1, g4_10: 0.5, g5_5: 1 });
 });

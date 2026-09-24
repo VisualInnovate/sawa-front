@@ -15,6 +15,7 @@ export default {
   requests_count: "{count} تقييمات",
   completed_evaluations_hint: "التقييمات التي أجريتها مع نتائجها، الأحدث أولاً",
   your_child: "طفلك",
+  eesa_invalid_boxes: "في نموذج EESA خانات بقيم غير مقبولة (المسموح: 1 أو 0.5 أو تركها فارغة، والمجموعة 5: 1 أو فارغة). صحّح الخانات المظللة بالأحمر.",
   consultant_label: "المستشار",
   new_consultation: "استشارة جديدة",
   new_consultation_who_when: "الطفل والموعد",

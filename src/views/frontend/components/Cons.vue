@@ -33,25 +33,25 @@
           <label class="w-full text-gray-700 font-semibold" for="username">{{ $t("رقم هاتف ولي الامر") }}</label>
           <InputText required class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.requester_phone" :class="{ 'p-invalid': submitted && !booking.details.requester_phone}" />
         </div>
-        <div class="flex flex-column gap-2 required-field">
+        <div class="flex flex-column gap-2">
           <label class="w-full text-gray-700 font-semibold" for="username">{{ $t("رقم هاتف اضافي") }}</label>
-          <InputText required class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.addtional_phone" :class="{ 'p-invalid': submitted && !booking.details.addtional_phone}" />
+          <InputText class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.addtional_phone" />
         </div>
-        <div class="flex flex-column gap-2 required-field">
+        <div class="flex flex-column gap-2">
           <label class="w-full text-gray-700 font-semibold" for="username">{{ $t("مالك الرقم الاضافي") }}</label>
-          <InputText required class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.addtional_phone_owner" :class="{ 'p-invalid': submitted && !booking.details.addtional_phone_owner}" />
+          <InputText class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.addtional_phone_owner" />
         </div>
-        <div class="flex flex-column gap-2 required-field">
+        <div class="flex flex-column gap-2">
           <label class="w-full text-gray-700 font-semibold" for="username">{{ $t("درجه قرابته بالطفل") }}</label>
-          <InputText required class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.addtional_phone_degree" :class="{ 'p-invalid': submitted && !booking.details.addtional_phone_degree}" />
+          <InputText class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.addtional_phone_degree" />
         </div>
-        <div class="flex flex-column gap-2 required-field">
+        <div class="flex flex-column gap-2">
           <label class="w-full text-gray-700 font-semibold" for="username">{{ $t("مصدر التحويل") }}</label>
-          <InputText required class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.conversion_type" :class="{ 'p-invalid': submitted && !booking.details.conversion_type}" />
+          <InputText class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.conversion_type" />
         </div>
-        <div class="flex flex-column gap-2 required-field">
+        <div class="flex flex-column gap-2">
           <label class="w-full text-gray-700 font-semibold" for="username">{{ $t("الطبيب الخاص بالطفل") }}</label>
-          <InputText required class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.child_doctor" :class="{ 'p-invalid': submitted && !booking.details.child_doctor}" />
+          <InputText class="text-center rounded-lg p-2 hover:bg-gray-100 transition duration-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" v-model="booking.details.child_doctor" />
         </div>
         <p class="lg:py-1 font-bold text-base text-start text-gray-800">{{ $t("answer_following_questions") }}</p>
         <div class="lg:flex flex-column gap-2 col-span-2 required-field">

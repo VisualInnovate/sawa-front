@@ -15,6 +15,7 @@ export default {
   requests_count: "{count} evaluations",
   completed_evaluations_hint: "Evaluations you carried out with their results, newest first",
   your_child: "your child",
+  eesa_invalid_boxes: "Some EESA boxes hold values the form does not allow (1, 0.5 or blank; group 5: 1 or blank). Fix the boxes shaded red.",
   consultant_label: "Consultant",
   new_consultation: "New consultation",
   new_consultation_who_when: "Child and appointment",
