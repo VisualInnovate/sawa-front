@@ -116,7 +116,10 @@ const deleteAction = () => {
       fetchData()
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
     })
-    .catch(() => {})
+    .catch((error) => {
+      deleteDialog.value = false
+      toast.add({ severity: 'error', summary: t('error'), detail: error.response?.data?.message || t('request_failed_retry'), life: 5000 })
+    })
 
 }
 
@@ -194,7 +197,9 @@ const initFilters = () => {
                 v-can="'milestone domain edit'"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+                <!-- A domain scored through its own form (EESA) cannot be deleted. -->
                 <Button
+                v-if="!slotProps.data.form"
                 v-can="'milestone domain delete'"
                 icon="pi pi-trash"
                 @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />

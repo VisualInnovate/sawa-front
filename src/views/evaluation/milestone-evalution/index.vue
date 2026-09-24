@@ -153,6 +153,14 @@
               </div>
             </section>
           </section>
+          <!-- This domain is scored through the EESA form instead of sub-goals. -->
+          <section v-if="eesa.show" class="milestone-domain lg:col-span-2">
+            <h2>{{ eesa.domain?.title }}</h2>
+            <div class="eesa-wrap">
+              <Message v-if="eesaInvalid.length" severity="error" :closable="false">{{ $t('eesa_invalid_boxes') }}</Message>
+              <EesaForm v-model="eesaBoxes" :previous="eesa.previous" :disabled="saving" />
+            </div>
+          </section>
         </template>
         <div v-if="strart_evaluate" class="flex flex-column gap-2">
           <label for="milestone-program">{{
@@ -201,9 +209,11 @@ import moment from "moment";
 import { resetUserProfile } from "../../../components/profile/userProfile";
 import InputNumber from "primevue/inputnumber";
 import EvaluationType from "../../../components/EvaluationType.vue";
+import EesaForm from "../../../components/milestone/EesaForm.vue";
+import { eesaInvalidKeys, eesaScores } from "../../../utils/eesa";
 import { useToast } from "primevue/usetoast";
 export default {
-  components: { EvaluationType },
+  components: { EvaluationType, EesaForm },
 
   data() {
     return {
@@ -226,6 +236,9 @@ export default {
         color: "6554C0",
       },
       allquestion: [],
+      // The EESA form, when the child's levels include its domain.
+      eesa: { show: false, domain: null, previous: [] },
+      eesaBoxes: {},
       childs: [],
       qustions: {},
       error: {},
@@ -237,6 +250,9 @@ export default {
   },
 
   computed: {
+    eesaInvalid() {
+      return this.eesa.show ? eesaInvalidKeys(this.eesaBoxes) : [];
+    },
     questionGroups() {
       const domains = new Map()
       for (const question of this.allquestion) {
@@ -299,8 +315,14 @@ export default {
           date: moment(this.answer.date).format('YYYY-MM-DD'), child_id: this.answer.child_id,
         })
         this.answer.child_age = Number(age)
-        const { data } = await axios.get(`api/milestone-answers/sub-goals/${age}`, { params: { child_id: this.answer.child_id } })
+        const [{ data }, { data: eesa }] = await Promise.all([
+          axios.get(`api/milestone-answers/sub-goals/${age}`, { params: { child_id: this.answer.child_id } }),
+          // Without the EESA endpoint (older server) the evaluation still loads, just without the form.
+          axios.get(`api/milestone-answers/eesa/${age}`, { params: { child_id: this.answer.child_id } }).catch(() => ({ data: null })),
+        ])
         this.allquestion = Array.isArray(data) ? data : (data.data || [])
+        this.eesa = { show: Boolean(eesa?.show), domain: eesa?.domain ?? null, previous: eesa?.previous ?? [] }
+        this.eesaBoxes = {}
       } catch (error) {
         this.alert_text = error.response?.data?.message || this.$t('request_failed_retry')
       } finally { this.questionsLoading = false }
@@ -321,6 +343,10 @@ export default {
 
     async getanswer() {
       if (this.saving) return;
+      if (this.eesaInvalid.length) {
+        this.alert_text = this.$t('eesa_invalid_boxes');
+        return;
+      }
       this.saving = true;
       this.error = {};
       try {
@@ -331,6 +357,7 @@ export default {
           student_program_id: this.answers.student_program_id,
           request_id: this.$route.query.requestId || null,
           answers,
+          ...(this.eesa.show ? { eesa: { scores: eesaScores(this.eesaBoxes) } } : {}),
         });
         resetUserProfile();
         await this.$router.push({
@@ -403,6 +430,7 @@ export default {
 
 <style scoped>
 .milestone-domain { border: 1px solid var(--sawa-border); border-radius: 16px; overflow: hidden; }
+.eesa-wrap { display: grid; gap: .75rem; padding: 1rem; }
 .milestone-domain h2 { margin: 0; padding: 1rem 1.25rem; color: var(--sawa-primary); background: #edf7f5; font-weight: 700; font-size: 1.15rem; }
 .milestone-goal { padding: 1rem 1.25rem; }
 .milestone-goal h3 { margin-bottom: .75rem; font-weight: 700; }

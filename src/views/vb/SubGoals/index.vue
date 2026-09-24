@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
@@ -18,6 +18,8 @@ import Toast from 'primevue/toast';
 const { t } = useI18n();
 const toast = useToast();
 const rows = ref([]), domains = ref([]), generalGoals = ref([]), levels = ref([]);
+// A domain scored through its own form (EESA) takes no new sub-goals; an existing one keeps its domain.
+const subGoalDomains = computed(() => domains.value.filter((domain) => !domain.form || domain.id === form.value?.question_type_id));
 const selectedLevel = ref(null), loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
 const errors = ref({});
 const form = ref({ display_order: 0, wording: emptyMilestoneWording() });
@@ -121,7 +123,7 @@ onMounted(async () => {
     </DataTable>
     <Dialog v-model:visible="dialog" :style="{ width: '760px', maxWidth: '95vw' }" :header="$t('milestone_sub_goal')"
       modal :closable="!saving" :closeOnEscape="!saving">
-      <SubGoalForm v-if="dialog" v-model="form" :domains="domains" :generalGoals="generalGoals" :errors="errors" :saving="saving" @submit="save" />
+      <SubGoalForm v-if="dialog" v-model="form" :domains="subGoalDomains" :generalGoals="generalGoals" :errors="errors" :saving="saving" @submit="save" />
     </Dialog>
     <Dialog :visible="Boolean(deleting)" @update:visible="deleting = null" :style="{ width: '450px', maxWidth: '95vw' }" :header="$t('submit')" modal>
       <p>{{ $t('remove_item') }}</p>
