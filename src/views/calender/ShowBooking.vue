@@ -4,7 +4,11 @@
       stripedRows>
       <template #header>
         <div class="bookings-header">
-          <h1 class="page-title">{{ $t("bookings") }}</h1>
+          <div class="bookings-title">
+            <h1 class="page-title">{{ $t("bookings") }}</h1>
+            <Button v-can="'bookings create'" icon="pi pi-plus" :label="$t('new_consultation')"
+              @click="$router.push({ name: 'BookingCreate' })" />
+          </div>
           <div class="bookings-filters">
             <div class="field">
               <label for="booking-status">{{ $t("booking_status_filter") }}</label>
@@ -141,6 +145,13 @@ export default {
 .bookings-header {
   display: grid;
   gap: 1rem;
+}
+.bookings-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 .bookings-filters {
   display: grid;
