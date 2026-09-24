@@ -469,7 +469,7 @@ export default {
       if (event.allDay) {
         this.$refs.fullCalendar.getApi().changeView('timeGridDay', event.start);
         return;
-      }
+      } 
       this.opts.event = event;
       this.slotEmployeeId = this.event.employee_id;
       this.event.title = "";
