@@ -1,116 +1,277 @@
-<template>
-  <div class="settings-page bg-gray-50 min-h-screen py-10 px-6">
-    <div class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold text-blue-800">{{ $t("اعدادات الاستشارات") }}</h1>
-    </div>
-    
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg mb-6">
-      <p class="text-lg text-gray-600 my-2">{{ $t("تعليمات الاستشارة") }}</p>
-      <textarea required name="notes" v-model="header" id="notes" class="border ring-1 w-full ring-black border-black rounded-md focus:ring-black" cols="30" rows="2"></textarea>
-    </div>
-
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-      <p class="text-lg text-gray-600 my-2">{{ $t("توصييات منزلية") }}</p>
-      <button v-can="'consultation settings edit'" @click="showInput = true" class="w-full create bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
-        <i class="pi pi-plus-circle"></i> {{ $t("add_new_item") }}
-      </button>
-      
-      <transition name="fade">
-        <div v-if="showInput" class="mt-5 bg-gray-100 p-4 rounded-lg shadow-md">
-          <input v-model="newValue" :placeholder="$t('enter_recommendation')" class="w-full p-3 border border-gray-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <button @click="addLabel" class="w-full create bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 mt-3 rounded-lg transition-all duration-300">
-            {{ $t("save") }}
-          </button>
-        </div>
-      </transition>
-      
-      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div v-for="(item, index) in labels" :key="index" class="bg-gray-50 p-4 rounded-lg shadow-md flex items-center justify-between">
-          <div class="flex-1">
-            <input v-model="item.value" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div class="flex justify-center m-auto text-center items-center gap-2">
-            
-            <button v-can="'consultation settings edit'" @click="removeLabel(index)" class="p-2 m-auto text-red-600 hover:text-red-800 transition-transform transform hover:scale-105">
-              <i class="pi pi-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <Button v-if="labels.length > 0" v-can="'consultation settings edit'" @click="updateSettings" :label="$t('save')" class="w-full mt-6 text-white font-semibold py-3 px-5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"></Button>
-    </div>
-    
-    <Toast />
-  </div>
-</template>
-
 <script>
-import { useToast } from "primevue/usetoast";
 import axios from "axios";
+import GenderTextField from "../../components/GenderTextField.vue";
+import NameTokenHint from "../../components/NameTokenHint.vue";
+
+// Consultation settings: the instructions parents read before a consultation, and the home recommendations
+// the consultant picks from when writing a result. Both have a boy's and a girl's wording; the one matching
+// the child's gender is used, with {{name}} replaced by the child's name.
+const genders = ["male", "female"];
+const blank = (value) => !String(value ?? "").trim();
 
 export default {
+  components: { GenderTextField, NameTokenHint },
   data() {
     return {
-      header: '',
-      toast: useToast(),
-      showInput: false,
-      newValue: "",
-      labels: [],
+      loading: true,
+      loadError: false,
+      saving: false,
+      submitted: false,
+      instructions: { male: "", female: "" },
+      recommendations: [],
+      // Local keys for v-for; new items have no id until saved.
+      nextKey: 1,
     };
   },
+  computed: {
+    canEdit() {
+      return this.$can("consultation settings edit");
+    },
+    instructionsMissing() {
+      return genders.some((gender) => blank(this.instructions[gender]));
+    },
+    incompleteCount() {
+      return this.recommendations.filter((item) => this.itemMissing(item)).length;
+    },
+    hasErrors() {
+      return this.instructionsMissing || this.incompleteCount > 0;
+    },
+  },
   methods: {
-    getSettings() {
-      axios.get("/api/consultation-settings")
-        .then((res) => {
-          this.labels = res.data.data.recommendations;
-          this.header = res.data.data.instructions;
-        })
-        .catch((err) => console.log(err));
+    itemMissing(item) {
+      return genders.some((gender) => blank(item.text[gender])) || item.display_order === null || item.display_order === undefined;
     },
-    updateSettings() {
-      axios.put("/api/consultation-settings", {
-          recommendations: this.labels,
-          instructions: this.header
-        })
-        .then(() => {
-          this.toast.add({
-            severity: "success",
-            summary: this.$t("saved"),
-            detail: this.$t("recommendations_updated"),
-            life: 3000,
-          });
-        })
-        .catch((err) => console.log(err));
+    // Rows in the old { value, index } shape read their text for both genders.
+    toItem(row) {
+      return {
+        key: this.nextKey++,
+        id: row.id ?? null,
+        display_order: row.display_order ?? (row.index != null ? row.index + 1 : null),
+        text: { male: row.male ?? row.value ?? "", female: row.female ?? row.value ?? "" },
+      };
     },
-    addLabel() {
-      if (!Array.isArray(this.labels)) {
-        this.labels = []; // Ensure labels is an array
+    sortItems() {
+      this.recommendations.sort((a, b) => (a.display_order ?? Infinity) - (b.display_order ?? Infinity) || (a.id ?? Infinity) - (b.id ?? Infinity));
+    },
+    async load() {
+      this.loading = true;
+      this.loadError = false;
+      try {
+        const { data } = await axios.get("/api/consultation-settings");
+        const settings = data.data ?? {};
+        this.instructions = {
+          male: settings.instructions_wording?.male ?? settings.instructions ?? "",
+          female: settings.instructions_wording?.female ?? settings.instructions ?? "",
+        };
+        this.recommendations = (settings.recommendations ?? []).map(this.toItem);
+        this.sortItems();
+      } catch {
+        this.loadError = true;
+      } finally {
+        this.loading = false;
       }
-      
-      if (this.newValue.trim() !== "") {
-        this.labels.push({ value: this.newValue, index: this.labels.length });
-        this.newValue = "";
-        this.showInput = false;
-      }
     },
-
-    removeLabel(index) {
-      this.labels.splice(index, 1);
-      this.labels.forEach((item, idx) => item.index = idx);
+    addItem() {
+      const last = Math.max(0, ...this.recommendations.map((item) => Number(item.display_order) || 0));
+      this.recommendations.push(this.toItem({ display_order: last + 1 }));
+      this.$nextTick(() => {
+        const cards = this.$el.querySelectorAll(".recommendation");
+        cards[cards.length - 1]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        cards[cards.length - 1]?.querySelector("textarea")?.focus();
+      });
+    },
+    removeItem(index) {
+      this.recommendations.splice(index, 1);
+    },
+    async save() {
+      this.submitted = true;
+      if (this.hasErrors || this.saving) {
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: this.$t("fill_required_fields"), life: 4000 });
+        return;
+      }
+      this.saving = true;
+      try {
+        const { data } = await axios.put("/api/consultation-settings", {
+          instructions_wording: this.instructions,
+          recommendations: this.recommendations.map((item) => ({
+            ...(item.id ? { id: item.id } : {}),
+            display_order: item.display_order,
+            male: item.text.male,
+            female: item.text.female,
+          })),
+        });
+        // New items now have ids, and the list comes back in display order.
+        this.recommendations = (data.data?.recommendations ?? []).map(this.toItem);
+        this.submitted = false;
+        this.$toast.add({ severity: "success", summary: this.$t("saved"), detail: this.$t("recommendations_updated"), life: 3000 });
+      } catch (error) {
+        const detail = Object.values(error.response?.data?.errors ?? {}).flat()[0] ?? error.response?.data?.message ?? this.$t("request_failed_retry");
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail, life: 6000 });
+      } finally {
+        this.saving = false;
+      }
     },
   },
   mounted() {
-    this.getSettings();
+    this.load();
   },
 };
 </script>
 
-<style>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease-in-out;
+<template>
+  <div class="page">
+    <Toast />
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">{{ $t("اعدادات الاستشارات") }}</h1>
+        <p class="page-hint">{{ $t("consultation_settings_hint") }}</p>
+      </div>
+    </div>
+
+    <div v-if="loading" class="surface-card empty-state"><ProgressSpinner style="width: 40px; height: 40px" /></div>
+    <Message v-else-if="loadError" severity="error" :closable="false">{{ $t("request_failed_retry") }}</Message>
+
+    <form v-else class="settings-form" novalidate data-no-request-spinner @submit.prevent="save">
+      <NameTokenHint :text="$t('consultation_settings_name_hint')" />
+
+      <section class="surface-card settings-section">
+        <header class="section-bar">
+          <h2 class="section-title">{{ $t("تعليمات الاستشارة") }}</h2>
+        </header>
+        <GenderTextField v-model="instructions" inputId="consultation-instructions" :label="$t('consultation_instructions_text')"
+          :rows="4" :showErrors="submitted" :disabled="!canEdit" />
+      </section>
+
+      <section class="surface-card settings-section">
+        <header class="section-bar">
+          <div>
+            <h2 class="section-title">{{ $t("توصييات منزلية") }}</h2>
+            <p class="section-hint">{{ $t("recommendations_order_hint") }}</p>
+          </div>
+          <div class="section-tools">
+            <Tag v-if="submitted && incompleteCount" severity="danger" :value="$t('recommendations_incomplete', { count: incompleteCount })" />
+            <Tag :value="$t('recommendations_count', { count: recommendations.length })" severity="secondary" />
+          </div>
+        </header>
+
+        <div v-if="!recommendations.length" class="empty-state">
+          <i class="pi pi-inbox" />{{ $t("no_recommendations") }}
+        </div>
+
+        <article v-for="(item, index) in recommendations" :key="item.key" class="recommendation"
+          :class="{ incomplete: submitted && itemMissing(item) }">
+          <div class="recommendation-side">
+            <label :for="`recommendation-order-${item.key}`" class="order-label">{{ $t("display_order") }}</label>
+            <InputNumber :inputId="`recommendation-order-${item.key}`" v-model="item.display_order" :min="0" :useGrouping="false"
+              :disabled="!canEdit" :invalid="submitted && item.display_order == null"
+              class="order-input" @blur="sortItems" />
+          </div>
+          <GenderTextField v-model="item.text" :inputId="`recommendation-${item.key}`"
+            :label="`${$t('recommendation')} ${index + 1}`" :rows="3" :showErrors="submitted" :disabled="!canEdit" class="recommendation-text" />
+          <Button v-if="canEdit" type="button" icon="pi pi-trash" severity="danger" variant="text" rounded
+            v-tooltip.top="$t('delete')" :aria-label="$t('delete')" class="recommendation-delete" @click="removeItem(index)" />
+        </article>
+
+        <Button v-if="canEdit" type="button" icon="pi pi-plus" :label="$t('add_new_item')" severity="secondary" variant="outlined"
+          class="add-button" @click="addItem" />
+      </section>
+
+      <div v-if="canEdit" class="form-actions">
+        <Button type="submit" :label="$t('save')" icon="pi pi-check" :loading="saving" />
+      </div>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+.page-hint,
+.section-hint {
+  margin: 0.25rem 0 0;
+  color: var(--sawa-muted);
+  font-size: 0.9rem;
 }
-.fade-enter, .fade-leave-to {
-  opacity: 0;
+.settings-form {
+  display: grid;
+  gap: 1rem;
+}
+.settings-section {
+  display: grid;
+  gap: 1rem;
+}
+.section-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sawa-primary);
+}
+.section-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.recommendation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid var(--sawa-border);
+  border-inline-start: 4px solid var(--sawa-primary);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+.recommendation.incomplete {
+  border-color: #fca5a5;
+  border-inline-start-color: #dc2626;
+}
+.recommendation-side {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+.order-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sawa-muted);
+  white-space: nowrap;
+}
+.order-input :deep(input) {
+  width: 4rem;
+  text-align: center;
+}
+.add-button {
+  justify-self: start;
+}
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+  background: linear-gradient(to top, var(--sawa-page-bg) 70%, transparent);
+}
+.form-actions .p-button {
+  min-width: 12rem;
+}
+@media (max-width: 640px) {
+  .recommendation {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .recommendation-side {
+    grid-column: 1 / -1;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    align-items: center;
+  }
+  .recommendation-text {
+    grid-column: 1;
+  }
 }
 </style>

@@ -3,6 +3,7 @@
 const Index = () => import("../views/calender/Index.vue");
 const ShowBooking = () => import("../views/calender/ShowBooking.vue");
 const BookingDetails = () => import("../views/calender/BookingDetails.vue");
+const BookingCreate = () => import("../views/calender/BookingCreate.vue");
 const working = () => import("../views/calender/Working-hour.vue");
 const Recommendations = () => import("../views/calender/recommendations.vue");
 
@@ -24,6 +25,12 @@ const calenderRoutes = [
     name: "ShowBooking",
     meta: { permission: ["bookings list"] },
     component: ShowBooking,
+  },
+  {
+    path: "bookings/create",
+    name: "BookingCreate",
+    meta: { permission: ["bookings create"] },
+    component: BookingCreate,
   },
   {
     path: "bookings/:id/details",

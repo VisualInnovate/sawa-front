@@ -1,12 +1,11 @@
 <script>
 import axios from "axios";
 import SideProfileQuestionGroup from "../../components/SideProfileQuestionGroup.vue";
+import NameTokenHint from "../../components/NameTokenHint.vue";
 import { genders } from "../../utils/sideProfileWording";
 
-const nameToken = "{{name}}";
-
 export default {
-  components: { SideProfileQuestionGroup },
+  components: { SideProfileQuestionGroup, NameTokenHint },
   data: () => ({
     evaluation: { title: "", side_profile_id: "", six_month: true, questions: [] },
     headers: [],
@@ -17,8 +16,6 @@ export default {
     loadError: false,
     submitted: false,
     saving: false,
-    nameToken,
-    tokenCopied: false,
   }),
   computed: {
     titleError() {
@@ -41,21 +38,6 @@ export default {
   methods: {
     addQuestion(headerId, inputs) {
       this.questions = { ...this.questions, [headerId]: inputs };
-    },
-    async copyToken() {
-      try {
-        await navigator.clipboard.writeText(nameToken);
-      } catch {
-        const input = document.createElement("textarea");
-        input.value = nameToken;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand("copy");
-        input.remove();
-      }
-      this.tokenCopied = true;
-      clearTimeout(this.tokenTimer);
-      this.tokenTimer = setTimeout(() => { this.tokenCopied = false; }, 2000);
     },
     async submit() {
       this.submitted = true;
@@ -105,9 +87,6 @@ export default {
       ]);
     },
   },
-  beforeUnmount() {
-    clearTimeout(this.tokenTimer);
-  },
   async created() {
     this.getSideProfile();
     try {
@@ -151,14 +130,7 @@ export default {
         <label for="evaluation-six-month">{{ $t("evaluation_exception") }}</label>
       </div>
 
-      <div class="name-hint">
-        <i class="pi pi-info-circle" aria-hidden="true" />
-        <span>{{ $t("side_profile_wording.name_hint_before") }}</span>
-        <code dir="ltr">{{ nameToken }}</code>
-        <Button type="button" size="small" variant="text" :icon="tokenCopied ? 'pi pi-check' : 'pi pi-copy'"
-          :label="tokenCopied ? $t('copied') : $t('copy')" class="hint-copy" @click="copyToken" />
-        <span class="hint-rest">{{ $t("side_profile_wording.name_hint_after") }}</span>
-      </div>
+      <NameTokenHint :text="$t('side_profile_wording.name_hint_after')" />
 
       <Message v-if="questionsError" severity="error" :closable="false">{{ $t("fill_all_questions") }}</Message>
 
@@ -183,31 +155,6 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-.name-hint {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 0.5rem;
-  background: var(--sawa-primary-soft);
-  color: var(--sawa-primary);
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-.name-hint code {
-  font-weight: 700;
-  background: #fff;
-  border-radius: 0.3rem;
-  padding: 0 0.35rem;
-}
-.hint-copy {
-  padding: 0.1rem 0.4rem;
-}
-.hint-rest {
-  flex-basis: 100%;
-  color: #3f6f75;
 }
 .form-actions {
   display: flex;

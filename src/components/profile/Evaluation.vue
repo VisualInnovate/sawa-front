@@ -40,7 +40,7 @@
             </div>
           </dl>
           <footer class="evaluation-actions">
-            <Button v-if="!evalu.result_id" v-can="'evaluations delete'" icon="pi pi-trash" @click="deleteevalution(evalu.id,evalu.child_id)" severity="danger" variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
+            <Button v-can="'evaluations delete'" icon="pi pi-trash" @click="deleteevalution(evalu)" severity="danger" variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
             <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
           </footer>
         </article>
@@ -57,7 +57,7 @@
         </div>
         <template #footer>
           <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-          <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
+          <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" :loading="deleting" severity="danger" />
         </template>
       </Dialog>
     <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
@@ -121,7 +121,8 @@ export default {
          business_hours:[],
          submitted:false,
          slots:[],
-         delete_id:0,
+         deleteTarget:null,
+         deleting:false,
          doctors:[],
          deleteDialog:false,
          updatedialog:false,
@@ -245,18 +246,28 @@ export default {
           this.loading = false
         })
     },
-    deleteevalution(id){
-      this.delete_id=id
-      this.deleteDialog=!(this.deleteDialog)
-    
+    deleteevalution(evaluation){
+      this.deleteTarget = evaluation
+      this.deleteDialog = true
     },
-    deleteAction(){
-      axios.delete(`api/evaluations/${this.delete_id}/delete`)
-        .then((response) => {
-
-         this.getusers(true)
-         this.deleteDialog=!(this.deleteDialog)
-        })
+    async deleteAction(){
+      if (!this.deleteTarget || this.deleting) return
+      this.deleting = true
+      const target = this.deleteTarget
+      const endpoint = target.result_id
+        ? `api/evaluations/results/${target.result_id}`
+        : `api/evaluations/${target.id}/delete`
+      try {
+        await axios.delete(endpoint)
+        this.deleteDialog = false
+        this.deleteTarget = null
+        this.getusers(true)
+        this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('evaluation_deleted_successfully'), life: 3000 })
+      } catch {
+        this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: this.$t('request_failed_retry'), life: 4000 })
+      } finally {
+        this.deleting = false
+      }
     },
 
    

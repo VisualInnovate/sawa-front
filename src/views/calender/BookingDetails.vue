@@ -451,23 +451,18 @@
         <MultiSelect
           v-model="student_massage.filed_value"
           filter
-          :options="fileds"
+          :options="recommendationOptions"
           optionLabel="value"
+          dataKey="id"
           class="border border-gray-300 rounded-md p-1 focus:ring-1 focus:ring-blue-500 text-sm"
         />
       </div>
 
-      <div
-        v-if="fileds.length > 0"
-        v-for="(filed, index) in student_massage?.filed_value"
-        :key="index"
-        class="py-1"
-      >
-        <input
-          :value="removeBracesAndReplace(fileds[index].value)"
-          readonly
-          class="w-full p-2 bg-gray-100 border border-gray-300 rounded-md text-sm focus:outline-none"
-        />
+      <!-- What the parent will read: the picked recommendations in display order, with the child's name. -->
+      <div v-for="item in pickedRecommendations" :key="item.id" class="py-1">
+        <p class="w-full p-2 bg-gray-100 border border-gray-300 rounded-md text-sm whitespace-pre-line">
+          {{ removeBracesAndReplace(item.value) }}
+        </p>
       </div>
       <div class="flex flex-col">
         <label class="text-gray-600 font-medium text-sm">
@@ -611,10 +606,28 @@ export default {
       }
     },
 
+    // Picks saved before recommendations had ids are matched to their recommendation by text; the rest keep an
+    // id of their own so they stay selected.
+    alignPickedRecommendations() {
+      const picked = this.student_massage?.filed_value;
+      if (!Array.isArray(picked) || !this.fileds.length) return;
+      const settings = this.settingsRecommendations;
+      this.student_massage.filed_value = picked.map((item, position) => {
+        if (item?.id != null && !String(item.id).startsWith("legacy-")) return item;
+        const text = String(item?.value ?? "");
+        const match = this.fileds.find((row) => [row.male, row.female, row.value].includes(text));
+        const option = match && settings.find((row) => row.id === (match.id ?? this.fileds.indexOf(match) + 1));
+        return option
+          ? { id: option.id, display_order: option.display_order, value: text }
+          : { id: `legacy-${position}`, display_order: 100000 + position, value: text };
+      });
+    },
     studentMassage() {
+      const filed_value = [...(this.student_massage.filed_value ?? [])]
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
       axios
         .post(`api/booking/result`, {
-          consultation_result: this.student_massage,
+          consultation_result: { ...this.student_massage, filed_value },
           booking_id: this.booking.id,
         })
         .then((response) => {
@@ -663,8 +676,8 @@ export default {
         });
     },
     removeBracesAndReplace(text) {
-      // استبدال النص المحاط بعلامتي {{}} باسم "محمد"
-      return text.replace(/\{\{.*?\}\}/g, this.booking.child_name);
+      // {{name}} (any {{...}}) is the child's name.
+      return String(text ?? "").replace(/\{\{.*?\}\}/g, this.booking.child_name);
     },
 
     AddEvalte(id) {
@@ -708,8 +721,10 @@ export default {
       this.booking = res.data.booking.booking;
       this.new_status = Number(res.data.booking.booking.accepted);
       this.accept_notes = res.data.booking.booking.accepted_notes;
-      if (res.data.booking.booking.consultation_result)
+      if (res.data.booking.booking.consultation_result) {
         this.student_massage = res.data.booking?.booking?.consultation_result;
+        this.alignPickedRecommendations();
+      }
       if (res.data.booking.booking.pre_evaluations?.pre_evalutions)
         this.pre_evalutions.pre_evalutions =
           res.data.booking?.booking?.pre_evaluations.pre_evalutions;
@@ -718,7 +733,8 @@ export default {
     },
     getConsultationSettings() {
       axios.get("api/consultation-settings").then((res) => {
-        this.fileds = res.data.data.recommendations;
+        this.fileds = res.data.data.recommendations ?? [];
+        this.alignPickedRecommendations();
       });
     },
     async updateBooking() {
@@ -775,6 +791,29 @@ export default {
     },
   },
   computed: {
+    childGender() {
+      return String(this.booking?.child_gender) === "1" ? "female" : "male";
+    },
+    // The home recommendations in display order, each in the child's gender.
+    settingsRecommendations() {
+      return (this.fileds ?? [])
+        .map((row, position) => ({
+          id: row.id ?? position + 1,
+          display_order: row.display_order ?? (row.index ?? position) + 1,
+          value: String(row[this.childGender] ?? row.value ?? ""),
+        }))
+        .sort((a, b) => a.display_order - b.display_order || a.id - b.id);
+    },
+    // Earlier picks that no longer match a recommendation stay listed so they can be kept or removed.
+    recommendationOptions() {
+      const kept = (this.student_massage?.filed_value ?? [])
+        .filter((item) => !this.settingsRecommendations.some((row) => row.id === item?.id));
+      return [...this.settingsRecommendations, ...kept];
+    },
+    pickedRecommendations() {
+      return [...(this.student_massage?.filed_value ?? [])]
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    },
     selectedStatusOption() {
       return this.status.find((option) => option.code === Number(this.new_status)) ?? null;
     },

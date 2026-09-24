@@ -472,6 +472,7 @@ export default {
       }
       this.opts.event = event;
       this.slotEmployeeId = this.event.employee_id;
+      this.event.title = "";
       this.visible = true;
     },
     createEvent() {
