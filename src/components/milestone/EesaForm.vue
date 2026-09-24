@@ -10,6 +10,10 @@ const props = defineProps({
   // The child's earlier assessments, oldest first: [{ assessment_number, group_totals, total }]
   previous: { type: Array, default: () => [] },
   disabled: Boolean,
+  // A saved assessment shown on the results page: boxes can be read, not changed.
+  readonly: Boolean,
+  // This assessment's number; by default the one after the last earlier assessment.
+  number: { type: Number, default: null },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -23,7 +27,7 @@ const format = (value) => (value === null || value === undefined ? "" : Number(v
 // Four assessment columns: the earlier ones and this one; up to four they are 1st-4th like the form, after that
 // the last four assessments.
 const columns = computed(() => {
-  const current = (props.previous.at(-1)?.assessment_number ?? 0) + 1;
+  const current = props.number ?? (props.previous.at(-1)?.assessment_number ?? 0) + 1;
   const filled = [
     ...props.previous.map((row) => ({ number: row.assessment_number, groups: row.group_totals ?? {}, total: row.total })),
     { number: current, groups: totals.value.groups, total: totals.value.total, current: true },
@@ -35,7 +39,7 @@ const columns = computed(() => {
 
 <template>
   <div class="eesa-scroll">
-    <article class="eesa" dir="ltr" lang="en">
+    <article class="eesa" :class="{ readonly }" dir="ltr" lang="en">
       <header class="eesa-banner">
         <h3>Early Echoic Skills Assessment (EESA)</h3>
         <p>Barbara E. Esch, Ph.D., BCBA-D, CCC-SLP</p>
@@ -74,7 +78,7 @@ const columns = computed(() => {
           <div v-if="group.columns" class="eesa-items" :class="{ prosody: group.number === 4 }">
             <div v-for="(column, c) in group.columns" :key="c" class="eesa-column">
               <label v-for="item in column" :key="item.key" class="eesa-item">
-                <input :value="modelValue[item.key] ?? ''" :disabled="disabled" :class="{ invalid: invalid(item.key, group) }"
+                <input :value="modelValue[item.key] ?? ''" :disabled="disabled" :readonly="readonly" :tabindex="readonly ? -1 : undefined" :class="{ invalid: invalid(item.key, group) }"
                   inputmode="decimal" maxlength="3" :aria-label="item.text.replaceAll('*', '')"
                   @input="set(item.key, $event.target.value)" />
                 <span>
@@ -89,7 +93,7 @@ const columns = computed(() => {
               <p class="eesa-line-heading">{{ section.heading }}</p>
               <div class="eesa-line">
                 <label v-for="item in section.items" :key="item.key" class="eesa-item">
-                  <input :value="modelValue[item.key] ?? ''" :disabled="disabled" :class="{ invalid: invalid(item.key, group) }"
+                  <input :value="modelValue[item.key] ?? ''" :disabled="disabled" :readonly="readonly" :tabindex="readonly ? -1 : undefined" :class="{ invalid: invalid(item.key, group) }"
                     inputmode="decimal" maxlength="3" :aria-label="item.text.replaceAll('*', '')"
                     @input="set(item.key, $event.target.value)" />
                   <span>
@@ -178,6 +182,9 @@ const columns = computed(() => {
 }
 .eesa-item input:focus { outline: 2px solid var(--eesa-orange); outline-offset: 0; }
 .eesa-item input.invalid { border-color: #dc2626; background: #fee2e2; }
+.eesa.readonly .eesa-item,
+.eesa.readonly .eesa-item input { cursor: default; }
+.eesa.readonly .eesa-item input:focus { outline: none; }
 .eesa-lines { margin-top: 0.3rem; }
 .eesa-line-heading { margin: 0.35rem 0 0.15rem 1.9rem; font-weight: 700; font-size: 0.85rem; }
 .eesa-line { display: flex; flex-wrap: wrap; gap: 0.25rem 1.2rem; }

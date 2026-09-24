@@ -82,6 +82,16 @@
       </div>
     </div>
 
+    <!-- The EESA filled in this evaluation, as the form (read only) -->
+    <div v-if="eesa.result" class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:mt-8 print:break-inside-avoid">
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
+        <h2 class="text-xl font-bold text-white">{{ eesa.domain?.title }}</h2>
+      </div>
+      <div class="p-4 print:p-2">
+        <EesaForm :modelValue="eesaBoxes" :previous="eesa.previous" :number="eesa.result.assessment_number" readonly />
+      </div>
+    </div>
+
     <!-- Evaluation Summary -->
     <div class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:mt-8">
       <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
@@ -185,25 +195,43 @@
 
 <script>
 import axios from "axios";
+import EesaForm from "../../../components/milestone/EesaForm.vue";
+
 export default {
   name: 'SquareGrid',
+  components: { EesaForm },
   data() {
     return {
+      // { domain, result: { assessment_number, scores, ... } | null, previous }
+      eesa: { domain: null, result: null, previous: [] },
       mainSquares: [],
       table_resulte: [],
       loading: true,
       loadError: false,
     };
   },
+  computed: {
+    // The saved scores in the boxes: "1" or "0.5"; blank boxes scored 0.
+    eesaBoxes() {
+      return Object.fromEntries(Object.entries(this.eesa.result?.scores ?? {}).map(([key, value]) => [key, String(value)]));
+    },
+  },
   methods: {
     async getresulte() {
       this.loading = true;
       this.loadError = false;
 
-      const [levelsResult, reportResult] = await Promise.allSettled([
+      const [levelsResult, reportResult, eesaResult] = await Promise.allSettled([
         axios.get(`api/mileston-levels/flow-chart/${this.$route.params.evla_id}`),
         axios.get(`api/evaluations/report/${this.$route.params.evla_id}`),
+        axios.get(`api/milestone-answers/eesa/result/${this.$route.params.evla_id}`),
       ]);
+
+      // An evaluation without the EESA (or an older server) simply shows no form.
+      if (eesaResult.status === "fulfilled" && eesaResult.value.data?.result) {
+        const { domain, result, previous } = eesaResult.value.data;
+        this.eesa = { domain, result, previous: previous ?? [] };
+      }
 
       if (levelsResult.status === "fulfilled") {
         this.mainSquares = levelsResult.value.data?.data || [];
