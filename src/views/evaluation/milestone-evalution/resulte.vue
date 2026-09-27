@@ -31,51 +31,29 @@
         </div>
         
         <!-- Grid Content -->
+        <!-- Built row by row from this level's own domains, so every domain gets a column
+             and cells line up even when a domain has fewer questions than the others. -->
         <div class="p-4 print:p-2">
-          <div class="grid grid-cols-10 border border-gray-200 rounded-lg overflow-hidden print:text-sm">
-            <!-- Question Numbers Column -->
-            <div class="grid grid-cols-1 bg-gray-100">
-              <div class="level-heading-spacer text-center flex items-center justify-center bg-gray-200 font-medium"></div>
-              <div 
-                class="w-20 h-16 m-auto text-center flex items-center justify-center border-t border-gray-200 font-medium print:w-16 print:h-12" 
-                v-for="(question, qIndex) in level?.subtests?.[0]?.questions || []" 
-                :key="qIndex"
-              >
-                {{ 5 - (qIndex % 5) }}
+          <div class="level-grid-scroll">
+            <div class="level-grid print:text-sm" :style="{ '--level-columns': level?.subtests?.length || 1 }">
+              <div class="level-heading-spacer level-grid-corner"></div>
+              <div v-for="(subtest, subIndex) in level?.subtests || []" :key="'title-' + subIndex" class="level-subtest-title">
+                {{ subtest.subtest_name }}
               </div>
-            </div>
-            
-            <!-- Test Columns -->
-            <div 
-              class="grid grid-cols-1" 
-              v-for="(subtest, subIndex) in mainSquares[0]?.subtests || []"
-            >
-              <!-- Subtest Name -->
-              <div class="level-subtest-title text-center flex justify-center bg-gray-100 border-l border-gray-200 font-medium">
-                {{ level?.subtests[subIndex]?.subtest_name }}
-              </div>
-              
-              <!-- Answer Cells -->
-              <div 
-                class="w-20 h-16 border-t border-l border-gray-200 flex flex-col justify-between print:w-16 print:h-12"
-                v-for="(question, qIndex) in level?.subtests?.[subIndex]?.questions || []" 
-                :key="qIndex"
-              >
-                <div 
-                  class="h-1/2 border-b border-gray-200"
-                  :style="{ 
-                    backgroundColor: question.answer_score == 1 ? `#${question.answer_color}` : '',
-                    border: '1px dotted #d1d5db'
-                  }"
-                ></div>
-                <div 
-                  class="h-1/2"
-                  :style="{ 
-                    backgroundColor: question?.answer_score == 1 || question?.answer_score == 0.5 ? `#${question?.answer_color}` : '',
-                    border: '1px dotted #d1d5db'
-                  }"
-                ></div>
-              </div>
+
+              <template v-for="row in levelRows(level)" :key="'row-' + row">
+                <div class="level-row-number">{{ levelRows(level) - row + 1 }}</div>
+                <div
+                  v-for="(subtest, subIndex) in level?.subtests || []"
+                  :key="row + '-' + subIndex"
+                  class="level-cell"
+                  :class="{ 'level-cell-empty': !subtest.questions?.[row - 1] }"
+                  :title="subtest.questions?.[row - 1]?.question"
+                >
+                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[row - 1], 1) }"></div>
+                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[row - 1], 0.5) }"></div>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -217,6 +195,16 @@ export default {
     },
   },
   methods: {
+    // Rows in a level = its longest domain (5 in the standard milestone).
+    levelRows(level) {
+      return Math.max(0, ...(level?.subtests || []).map((subtest) => subtest.questions?.length || 0));
+    },
+    // Top half fills for a full score (1), bottom half for a full or half score.
+    cellColor(question, threshold) {
+      if (!question?.answer_color) return '';
+      const score = Number(question.answer_score);
+      return score >= threshold ? `#${question.answer_color}` : '';
+    },
     async getresulte() {
       this.loading = true;
       this.loadError = false;
@@ -306,15 +294,79 @@ th, td {
 /* Keep long Arabic subtest titles inside their own columns without changing the table design. */
 .level-heading-spacer,
 .level-subtest-title {
-  width: 5rem;
-  height: 7.5rem;
   min-height: 7.5rem;
 }
 
+.level-grid-scroll {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: 4.5rem repeat(var(--level-columns), minmax(5rem, 1fr));
+  min-width: calc(4.5rem + var(--level-columns) * 5rem);
+  background: #fff;
+}
+
+.level-grid-corner {
+  background: #e5e7eb;
+}
+
+.level-row-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 4rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  font-weight: 500;
+}
+
+.level-cell {
+  display: flex;
+  flex-direction: column;
+  height: 4rem;
+  border-top: 1px solid #e5e7eb;
+  border-inline-start: 1px solid #e5e7eb;
+}
+
+.level-cell-half {
+  flex: 1;
+  border: 1px dotted #d1d5db;
+}
+
+.level-cell-empty {
+  background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 6px, #f1f5f9 6px, #f1f5f9 12px);
+}
+
+.level-cell-empty .level-cell-half {
+  border-color: transparent;
+}
+
+@media print {
+  /* Fit every domain on the page instead of scrolling. */
+  .level-grid-scroll { overflow: visible; }
+  .level-grid {
+    grid-template-columns: 3rem repeat(var(--level-columns), minmax(0, 1fr));
+    min-width: 0;
+  }
+  .level-row-number,
+  .level-cell {
+    height: 3rem;
+  }
+}
+
 .level-subtest-title {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  background: #f3f4f6;
+  border-inline-start: 1px solid #e5e7eb;
+  font-weight: 500;
   align-items: center;
   padding: 0.75rem 0.5rem;
-  overflow: hidden;
   font-size: 0.75rem;
   line-height: 1.75;
   white-space: normal;
@@ -621,8 +673,6 @@ th, td {
 
   .level-heading-spacer,
   .level-subtest-title {
-    width: 4rem;
-    height: 6.5rem;
     min-height: 6.5rem;
   }
 

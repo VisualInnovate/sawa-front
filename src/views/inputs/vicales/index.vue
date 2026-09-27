@@ -174,6 +174,11 @@ const initFilters = () => {
               {{ slotProps.data.insurance_exp_date }}
             </template>
            </Column>
+           <Column field="insurance_company" :header='$t("insurance_company")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ slotProps.data.insurance_company || '—' }}
+            </template>
+           </Column>
            <Column field="license_exp_date" :header='$t("License_expiration")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.license_exp_date }}
