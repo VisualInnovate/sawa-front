@@ -147,9 +147,9 @@ const resultStyles = `
 .cr-chip-label{color:#64748b}
 .cr-section{border:1px solid #e2e8f0;border-inline-start:4px solid #135c65;border-radius:12px;padding:12px 16px;break-inside:avoid}
 .cr-label{margin:0 0 6px;font-size:15px;font-weight:700;color:#135c65}
-.cr-text{margin:0;white-space:pre-line}
+.cr-text{margin:0;white-space:pre-line;overflow-wrap:anywhere}
 .cr-list{margin:0;padding-inline-start:22px;display:grid;gap:6px;list-style:disc outside}
-.cr-list li{display:list-item;line-height:1.8}
+.cr-list li{display:list-item;line-height:1.8;overflow-wrap:anywhere}
 .cr-list li::marker{color:#135c65;font-weight:700}
 .cr-empty{margin:0;text-align:center;color:#64748b;padding:24px}
 `;
