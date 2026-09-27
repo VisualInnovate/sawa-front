@@ -112,17 +112,6 @@
           </Select>
         </div>
 
-        <!-- Evaluation Button -->
-        <div class="text-center mt-4">
-          <Button
-            v-can="'evaluation request create'"
-            :disabled="comparisonResult"
-            @click="AddEvalte(booking?.child_id)"
-            class="bg-gradient-to-r from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-80"
-            icon="pi pi-plus"
-            :label="$t('RatingAdd')"></Button>
-        </div>
-
         <!-- Submit Button -->
         <div class="text-center mt-4">
           <Button
@@ -261,6 +250,29 @@
         class="w-full text-white py-2 px-4 rounded-md font-semibold transition-all duration-300 ease-in-out shadow-md flex items-center justify-center"
         icon="pi pi-check" />
     </form>
+  </div>
+
+  <!-- Book an evaluation for the child (opens the evaluation calendar); allowed from the consultation day. -->
+  <div v-can="'evaluation request create'" class="sawa-card mt-5 p-[2%] bg-slate-50">
+    <section class="add-evaluation-card">
+      <div class="add-evaluation-icon" aria-hidden="true"><i class="pi pi-calendar-plus"></i></div>
+      <div class="add-evaluation-text">
+        <h2>{{ $t("book_child_evaluation") }}</h2>
+        <p>{{ $t("book_child_evaluation_hint") }}</p>
+        <p v-if="booking?.child_name" class="add-evaluation-child">
+          <i class="pi pi-user" aria-hidden="true"></i> {{ booking.child_name }}
+        </p>
+        <p v-if="comparisonResult" class="add-evaluation-locked">
+          <i class="pi pi-lock" aria-hidden="true"></i> {{ $t("book_child_evaluation_locked") }}
+        </p>
+      </div>
+      <Button
+        :disabled="comparisonResult || !booking?.child_id"
+        @click="AddEvalte(booking?.child_id)"
+        icon="pi pi-plus"
+        :label="$t('RatingAdd')"
+        class="add-evaluation-btn" />
+    </section>
   </div>
 </template>
 <script>
@@ -736,6 +748,17 @@ export default {
 .option-pending { color: #92400e; }
 .option-cancelled { color: #9f1239; }
 .booking-status-placeholder { color: #64748b; font-weight: 500; }
+
+.add-evaluation-card { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; padding: 1.5rem; border: 1px solid #e2e8f0; border-inline-start: 5px solid var(--sawa-primary, #135c65); border-radius: 0.9rem; background: #fff; box-shadow: 0 10px 24px -18px rgb(15 23 42 / .35); }
+.add-evaluation-icon { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; border-radius: 1rem; background: #e6f4f3; color: var(--sawa-primary, #135c65); font-size: 1.5rem; }
+.add-evaluation-icon i { font-size: 1.5rem; }
+.add-evaluation-text { flex: 1 1 18rem; min-width: 0; }
+.add-evaluation-text h2 { margin: 0 0 .3rem; color: #0f172a; font-size: 1.25rem; font-weight: 700; }
+.add-evaluation-text p { margin: 0; color: #64748b; line-height: 1.7; }
+.add-evaluation-child { display: inline-flex; align-items: center; gap: .4rem; margin-top: .5rem !important; padding: .2rem .7rem; border-radius: 999px; background: #f1f5f9; color: #334155 !important; font-weight: 600; }
+.add-evaluation-locked { display: flex; align-items: center; gap: .4rem; margin-top: .6rem !important; color: #92400e !important; font-size: .9rem; }
+.add-evaluation-btn { min-width: 12rem; padding-block: .75rem; }
+@media (max-width: 640px) { .add-evaluation-btn { width: 100%; } }
 
 .booking-details { overflow: hidden; border-radius: 12px; background: #f8fafc; box-shadow: 0 4px 6px -1px rgb(0 0 0 / .08), 0 2px 4px -2px rgb(0 0 0 / .06); }
 .booking-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; padding: 1.25rem 1.5rem; }
