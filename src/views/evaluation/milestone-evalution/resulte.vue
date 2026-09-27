@@ -24,16 +24,17 @@
 
     <!-- Levels Grid -->
     <div class="space-y-12 print:space-y-6">
-      <div v-for="(level, index) in mainSquares" :key="index" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:break-inside-avoid">
+      <div v-for="(level, index) in mainSquares" :key="index" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border">
         <!-- Level Header -->
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
           <h1 class="w-full py-2 text-2xl font-bold text-center text-white">{{ level.level_name || $t("level_n", { n: index + 1 }) }}</h1>
         </div>
-        
+
         <!-- Grid Content -->
-        <!-- Built row by row from this level's own domains, so every domain gets a column
+        <!-- Question 1 sits in the bottom row (numbered 1) and later questions climb upwards.
+             Built row by row from this level's own domains, so every domain gets a column
              and cells line up even when a domain has fewer questions than the others. -->
-        <div class="p-4 print:p-2">
+        <div class="p-4 print:p-2 print:break-inside-avoid">
           <div class="level-grid-scroll">
             <div class="level-grid print:text-sm" :style="{ '--level-columns': level?.subtests?.length || 1 }">
               <div class="level-heading-spacer level-grid-corner"></div>
@@ -47,26 +48,35 @@
                   v-for="(subtest, subIndex) in level?.subtests || []"
                   :key="row + '-' + subIndex"
                   class="level-cell"
-                  :class="{ 'level-cell-empty': !subtest.questions?.[row - 1] }"
-                  :title="subtest.questions?.[row - 1]?.question"
+                  :class="{ 'level-cell-empty': !subtest.questions?.[levelRows(level) - row] }"
+                  :title="subtest.questions?.[levelRows(level) - row]?.question"
                 >
-                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[row - 1], 1) }"></div>
-                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[row - 1], 0.5) }"></div>
+                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[levelRows(level) - row], 1) }"></div>
+                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[levelRows(level) - row], 0.5) }"></div>
                 </div>
               </template>
             </div>
           </div>
         </div>
+
+        <!-- The EESA filled in this level, as the form (read only) -->
+        <section v-if="eesaForLevel(level, index)" class="level-eesa">
+          <h2 class="level-eesa-title">{{ eesa.domain?.title }}</h2>
+          <div class="p-4 print:p-2">
+            <EesaForm :modelValue="eesaBoxes(eesaForLevel(level, index))" :previous="eesaForLevel(level, index).previous"
+              :number="eesaForLevel(level, index).result.assessment_number" readonly />
+          </div>
+        </section>
       </div>
     </div>
 
-    <!-- The EESA filled in this evaluation, as the form (read only) -->
-    <div v-if="eesa.result" class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:mt-8 print:break-inside-avoid">
+    <!-- An EESA whose level has no chart above (should not happen) still shows. -->
+    <div v-for="item in unplacedEesa" :key="'eesa-' + item.level_id" class="mt-12 bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:mt-8">
       <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
-        <h2 class="text-xl font-bold text-white">{{ eesa.domain?.title }}</h2>
+        <h2 class="text-xl font-bold text-white">{{ eesa.domain?.title }} — {{ item.level_title }}</h2>
       </div>
       <div class="p-4 print:p-2">
-        <EesaForm :modelValue="eesaBoxes" :previous="eesa.previous" :number="eesa.result.assessment_number" readonly />
+        <EesaForm :modelValue="eesaBoxes(item)" :previous="item.previous" :number="item.result.assessment_number" readonly />
       </div>
     </div>
 
@@ -181,7 +191,8 @@ export default {
   data() {
     return {
       // { domain, result: { assessment_number, scores, ... } | null, previous }
-      eesa: { domain: null, result: null, previous: [] },
+      // results: [{ level_id, level_title, result: { assessment_number, scores, ... }, previous }]
+      eesa: { domain: null, results: [] },
       mainSquares: [],
       table_resulte: [],
       loading: true,
@@ -189,12 +200,21 @@ export default {
     };
   },
   computed: {
-    // The saved scores in the boxes: "1" or "0.5"; blank boxes scored 0.
-    eesaBoxes() {
-      return Object.fromEntries(Object.entries(this.eesa.result?.scores ?? {}).map(([key, value]) => [key, String(value)]));
+    unplacedEesa() {
+      return this.eesa.results.filter((item) => !this.mainSquares.some((level, index) => this.eesaForLevel(level, index) === item));
     },
   },
   methods: {
+    // A level's EESA; one saved without a level (older server) belongs to the first level.
+    eesaForLevel(level, index) {
+      return this.eesa.results.find((item) => item.level_id != null && item.level_id === level?.level_id)
+        ?? (index === 0 ? this.eesa.results.find((item) => item.level_id == null || level?.level_id == null) : null)
+        ?? null;
+    },
+    // The saved scores in the boxes: "1" or "0.5"; blank boxes scored 0.
+    eesaBoxes(item) {
+      return Object.fromEntries(Object.entries(item?.result?.scores ?? {}).map(([key, value]) => [key, String(value)]));
+    },
     // Rows in a level = its longest domain (5 in the standard milestone).
     levelRows(level) {
       return Math.max(0, ...(level?.subtests || []).map((subtest) => subtest.questions?.length || 0));
@@ -216,9 +236,12 @@ export default {
       ]);
 
       // An evaluation without the EESA (or an older server) simply shows no form.
-      if (eesaResult.status === "fulfilled" && eesaResult.value.data?.result) {
-        const { domain, result, previous } = eesaResult.value.data;
-        this.eesa = { domain, result, previous: previous ?? [] };
+      if (eesaResult.status === "fulfilled") {
+        const { domain, results, result, previous } = eesaResult.value.data ?? {};
+        this.eesa = {
+          domain,
+          results: Array.isArray(results) ? results : result ? [{ level_id: null, result, previous: previous ?? [] }] : [],
+        };
       }
 
       if (levelsResult.status === "fulfilled") {
@@ -297,16 +320,32 @@ th, td {
   min-height: 7.5rem;
 }
 
+.level-eesa {
+  border-top: 1px solid #e5e7eb;
+}
+
+.level-eesa-title {
+  margin: 0;
+  padding: 0.85rem 1.25rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
 .level-grid-scroll {
   overflow-x: auto;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
 }
 
+/* A gap separates the domain columns; each column keeps its own borders. */
 .level-grid {
+  --level-gap: 0.6rem;
   display: grid;
   grid-template-columns: 4.5rem repeat(var(--level-columns), minmax(5rem, 1fr));
-  min-width: calc(4.5rem + var(--level-columns) * 5rem);
+  column-gap: var(--level-gap);
+  min-width: calc(4.5rem + var(--level-columns) * (5rem + var(--level-gap)));
   background: #fff;
 }
 
@@ -329,7 +368,7 @@ th, td {
   flex-direction: column;
   height: 4rem;
   border-top: 1px solid #e5e7eb;
-  border-inline-start: 1px solid #e5e7eb;
+  border-inline: 1px solid #e5e7eb;
 }
 
 .level-cell-half {
@@ -349,6 +388,7 @@ th, td {
   /* Fit every domain on the page instead of scrolling. */
   .level-grid-scroll { overflow: visible; }
   .level-grid {
+    --level-gap: 0.25rem;
     grid-template-columns: 3rem repeat(var(--level-columns), minmax(0, 1fr));
     min-width: 0;
   }
@@ -363,7 +403,7 @@ th, td {
   justify-content: center;
   text-align: center;
   background: #f3f4f6;
-  border-inline-start: 1px solid #e5e7eb;
+  border-inline: 1px solid #e5e7eb;
   font-weight: 500;
   align-items: center;
   padding: 0.75rem 0.5rem;
