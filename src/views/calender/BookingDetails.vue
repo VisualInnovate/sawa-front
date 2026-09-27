@@ -1,31 +1,49 @@
 <template>
   <div class="sawa-card p-[1%]">
     <h1 class="border-b text-3xl w-full md:w-1/2 uppercase text-green-800 py-4">
-      {{ $t("bookings") }} / {{ booking.requester_name }}
+      {{ $t("bookings") }}<template v-if="booking.requester_name || booking.child_name"> / {{ booking.requester_name || booking.child_name }}</template>
     </h1>
     <!-- Booking details and the parent's answers, all on the page (no popup). -->
-    <div class="booking-details mt-4">
-      <div class="booking-details-grid">
-        <div v-for="(field, index) in bookingFields" :key="index" class="booking-detail">
-          <i class="booking-detail-icon pi pi-check" aria-hidden="true"></i>
-          <p class="booking-detail-label">{{ field.label }} :</p>
-          <p class="booking-detail-value" :dir="field.ltr ? 'ltr' : null">{{ field.value }}</p>
-        </div>
-      </div>
-
-      <template v-if="answerFields.length">
-        <h2 class="booking-answers-title">
-          <i class="pi pi-comments" aria-hidden="true"></i>
-          {{ $t("Answer_the_questions") }}
-        </h2>
-        <div class="booking-answers">
-          <div v-for="(field, index) in answerFields" :key="index" class="booking-detail">
-            <i class="booking-detail-icon pi pi-check" aria-hidden="true"></i>
-            <p class="booking-detail-label">{{ field.label }} :</p>
-            <p class="booking-detail-value">{{ field.value }}</p>
+    <div v-if="booking?.child_name || booking?.requester_name" class="booking-overview mt-4">
+      <!-- The child at a glance -->
+      <header class="child-hero">
+        <div class="child-avatar" aria-hidden="true">{{ childInitial }}</div>
+        <div class="child-hero-text">
+          <h2>{{ booking.child_name || "—" }}</h2>
+          <div class="child-chips">
+            <span v-if="childGenderLabel" class="child-chip"><i class="pi pi-user" aria-hidden="true"></i>{{ childGenderLabel }}</span>
+            <span v-if="childAgeLabel" class="child-chip"><i class="pi pi-hourglass" aria-hidden="true"></i>{{ childAgeLabel }}</span>
+            <span v-if="booking.event_date" class="child-chip is-accent">
+              <i class="pi pi-calendar" aria-hidden="true"></i>{{ $t("Consultation_date") }}: <span dir="ltr">{{ String(booking.event_date).slice(0, 10) }}</span>
+            </span>
           </div>
         </div>
-      </template>
+      </header>
+
+      <div class="info-cards" :class="{ 'is-single': infoCards.length === 1 }">
+        <section v-for="card in infoCards" :key="card.key" class="info-card">
+          <h3 class="info-card-title"><i :class="card.icon" aria-hidden="true"></i>{{ card.title }}</h3>
+          <dl class="info-list">
+            <div v-for="(field, index) in card.fields" :key="index" class="info-row">
+              <dt><i :class="field.icon" aria-hidden="true"></i>{{ field.label }}</dt>
+              <dd :dir="field.ltr ? 'ltr' : null">{{ field.value }}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+
+      <section v-if="answerFields.length" class="info-card answers-card">
+        <h3 class="info-card-title"><i class="pi pi-comments" aria-hidden="true"></i>{{ $t("Answer_the_questions") }}</h3>
+        <ol class="qa-list">
+          <li v-for="(field, index) in answerFields" :key="index" class="qa-item">
+            <span class="qa-number">{{ index + 1 }}</span>
+            <div class="qa-body">
+              <p class="qa-question">{{ field.label }}</p>
+              <p class="qa-answer">{{ field.value }}</p>
+            </div>
+          </li>
+        </ol>
+      </section>
     </div>
   </div>
   <div class="sawa-card mt-5 p-[2%] bg-slate-50" v-if="$can('bookings edit')">
@@ -278,6 +296,7 @@
 <script>
 import axios from "axios";
 import moment from "moment";
+import { formatChildAge } from "@/utils/childAge";
 
 export default {
   props: ["id"],
@@ -423,9 +442,9 @@ export default {
           this.slots = response.data.slots;
         });
     },
-    infoField(label, value, ltr = false) {
+    infoField(label, value, ltr = false, icon = "pi pi-circle-fill") {
       if (value == null || String(value).trim() === "") return null;
-      return { label: this.$t(label), value, ltr };
+      return { label: this.$t(label), value, ltr, icon };
     },
     removeBracesAndReplace(text) {
       // {{name}} (any {{...}}) is the child's name.
@@ -558,36 +577,57 @@ export default {
     },
     // Earlier picks that no longer match a recommendation stay listed so they can be kept or removed.
     // Only filled fields are shown.
-    bookingFields() {
+    childGenderLabel() {
+      const gender = this.booking?.child_gender;
+      if (gender == null || gender === "") return "";
+      // Gender codes match the child forms: 0 = male, 1 = female.
+      return String(gender) === "0" ? this.$t("male") : this.$t("female");
+    },
+    childAgeLabel() {
+      return this.booking?.child_birth_date ? formatChildAge(this.booking.child_birth_date, null, this.$t) : "";
+    },
+    childInitial() {
+      return String(this.booking?.child_name ?? "").trim().charAt(0) || "؟";
+    },
+    // Only filled fields are shown; a card with nothing filled is hidden.
+    infoCards() {
       const b = this.booking ?? {};
       return [
-        this.infoField("applicant", b.requester_name),
-        this.infoField("degree_closeness_child", b.relative_degree),
-        this.infoField("Full_Name", b.child_name),
-        this.infoField("place_of_birth", b.child_birth_place),
-        this.infoField("birth_date", b.child_birth_date, true),
-        this.infoField("primary_language", b.child_lang),
-        this.infoField("Nationality", b.child_nationalty),
-        this.infoField("national_number", b.child_national_id, true),
-        this.infoField("address", b.child_address),
-        this.infoField("phone_number", b.requester_phone, true),
-        this.infoField("Additional_phone_number", b.addtional_phone, true),
-        this.infoField("owner_extra_number", b.addtional_phone_owner),
-        this.infoField("degree_closeness_child", b.addtional_phone_degree),
-        this.infoField("conversion_source", b.conversion_type),
-        this.infoField("Specialist_code", b.doctor_code),
-      ].filter(Boolean);
+        {
+          key: "child", icon: "pi pi-id-card", title: this.$t("booking_child_info"),
+          fields: [
+            this.infoField("Full_Name", b.child_name, false, "pi pi-user"),
+            this.infoField("birth_date", b.child_birth_date, true, "pi pi-calendar"),
+            this.infoField("place_of_birth", b.child_birth_place, false, "pi pi-map-marker"),
+            this.infoField("Nationality", b.child_nationalty, false, "pi pi-flag"),
+            this.infoField("national_number", b.child_national_id, true, "pi pi-hashtag"),
+            this.infoField("primary_language", b.child_lang, false, "pi pi-language"),
+            this.infoField("address", b.child_address, false, "pi pi-home"),
+          ],
+        },
+        {
+          key: "requester", icon: "pi pi-phone", title: this.$t("booking_requester_info"),
+          fields: [
+            this.infoField("applicant", b.requester_name, false, "pi pi-user"),
+            this.infoField("degree_closeness_child", b.relative_degree, false, "pi pi-users"),
+            this.infoField("phone_number", b.requester_phone, true, "pi pi-phone"),
+            this.infoField("Additional_phone_number", b.addtional_phone, true, "pi pi-mobile"),
+            this.infoField("owner_extra_number", b.addtional_phone_owner, false, "pi pi-user-plus"),
+            this.infoField("degree_closeness_child", b.addtional_phone_degree, false, "pi pi-users"),
+            this.infoField("conversion_source", b.conversion_type, false, "pi pi-directions"),
+            this.infoField("Specialist_code", b.doctor_code, false, "pi pi-key"),
+          ],
+        },
+      ]
+        .map((card) => ({ ...card, fields: card.fields.filter(Boolean) }))
+        .filter((card) => card.fields.length);
     },
     answerFields() {
       const b = this.booking ?? {};
       const d = b.details ?? {};
-      // Gender codes match the child forms: 0 = male, 1 = female.
-      const gender = b.child_gender != null && b.child_gender !== ""
-        ? (String(b.child_gender) === "0" ? this.$t("male") : this.$t("female"))
-        : null;
       if (!this.booking?.id && !b.child_name) return [];
+      // The gender shows in the child header above.
       return [
-        this.infoField("Type", gender),
         this.infoField("problem_type", d.child_parents_problems),
         this.infoField("child_problems_notes", d.child_problems_notes),
         this.infoField("child_problem", b.child_aids == 1 ? this.$t("yes") : this.$t("no")),
@@ -760,21 +800,52 @@ export default {
 .add-evaluation-btn { min-width: 12rem; padding-block: .75rem; }
 @media (max-width: 640px) { .add-evaluation-btn { width: 100%; } }
 
-.booking-details { overflow: hidden; border-radius: 12px; background: #f8fafc; box-shadow: 0 4px 6px -1px rgb(0 0 0 / .08), 0 2px 4px -2px rgb(0 0 0 / .06); }
-.booking-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; padding: 1.25rem 1.5rem; }
-.booking-detail { display: flex; align-items: flex-start; gap: .4rem; min-width: 0; }
-.booking-detail-icon { flex-shrink: 0; margin-top: .3rem; padding: .25rem; border-radius: 9999px; background: #EC477C; color: #fff; font-size: .8rem; }
-.booking-detail-label { flex-shrink: 0; font-size: 1.15rem; color: #1f2937; }
-.booking-detail-value { min-width: 0; font-size: 1.1rem; line-height: 1.8; color: #6b7280; white-space: pre-line; overflow-wrap: anywhere; }
-.booking-detail-value[dir="ltr"] { unicode-bidi: plaintext; }
-.booking-answers-title { display: flex; align-items: center; gap: .5rem; margin: 0; padding: .9rem 1.5rem; border-top: 1px solid #e2e8f0; background: #edf7f5; color: var(--sawa-primary, #135c65); font-size: 1.15rem; font-weight: 700; }
-.booking-answers { display: grid; gap: 1rem; padding: 1.25rem 1.5rem; }
-.booking-answers .booking-detail { padding-bottom: 1rem; border-bottom: 1px dashed #e2e8f0; }
-.booking-answers .booking-detail:last-child { padding-bottom: 0; border-bottom: 0; }
-@media (max-width: 767px) {
-  .booking-details-grid { grid-template-columns: 1fr; }
-  .booking-detail { flex-wrap: wrap; }
+.booking-overview { display: grid; gap: 1.25rem; }
+.child-hero { display: flex; align-items: center; gap: 1.1rem; padding: 1.25rem 1.5rem; border-radius: 1rem; background: linear-gradient(135deg, #e6f4f3, #fdf2f7); border: 1px solid #e2e8f0; }
+.child-avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 4rem; height: 4rem; border-radius: 50%; background: linear-gradient(135deg, var(--sawa-primary, #135c65), #EC477C); color: #fff; font-size: 1.75rem; font-weight: 700; box-shadow: 0 8px 18px -10px rgb(19 92 101 / .8); }
+.child-hero-text { min-width: 0; }
+.child-hero-text h2 { margin: 0 0 .5rem; color: #0f172a; font-size: 1.5rem; font-weight: 700; overflow-wrap: anywhere; }
+.child-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.child-chip { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .75rem; border-radius: 999px; background: #fff; color: #334155; font-size: .85rem; font-weight: 600; box-shadow: 0 1px 2px rgb(15 23 42 / .06); }
+.child-chip i { color: #EC477C; font-size: .8rem; }
+.child-chip.is-accent { background: var(--sawa-primary, #135c65); color: #fff; }
+.child-chip.is-accent i { color: #fff; }
+.info-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
+.info-card { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 1rem; background: #fff; box-shadow: 0 10px 24px -20px rgb(15 23 42 / .45); }
+.info-card-title { display: flex; align-items: center; gap: .55rem; margin: 0; padding: .9rem 1.25rem; border-bottom: 1px solid #eef2f6; background: #f8fafc; color: var(--sawa-primary, #135c65); font-size: 1.1rem; font-weight: 700; }
+.info-card-title i { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: .6rem; background: #e6f4f3; font-size: .95rem; }
+.info-list { margin: 0; }
+.info-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: .8rem 1.25rem; }
+.info-row + .info-row { border-top: 1px solid #f1f5f9; }
+.info-row dt { display: inline-flex; flex-shrink: 0; align-items: center; gap: .5rem; color: #64748b; font-size: .92rem; }
+.info-row dt i { color: #EC477C; font-size: .85rem; width: 1rem; text-align: center; }
+.info-row dd { margin: 0; min-width: 0; color: #0f172a; font-size: 1rem; font-weight: 600; text-align: end; white-space: pre-line; overflow-wrap: anywhere; }
+.info-row dd[dir="ltr"] { unicode-bidi: plaintext; }
+.qa-list { display: grid; gap: .9rem; margin: 0; padding: 1.25rem; list-style: none; }
+.qa-item { display: flex; align-items: flex-start; gap: .85rem; }
+.qa-number { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; background: #fdf2f7; color: #EC477C; font-weight: 700; }
+.qa-body { flex: 1; min-width: 0; }
+.qa-question { margin: .25rem 0 .45rem; color: #1e293b; font-weight: 700; line-height: 1.6; }
+.qa-answer { margin: 0; padding: .7rem 1rem; border-radius: .75rem; border-start-start-radius: .2rem; background: #f1f5f9; color: #334155; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; }
+/* A lone card (e.g. a booking without requester details) spans the row with its fields in two columns. */
+.info-cards.is-single { grid-template-columns: 1fr; }
+.info-cards.is-single .info-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.info-cards.is-single .info-row { border-top: 0; }
+.info-cards.is-single .info-row:nth-child(even) { border-inline-start: 1px solid #f1f5f9; }
+.info-cards.is-single .info-row:nth-child(n + 3) { border-top: 1px solid #f1f5f9; }
+@media (max-width: 900px) {
+  .info-cards { grid-template-columns: 1fr; }
+  .info-cards.is-single .info-list { grid-template-columns: 1fr; }
+  .info-cards.is-single .info-row:nth-child(n + 2) { border-top: 1px solid #f1f5f9; }
+  .info-cards.is-single .info-row:nth-child(even) { border-inline-start: 0; }
 }
+@media (max-width: 520px) {
+  .child-hero { flex-direction: column; text-align: center; }
+  .child-chips { justify-content: center; }
+  .info-row { flex-direction: column; gap: .3rem; }
+  .info-row dd { text-align: start; }
+}
+
 </style>
 
 <style>

@@ -517,6 +517,8 @@ export default {
   age_range: "الفئة العمرية",
   parent_category: "القسم الرئيسي",
   RatingAdd: "اضافــــة تقييم",
+  booking_child_info: "بيانات الطفل",
+  booking_requester_info: "مقدم الطلب والتواصل",
   book_child_evaluation: "حجز موعد تقييم للطفل",
   book_child_evaluation_hint: "اختر نوع التقييم والمعالج والموعد المناسب من تقويم التقييمات.",
   book_child_evaluation_locked: "يمكن إضافة تقييم ابتداءً من يوم موعد الاستشارة.",
