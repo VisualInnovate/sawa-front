@@ -21,8 +21,7 @@
           <header class="evaluation-heading">
             <span class="evaluation-symbol"><i class="pi pi-chart-line" /></span>
             <div class="evaluation-title">
-              <h3>{{ evalu.title }}</h3>
-              <span>{{ typeLabel(evalu.type) }}</span>
+              <h3>{{ typeLabel(evalu.type) || evalu.title }}</h3>
             </div>
             <Tag :severity="evalu.status == 1 ? 'success' : 'warn'" :value="$t(evalu.status == 1 ? 'status_finished' : 'status_under_evaluation')" />
           </header>

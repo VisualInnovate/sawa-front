@@ -29,7 +29,7 @@
             </span>
           </header>
 
-          <h3 class="evaluation-title">{{ evalu.title || typeLabel(evalu) }}</h3>
+          <h3 class="evaluation-title">{{ isSideProfile(evalu) && evalu.title ? evalu.title : typeLabel(evalu) }}</h3>
 
           <dl class="evaluation-meta">
             <div>

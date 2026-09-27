@@ -19,7 +19,11 @@
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t("نوع التقييم") }} :</h3>
-            <p class="text-xl  px-1 my-auto">{{ evalu.title }}</p>
+            <p class="text-xl  px-1 my-auto">{{ typeLabel(evalu) }}</p>
+          </div>
+          <div v-if="evalu.notes" class="flex py-2 ">
+            <h3 class="my-auto font-bold">{{ $t("notes") }} :</h3>
+            <p class="text-lg px-1 my-auto whitespace-pre-line">{{ evalu.notes }}</p>
           </div>
           <div class="flex py-2 ">
             <h3 class="my-auto font-bold">{{ $t(" حالة التقييم") }} :</h3>
@@ -76,6 +80,7 @@
   import { useStorage } from "@vueuse/core";
   import ChildTaps from '../../components/ChildTaps.vue'
   import { requestStatus } from "../../utils/evaluationRequestStatus";
+  import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
   
     import {useToast} from 'primevue/usetoast'
   export default {
@@ -94,6 +99,9 @@
   
     methods: {
       requestStatus,
+      typeLabel(request) {
+        return getEvaluationTypeLabel(request.evaluation_type, this.$t, request.title || "-");
+      },
   
   
   

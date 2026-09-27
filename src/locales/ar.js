@@ -438,6 +438,7 @@ export default {
   department: "الاقسام",
   questions: "الاسئلة",
   notes: "ملاحظات",
+  optional: "اختياري",
   field_type: "نوع الحقل",
   field_name: "اسم الحقل",
   show_in_table: " اظهار في الجدول",

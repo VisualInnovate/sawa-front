@@ -65,13 +65,9 @@
     >
       <form @submit.prevent="create" class="">
         <p>{{ $t('employee_name') }}: {{ employees.find(employee => employee.id === event.employee_id)?.name }}</p>
-        <div class="flex flex-column">
-          <label class="text-start">{{ $t("title") }}</label>
-          <InputText
-            required
-            v-model="event.title"
-            :class="{ 'p-invalid': submitted && !event.title }"
-          />
+        <div class="flex flex-column gap-1">
+          <label class="text-start" for="evaluation-notes">{{ $t("notes") }} ({{ $t("optional") }})</label>
+          <Textarea id="evaluation-notes" v-model="event.notes" rows="3" autoResize maxlength="2000" />
         </div>
 
         <div class="flex flex-column gap-2 py-1">
@@ -144,6 +140,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import DatePicker from 'primevue/datepicker';
 import InputText from "primevue/inputtext";
+import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
 import { useAppLangStore } from "../../stores/AppLangStore";
 import { Toast } from "flowbite-vue";
 import { watch } from "vue";
@@ -351,7 +348,7 @@ export default {
         await axios.post(`api/evaluation-request`, {
           employee_id: this.event.employee_id,
           color: this.event.color,
-          title: this.event.title,
+          notes: this.event.notes?.trim() || null,
           evaluation_type: this.event.evaluation_type,
           consultant_id: localStorage.getItem("user_id"),
           child_id: this.event.child_id,
@@ -424,8 +421,10 @@ export default {
             this.$nextTick(() => this.$refs.fullCalendar?.getApi().gotoDate(firstDay));
           }
           this.opts.dayCellClassNames = this.dayCellClassNames.bind(this);
+          // A booking reads as its evaluation type and child (older ones fall back to their title).
           this.booked = this.asList(response.data.data?.booked).map((event) => ({
-            title: event.title,
+            title: [getEvaluationTypeLabel(event.evaluation_type, this.$t, event.title || ''), event.child?.name]
+              .filter(Boolean).join(' - '),
             start: `${event.date}T${event.start_time}`,
             end: `${event.date}T${event.end_time}`,
             backgroundColor: "#" + event.color,
@@ -472,7 +471,7 @@ export default {
       } 
       this.opts.event = event;
       this.slotEmployeeId = this.event.employee_id;
-      this.event.title = "";
+      this.event.notes = "";
       this.visible = true;
     },
     createEvent() {

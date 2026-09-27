@@ -13,11 +13,6 @@
         <!-- ... existing code ... -->
           
             
-              <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('evaluation_name') }}</label>
-                  <InputText  invalid v-model="answer.title" :placeholder='$t("evaluation_name")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-              </div> 
     
               <div class="flex flex-column gap-2">
                   <label for="username">{{ $t('child_name') }}</label>
@@ -39,7 +34,7 @@
              
             
                  
-              <div v-if="answer.child_age && answer.title"  class=" flex flex-column gap-2">
+              <div v-if="answer.child_age"  class=" flex flex-column gap-2">
                   <label for="username">{{ $t('color') }}</label>
 
                    <div class="flex">
@@ -102,6 +97,7 @@
 </template>
 
 <script>
+import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
 
@@ -164,7 +160,7 @@ export default {
       axios
         .post(`api/evaluations/create`,{
           type:4,
-          title:this.answer.title,
+          title: getEvaluationTypeLabel(4, this.$t, this.$t("evaluation_results")),
           child_id:this.answer.child_id,
           specialist_id:localStorage.getItem("user_id"),
           date:this.answer.date,
