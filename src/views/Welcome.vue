@@ -18,7 +18,7 @@
       />
     </div>
 
-    <div v-if="isConsultant && (loadingBookings || pendingBookings.length)" class="pending-card">
+    <div v-if="seesPendingBookings && (loadingBookings || pendingBookings.length)" class="pending-card">
       <header class="bookings-header">
         <h2>{{ $t("pending_bookings_title") }}</h2>
         <p>{{ $t("pending_bookings_hint") }}</p>
@@ -74,6 +74,8 @@ import { can } from "../utils/permissions";
 
 // Employee type 5 is the consultant ("Evaluator" in the employee form).
 const CONSULTANT_TYPE = 5;
+// The reception role, created from the roles screen, also follows up on bookings.
+const RECEPTION_ROLE = "استقبال";
 // Booking "accepted" values: -1 waiting, 1 accepted, 0 rejected.
 const BOOKING_PENDING = -1;
 
@@ -86,7 +88,9 @@ const startingId = ref(null);
 const loadingRequests = ref(false);
 const pendingBookings = ref([]);
 const loadingBookings = ref(false);
-const isConsultant = computed(() => Number(authStore.authUser?.type ?? authStore.type) === CONSULTANT_TYPE);
+const seesPendingBookings = computed(() =>
+  Number(authStore.authUser?.type ?? authStore.type) === CONSULTANT_TYPE
+  || String(authStore.authUser?.roles?.name ?? "").trim() === RECEPTION_ROLE);
 const userName = computed(() => {
   const user = authStore.authUser ?? {};
   return String(user.name ?? "").trim() || String(user.email ?? "").split("@")[0];
@@ -108,9 +112,9 @@ const loadPendingRequests = async () => {
   }
 };
 
-// Consultants see every booking still waiting for a decision, and open its details to act on it.
+// Consultants and reception see every booking still waiting for a decision, and open its details to act on it.
 const loadPendingBookings = async () => {
-  if (!isConsultant.value || !can("bookings list")) return;
+  if (!seesPendingBookings.value || !can("bookings list")) return;
 
   loadingBookings.value = true;
   try {
