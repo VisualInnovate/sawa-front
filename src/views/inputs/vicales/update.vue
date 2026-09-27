@@ -38,8 +38,13 @@
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('Insurance_date') }}</label>
-                    <DatePicker  style="width: 100%" showButtonBar v-model.number="veciles.insurance_exp_date" showIcon  :placeholder='$t("Insurance_date")'  :maxDate="maxDate" />   
+                    <DatePicker  style="width: 100%" showButtonBar v-model.number="veciles.insurance_exp_date" showIcon  :placeholder='$t("Insurance_date")' />   
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.insurance_exp_date">{{ error.insurance_exp_date[0] }}</div>
+                </div> 
+                <div class="flex flex-column gap-2">
+                    <label for="insurance_company">{{ $t('insurance_company') }}</label>
+                    <InputText id="insurance_company" v-model="veciles.insurance_company" :placeholder='$t("insurance_company")' />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.insurance_company">{{ error.insurance_company[0] }}</div>
                 </div> 
                 <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('License_expiration') }}</label>

@@ -2,45 +2,47 @@
   <div>
     <ChildTaps></ChildTaps>
 
-    <div class="sawa-card">
-      <div
-        v-if="evaluations.length"
-        class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4"
-      >
-        <div
-          class="shadow-md bg-slate-100 rounded-sm p-4 grid grid-cols-2"
+    <div class="sawa-card evaluations-page">
+      <div v-if="loading" class="evaluations-empty">
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+        <p>{{ $t("loading") }}</p>
+      </div>
+
+      <div v-else-if="evaluations.length" class="evaluations-grid">
+        <article
           v-for="evalu in evaluations"
-          :key="evalu.id"
+          :key="(isSideProfile(evalu) ? 'side-' : 'eval-') + evalu.id"
+          class="evaluation-card"
+          :class="'type-' + typeTone(evalu)"
         >
-          <div>
-            <div class="flex py-2">
-              <h3 class="my-auto font-bold">{{ $t("اسم التقييم") }} :</h3>
-              <p class="text-xl px-1 my-auto">
-                {{ evalu.title || evalu.type_name || "-" }}
-              </p>
+          <header class="evaluation-card-header">
+            <span class="evaluation-type-badge">
+              <i :class="typeIcon(evalu)" aria-hidden="true"></i>
+              {{ typeLabel(evalu) }}
+            </span>
+            <span
+              v-if="!isSideProfile(evalu) && (evalu.status == 0 || evalu.status == 1)"
+              class="evaluation-status"
+              :class="evalu.status == 1 ? 'is-finished' : 'is-pending'"
+            >
+              {{ evalu.status == 1 ? $t("status_finished") : $t("status_under_evaluation") }}
+            </span>
+          </header>
+
+          <h3 class="evaluation-title">{{ evalu.title || typeLabel(evalu) }}</h3>
+
+          <dl class="evaluation-meta">
+            <div>
+              <dt><i class="pi pi-calendar" aria-hidden="true"></i>{{ $t("evaluation_date") }}</dt>
+              <dd dir="ltr">{{ evalu.date || "—" }}</dd>
             </div>
-            <div class="flex py-2">
-              <h3 class="my-auto font-bold">{{ $t("تاريخ التقييم") }} :</h3>
-              <p class="text-xl px-1 my-auto">{{ evalu.date || "-" }}</p>
+            <div v-if="evalu.specialist?.name || evalu.doctor?.name">
+              <dt><i class="pi pi-user" aria-hidden="true"></i>{{ $t("Name_evaluator") }}</dt>
+              <dd>{{ evalu.specialist?.name || evalu.doctor?.name }}</dd>
             </div>
-            <div class="flex py-2">
-              <h3 class="my-auto font-bold">{{ $t("اسم المقييم") }} :</h3>
-              <p class="text-xl px-1 my-auto">
-                {{ evalu.specialist?.name || evalu.doctor?.name || "-" }}
-              </p>
-            </div>
-            <div class="flex py-2">
-              <h3 class="my-auto font-bold">{{ $t(" حالة التقييم") }} :</h3>
-              <p v-if="evalu.status == 1" class="text-xl px-1 my-auto">
-                {{ $t("status_finished") }}
-              </p>
-              <p v-else-if="evalu.status == 0" class="text-xl px-1 my-auto">
-                {{ $t("status_under_evaluation") }}
-              </p>
-              <p v-else class="text-xl px-1 my-auto">-</p>
-            </div>
-          </div>
-          <div class="text-center">
+          </dl>
+
+          <footer class="evaluation-actions">
             <Button
               v-can="[
                 'evaluation results list',
@@ -49,42 +51,38 @@
                 'milestone answer list',
                 'barrier answer list',
               ]"
-              @click="go_evaluate(evalu.id, evalu.type, evalu.child_id, evalu)"
-              class="m-auto"
-              >{{ $t("evaluation_results") }}</Button
-            >
+              @click="go_evaluate(evalu)"
+              icon="pi pi-chart-bar"
+              :label="$t('evaluation_results')"
+              class="evaluation-results-btn"
+            />
+            <!-- Side profile rows are shared evaluation templates: deleting one would remove it for every child. -->
             <Button
+              v-if="!isSideProfile(evalu)"
               v-can="'evaluations delete'"
               icon="pi pi-trash"
-              @click="deleteevalution(evalu.id, evalu.child_id)"
-              class="m-auto"
+              @click="deleteevalution(evalu.id)"
               severity="danger"
+              variant="outlined"
               v-tooltip.top="$t('delete')"
               :aria-label="$t('delete')"
-            >
-            </Button>
-          </div>
-        </div>
+            />
+          </footer>
+        </article>
       </div>
 
-      <div v-else class="p-6 text-center text-gray-600">
-        {{ $t("no_evaluations_yet") }}
+      <div v-else class="evaluations-empty">
+        <i class="pi pi-inbox" aria-hidden="true"></i>
+        <p>{{ $t("no_evaluations_yet") }}</p>
       </div>
 
-      <div v-if="total_pages > 1" class="w-full pb-2 text-center">
-        <div class="card">
-          <Paginator
-            v-model:first="current_page"
-            :rows="1"
-            :totalRecords="total_pages"
-            :rowsPerPageOptions="[10, 20, 30]"
-            :template="{
-              default:
-                'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink JumpToPageDropdown',
-            }"
-          ></Paginator>
-        </div>
-      </div>
+      <Paginator
+        v-if="total_records > per_page"
+        v-model:first="first"
+        :rows="per_page"
+        :totalRecords="total_records"
+        class="evaluations-paginator"
+      />
     </div>
 
     <Dialog
@@ -209,6 +207,7 @@ import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from "../../components/ChildTaps.vue";
 import moment from "moment";
+import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
 
 export default {
   components: { ChildTaps },
@@ -228,8 +227,10 @@ export default {
       delete_id: 0,
       doctors: [],
       deleteDialog: false,
-      total_pages: 1,
-      current_page: 0,
+      loading: true,
+      first: 0,
+      per_page: 6,
+      total_records: 0,
       updatedialog: false,
       evaluate_types: [
         { name: "side profile", id: 1 },
@@ -273,44 +274,52 @@ export default {
         });
     },
 
-    go_evaluate(id, type, child_id, data) {
-      if (!data?.pivot?.child_id || !id) {
+    // Side profile rows come from the evaluation_results pivot and have no type;
+    // every other row is the child's own evaluation with a type.
+    isSideProfile(evalu) {
+      return Boolean(evalu?.pivot) || evalu?.type == null;
+    },
+    typeLabel(evalu) {
+      return this.isSideProfile(evalu)
+        ? this.$t("side_profile_eval")
+        : getEvaluationTypeLabel(evalu.type, this.$t, this.$t("evaluation_results"));
+    },
+    typeTone(evalu) {
+      return this.isSideProfile(evalu) ? 1 : Number(evalu.type) || 0;
+    },
+    typeIcon(evalu) {
+      return {
+        1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap",
+      }[this.typeTone(evalu)] || "pi pi-file";
+    },
+
+    go_evaluate(evalu) {
+      const childId = evalu?.pivot?.child_id || evalu?.child_id || Number(localStorage.getItem("child_id"));
+      if (!evalu?.id || !childId) {
         this.$toast.add({
           severity: "error",
           summary: this.$t("error"),
-          detail: `${this.$t("mission_error")}`,
+          detail: this.$t("mission_error"),
           life: 3000,
         });
         return;
       }
 
-      if (type == 2) {
-        this.$router.push({
-          name: "milestone-resulte",
-          params: { id: child_id, evla_id: id },
-        });
-      }
-      if (type == 3) {
-        this.$router.push({
-          name: "barrier-resulte",
-          params: { id: child_id },
-        });
-      }
-      if (type == 4) {
-        this.$router.push({ name: "ablls-resulte", params: { id: id } });
-      }
-      if (type == 5) {
-        this.$router.push({ name: "carolina-resulte", params: { id: id } });
-      } else {
-        this.$router.push({
-          name: "showChildResult",
-          params: {
-            child_id: data.pivot.child_id,
-            sideProfile_id: data.side_profile_id || 0,
-            evaluation_id: id,
-          },
-        });
-      }
+      const type = this.isSideProfile(evalu) ? 1 : Number(evalu.type);
+      const routes = {
+        2: { name: "milestone-resulte", params: { id: childId, evla_id: evalu.id } },
+        3: { name: "barrier-resulte", params: { id: childId } },
+        4: { name: "ablls-resulte", params: { id: evalu.id } },
+        5: { name: "carolina-resulte", params: { id: evalu.id } },
+      };
+      this.$router.push(routes[type] || {
+        name: "showChildResult",
+        params: {
+          child_id: childId,
+          sideProfile_id: evalu.side_profile_id || 0,
+          evaluation_id: evalu.id,
+        },
+      });
     },
 
     create() {
@@ -344,32 +353,26 @@ export default {
         });
     },
 
-    getusers() {
+    getusers(page = 1) {
+      this.loading = true;
       axios
-        .get(`api/child/${localStorage.getItem("child_id")}/get/evaluations`)
+        .get(`api/child/${localStorage.getItem("child_id")}/get/evaluations`, { params: { page } })
         .then((response) => {
-          const root =
-            response.data?.evaluations ||
-            response.data?.data?.evaluations ||
-            response.data?.data ||
-            response.data ||
-            {};
-          const list = Array.isArray(root.data)
-            ? root.data
-            : Array.isArray(root)
-            ? root
-            : [];
+          const root = response.data?.evaluations || response.data?.data?.evaluations || {};
+          const list = Array.isArray(root.data) ? root.data : Array.isArray(root) ? root : [];
 
           this.details = response.data || {};
           this.evaluations = list;
-          this.total_pages =
-            Number(root.last_page) > 0
-              ? Number(root.last_page)
-              : Math.max(1, list.length || 1);
+          this.per_page = Number(root.per_page) || this.per_page;
+          this.total_records = Number(root.total) || list.length;
         })
-        .catch((error) => {
+        .catch(() => {
           this.details = {};
           this.evaluations = [];
+          this.total_records = 0;
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
 
@@ -381,9 +384,14 @@ export default {
     deleteAction() {
       axios
         .delete(`api/evaluations/${this.delete_id}/delete`)
-        .then((response) => {
-          this.getusers();
-          this.deleteDialog = !this.deleteDialog;
+        .then(() => {
+          this.deleteDialog = false;
+          // Step back a page when the last item on it was removed.
+          if (this.evaluations.length === 1 && this.first >= this.per_page) this.first -= this.per_page;
+          else this.getusers(Math.floor(this.first / this.per_page) + 1);
+        })
+        .catch(() => {
+          this.$toast.add({ severity: "error", summary: this.$t("error"), detail: this.$t("mission_error"), life: 3000 });
         });
     },
 
@@ -405,26 +413,9 @@ export default {
   },
 
   watch: {
-    current_page(newVal, oldVal) {
-      axios
-        .get(
-          `api/child/${localStorage.getItem(
-            "child_id",
-          )}/get/evaluations?page=${newVal}`,
-        )
-        .then((response) => {
-          const root =
-            response.data?.evaluations ||
-            response.data?.data?.evaluations ||
-            response.data?.data ||
-            response.data ||
-            {};
-          this.evaluations = Array.isArray(root.data)
-            ? root.data
-            : Array.isArray(root)
-            ? root
-            : [];
-        });
+    // Paginator's `first` is a 0-based row offset; the API pages start at 1.
+    first(value) {
+      this.getusers(Math.floor(value / this.per_page) + 1);
     },
   },
 
@@ -435,3 +426,40 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.evaluations-page { padding: 1.25rem; }
+.evaluations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1rem; }
+.evaluation-card {
+  --tone: #135c65; --tone-soft: #e6f4f3;
+  display: flex; flex-direction: column; gap: .85rem; padding: 1.1rem 1.25rem;
+  border: 1px solid #e2e8f0; border-top: 4px solid var(--tone); border-radius: 14px; background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / .04); transition: box-shadow .2s, transform .2s;
+}
+.evaluation-card:hover { box-shadow: 0 10px 24px -12px rgb(15 23 42 / .25); transform: translateY(-2px); }
+.evaluation-card.type-1 { --tone: #6554C0; --tone-soft: #efedfa; }
+.evaluation-card.type-2 { --tone: #0f8a7e; --tone-soft: #e3f5f2; }
+.evaluation-card.type-3 { --tone: #d9730d; --tone-soft: #fdf0e3; }
+.evaluation-card.type-4 { --tone: #2563eb; --tone-soft: #e8effd; }
+.evaluation-card.type-5 { --tone: #db2777; --tone-soft: #fce8f1; }
+.evaluation-card-header { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+.evaluation-type-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .7rem; border-radius: 999px; background: var(--tone-soft); color: var(--tone); font-size: .8rem; font-weight: 700; }
+.evaluation-status { padding: .25rem .65rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.evaluation-status.is-finished { background: #dcfce7; color: #166534; }
+.evaluation-status.is-pending { background: #fef3c7; color: #92400e; }
+.evaluation-title { margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 700; line-height: 1.6; overflow-wrap: anywhere; }
+.evaluation-meta { display: grid; gap: .5rem; margin: 0; padding: .75rem; border-radius: 10px; background: #f8fafc; }
+.evaluation-meta > div { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.evaluation-meta dt { display: inline-flex; align-items: center; gap: .4rem; color: #64748b; font-size: .85rem; }
+.evaluation-meta dt i { color: var(--tone); font-size: .85rem; }
+.evaluation-meta dd { margin: 0; color: #1e293b; font-weight: 600; }
+.evaluation-actions { display: flex; gap: .5rem; margin-top: auto; }
+.evaluation-results-btn { flex: 1; }
+.evaluations-empty { display: grid; justify-items: center; gap: .6rem; padding: 3rem 1rem; color: #64748b; }
+.evaluations-empty i { font-size: 2.25rem; color: #94a3b8; }
+.evaluations-paginator { margin-top: 1rem; }
+@media (max-width: 480px) {
+  .evaluations-page { padding: .75rem; }
+  .evaluations-grid { grid-template-columns: 1fr; }
+}
+</style>
