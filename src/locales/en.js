@@ -406,6 +406,7 @@ export default {
   department: "departments",
   questions: "Questions",
   notes: "notes",
+  optional: "optional",
   score: "score",
   color: "color",
   Answers: "Answers",
