@@ -17,6 +17,44 @@
         @start="startEvaluation"
       />
     </div>
+
+    <div v-if="isConsultant && (loadingBookings || pendingBookings.length)" class="pending-card">
+      <header class="bookings-header">
+        <h2>{{ $t("pending_bookings_title") }}</h2>
+        <p>{{ $t("pending_bookings_hint") }}</p>
+      </header>
+      <DataTable :value="pendingBookings" :loading="loadingBookings" dataKey="id" stripedRows responsiveLayout="scroll">
+        <Column field="child_name" :header="$t('child_name')">
+          <template #body="{ data }">
+            <span class="font-semibold">{{ data.child_name }}</span>
+          </template>
+        </Column>
+        <Column :header="$t('child_age')">
+          <template #body="{ data }">{{ formatChildAge(data.child_birth_date, data.child_age, t) }}</template>
+        </Column>
+        <Column :header="$t('parent.phone')">
+          <template #body="{ data }">
+            <span dir="ltr">{{ data.details?.requester_phone || "—" }}</span>
+          </template>
+        </Column>
+        <Column :header="$t('consultation_date')">
+          <template #body="{ data }">
+            <span dir="ltr">{{ data.event_date || "—" }}</span>
+          </template>
+        </Column>
+        <Column :header="$t('booking_status_filter')">
+          <template #body>
+            <Tag :value="$t('Pending')" severity="warn" />
+          </template>
+        </Column>
+        <Column :header="$t('actions')" style="width: 10rem">
+          <template #body="{ data }">
+            <Button icon="pi pi-eye" :label="$t('follow_details')" size="small"
+              @click="router.push({ name: 'BookingDetails', params: { id: data.id } })" />
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </section>
 </template>
 
@@ -31,6 +69,13 @@ import EvaluationRequestsBoard from "../components/EvaluationRequestsBoard.vue";
 import { useAuthStore } from "../stores/Auth";
 import { getEvaluationStartRoute } from "../utils/evaluationTypes";
 import { isRequestOpen, startEvaluationRequest } from "../utils/evaluationRequestStatus";
+import { formatChildAge } from "../utils/childAge";
+import { can } from "../utils/permissions";
+
+// Employee type 5 is the consultant ("Evaluator" in the employee form).
+const CONSULTANT_TYPE = 5;
+// Booking "accepted" values: -1 waiting, 1 accepted, 0 rejected.
+const BOOKING_PENDING = -1;
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -39,6 +84,9 @@ const { t } = useI18n();
 const pendingRequests = ref([]);
 const startingId = ref(null);
 const loadingRequests = ref(false);
+const pendingBookings = ref([]);
+const loadingBookings = ref(false);
+const isConsultant = computed(() => Number(authStore.authUser?.type ?? authStore.type) === CONSULTANT_TYPE);
 const userName = computed(() => {
   const user = authStore.authUser ?? {};
   return String(user.name ?? "").trim() || String(user.email ?? "").split("@")[0];
@@ -57,6 +105,22 @@ const loadPendingRequests = async () => {
     pendingRequests.value = [];
   } finally {
     loadingRequests.value = false;
+  }
+};
+
+// Consultants see every booking still waiting for a decision, and open its details to act on it.
+const loadPendingBookings = async () => {
+  if (!isConsultant.value || !can("bookings list")) return;
+
+  loadingBookings.value = true;
+  try {
+    const response = await axios.get("/api/calender/bookings", { params: { accepted: BOOKING_PENDING, _ts: Date.now() } });
+    pendingBookings.value = Object.values(response.data.bookings ?? [])
+      .filter((booking) => booking && String(booking.child_name ?? "").trim() !== "");
+  } catch {
+    pendingBookings.value = [];
+  } finally {
+    loadingBookings.value = false;
   }
 };
 
@@ -84,9 +148,9 @@ const startEvaluation = async (request) => {
 // A session saved by an older build may lack the user's name; reload it from the API.
 onMounted(async () => {
   if (!String(authStore.authUser?.name ?? "").trim()) await authStore.getUser().catch(() => {});
-  await loadPendingRequests();
+  await Promise.all([loadPendingRequests(), loadPendingBookings()]);
 });
-onActivated(loadPendingRequests);
+onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
 </script>
 
 <style scoped>
@@ -122,6 +186,23 @@ onActivated(loadPendingRequests);
   border-radius: 18px;
   box-shadow: 0 8px 24px rgba(19, 92, 101, 0.07);
   overflow: hidden;
+}
+
+.bookings-header {
+  padding: 1.25rem 1.5rem 0.75rem;
+}
+
+.bookings-header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #135c65;
+}
+
+.bookings-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
 }
 
 .welcome-logo {

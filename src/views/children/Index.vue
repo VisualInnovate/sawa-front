@@ -6,6 +6,7 @@ import { useStorage } from "@vueuse/core"
 import axios from "axios"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
+import ChildRecommendationsDialog from "../../components/children/ChildRecommendationsDialog.vue"
 
 const toast = useToast()
 const { t } = useI18n()
@@ -129,6 +130,14 @@ const initFilters = () => {
   filters.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
+}
+
+// The child whose home recommendations are being picked.
+const recommendationsChild = ref(null)
+const recommendationsDialog = ref(false)
+const addRecommendations = (child) => {
+  recommendationsChild.value = { id: child.id, name: child.name, gender: child.gender }
+  recommendationsDialog.value = true
 }
 
 const addEvaluation = (id) => {
@@ -280,6 +289,11 @@ const childRowClass = (child) => hasPendingRequests(child) ? 'has-pending-reques
                     @click="addEvaluation(slotProps.data.id)"
                     v-can="'evaluation request create'"
                     v-tooltip.top="$t('request_evaluation')" :aria-label="$t('request_evaluation')" rounded variant="outlined" severity="help" />
+                  <Button
+                    icon="pi pi-lightbulb"
+                    @click="addRecommendations(slotProps.data)"
+                    v-can="'child recommendations create'"
+                    v-tooltip.top="$t('add_recommendations')" :aria-label="$t('add_recommendations')" rounded variant="outlined" severity="warn" />
                 </div>
               </template>
             </Column>
@@ -298,6 +312,8 @@ const childRowClass = (child) => hasPendingRequests(child) ? 'has-pending-reques
             </template>
           </DataTable>
         </div>
+
+        <ChildRecommendationsDialog v-model:visible="recommendationsDialog" :child="recommendationsChild" />
 
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("confirm")' :modal="true">
           <div class="flex align-items-center justify-content-center">
