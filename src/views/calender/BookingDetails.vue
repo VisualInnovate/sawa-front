@@ -5,42 +5,44 @@
     </h1>
     <!-- Booking details and the parent's answers, all on the page (no popup). -->
     <div v-if="booking?.child_name || booking?.requester_name" class="booking-overview mt-4">
-      <!-- The child at a glance -->
-      <header class="child-hero">
-        <div class="child-avatar" aria-hidden="true">{{ childInitial }}</div>
-        <div class="child-hero-text">
-          <h2>{{ booking.child_name || "—" }}</h2>
-          <div class="child-chips">
-            <span v-if="childGenderLabel" class="child-chip"><i class="pi pi-user" aria-hidden="true"></i>{{ childGenderLabel }}</span>
-            <span v-if="childAgeLabel" class="child-chip"><i class="pi pi-hourglass" aria-hidden="true"></i>{{ childAgeLabel }}</span>
-            <span v-if="booking.event_date" class="child-chip is-accent">
-              <i class="pi pi-calendar" aria-hidden="true"></i>{{ $t("Consultation_date") }}: <span dir="ltr">{{ String(booking.event_date).slice(0, 10) }}</span>
-            </span>
+      <!-- One compact profile card: the child, then its details and the requester's as tiles sized to their text. -->
+      <section class="profile-card">
+        <header class="profile-head">
+          <div class="profile-avatar" aria-hidden="true">{{ childInitial }}</div>
+          <div class="profile-name">
+            <h2>{{ booking.child_name || "—" }}</h2>
+            <div class="profile-chips">
+              <span v-if="childGenderLabel" class="profile-chip"><i class="pi pi-user" aria-hidden="true"></i>{{ childGenderLabel }}</span>
+              <span v-if="childAgeLabel" class="profile-chip"><i class="pi pi-hourglass" aria-hidden="true"></i>{{ childAgeLabel }}</span>
+            </div>
           </div>
+          <div v-if="booking.event_date" class="profile-date">
+            <span>{{ $t("Consultation_date") }}</span>
+            <strong dir="ltr">{{ String(booking.event_date).slice(0, 10) }}</strong>
+          </div>
+        </header>
+
+        <div v-for="card in infoCards" :key="card.key" class="profile-section">
+          <h3 class="profile-section-title">{{ card.title }}</h3>
+          <ul class="info-tiles">
+            <li v-for="(field, index) in card.fields" :key="index" class="info-tile">
+              <span class="info-tile-icon" aria-hidden="true"><i :class="field.icon"></i></span>
+              <span class="info-tile-text">
+                <small>{{ field.label }}</small>
+                <strong :dir="field.ltr ? 'ltr' : null">{{ field.value }}</strong>
+              </span>
+            </li>
+          </ul>
         </div>
-      </header>
+      </section>
 
-      <div class="info-cards" :class="{ 'is-single': infoCards.length === 1 }">
-        <section v-for="card in infoCards" :key="card.key" class="info-card">
-          <h3 class="info-card-title"><i :class="card.icon" aria-hidden="true"></i>{{ card.title }}</h3>
-          <dl class="info-list">
-            <div v-for="(field, index) in card.fields" :key="index" class="info-row">
-              <dt><i :class="field.icon" aria-hidden="true"></i>{{ field.label }}</dt>
-              <dd :dir="field.ltr ? 'ltr' : null">{{ field.value }}</dd>
-            </div>
-          </dl>
-        </section>
-      </div>
-
-      <section v-if="answerFields.length" class="info-card answers-card">
-        <h3 class="info-card-title"><i class="pi pi-comments" aria-hidden="true"></i>{{ $t("Answer_the_questions") }}</h3>
-        <ol class="qa-list">
-          <li v-for="(field, index) in answerFields" :key="index" class="qa-item">
-            <span class="qa-number">{{ index + 1 }}</span>
-            <div class="qa-body">
-              <p class="qa-question">{{ field.label }}</p>
-              <p class="qa-answer">{{ field.value }}</p>
-            </div>
+      <section v-if="answerFields.length" class="answers-block">
+        <h3 class="answers-title"><i class="pi pi-comments" aria-hidden="true"></i>{{ $t("Answer_the_questions") }}</h3>
+        <ol class="answer-cards">
+          <li v-for="(field, index) in answerFields" :key="index" class="answer-card">
+            <span class="answer-number">{{ index + 1 }}</span>
+            <p class="answer-question">{{ field.label }}</p>
+            <p class="answer-text">{{ field.value }}</p>
           </li>
         </ol>
       </section>
@@ -596,7 +598,6 @@ export default {
         {
           key: "child", icon: "pi pi-id-card", title: this.$t("booking_child_info"),
           fields: [
-            this.infoField("Full_Name", b.child_name, false, "pi pi-user"),
             this.infoField("birth_date", b.child_birth_date, true, "pi pi-calendar"),
             this.infoField("place_of_birth", b.child_birth_place, false, "pi pi-map-marker"),
             this.infoField("Nationality", b.child_nationalty, false, "pi pi-flag"),
@@ -800,50 +801,43 @@ export default {
 .add-evaluation-btn { min-width: 12rem; padding-block: .75rem; }
 @media (max-width: 640px) { .add-evaluation-btn { width: 100%; } }
 
-.booking-overview { display: grid; gap: 1.25rem; }
-.child-hero { display: flex; align-items: center; gap: 1.1rem; padding: 1.25rem 1.5rem; border-radius: 1rem; background: linear-gradient(135deg, #e6f4f3, #fdf2f7); border: 1px solid #e2e8f0; }
-.child-avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 4rem; height: 4rem; border-radius: 50%; background: linear-gradient(135deg, var(--sawa-primary, #135c65), #EC477C); color: #fff; font-size: 1.75rem; font-weight: 700; box-shadow: 0 8px 18px -10px rgb(19 92 101 / .8); }
-.child-hero-text { min-width: 0; }
-.child-hero-text h2 { margin: 0 0 .5rem; color: #0f172a; font-size: 1.5rem; font-weight: 700; overflow-wrap: anywhere; }
-.child-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
-.child-chip { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .75rem; border-radius: 999px; background: #fff; color: #334155; font-size: .85rem; font-weight: 600; box-shadow: 0 1px 2px rgb(15 23 42 / .06); }
-.child-chip i { color: #EC477C; font-size: .8rem; }
-.child-chip.is-accent { background: var(--sawa-primary, #135c65); color: #fff; }
-.child-chip.is-accent i { color: #fff; }
-.info-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
-.info-card { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 1rem; background: #fff; box-shadow: 0 10px 24px -20px rgb(15 23 42 / .45); }
-.info-card-title { display: flex; align-items: center; gap: .55rem; margin: 0; padding: .9rem 1.25rem; border-bottom: 1px solid #eef2f6; background: #f8fafc; color: var(--sawa-primary, #135c65); font-size: 1.1rem; font-weight: 700; }
-.info-card-title i { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: .6rem; background: #e6f4f3; font-size: .95rem; }
-.info-list { margin: 0; }
-.info-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: .8rem 1.25rem; }
-.info-row + .info-row { border-top: 1px solid #f1f5f9; }
-.info-row dt { display: inline-flex; flex-shrink: 0; align-items: center; gap: .5rem; color: #64748b; font-size: .92rem; }
-.info-row dt i { color: #EC477C; font-size: .85rem; width: 1rem; text-align: center; }
-.info-row dd { margin: 0; min-width: 0; color: #0f172a; font-size: 1rem; font-weight: 600; text-align: end; white-space: pre-line; overflow-wrap: anywhere; }
-.info-row dd[dir="ltr"] { unicode-bidi: plaintext; }
-.qa-list { display: grid; gap: .9rem; margin: 0; padding: 1.25rem; list-style: none; }
-.qa-item { display: flex; align-items: flex-start; gap: .85rem; }
-.qa-number { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; background: #fdf2f7; color: #EC477C; font-weight: 700; }
-.qa-body { flex: 1; min-width: 0; }
-.qa-question { margin: .25rem 0 .45rem; color: #1e293b; font-weight: 700; line-height: 1.6; }
-.qa-answer { margin: 0; padding: .7rem 1rem; border-radius: .75rem; border-start-start-radius: .2rem; background: #f1f5f9; color: #334155; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; }
-/* A lone card (e.g. a booking without requester details) spans the row with its fields in two columns. */
-.info-cards.is-single { grid-template-columns: 1fr; }
-.info-cards.is-single .info-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.info-cards.is-single .info-row { border-top: 0; }
-.info-cards.is-single .info-row:nth-child(even) { border-inline-start: 1px solid #f1f5f9; }
-.info-cards.is-single .info-row:nth-child(n + 3) { border-top: 1px solid #f1f5f9; }
-@media (max-width: 900px) {
-  .info-cards { grid-template-columns: 1fr; }
-  .info-cards.is-single .info-list { grid-template-columns: 1fr; }
-  .info-cards.is-single .info-row:nth-child(n + 2) { border-top: 1px solid #f1f5f9; }
-  .info-cards.is-single .info-row:nth-child(even) { border-inline-start: 0; }
-}
+.booking-overview { display: grid; gap: 1rem; }
+
+.profile-card { padding: 1.25rem 1.5rem; border: 1px solid #e2e8f0; border-radius: 1rem; background: #fff; box-shadow: 0 12px 28px -24px rgb(15 23 42 / .5); }
+.profile-head { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.profile-avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 3.25rem; height: 3.25rem; border-radius: 50%; background: linear-gradient(135deg, var(--sawa-primary, #135c65), #EC477C); color: #fff; font-size: 1.4rem; font-weight: 700; }
+.profile-name { flex: 1 1 14rem; min-width: 0; }
+.profile-name h2 { margin: 0 0 .35rem; color: #0f172a; font-size: 1.3rem; font-weight: 700; overflow-wrap: anywhere; }
+.profile-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.profile-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .6rem; border-radius: 999px; background: #fdf2f7; color: #9d174d; font-size: .8rem; font-weight: 600; }
+.profile-chip i { font-size: .72rem; }
+.profile-date { display: grid; justify-items: center; gap: .1rem; padding: .5rem 1rem; border-radius: .8rem; background: var(--sawa-primary, #135c65); color: #fff; }
+.profile-date span { font-size: .72rem; opacity: .85; }
+.profile-date strong { font-size: 1rem; }
+
+.profile-section { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0; }
+.profile-section-title { margin: 0 0 .7rem; color: #64748b; font-size: .85rem; font-weight: 700; }
+.info-tiles { display: flex; flex-wrap: wrap; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.info-tile { display: inline-flex; align-items: center; gap: .6rem; max-width: 100%; padding: .5rem .9rem .5rem .6rem; border: 1px solid #eef2f6; border-radius: .8rem; background: #f8fafc; }
+.info-tile-icon { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: .6rem; background: #fff; color: #EC477C; box-shadow: 0 1px 2px rgb(15 23 42 / .06); }
+.info-tile-icon i { font-size: .85rem; }
+.info-tile-text { display: grid; min-width: 0; line-height: 1.35; }
+.info-tile-text small { color: #94a3b8; font-size: .72rem; }
+.info-tile-text strong { color: #0f172a; font-size: .95rem; font-weight: 600; overflow-wrap: anywhere; }
+.info-tile-text strong[dir="ltr"] { unicode-bidi: plaintext; text-align: start; }
+
+.answers-block { padding: 1.1rem 1.5rem 1.25rem; border: 1px solid #e2e8f0; border-radius: 1rem; background: #fff; box-shadow: 0 12px 28px -24px rgb(15 23 42 / .5); }
+.answers-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .85rem; color: var(--sawa-primary, #135c65); font-size: 1.05rem; font-weight: 700; }
+.answer-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.answer-card { position: relative; padding: .85rem 1rem .9rem; padding-inline-start: 2.9rem; border-radius: .8rem; background: #f8fafc; border: 1px solid #eef2f6; }
+.answer-number { position: absolute; top: .85rem; inset-inline-start: .85rem; display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: #fdf2f7; color: #EC477C; font-size: .75rem; font-weight: 700; }
+.answer-question { margin: 0 0 .35rem; color: #64748b; font-size: .82rem; line-height: 1.6; }
+.answer-text { margin: 0; color: #0f172a; font-weight: 700; line-height: 1.7; white-space: pre-line; overflow-wrap: anywhere; }
+
 @media (max-width: 520px) {
-  .child-hero { flex-direction: column; text-align: center; }
-  .child-chips { justify-content: center; }
-  .info-row { flex-direction: column; gap: .3rem; }
-  .info-row dd { text-align: start; }
+  .profile-card, .answers-block { padding-inline: 1rem; }
+  .profile-date { width: 100%; }
+  .info-tile { width: 100%; }
 }
 
 </style>
