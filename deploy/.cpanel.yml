@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html/repositories/sawa-front.test/dist
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/rm -rf $DEPLOYPATH/*
+    - /bin/cp -R . $DEPLOYPATH/
+    - /bin/rm -rf $DEPLOYPATH/.git $DEPLOYPATH/.cpanel.yml
