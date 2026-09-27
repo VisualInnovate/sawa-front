@@ -117,30 +117,33 @@
                   :aria-label="'#' + color" @click="setLevelColor(level.id, color)"></button>
               </div>
             </header>
-            <section v-for="domain in level.domains" :key="domain.id" class="milestone-domain">
-              <h3 class="milestone-domain-title">{{ domain.title }}</h3>
-              <section v-for="goal in domain.goals" :key="goal.id" class="milestone-goal">
-                <h4>{{ goal.title }}</h4>
-                <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
-                  <p>{{ question.title }}</p>
-                  <div class="milestone-scores">
-                    <label v-for="score in [0, 0.5, 1]" :key="score">
-                      <input type="radio" required :name="'question-' + question.id" :value="score"
-                        @change="collectanswer($event, question.id)" />
-                      <span>{{ score }}</span>
-                    </label>
-                  </div>
+            <template v-for="block in level.blocks" :key="block.key">
+              <!-- The EESA domain is scored through its form, once in each level, in the domain's place. -->
+              <section v-if="block.eesa" class="milestone-domain">
+                <h3 class="milestone-domain-title">{{ eesa.domain?.title }}</h3>
+                <div class="eesa-wrap">
+                  <Message v-if="eesaInvalidLevels.includes(level.id)" severity="error" :closable="false">{{ $t('eesa_invalid_boxes') }}</Message>
+                  <EesaForm :modelValue="eesaBoxes[level.id] || {}" @update:modelValue="setEesaBoxes(level.id, $event)"
+                    :previous="block.eesa.previous" :disabled="saving" />
                 </div>
               </section>
-            </section>
-          </section>
-          <!-- This domain is scored through the EESA form instead of sub-goals. -->
-          <section v-if="eesa.show" class="milestone-domain lg:col-span-2">
-            <h2>{{ eesa.domain?.title }}</h2>
-            <div class="eesa-wrap">
-              <Message v-if="eesaInvalid.length" severity="error" :closable="false">{{ $t('eesa_invalid_boxes') }}</Message>
-              <EesaForm v-model="eesaBoxes" :previous="eesa.previous" :disabled="saving" />
-            </div>
+              <section v-else class="milestone-domain">
+                <h3 class="milestone-domain-title">{{ block.title }}</h3>
+                <section v-for="goal in block.goals" :key="goal.id" class="milestone-goal">
+                  <h4>{{ goal.title }}</h4>
+                  <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
+                    <p>{{ question.title }}</p>
+                    <div class="milestone-scores">
+                      <label v-for="score in [0, 0.5, 1]" :key="score">
+                        <input type="radio" required :name="'question-' + question.id" :value="score"
+                          @change="collectanswer($event, question.id)" />
+                        <span>{{ score }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </section>
+              </section>
+            </template>
           </section>
         </template>
         <div v-if="strart_evaluate" class="flex flex-column gap-2">
@@ -220,7 +223,9 @@ export default {
       // level id -> chosen color (hex without #)
       levelColors: {},
       // The EESA form, when the child's levels include its domain.
-      eesa: { show: false, domain: null, previous: [] },
+      // levels: [{ level_id, title, previous }], one form per level.
+      eesa: { show: false, domain: null, levels: [] },
+      // level id -> { g1_1: "1", ... }
       eesaBoxes: {},
       childs: [],
       qustions: {},
@@ -233,8 +238,10 @@ export default {
   },
 
   computed: {
-    eesaInvalid() {
-      return this.eesa.show ? eesaInvalidKeys(this.eesaBoxes) : [];
+    eesaInvalidLevels() {
+      return this.eesa.levels
+        .filter((level) => eesaInvalidKeys(this.eesaBoxes[level.level_id] || {}).length)
+        .map((level) => level.level_id);
     },
     levelGroups() {
       const titles = new Map(this.levels.map(level => [level.id, level.title]))
@@ -251,13 +258,19 @@ export default {
         domain.goals.get(goalId).questions.push(question)
       }
       const order = new Map(this.levels.map((level, index) => [level.id, index]))
+      const eesaDomainId = Number(this.eesa.domain?.id)
       return [...levels.values()]
         .sort((a, b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity))
-        .map((level, index) => ({
-          ...level,
-          title: level.title || this.$t('level_n', { n: index + 1 }),
-          domains: [...level.domains.values()].map(domain => ({ ...domain, goals: [...domain.goals.values()] })),
-        }))
+        .map((level, index) => {
+          const blocks = [...level.domains.values()].map(domain => ({ ...domain, key: 'domain-' + domain.id, goals: [...domain.goals.values()] }))
+          // The EESA sits where its domain falls in the domain order (before the first domain numbered after it).
+          const eesa = this.eesa.levels.find(item => item.level_id === level.id)
+          if (eesa) {
+            const at = blocks.findIndex(block => Number(block.id) > eesaDomainId)
+            blocks.splice(at === -1 ? blocks.length : at, 0, { key: 'eesa', eesa })
+          }
+          return { ...level, title: level.title || this.$t('level_n', { n: index + 1 }), blocks }
+        })
     },
     questionLevels() {
       return Object.fromEntries(this.allquestion.map(question => [question.id, question.subtest?.level_id ?? 'other']))
@@ -278,6 +291,9 @@ export default {
       if (this.levelColors[levelId]) return this.levelColors[levelId];
       const index = Math.max(0, this.levelGroups.findIndex(level => level.id === levelId));
       return this.colorOptions[index % this.colorOptions.length];
+    },
+    setEesaBoxes(levelId, boxes) {
+      this.eesaBoxes = { ...this.eesaBoxes, [levelId]: boxes };
     },
     setLevelColor(levelId, color) {
       this.levelColors = { ...this.levelColors, [levelId]: color };
@@ -320,7 +336,10 @@ export default {
           axios.get(`api/milestone-answers/eesa/${age}`, { params: { child_id: this.answer.child_id } }).catch(() => ({ data: null })),
         ])
         this.allquestion = Array.isArray(data) ? data : (data.data || [])
-        this.eesa = { show: Boolean(eesa?.show), domain: eesa?.domain ?? null, previous: eesa?.previous ?? [] }
+        // An older server returns one form without levels: it belongs to the first level.
+        const eesaLevels = Array.isArray(eesa?.levels) ? eesa.levels
+          : eesa?.show ? [{ level_id: this.allquestion[0]?.subtest?.level_id, previous: eesa.previous ?? [] }] : []
+        this.eesa = { show: eesaLevels.length > 0, domain: eesa?.domain ?? null, levels: eesaLevels }
         this.eesaBoxes = {}
       } catch (error) {
         this.alert_text = error.response?.data?.message || this.$t('request_failed_retry')
@@ -341,7 +360,7 @@ export default {
 
     async getanswer() {
       if (this.saving) return;
-      if (this.eesaInvalid.length) {
+      if (this.eesaInvalidLevels.length) {
         this.alert_text = this.$t('eesa_invalid_boxes');
         return;
       }
@@ -355,7 +374,9 @@ export default {
           student_program_id: this.answers.student_program_id,
           request_id: this.$route.query.requestId || null,
           answers,
-          ...(this.eesa.show ? { eesa: { scores: eesaScores(this.eesaBoxes) } } : {}),
+          ...(this.eesa.show ? {
+            eesa: { levels: Object.fromEntries(this.eesa.levels.map((level) => [level.level_id, eesaScores(this.eesaBoxes[level.level_id] || {})])) },
+          } : {}),
         });
         resetUserProfile();
         await this.$router.push({
