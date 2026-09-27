@@ -3,178 +3,29 @@
     <h1 class="border-b text-3xl w-full md:w-1/2 uppercase text-green-800 py-4">
       {{ $t("bookings") }} / {{ booking.requester_name }}
     </h1>
-    <div class="w-full mt-4 py-2">
-      <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 bg-slate-50 gap-y-8 gap-x-4 shadow-md p-[1%]"
-      >
-        <div class="flex" v-if="booking.requester_name">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">{{ $t("applicant") }} :</p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.requester_name }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.relative_degree">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("degree_closeness_child") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.relative_degree }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_name">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">{{ $t("Full_Name") }} :</p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_name }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_birth_place">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("place_of_birth") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_birth_place }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_birth_date">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("birth_date") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_birth_date }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_lang">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("primary_language") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_lang }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_nationalty">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("Nationality") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_nationalty }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_national_id">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("national_number") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_national_id }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.child_address">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">{{ $t("address") }} :</p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.child_address }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.requester_phone">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("phone_number") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.requester_phone }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.addtional_phone">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("Additional_phone_number") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.addtional_phone }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.addtional_phone_owner">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("owner_extra_number") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.addtional_phone_owner }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.addtional_phone_degree">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("degree_closeness_child") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.addtional_phone_degree }}
-          </p>
-        </div>
-        <div class="flex" v-if="booking.conversion_type">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("conversion_source") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.conversion_type }}
-          </p>
-        </div>
-
-        <div class="flex" v-if="booking.doctor_code">
-          <i
-            class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-          ></i>
-          <p class="text-xl md:text-xl px-1 my-auto">
-            {{ $t("Specialist_code") }} :
-          </p>
-          <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-            {{ booking.doctor_code }}
-          </p>
-        </div>
-
-        <div class="flex">
-          <Button
-            @click="show_answer_modal = true"
-            icon="pi pi-arrow-left"
-            :label="$t('Answer_the_questions')"></Button>
+    <!-- Booking details and the parent's answers, all on the page (no popup). -->
+    <div class="booking-details mt-4">
+      <div class="booking-details-grid">
+        <div v-for="(field, index) in bookingFields" :key="index" class="booking-detail">
+          <i class="booking-detail-icon pi pi-check" aria-hidden="true"></i>
+          <p class="booking-detail-label">{{ field.label }} :</p>
+          <p class="booking-detail-value" :dir="field.ltr ? 'ltr' : null">{{ field.value }}</p>
         </div>
       </div>
+
+      <template v-if="answerFields.length">
+        <h2 class="booking-answers-title">
+          <i class="pi pi-comments" aria-hidden="true"></i>
+          {{ $t("Answer_the_questions") }}
+        </h2>
+        <div class="booking-answers">
+          <div v-for="(field, index) in answerFields" :key="index" class="booking-detail">
+            <i class="booking-detail-icon pi pi-check" aria-hidden="true"></i>
+            <p class="booking-detail-label">{{ field.label }} :</p>
+            <p class="booking-detail-value">{{ field.value }}</p>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
   <div class="sawa-card mt-5 p-[2%] bg-slate-50" v-if="$can('bookings edit')">
@@ -286,130 +137,6 @@
     </form>
   </div>
 
-  <div class="w-full mx-auto">
-    <div class="flex justify-center">
-      <div
-        v-show="show_answer_modal"
-        class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 z-50"
-      >
-        <div class="w-1/2 p-6 bg-white rounded-md shadow-xl">
-          <div class="flex items-center justify-between">
-            <h3 class="text-3xl text-center">
-              {{ $t("Answer_the_questions") }}
-            </h3>
-            <svg
-              @click="show_answer_modal = false"
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-8 h-8 cursor-pointer"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <div class="mt-4">
-            <!-- Gender codes match the child forms: 0 = male, 1 = female (0 is falsy, so check for null). -->
-            <div class="flex flex-initial" v-if="booking.child_gender != null && booking.child_gender !== ''">
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">{{ $t("Type") }} :</p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ String(booking.child_gender) === "0" ? $t("male") : $t("female") }}
-              </p>
-            </div>
-            <div
-              class="flex flex-initial py-4"
-              v-if="booking.details?.child_parents_problems"
-            >
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">
-                {{ $t("problem_type") }} :
-              </p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.details?.child_parents_problems }}
-              </p>
-            </div>
-            <div
-              class="flex flex-initial py-4"
-              v-if="booking.details?.child_problems_notes"
-            >
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">
-                {{ $t("child_problems_notes") }} :
-              </p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.details?.child_problems_notes }}
-              </p>
-            </div>
-            <div class="flex flex-initial py-4">
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">
-                {{ $t("child_problem") }} :
-              </p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.child_aids == 1 ? "yes" : "no" }}
-              </p>
-            </div>
-            <div
-              class="flex flex-initial py-4"
-              v-if="booking.details?.child_aids_notes"
-            >
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">
-                {{ $t("child_aids_notes") }} :
-              </p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.details?.child_aids_notes }}
-              </p>
-            </div>
-            <div
-              class="flex flex-initial py-4"
-              v-if="booking.details?.child_aids_notes"
-            >
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">
-                {{ $t("main_problems") }} :
-              </p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.details?.child_aids_notes }}
-              </p>
-            </div>
-            <div
-              class="flex flex-initial py-4"
-              v-if="booking.details?.parents_priorities"
-            >
-              <i
-                class="bg-[#EC477C] p-1 rounded-full text-[white] my-auto pi pi-check"
-              ></i>
-              <p class="text-xl md:text-xl px-1 my-auto">
-                {{ $t("priority_parents") }} :
-              </p>
-              <p class="text-lg text-[#7d7979] md:text-xl px-1 my-auto">
-                {{ booking.details?.parents_priorities }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <Toast />
 
   <div class="sawa-card mt-5 p-[2%] bg-slate-50" v-if="$can('consultations edit')">
@@ -454,8 +181,18 @@
           :options="recommendationOptions"
           optionLabel="value"
           dataKey="id"
-          class="border border-gray-300 rounded-md p-1 focus:ring-1 focus:ring-blue-500 text-sm"
-        />
+          :maxSelectedLabels="0"
+          :selectedItemsLabel="$t('recommendations_selected', ['{0}'])"
+          :placeholder="$t('choose_home_recommendations')"
+          :filterPlaceholder="$t('search')"
+          overlayClass="recommendations-overlay"
+          class="w-full text-sm"
+        >
+          <!-- Long recommendations wrap inside the list instead of stretching it off screen. -->
+          <template #option="{ option }">
+            <span class="recommendation-option">{{ removeBracesAndReplace(option.value) }}</span>
+          </template>
+        </MultiSelect>
       </div>
 
       <!-- What the parent will read: the picked recommendations in display order, with the child's name. -->
@@ -565,7 +302,6 @@ export default {
       new_doctors: [],
       slots: [],
       accept_notes: "",
-      show_answer_modal: false,
       show_modal: false,
       updatedialog: false,
       modal_text: "",
@@ -674,6 +410,10 @@ export default {
         .then((response) => {
           this.slots = response.data.slots;
         });
+    },
+    infoField(label, value, ltr = false) {
+      if (value == null || String(value).trim() === "") return null;
+      return { label: this.$t(label), value, ltr };
     },
     removeBracesAndReplace(text) {
       // {{name}} (any {{...}}) is the child's name.
@@ -805,6 +545,44 @@ export default {
         .sort((a, b) => a.display_order - b.display_order || a.id - b.id);
     },
     // Earlier picks that no longer match a recommendation stay listed so they can be kept or removed.
+    // Only filled fields are shown.
+    bookingFields() {
+      const b = this.booking ?? {};
+      return [
+        this.infoField("applicant", b.requester_name),
+        this.infoField("degree_closeness_child", b.relative_degree),
+        this.infoField("Full_Name", b.child_name),
+        this.infoField("place_of_birth", b.child_birth_place),
+        this.infoField("birth_date", b.child_birth_date, true),
+        this.infoField("primary_language", b.child_lang),
+        this.infoField("Nationality", b.child_nationalty),
+        this.infoField("national_number", b.child_national_id, true),
+        this.infoField("address", b.child_address),
+        this.infoField("phone_number", b.requester_phone, true),
+        this.infoField("Additional_phone_number", b.addtional_phone, true),
+        this.infoField("owner_extra_number", b.addtional_phone_owner),
+        this.infoField("degree_closeness_child", b.addtional_phone_degree),
+        this.infoField("conversion_source", b.conversion_type),
+        this.infoField("Specialist_code", b.doctor_code),
+      ].filter(Boolean);
+    },
+    answerFields() {
+      const b = this.booking ?? {};
+      const d = b.details ?? {};
+      // Gender codes match the child forms: 0 = male, 1 = female.
+      const gender = b.child_gender != null && b.child_gender !== ""
+        ? (String(b.child_gender) === "0" ? this.$t("male") : this.$t("female"))
+        : null;
+      if (!this.booking?.id && !b.child_name) return [];
+      return [
+        this.infoField("Type", gender),
+        this.infoField("problem_type", d.child_parents_problems),
+        this.infoField("child_problems_notes", d.child_problems_notes),
+        this.infoField("child_problem", b.child_aids == 1 ? this.$t("yes") : this.$t("no")),
+        this.infoField("child_aids_notes", d.child_aids_notes),
+        this.infoField("priority_parents", d.parents_priorities),
+      ].filter(Boolean);
+    },
     recommendationOptions() {
       const kept = (this.student_massage?.filed_value ?? [])
         .filter((item) => !this.settingsRecommendations.some((row) => row.id === item?.id));
@@ -958,4 +736,43 @@ export default {
 .option-pending { color: #92400e; }
 .option-cancelled { color: #9f1239; }
 .booking-status-placeholder { color: #64748b; font-weight: 500; }
+
+.booking-details { overflow: hidden; border-radius: 12px; background: #f8fafc; box-shadow: 0 4px 6px -1px rgb(0 0 0 / .08), 0 2px 4px -2px rgb(0 0 0 / .06); }
+.booking-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; padding: 1.25rem 1.5rem; }
+.booking-detail { display: flex; align-items: flex-start; gap: .4rem; min-width: 0; }
+.booking-detail-icon { flex-shrink: 0; margin-top: .3rem; padding: .25rem; border-radius: 9999px; background: #EC477C; color: #fff; font-size: .8rem; }
+.booking-detail-label { flex-shrink: 0; font-size: 1.15rem; color: #1f2937; }
+.booking-detail-value { min-width: 0; font-size: 1.1rem; line-height: 1.8; color: #6b7280; white-space: pre-line; overflow-wrap: anywhere; }
+.booking-detail-value[dir="ltr"] { unicode-bidi: plaintext; }
+.booking-answers-title { display: flex; align-items: center; gap: .5rem; margin: 0; padding: .9rem 1.5rem; border-top: 1px solid #e2e8f0; background: #edf7f5; color: var(--sawa-primary, #135c65); font-size: 1.15rem; font-weight: 700; }
+.booking-answers { display: grid; gap: 1rem; padding: 1.25rem 1.5rem; }
+.booking-answers .booking-detail { padding-bottom: 1rem; border-bottom: 1px dashed #e2e8f0; }
+.booking-answers .booking-detail:last-child { padding-bottom: 0; border-bottom: 0; }
+@media (max-width: 767px) {
+  .booking-details-grid { grid-template-columns: 1fr; }
+  .booking-detail { flex-wrap: wrap; }
+}
+</style>
+
+<style>
+/* The list is teleported to <body>, so it can't use scoped styles. */
+.recommendations-overlay {
+  max-width: min(46rem, calc(100vw - 2rem));
+}
+.recommendations-overlay .p-multiselect-option {
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eef2f7;
+}
+.recommendations-overlay .p-multiselect-option .p-checkbox {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+.recommendation-option {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+  font-size: 0.9rem;
+}
 </style>
