@@ -105,6 +105,8 @@ export default {
   calender: "Calender",
   basal_age: "Basal Age",
   RatingAdd: "Add evaluation",
+  booking_child_info: "Child information",
+  booking_requester_info: "Requester and contact",
   book_child_evaluation: "Book an evaluation for the child",
   book_child_evaluation_hint: "Pick the evaluation type, therapist and time from the evaluation calendar.",
   book_child_evaluation_locked: "An evaluation can be added from the consultation day onwards.",
