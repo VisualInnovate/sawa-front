@@ -75,6 +75,18 @@ const childrenRoutes = [
     component: () => import("../views/children/evaluate.vue")
   },
   {
+    path: 'children-consultations',
+    name: 'children-consultations',
+    meta: { permission: ["bookings list"] },
+    component: () => import("../views/children/consultations.vue")
+  },
+  {
+    path: 'children-recommendations',
+    name: 'children-recommendations',
+    meta: { permission: ["child recommendations list", "child recommendations create"] },
+    component: () => import("../views/children/recommendations.vue")
+  },
+  {
     path: 'children-request', // Define the path for your addRoom route
     name: 'children-request',
     meta: { permission: ["child list"] },

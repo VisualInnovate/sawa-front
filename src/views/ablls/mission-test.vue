@@ -35,12 +35,15 @@
             
                  
               <div v-if="answer.child_age"  class=" flex flex-column gap-2">
-                  <label for="username">{{ $t('color') }}</label>
-
-                   <div class="flex">
-                    <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
-                      <Button @click="createevalutae"  class="m-auto w-full h-[50px]" :label='$t("strart_evaluate")'></Button>
-                   </div>
+                  <label>{{ $t('color') }}</label>
+                  <div class="flex gap-2">
+                    <div class="ablls-colors">
+                      <button v-for="color in colorOptions" :key="color" type="button"
+                        :class="{ selected: answer.color === color }" :style="{ backgroundColor: '#' + color }"
+                        :aria-label="'#' + color" @click="answer.color = color"></button>
+                    </div>
+                    <Button v-if="!strart_evaluate" @click="createevalutae" class="m-auto w-full h-[50px]" :label='$t("strart_evaluate")'></Button>
+                  </div>
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
               </div> 
               <div v-if="strart_evaluate" class="col-span-2" >
@@ -118,10 +121,9 @@ export default {
       type:4,
       
          score:[],
-      answer:{ 
-          color:"00a2ff",
-          
-          
+      colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
+      answer:{
+          color:"00B8D9",
       },
      allquestion:{},
       childs:[],
@@ -147,10 +149,7 @@ export default {
 
 
     getanswerscore(e,id,index){
-      console.log(e.value)
       this.answer.mission_id=id
-      
-         
       this.answers.answers[id]=({mission_id:id,score:e.value,color:this.answer.color,child_id:this.answer.child_id,date:this.answer.date,child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
       console.log(this.answers.answers)
     },
@@ -204,8 +203,10 @@ export default {
         })
     },
     getanswer(){
-
-      
+      // The color can still change after answering; every answer takes the final one.
+      this.answers.answers.forEach((answer) => {
+        if (answer) answer.color = this.answer.color;
+      });
       axios.post("/api/able-answer",this.answers).then((res) => {
         this.change_status
         axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
@@ -275,6 +276,10 @@ export default {
 </script>
 
 <style scoped>
+.ablls-colors { display: flex; align-items: center; gap: .4rem; }
+.ablls-colors button { width: 40px; height: 50px; border-radius: 8px; border: 3px solid transparent; cursor: pointer; transition: transform .15s; }
+.ablls-colors button:hover { transform: scale(1.05); }
+.ablls-colors button.selected { border-color: #333; box-shadow: 0 0 0 2px #fff inset; }
 /* Add custom styles for the name input field */
 .name-input {
   height: 70vh;
