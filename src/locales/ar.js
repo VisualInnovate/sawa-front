@@ -1016,6 +1016,7 @@ export default {
     half_plan_goal: "1/2 - صياغة هدف بالخطة",
     zero_weakness: "0 - صياغة نقطة ضعف",
     zero_plan_goal: "0 - صياغة هدف بالخطة",
+    practice: "صياغة الممارسة",
     name_hint_before: "اكتب الرمز",
     name_hint_after:
       "في أي حقل ليُستبدل تلقائيًا باسم الطفل، وتُعرض صياغة الذكر أو الأنثى حسب جنس الطفل.",

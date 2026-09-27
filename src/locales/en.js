@@ -990,6 +990,7 @@ export default {
     "half_plan_goal": "1/2 - plan goal wording",
     "zero_weakness": "0 - weakness wording",
     "zero_plan_goal": "0 - plan goal wording",
+    "practice": "Practice wording",
     "name_hint_before": "Type",
     "name_hint_after": "in any field and it is replaced by the child's name; the male or female wording is shown according to the child's gender.",
     "gender_tabs": "Wording by gender",

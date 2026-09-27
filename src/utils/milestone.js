@@ -1,4 +1,4 @@
-// Six wordings of a milestone sub-goal; `label` is an i18n key.
+// Seven wordings of a milestone sub-goal; `label` is an i18n key.
 export const milestoneFields = [
   { key: 'title', label: 'milestone_wording.title' },
   { key: 'half_strength', label: 'milestone_wording.half_strength' },
@@ -6,6 +6,7 @@ export const milestoneFields = [
   { key: 'half_plan_goal', label: 'milestone_wording.half_plan_goal' },
   { key: 'zero_weakness', label: 'milestone_wording.zero_weakness' },
   { key: 'zero_plan_goal', label: 'milestone_wording.zero_plan_goal' },
+  { key: 'practice', label: 'milestone_wording.practice' },
 ];
 
 export const emptyMilestoneWording = () => Object.fromEntries(
