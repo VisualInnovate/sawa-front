@@ -92,65 +92,46 @@
           v-if="answer.child_id && answer.child_age != null"
           class="flex flex-column gap-2"
         >
-          <label for="username">{{ $t("color") }}</label>
-
-          <div class="flex">
-            <!-- <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" /> -->
-            <div>
-              <div class="flex gap-1">
-                <span
-                  @click="addcolor('00B8D9')"
-                  class="w-[30px] h-[30px] bg-[#00B8D9] cursor-pointer hover:border-2 hover:border-[#333] transition"
-                ></span>
-                <span
-                  @click="addcolor('36B37E')"
-                  class="w-[30px] h-[30px] bg-[#36B37E] cursor-pointer hover:border-2 hover:border-[#333] transition"
-                ></span>
-                <span
-                  @click="addcolor('FFAB00')"
-                  class="w-[30px] h-[30px] bg-[#FFAB00] cursor-pointer hover:border-2 hover:border-[#333] transition"
-                ></span>
-                <span
-                  @click="addcolor('FF5630')"
-                  class="w-[30px] h-[30px] bg-[#FF5630] cursor-pointer hover:border-2 hover:border-[#333] transition"
-                ></span>
-                <span
-                  @click="addcolor('6554C0')"
-                  class="w-[30px] h-[30px] bg-[#6554C0] cursor-pointer hover:border-2 hover:border-[#333] transition"
-                ></span>
-              </div>
-              <div class="bg-[#00B8D9] h-[40%] mt-1" ref="showcolor"></div>
-            </div>
-            <Button
-              @click="createevalutae"
-              :loading="starting"
-              :disabled="questionsLoading || !allquestion.length || strart_evaluate"
-              class="m-auto w-full h-[50px]"
-              :label="$t('strart_evaluate')"
-            ></Button>
-          </div>
-          <div class="mt-1 mb-5 text-red-500" v-if="error?.color">
-            {{ error.color[0] }}
-          </div>
+          <label style="visibility: hidden">{{ $t("strart_evaluate") }}</label>
+          <Button
+            @click="createevalutae"
+            :loading="starting"
+            :disabled="questionsLoading || !allquestion.length || strart_evaluate"
+            class="w-full"
+            :label="$t('strart_evaluate')"
+          ></Button>
         </div>
 
         <Message v-if="questionsLoading" class="lg:col-span-2">{{ $t('loading') }}</Message>
         <Message v-else-if="answer.child_age != null && !allquestion.length" severity="warn" class="lg:col-span-2">{{ $t('no_records_found') }}</Message>
         <template v-if="strart_evaluate">
-          <section v-for="domain in questionGroups" :key="domain.id" class="milestone-domain lg:col-span-2">
-            <h2>{{ domain.title }}</h2>
-            <section v-for="goal in domain.goals" :key="goal.id" class="milestone-goal">
-              <h3>{{ goal.title }}</h3>
-              <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
-                <p>{{ question.title }}</p>
-                <div class="milestone-scores">
-                  <label v-for="score in [0, 0.5, 1]" :key="score">
-                    <input type="radio" required :name="'question-' + question.id" :value="score"
-                      @change="collectanswer($event, question.id)" />
-                    <span>{{ score }}</span>
-                  </label>
-                </div>
+          <!-- Each level is its own card with its own color; answers are saved with their level's color. -->
+          <section v-for="level in levelGroups" :key="level.id" class="milestone-level lg:col-span-2"
+            :style="{ '--level-color': '#' + levelColor(level.id) }">
+            <header class="milestone-level-header">
+              <h2>{{ level.title }}</h2>
+              <div class="milestone-level-colors">
+                <span>{{ $t("color") }}</span>
+                <button v-for="color in colorOptions" :key="color" type="button"
+                  :class="{ selected: levelColor(level.id) === color }" :style="{ backgroundColor: '#' + color }"
+                  :aria-label="'#' + color" @click="setLevelColor(level.id, color)"></button>
               </div>
+            </header>
+            <section v-for="domain in level.domains" :key="domain.id" class="milestone-domain">
+              <h3 class="milestone-domain-title">{{ domain.title }}</h3>
+              <section v-for="goal in domain.goals" :key="goal.id" class="milestone-goal">
+                <h4>{{ goal.title }}</h4>
+                <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
+                  <p>{{ question.title }}</p>
+                  <div class="milestone-scores">
+                    <label v-for="score in [0, 0.5, 1]" :key="score">
+                      <input type="radio" required :name="'question-' + question.id" :value="score"
+                        @change="collectanswer($event, question.id)" />
+                      <span>{{ score }}</span>
+                    </label>
+                  </div>
+                </div>
+              </section>
             </section>
           </section>
           <!-- This domain is scored through the EESA form instead of sub-goals. -->
@@ -232,10 +213,12 @@ export default {
       starting: false,
       type: 2,
 
-      answer: {
-        color: "6554C0",
-      },
+      answer: {},
       allquestion: [],
+      levels: [],
+      colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
+      // level id -> chosen color (hex without #)
+      levelColors: {},
       // The EESA form, when the child's levels include its domain.
       eesa: { show: false, domain: null, previous: [] },
       eesaBoxes: {},
@@ -253,17 +236,31 @@ export default {
     eesaInvalid() {
       return this.eesa.show ? eesaInvalidKeys(this.eesaBoxes) : [];
     },
-    questionGroups() {
-      const domains = new Map()
+    levelGroups() {
+      const titles = new Map(this.levels.map(level => [level.id, level.title]))
+      const levels = new Map()
       for (const question of this.allquestion) {
+        const levelId = question.subtest?.level_id ?? 'other'
+        if (!levels.has(levelId)) levels.set(levelId, { id: levelId, title: titles.get(levelId), domains: new Map() })
+        const level = levels.get(levelId)
         const domainId = question.question_type_id ?? 'other'
-        if (!domains.has(domainId)) domains.set(domainId, { id: domainId, title: question.question_type?.title || this.$t('milestone_domains'), goals: new Map() })
-        const domain = domains.get(domainId)
+        if (!level.domains.has(domainId)) level.domains.set(domainId, { id: domainId, title: question.question_type?.title || this.$t('milestone_domains'), goals: new Map() })
+        const domain = level.domains.get(domainId)
         const goalId = question.subtest_id
         if (!domain.goals.has(goalId)) domain.goals.set(goalId, { id: goalId, title: question.subtest?.title || this.$t('milestone_general_goals'), questions: [] })
         domain.goals.get(goalId).questions.push(question)
       }
-      return [...domains.values()].map(domain => ({ ...domain, goals: [...domain.goals.values()] }))
+      const order = new Map(this.levels.map((level, index) => [level.id, index]))
+      return [...levels.values()]
+        .sort((a, b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity))
+        .map((level, index) => ({
+          ...level,
+          title: level.title || this.$t('level_n', { n: index + 1 }),
+          domains: [...level.domains.values()].map(domain => ({ ...domain, goals: [...domain.goals.values()] })),
+        }))
+    },
+    questionLevels() {
+      return Object.fromEntries(this.allquestion.map(question => [question.id, question.subtest?.level_id ?? 'other']))
     },
   },
   methods: {
@@ -276,9 +273,14 @@ export default {
       if (!option) return "";
       return option.program?.name || option.name || "";
     },
-    addcolor(color) {
-      this.answer.color = color;
-      this.$refs.showcolor.style.background = "#" + color;
+    // Until one is chosen, each level gets a different default color.
+    levelColor(levelId) {
+      if (this.levelColors[levelId]) return this.levelColors[levelId];
+      const index = Math.max(0, this.levelGroups.findIndex(level => level.id === levelId));
+      return this.colorOptions[index % this.colorOptions.length];
+    },
+    setLevelColor(levelId, color) {
+      this.levelColors = { ...this.levelColors, [levelId]: color };
     },
     submit() {},
     async createevalutae() {
@@ -301,9 +303,6 @@ export default {
     anserdata(id, val) {
       console.log(id);
       console.log(val);
-    },
-    getcolor(id) {
-      this.answer.color = id.target.value;
     },
     async getage() {
       if (!this.answer.date || this.strart_evaluate) return
@@ -332,7 +331,6 @@ export default {
       this.answers.answers[id] = {
         question_id: id,
         score: e.target.value,
-        color: this.answer.color,
         child_id: this.answer.child_id,
         date: moment(this.answer.date).format("YYYY-MM-DD"),
         child_age: this.answer.child_age,
@@ -352,7 +350,7 @@ export default {
       try {
         const answers = this.answers.answers
           .filter(Boolean)
-          .map((answer) => ({ ...answer, color: this.answer.color }));
+          .map((answer) => ({ ...answer, color: this.levelColor(this.questionLevels[answer.question_id]) }));
         await axios.post("/api/milestone-answers", {
           student_program_id: this.answers.student_program_id,
           request_id: this.$route.query.requestId || null,
@@ -383,6 +381,13 @@ export default {
         this.answer.child_id = Number(this.$route.params.id || localStorage.getItem("child_id"));
         this.answer.date = new Date();
         this.getage();
+        axios
+          .get("api/mileston-levels")
+          .then(({ data }) => {
+            const levels = data?.data?.data ?? data?.data ?? [];
+            this.levels = Array.isArray(levels) ? levels : [];
+          })
+          .catch(() => {});
         axios
           .get(`/api/milestone-answers/programs/${this.answer.child_id}`)
           .then(({ data }) => {
@@ -429,11 +434,22 @@ export default {
 </script>
 
 <style scoped>
+.milestone-level { border: 2px solid var(--level-color); border-radius: 16px; overflow: hidden; }
+.milestone-level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding: 1rem 1.25rem; background: var(--level-color); color: #fff; }
+.milestone-level-header h2 { margin: 0; font-weight: 700; font-size: 1.25rem; }
+.milestone-level-colors { display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem; border-radius: 10px; background: rgba(255, 255, 255, .9); color: #333; }
+.milestone-level-colors span { font-size: .85rem; margin-inline-end: .25rem; }
+.milestone-level-colors button { width: 26px; height: 26px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }
+.milestone-level-colors button:hover { transform: scale(1.1); }
+.milestone-level-colors button.selected { border-color: #333; box-shadow: 0 0 0 2px #fff inset; }
 .milestone-domain { border: 1px solid var(--sawa-border); border-radius: 16px; overflow: hidden; }
+.milestone-level .milestone-domain { border: 0; border-radius: 0; }
+.milestone-level .milestone-domain + .milestone-domain { border-top: 1px solid var(--sawa-border); }
+.milestone-domain-title { margin: 0; padding: .85rem 1.25rem; color: var(--sawa-primary); background: #edf7f5; font-weight: 700; font-size: 1.1rem; }
 .eesa-wrap { display: grid; gap: .75rem; padding: 1rem; }
 .milestone-domain h2 { margin: 0; padding: 1rem 1.25rem; color: var(--sawa-primary); background: #edf7f5; font-weight: 700; font-size: 1.15rem; }
 .milestone-goal { padding: 1rem 1.25rem; }
-.milestone-goal h3 { margin-bottom: .75rem; font-weight: 700; }
+.milestone-goal h4 { margin-bottom: .75rem; font-weight: 700; }
 .milestone-question { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--sawa-border); padding: 1rem 0; }
 .milestone-question p { flex: 1 1 20rem; }
 .milestone-scores { display: flex; gap: .6rem; }

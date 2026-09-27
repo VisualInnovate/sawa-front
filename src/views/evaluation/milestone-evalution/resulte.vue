@@ -27,7 +27,7 @@
       <div v-for="(level, index) in mainSquares" :key="index" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:break-inside-avoid">
         <!-- Level Header -->
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
-          <h1 class="w-full py-2 text-2xl font-bold text-center text-white">{{ $t("level_n", { n: index + 1 }) }}</h1>
+          <h1 class="w-full py-2 text-2xl font-bold text-center text-white">{{ level.level_name || $t("level_n", { n: index + 1 }) }}</h1>
         </div>
         
         <!-- Grid Content -->

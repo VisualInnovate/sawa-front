@@ -1154,6 +1154,7 @@ export default {
   health_development_history: "السيرة الصحية والنمائية",
   consultant_recommendations: "توصيات المستشار",
   choose_home_recommendations: "اختر التوصيات المنزلية",
+  recommendations_selected: "تم اختيار {0} توصية",
   additional_notes: "ملاحظات إضافية",
   pre_appointments_hint: "من هذه القائمة يمكنك إضافة التقييمات المطلوبة للطفل.",
   event_type: {

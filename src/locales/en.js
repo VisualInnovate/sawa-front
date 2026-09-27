@@ -1118,6 +1118,7 @@ export default {
   "health_development_history": "Health and developmental history",
   "consultant_recommendations": "Consultant recommendations",
   "choose_home_recommendations": "Choose home recommendations",
+  "recommendations_selected": "{0} recommendations selected",
   "additional_notes": "Additional notes",
   "pre_appointments_hint": "From this list, you can add the required assessments for the child.",
   "event_type": {
