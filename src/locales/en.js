@@ -1118,7 +1118,7 @@ export default {
   "consultant_recommendations": "Consultant recommendations",
   "choose_home_recommendations": "Choose home recommendations",
   "additional_notes": "Additional notes",
-  "pre_appointments_hint": "Use this list to add upcoming appointments for the child.",
+  "pre_appointments_hint": "From this list, you can add the required assessments for the child.",
   "event_type": {
     "evaluations": "Evaluations",
     "meetings": "Meetings",

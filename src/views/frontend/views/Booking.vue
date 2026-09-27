@@ -88,9 +88,9 @@
 
       <section v-if="homeRecommendations.length" class="cr-section">
         <h3 class="cr-label">{{ $t("التوصييات المزلية") }}</h3>
-        <ol class="cr-list">
-          <li v-for="(item, index) in homeRecommendations" :key="item.id ?? index">{{ fillChildName(item.value) }}</li>
-        </ol>
+        <ul class="cr-list">
+          <li v-for="(line, index) in homeRecommendations" :key="index">{{ fillChildName(line) }}</li>
+        </ul>
       </section>
 
       <section v-if="result.notes" class="cr-section">
@@ -148,7 +148,8 @@ const resultStyles = `
 .cr-section{border:1px solid #e2e8f0;border-inline-start:4px solid #135c65;border-radius:12px;padding:12px 16px;break-inside:avoid}
 .cr-label{margin:0 0 6px;font-size:15px;font-weight:700;color:#135c65}
 .cr-text{margin:0;white-space:pre-line}
-.cr-list{margin:0;padding-inline-start:22px;display:grid;gap:6px}
+.cr-list{margin:0;padding-inline-start:22px;display:grid;gap:6px;list-style:disc outside}
+.cr-list li{display:list-item;line-height:1.8}
 .cr-list li::marker{color:#135c65;font-weight:700}
 .cr-empty{margin:0;text-align:center;color:#64748b;padding:24px}
 `;
@@ -163,8 +164,11 @@ const parseResult = (value) => {
   return parsed && typeof parsed === "object" ? parsed : {};
 };
 const result = computed(() => parseResult(selectedConsultationResult.value?.consultation_result));
+// Each recommendation (and each line inside one) is shown as its own bullet.
 const homeRecommendations = computed(() => (Array.isArray(result.value.filed_value) ? result.value.filed_value : [])
-  .filter((item) => item?.value));
+  .flatMap((item) => String(item?.value ?? "").split(/\r?\n/))
+  .map((line) => line.trim())
+  .filter(Boolean));
 const hasResult = computed(() => Boolean(result.value.health || result.value.consultant_recommendations
   || result.value.notes || homeRecommendations.value.length));
 
