@@ -323,6 +323,14 @@ const routes = [
     component: () => import("@/components/ResetPassword.vue"),
   },
   {
+    // The printable evaluation report (A4 pages with editable fields), outside the dashboard layout.
+    path: "/evaluation-report/:childId",
+    name: "evaluation-report",
+    beforeEnter: auth,
+    meta: { permission: ["evaluation reports list"] },
+    component: () => import("@/views/reports/ReportEditor.vue"),
+  },
+  {
     path: "/print-child-result/:child_id/:sideProfile_id/:evaluation_id/:start/:end",
     name: "printChildResult",
     beforeEnter: auth,

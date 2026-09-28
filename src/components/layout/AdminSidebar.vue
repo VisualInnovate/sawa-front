@@ -21,7 +21,7 @@ const sections = computed(() =>
     {
       key: "care",
       label: "sidebar_care",
-      keys: ["evaluations", "custom-files", "inputs", "rooms"],
+      keys: ["evaluations", "evaluation-reports", "custom-files", "inputs", "rooms"],
     },
     {
       key: "system",

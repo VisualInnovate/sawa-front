@@ -50,6 +50,13 @@ export const buildMenu = () => [
     ],
   },
   {
+    key: "evaluation-reports",
+    icon: "mdi-file-chart-outline",
+    label: "ereport.menu",
+    to: { name: "evaluation-reports" },
+    perm: "evaluation reports list",
+  },
+  {
     key: "therapeutic",
     icon: "mdi-doctor",
     label: "Therapeutic",
