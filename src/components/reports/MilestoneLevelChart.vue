@@ -82,47 +82,56 @@ const fill = (question, threshold) =>
 }
 .mc-grid {
   display: grid;
-  grid-template-columns: 22px repeat(var(--cols), minmax(0, 1fr));
-  gap: 2px;
+  grid-template-columns: 26px repeat(var(--cols), minmax(0, 1fr));
+  gap: 0 3px;
   padding: 6px;
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
+/* As on the results page: grey headings and row numbers, a column per domain, dotted halves. */
 .mc-corner {
-  min-height: 34px;
+  min-height: 38px;
+  background: #e5e7eb;
 }
 .mc-domain {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 0 1px 2px;
+  min-height: 38px;
+  padding: 2px;
+  border-inline: 1px solid #e5e7eb;
+  background: #f3f4f6;
   font-size: 7.5pt;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
   text-align: center;
-  color: #334155;
+  color: #374151;
   overflow-wrap: anywhere;
 }
 .mc-num {
   display: grid;
   place-items: center;
+  border-top: 1px solid #e5e7eb;
+  background: #f3f4f6;
   font-size: 8pt;
   font-weight: 700;
-  color: #64748b;
+  color: #4b5563;
 }
 .mc-cell {
   display: grid;
   grid-template-rows: 1fr 1fr;
-  height: 22px;
-  border: 1px solid #94a3b8;
-  border-radius: 2px;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
+  height: 24px;
+  border-top: 1px solid #e5e7eb;
+  border-inline: 1px solid #e5e7eb;
 }
-.mc-cell span:first-child {
-  border-bottom: 1px dashed #cbd5e1;
+.mc-cell span {
+  border: 1px dotted #d1d5db;
 }
 .mc-cell.is-none {
-  border-style: dashed;
-  border-color: #e2e8f0;
+  background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 4px, #f1f5f9 4px, #f1f5f9 8px);
+}
+.mc-cell.is-none span {
+  border-color: transparent;
 }
 </style>
