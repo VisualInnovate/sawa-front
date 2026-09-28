@@ -33,6 +33,13 @@ const evaluationRoutes = [
     meta: { permission: ["evaluations edit"] },
     component: Edit,
   },
+  // Evaluation reports: children with finished evaluations -> choose evaluations -> report editor (full page, outside the layout).
+  {
+    path: 'evaluation-reports',
+    name: 'evaluation-reports',
+    meta: { permission: ["evaluation reports list"] },
+    component: () => import("../views/reports/index.vue")
+  },
   // ablls && missions
   {
     path: '/ablls', // Define the path for your addRoom route
