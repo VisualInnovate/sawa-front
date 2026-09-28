@@ -1,213 +1,395 @@
 <template>
-    <Ablls></Ablls>
-    <div v-can="'able category list'" class="sawa-card p-[1%]" >
-        <Button v-can="'able category create'" :label='$t("create_button")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
+  <div class="ab-page">
+    <Ablls />
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 ">
-             <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
-               <div class="col-span-2">
-                <div class="flex">
-                      <h3 class="text-base font-bold " >  {{ $t("index") }}</h3>
-                      <p> : {{ index +1}}</p>
-                   </div>
-                   <div style="overflow: hidden !important;" class="flex max-w-full">
-                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("title") }}</h3>
-                      <p >: {{ data.title }}</p>
-                   </div>
-                   <div style="overflow: hidden !important;" class="flex max-w-full">
-                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("sympol") }}</h3>
-                      <p >: {{ data.symbol }}</p>
-                   </div>
-               </div>
-               <div class="flex">
-                <Button v-can="'able category edit'" icon="pi pi-pencil" class="m-auto" @click="edit(data.id)" rounded severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
-                <Button v-can="'able category delete'"  icon="pi pi-trash" class="m-auto" @click="confirmDelete(data.id)" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-               </div>
-             </div>
+    <template v-if="$can('able category list')">
+      <header class="ab-hero">
+        <div class="ab-hero-main">
+          <span class="ab-hero-icon"><i class="pi pi-th-large" aria-hidden="true" /></span>
+          <div>
+            <h1>{{ $t('ablls_ui.categories_title') }}</h1>
+            <p>{{ $t('ablls_ui.categories_subtitle') }}</p>
+          </div>
+        </div>
+        <div class="ab-hero-side">
+          <div class="ab-stat">
+            <b>{{ categories.length }}</b>
+            <span>{{ $t('ablls_ui.categories_count') }}</span>
+          </div>
+          <div v-if="missionCounts" class="ab-stat">
+            <b>{{ totalMissions }}</b>
+            <span>{{ $t('ablls_ui.missions_count') }}</span>
+          </div>
+          <Button
+            v-can="'able category create'"
+            class="ab-hero-action"
+            :label="$t('ablls_ui.new_category')"
+            icon="pi pi-plus"
+            @click="openCreate"
+          />
+        </div>
+      </header>
 
-             <!-- delete and create -->
-             <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
+      <div class="ab-toolbar">
+        <IconField class="ab-search">
+          <InputIcon class="pi pi-search" />
+          <InputText v-model="search" :placeholder="$t('ablls_ui.search_categories')" />
+        </IconField>
+      </div>
+
+      <!-- loading -->
+      <div v-if="loading" class="cat-grid">
+        <div v-for="n in 6" :key="n" class="cat-card">
+          <div class="cat-top">
+            <Skeleton width="3.25rem" height="3.25rem" border-radius="14px" />
+            <div class="flex-1 grid gap-2">
+              <Skeleton width="70%" height="1.1rem" />
+              <Skeleton width="40%" height=".9rem" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="!categories.length" class="ab-empty">
+        <i class="pi pi-folder-open" aria-hidden="true" />
+        <h3>{{ $t('ablls_ui.empty_categories') }}</h3>
+        <p>{{ $t('ablls_ui.empty_categories_hint') }}</p>
+        <Button v-can="'able category create'" :label="$t('ablls_ui.new_category')" icon="pi pi-plus" @click="openCreate" />
+      </div>
+
+      <div v-else-if="!filtered.length" class="ab-empty">
+        <i class="pi pi-search" aria-hidden="true" />
+        <p>{{ $t('ablls_ui.no_results') }}</p>
+      </div>
+
+      <div v-else class="cat-grid">
+        <article v-for="item in filtered" :key="item.id" class="cat-card">
+          <div class="cat-top">
+            <span class="ab-symbol is-lg">{{ item.symbol }}</span>
+            <div class="cat-info">
+              <span class="cat-index">#{{ item.order }}</span>
+              <h3 :title="item.title">{{ item.title }}</h3>
+            </div>
+            <div class="ab-actions">
+              <Button
+                v-can="'able category edit'"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
+                v-tooltip.top="$t('edit')"
+                :aria-label="$t('edit')"
+                @click="openEdit(item)"
+              />
+              <Button
+                v-can="'able category delete'"
+                icon="pi pi-trash"
+                text
+                rounded
+                severity="danger"
+                v-tooltip.top="$t('delete')"
+                :aria-label="$t('delete')"
+                @click="askDelete(item)"
+              />
+            </div>
+          </div>
+
+          <div class="cat-footer">
+            <span v-if="missionCounts" class="cat-count" :class="{ 'is-zero': !missionCounts[item.id] }">
+              <i class="pi pi-list-check" aria-hidden="true" />
+              {{ missionCounts[item.id] ? $t('ablls_ui.missions_n', { n: missionCounts[item.id] }) : $t('ablls_ui.no_missions') }}
+            </span>
+            <router-link
+              v-if="$can('able mission list')"
+              :to="{ name: 'missions', query: { category: item.id } }"
+              class="cat-link"
             >
+              {{ $t('ablls_ui.view_missions') }}
+              <i class="pi pi-arrow-left cat-link-icon" aria-hidden="true" />
+            </router-link>
           </div>
-          <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
-          </template>
-        </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
+        </article>
+      </div>
+    </template>
 
-             <div>
+    <!-- create / edit -->
+    <Dialog v-model:visible="formDialog" :style="{ width: '32rem' }" :breakpoints="{ '640px': '94vw' }" modal :draggable="false">
+      <template #header>
+        <div class="ab-dialog-title">
+          <i :class="['pi', form.id ? 'pi-pencil' : 'pi-plus']" aria-hidden="true" />
+          {{ form.id ? $t('ablls_ui.edit_category') : $t('ablls_ui.new_category') }}
+        </div>
+      </template>
 
-             </div>
-            
+      <form class="grid gap-4" @submit.prevent="save">
+        <div class="ab-field">
+          <label for="cat-title">{{ $t('ablls_ui.category_title') }}<span class="ab-req">*</span></label>
+          <InputText id="cat-title" v-model="form.title" :placeholder="$t('ablls_ui.category_title_ph')" :invalid="!!errors.title" autofocus />
+          <small v-if="errors.title" class="ab-error">{{ errors.title[0] }}</small>
+        </div>
+        <div class="ab-field">
+          <label for="cat-symbol">{{ $t('ablls_ui.symbol') }}<span class="ab-req">*</span></label>
+          <InputText id="cat-symbol" v-model="form.symbol" class="ltr" maxlength="10" :placeholder="$t('ablls_ui.symbol_ph')" :invalid="!!errors.symbol" />
+          <small v-if="errors.symbol" class="ab-error">{{ errors.symbol[0] }}</small>
+          <small v-else class="ab-hint">{{ $t('ablls_ui.symbol_hint') }}</small>
+        </div>
+
+        <div class="cat-preview">
+          <span class="cat-preview-label">{{ $t('ablls_ui.preview') }}</span>
+          <div class="cat-top">
+            <span class="ab-symbol is-lg">{{ form.symbol || '?' }}</span>
+            <div class="cat-info">
+              <h3>{{ form.title || $t('ablls_ui.category_title') }}</h3>
+              <span class="ab-key">{{ (form.symbol || '?') + '-1' }}</span>
+            </div>
           </div>
-    </div>
-  </template>
+        </div>
+        <button type="submit" hidden />
+      </form>
+
+      <template #footer>
+        <Button :label="$t('cancel')" severity="secondary" variant="text" @click="formDialog = false" />
+        <Button :label="$t('save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="save" />
+      </template>
+    </Dialog>
+
+    <!-- delete -->
+    <Dialog v-model:visible="deleteDialog" :style="{ width: '28rem' }" :breakpoints="{ '640px': '94vw' }" modal :draggable="false" :header="$t('ablls_ui.delete_title')">
+      <div class="ab-confirm">
+        <span class="ab-confirm-icon"><i class="pi pi-trash" aria-hidden="true" /></span>
+        <p>{{ $t('ablls_ui.delete_category_msg', { name: toDelete?.title }) }}</p>
+      </div>
+      <template #footer>
+        <Button :label="$t('cancel')" severity="secondary" variant="text" @click="deleteDialog = false" />
+        <Button :label="$t('delete')" icon="pi pi-trash" severity="danger" :loading="deleting" data-no-request-spinner @click="remove" />
+      </template>
+    </Dialog>
+  </div>
+</template>
 
 <script setup>
-import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
-import {FilterMatchMode} from '@primevue/core/api'
-import {ref, onMounted, onBeforeMount} from 'vue'
-// import ProductService from '@/service/ProductService';
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast'
+import axios from 'axios'
 import Ablls from '../../components/Ablls.vue'
-import {useToast} from 'primevue/usetoast'
-import axios from "axios";
-import {useRouter} from "vue-router";
+import { can } from '@/utils/permissions'
+import '@/components/ablls/ablls.css'
+
+const { t } = useI18n()
 const toast = useToast()
-const router = useRouter()
 
+const categories = ref([])
+const missionCounts = ref(null)
 const loading = ref(true)
-const user = ref({})
-const error = ref('')
-const users = ref(null)
-const productDialog = ref(false)
-const deleteDialog = ref(false)
-const confir_id=ref('')
-const selectedProducts = ref(null)
-const dt = ref(null)
-const filters = ref({})
-const createdialog=ref(false)
-const levels=ref({})
-const updatedialog=ref(false)
+const search = ref('')
 
-onBeforeMount(() => {
-  initFilters()
+const formDialog = ref(false)
+const form = ref({})
+const errors = ref({})
+const saving = ref(false)
+
+const deleteDialog = ref(false)
+const toDelete = ref(null)
+const deleting = ref(false)
+
+const totalMissions = computed(() => Object.values(missionCounts.value || {}).reduce((a, b) => a + b, 0))
+
+const filtered = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return categories.value
+  return categories.value.filter(
+    (c) => (c.title || '').toLowerCase().includes(q) || (c.symbol || '').toLowerCase().includes(q)
+  )
 })
 
- const fetchData= ()=>{
-
-
-  axios.get("/api/able-category").then((res)=>{
-    loading.value= false
-    users.value= res.data.data
-    console.log(users.value)
-
-  });
-
-
+const fetchData = async () => {
+  try {
+    const res = await axios.get('/api/able-category')
+    categories.value = (res.data.data || []).map((c, i) => ({ ...c, order: i + 1 }))
+  } finally {
+    loading.value = false
+  }
 }
 
-
+// Mission counts per category (only when the user may list missions).
+const fetchCounts = async () => {
+  if (!can('able mission list')) return
+  try {
+    const res = await axios.get('/api/able-mission')
+    const counts = {}
+    for (const m of res.data.data || []) counts[m.category_id] = (counts[m.category_id] || 0) + 1
+    missionCounts.value = counts
+  } catch {
+    missionCounts.value = null
+  }
+}
 
 onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
-fetchData()
-
+  fetchData()
+  fetchCounts()
 })
-const edit=(id)=>{
-    axios.get(`/api/able-category/${id}`).then((res)=>{
-    loading.value= false
-    levels.value= res.data.data
-    console.log(users.value)
 
-  });
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
+const openCreate = () => {
+  form.value = { title: '', symbol: '' }
+  errors.value = {}
+  formDialog.value = true
 }
 
-
-///// update
-
-const editescrud=()=>{
-    axios
-    .put(`/api/able-category/${confir_id.value}`,levels.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
+const openEdit = (item) => {
+  form.value = { id: item.id, title: item.title, symbol: item.symbol }
+  errors.value = {}
+  formDialog.value = true
 }
 
-const openNew = () => {
-    createdialog.value=!(createdialog.value)
+const save = async () => {
+  if (saving.value) return
+  errors.value = {}
+  if (!form.value.title?.trim()) errors.value.title = [t('ablls_ui.required')]
+  if (!form.value.symbol?.trim()) errors.value.symbol = [t('ablls_ui.required')]
+  if (Object.keys(errors.value).length) return
+
+  saving.value = true
+  const payload = { title: form.value.title.trim(), symbol: form.value.symbol.trim() }
+  try {
+    if (form.value.id) await axios.put(`/api/able-category/${form.value.id}`, payload)
+    else await axios.post('/api/able-category', payload)
+    formDialog.value = false
+    toast.add({ severity: 'success', summary: t('success_message'), detail: t('ablls_ui.saved'), life: 3000 })
+    fetchData()
+  } catch (e) {
+    errors.value = e.response?.data?.errors || {}
+  } finally {
+    saving.value = false
+  }
 }
 
-const confirmDelete = (id) => {
-  console.log(id)
+const askDelete = (item) => {
+  toDelete.value = item
   deleteDialog.value = true
-  confir_id.value=id
- 
-
 }
 
-const createcrude=()=>{
-    axios
-    .post('/api/able-category',levels.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-const deleteAction = () => {
-  axios
-    .delete(`/api/able-category/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
-      deleteDialog.value=false
-      fetchData()
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-    })
-    .catch(() => {})
-
-}
-
-
-
-
-const initFilters = () => {
-  filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+const remove = async () => {
+  deleting.value = true
+  try {
+    await axios.delete(`/api/able-category/${toDelete.value.id}`)
+    deleteDialog.value = false
+    toast.add({ severity: 'success', summary: t('success_message'), detail: t('ablls_ui.deleted'), life: 3000 })
+    fetchData()
+    fetchCounts()
+  } catch (e) {
+    toast.add({ severity: 'error', summary: t('delete'), detail: e.response?.data?.message || e.message, life: 4000 })
+  } finally {
+    deleting.value = false
   }
 }
 </script>
 
-  
-  <style scoped>
-  /* Additional styling if needed */
-  </style>
-  
+<style scoped>
+.cat-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+.cat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  box-shadow: var(--sawa-shadow);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.cat-card:hover {
+  border-color: #b6d7db;
+  box-shadow: 0 10px 24px -14px rgba(19, 92, 101, 0.45);
+  transform: translateY(-2px);
+}
+.cat-top {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.cat-info {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 0.15rem;
+}
+.cat-info h3 {
+  margin: 0;
+  max-width: 100%;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sawa-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cat-index {
+  font-size: 0.75rem;
+  color: var(--sawa-muted);
+  font-weight: 600;
+}
+.cat-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--sawa-border);
+  font-size: 0.85rem;
+}
+.cat-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  font-weight: 600;
+}
+.cat-count.is-zero {
+  background: #f1f5f9;
+  color: var(--sawa-muted);
+}
+.cat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-inline-start: auto;
+  color: var(--sawa-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.cat-link:hover {
+  text-decoration: underline;
+}
+[dir='ltr'] .cat-link-icon {
+  transform: scaleX(-1);
+}
+.cat-preview {
+  position: relative;
+  padding: 1.1rem 1rem 1rem;
+  border: 1px dashed #b6d7db;
+  border-radius: var(--sawa-radius);
+  background: #fafdfd;
+}
+.cat-preview-label {
+  position: absolute;
+  top: -0.65rem;
+  inset-inline-start: 0.75rem;
+  padding: 0 0.4rem;
+  background: #fff;
+  color: var(--sawa-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+</style>
