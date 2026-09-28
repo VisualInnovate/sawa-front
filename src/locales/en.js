@@ -723,7 +723,7 @@ export default {
   leave_type: "Leave Type",
   // Added: keys used in components that had no translation
   "multiple": "Multiple",
-  "ablls": "ABLLS",
+  "ablls": "ABLLS Academy",
   "forgot_password": "Forgot password?",
   "send_link": "Send link",
   "side profile": "Side profile",
@@ -920,7 +920,7 @@ export default {
   "youtube ": "YouTube",
   "Site Logo": "Site logo",
   "Site Cover": "Site cover",
-  "ablls_eval": "ABLLS evaluation",
+  "ablls_eval": "ABLLS Academy evaluation",
   "check_booking_failed": "Could not check the child's booking. Try again.",
   "code_sent_to": "We sent the activation code to",
   "account_created_check_email": "Account created. We sent the activation code to your email.",
@@ -1251,9 +1251,9 @@ export default {
     "file": "File"
   },
   ablls_ui: {
-    categories_title: "ABLLS categories",
+    categories_title: "ABLLS Academy categories",
     categories_subtitle: "The domains assessment missions are built on. Each category's symbol prefixes its mission keys.",
-    missions_title: "ABLLS missions",
+    missions_title: "ABLLS Academy missions",
     missions_subtitle: "Every assessment mission grouped by category, with its key and degree scale.",
     new_category: "New category",
     edit_category: "Edit category",

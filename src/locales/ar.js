@@ -744,7 +744,7 @@ export default {
   leave_type: "نوع المغادرة",
   // Added: keys used in components that had no translation
   multiple: "متعدد",
-  ablls: "ABLLS",
+  ablls: "ABLLS Academy",
   forgot_password: "نسيت كلمة المرور؟",
   send_link: "إرسال الرابط",
   "side profile": "تقييم الصورة الجانبية",
@@ -937,7 +937,7 @@ export default {
   "youtube ": "يوتيوب",
   "Site Logo": "شعار الموقع",
   "Site Cover": "غلاف الموقع",
-  ablls_eval: "تقييم ABLLS",
+  ablls_eval: "تقييم ABLLS Academy",
   check_booking_failed: "تعذر التحقق من حجز الطفل. حاول مرة أخرى.",
   code_sent_to: "أرسلنا رمز التفعيل إلى",
   account_created_check_email:
@@ -1287,9 +1287,9 @@ export default {
     file: "ملف",
   },
   ablls_ui: {
-    categories_title: "فئات ABLLS",
+    categories_title: "فئات ABLLS Academy",
     categories_subtitle: "المجالات التي تُبنى عليها مهمات التقييم، ولكل فئة رمز يظهر في مفتاح المهمة.",
-    missions_title: "مهمات ABLLS",
+    missions_title: "مهمات ABLLS Academy",
     missions_subtitle: "جميع مهمات التقييم مرتبة حسب الفئة، مع المفتاح ومقياس الدرجات لكل مهمة.",
     new_category: "فئة جديدة",
     edit_category: "تعديل الفئة",
