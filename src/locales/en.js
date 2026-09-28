@@ -1346,6 +1346,8 @@ export default {
     selected_n: "{n} selected",
     evaluator: "Evaluator",
     create_report: "Prepare report",
+    limit_hint: "You can choose up to {n} evaluations of each type.",
+    limit_reached: "The limit ({n}) for this type is reached",
     choose_one: "Choose at least one evaluation",
     side_profile: "Side profile",
     editor_hint: "Highlighted fields can be edited before printing; they are saved on this device.",

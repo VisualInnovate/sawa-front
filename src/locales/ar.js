@@ -1382,6 +1382,8 @@ export default {
     selected_n: "{n} محدد",
     evaluator: "المقيّم",
     create_report: "إعداد التقرير",
+    limit_hint: "يمكنك اختيار {n} تقييمات كحد أقصى من كل نوع.",
+    limit_reached: "وصلت إلى الحد الأقصى ({n}) لهذا النوع",
     choose_one: "اختر تقييمًا واحدًا على الأقل",
     side_profile: "الصورة الجانبية",
     // Report editor
