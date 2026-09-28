@@ -13,10 +13,14 @@ import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
-import ReportResults from "@/components/reports/ReportResults.vue";
+import TestTables from "@/components/reports/TestTables.vue";
+import BarrierChart from "@/components/reports/BarrierChart.vue";
+import AbllsChart from "@/components/reports/AbllsChart.vue";
+import CarolinaChart from "@/components/reports/CarolinaChart.vue";
+import SideProfileChart from "@/components/reports/SideProfileChart.vue";
 import {
-  MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
-  isBehavioural, isFemale, shortAge, typeIcon, typeLabel, ymd,
+  ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  isBehavioural, isFemale, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
 const { t } = useI18n();
@@ -69,7 +73,6 @@ const todayIso = (() => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 })();
 
-const TEST_KEYS = ["1st test", "2nd test", "3rd test", "4th test"];
 const behaviourColumns = ["behavior", "behavior_detail", "severity", "frequency", "duration"];
 
 // ---- editable values -------------------------------------------------------------------------------
@@ -348,52 +351,9 @@ function back() {
             </header>
 
             <p class="rx-kicker">{{ $t("ereport.special_education") }}</p>
-            <p class="rx-intro">{{ $t("ereport.vb_intro", { name: child.name }) }}</p>
+            <p class="rx-intro">{{ $t("ereport.form_intro", { name: child.name, evaluation: "VB-MAPP" }) }}</p>
 
-            <div class="vb-tables">
-              <table class="vb-table vb-info">
-                <tbody>
-                  <tr>
-                    <th class="tone-a">Child name</th>
-                    <td colspan="2">{{ child.name }}</td>
-                  </tr>
-                  <tr>
-                    <th class="tone-b">Date of birth</th>
-                    <td colspan="2" class="ltr-cell"><span class="ltr">{{ ymd(child.birth_date) }}</span></td>
-                  </tr>
-                  <tr v-for="(key, i) in TEST_KEYS" :key="key">
-                    <th v-if="i === 0" :rowspan="TEST_KEYS.length" class="tone-c">Age at testing</th>
-                    <th class="tone-c vb-n">{{ i + 1 }}</th>
-                    <td class="ltr-cell"><span class="ltr">{{ section.tests[i] ? shortAge(section.tests[i].result?.age_months) : "" }}</span></td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <table class="vb-table vb-tests">
-                <thead>
-                  <tr>
-                    <th class="tone-a">Tester</th>
-                    <th class="tone-b">Color</th>
-                    <th class="tone-c">Date</th>
-                    <th class="tone-d">Score</th>
-                    <th class="tone-e">Key</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(key, i) in TEST_KEYS" :key="key">
-                    <td>{{ section.tests[i]?.result?.testers?.join(" / ") ?? "" }}</td>
-                    <td>
-                      <span class="vb-swatches">
-                        <i v-for="color in section.tests[i]?.result?.colors ?? []" :key="color" :style="{ background: '#' + color }" />
-                      </span>
-                    </td>
-                    <td class="ltr-cell"><span class="ltr">{{ ymd(section.tests[i]?.date) }}</span></td>
-                    <td><EditableText v-if="section.tests[i]" v-model="edits.cases[section.group].scores[i]" block /></td>
-                    <th class="tone-e ltr-cell"><span class="ltr">{{ key }}</span></th>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
 
             <div class="vb-levels">
               <MilestoneLevelChart v-for="level in levelsHighFirst(section.newest)" :key="level.level_id" :level="level" />
@@ -404,22 +364,22 @@ function back() {
           </section>
         </template>
 
-        <!-- Any other type: its heading once, then each chosen evaluation's results -->
+        <!-- Any other type: the same test tables, then its chart as on its results page -->
         <section v-else class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
-            <span>{{ section.label }}</span>
+            <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
           </header>
 
           <h2 class="rx-band">{{ $t("ereport.results_of", { name: section.label }) }}</h2>
-          <div v-for="(test, i) in section.tests" :key="test.key" class="rx-test">
-            <p class="rx-meta">
-              <b v-if="section.tests.length > 1" class="rx-test-key ltr">{{ TEST_KEYS[i] }}</b>
-              <span><i class="pi pi-calendar" aria-hidden="true" /> <span class="ltr">{{ dmy(test.date) }}</span></span>
-              <span v-if="test.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ $t("ereport.evaluator") }}: {{ test.specialist.name }}</span>
-            </p>
-            <ReportResults :item="test" />
-          </div>
+          <p class="rx-intro">{{ $t("ereport.form_intro", { name: child.name, evaluation: section.label }) }}</p>
+
+          <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
+
+          <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
+          <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
+          <CarolinaChart v-else-if="section.type === CAROLINA" :tests="section.tests" />
+          <SideProfileChart v-else-if="section.type === SIDE_PROFILE" :tests="section.tests" />
 
           <template v-if="section.behavioural">
             <h2 class="rx-band rx-band-soft rx-space">{{ $t("ereport.behaviors") }}</h2>
@@ -790,15 +750,7 @@ function back() {
   color: #64748b;
   text-align: center;
 }
-.rx-test + .rx-test {
-  margin-top: 7mm;
-}
-.rx-test-key {
-  padding: 0 8px;
-  border-radius: 6px;
-  background: #e0e7ff;
-  color: #1e293b;
-}
+
 
 /* tables */
 .rx-table {
@@ -876,55 +828,6 @@ function back() {
   font-size: 10pt;
 }
 
-/* VB-MAPP tables */
-.vb-tables {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
-  gap: 8mm;
-  align-items: start;
-  margin-bottom: 7mm;
-}
-.vb-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 9pt;
-  line-height: 1.4;
-}
-.vb-table th,
-.vb-table td {
-  padding: 4px 6px;
-  border: 1px solid #94a3b8;
-  text-align: center;
-  vertical-align: middle;
-}
-.vb-table th {
-  font-weight: 800;
-  color: #1e293b;
-  white-space: nowrap;
-}
-.vb-table td {
-  background: #fff;
-}
-.vb-n {
-  width: 26px;
-}
-.tone-a { background: #cfe8ea; }
-.tone-b { background: #dcfce7; }
-.tone-c { background: #fef3c7; }
-.tone-d { background: #fce7f3; }
-.tone-e { background: #e0e7ff; }
-.vb-tests td {
-  height: 26px;
-}
-.vb-swatches {
-  display: inline-flex;
-  gap: 0;
-}
-.vb-swatches i {
-  width: 16px;
-  height: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.25);
-}
 .vb-levels {
   display: grid;
   gap: 5mm;

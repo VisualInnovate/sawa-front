@@ -1,414 +1,650 @@
 <template>
-  <div>
-      
-  
-  </div>
-  <div class="sawa-card">
-    <div>
-      <Message v-if="alert_text" severity="error" class="mb-3">{{ alert_text }}</Message>
+  <div class="be-page">
+    <Toast />
 
-    
-      <form style="max-height: 80vh; overflow-y: scroll;" ref="form" @submit.prevent="getanswer" class="p-[2%]  bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" >
-        <!-- ... existing code ... -->
-          
-          
-    
-              <div class="flex flex-column gap-2">
-                  <label for="username">{{ $t('child_name') }}</label>
-                  <Select filter required disabled v-model="answer.child_id"  option-value="id" :options="childs" optionLabel="name" :placeholder='$t("child_name")' class="w-full" />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.child_id">{{ error.child_id[0] }}</div>
-              </div>
-              
-              <div  v-if="answer.child_id" class="flex flex-column gap-2">
-                <label for="username">{{ $t('date') }}</label>
-                <DatePicker  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'  :minDate="maxDate" />   
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
+    <header class="be-hero">
+      <div class="be-hero-main">
+        <span class="be-hero-icon"><i class="pi pi-shield" aria-hidden="true" /></span>
+        <div>
+          <h1>{{ $t("barrier_ui.title") }}</h1>
+          <p v-if="childName">{{ childName }}</p>
+        </div>
+      </div>
+      <div v-if="started" class="be-hero-progress">
+        <b>{{ answeredCount }}/{{ barriers.length }}</b>
+        <span>{{ $t("barrier_ui.answered") }}</span>
+      </div>
+    </header>
 
-            </div> 
-            <div  v-if="answer.date" class="flex flex-column gap-2">
-                  <label for="username">{{ $t('age') }}</label>
-                  <InputNumber readonly  required v-model="answer.child_age" :placeholder='$t("age")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
-              </div> 
-           
-            
-              <!-- <div  v-if="answer.child_id" class="flex flex-column gap-2">
-                  <label for="username">{{ $t('score') }}</label>
-                  
-                  <InputNumber  :min="0" :max=".9" required inputId="minmaxfraction" :minFractionDigits="1" :maxFractionDigits="5" v-model="answer.score" :placeholder='$t("score")' />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.score">{{ error.score[0] }}</div>
-              </div> 
-              -->
-        
+    <Message v-if="alert_text" severity="error" :closable="false">{{ alert_text }}</Message>
 
-              <div v-if="answer.child_id" class=" flex flex-column gap-2">
-                  <label for="username">{{ $t('color') }}</label>
-                  <div class="flex">
-                    <ColorPicker   :style="{ 'background-color':'#' +answer.color  }"  class="w-full h-[50px]" v-model="answer.color" />
-                    <Button @click="createevalutae" class="m-auto w-full h-[50px]" :label='$t("strart_evaluate")'></Button>
-                  </div>
-                  
-                  
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
-              </div> 
-             <div class="col-span-2">
-              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                <a style="color: blue;" v-if="strart_evaluate" v-for="head,ind in allquestion" :href="'#'+ind">{{ head.title.substring(0, 30) + '...' }}</a>
-              </div>
-              <div v-if="strart_evaluate" v-for="head,ind in allquestion" class="col-span-2 flex flex-column gap-2">
-                <a :id="ind" class="text-[black] font-bold" >{{head.title }}</a>
-               <div style="border: 1px solid black; border-radius: 5px;">
-                
-                      
-                <div style="border-radius: 5px;padding: 1%;" class="my-2"  v-for="(question, index) in head.barriers_questiont" :key="index">
-                    <div class="flex">
-                      <input  @change="getscore(ind,question.id,question.subtest_id,question.index)" type="radio" style="border: 1px solid black " class="p-1 mx-2 my-auto" :name="ind" :value="index">
-                     <p class="py-1"> {{ question.title }}:</p>
-                    </div>
+    <!-- 1. Evaluation details -->
+    <section class="be-card">
+      <div class="be-card-head">
+        <span class="be-step">1</span>
+        <div>
+          <h2>{{ $t("barrier_ui.details") }}</h2>
+          <p>{{ $t("barrier_ui.details_hint") }}</p>
+        </div>
+        <Tag v-if="started" severity="success" icon="pi pi-check" :value="$t('barrier_ui.started')" class="be-started" />
+      </div>
 
-                  
-                     
-                  
-                </div>
-                <!-- <div class="w-full text-center">
-                  <Button @click="pushanser(head.id,ind)"  class="lg:w-44 m-auto my-2" :label='$t("send_answer")'></Button>
+      <div class="be-grid">
+        <div class="be-field">
+          <label>{{ $t("child_name") }}</label>
+          <div class="be-readonly"><i class="pi pi-user" aria-hidden="true" /> {{ childName || "—" }}</div>
+          <small v-if="error?.child_id" class="be-error">{{ error.child_id[0] }}</small>
+        </div>
 
-                </div> -->
-               </div>
-                      
-                         
-                 
-            
-              </div> 
-              <div class="mt-1 mb-5 text-red-500" v-if="error?.scores">{{ error.scores[0] }}</div>
-              
-             </div>
-             
-       
-           
-              <div class="flex flex-column gap-2 w-full">
-                <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button type="submit" class="m-auto w-full" :label='$t("submit")'></Button>
-                <small id="username-help"></small>
-              </div>
-              
+        <div class="be-field">
+          <label for="be-date">{{ $t("date") }}<span class="be-req">*</span></label>
+          <DatePicker
+            v-model="answer.date"
+            inputId="be-date"
+            showIcon
+            showButtonBar
+            :minDate="minDate"
+            :disabled="started"
+            :placeholder="$t('date')"
+            fluid
+            @update:model-value="getage"
+          />
+        </div>
 
-      
-      </form>
-<Toast />
-      <!-- ... existing code ... -->
-    </div>
+        <div class="be-field">
+          <label>{{ $t("age") }}</label>
+          <div class="be-readonly">
+            <i class="pi pi-hourglass" aria-hidden="true" />
+            <template v-if="answer.child_age !== undefined && answer.child_age !== null">
+              {{ formatChildAge(null, answer.child_age, $t) }}
+            </template>
+            <span v-else class="be-muted">{{ $t("barrier_ui.pick_date") }}</span>
+          </div>
+          <small v-if="error?.child_age" class="be-error">{{ error.child_age[0] }}</small>
+        </div>
+
+        <div class="be-field">
+          <label>{{ $t("color") }}</label>
+          <div class="be-colors" role="radiogroup" :aria-label="$t('color')">
+            <button
+              v-for="color in colorOptions"
+              :key="color"
+              type="button"
+              role="radio"
+              :aria-checked="answer.color === color"
+              :aria-label="'#' + color"
+              :class="{ selected: answer.color === color }"
+              :style="{ backgroundColor: '#' + color }"
+              @click="answer.color = color"
+            >
+              <i v-if="answer.color === color" class="pi pi-check" aria-hidden="true" />
+            </button>
+          </div>
+          <small class="be-hint">{{ $t("barrier_ui.color_hint") }}</small>
+          <small v-if="error?.color" class="be-error">{{ error.color[0] }}</small>
+        </div>
+      </div>
+
+      <div v-if="!started" class="be-start">
+        <Button
+          :label="$t('strart_evaluate')"
+          icon="pi pi-play"
+          :disabled="!answer.date || answer.child_age === undefined"
+          :loading="starting"
+          data-no-request-spinner
+          @click="createevalutae"
+        />
+      </div>
+    </section>
+
+    <!-- 2. The barriers -->
+    <template v-if="started">
+      <nav class="be-nav" :aria-label="$t('barrier_ui.barriers')">
+        <div class="be-progress"><span :style="{ width: progress + '%', background: '#' + answer.color }" /></div>
+        <div class="be-chips">
+          <a
+            v-for="(barrier, ind) in barriers"
+            :key="barrier.id"
+            :href="'#barrier-' + ind"
+            class="be-chip"
+            :class="{ 'is-done': selected[ind] !== undefined, 'is-missing': showMissing && selected[ind] === undefined }"
+            @click.prevent="scrollTo(ind)"
+          >
+            <i :class="selected[ind] !== undefined ? 'pi pi-check-circle' : 'pi pi-circle'" aria-hidden="true" />
+            {{ ind + 1 }}
+          </a>
+        </div>
+      </nav>
+
+      <section
+        v-for="(barrier, ind) in barriers"
+        :id="'barrier-' + ind"
+        :key="barrier.id"
+        class="be-card be-barrier"
+        :class="{ 'is-missing': showMissing && selected[ind] === undefined }"
+      >
+        <header class="be-barrier-head">
+          <span class="be-num" :style="selected[ind] !== undefined ? { background: '#' + answer.color, color: '#fff' } : null">{{ ind + 1 }}</span>
+          <h3>{{ barrier.title }}</h3>
+          <span v-if="selected[ind] !== undefined" class="be-score" :style="{ borderColor: '#' + answer.color }">
+            {{ $t("barrier_ui.score") }}: <b>{{ selected[ind] }}</b>
+          </span>
+        </header>
+
+        <div class="be-options" role="radiogroup" :aria-label="barrier.title">
+          <label
+            v-for="question in barrier.options"
+            :key="question.id"
+            class="be-option"
+            :class="{ 'is-picked': selected[ind] === question.index }"
+            :style="selected[ind] === question.index ? { '--pick': '#' + answer.color } : null"
+          >
+            <input
+              type="radio"
+              class="be-radio"
+              :name="'barrier-' + ind"
+              :value="question.index"
+              :checked="selected[ind] === question.index"
+              @change="getscore(ind, question.id, question.subtest_id, question.index)"
+            />
+            <span class="be-option-score">{{ question.index }}</span>
+            <span class="be-option-text">{{ question.title }}</span>
+          </label>
+        </div>
+      </section>
+
+      <footer class="be-footer">
+        <span class="be-footer-count">
+          <i class="pi pi-list-check" aria-hidden="true" />
+          {{ $t("barrier_ui.answered_of", { n: answeredCount, total: barriers.length }) }}
+        </span>
+        <Button :label="$t('barrier_ui.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="getanswer" />
+      </footer>
+    </template>
   </div>
 </template>
 
 <script>
-import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
 import axios from "axios";
-import moment from "moment";
-import InputNumber from "primevue/inputnumber";
-import EvaluationType from '../../../components/EvaluationType.vue'
-  import {useToast} from 'primevue/usetoast'
+import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
+import { formatChildAge, toDateOnly } from "../../../utils/childAge";
+
+// The colors every evaluation screen offers (VB-MAPP, ABLLS, Carolina use the same ones).
+const COLOR_OPTIONS = ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"];
+
 export default {
-  components:{EvaluationType},
-
-
   data() {
     return {
-      alert_text:"",
-      answers:[],
-      change:{
-        status:"1"
-      },
-      alltypes:[],
-      strart_evaluate:false,
-      answer:{ 
-          color:"00a2ff"
-      },
-      score:[],
-     allquestion:[],
-      childs:[],
-      qustions:{},
+      alert_text: "",
+      change: { status: "1" },
+      started: false,
+      starting: false,
+      saving: false,
+      showMissing: false,
+      colorOptions: COLOR_OPTIONS,
+      // The child is in the URL (/barrier-evaluation/:id); older links relied on the stored child.
+      answer: { color: COLOR_OPTIONS[0], child_id: parseInt(this.$route.params.id) || parseInt(localStorage.getItem("child_id")) || null },
+      // barrier position -> the chosen option's score
+      selected: {},
+      score: [],
+      allquestion: [],
+      childName: "",
       error: {},
-      maxDate: new Date(),
-      notanswer:[],
-     
-      // Add other validation rules for the title field
+      minDate: new Date(),
     };
-
   },
-
-
+  computed: {
+    // Each barrier with its options in score order (0-4).
+    barriers() {
+      return this.allquestion.map((barrier) => ({
+        ...barrier,
+        options: [...(barrier.barriers_questiont ?? [])].sort((a, b) => Number(a.index) - Number(b.index)),
+      }));
+    },
+    answeredCount() {
+      return Object.keys(this.selected).length;
+    },
+    progress() {
+      return this.barriers.length ? Math.round((this.answeredCount / this.barriers.length) * 100) : 0;
+    },
+  },
   methods: {
-    // ... existing methods ...
-    Therapeutic (){
-      this.$router.push({ name: 'answer' });
-    },
-    createevalutae(id){
-        console.log(id)
-        
-        axios
-          .post(`api/evaluations/create`,{
-            type:3,
-            title: getEvaluationTypeLabel(3, this.$t, this.$t("evaluation_results")),
-            child_id:this.answer.child_id,
-            specialist_id:localStorage.getItem("user_id"),
-            date:this.answer.date,
-             
-          
-          })
-          .then((response) => {
-          
-            this.answer.evaluation_id=response.data.evaluation.id
-            this.strart_evaluate=!(this.strart_evaluate)
-           
-           
-          }).catch((el)=>{
-        console.log(el.response.data)
-     this.error = el.response.data.errors
-     console.log(this.error)
-    })
-      },
-
-    submit(){
-      
-      
-    },
-
-    anserdata(id,val){
-      console.log(id)
-      console.log(val)
-    },
-    getcolor(id){
-      this.answer.color=id.target.value
-    },
-    getscore(index,question_id,subtest_id,question_index){
-    
-        this.score[index]={subtest_id:subtest_id,question_id:question_id,question_index:question_index}
-      
-      
-      console.log(this.score)
-    
-
-    },
-
-    getage(){
+    formatChildAge,
+    createevalutae() {
+      this.starting = true;
       axios
-        .post("api/milestone-answers/get-age-child",{
-          date:this.answer.date,
-          child_id:this.answer.child_id
+        .post(`api/evaluations/create`, {
+          type: 3,
+          title: getEvaluationTypeLabel(3, this.$t, this.$t("evaluation_results")),
+          child_id: this.answer.child_id,
+          specialist_id: localStorage.getItem("user_id"),
+          // A plain YYYY-MM-DD: a Date object used to be sent and saved as 0000-00-00.
+          date: toDateOnly(this.answer.date),
         })
         .then((response) => {
-         this.answer.child_age=response.data
-         
+          this.answer.evaluation_id = response.data.evaluation.id;
+          this.started = true;
         })
+        .catch((el) => {
+          this.error = el.response?.data?.errors ?? {};
+        })
+        .finally(() => {
+          this.starting = false;
+        });
     },
-    getallquestion(){
-      axios.get("api/barrier-subtest")
+    getscore(index, question_id, subtest_id, question_index) {
+      this.score[index] = { subtest_id, question_id, question_index };
+      this.selected = { ...this.selected, [index]: question_index };
+    },
+    getage() {
+      if (!this.answer.date) return;
+      axios
+        .post("api/milestone-answers/get-age-child", { date: toDateOnly(this.answer.date), child_id: this.answer.child_id })
         .then((response) => {
-          console.log(response.data.data)
-          this.allquestion = response.data.data
-         
+          this.answer.child_age = response.data;
+        });
+    },
+    getallquestion() {
+      axios.get("api/barrier-subtest").then((response) => {
+        this.allquestion = response.data.data ?? [];
+      });
+    },
+    // The children list is open to evaluators ("barrier answer create"); the child's own endpoints are not.
+    getchild() {
+      if (!this.answer.child_id) return;
+      axios
+        .get("api/child")
+        .then(({ data }) => {
+          this.childName = (data?.children ?? []).find((child) => child.id === this.answer.child_id)?.name ?? "";
         })
-
+        .catch(() => {});
     },
-    getalltypeanswer(){
-      axios.get("api/barrier-answer-type")
-        .then((response) => {
-          console.log(response.data.data)
-          this.alltypes = response.data.data
-         
+    scrollTo(ind) {
+      document.getElementById("barrier-" + ind)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+    getanswer() {
+      const missing = this.barriers.findIndex((_, ind) => this.selected[ind] === undefined);
+      if (missing !== -1) {
+        this.showMissing = true;
+        this.alert_text = this.$t("answer_all_questions");
+        this.scrollTo(missing);
+        setTimeout(() => (this.alert_text = ""), 3000);
+        return;
+      }
+      this.saving = true;
+      this.answer.scores = this.score;
+      const payload = { ...this.answer, date: toDateOnly(this.answer.date) };
+      // The request being closed: the one opened from the requests list (same id either way).
+      const requestId = this.$route.query.requestId || localStorage.getItem("eavl_id");
+      axios
+        .post("/api/barrier-answer", payload)
+        .then(() => {
+          if (requestId) axios.post(`/api/evaluation-request/change-status/${requestId}`, this.change);
+          this.$router.push({ name: "barrier-resulte", params: { id: this.answer.child_id } });
         })
-
-    },
-      pushanser(subtest_id,index){
-           console.log(index,subtest_id)
-           this.answer.date= moment(this.answer.date).format("Y-MM-DD")
-      
-        console.log(this.answers)
-      },
-
-    getanswer(){
-              
-        this.answer.scores=this.score
-        axios.post("/api/barrier-answer",this.answer).then((res) => {
-          axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
-        this.$router.push({ name: 'barrier-resulte', params:{'id':this.answer.child_id}});
-      }).catch((el)=>{
-          this.alert_text=this.$t('answer_all_questions')
-            setTimeout(() => {
-        this.alert_text=''
-      }, 2500); 
-      })
-    
-
-    },
-    getusers(){
-     axios
-          .get("api/child")
-          .then((response) => {
-           
-            this.childs = response.data.children
-            this.answer.child_id=parseInt(localStorage.getItem("child_id")) 
-          
-          })
-        axios
-        .get("api/mileston-levels")
-        .then((response) => {
-          console.log(response.data.data)
-          this.qustions = response.data.data
-         
+        .catch(() => {
+          this.alert_text = this.$t("answer_all_questions");
+          setTimeout(() => (this.alert_text = ""), 3000);
         })
-       
-
+        .finally(() => {
+          this.saving = false;
+        });
     },
-   
-    
-  
-    createtreatment() {
-    
-      axios.post("api/barrier-question/check/answers",{
-        child_id:this.answer.child_id,
-        level_id:this.answer.level_id,
-
-      }).then((res) => {
-        console.log(res.data.data)
-        this.notanswer=res.data.data
-        if(this.notanswer == ''){
-          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('successful'), life: 3000 });
-        }
-      }).catch((el)=>{
-        console.log(el.response.data.errors.name)
-     this.error = el.response.data.errors
-    })
-    },
-   
   },
   mounted() {
-   this.getusers()
-   this.getallquestion()
-   this.getalltypeanswer()
+    this.getchild();
+    this.getallquestion();
   },
 };
 </script>
 
 <style scoped>
-/* Add custom styles for the name input field */
-.name-input {
-  height: 70vh;
-  margin: auto !important;
-   overflow-y: scroll;
-  width: 100%;
-  position: relative;
-  background-color: #e7e7e7;
-  padding: 10px;
-  margin-bottom: 15px !important;
-  border-radius: 10px;
-}
-.name-input::-webkit-scrollbar {
-  display: none;
-}
-/* Hide scrollbar for IE, Edge and Firefox */
-.name-input {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-.name-input {
-  width: 606px;
+.be-page {
+  display: grid;
+  gap: 1rem;
 }
 
-
-
-.seed {
-  width: 600px;
-
-  margin: auto !important;
-  background-color: #135c65;
-  display: block;
-  color: white;
- 
-
- 
-  /* Set the width to 606px */
+.be-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--sawa-radius);
+  background: linear-gradient(135deg, var(--sawa-primary) 0%, #1b7c86 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px -12px rgba(19, 92, 101, 0.55);
 }
-
-.custom-select {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #f8f8f8;
-  color: #333;
-  appearance: none;
-  /* Remove default arrow in some browsers */
-  -webkit-appearance: none;
-  /* Remove default arrow in Chrome and Safari */
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-
-
-
-.loader {
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
-  margin: 20px auto;
-  /* Adjust margin as needed */
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.error-message {
+.be-hero-main {
   display: flex;
   align-items: center;
-  color: #ff0000;
-  /* Red color for errors */
-  margin-top: 5px;
-  font-size: 0.9em;
+  gap: 1rem;
+}
+.be-hero-icon {
+  display: grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 1.35rem;
+}
+.be-hero h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+.be-hero p {
+  margin: 0.15rem 0 0;
+  opacity: 0.9;
+}
+.be-hero-progress {
+  display: grid;
+  min-width: 6rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  text-align: center;
+}
+.be-hero-progress b {
+  font-size: 1.25rem;
+}
+.be-hero-progress span {
+  font-size: 0.75rem;
+  opacity: 0.85;
 }
 
-.error-icon {
-  margin-right: 5px;
-  /* Add styles for your error icon */
+.be-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  box-shadow: var(--sawa-shadow);
+  scroll-margin-top: calc(var(--header-h, 64px) + 8rem);
+}
+.be-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.be-card-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.be-card-head p {
+  margin: 0.15rem 0 0;
+  color: var(--sawa-muted);
+  font-size: 0.85rem;
+}
+.be-started {
+  margin-inline-start: auto;
+}
+.be-step {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  font-weight: 800;
+}
+.be-grid {
+  display: grid;
+  gap: 1rem 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+.be-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.be-field > label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #334155;
+}
+.be-req {
+  color: #dc2626;
+  margin-inline-start: 0.15rem;
+}
+.be-readonly {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.65rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 6px;
+  background: #f8fafc;
+  font-weight: 600;
+}
+.be-readonly .pi {
+  color: var(--sawa-muted);
+}
+.be-muted {
+  color: var(--sawa-muted);
+  font-weight: 400;
+}
+.be-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.be-colors button {
+  display: grid;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.be-colors button:hover {
+  transform: scale(1.06);
+}
+.be-colors button.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #1e293b;
+}
+.be-hint {
+  color: var(--sawa-muted);
+  font-size: 0.8rem;
+}
+.be-error {
+  color: #dc2626;
+  font-size: 0.82rem;
+}
+.be-start {
+  display: flex;
+  justify-content: flex-end;
+}
+.be-start .p-button {
+  min-width: 12rem;
 }
 
-@media (max-width: 768px) {
-
-  .name-input,
-  .custom-select,
-  .error-message {
-    width: 100%;
-    /* Full width on smaller screens */
-    margin-bottom: 15px;
-  }
-
-  .v-btn {
-    width: 100%;
-    /* Full width button */
-    padding: 12px;
-    /* Larger touch target */
-  }
-
-  .error-message {
-    font-size: 0.8em;
-    /* Adjust font size */
-  }
+/* progress + quick navigation */
+.be-nav {
+  position: sticky;
+  /* below the dashboard's fixed header */
+  top: calc(var(--header-h, 64px) + 0.5rem);
+  z-index: 5;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  box-shadow: 0 6px 16px -10px rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(4px);
+}
+.be-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.be-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s;
+}
+.be-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.be-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.be-chip .pi {
+  font-size: 0.8rem;
+}
+.be-chip.is-done {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #15803d;
+}
+.be-chip.is-missing {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
-/* Add additional CSS for animation or other styling as needed */
+/* a barrier */
+.be-barrier.is-missing {
+  border-color: #fca5a5;
+  box-shadow: 0 0 0 3px #fee2e2;
+}
+.be-barrier-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.be-barrier-head h3 {
+  flex: 1;
+  margin: 0.2rem 0 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--sawa-text);
+}
+.be-num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 10px;
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  font-weight: 800;
+  transition: background-color 0.15s;
+}
+.be-score {
+  flex: none;
+  padding: 0.2rem 0.7rem;
+  border: 2px solid;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.be-options {
+  display: grid;
+  gap: 0.5rem;
+}
+.be-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--sawa-border);
+  border-radius: 10px;
+  background: #fbfcfd;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.be-option:hover {
+  border-color: #b6d7db;
+  background: #fff;
+}
+.be-option.is-picked {
+  border-color: var(--pick);
+  background: color-mix(in srgb, var(--pick) 9%, #fff);
+}
+.be-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.be-option:has(.be-radio:focus-visible) {
+  outline: 2px solid var(--sawa-primary);
+  outline-offset: 2px;
+}
+.be-option-score {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  font-weight: 800;
+}
+.be-option.is-picked .be-option-score {
+  border-color: var(--pick);
+  background: var(--pick);
+  color: #fff;
+}
+.be-option-text {
+  padding-top: 0.2rem;
+  line-height: 1.7;
+}
 
-/* Add any other custom styles here */
+.be-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 1px solid var(--sawa-border);
+  border-radius: var(--sawa-radius);
+  box-shadow: 0 -6px 16px -12px rgba(15, 23, 42, 0.35);
+}
+.be-footer-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--sawa-muted);
+  font-weight: 600;
+}
+.be-footer .p-button {
+  min-width: 11rem;
+}
 </style>
