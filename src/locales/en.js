@@ -1315,4 +1315,13 @@ export default {
     saved: "Saved successfully",
     deleted: "Deleted successfully",
   },
+  rec_print: {
+    title: "Home recommendations",
+    subtitle: "Home recommendations for the parent",
+    date: "Date",
+    wording: "Wording",
+    for_male: "Boy's wording",
+    for_female: "Girl's wording",
+    footer: "Wishing your child continued progress — Sawa Academy for Special Education",
+  },
 };
