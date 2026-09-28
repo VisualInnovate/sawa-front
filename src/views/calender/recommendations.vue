@@ -2,6 +2,8 @@
 import axios from "axios";
 import GenderTextField from "../../components/GenderTextField.vue";
 import NameTokenHint from "../../components/NameTokenHint.vue";
+import Menu from "primevue/menu";
+import { printRecommendations } from "../../utils/printRecommendations";
 
 // Consultation settings: the instructions parents read before a consultation, and the home recommendations
 // the consultant picks from when writing a result. Both have a boy's and a girl's wording; the one matching
@@ -10,7 +12,7 @@ const genders = ["male", "female"];
 const blank = (value) => !String(value ?? "").trim();
 
 export default {
-  components: { GenderTextField, NameTokenHint },
+  components: { GenderTextField, NameTokenHint, Menu },
   data() {
     return {
       loading: true,
@@ -32,6 +34,9 @@ export default {
     },
     incompleteCount() {
       return this.recommendations.filter((item) => this.itemMissing(item)).length;
+    },
+    printOptions() {
+      return genders.map((gender) => ({ label: this.$t(`rec_print.for_${gender}`), command: () => this.print(gender) }));
     },
     hasErrors() {
       return this.instructionsMissing || this.incompleteCount > 0;
@@ -79,6 +84,14 @@ export default {
         cards[cards.length - 1]?.scrollIntoView({ behavior: "smooth", block: "center" });
         cards[cards.length - 1]?.querySelector("textarea")?.focus();
       });
+    },
+    // Prints the list in display order (as currently shown, including unsaved edits) in one gender's wording.
+    print(gender) {
+      const texts = [...this.recommendations]
+        .sort((a, b) => (a.display_order ?? Infinity) - (b.display_order ?? Infinity) || (a.id ?? Infinity) - (b.id ?? Infinity))
+        .map((item) => item.text[gender])
+        .filter((text) => !blank(text));
+      printRecommendations({ texts, genderLabel: this.$t(`rec_print.for_${gender}`), t: this.$t });
     },
     removeItem(index) {
       this.recommendations.splice(index, 1);
@@ -151,6 +164,9 @@ export default {
           <div class="section-tools">
             <Tag v-if="submitted && incompleteCount" severity="danger" :value="$t('recommendations_incomplete', { count: incompleteCount })" />
             <Tag :value="$t('recommendations_count', { count: recommendations.length })" severity="secondary" />
+            <Button v-if="recommendations.length" type="button" icon="pi pi-print" :label="$t('print')" severity="secondary"
+              variant="outlined" size="small" aria-haspopup="true" data-no-request-spinner @click="$refs.printMenu.toggle($event)" />
+            <Menu ref="printMenu" :model="printOptions" popup />
           </div>
         </header>
 
@@ -214,6 +230,7 @@ export default {
 .section-tools {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
 .recommendation {
