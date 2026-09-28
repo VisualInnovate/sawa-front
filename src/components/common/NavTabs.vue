@@ -1,5 +1,5 @@
 <script setup>
-// Row of links between the pages of one section. items: [{ to, label (i18n key) | text, perm }]
+// Row of links between the pages of one section. items: [{ to, label (i18n key) | text, perm }]; slot `end` sits opposite them.
 import { computed } from "vue";
 import { can } from "@/utils/permissions";
 
@@ -12,6 +12,8 @@ const visible = computed(() => props.items.filter((item) => !item.perm || can(it
     <router-link v-for="item in visible" :key="item.label ?? item.text" :to="item.to" class="nav-tab">
       {{ item.text ?? $t(item.label) }}
     </router-link>
+    <!-- Optional content on the opposite side of the tabs (e.g. whose pages these are). -->
+    <div v-if="$slots.end" class="section-tabs-end"><slot name="end" /></div>
   </nav>
 </template>
 
@@ -22,5 +24,10 @@ const visible = computed(() => props.items.filter((item) => !item.perm || can(it
   background: #fff;
   border: 1px solid var(--sawa-border);
   border-radius: var(--sawa-radius);
+}
+.section-tabs-end {
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
 }
 </style>
