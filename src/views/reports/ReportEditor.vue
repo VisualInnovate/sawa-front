@@ -3,8 +3,9 @@
 // directly on the page (kept as a draft on this device) and "Print" prints the pages only.
 //
 // Pages: 1 cover (logo, child, evaluations) · 2 personal info + team signatures (newest chosen evaluation)
-// · then per evaluation: VB-MAPP = case description + behaviours, and the VB-MAPP charts page;
-// any other type = its results page.
+// · then one section per evaluation type (at most four evaluations each): VB-MAPP = case description page
+// and one VB-MAPP form page whose test columns are the chosen tests only; any other type = its results,
+// one block per chosen evaluation. The behaviour-problems table belongs to a behavioural evaluation only.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -14,16 +15,18 @@ import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import ReportResults from "@/components/reports/ReportResults.vue";
 import {
-  MILESTONE, ageOn, ageWords, dateParts, dmy, evaluationLabel, firstName, isFemale, shortAge, typeIcon, ymd,
+  MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  isBehavioural, isFemale, shortAge, typeIcon, typeLabel, ymd,
 } from "@/components/reports/reportUtils";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-const childId = String(route.params.childId);
-const keys = String(route.query.items ?? "").split(",").map((key) => key.trim()).filter(Boolean);
-const draftKey = `ereport-draft:${childId}:${[...keys].sort().join(",")}`;
+// The child and the chosen evaluations come from the URL (a new selection reloads the report).
+const childId = computed(() => String(route.params.childId));
+const keys = computed(() => String(route.query.items ?? "").split(",").map((key) => key.trim()).filter(Boolean));
+const draftKey = computed(() => `ereport-draft:${childId.value}:${[...keys.value].sort().join(",")}`);
 
 const loading = ref(true);
 const loadError = ref(false);
@@ -36,6 +39,31 @@ const female = computed(() => isFemale(child.value.gender));
 const shortName = computed(() => firstName(child.value.name));
 const birth = computed(() => dateParts(child.value.birth_date));
 const dates = computed(() => items.value.map((item) => item.date).filter(Boolean).sort());
+
+// One section per evaluation type, newest type first; inside, oldest to newest (1st test ... 4th test).
+const byDate = (a, b) => String(a.date).localeCompare(String(b.date)) || a.id - b.id;
+const sections = computed(() =>
+  groupItems(items.value, t).map((group) => {
+    const tests = [...group.items].sort(byDate).slice(-MAX_PER_GROUP);
+    return { ...group, tests, newest: tests[tests.length - 1], behavioural: isBehavioural(group.label) };
+  })
+);
+
+// Cover: one card per evaluation family; side-profile dimensions are rows of one card.
+const coverCards = computed(() => {
+  const cards = new Map();
+  for (const section of sections.value) {
+    const family = section.type;
+    if (!cards.has(family)) cards.set(family, { type: family, label: typeLabel(family, t), rows: [], count: 0 });
+    const card = cards.get(family);
+    card.rows.push({ label: family === SIDE_PROFILE ? section.label : null, tests: section.tests });
+    card.count += section.tests.length;
+  }
+  return [...cards.values()].map((card) => ({
+    ...card,
+    evaluators: [...new Set(card.rows.flatMap((row) => row.tests).map((test) => test.specialist?.name).filter(Boolean))].join("، "),
+  }));
+});
 const todayIso = (() => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -57,17 +85,15 @@ function defaults(data) {
       { name: team.therapist?.name ?? "", specialty: therapistSpecialty },
       { name: team.parent?.name ?? "", specialty: team.parent?.relation ?? "" },
     ],
-    cases: Object.fromEntries(
-      (data.items ?? [])
-        .filter((item) => item.type === MILESTONE)
-        .map((item) => [item.key, { level: "", skills: "", behaviors: Array.from({ length: 3 }, () => ["", "", "", "", ""]), scores: ["", "", "", ""] }])
-    ),
+    // Per section (evaluation type): the case-description blanks and VB-MAPP scores, and the behaviour table.
+    cases: Object.fromEntries(groupItems(data.items).map((group) => [group.group, { level: "", skills: "", scores: ["", "", "", ""] }])),
+    behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
   };
 }
 
 function readDraft() {
   try {
-    const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
+    const saved = JSON.parse(localStorage.getItem(draftKey.value) ?? "null");
     return saved && typeof saved === "object" ? saved : null;
   } catch {
     return null;
@@ -79,6 +105,7 @@ function applyDraft(base, saved) {
   if (Array.isArray(saved.team)) base.team = base.team.map((row, i) => ({ ...row, ...(saved.team[i] ?? {}) }));
   for (const key of Object.keys(base.cases)) {
     if (saved.cases?.[key]) base.cases[key] = { ...base.cases[key], ...saved.cases[key] };
+    if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
   }
   return base;
 }
@@ -86,7 +113,7 @@ function applyDraft(base, saved) {
 watch(edits, (value) => {
   if (!value) return;
   try {
-    localStorage.setItem(draftKey, JSON.stringify(value));
+    localStorage.setItem(draftKey.value, JSON.stringify(value));
   } catch {
     // Storage full or blocked: the edits still stay on the page.
   }
@@ -94,7 +121,7 @@ watch(edits, (value) => {
 
 function resetEdits() {
   try {
-    localStorage.removeItem(draftKey);
+    localStorage.removeItem(draftKey.value);
   } catch {
     // ignore
   }
@@ -107,7 +134,7 @@ async function load() {
   loading.value = true;
   loadError.value = false;
   try {
-    const { data } = await axios.get(`api/reports/children/${childId}/report`, { params: { items: keys } });
+    const { data } = await axios.get(`api/reports/children/${childId.value}/report`, { params: { items: keys.value } });
     report.value = data;
     edits.value = applyDraft(defaults(data), readDraft());
     document.title = `${t("ereport.report_title")} - ${data.child?.name ?? ""}`;
@@ -119,14 +146,20 @@ async function load() {
 }
 
 const previousTitle = document.title;
-onMounted(() => {
+function open() {
   window.scrollTo(0, 0);
-  if (!keys.length) {
+  report.value = null;
+  edits.value = null;
+  if (!keys.value.length) {
     loading.value = false;
     loadError.value = true;
     return;
   }
   load();
+}
+onMounted(open);
+watch(() => route.fullPath, (path, before) => {
+  if (route.name === "evaluation-report" && path !== before) open();
 });
 onBeforeUnmount(() => {
   document.title = previousTitle;
@@ -134,8 +167,8 @@ onBeforeUnmount(() => {
 
 // ---- VB-MAPP helpers -------------------------------------------------------------------------------
 
-const levelsHighFirst = (item) => [...(item.result?.levels ?? [])].sort((a, b) => Number(b.level_id) - Number(a.level_id));
-const historyRow = (item, index) => item.result?.history?.[index] ?? null;
+// The chart is the newest chosen test's; levels from the highest down (3, 2, 1).
+const levelsHighFirst = (item) => [...(item?.result?.levels ?? [])].sort((a, b) => Number(b.level_id) - Number(a.level_id));
 const caseAge = (item) => ageWords(ageOn(child.value.birth_date, item.date), t);
 
 // ---- actions ---------------------------------------------------------------------------------------
@@ -146,7 +179,7 @@ function print() {
 }
 
 function back() {
-  router.push({ name: "evaluation-reports", query: { child: childId } });
+  router.push({ name: "evaluation-reports", query: { child: childId.value } });
 }
 </script>
 
@@ -187,28 +220,36 @@ function back() {
           <p class="rx-cover-kicker">{{ $t("ereport.report_title") }}</p>
           <h1 class="rx-cover-name">{{ child.name }}</h1>
           <div class="rx-cover-line" />
+          <p class="rx-cover-facts">
+            <span>{{ female ? $t("female") : $t("male") }}</span>
+            <span v-if="birth">{{ $t("ereport.birth_date") }}: <b class="ltr">{{ dmy(child.birth_date) }}</b></span>
+            <span>{{ $t("ereport.report_date") }}: <b class="ltr">{{ dmy(todayIso) }}</b></span>
+          </p>
         </div>
 
         <div class="rx-cover-list">
           <h2>{{ $t("ereport.included") }}</h2>
-          <ol>
-            <li v-for="(item, i) in items" :key="item.key">
-              <span class="rx-cover-num">{{ i + 1 }}</span>
-              <span class="rx-cover-icon"><i :class="typeIcon(item.type)" aria-hidden="true" /></span>
-              <span class="rx-cover-eval">
-                <strong>{{ evaluationLabel(item, $t) }}</strong>
-                <small>
-                  <span class="ltr">{{ dmy(item.date) }}</span>
-                  <template v-if="item.specialist?.name"> · {{ item.specialist.name }}</template>
-                </small>
-              </span>
-            </li>
-          </ol>
+          <div class="rx-cover-grid" :class="{ 'is-single': coverCards.length === 1 }">
+            <article v-for="card in coverCards" :key="card.type" class="rx-cover-card">
+              <header>
+                <span class="rx-cover-icon"><i :class="typeIcon(card.type)" aria-hidden="true" /></span>
+                <strong>{{ card.label }}</strong>
+                <span class="rx-cover-count">{{ card.count }}</span>
+              </header>
+              <div v-for="(row, r) in card.rows" :key="r" class="rx-cover-row">
+                <span v-if="row.label" class="rx-cover-dim">{{ row.label }}</span>
+                <span class="rx-cover-dates">
+                  <span v-for="test in row.tests" :key="test.key" class="ltr">{{ dmy(test.date) }}</span>
+                </span>
+              </div>
+              <footer v-if="card.evaluators">
+                <i class="pi pi-user" aria-hidden="true" /> {{ card.evaluators }}
+              </footer>
+            </article>
+          </div>
         </div>
 
-        <footer class="rx-cover-foot">
-          <span>{{ $t("ereport.report_date") }}: <b class="ltr">{{ dmy(todayIso) }}</b></span>
-        </footer>
+        <footer class="rx-cover-foot">{{ $t("ereport.academy") }}</footer>
       </section>
 
       <!-- 2. Personal information and team -->
@@ -278,48 +319,32 @@ function back() {
         <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
       </section>
 
-      <!-- 3+. Each evaluation -->
-      <template v-for="item in items" :key="item.key">
-        <template v-if="item.type === MILESTONE">
-          <!-- Case description + behaviour problems -->
+      <!-- 3+. One section per evaluation type -->
+      <template v-for="section in sections" :key="section.group">
+        <template v-if="section.type === MILESTONE">
+          <!-- Case description (once, at the newest chosen test) -->
           <section class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
-              <span>VB-MAPP · <span class="ltr">{{ dmy(item.date) }}</span></span>
+              <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
 
             <h2 class="rx-band">{{ $t("ereport.case_description", { name: shortName }) }}</h2>
             <p class="rx-case">
-              {{ $t(female ? "ereport.case_text_female" : "ereport.case_text_male", { name: shortName, age: caseAge(item) }) }}
-              <EditableText v-model="edits.cases[item.key].level" bold :placeholder="$t('ereport.blank')" />
+              {{ $t(female ? "ereport.case_text_female" : "ereport.case_text_male", { name: shortName, age: caseAge(section.newest) }) }}
+              <EditableText v-model="edits.cases[section.group].level" bold :placeholder="$t('ereport.blank')" />
               {{ $t(female ? "ereport.case_text_2_female" : "ereport.case_text_2_male") }}
-              <EditableText v-model="edits.cases[item.key].skills" :placeholder="$t('ereport.blank')" />.
+              <EditableText v-model="edits.cases[section.group].skills" :placeholder="$t('ereport.blank')" />.
             </p>
-
-            <h2 class="rx-band rx-band-soft rx-space">{{ $t("ereport.behaviors") }}</h2>
-            <table class="rx-table rx-behaviours">
-              <thead>
-                <tr>
-                  <th v-for="column in behaviourColumns" :key="column">{{ $t(`ereport.${column}`) }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, r) in edits.cases[item.key].behaviors" :key="r">
-                  <td v-for="(value, c) in row" :key="c">
-                    <EditableText v-model="row[c]" block multiline />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
 
-          <!-- VB-MAPP charts -->
+          <!-- The VB-MAPP form: test columns = the chosen tests only; chart = the newest one -->
           <section class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
-              <span>VB-MAPP · <span class="ltr">{{ dmy(item.date) }}</span></span>
+              <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
 
             <p class="rx-kicker">{{ $t("ereport.special_education") }}</p>
@@ -339,7 +364,7 @@ function back() {
                   <tr v-for="(key, i) in TEST_KEYS" :key="key">
                     <th v-if="i === 0" :rowspan="TEST_KEYS.length" class="tone-c">Age at testing</th>
                     <th class="tone-c vb-n">{{ i + 1 }}</th>
-                    <td class="ltr-cell"><span class="ltr">{{ historyRow(item, i) ? shortAge(historyRow(item, i).age_months) : "" }}</span></td>
+                    <td class="ltr-cell"><span class="ltr">{{ section.tests[i] ? shortAge(section.tests[i].result?.age_months) : "" }}</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -356,14 +381,14 @@ function back() {
                 </thead>
                 <tbody>
                   <tr v-for="(key, i) in TEST_KEYS" :key="key">
-                    <td>{{ historyRow(item, i)?.testers?.join(" / ") ?? "" }}</td>
+                    <td>{{ section.tests[i]?.result?.testers?.join(" / ") ?? "" }}</td>
                     <td>
                       <span class="vb-swatches">
-                        <i v-for="color in historyRow(item, i)?.colors ?? []" :key="color" :style="{ background: '#' + color }" />
+                        <i v-for="color in section.tests[i]?.result?.colors ?? []" :key="color" :style="{ background: '#' + color }" />
                       </span>
                     </td>
-                    <td class="ltr-cell"><span class="ltr">{{ ymd(historyRow(item, i)?.date) }}</span></td>
-                    <td><EditableText v-model="edits.cases[item.key].scores[i]" block /></td>
+                    <td class="ltr-cell"><span class="ltr">{{ ymd(section.tests[i]?.date) }}</span></td>
+                    <td><EditableText v-if="section.tests[i]" v-model="edits.cases[section.group].scores[i]" block /></td>
                     <th class="tone-e ltr-cell"><span class="ltr">{{ key }}</span></th>
                   </tr>
                 </tbody>
@@ -371,27 +396,48 @@ function back() {
             </div>
 
             <div class="vb-levels">
-              <MilestoneLevelChart v-for="level in levelsHighFirst(item)" :key="level.level_id" :level="level" />
-              <p v-if="!levelsHighFirst(item).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+              <MilestoneLevelChart v-for="level in levelsHighFirst(section.newest)" :key="level.level_id" :level="level" />
+              <p v-if="!levelsHighFirst(section.newest).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
             </div>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
         </template>
 
-        <!-- Any other evaluation: its results -->
+        <!-- Any other type: its heading once, then each chosen evaluation's results -->
         <section v-else class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
-            <span>{{ evaluationLabel(item, $t) }} · <span class="ltr">{{ dmy(item.date) }}</span></span>
+            <span>{{ section.label }}</span>
           </header>
 
-          <h2 class="rx-band">{{ $t("ereport.results_of", { name: evaluationLabel(item, $t) }) }}</h2>
-          <p class="rx-meta">
-            <span><i class="pi pi-calendar" aria-hidden="true" /> <span class="ltr">{{ dmy(item.date) }}</span></span>
-            <span v-if="item.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ $t("ereport.evaluator") }}: {{ item.specialist.name }}</span>
-          </p>
-          <ReportResults :item="item" />
+          <h2 class="rx-band">{{ $t("ereport.results_of", { name: section.label }) }}</h2>
+          <div v-for="(test, i) in section.tests" :key="test.key" class="rx-test">
+            <p class="rx-meta">
+              <b v-if="section.tests.length > 1" class="rx-test-key ltr">{{ TEST_KEYS[i] }}</b>
+              <span><i class="pi pi-calendar" aria-hidden="true" /> <span class="ltr">{{ dmy(test.date) }}</span></span>
+              <span v-if="test.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ $t("ereport.evaluator") }}: {{ test.specialist.name }}</span>
+            </p>
+            <ReportResults :item="test" />
+          </div>
+
+          <template v-if="section.behavioural">
+            <h2 class="rx-band rx-band-soft rx-space">{{ $t("ereport.behaviors") }}</h2>
+            <table class="rx-table rx-behaviours">
+              <thead>
+                <tr>
+                  <th v-for="column in behaviourColumns" :key="column">{{ $t(`ereport.${column}`) }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, r) in edits.behaviors[section.group]" :key="r">
+                  <td v-for="(value, c) in row" :key="c">
+                    <EditableText v-model="row[c]" block multiline />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
 
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
@@ -515,119 +561,165 @@ function back() {
   padding: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at 100% 0, rgba(19, 92, 101, 0.1) 0 180px, transparent 181px),
-    radial-gradient(circle at 0 100%, rgba(169, 171, 127, 0.18) 0 220px, transparent 221px),
+    radial-gradient(circle at 100% 0, rgba(19, 92, 101, 0.1) 0 150px, transparent 151px),
+    radial-gradient(circle at 0 100%, rgba(169, 171, 127, 0.16) 0 170px, transparent 171px),
     #fff;
 }
 .rx-cover-top {
   display: grid;
   justify-items: center;
-  gap: 6px;
-  padding: 22mm 20mm 0;
+  gap: 4px;
+  padding: 16mm 20mm 0;
 }
 .rx-cover-logo {
-  height: 118px;
+  height: 84px;
 }
 .rx-cover-academy {
   margin: 0;
   color: #135c65;
-  font-size: 13pt;
+  font-size: 12pt;
   font-weight: 700;
 }
 .rx-cover-center {
   display: grid;
   justify-items: center;
-  gap: 6px;
-  margin: 18mm 20mm 12mm;
-  padding: 12mm 10mm;
-  border-radius: 18px;
+  gap: 4px;
+  margin: 10mm 20mm 9mm;
+  padding: 8mm 10mm 7mm;
+  border-radius: 16px;
   background: linear-gradient(135deg, #135c65 0%, #1b7c86 100%);
   color: #fff;
   text-align: center;
 }
 .rx-cover-kicker {
   margin: 0;
-  font-size: 13pt;
-  letter-spacing: 0.02em;
+  font-size: 11.5pt;
   opacity: 0.85;
 }
 .rx-cover-name {
   margin: 0;
-  font-size: 28pt;
+  font-size: 23pt;
   font-weight: 800;
   line-height: 1.35;
 }
 .rx-cover-line {
-  width: 70px;
+  width: 60px;
   height: 4px;
-  margin-top: 6px;
+  margin: 2px 0 4px;
   border-radius: 4px;
   background: #a9ab7f;
 }
+.rx-cover-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 18px;
+  margin: 0;
+  font-size: 10pt;
+  opacity: 0.92;
+}
 .rx-cover-list {
-  margin: 0 20mm;
+  margin: 0 18mm;
 }
 .rx-cover-list h2 {
-  margin: 0 0 10px;
-  color: #135c65;
-  font-size: 13pt;
-  font-weight: 800;
-}
-.rx-cover-list ol {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.rx-cover-list li {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 9px 14px;
-  border: 1px solid #d5e6e8;
-  border-radius: 12px;
-  background: #fff;
-  break-inside: avoid;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: #135c65;
+  font-size: 12pt;
+  font-weight: 800;
 }
-.rx-cover-num {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 28px;
-  height: 28px;
+.rx-cover-list h2::before {
+  content: "";
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #135c65;
-  color: #fff;
-  font-weight: 800;
-  font-size: 10pt;
+}
+.rx-cover-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.rx-cover-grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.rx-cover-card {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding: 8px 11px;
+  border: 1px solid #d5e6e8;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 9.5pt;
+  line-height: 1.5;
+  break-inside: avoid;
+}
+.rx-cover-card header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rx-cover-card header strong {
+  flex: 1;
+  color: #0e464d;
+  font-size: 11pt;
 }
 .rx-cover-icon {
   display: grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
   background: #eef8f9;
   color: #135c65;
+  font-size: 9pt;
 }
-.rx-cover-eval {
+.rx-cover-count {
   display: grid;
-  line-height: 1.45;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #135c65;
+  color: #fff;
+  font-size: 9pt;
+  font-weight: 800;
 }
-.rx-cover-eval strong {
-  font-size: 12pt;
+.rx-cover-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
 }
-.rx-cover-eval small {
+.rx-cover-dim {
+  color: #334155;
+  font-weight: 700;
+}
+.rx-cover-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.rx-cover-dates span {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 9pt;
+}
+.rx-cover-card footer {
   color: #64748b;
-  font-size: 9.5pt;
+  font-size: 8.5pt;
 }
 .rx-cover-foot {
   margin-top: auto;
-  padding: 10mm 20mm 14mm;
-  color: #475569;
-  font-size: 11pt;
+  padding: 8mm 20mm 11mm;
+  color: #94a3b8;
+  font-size: 9.5pt;
   text-align: center;
 }
 
@@ -697,6 +789,15 @@ function back() {
 .rx-empty {
   color: #64748b;
   text-align: center;
+}
+.rx-test + .rx-test {
+  margin-top: 7mm;
+}
+.rx-test-key {
+  padding: 0 8px;
+  border-radius: 6px;
+  background: #e0e7ff;
+  color: #1e293b;
 }
 
 /* tables */

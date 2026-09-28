@@ -8,6 +8,9 @@ export const BARRIER = 3;
 export const ABLLS = 4;
 export const CAROLINA = 5;
 
+/** A report takes at most this many evaluations of one type (the VB-MAPP form has four test columns). */
+export const MAX_PER_GROUP = 4;
+
 /** "YYYY-MM-DD" -> { year, month, day } (strings, zero padded), or null. */
 export const dateParts = (value) => {
   const match = String(value ?? "").match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -76,3 +79,20 @@ export const typeLabel = (type, t) =>
 
 export const typeIcon = (type) =>
   ({ 1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap" })[Number(type)] || "pi pi-file";
+
+/**
+ * Items in blocks per type — `group` from the API: "t2" for a type, "s8" for one side-profile dimension —
+ * in the order each block's first item appears (items come newest first).
+ */
+export const groupItems = (items, t) => {
+  const blocks = new Map();
+  for (const item of items ?? []) {
+    const key = item.group ?? `t${item.type}`;
+    if (!blocks.has(key)) blocks.set(key, { group: key, type: Number(item.type), label: t ? evaluationLabel(item, t) : "", items: [] });
+    blocks.get(key).items.push(item);
+  }
+  return [...blocks.values()];
+};
+
+/** Behaviour problems are described only on a behavioural evaluation. */
+export const isBehavioural = (label) => /سلوك|behavio/i.test(String(label ?? ""));

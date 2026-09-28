@@ -6,7 +6,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { formatChildAge } from "@/utils/childAge";
-import { dmy, evaluationLabel, isFemale, typeIcon, typeLabel } from "@/components/reports/reportUtils";
+import { MAX_PER_GROUP, dmy, groupItems, isFemale, typeIcon, typeLabel } from "@/components/reports/reportUtils";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -31,7 +31,13 @@ const filtered = computed(() => {
   return children.value.filter((child) => [child.name, child.parent_name].some((v) => String(v ?? "").toLowerCase().includes(q)));
 });
 
-const allPicked = computed(() => evaluations.value.length > 0 && picked.value.length === evaluations.value.length);
+// The list shown in blocks per evaluation type (a side-profile dimension is its own type), newest first.
+const groups = computed(() => groupItems(evaluations.value, t));
+const pickedIn = (group) => group.items.filter((item) => picked.value.includes(item.key)).length;
+const groupFull = (group) => pickedIn(group) >= MAX_PER_GROUP;
+// "Select all" = the newest four of every type.
+const maxPick = computed(() => groups.value.flatMap((group) => group.items.slice(0, MAX_PER_GROUP).map((item) => item.key)));
+const allPicked = computed(() => maxPick.value.length > 0 && maxPick.value.every((key) => picked.value.includes(key)));
 
 async function loadChildren() {
   loading.value = true;
@@ -71,11 +77,12 @@ async function selectChild(child, scroll = true) {
 }
 
 function toggleAll() {
-  picked.value = allPicked.value ? [] : evaluations.value.map((item) => item.key);
+  picked.value = allPicked.value ? [] : [...maxPick.value];
 }
 
-function toggle(key) {
-  picked.value = picked.value.includes(key) ? picked.value.filter((k) => k !== key) : [...picked.value, key];
+function toggle(item, group) {
+  if (picked.value.includes(item.key)) picked.value = picked.value.filter((key) => key !== item.key);
+  else if (!groupFull(group)) picked.value = [...picked.value, item.key];
 }
 
 function openReport() {
@@ -212,21 +219,36 @@ onMounted(loadChildren);
             <Skeleton v-for="n in 4" :key="n" height="4rem" />
           </div>
 
-          <ul v-else class="rp-evals">
-            <li v-for="item in evaluations" :key="item.key">
-              <label class="rp-eval" :class="{ 'is-picked': picked.includes(item.key) }">
-                <Checkbox :modelValue="picked.includes(item.key)" binary @update:modelValue="toggle(item.key)" />
-                <span class="rp-eval-icon" :class="'type-' + item.type"><i :class="typeIcon(item.type)" aria-hidden="true" /></span>
-                <span class="rp-eval-text">
-                  <strong>{{ evaluationLabel(item, $t) }}</strong>
-                  <small>
-                    <span class="ltr"><i class="pi pi-calendar" aria-hidden="true" /> {{ dmy(item.date) }}</span>
-                    <span v-if="item.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ item.specialist.name }}</span>
-                  </small>
-                </span>
-              </label>
-            </li>
-          </ul>
+          <div v-else class="rp-groups">
+            <p v-if="evaluations.length" class="rp-limit"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.limit_hint", { n: MAX_PER_GROUP }) }}</p>
+            <section v-for="group in groups" :key="group.group" class="rp-group" :class="'type-' + group.type">
+              <header class="rp-group-head">
+                <span class="rp-eval-icon"><i :class="typeIcon(group.type)" aria-hidden="true" /></span>
+                <strong>{{ group.label }}</strong>
+                <span class="rp-group-count" :class="{ 'is-full': groupFull(group) }">{{ pickedIn(group) }}/{{ Math.min(MAX_PER_GROUP, group.items.length) }}</span>
+              </header>
+              <ul class="rp-evals">
+                <li v-for="item in group.items" :key="item.key">
+                  <label
+                    class="rp-eval"
+                    :class="{ 'is-picked': picked.includes(item.key), 'is-locked': !picked.includes(item.key) && groupFull(group) }"
+                    :title="!picked.includes(item.key) && groupFull(group) ? $t('ereport.limit_reached', { n: MAX_PER_GROUP }) : undefined"
+                  >
+                    <Checkbox
+                      :modelValue="picked.includes(item.key)"
+                      binary
+                      :disabled="!picked.includes(item.key) && groupFull(group)"
+                      @update:modelValue="toggle(item, group)"
+                    />
+                    <span class="rp-eval-text">
+                      <strong class="ltr">{{ dmy(item.date) }}</strong>
+                      <small v-if="item.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ item.specialist.name }}</small>
+                    </span>
+                  </label>
+                </li>
+              </ul>
+            </section>
+          </div>
 
           <footer class="rp-panel-foot">
             <span class="rp-picked">{{ picked.length ? $t("ereport.selected_n", { n: picked.length }) : $t("ereport.choose_one") }}</span>
@@ -485,20 +507,67 @@ onMounted(loadChildren);
   background: var(--sawa-primary-soft);
   font-size: 0.78rem;
 }
+.rp-groups {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-inline-end: 2px;
+}
+.rp-limit {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--sawa-muted);
+  font-size: 0.8rem;
+}
+.rp-group {
+  display: grid;
+  gap: 0.45rem;
+}
+.rp-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rp-group-head .rp-eval-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+.rp-group-head strong {
+  flex: 1;
+  color: var(--sawa-text);
+  font-size: 0.92rem;
+}
+.rp-group-count {
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--sawa-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.rp-group-count.is-full {
+  background: var(--tone-soft);
+  color: var(--tone);
+}
 .rp-evals {
   display: grid;
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 0.4rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: 60vh;
-  overflow-y: auto;
 }
 .rp-eval {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.65rem 0.75rem;
+  gap: 0.6rem;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--sawa-border);
   border-radius: 10px;
   background: #fbfcfd;
@@ -511,6 +580,10 @@ onMounted(loadChildren);
 .rp-eval.is-picked {
   border-color: var(--sawa-primary);
   background: var(--sawa-primary-soft);
+}
+.rp-eval.is-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .rp-eval-icon {
   display: grid;
