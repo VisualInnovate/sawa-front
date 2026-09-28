@@ -37,7 +37,7 @@ export const buildMenu = () => [
     label: "evaluations",
     children: [
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },
-      { text: "ablls", to: { name: "ablls" }, perm: "able category list" },
+      { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
       { text: "carolina", to: { name: "agerange" }, perm: "carolina age range list" },
       {
         key: "vb-mapp",

@@ -161,7 +161,7 @@ export default {
       evaluate_types: [
         { name: "milestone", id: 2 },
         { name: "barrier", id: 3 },
-        { name: "ablls", id: 4 },
+        { name: "ABLLS Academy", id: 4 },
         { name: "carolina", id: 5 },
         { name: "البعد المعرفي", id: 101 },
         { name: "البعد العنايه الذاتيه", id: 102 },
