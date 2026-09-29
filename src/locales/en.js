@@ -1391,6 +1391,12 @@ export default {
     test_date: "Test date",
     results_of: "{name} results",
     no_result_data: "No result data for this evaluation.",
+    summary_intro_male: "His responses to the scale's items showed the following strengths and weaknesses:",
+    summary_intro_female: "Her responses to the scale's items showed the following strengths and weaknesses:",
+    strengths: "Strengths",
+    weaknesses: "Weaknesses",
+    goal_status: "Goal status",
+    target_symbol: "Target symbol",
     blank: "Type here",
     age_words: {
       year_one: "1 year",

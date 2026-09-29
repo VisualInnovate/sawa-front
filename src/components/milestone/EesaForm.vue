@@ -14,6 +14,9 @@ const props = defineProps({
   readonly: Boolean,
   // This assessment's number; by default the one after the last earlier assessment.
   number: { type: Number, default: null },
+  // The four assessment columns given outright ([{ number, groups, total, current }]); the printed report numbers
+  // them by the chosen tests rather than by the child's history.
+  assessments: { type: Array, default: null },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -27,6 +30,7 @@ const format = (value) => (value === null || value === undefined ? "" : Number(v
 // Four assessment columns: the earlier ones and this one; up to four they are 1st-4th like the form, after that
 // the last four assessments.
 const columns = computed(() => {
+  if (props.assessments) return props.assessments;
   const current = props.number ?? (props.previous.at(-1)?.assessment_number ?? 0) + 1;
   const filled = [
     ...props.previous.map((row) => ({ number: row.assessment_number, groups: row.group_totals ?? {}, total: row.total })),
