@@ -4,7 +4,9 @@
 //
 // Pages: 1 cover (logo, child, evaluations) · 2 personal info + team signatures (newest chosen evaluation)
 // · then one section per evaluation type (at most four evaluations each): VB-MAPP = case description page
-// and one VB-MAPP form page whose test columns are the chosen tests only; any other type = its results,
+// and one VB-MAPP form page whose test columns are the chosen tests only, then the EESA of the newest chosen test
+// that has one (its totals = the chosen tests') and a strengths/weaknesses table of the newest chosen test; any
+// other type = its results,
 // one block per chosen evaluation. The behaviour-problems table belongs to a behavioural evaluation only.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -12,6 +14,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 import EditableText from "@/components/reports/EditableText.vue";
+import EesaForm from "@/components/milestone/EesaForm.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
@@ -200,6 +203,48 @@ const caseAge = (item) => (item ? ageWords(ageOn(child.value.birth_date, item.da
 // The age in the case description: at the newest chosen VB-MAPP test, or else the newest chosen evaluation.
 const caseItem = computed(() => sections.value.find((section) => section.type === MILESTONE)?.newest ?? items.value[0] ?? null);
 
+// The EESA forms (one per level) of the newest chosen test that has one. Each total column is a chosen test,
+// numbered 1-4 oldest first as in the test table; a chosen test without that level's EESA leaves its column blank.
+const sameLevel = (a, b) => (a.level_id ?? null) === (b.level_id ?? null);
+const eesaForms = (section) => {
+  const source = [...section.tests].reverse().find((test) => test.result?.eesa?.length);
+  if (!source) return [];
+  return source.result.eesa.map((form) => ({
+    key: form.level_id ?? "none",
+    title: form.level_title,
+    date: source.date,
+    boxes: Object.fromEntries(Object.entries(form.scores ?? {}).map(([key, value]) => [key, String(value)])),
+    columns: Array.from({ length: MAX_PER_GROUP }, (_, i) => {
+      const test = section.tests[i];
+      const row = test?.result?.eesa?.find((item) => sameLevel(item, form));
+      return { number: i + 1, groups: row?.group_totals ?? {}, total: row?.total ?? null, current: test === source };
+    }),
+  }));
+};
+
+// The newest chosen test's strengths and weaknesses, one row per target symbol (its levels merged). Weaknesses
+// are numbered inside their symbol: M-1, M-2...
+const summaryRows = (section) => {
+  const rows = new Map();
+  for (const goal of section.newest?.result?.summary ?? []) {
+    const key = goal.symbol || goal.general_goal;
+    if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.general_goal ?? "", statuses: new Set(), strengths: [], weaknesses: [] });
+    const row = rows.get(key);
+    if (goal.status) row.statuses.add(goal.status);
+    row.strengths.push(...(goal.strength ?? []).map((point) => point.question).filter(Boolean));
+    row.weaknesses.push(...(goal.weak ?? []).map((point) => point.question).filter(Boolean));
+  }
+  return [...rows.values()].map((row) => ({
+    ...row,
+    status: [...row.statuses].join("، "),
+    weaknesses: row.weaknesses.map((text, i) => ({ code: [row.symbol, i + 1].filter(Boolean).join("-"), text })),
+  }));
+};
+
+const milestoneExtras = computed(() => Object.fromEntries(sections.value
+  .filter((section) => section.type === MILESTONE)
+  .map((section) => [section.group, { eesa: eesaForms(section), summary: summaryRows(section) }])));
+
 // ---- actions ---------------------------------------------------------------------------------------
 
 function print() {
@@ -385,6 +430,65 @@ function back() {
               <MilestoneLevelChart v-for="level in mergedLevels(section.tests)" :key="level.level_id" :level="level" />
               <p v-if="!mergedLevels(section.tests).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
             </div>
+
+            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+          </section>
+
+          <!-- The EESA of the newest chosen test that has one; its totals are the chosen tests' -->
+          <section v-for="form in milestoneExtras[section.group].eesa" :key="'eesa-' + form.key" class="rx-page">
+            <header class="rx-head">
+              <img :src="sawaLogo" alt="Sawa" />
+              <span>VB-MAPP · EESA<template v-if="milestoneExtras[section.group].eesa.length > 1 && form.title"> · {{ form.title }}</template> · <span class="ltr">{{ dmy(form.date) }}</span></span>
+            </header>
+
+            <div class="rx-eesa">
+              <EesaForm :modelValue="form.boxes" :assessments="form.columns" readonly />
+            </div>
+
+            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+          </section>
+
+          <!-- Strengths and weaknesses of the newest chosen test, one row per target symbol -->
+          <section class="rx-page">
+            <header class="rx-head">
+              <img :src="sawaLogo" alt="Sawa" />
+              <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+            </header>
+
+            <p class="rx-summary-intro">{{ $t(female ? "ereport.summary_intro_female" : "ereport.summary_intro_male") }}</p>
+
+            <table v-if="milestoneExtras[section.group].summary.length" class="rx-table rx-summary">
+              <thead>
+                <tr>
+                  <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
+                  <th>{{ $t("ereport.strengths") }}</th>
+                  <th>{{ $t("ereport.weaknesses") }}</th>
+                  <th class="rx-sum-status">{{ $t("ereport.goal_status") }}</th>
+                  <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, r) in milestoneExtras[section.group].summary" :key="r">
+                  <td class="rx-sum-num">{{ r + 1 }}</td>
+                  <td>
+                    <ul v-if="row.strengths.length" class="rx-points">
+                      <li v-for="(point, p) in row.strengths" :key="p">{{ point }}</li>
+                    </ul>
+                  </td>
+                  <td>
+                    <template v-if="row.weaknesses.length">
+                      <strong class="rx-weak-name">{{ row.name }}:</strong>
+                      <p v-for="point in row.weaknesses" :key="point.code" class="rx-weak">
+                        <b class="ltr">{{ point.code }}</b> {{ point.text }}
+                      </p>
+                    </template>
+                  </td>
+                  <td class="rx-sum-status">{{ row.status }}</td>
+                  <td class="rx-sum-symbol"><b class="ltr">{{ row.symbol }}</b></td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
@@ -856,6 +960,99 @@ function back() {
   font-size: 10pt;
 }
 
+.rx-eesa {
+  /* The form is drawn 800px wide; this fits it on one sheet. */
+  zoom: 0.79;
+}
+.rx-eesa :deep(.eesa-scroll) {
+  overflow: visible;
+}
+.rx-eesa :deep(.eesa) {
+  min-width: 0;
+  padding-bottom: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+/* Tighter rows than on screen so the whole form fits one sheet. */
+.rx-eesa :deep(.eesa-banner) {
+  padding: 0.3rem 1rem;
+}
+.rx-eesa :deep(.eesa-top) {
+  padding-top: 0.4rem;
+}
+.rx-eesa :deep(.eesa-group) {
+  padding-top: 0.3rem;
+}
+.rx-eesa :deep(.eesa-items) {
+  margin-top: 0.25rem;
+}
+.rx-eesa :deep(.eesa-column) {
+  gap: 0.1rem;
+}
+.rx-eesa :deep(.eesa-item input) {
+  height: 1.3rem;
+}
+.rx-eesa :deep(.eesa-assessment td) {
+  height: 1.55rem;
+}
+.rx-eesa :deep(.eesa-line-heading) {
+  margin-top: 0.15rem;
+  margin-bottom: 0.05rem;
+}
+.rx-eesa :deep(.eesa-footer) {
+  padding-top: 0.5rem;
+}
+.rx-summary-intro {
+  margin: 0 0 10px;
+  font-size: 12.5pt;
+  font-weight: 700;
+}
+.rx-summary th,
+.rx-summary td {
+  padding: 6px 8px;
+  font-size: 10pt;
+  line-height: 1.6;
+  vertical-align: top;
+}
+.rx-summary thead th {
+  text-align: center;
+  vertical-align: middle;
+}
+.rx-summary tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.rx-sum-num {
+  width: 7%;
+  text-align: center !important;
+}
+.rx-sum-status {
+  width: 12%;
+  text-align: center !important;
+}
+.rx-sum-symbol {
+  width: 11%;
+  text-align: center !important;
+}
+.rx-points {
+  margin: 0;
+  padding-inline-start: 1.1em;
+  list-style: disc;
+}
+.rx-points li::marker {
+  color: #135c65;
+}
+.rx-weak-name {
+  display: block;
+  color: #0e464d;
+}
+.rx-weak {
+  margin: 0;
+}
+.rx-weak b {
+  display: inline-block;
+  color: #b45309;
+}
 .vb-levels {
   display: grid;
   gap: 5mm;

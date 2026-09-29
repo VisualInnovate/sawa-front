@@ -1428,6 +1428,12 @@ export default {
     test_date: "تاريخ التقييم",
     results_of: "نتائج {name}",
     no_result_data: "لا توجد بيانات نتائج لهذا التقييم.",
+    summary_intro_male: "وأظهرت استجاباته على فقرات المقياس نقاط القوة والضعف التالية:",
+    summary_intro_female: "وأظهرت استجاباتها على فقرات المقياس نقاط القوة والضعف التالية:",
+    strengths: "نقاط القوة",
+    weaknesses: "نقاط الضعف",
+    goal_status: "حالة الهدف",
+    target_symbol: "الرمز المستهدف",
     blank: "اكتب هنا",
     age_words: {
       year_one: "سنة",
