@@ -21,7 +21,7 @@ const deleting = ref(false);
 const canAdd = computed(() => can("child recommendations create"));
 const canDelete = computed(() => can("child recommendations delete"));
 // {{name}} (any {{...}}) is the child's name.
-const withName = (text) => String(text ?? "").replace(/\{\{.*?\}\}/g, child.value?.name ?? "");
+const withName = (text) => String(text ?? "").replace(/\{\{.*?\}\}/g, child.value?.name.split(" ")[0] ?? "");
 
 async function load() {
   loading.value = true;

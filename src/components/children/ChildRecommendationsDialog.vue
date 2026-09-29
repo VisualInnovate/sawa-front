@@ -20,7 +20,7 @@ const saving = ref(false);
 
 const gender = computed(() => (String(props.child?.gender) === "1" ? "female" : "male"));
 // {{name}} (any {{...}}) is the child's name.
-const withName = (text) => String(text ?? "").replace(/\{\{.*?\}\}/g, props.child?.name ?? "");
+const withName = (text) => String(text ?? "").replace(/\{\{.*?\}\}/g, props.child?.name.split(" ")[0] ?? "");
 const givenIds = computed(() => new Set(given.value.map((item) => item.recommendation_id)));
 // Recommendations the child already has are listed but cannot be picked again.
 const options = computed(() => [...settings.value]
