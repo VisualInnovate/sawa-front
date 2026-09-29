@@ -1,34 +1,42 @@
 <script setup>
-// One VB-MAPP level as the classic grid: a column per domain, milestone 1 at the bottom.
-// A full score (1) fills the whole box, a half score (0.5) its lower half, in the level's color.
+// One VB-MAPP level as the classic grid: a column per domain, milestone 1 at the bottom, with every chosen
+// test drawn together. A full score (1) fills the box's upper and lower half, a half score (0.5) the lower
+// half only; each test that reached a half gets its own segment there, in its color, with its number (1-4).
 import { computed } from "vue";
 
 const props = defineProps({
-  // { level_id, level_name, subtests: [{ subtest_name, questions: [{ question, answer_score, answer_color }] }] }
+  // { level_id, level_name, subtests: [{ subtest_name, questions: [{ question, marks: [{ n, color, score }] }] }] }
   level: { type: Object, required: true },
 });
 
 const subtests = computed(() => props.level?.subtests ?? []);
 const rows = computed(() => Math.max(0, ...subtests.value.map((s) => s.questions?.length || 0)));
-const color = computed(() => {
-  for (const subtest of subtests.value) {
-    const found = subtest.questions?.find((q) => q.answer_color);
-    if (found) return `#${found.answer_color}`;
-  }
-  return "#135c65";
-});
 // Row 1 is the bottom one.
 const rowNumbers = computed(() => Array.from({ length: rows.value }, (_, i) => rows.value - i));
 const cell = (subtest, number) => subtest.questions?.[number - 1] ?? null;
-const fill = (question, threshold) =>
-  question?.answer_color && Number(question.answer_score) >= threshold ? `#${question.answer_color}` : "transparent";
+const reached = (question, threshold) => (question?.marks ?? []).filter((mark) => mark.color && Number(mark.score) >= threshold);
+
+// The tests' colors at this level (the legend under the title).
+const legend = computed(() => {
+  const seen = new Map();
+  for (const subtest of subtests.value) {
+    for (const question of subtest.questions ?? []) {
+      for (const mark of question.marks ?? []) if (mark.color && !seen.has(mark.n)) seen.set(mark.n, mark.color);
+    }
+  }
+  return [...seen.entries()].sort((a, b) => a[0] - b[0]).map(([n, color]) => ({ n, color }));
+});
 </script>
 
 <template>
-  <section class="mc" :style="{ '--level': color, '--cols': subtests.length || 1 }">
+  <section class="mc" :style="{ '--cols': subtests.length || 1 }">
     <header class="mc-head">
-      <span class="mc-swatch" />
       <h4>{{ level.level_name }}</h4>
+      <span class="mc-legend">
+        <span v-for="item in legend" :key="item.n" class="mc-legend-item">
+          <i :style="{ background: '#' + item.color }">{{ item.n }}</i>
+        </span>
+      </span>
     </header>
     <div class="mc-grid">
       <div class="mc-corner" />
@@ -42,8 +50,9 @@ const fill = (question, threshold) =>
           :class="{ 'is-none': !cell(subtest, number) }"
           :title="cell(subtest, number)?.question"
         >
-          <span :style="{ background: fill(cell(subtest, number), 1) }" />
-          <span :style="{ background: fill(cell(subtest, number), 0.5) }" />
+          <span v-for="threshold in [1, 0.5]" :key="threshold" class="mc-half">
+            <i v-for="mark in reached(cell(subtest, number), threshold)" :key="mark.n" :style="{ background: '#' + mark.color }">{{ mark.n }}</i>
+          </span>
         </div>
       </template>
     </div>
@@ -52,7 +61,7 @@ const fill = (question, threshold) =>
 
 <style scoped>
 .mc {
-  border: 1.5px solid var(--level);
+  border: 1.5px solid #135c65;
   border-radius: 8px;
   overflow: hidden;
   break-inside: avoid;
@@ -61,19 +70,34 @@ const fill = (question, threshold) =>
 .mc-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 5px 10px;
-  background: var(--level);
+  background: #135c65;
   color: #fff;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-.mc-swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  background: #fff;
-  box-shadow: inset 0 0 0 3px var(--level);
+.mc-legend {
+  display: flex;
+  gap: 4px;
+  direction: ltr;
+}
+.mc-legend i,
+.mc-half i {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-style: normal;
+  font-weight: 800;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.45);
+}
+.mc-legend i {
+  min-width: 18px;
+  height: 18px;
+  border: 1.5px solid #fff;
+  border-radius: 4px;
+  font-size: 8pt;
 }
 .mc-head h4 {
   margin: 0;
@@ -125,13 +149,21 @@ const fill = (question, threshold) =>
   border-top: 1px solid #e5e7eb;
   border-inline: 1px solid #e5e7eb;
 }
-.mc-cell span {
+.mc-half {
+  display: flex;
+  direction: ltr;
   border: 1px dotted #d1d5db;
+  overflow: hidden;
+}
+.mc-half i {
+  flex: 1;
+  font-size: 6.5pt;
+  line-height: 1;
 }
 .mc-cell.is-none {
   background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 4px, #f1f5f9 4px, #f1f5f9 8px);
 }
-.mc-cell.is-none span {
+.mc-cell.is-none .mc-half {
   border-color: transparent;
 }
 </style>

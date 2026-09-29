@@ -1468,4 +1468,13 @@ export default {
     answered_of: "تمت الإجابة على {n} من {total}",
     save: "حفظ التقييم",
   },
+  edit_recommendation: "تعديل التوصية",
+  recommendation_replace_with: "استبدالها بالتوصية",
+  recommendation_current: "الحالية",
+  recommendation_edit_note: "اختر توصية من قائمة التوصيات؛ تبقى التوصية الحالية ظاهرة أسفل الجديدة كنص سابق.",
+  recommendation_updated: "تم تعديل التوصية",
+  recommendation_edited: "تم التعديل",
+  recommendation_previous_text: "النص قبل التعديل:",
+  recommendation_all_edits: "عرض كل النصوص السابقة ({n})",
+  recommendation_hide_edits: "إخفاء النصوص السابقة",
 };

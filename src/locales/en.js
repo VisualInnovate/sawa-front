@@ -1431,4 +1431,13 @@ export default {
     answered_of: "{n} of {total} answered",
     save: "Save evaluation",
   },
+  edit_recommendation: "Edit recommendation",
+  recommendation_replace_with: "Replace it with",
+  recommendation_current: "current",
+  recommendation_edit_note: "Pick a recommendation from the list; the current one stays visible under the new one as an earlier text.",
+  recommendation_updated: "Recommendation updated",
+  recommendation_edited: "Edited",
+  recommendation_previous_text: "Text before the edit:",
+  recommendation_all_edits: "Show all earlier texts ({n})",
+  recommendation_hide_edits: "Hide earlier texts",
 };

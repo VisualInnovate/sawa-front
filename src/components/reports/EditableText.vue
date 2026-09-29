@@ -54,10 +54,12 @@ const onPaste = (event) => {
 </template>
 
 <style scoped>
+/* Inline so a long answer wraps with the sentence around it; an empty one keeps some width. */
 .rx-edit {
-  display: inline-block;
-  min-width: 7rem;
+  display: inline;
   padding: 0 0.3rem;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   border-radius: 4px;
   background: #fff8db;
   box-shadow: inset 0 -1px 0 #e5c100;
@@ -84,6 +86,10 @@ const onPaste = (event) => {
 }
 .rx-edit.is-multiline.is-block {
   min-height: 3.2em;
+}
+.rx-edit.is-empty:not(.is-block) {
+  display: inline-block;
+  min-width: 7rem;
 }
 .rx-edit.is-empty::before {
   content: attr(data-placeholder);

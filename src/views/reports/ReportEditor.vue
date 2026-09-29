@@ -89,7 +89,9 @@ function defaults(data) {
       { name: team.parent?.name ?? "", specialty: team.parent?.relation ?? "" },
     ],
     // Per section (evaluation type): the case-description blanks and VB-MAPP scores, and the behaviour table.
-    cases: Object.fromEntries(groupItems(data.items).map((group) => [group.group, { level: "", skills: "", scores: ["", "", "", ""] }])),
+    // The case description page's two blanks (one page per report).
+    caseText: { level: "", skills: "" },
+    cases: Object.fromEntries(groupItems(data.items).map((group) => [group.group, { scores: ["", "", "", ""] }])),
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
   };
 }
@@ -106,8 +108,11 @@ function readDraft() {
 function applyDraft(base, saved) {
   if (!saved) return base;
   if (Array.isArray(saved.team)) base.team = base.team.map((row, i) => ({ ...row, ...(saved.team[i] ?? {}) }));
+  // Drafts from before the case page moved kept its blanks with the VB-MAPP section.
+  const oldCase = Object.values(saved.cases ?? {}).find((value) => value?.level || value?.skills);
+  base.caseText = { ...base.caseText, ...(oldCase ? { level: oldCase.level ?? "", skills: oldCase.skills ?? "" } : {}), ...(saved.caseText ?? {}) };
   for (const key of Object.keys(base.cases)) {
-    if (saved.cases?.[key]) base.cases[key] = { ...base.cases[key], ...saved.cases[key] };
+    if (Array.isArray(saved.cases?.[key]?.scores)) base.cases[key].scores = saved.cases[key].scores;
     if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
   }
   return base;
@@ -171,8 +176,29 @@ onBeforeUnmount(() => {
 // ---- VB-MAPP helpers -------------------------------------------------------------------------------
 
 // The chart is the newest chosen test's; levels from the highest down (3, 2, 1).
-const levelsHighFirst = (item) => [...(item?.result?.levels ?? [])].sort((a, b) => Number(b.level_id) - Number(a.level_id));
-const caseAge = (item) => ageWords(ageOn(child.value.birth_date, item.date), t);
+// All chosen tests on one chart per level (highest level first): each milestone box lists, per test
+// (numbered 1-4 like the test table, oldest first), the score and color that test gave it.
+const mergedLevels = (tests) => {
+  const levels = new Map();
+  tests.forEach((test, index) => {
+    for (const level of test.result?.levels ?? []) {
+      if (!levels.has(level.level_id)) levels.set(level.level_id, { level_id: level.level_id, level_name: level.level_name, subtests: [] });
+      const target = levels.get(level.level_id);
+      for (const subtest of level.subtests ?? []) {
+        let domain = target.subtests.find((item) => item.subtest_name === subtest.subtest_name);
+        if (!domain) target.subtests.push((domain = { subtest_name: subtest.subtest_name, questions: [] }));
+        (subtest.questions ?? []).forEach((question, q) => {
+          domain.questions[q] ??= { question: question.question, marks: [] };
+          domain.questions[q].marks.push({ n: index + 1, color: question.answer_color, score: question.answer_score });
+        });
+      }
+    }
+  });
+  return [...levels.values()].sort((a, b) => Number(b.level_id) - Number(a.level_id));
+};
+const caseAge = (item) => (item ? ageWords(ageOn(child.value.birth_date, item.date), t) : "");
+// The age in the case description: at the newest chosen VB-MAPP test, or else the newest chosen evaluation.
+const caseItem = computed(() => sections.value.find((section) => section.type === MILESTONE)?.newest ?? items.value[0] ?? null);
 
 // ---- actions ---------------------------------------------------------------------------------------
 
@@ -322,27 +348,27 @@ function back() {
         <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
       </section>
 
-      <!-- 3+. One section per evaluation type -->
+      <!-- 3. Case description: always the third page, before any chart -->
+      <section class="rx-page">
+        <header class="rx-head">
+          <img :src="sawaLogo" alt="Sawa" />
+          <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
+        </header>
+
+        <h2 class="rx-band">{{ $t("ereport.case_description", { name: shortName }) }}</h2>
+        <p class="rx-case">
+          {{ $t(female ? "ereport.case_text_female" : "ereport.case_text_male", { name: shortName, age: caseAge(caseItem) }) }}
+          <EditableText v-model="edits.caseText.level" bold :placeholder="$t('ereport.blank')" />
+          {{ $t(female ? "ereport.case_text_2_female" : "ereport.case_text_2_male") }}
+          <EditableText v-model="edits.caseText.skills" :placeholder="$t('ereport.blank')" />.
+        </p>
+
+        <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+      </section>
+
+      <!-- 4+. One section per evaluation type -->
       <template v-for="section in sections" :key="section.group">
         <template v-if="section.type === MILESTONE">
-          <!-- Case description (once, at the newest chosen test) -->
-          <section class="rx-page">
-            <header class="rx-head">
-              <img :src="sawaLogo" alt="Sawa" />
-              <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
-            </header>
-
-            <h2 class="rx-band">{{ $t("ereport.case_description", { name: shortName }) }}</h2>
-            <p class="rx-case">
-              {{ $t(female ? "ereport.case_text_female" : "ereport.case_text_male", { name: shortName, age: caseAge(section.newest) }) }}
-              <EditableText v-model="edits.cases[section.group].level" bold :placeholder="$t('ereport.blank')" />
-              {{ $t(female ? "ereport.case_text_2_female" : "ereport.case_text_2_male") }}
-              <EditableText v-model="edits.cases[section.group].skills" :placeholder="$t('ereport.blank')" />.
-            </p>
-
-            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
-          </section>
-
           <!-- The VB-MAPP form: test columns = the chosen tests only; chart = the newest one -->
           <section class="rx-page">
             <header class="rx-head">
@@ -356,8 +382,8 @@ function back() {
             <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
 
             <div class="vb-levels">
-              <MilestoneLevelChart v-for="level in levelsHighFirst(section.newest)" :key="level.level_id" :level="level" />
-              <p v-if="!levelsHighFirst(section.newest).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+              <MilestoneLevelChart v-for="level in mergedLevels(section.tests)" :key="level.level_id" :level="level" />
+              <p v-if="!mergedLevels(section.tests).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
             </div>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
@@ -744,7 +770,9 @@ function back() {
   background: #fbfdfd;
   font-size: 12.5pt;
   line-height: 2.1;
-  text-align: justify;
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .rx-empty {
   color: #64748b;
@@ -841,14 +869,22 @@ function back() {
 </style>
 
 <style>
-/* Printing: only the pages, one per sheet, edge to edge (the pages carry their own margins). */
+/*
+ * Printing: one report page per A4 sheet. The margins come from @page and each page just fills the printable
+ * area (no fixed 210mm width and no zero margins): macOS / Safari do not honour margin 0 and apply the
+ * printer's minimum margins, which pushed a fixed-width page right and down.
+ */
 @media print {
   @page {
-    size: A4;
-    margin: 0;
+    size: A4 portrait;
+    margin: 12mm 12mm 12mm;
   }
   html,
   body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
     background: #fff !important;
   }
   .rx-toolbar,
@@ -862,12 +898,13 @@ function back() {
   .rx-pages {
     display: block !important;
     padding: 0 !important;
+    margin: 0 !important;
     overflow: visible !important;
   }
   .rx-page {
-    width: 210mm !important;
-    /* a hair under A4 so rounding never spills a blank sheet */
-    min-height: 296mm !important;
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
     break-after: page;
@@ -876,6 +913,23 @@ function back() {
   .rx-page:last-child {
     break-after: auto;
     page-break-after: auto;
+  }
+  /* The footer follows the content instead of being pushed to a fixed sheet bottom. */
+  .rx-page > :not(.rx-foot):nth-last-child(2) {
+    margin-bottom: 6mm !important;
+  }
+  /* The cover's own side margins are replaced by the sheet margins. */
+  .rx-cover-top {
+    padding: 4mm 0 0 !important;
+  }
+  .rx-cover-center {
+    margin: 10mm 0 9mm !important;
+  }
+  .rx-cover-list {
+    margin: 0 !important;
+  }
+  .rx-cover-foot {
+    padding: 10mm 0 0 !important;
   }
 }
 </style>
