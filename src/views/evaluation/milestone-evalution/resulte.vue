@@ -119,6 +119,7 @@
           </header>
 
           <div class="summary-columns">
+            <!-- Strengths -->
             <section class="summary-column summary-strengths">
               <div class="summary-column-heading">
                 <span class="summary-heading-icon" aria-hidden="true">✓</span>
@@ -135,6 +136,7 @@
               <p v-else class="summary-empty">{{ $t("no_data_available") }}</p>
             </section>
 
+            <!-- Weaknesses -->
             <section class="summary-column summary-weaknesses">
               <div class="summary-column-heading">
                 <span class="summary-heading-icon" aria-hidden="true">!</span>
@@ -150,7 +152,8 @@
               </ul>
               <p v-else class="summary-empty">{{ $t("no_data_available") }}</p>
             </section>
-
+            
+            <!-- Plan -->
             <section class="summary-column summary-plan-goals">
               <div class="summary-column-heading">
                 <span class="summary-heading-icon summary-goal-icon" aria-hidden="true">▣</span>
