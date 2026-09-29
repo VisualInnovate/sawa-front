@@ -870,14 +870,14 @@ function back() {
 
 <style>
 /*
- * Printing: one report page per A4 sheet. The margins come from @page and each page just fills the printable
- * area (no fixed 210mm width and no zero margins): macOS / Safari do not honour margin 0 and apply the
- * printer's minimum margins, which pushed a fixed-width page right and down.
+ * Printing: one report page per A4 sheet, edge to edge (the pages carry their own margins; margin 0 also keeps
+ * the browser's date/URL header and footer off). A page fills the sheet's width rather than a fixed 210mm, so a
+ * browser that still adds margins (Safari with "Print headers and footers") shrinks it instead of shifting it.
  */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm 12mm 12mm;
+    margin: 0;
   }
   html,
   body {
@@ -902,9 +902,9 @@ function back() {
     overflow: visible !important;
   }
   .rx-page {
-    width: auto !important;
-    min-height: 0 !important;
-    padding: 0 !important;
+    width: 100% !important;
+    /* a hair under A4 so rounding never spills a blank sheet */
+    min-height: 296mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     break-after: page;
@@ -913,23 +913,6 @@ function back() {
   .rx-page:last-child {
     break-after: auto;
     page-break-after: auto;
-  }
-  /* The footer follows the content instead of being pushed to a fixed sheet bottom. */
-  .rx-page > :not(.rx-foot):nth-last-child(2) {
-    margin-bottom: 6mm !important;
-  }
-  /* The cover's own side margins are replaced by the sheet margins. */
-  .rx-cover-top {
-    padding: 4mm 0 0 !important;
-  }
-  .rx-cover-center {
-    margin: 10mm 0 9mm !important;
-  }
-  .rx-cover-list {
-    margin: 0 !important;
-  }
-  .rx-cover-foot {
-    padding: 10mm 0 0 !important;
   }
 }
 </style>
