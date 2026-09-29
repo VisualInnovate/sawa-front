@@ -21,11 +21,14 @@ const saving = ref(false);
 const gender = computed(() => (String(props.child?.gender) === "1" ? "female" : "male"));
 // {{name}} (any {{...}}) is the child's name.
 const withName = (text) => String(text ?? "").replace(/\{\{.*?\}\}/g, props.child?.name.split(" ")[0] ?? "");
-const givenIds = computed(() => new Set(given.value.map((item) => item.recommendation_id)));
-// Recommendations the child already has are listed but cannot be picked again.
+// How many times the child already has each recommendation (it can be given again).
+const givenCount = computed(() => given.value.reduce((counts, item) => {
+  counts[item.recommendation_id] = (counts[item.recommendation_id] ?? 0) + 1;
+  return counts;
+}, {}));
 const options = computed(() => [...settings.value]
   .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0) || a.id - b.id)
-  .map((row) => ({ id: row.id, text: withName(row[gender.value] ?? row.value), disabled: givenIds.value.has(row.id) })));
+  .map((row) => ({ id: row.id, text: withName(row[gender.value] ?? row.value), given: givenCount.value[row.id] ?? 0 })));
 
 watch(visible, async (open) => {
   if (!open || !props.child?.id) return;
@@ -75,7 +78,6 @@ async function save() {
         :options="options"
         optionLabel="text"
         optionValue="id"
-        optionDisabled="disabled"
         filter
         :maxSelectedLabels="0"
         :selectedItemsLabel="$t('recommendations_selected', ['{0}'])"
@@ -87,7 +89,9 @@ async function save() {
         <template #option="{ option }">
           <span class="recommendation-option">
             {{ option.text }}
-            <small v-if="option.disabled" class="recommendation-given">({{ $t("recommendation_already_given") }})</small>
+            <small v-if="option.given" class="recommendation-given">
+              ({{ $t("recommendation_already_given") }}<template v-if="option.given > 1"> × {{ option.given }}</template>)
+            </small>
           </span>
         </template>
       </MultiSelect>
