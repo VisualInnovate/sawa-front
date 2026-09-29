@@ -1322,6 +1322,7 @@ export default {
     wording: "Wording",
     for_male: "Boy's wording",
     for_female: "Girl's wording",
+    count: "Recommendations",
     footer: "Wishing your child continued progress — Sawa Academy for Special Education",
   },
   ereport: {

@@ -7,6 +7,7 @@ import { useToast } from "primevue/usetoast";
 import ChildTaps from "../../components/ChildTaps.vue";
 import ChildRecommendationsDialog from "../../components/children/ChildRecommendationsDialog.vue";
 import { can } from "@/utils/permissions";
+import { printRecommendations } from "@/utils/printRecommendations";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -23,6 +24,17 @@ const canDelete = computed(() => can("child recommendations delete"));
 // {{name}} (any {{...}}) is the child's name.
 const withName = (text) => String(text ?? "").replace(/\{\{.*?\}\}/g, child.value?.name.split(" ")[0] ?? "");
 
+// The order set in the consultation settings (the API already sends them so; kept here for older responses).
+// A recommendation since removed from the settings has no order and goes last.
+const inDisplayOrder = (list) =>
+  [...list].sort((a, b) => (a.display_order ?? Infinity) - (b.display_order ?? Infinity));
+
+function print() {
+  const d = new Date();
+  const today = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+  printRecommendations({ texts: items.value.map((item) => withName(item.text)), childName: child.value?.name, date: today, t });
+}
+
 async function load() {
   loading.value = true;
   try {
@@ -33,7 +45,7 @@ async function load() {
     ]);
     const data = childRes.data;
     child.value = data?.id ? { id: data.id, name: data.name, gender: data.gender } : { id: childId, name: "" };
-    items.value = listRes.data?.data ?? [];
+    items.value = inDisplayOrder(listRes.data?.data ?? []);
   } catch {
     items.value = [];
     toast.add({ severity: "error", summary: t("error"), detail: t("request_failed_retry"), life: 4000 });
@@ -47,7 +59,7 @@ async function remove() {
   deleting.value = true;
   try {
     const { data } = await axios.delete(`api/child-recommendations/${childId}/${deleteId.value}`);
-    items.value = data?.data ?? items.value.filter((item) => item.id !== deleteId.value);
+    items.value = inDisplayOrder(data?.data ?? items.value.filter((item) => item.id !== deleteId.value));
     deleteId.value = null;
   } catch {
     toast.add({ severity: "error", summary: t("error"), detail: t("request_failed_retry"), life: 4000 });
@@ -71,7 +83,11 @@ onMounted(load);
           <h2>{{ $t("child_recommendations") }}</h2>
           <p v-if="child?.name">{{ child.name }}</p>
         </div>
-        <Button v-if="canAdd" icon="pi pi-plus" :label="$t('add_recommendations')" @click="dialog = true" />
+        <div class="page-actions">
+          <Button v-if="items.length" icon="pi pi-print" :label="$t('print')" severity="secondary" variant="outlined"
+            data-no-request-spinner @click="print" />
+          <Button v-if="canAdd" icon="pi pi-plus" :label="$t('add_recommendations')" @click="dialog = true" />
+        </div>
       </header>
 
       <div v-if="loading" class="page-state"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i><p>{{ $t("loading") }}</p></div>
@@ -97,7 +113,7 @@ onMounted(load);
       </div>
     </div>
 
-    <ChildRecommendationsDialog v-model:visible="dialog" :child="child" @saved="items = $event" />
+    <ChildRecommendationsDialog v-model:visible="dialog" :child="child" @saved="items = inDisplayOrder($event)" />
 
     <Dialog :visible="deleteId !== null" @update:visible="deleteId = null" modal :header="$t('confirm')" :style="{ width: '28rem', maxWidth: '95vw' }">
       <p>{{ $t("confirm_delete_recommendation") }}</p>
@@ -112,6 +128,7 @@ onMounted(load);
 <style scoped>
 .recommendations-page { padding: 1.25rem; }
 .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.page-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .page-head h2 { margin: 0; color: #0f172a; font-size: 1.3rem; font-weight: 700; }
 .page-head p { margin: 0.2rem 0 0; color: #64748b; }
 .recommendation-list { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }

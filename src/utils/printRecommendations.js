@@ -1,5 +1,7 @@
-// Prints the home recommendations list (consultation settings) as a clean A4 sheet through a hidden
-// iframe, so no pop-up window is needed. texts: the recommendations already in display order.
+// Prints home recommendations as a clean A4 sheet through a hidden iframe, so no pop-up window is needed.
+// texts: the recommendations already in display order.
+// The settings page prints a blank sheet (genderLabel = which wording, name and date left to fill in by hand);
+// a child's page passes childName and date, and its texts already carry the child's name.
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 
 const escape = (value) =>
@@ -8,7 +10,7 @@ const escape = (value) =>
 // {{name}} (any {{...}}) becomes a blank the staff can fill in by hand.
 const withBlank = (text) => escape(text).replace(/\{\{.*?\}\}/g, '<span class="blank"></span>');
 
-export function printRecommendations({ texts, genderLabel, t }) {
+export function printRecommendations({ texts, genderLabel = null, childName = null, date = null, t }) {
   const dir = document.documentElement.dir || "rtl";
   const lang = document.documentElement.lang || "ar";
   const logo = new URL(sawaLogo, window.location.href).href;
@@ -21,7 +23,7 @@ export function printRecommendations({ texts, genderLabel, t }) {
 <html lang="${escape(lang)}" dir="${dir}">
 <head>
 <meta charset="utf-8">
-<title>${escape(t("rec_print.title"))}</title>
+<title>${escape(t("rec_print.title"))}${childName ? " - " + escape(childName) : ""}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   @page { size: A4; margin: 14mm 14mm 16mm; }
@@ -87,6 +89,7 @@ export function printRecommendations({ texts, genderLabel, t }) {
     font-size: 11pt;
   }
   .item p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+  .ltr { direction: ltr; unicode-bidi: isolate; }
   .blank { display: inline-block; min-width: 90px; border-bottom: 1px dotted #64748b; }
   .foot {
     margin-top: 26px;
@@ -105,9 +108,9 @@ export function printRecommendations({ texts, genderLabel, t }) {
   </header>
   <h1>${escape(t("rec_print.title"))}</h1>
   <div class="meta">
-    <span><b>${escape(t("child_name"))}:</b><span class="line"></span></span>
-    <span><b>${escape(t("rec_print.date"))}:</b><span class="line"></span></span>
-    <span><b>${escape(t("rec_print.wording"))}:</b>${escape(genderLabel)}</span>
+    <span><b>${escape(t("child_name"))}:</b>${childName ? `<strong>${escape(childName)}</strong>` : '<span class="line"></span>'}</span>
+    <span><b>${escape(t("rec_print.date"))}:</b>${date ? `<span class="ltr">${escape(date)}</span>` : '<span class="line"></span>'}</span>
+    ${genderLabel ? `<span><b>${escape(t("rec_print.wording"))}:</b>${escape(genderLabel)}</span>` : `<span><b>${escape(t("rec_print.count"))}:</b>${texts.length}</span>`}
   </div>
   <ol>${rows}</ol>
   <div class="foot">${escape(t("rec_print.footer"))}</div>
