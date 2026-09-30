@@ -222,11 +222,11 @@ const eesaForms = (section) => {
   }));
 };
 
-// The newest chosen test's strengths and weaknesses, one row per target symbol (its levels merged). Weaknesses
-// are numbered inside their symbol: M-1, M-2...
-const summaryRows = (section) => {
+// The newest chosen test's strengths and weaknesses: one table per level (the first level first), one row per
+// target symbol. Weaknesses are numbered inside their row: M-1, M-2...
+const summaryRows = (goals) => {
   const rows = new Map();
-  for (const goal of section.newest?.result?.summary ?? []) {
+  for (const goal of goals) {
     const key = goal.symbol || goal.general_goal;
     if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.general_goal ?? "", statuses: new Set(), strengths: [], weaknesses: [] });
     const row = rows.get(key);
@@ -240,10 +240,22 @@ const summaryRows = (section) => {
     weaknesses: row.weaknesses.map((text, i) => ({ code: [row.symbol, i + 1].filter(Boolean).join("-"), text })),
   }));
 };
+const summaryTables = (section) => {
+  const names = new Map((section.newest?.result?.levels ?? []).map((level) => [String(level.level_id), level.level_name]));
+  const levels = new Map();
+  for (const goal of section.newest?.result?.summary ?? []) {
+    const key = String(goal.level_id ?? "");
+    if (!levels.has(key)) levels.set(key, []);
+    levels.get(key).push(goal);
+  }
+  return [...levels.entries()]
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([key, goals]) => ({ key, title: names.get(key) ?? "", rows: summaryRows(goals) }));
+};
 
 const milestoneExtras = computed(() => Object.fromEntries(sections.value
   .filter((section) => section.type === MILESTONE)
-  .map((section) => [section.group, { eesa: eesaForms(section), summary: summaryRows(section) }])));
+  .map((section) => [section.group, { eesa: eesaForms(section), summary: summaryTables(section) }])));
 
 // ---- actions ---------------------------------------------------------------------------------------
 
@@ -457,7 +469,9 @@ function back() {
 
             <p class="rx-summary-intro">{{ $t(female ? "ereport.summary_intro_female" : "ereport.summary_intro_male") }}</p>
 
-            <table v-if="milestoneExtras[section.group].summary.length" class="rx-table rx-summary">
+            <template v-for="table in milestoneExtras[section.group].summary" :key="table.key">
+            <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
+            <table class="rx-table rx-summary">
               <thead>
                 <tr>
                   <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
@@ -468,7 +482,7 @@ function back() {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, r) in milestoneExtras[section.group].summary" :key="r">
+                <tr v-for="(row, r) in table.rows" :key="r">
                   <td class="rx-sum-num">{{ r + 1 }}</td>
                   <td>
                     <ul v-if="row.strengths.length" class="rx-points">
@@ -488,7 +502,8 @@ function back() {
                 </tr>
               </tbody>
             </table>
-            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+            </template>
+            <p v-if="!milestoneExtras[section.group].summary.length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
@@ -1007,6 +1022,19 @@ function back() {
   font-size: 12.5pt;
   font-weight: 700;
 }
+.rx-summary-level {
+  margin: 14px 0 6px;
+  padding-inline-start: 10px;
+  border-inline-start: 4px solid #135c65;
+  color: #135c65;
+  font-size: 12pt;
+  font-weight: 800;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+.rx-summary-intro + .rx-summary-level {
+  margin-top: 0;
+}
 .rx-summary th,
 .rx-summary td {
   padding: 6px 8px;
@@ -1055,7 +1083,7 @@ function back() {
 }
 .vb-levels {
   display: grid;
-  gap: 5mm;
+  gap: 3mm;
 }
 
 @media (max-width: 860px) {
