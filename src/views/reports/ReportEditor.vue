@@ -460,16 +460,20 @@ function back() {
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
 
-          <!-- Strengths and weaknesses of the newest chosen test, one row per target symbol -->
-          <section class="rx-page">
+          <!-- Strengths and weaknesses of the newest chosen test: each level starts its own page -->
+          <section
+            v-for="(table, t) in milestoneExtras[section.group].summary.length ? milestoneExtras[section.group].summary : [null]"
+            :key="'summary-' + (table?.key ?? 'none')"
+            class="rx-page"
+          >
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
 
-            <p class="rx-summary-intro">{{ $t(female ? "ereport.summary_intro_female" : "ereport.summary_intro_male") }}</p>
+            <p v-if="t === 0" class="rx-summary-intro">{{ $t(female ? "ereport.summary_intro_female" : "ereport.summary_intro_male") }}</p>
 
-            <template v-for="table in milestoneExtras[section.group].summary" :key="table.key">
+            <template v-if="table">
             <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
             <table class="rx-table rx-summary">
               <thead>
@@ -503,7 +507,7 @@ function back() {
               </tbody>
             </table>
             </template>
-            <p v-if="!milestoneExtras[section.group].summary.length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
@@ -1032,6 +1036,7 @@ function back() {
   break-after: avoid;
   page-break-after: avoid;
 }
+.rx-head + .rx-summary-level,
 .rx-summary-intro + .rx-summary-level {
   margin-top: 0;
 }
