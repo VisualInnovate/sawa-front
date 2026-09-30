@@ -72,7 +72,7 @@ const legend = computed(() => {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 5px 10px;
+  padding: 2px 8px;
   background: #135c65;
   color: #fff;
   -webkit-print-color-adjust: exact;
@@ -93,42 +93,42 @@ const legend = computed(() => {
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.45);
 }
 .mc-legend i {
-  min-width: 18px;
-  height: 18px;
+  min-width: 15px;
+  height: 15px;
   border: 1.5px solid #fff;
   border-radius: 4px;
   font-size: 8pt;
 }
 .mc-head h4 {
   margin: 0;
-  font-size: 11pt;
+  font-size: 10pt;
   font-weight: 800;
 }
 .mc-grid {
   display: grid;
-  grid-template-columns: 26px repeat(var(--cols), minmax(0, 1fr));
-  gap: 0 3px;
-  padding: 6px;
+  grid-template-columns: 20px repeat(var(--cols), minmax(0, 1fr));
+  gap: 0 2px;
+  padding: 4px;
   background: #fff;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 /* As on the results page: grey headings and row numbers, a column per domain, dotted halves. */
 .mc-corner {
-  min-height: 38px;
+  min-height: 30px;
   background: #e5e7eb;
 }
 .mc-domain {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
-  padding: 2px;
+  min-height: 30px;
+  padding: 1px 2px;
   border-inline: 1px solid #e5e7eb;
   background: #f3f4f6;
-  font-size: 7.5pt;
+  font-size: 6.8pt;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.15;
   text-align: center;
   color: #374151;
   overflow-wrap: anywhere;
@@ -145,7 +145,7 @@ const legend = computed(() => {
 .mc-cell {
   display: grid;
   grid-template-rows: 1fr 1fr;
-  height: 24px;
+  height: 17px;
   border-top: 1px solid #e5e7eb;
   border-inline: 1px solid #e5e7eb;
 }
@@ -157,7 +157,7 @@ const legend = computed(() => {
 }
 .mc-half i {
   flex: 1;
-  font-size: 6.5pt;
+  font-size: 5.5pt;
   line-height: 1;
 }
 .mc-cell.is-none {
