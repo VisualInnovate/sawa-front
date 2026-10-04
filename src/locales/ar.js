@@ -1503,4 +1503,8 @@ export default {
   notifications_title: "الإشعارات",
   milestone_color_used_last: "هذا لون آخر تقييم في هذا المستوى، اختر لوناً آخر",
   milestone_color_used_last_error: "أحد المستويات يستخدم نفس لون آخر تقييم له، اختر لوناً آخر لذلك المستوى.",
+  recommendation_edit_text: "تعديل النص",
+  recommendation_replace: "استبدال بتوصية أخرى",
+  recommendation_text: "نص التوصية",
+  recommendation_edit_text_note: "عدّل النص كما تريد؛ يبقى النص الحالي ظاهراً أسفل الجديد كنص سابق.",
 };

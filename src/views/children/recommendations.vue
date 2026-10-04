@@ -71,10 +71,9 @@ async function remove() {
 
 const formatDate = (value) => (value ? String(value).slice(0, 10) : "—");
 
-// Editing one recommendation's text; the API keeps the replaced text in the row's history.
-// Editing = replacing one given recommendation with another from the consultation settings list;
-// the API keeps the replaced one in the row's history.
-const editing = ref(null); // { id, current, picked }
+// Editing one given recommendation, either by rewriting its own text or by replacing it with another one from
+// the consultation settings list; the API keeps the replaced text in the row's history (shown as an edit).
+const editing = ref(null); // { id, mode: "text" | "replace", text, original, current, picked }
 const savingEdit = ref(false);
 const editError = ref("");
 const openedHistory = ref({}); // row id -> all earlier texts shown
@@ -89,9 +88,22 @@ const replacementOptions = computed(() => {
     .map((row) => ({ id: row.id, order: row.display_order, text: withName(row[gender] ?? row.value) }));
 });
 
+const editModes = computed(() => [
+  { label: t("recommendation_edit_text"), value: "text" },
+  { label: t("recommendation_replace"), value: "replace" },
+]);
+const canSaveEdit = computed(() => {
+  const edit = editing.value;
+  if (!edit) return false;
+  if (edit.mode === "text") return edit.text.trim() !== "" && edit.text.trim() !== edit.original.trim();
+  return !!edit.picked && edit.picked !== edit.current;
+});
+
 async function startEdit(item) {
   editError.value = "";
-  editing.value = { id: item.id, current: item.recommendation_id, picked: item.recommendation_id };
+  // The text as it reads (the child's name filled in), ready to rewrite.
+  const text = withName(item.text);
+  editing.value = { id: item.id, mode: "text", text, original: text, current: item.recommendation_id, picked: item.recommendation_id };
   if (settingsList.value.length) return;
   settingsLoading.value = true;
   try {
@@ -105,17 +117,18 @@ async function startEdit(item) {
 }
 
 async function saveEdit() {
-  if (!editing.value || savingEdit.value || !editing.value.picked) return;
+  if (!canSaveEdit.value || savingEdit.value) return;
   savingEdit.value = true;
   try {
-    const { data } = await axios.put(`api/child-recommendations/${childId}/${editing.value.id}`, {
-      recommendation_id: editing.value.picked,
-    });
+    const edit = editing.value;
+    const { data } = await axios.put(`api/child-recommendations/${childId}/${edit.id}`,
+      edit.mode === "text" ? { text: edit.text.trim() } : { recommendation_id: edit.picked });
     items.value = inDisplayOrder(data?.data ?? items.value);
     editing.value = null;
     toast.add({ severity: "success", summary: t("success_message"), detail: t("recommendation_updated"), life: 3000 });
   } catch (error) {
-    editError.value = error.response?.data?.errors?.recommendation_id?.[0] ?? t("request_failed_retry");
+    const errors = error.response?.data?.errors ?? {};
+    editError.value = errors.text?.[0] ?? errors.recommendation_id?.[0] ?? t("request_failed_retry");
   } finally {
     savingEdit.value = false;
   }
@@ -196,7 +209,19 @@ onMounted(load);
     <Dialog :visible="editing !== null" @update:visible="editing = null" modal :header="$t('edit_recommendation')"
       :style="{ width: '40rem', maxWidth: '95vw' }">
       <div v-if="editing" class="edit-form">
-        <div v-if="settingsLoading" class="edit-state"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> {{ $t("loading") }}</div>
+        <SelectButton v-model="editing.mode" :options="editModes" optionLabel="label" optionValue="value" :allowEmpty="false"
+          class="edit-modes" @update:modelValue="editError = ''" />
+
+        <!-- Rewrite this recommendation's own text -->
+        <template v-if="editing.mode === 'text'">
+          <label for="edit-recommendation-text">{{ $t("recommendation_text") }}</label>
+          <Textarea id="edit-recommendation-text" v-model="editing.text" rows="5" autoResize maxlength="5000"
+            :invalid="!!editError" fluid />
+          <small v-if="editError" class="field-error">{{ editError }}</small>
+          <small v-else class="edit-note">{{ $t("recommendation_edit_text_note") }}</small>
+        </template>
+
+        <div v-else-if="settingsLoading" class="edit-state"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> {{ $t("loading") }}</div>
         <template v-else>
           <label for="edit-recommendation">{{ $t("recommendation_replace_with") }}</label>
           <Select
@@ -226,7 +251,7 @@ onMounted(load);
       <template #footer>
         <Button :label="$t('cancel')" variant="text" severity="secondary" @click="editing = null" />
         <Button :label="$t('save')" icon="pi pi-check" :loading="savingEdit" data-no-request-spinner
-          :disabled="!editing?.picked || editing?.picked === editing?.current" @click="saveEdit" />
+          :disabled="!canSaveEdit" @click="saveEdit" />
       </template>
     </Dialog>
 
@@ -261,6 +286,7 @@ onMounted(load);
 .edited-toggle { padding: 0; margin-top: 0.3rem; }
 .edit-form { display: grid; gap: 0.5rem; }
 .edit-form label { font-weight: 600; color: #334155; }
+.edit-modes { margin-bottom: 0.5rem; }
 .edit-note { color: #64748b; }
 .edit-state { padding: 1rem 0; text-align: center; color: #64748b; }
 .edit-preview { margin: 0; padding: 0.6rem 0.8rem; border-radius: 0.5rem; background: #f8fafc; line-height: 1.8; white-space: pre-line; }

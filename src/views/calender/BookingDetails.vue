@@ -134,13 +134,14 @@
 
         <!-- Submit Button -->
         <div class="text-center mt-4">
+          <!-- "Confirm" the first time; once the booking has been answered, the same form edits that answer. -->
           <Button
-            :label="$t('submit')"
+            :label="bookingAnswered ? $t('edit') : $t('submit')"
             type="submit"
             :loading="submittingBooking"
             :disabled="submittingBooking"
             class="bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 transition-all duration-300 px-6 py-2 rounded-lg shadow-md w-60"
-            icon="pi pi-check"></Button>
+            :icon="bookingAnswered ? 'pi pi-pencil' : 'pi pi-check'"></Button>
         </div>
       </div>
     </form>
@@ -533,6 +534,13 @@ export default {
     },
   },
   computed: {
+    // The booking was confirmed before (saved with a decision or a note to the parents), so the form edits it.
+    // Read from the saved booking, not the form, so the label changes only after saving.
+    bookingAnswered() {
+      const accepted = this.booking?.accepted;
+      const decided = accepted !== undefined && accepted !== null && accepted !== "" && Number(accepted) !== -1;
+      return decided || String(this.booking?.accepted_notes ?? "").trim() !== "";
+    },
     childGender() {
       return String(this.booking?.child_gender) === "1" ? "female" : "male";
     },

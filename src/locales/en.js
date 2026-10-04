@@ -1466,4 +1466,8 @@ export default {
   notifications_title: "Notifications",
   milestone_color_used_last: "This level's last evaluation used this color; pick another one",
   milestone_color_used_last_error: "A level uses the same color as its last evaluation; pick another color for that level.",
+  recommendation_edit_text: "Edit the text",
+  recommendation_replace: "Replace with another",
+  recommendation_text: "Recommendation text",
+  recommendation_edit_text_note: "Rewrite the text as needed; the current text stays visible under the new one as an earlier text.",
 };
