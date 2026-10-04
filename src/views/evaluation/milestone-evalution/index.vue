@@ -43,7 +43,6 @@
             v-model.number="answer.date"
             showIcon
             :placeholder="$t('date')"
-            :minDate="maxDate"
           />
           <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">
             {{ error.child_age[0] }}
