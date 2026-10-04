@@ -1,7 +1,8 @@
 <script setup>
-// One VB-MAPP level as the classic grid: a column per domain, milestone 1 at the bottom, with every chosen
-// test drawn together. A full score (1) fills the box's upper and lower half, a half score (0.5) the lower
-// half only; each test that reached a half gets its own segment there, in its color, with its number (1-4).
+// One VB-MAPP level as on the VB-MAPP master scoring form: a column of stacked square boxes per domain,
+// milestone 1 at the bottom. A full score (1) fills a box's upper and lower half, a half score (0.5) the lower
+// half only. Each half takes the color of the first chosen test (oldest first) that reached it, so the column
+// shows what every test added (the legend numbers the colors 1-4 like the test table).
 import { computed } from "vue";
 
 const props = defineProps({
@@ -14,7 +15,12 @@ const rows = computed(() => Math.max(0, ...subtests.value.map((s) => s.questions
 // Row 1 is the bottom one.
 const rowNumbers = computed(() => Array.from({ length: rows.value }, (_, i) => rows.value - i));
 const cell = (subtest, number) => subtest.questions?.[number - 1] ?? null;
-const reached = (question, threshold) => (question?.marks ?? []).filter((mark) => mark.color && Number(mark.score) >= threshold);
+const firstReached = (question, threshold) =>
+  [...(question?.marks ?? [])].sort((a, b) => a.n - b.n).find((mark) => mark.color && Number(mark.score) >= threshold) ?? null;
+const halfColor = (question, threshold) => {
+  const mark = firstReached(question, threshold);
+  return mark ? "#" + mark.color : "";
+};
 
 // The tests' colors at this level (the legend under the title).
 const legend = computed(() => {
@@ -50,8 +56,9 @@ const legend = computed(() => {
           :class="{ 'is-none': !cell(subtest, number) }"
           :title="cell(subtest, number)?.question"
         >
-          <span v-for="threshold in [1, 0.5]" :key="threshold" class="mc-half">
-            <i v-for="mark in reached(cell(subtest, number), threshold)" :key="mark.n" :style="{ background: '#' + mark.color }">{{ mark.n }}</i>
+          <span class="mc-box" :class="{ 'is-top': !cell(subtest, number + 1) }">
+            <span v-for="threshold in [1, 0.5]" :key="threshold" class="mc-half"
+              :style="{ background: halfColor(cell(subtest, number), threshold) }" />
           </span>
         </div>
       </template>
@@ -83,8 +90,7 @@ const legend = computed(() => {
   gap: 4px;
   direction: ltr;
 }
-.mc-legend i,
-.mc-half i {
+.mc-legend i {
   display: grid;
   place-items: center;
   color: #fff;
@@ -142,28 +148,32 @@ const legend = computed(() => {
   font-weight: 700;
   color: #4b5563;
 }
+/* The domain column is wider than its boxes: they stack in the middle of it as one strip. */
 .mc-cell {
   display: grid;
+  place-items: center;
+  border-inline: 1px solid #f3f4f6;
+}
+.mc-box {
+  display: grid;
   grid-template-rows: 1fr 1fr;
-  height: 17px;
-  border-top: 1px solid #e5e7eb;
-  border-inline: 1px solid #e5e7eb;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #6b7280;
+  border-top-width: 0;
+  background: #fff;
 }
-.mc-half {
-  display: flex;
-  direction: ltr;
-  border: 1px dotted #d1d5db;
-  overflow: hidden;
+/* The box at the top of a column closes the strip. */
+.mc-box.is-top {
+  border-top-width: 1px;
 }
-.mc-half i {
-  flex: 1;
-  font-size: 5.5pt;
-  line-height: 1;
+.mc-half + .mc-half {
+  border-top: 1px dotted #6b7280;
 }
 .mc-cell.is-none {
   background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 4px, #f1f5f9 4px, #f1f5f9 8px);
 }
-.mc-cell.is-none .mc-half {
-  border-color: transparent;
+.mc-cell.is-none .mc-box {
+  visibility: hidden;
 }
 </style>

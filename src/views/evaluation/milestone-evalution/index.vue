@@ -100,9 +100,13 @@
               <h2>{{ level.title }}</h2>
               <div class="milestone-level-colors">
                 <span>{{ $t("color") }}</span>
+                <!-- The color of the last evaluation in this level is locked, so the report tells the tests apart. -->
                 <button v-for="color in colorOptions" :key="color" type="button"
-                  :class="{ selected: levelColor(level.id) === color }" :style="{ backgroundColor: '#' + color }"
-                  :aria-label="'#' + color" @click="setLevelColor(level.id, color)"></button>
+                  :class="{ selected: levelColor(level.id) === color, blocked: isBlockedColor(level.id, color) }"
+                  :style="{ backgroundColor: '#' + color }" :disabled="isBlockedColor(level.id, color)"
+                  :title="isBlockedColor(level.id, color) ? $t('milestone_color_used_last') : ''"
+                  :aria-label="'#' + color + (isBlockedColor(level.id, color) ? ' — ' + $t('milestone_color_used_last') : '')"
+                  @click="setLevelColor(level.id, color)"></button>
               </div>
             </header>
             <template v-for="block in level.blocks" :key="block.key">
@@ -211,6 +215,8 @@ export default {
       colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
       // level id -> chosen color (hex without #)
       levelColors: {},
+      // level id -> the color the child's last evaluation used in that level (not allowed again)
+      lastColors: {},
       // The EESA form, when the child's levels include its domain.
       // levels: [{ level_id, title, previous }], one form per level.
       eesa: { show: false, domain: null, levels: [] },
@@ -277,14 +283,19 @@ export default {
     },
     // Until one is chosen, each level gets a different default color.
     levelColor(levelId) {
-      if (this.levelColors[levelId]) return this.levelColors[levelId];
+      if (this.levelColors[levelId] && !this.isBlockedColor(levelId, this.levelColors[levelId])) return this.levelColors[levelId];
       const index = Math.max(0, this.levelGroups.findIndex(level => level.id === levelId));
-      return this.colorOptions[index % this.colorOptions.length];
+      const free = this.colorOptions.filter(color => !this.isBlockedColor(levelId, color));
+      return free[index % free.length] ?? this.colorOptions[index % this.colorOptions.length];
+    },
+    isBlockedColor(levelId, color) {
+      return String(this.lastColors[levelId] ?? '').toUpperCase() === String(color).toUpperCase();
     },
     setEesaBoxes(levelId, boxes) {
       this.eesaBoxes = { ...this.eesaBoxes, [levelId]: boxes };
     },
     setLevelColor(levelId, color) {
+      if (this.isBlockedColor(levelId, color)) return;
       this.levelColors = { ...this.levelColors, [levelId]: color };
     },
     submit() {},
@@ -379,6 +390,7 @@ export default {
         this.error = error.response?.data?.errors || {};
         this.alert_text =
           Object.values(this.error).flat().join(" ") ||
+          (error.response?.status === 422 && error.response?.data?.data?.level_id ? this.$t("milestone_color_used_last_error") : "") ||
           this.$t("request_failed_retry");
       } finally {
         this.saving = false;
@@ -391,6 +403,11 @@ export default {
         this.answer.child_id = Number(this.$route.params.id || localStorage.getItem("child_id"));
         this.answer.date = new Date();
         this.getage();
+        // Without the endpoint (older server) every color stays available.
+        axios
+          .get(`api/milestone-answers/last-colors/${this.answer.child_id}`)
+          .then(({ data }) => { this.lastColors = data?.levels ?? {}; })
+          .catch(() => {});
         axios
           .get("api/mileston-levels")
           .then(({ data }) => {
@@ -452,6 +469,9 @@ export default {
 .milestone-level-colors button { width: 26px; height: 26px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }
 .milestone-level-colors button:hover { transform: scale(1.1); }
 .milestone-level-colors button.selected { border-color: #333; box-shadow: 0 0 0 2px #fff inset; }
+/* The last evaluation's color: crossed out and not clickable. */
+.milestone-level-colors button.blocked { position: relative; cursor: not-allowed; opacity: .35; transform: none; }
+.milestone-level-colors button.blocked::after { content: ""; position: absolute; inset: 45% -2px auto; height: 2px; background: #333; transform: rotate(-45deg); }
 .milestone-domain { border: 1px solid var(--sawa-border); border-radius: 16px; overflow: hidden; }
 .milestone-level .milestone-domain { border: 0; border-radius: 0; }
 .milestone-level .milestone-domain + .milestone-domain { border-top: 1px solid var(--sawa-border); }
