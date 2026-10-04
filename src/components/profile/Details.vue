@@ -199,6 +199,21 @@
        <Toast />
      </form>
 
+     <!-- Every user picks the employee who stands in for them (information only). -->
+     <section v-if="!loading" class="password-section substitute-section">
+       <div>
+         <h3>{{ $t('substitute_employee') }}</h3>
+         <p>{{ $t('substitute_employee_hint') }}</p>
+       </div>
+       <form class="substitute-form" @submit.prevent="saveSubstitute">
+         <div class="flex flex-column gap-2">
+           <label for="profile-substitute">{{ $t('substitute_employee') }}</label>
+           <SubstituteSelect v-model="substituteId" inputId="profile-substitute" :exclude="employee_id" />
+         </div>
+         <Button type="submit" icon="pi pi-check" :label="$t('save')" :loading="substituteSaving"
+           :disabled="substituteSaving || substituteId === savedSubstituteId" />
+       </form>
+     </section>
      <section v-if="!loading" class="password-section">
        <div>
          <h3>{{ $t('change_password') }}</h3>
@@ -237,9 +252,11 @@
   import moment from "moment";
   import { fetchUserProfile } from "./userProfile";
   import { can } from "../../utils/permissions";
+  import SubstituteSelect from "../SubstituteSelect.vue";
   
     import {useToast} from 'primevue/usetoast'
   export default {
+    components: { SubstituteSelect },
   
   
     data() {
@@ -268,6 +285,9 @@
           ,passwordForm: { current_password: '', password: '', password_confirmation: '' }
           ,passwordErrors: {}
           ,passwordLoading: false
+          ,substituteId: null
+          ,savedSubstituteId: null
+          ,substituteSaving: false
         // Add other validation rules for the title field
       };
   
@@ -352,6 +372,7 @@
           
       
               this.employee.image = response.data.user.image          
+              this.substituteId = this.savedSubstituteId = response.data.user.substitute_id ?? null
               if (!this.canEditProfile) {
                 this.positions = response.data.user.position ? [response.data.user.position] : []
                 this.shifts = response.data.user.shift ? [response.data.user.shift] : []
@@ -440,6 +461,20 @@
             this.$toast.add({ severity: 'error', summary: this.$t("error"), detail:  `${el.response.data.message}`, life: 3000 });
       })
       },
+      async saveSubstitute() {
+        if (this.substituteSaving) return
+        this.substituteSaving = true
+        try {
+          const { data } = await axios.post('/api/users/profile/substitute', { substitute_id: this.substituteId })
+          this.substituteId = this.savedSubstituteId = data?.substitute?.id ?? null
+          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('substitute_employee_saved'), life: 3000 })
+        } catch (error) {
+          const detail = error.response?.data?.errors?.substitute_id?.[0] ?? this.$t('request_failed_retry')
+          this.$toast.add({ severity: 'error', summary: this.$t('error'), detail, life: 4000 })
+        } finally {
+          this.substituteSaving = false
+        }
+      },
       async updatePassword() {
         if (this.passwordLoading || this.passwordMismatch) return
         this.passwordLoading = true
@@ -489,6 +524,16 @@
   .password-section p {
     margin: 0.35rem 0 1rem;
     color: var(--sawa-muted, #64748b);
+  }
+
+  .substitute-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: end;
+  }
+  @media (max-width: 640px) {
+    .substitute-form { grid-template-columns: 1fr; }
   }
 
   .password-form {
