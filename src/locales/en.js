@@ -1326,6 +1326,7 @@ export default {
     footer: "Wishing your child continued progress — Sawa Academy for Special Education",
   },
   ereport: {
+    levels_shown: "Levels shown",
     menu: "Reports",
     title: "Evaluation reports",
     subtitle: "Pick a child to see their finished evaluations, then choose the ones to include in a report.",
