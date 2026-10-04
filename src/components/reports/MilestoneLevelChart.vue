@@ -1,9 +1,9 @@
 <script setup>
 // One VB-MAPP level as on the VB-MAPP master scoring form: a strip of stacked square boxes under each domain
 // (its English symbol and Arabic name on top), milestone 1 at the bottom, the level drawn in its own color.
-// A full score (1) fills a box's upper and lower half, a half score (0.5) the lower half only. Each half takes
-// the color of the first test (oldest first) that reached it, so the strip shows what every test added; the
-// legend numbers the colors 1-4 like the report's test table. Used by the report and the results page.
+// A full score (1) fills a box's upper and lower half, a half score (0.5) the lower half only. With several tests,
+// each half shows the colors of every test that reached it side by side (oldest first, narrow stripes, no
+// numbers); the legend numbers the colors 1-4 like the report's test table. Used by the report and the results page.
 import { computed } from "vue";
 
 const props = defineProps({
@@ -21,12 +21,9 @@ const rows = computed(() => Math.max(1, ...subtests.value.map((s) => s.questions
 const levelNumber = computed(() => Number(props.level?.level_age) || null);
 const color = computed(() => LEVEL_COLORS[levelNumber.value] ?? "#135c65");
 
-const firstReached = (question, threshold) =>
-  [...(question?.marks ?? [])].sort((a, b) => a.n - b.n).find((mark) => mark.color && Number(mark.score) >= threshold) ?? null;
-const halfColor = (question, threshold) => {
-  const mark = firstReached(question, threshold);
-  return mark ? "#" + mark.color : "";
-};
+// The tests (oldest first) whose score reached this half: 1 for the upper half, 0.5 for the lower one.
+const reached = (question, threshold) =>
+  [...(question?.marks ?? [])].sort((a, b) => a.n - b.n).filter((mark) => mark.color && Number(mark.score) >= threshold);
 
 // The tests' colors at this level.
 const legendItems = computed(() => {
@@ -58,8 +55,9 @@ const legendItems = computed(() => {
         <!-- Milestone 1 at the bottom: the strip grows upwards. -->
         <div class="mc-strip">
           <span v-for="(question, q) in subtest.questions ?? []" :key="q" class="mc-box" :title="(q + 1) + ' - ' + (question.question ?? '')">
-            <span class="mc-half" :style="{ background: halfColor(question, 1) }" />
-            <span class="mc-half" :style="{ background: halfColor(question, 0.5) }" />
+            <span v-for="threshold in [1, 0.5]" :key="threshold" class="mc-half">
+              <i v-for="mark in reached(question, threshold)" :key="mark.n" :style="{ background: '#' + mark.color }" />
+            </span>
           </span>
         </div>
       </div>
@@ -183,6 +181,16 @@ const legendItems = computed(() => {
 }
 .mc-box:last-child {
   border-top-width: 1px;
+}
+.mc-half {
+  display: flex;
+  direction: ltr;
+  min-height: 0;
+  overflow: hidden;
+}
+.mc-half i {
+  flex: 1 1 0;
+  min-width: 0;
 }
 .mc-half + .mc-half {
   border-top: 1px dotted var(--level);
