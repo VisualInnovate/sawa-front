@@ -1463,4 +1463,6 @@ export default {
   appointment_cancelled: "Appointment cancelled",
   no_consultation_result: "The consultant has not written the consultation result yet.",
   notifications_title: "Notifications",
+  milestone_color_used_last: "This level's last evaluation used this color; pick another one",
+  milestone_color_used_last_error: "A level uses the same color as its last evaluation; pick another color for that level.",
 };
