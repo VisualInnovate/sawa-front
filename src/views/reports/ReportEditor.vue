@@ -4,8 +4,8 @@
 //
 // Pages: 1 cover (logo, child, evaluations) · 2 personal info + team signatures (newest chosen evaluation)
 // · then one section per evaluation type (at most four evaluations each): VB-MAPP = case description page
-// and one VB-MAPP form page whose test columns are the chosen tests only, then the EESA of the newest chosen test
-// that has one (its totals = the chosen tests') and a strengths/weaknesses table of the newest chosen test; any
+// and one VB-MAPP form page whose test columns are the chosen tests only, then a strengths/weaknesses table of the
+// newest chosen test (the EESA form never appears in the report); any
 // other type = its results,
 // one block per chosen evaluation. The behaviour-problems table belongs to a behavioural evaluation only.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
@@ -14,7 +14,6 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 import EditableText from "@/components/reports/EditableText.vue";
-import EesaForm from "@/components/milestone/EesaForm.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
@@ -94,6 +93,8 @@ function defaults(data) {
     // Per section (evaluation type): the case-description blanks and VB-MAPP scores, and the behaviour table.
     // The case description page's two blanks (one page per report).
     caseText: { level: "", skills: "" },
+    // VB-MAPP levels left out of the report (their charts and strengths/weaknesses tables), by level id.
+    hiddenLevels: [],
     cases: Object.fromEntries(groupItems(data.items).map((group) => [group.group, { scores: ["", "", "", ""] }])),
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
   };
@@ -114,6 +115,7 @@ function applyDraft(base, saved) {
   // Drafts from before the case page moved kept its blanks with the VB-MAPP section.
   const oldCase = Object.values(saved.cases ?? {}).find((value) => value?.level || value?.skills);
   base.caseText = { ...base.caseText, ...(oldCase ? { level: oldCase.level ?? "", skills: oldCase.skills ?? "" } : {}), ...(saved.caseText ?? {}) };
+  if (Array.isArray(saved.hiddenLevels)) base.hiddenLevels = saved.hiddenLevels.map(String);
   for (const key of Object.keys(base.cases)) {
     if (Array.isArray(saved.cases?.[key]?.scores)) base.cases[key].scores = saved.cases[key].scores;
     if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
@@ -178,18 +180,20 @@ onBeforeUnmount(() => {
 
 // ---- VB-MAPP helpers -------------------------------------------------------------------------------
 
-// The chart is the newest chosen test's; levels from the highest down (3, 2, 1).
-// All chosen tests on one chart per level (highest level first): each milestone box lists, per test
-// (numbered 1-4 like the test table, oldest first), the score and color that test gave it.
+// All chosen tests on one chart per level, from the highest level down (3, 2, 1), without the levels hidden in
+// the toolbar: each milestone box lists, per test (numbered 1-4 like the test table, oldest first), the score and
+// color that test gave it.
 const mergedLevels = (tests) => {
   const levels = new Map();
   tests.forEach((test, index) => {
     for (const level of test.result?.levels ?? []) {
-      if (!levels.has(level.level_id)) levels.set(level.level_id, { level_id: level.level_id, level_name: level.level_name, subtests: [] });
+      if (!levels.has(level.level_id)) {
+        levels.set(level.level_id, { level_id: level.level_id, level_name: level.level_name, level_age: level.level_age, subtests: [] });
+      }
       const target = levels.get(level.level_id);
       for (const subtest of level.subtests ?? []) {
         let domain = target.subtests.find((item) => item.subtest_name === subtest.subtest_name);
-        if (!domain) target.subtests.push((domain = { subtest_name: subtest.subtest_name, questions: [] }));
+        if (!domain) target.subtests.push((domain = { subtest_name: subtest.subtest_name, subtest_symbol: subtest.subtest_symbol, questions: [] }));
         (subtest.questions ?? []).forEach((question, q) => {
           domain.questions[q] ??= { question: question.question, marks: [] };
           domain.questions[q].marks.push({ n: index + 1, color: question.answer_color, score: question.answer_score });
@@ -197,30 +201,33 @@ const mergedLevels = (tests) => {
       }
     }
   });
-  return [...levels.values()].sort((a, b) => Number(b.level_id) - Number(a.level_id));
+  return [...levels.values()]
+    .filter((level) => isLevelShown(level.level_id))
+    .sort((a, b) => (Number(b.level_age) || 0) - (Number(a.level_age) || 0) || Number(b.level_id) - Number(a.level_id));
 };
+
+// The VB-MAPP levels in the chosen tests (lowest first) for the toolbar's level picker.
+const milestoneLevels = computed(() => {
+  const levels = new Map();
+  for (const section of sections.value.filter((item) => item.type === MILESTONE)) {
+    for (const test of section.tests) {
+      for (const level of test.result?.levels ?? []) {
+        if (!levels.has(String(level.level_id))) levels.set(String(level.level_id), { id: String(level.level_id), name: level.level_name, age: level.level_age });
+      }
+    }
+  }
+  return [...levels.values()].sort((a, b) => (Number(a.age) || 0) - (Number(b.age) || 0) || Number(a.id) - Number(b.id));
+});
+const isLevelShown = (levelId) => !(edits.value?.hiddenLevels ?? []).includes(String(levelId));
+function toggleLevel(levelId, shown) {
+  const hidden = new Set(edits.value.hiddenLevels.map(String));
+  if (shown) hidden.delete(String(levelId));
+  else hidden.add(String(levelId));
+  edits.value.hiddenLevels = [...hidden];
+}
 const caseAge = (item) => (item ? ageWords(ageOn(child.value.birth_date, item.date), t) : "");
 // The age in the case description: at the newest chosen VB-MAPP test, or else the newest chosen evaluation.
 const caseItem = computed(() => sections.value.find((section) => section.type === MILESTONE)?.newest ?? items.value[0] ?? null);
-
-// The EESA forms (one per level) of the newest chosen test that has one. Each total column is a chosen test,
-// numbered 1-4 oldest first as in the test table; a chosen test without that level's EESA leaves its column blank.
-const sameLevel = (a, b) => (a.level_id ?? null) === (b.level_id ?? null);
-const eesaForms = (section) => {
-  const source = [...section.tests].reverse().find((test) => test.result?.eesa?.length);
-  if (!source) return [];
-  return source.result.eesa.map((form) => ({
-    key: form.level_id ?? "none",
-    title: form.level_title,
-    date: source.date,
-    boxes: Object.fromEntries(Object.entries(form.scores ?? {}).map(([key, value]) => [key, String(value)])),
-    columns: Array.from({ length: MAX_PER_GROUP }, (_, i) => {
-      const test = section.tests[i];
-      const row = test?.result?.eesa?.find((item) => sameLevel(item, form));
-      return { number: i + 1, groups: row?.group_totals ?? {}, total: row?.total ?? null, current: test === source };
-    }),
-  }));
-};
 
 // The newest chosen test's strengths and weaknesses: one table per level (the first level first), one row per
 // target symbol. Weaknesses are numbered inside their row: M-1, M-2...
@@ -249,13 +256,14 @@ const summaryTables = (section) => {
     levels.get(key).push(goal);
   }
   return [...levels.entries()]
+    .filter(([key]) => isLevelShown(key))
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([key, goals]) => ({ key, title: names.get(key) ?? "", rows: summaryRows(goals) }));
 };
 
 const milestoneExtras = computed(() => Object.fromEntries(sections.value
   .filter((section) => section.type === MILESTONE)
-  .map((section) => [section.group, { eesa: eesaForms(section), summary: summaryTables(section) }])));
+  .map((section) => [section.group, { summary: summaryTables(section) }])));
 
 // ---- actions ---------------------------------------------------------------------------------------
 
@@ -278,6 +286,15 @@ function back() {
         <strong>{{ $t("ereport.report_title") }}<template v-if="child.name"> — {{ child.name }}</template></strong>
         <small><i class="pi pi-pencil" aria-hidden="true" /> {{ $t("ereport.editor_hint") }}</small>
       </div>
+      <!-- Which VB-MAPP levels the report shows (charts and strengths/weaknesses); not printed. -->
+      <fieldset v-if="report && milestoneLevels.length" class="rx-levels">
+        <legend>{{ $t("ereport.levels_shown") }}</legend>
+        <label v-for="level in milestoneLevels" :key="level.id" class="rx-level-option">
+          <Checkbox :modelValue="isLevelShown(level.id)" binary :inputId="'rx-level-' + level.id"
+            @update:modelValue="toggleLevel(level.id, $event)" />
+          <span>{{ level.name || $t("level_n", { n: level.age || level.id }) }}</span>
+        </label>
+      </fieldset>
       <div class="rx-toolbar-actions">
         <Button v-if="report" :label="$t('ereport.reset')" icon="pi pi-refresh" severity="secondary" variant="text" @click="resetEdits" />
         <Button :label="$t('ereport.print')" icon="pi pi-print" :disabled="!report" data-no-request-spinner @click="print" />
@@ -446,20 +463,6 @@ function back() {
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
 
-          <!-- The EESA of the newest chosen test that has one; its totals are the chosen tests' -->
-          <section v-for="form in milestoneExtras[section.group].eesa" :key="'eesa-' + form.key" class="rx-page">
-            <header class="rx-head">
-              <img :src="sawaLogo" alt="Sawa" />
-              <span>VB-MAPP · EESA<template v-if="milestoneExtras[section.group].eesa.length > 1 && form.title"> · {{ form.title }}</template> · <span class="ltr">{{ dmy(form.date) }}</span></span>
-            </header>
-
-            <div class="rx-eesa">
-              <EesaForm :modelValue="form.boxes" :assessments="form.columns" readonly />
-            </div>
-
-            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
-          </section>
-
           <!-- Strengths and weaknesses of the newest chosen test: each level starts its own page -->
           <section
             v-for="(table, t) in milestoneExtras[section.group].summary.length ? milestoneExtras[section.group].summary : [null]"
@@ -594,6 +597,31 @@ function back() {
 .rx-toolbar-actions {
   display: flex;
   gap: 0.5rem;
+}
+.rx-levels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+}
+.rx-levels legend {
+  float: inline-start;
+  margin-inline-end: 0.25rem;
+  padding: 0;
+  color: var(--sawa-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.rx-level-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 .rx-state {
   display: grid;
@@ -979,48 +1007,7 @@ function back() {
   font-size: 10pt;
 }
 
-.rx-eesa {
-  /* The form is drawn 800px wide; this fits it on one sheet. */
-  zoom: 0.79;
-}
-.rx-eesa :deep(.eesa-scroll) {
-  overflow: visible;
-}
-.rx-eesa :deep(.eesa) {
-  min-width: 0;
-  padding-bottom: 0;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
 /* Tighter rows than on screen so the whole form fits one sheet. */
-.rx-eesa :deep(.eesa-banner) {
-  padding: 0.3rem 1rem;
-}
-.rx-eesa :deep(.eesa-top) {
-  padding-top: 0.4rem;
-}
-.rx-eesa :deep(.eesa-group) {
-  padding-top: 0.3rem;
-}
-.rx-eesa :deep(.eesa-items) {
-  margin-top: 0.25rem;
-}
-.rx-eesa :deep(.eesa-column) {
-  gap: 0.1rem;
-}
-.rx-eesa :deep(.eesa-item input) {
-  height: 1.3rem;
-}
-.rx-eesa :deep(.eesa-assessment td) {
-  height: 1.55rem;
-}
-.rx-eesa :deep(.eesa-line-heading) {
-  margin-top: 0.15rem;
-  margin-bottom: 0.05rem;
-}
-.rx-eesa :deep(.eesa-footer) {
-  padding-top: 0.5rem;
-}
 .rx-summary-intro {
   margin: 0 0 10px;
   font-size: 12.5pt;

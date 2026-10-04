@@ -25,38 +25,9 @@
     <!-- Levels Grid -->
     <div class="space-y-12 print:space-y-6">
       <div v-for="(level, index) in mainSquares" :key="index" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border">
-        <!-- Level Header -->
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
-          <h1 class="w-full py-2 text-2xl font-bold text-center text-white">{{ level.level_name || $t("level_n", { n: index + 1 }) }}</h1>
-        </div>
-
-        <!-- Grid Content -->
-        <!-- Question 1 sits in the bottom row (numbered 1) and later questions climb upwards.
-             Built row by row from this level's own domains, so every domain gets a column
-             and cells line up even when a domain has fewer questions than the others. -->
-        <div class="p-4 print:p-2 print:break-inside-avoid">
-          <div class="level-grid-scroll">
-            <div class="level-grid print:text-sm" :style="{ '--level-columns': level?.subtests?.length || 1 }">
-              <div class="level-heading-spacer level-grid-corner"></div>
-              <div v-for="(subtest, subIndex) in level?.subtests || []" :key="'title-' + subIndex" class="level-subtest-title">
-                {{ subtest.subtest_name }}
-              </div>
-
-              <template v-for="row in levelRows(level)" :key="'row-' + row">
-                <div class="level-row-number">{{ levelRows(level) - row + 1 }}</div>
-                <div
-                  v-for="(subtest, subIndex) in level?.subtests || []"
-                  :key="row + '-' + subIndex"
-                  class="level-cell"
-                  :class="{ 'level-cell-empty': !subtest.questions?.[levelRows(level) - row] }"
-                  :title="subtest.questions?.[levelRows(level) - row]?.question"
-                >
-                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[levelRows(level) - row], 1) }"></div>
-                  <div class="level-cell-half" :style="{ backgroundColor: cellColor(subtest.questions?.[levelRows(level) - row], 0.5) }"></div>
-                </div>
-              </template>
-            </div>
-          </div>
+        <!-- The level as on the VB-MAPP form: a strip of boxes per domain, milestone 1 at the bottom. -->
+        <div class="p-4 print:p-2 print:break-inside-avoid level-chart">
+          <MilestoneLevelChart :level="chartLevel(level)" :legend="false" />
         </div>
 
         <!-- The EESA filled in this level, as the form (read only) -->
@@ -187,10 +158,11 @@
 <script>
 import axios from "axios";
 import EesaForm from "../../../components/milestone/EesaForm.vue";
+import MilestoneLevelChart from "../../../components/reports/MilestoneLevelChart.vue";
 
 export default {
   name: 'SquareGrid',
-  components: { EesaForm },
+  components: { EesaForm, MilestoneLevelChart },
   data() {
     return {
       // { domain, result: { assessment_number, scores, ... } | null, previous }
@@ -208,25 +180,28 @@ export default {
     },
   },
   methods: {
-    // A level's EESA; one saved without a level (older server) belongs to the first level.
+    // A level's EESA; one saved without a level (older server) belongs to the first level (shown last).
     eesaForLevel(level, index) {
       return this.eesa.results.find((item) => item.level_id != null && item.level_id === level?.level_id)
-        ?? (index === 0 ? this.eesa.results.find((item) => item.level_id == null || level?.level_id == null) : null)
+        ?? (index === this.mainSquares.length - 1 ? this.eesa.results.find((item) => item.level_id == null || level?.level_id == null) : null)
         ?? null;
     },
     // The saved scores in the boxes: "1" or "0.5"; blank boxes scored 0.
     eesaBoxes(item) {
       return Object.fromEntries(Object.entries(item?.result?.scores ?? {}).map(([key, value]) => [key, String(value)]));
     },
-    // Rows in a level = its longest domain (5 in the standard milestone).
-    levelRows(level) {
-      return Math.max(0, ...(level?.subtests || []).map((subtest) => subtest.questions?.length || 0));
-    },
-    // Top half fills for a full score (1), bottom half for a full or half score.
-    cellColor(question, threshold) {
-      if (!question?.answer_color) return '';
-      const score = Number(question.answer_score);
-      return score >= threshold ? `#${question.answer_color}` : '';
+    // This evaluation is the chart's only test: each answer is its single mark.
+    chartLevel(level) {
+      return {
+        ...level,
+        subtests: (level?.subtests || []).map((subtest) => ({
+          ...subtest,
+          questions: (subtest.questions || []).map((question) => ({
+            question: question.question,
+            marks: question.answer_color ? [{ n: 1, color: question.answer_color, score: question.answer_score }] : [],
+          })),
+        })),
+      };
     },
     async getresulte() {
       this.loading = true;
@@ -248,7 +223,9 @@ export default {
       }
 
       if (levelsResult.status === "fulfilled") {
-        this.mainSquares = levelsResult.value.data?.data || [];
+        // As on the VB-MAPP form: the highest level first (3, 2, 1).
+        this.mainSquares = [...(levelsResult.value.data?.data || [])]
+          .sort((a, b) => (Number(b.level_age) || 0) - (Number(a.level_age) || 0));
       } else {
         this.mainSquares = [];
         this.loadError = true;
@@ -317,12 +294,6 @@ th, td {
   vertical-align: middle !important;
 }
 
-/* Keep long Arabic subtest titles inside their own columns without changing the table design. */
-.level-heading-spacer,
-.level-subtest-title {
-  min-height: 7.5rem;
-}
-
 .level-eesa {
   border-top: 1px solid #e5e7eb;
 }
@@ -336,85 +307,13 @@ th, td {
   font-weight: 700;
 }
 
-.level-grid-scroll {
+/* The chart is drawn at report (A4) size; larger on screen, true size in print. */
+.level-chart {
   overflow-x: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  zoom: 1.35;
 }
-
-/* A gap separates the domain columns; each column keeps its own borders. */
-.level-grid {
-  --level-gap: 0.6rem;
-  display: grid;
-  grid-template-columns: 4.5rem repeat(var(--level-columns), minmax(5rem, 1fr));
-  column-gap: var(--level-gap);
-  min-width: calc(4.5rem + var(--level-columns) * (5rem + var(--level-gap)));
-  background: #fff;
-}
-
-.level-grid-corner {
-  background: #e5e7eb;
-}
-
-.level-row-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 4rem;
-  border-top: 1px solid #e5e7eb;
-  background: #f3f4f6;
-  font-weight: 500;
-}
-
-.level-cell {
-  display: flex;
-  flex-direction: column;
-  height: 4rem;
-  border-top: 1px solid #e5e7eb;
-  border-inline: 1px solid #e5e7eb;
-}
-
-.level-cell-half {
-  flex: 1;
-  border: 1px dotted #d1d5db;
-}
-
-.level-cell-empty {
-  background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 6px, #f1f5f9 6px, #f1f5f9 12px);
-}
-
-.level-cell-empty .level-cell-half {
-  border-color: transparent;
-}
-
 @media print {
-  /* Fit every domain on the page instead of scrolling. */
-  .level-grid-scroll { overflow: visible; }
-  .level-grid {
-    --level-gap: 0.25rem;
-    grid-template-columns: 3rem repeat(var(--level-columns), minmax(0, 1fr));
-    min-width: 0;
-  }
-  .level-row-number,
-  .level-cell {
-    height: 3rem;
-  }
-}
-
-.level-subtest-title {
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  background: #f3f4f6;
-  border-inline: 1px solid #e5e7eb;
-  font-weight: 500;
-  align-items: center;
-  padding: 0.75rem 0.5rem;
-  font-size: 0.75rem;
-  line-height: 1.75;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: normal;
+  .level-chart { zoom: 1; }
 }
 
 .evaluation-summary-list {
@@ -712,17 +611,6 @@ th, td {
   
   .border, .border-t, .border-b, .border-l, .border-r {
     border-color: #e5e7eb !important;
-  }
-
-  .level-heading-spacer,
-  .level-subtest-title {
-    min-height: 6.5rem;
-  }
-
-  .level-subtest-title {
-    padding: 0.5rem 0.25rem;
-    font-size: 0.625rem;
-    line-height: 1.45;
   }
 
   .evaluation-summary-list {
