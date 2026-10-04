@@ -6,6 +6,7 @@ const BookingDetails = () => import("../views/calender/BookingDetails.vue");
 const BookingCreate = () => import("../views/calender/BookingCreate.vue");
 const working = () => import("../views/calender/Working-hour.vue");
 const Recommendations = () => import("../views/calender/recommendations.vue");
+const RequiredEvaluations = () => import("../views/calender/RequiredEvaluations.vue");
 
 const calenderRoutes = [
   {
@@ -13,6 +14,12 @@ const calenderRoutes = [
     name: "Calender",
     meta: { permission: ["evaluation request create"] },
     component: Index,
+  },
+  {
+    path: "required-evaluations",
+    name: "required-evaluations",
+    meta: { permission: ["required evaluations list"] },
+    component: RequiredEvaluations,
   },
   {
     path: "recommendations",

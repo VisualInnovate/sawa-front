@@ -78,6 +78,7 @@ export const buildMenu = () => [
     label: "consulting",
     children: [
       { label: "bookings", to: { name: "ShowBooking" }, perm: "bookings list" },
+      { label: "required_evaluations", to: { name: "required-evaluations" }, perm: "required evaluations list" },
       { label: "Consultation_Settings", to: { name: "recommendations" }, perm: "consultation settings list" },
       { label: "Working_hours", to: { name: "working-hours" }, perm: "working hours list" },
     ],

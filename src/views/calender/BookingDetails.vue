@@ -210,6 +210,25 @@
           {{ removeBracesAndReplace(item.value) }}
         </p>
       </div>
+      <!-- The evaluations the child needs; the programs manager books them with the specialists. -->
+      <div class="flex flex-col">
+        <label class="text-gray-600 font-medium text-sm" for="required-evaluations">{{ $t("required_evaluations") }}</label>
+        <small class="text-gray-500 mb-1">{{ $t("required_evaluations_pick_hint") }}</small>
+        <MultiSelect
+          inputId="required-evaluations"
+          v-model="pre_evalutions.pre_evalutions"
+          :options="evaluate_types"
+          optionLabel="name"
+          dataKey="id"
+          :placeholder="$t('required_evaluations')"
+          class="w-full text-sm"
+        >
+          <template #option="{ option }">{{ getEvaluationTypeLabel(option.id, $t, option.name) }}</template>
+          <template #value="{ value, placeholder }">
+            {{ value?.length ? value.map((item) => getEvaluationTypeLabel(item.id, $t, item.name)).join("، ") : placeholder }}
+          </template>
+        </MultiSelect>
+      </div>
       <div class="flex flex-col">
         <label class="text-gray-600 font-medium text-sm">
           {{ $t("additional_notes") }}
@@ -229,46 +248,6 @@
         class="w-full py-1.5 mt-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-200"
         icon="pi pi-check">
       </Button>
-    </form>
-  </div>
-
-  <div v-can="'bookings edit'" class="sawa-card mt-5 p-[2%] bg-slate-50">
-    <form
-      class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
-    >
-      <div class="space-y-2">
-        <p class="w-full text- font-bold" for="username">
-          {{ $t(" اضافة مواعيد مسبقة ") }}
-        </p>
-
-        <label class="block text-gray-700 font-semibold text-lg" for="username">
-          {{ $t("pre_appointments_hint") }}
-        </label>
-
-
-        <MultiSelect
-          v-model="pre_evalutions.pre_evalutions"
-          :options="evaluate_types"
-          optionLabel="name"
-          class="w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-300"
-        />
-      </div>
-
-      <div class="bg-gray-100 p-3 rounded-md">
-        <p
-          v-for="(pre, index) in pre_evalutions.pre_evalutions"
-          :key="pre.name"
-          class="text-gray-800 text-sm font-medium"
-        >
-          {{ index + 1 }} - {{ pre.name }}
-        </p>
-      </div>
-
-      <Button
-        @click="SenPrEvalutions(booking.id)"
-        :label="$t('submit')"
-        class="w-full text-white py-2 px-4 rounded-md font-semibold transition-all duration-300 ease-in-out shadow-md flex items-center justify-center"
-        icon="pi pi-check" />
     </form>
   </div>
 
@@ -299,6 +278,7 @@
 import axios from "axios";
 import moment from "moment";
 import { formatChildAge } from "@/utils/childAge";
+import { getEvaluationTypeLabel } from "@/utils/evaluationTypes";
 
 export default {
   props: ["id"],
@@ -347,20 +327,6 @@ export default {
   },
 
   methods: {
-    SenPrEvalutions(id) {
-      axios
-        .post(`api/calender/bookings/${id}/evaluations`, {
-          pre_evaluations: this.pre_evalutions,
-        })
-        .then((res) => {
-          this.$toast.add({
-            severity: "success",
-            summary: this.$t("success_message"),
-            detail: `${this.$t("تم ارسال التقيممات المسبقة ")}`,
-            life: 3000,
-          });
-        });
-    },
     compareDates() {
       const eventDate = new Date(this.booking.event_date);
       const currentDate = new Date();
@@ -398,6 +364,7 @@ export default {
         .post(`api/booking/result`, {
           consultation_result: { ...this.student_massage, filed_value },
           booking_id: this.booking.id,
+          pre_evaluations: { pre_evalutions: this.pre_evalutions.pre_evalutions ?? [] },
         })
         .then((response) => {
           this.$toast.add({
@@ -453,9 +420,11 @@ export default {
       return String(text ?? "").replace(/\{\{.*?\}\}/g, this.booking.child_name);
     },
 
+    // The calendar books for this consultation, so the evaluation is linked to it (and to its consultant).
     AddEvalte(id) {
-      this.$router.push({ name: "Calender", params: { id: id } });
+      this.$router.push({ name: "Calender", params: { id: id }, query: { bookingId: this.booking.id } });
     },
+    getEvaluationTypeLabel,
     create() {
       axios
         .post(`api/evaluation-request`, {
