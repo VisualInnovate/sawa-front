@@ -542,6 +542,11 @@
               :class="{ 'p-invalid': submitted && !employee.role }"
             />
           </div>
+          <!-- The employee who stands in for this one (information only); every employee, searchable. -->
+          <div class="flex flex-column gap-2 py-1">
+            <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
+            <SubstituteSelect v-model="employee.substitute_id" />
+          </div>
         </div>
         <div class="text-center">
           <Button
@@ -561,9 +566,11 @@
 
 <script>
 import axios from "axios";
+import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import moment from "moment";
 import Treatment from "../../Treatment/Treatment.vue";
 export default {
+  components: { SubstituteSelect },
   data() {
     return {
       evaluate_types: [
@@ -695,6 +702,7 @@ export default {
       if (this.employee.evaluation)
         body.append("evaluations", this.employee.evaluation);
       if (this.employee.role) body.append("role", this.employee.role);
+      if (this.employee.substitute_id) body.append("substitute_id", this.employee.substitute_id);
       if (this.employee.treatments)
         body.append("treatments", this.employee.treatments);
       if (this.employee.skills) body.append("skills", this.employee.skills);

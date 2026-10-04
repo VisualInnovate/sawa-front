@@ -1470,4 +1470,8 @@ export default {
   recommendation_replace: "Replace with another",
   recommendation_text: "Recommendation text",
   recommendation_edit_text_note: "Rewrite the text as needed; the current text stays visible under the new one as an earlier text.",
+  substitute_employee: "Substitute employee",
+  substitute_employee_pick: "Choose the substitute employee",
+  substitute_employee_hint: "The employee who stands in for you when you are away. You can change it any time.",
+  substitute_employee_saved: "Substitute employee saved",
 };

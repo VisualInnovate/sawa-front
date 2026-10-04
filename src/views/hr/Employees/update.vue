@@ -292,6 +292,11 @@
               v-model="employee.role" option-value="id" filter :options="roles" optionLabel="name"
               :class="{ 'p-invalid': submitted && !employee.role }" />
           </div>
+          <!-- The employee who stands in for this one (information only); every employee, searchable. -->
+          <div class="flex flex-column gap-2 py-1">
+            <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
+            <SubstituteSelect v-model="employee.substitute_id" :exclude="employee.user_id" />
+          </div>
         </div>
         <div class="text-center">
           <Button @click="previousStep" :label="$t('Back')"></Button>
@@ -306,11 +311,13 @@
 
 <script>
 import axios from "axios";
+import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import InputNumber from "primevue/inputnumber";
 import moment from "moment";
 
 import { useToast } from "primevue/usetoast";
 export default {
+  components: { SubstituteSelect },
   data() {
     return {
       evaluate_types: [
@@ -418,6 +425,7 @@ export default {
         this.employee.image = response.data.data.user.image;
         this.employee.title = response.data.data.user.title;
         this.employee.role = response.data.data.user.roles[0].id;
+        this.employee.substitute_id = response.data.data.user.substitute_id ?? null;
         this.employee.national_id = parseInt(response.data.data.national_id);
         this.employee.skills = [];
         for (let i = 0; i < response.data.data.user.skills.length; i++) {
@@ -520,6 +528,8 @@ export default {
         body.append("basic_salary", this.employee.basic_salary);
       if (this.employee.type) body.append("type", this.employee.type);
       if (this.employee.role) body.append("role", this.employee.role);
+      // Always sent: an empty value clears the substitute.
+      body.append("substitute_id", this.employee.substitute_id ?? "");
       if (this.employee.evaluation)
         body.append("evaluations", this.employee.evaluation);
       if (this.employee.treatments)

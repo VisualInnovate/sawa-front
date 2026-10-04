@@ -1507,4 +1507,8 @@ export default {
   recommendation_replace: "استبدال بتوصية أخرى",
   recommendation_text: "نص التوصية",
   recommendation_edit_text_note: "عدّل النص كما تريد؛ يبقى النص الحالي ظاهراً أسفل الجديد كنص سابق.",
+  substitute_employee: "الموظف البديل",
+  substitute_employee_pick: "اختر الموظف البديل",
+  substitute_employee_hint: "الموظف الذي يحل محلك عند غيابك. يمكنك تغييره في أي وقت.",
+  substitute_employee_saved: "تم حفظ الموظف البديل",
 };
