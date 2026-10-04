@@ -235,7 +235,8 @@ const summaryRows = (goals) => {
   const rows = new Map();
   for (const goal of goals) {
     const key = goal.symbol || goal.general_goal;
-    if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.general_goal ?? "", statuses: new Set(), strengths: [], weaknesses: [] });
+    // The weaknesses are named by the goal's domain (older results without it fall back to the general goal).
+    if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.domain || goal.general_goal || "", statuses: new Set(), strengths: [], weaknesses: [] });
     const row = rows.get(key);
     if (goal.status) row.statuses.add(goal.status);
     row.strengths.push(...(goal.strength ?? []).map((point) => point.question).filter(Boolean));
