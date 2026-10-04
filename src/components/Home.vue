@@ -8,6 +8,7 @@ import { canVisit, homeRoute } from "../utils/permissions";
 import LocaleSelect from "./LocaleSelect.vue";
 import UserProfileMenu from "./UserProfileMenu.vue";
 import AdminSidebar from "./layout/AdminSidebar.vue";
+import NotificationBell from "./layout/NotificationBell.vue";
 import { buildMenu, visibleMenu } from "./layout/menu";
 
 const router = useRouter();
@@ -69,6 +70,7 @@ onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange))
       </router-link>
       <div class="admin-header-actions">
         <LocaleSelect />
+        <NotificationBell v-if="authStore.authenticated" />
         <UserProfileMenu v-if="authStore.authenticated" />
         <Button v-else as="router-link" :to="{ name: 'Login' }" :label="$t('sign_in')" />
       </div>

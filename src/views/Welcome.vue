@@ -6,6 +6,11 @@
       <p class="welcome-hint">{{ $t("welcome_hint") }}</p>
     </div>
 
+    <!-- Evaluation coordinators start from the evaluations waiting for an appointment. -->
+    <div v-if="seesRequiredEvaluations" class="pending-card">
+      <RequiredEvaluationsBoard compact />
+    </div>
+
     <div v-if="loadingRequests || pendingRequests.length" class="pending-card">
       <EvaluationRequestsBoard
         :requests="pendingRequests"
@@ -66,6 +71,7 @@ import { useToast } from "primevue/usetoast";
 import { useI18n } from "vue-i18n";
 import sawaLogo from "../assets/img/sawa_logo.svg";
 import EvaluationRequestsBoard from "../components/EvaluationRequestsBoard.vue";
+import RequiredEvaluationsBoard from "../components/RequiredEvaluationsBoard.vue";
 import { useAuthStore } from "../stores/Auth";
 import { getEvaluationStartRoute } from "../utils/evaluationTypes";
 import { isRequestOpen, startEvaluationRequest } from "../utils/evaluationRequestStatus";
@@ -91,6 +97,10 @@ const loadingBookings = ref(false);
 const seesPendingBookings = computed(() =>
   Number(authStore.authUser?.type ?? authStore.type) === CONSULTANT_TYPE
   || String(authStore.authUser?.roles?.name ?? "").trim() === RECEPTION_ROLE);
+const seesRequiredEvaluations = computed(() => {
+  void authStore.userPermissions;
+  return can("required evaluations list");
+});
 const userName = computed(() => {
   const user = authStore.authUser ?? {};
   return String(user.name ?? "").trim() || String(user.email ?? "").split("@")[0];

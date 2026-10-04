@@ -45,6 +45,14 @@
       <template #end> </template>
     </Toolbar>
 <h2 class="text-xl text-center">{{ childreen.find(child => child.id === event.child_id)?.name }}</h2>
+    <!-- Opened for a consultation: what it asked for and what is already booked. -->
+    <div v-if="required" class="required-strip" role="status">
+      <span class="required-strip-label">{{ $t("required_evaluations") }}:</span>
+      <Tag v-for="item in required.required" :key="item.type"
+        :severity="item.booked ? 'success' : 'warn'"
+        :icon="item.booked ? 'pi pi-check' : 'pi pi-clock'"
+        :value="requiredLabel(item)" />
+    </div>
     <p role="status" class="calendar-status">
       <span v-if="employeesLoading || calendarLoading">{{ $t('calendar_loading') }}</span>
       <span v-else-if="calendarError">{{ calendarError }}</span>
@@ -155,6 +163,8 @@ export default {
   data() {
     return {
       filter: {},
+      bookingId: Number(this.$route.query.bookingId) || null,
+      required: null,
       not_find: false,
       childreen: [],
       modal_text: false,
@@ -230,6 +240,28 @@ export default {
     };
   },
   methods: {
+    // The consultation this calendar books for (?bookingId=), and the next evaluation it still needs.
+    async loadRequired({ selectNext = true } = {}) {
+      try {
+        const { data } = await axios.get(`api/required-evaluations/${this.bookingId}`, { params: { _ts: Date.now() } });
+        this.required = data.data;
+      } catch {
+        this.required = null;
+        return;
+      }
+      if (!selectNext) return;
+      const next = this.required.required.find(item => !item.booked);
+      if (!next) return;
+      // Side profile is booked one dimension at a time.
+      const type = next.missing_dimensions?.[0] ?? next.type;
+      if (this.evaluate_types.some(option => option.id === type)) await this.fetchEmployees(type);
+    },
+    requiredLabel(item) {
+      const label = getEvaluationTypeLabel(item.type, this.$t, String(item.type));
+      return item.missing_dimensions?.length
+        ? `${label} (${this.$t("required_dimensions_left", { count: item.missing_dimensions.length })})`
+        : label;
+    },
     goBack() {
       this.$router.go(-1);
     },
@@ -346,6 +378,7 @@ export default {
       this.saving = true;
       try {
         await axios.post(`api/evaluation-request`, {
+          booking_id: this.bookingId,
           employee_id: this.event.employee_id,
           color: this.event.color,
           notes: this.event.notes?.trim() || null,
@@ -364,6 +397,7 @@ export default {
             life: 3000,
           });
           await this.getTimes();
+          if (this.bookingId) await this.loadRequired({ selectNext: false });
       } catch (el) {
           const pastSlot = Boolean(el.response?.data?.errors?.start_time);
           this.$toast.add({
@@ -518,15 +552,27 @@ export default {
   },
   mounted() {
     this.getClidreen();
-    this.fetchEmployees();
+    if (this.bookingId) this.loadRequired().then(() => { if (!this.employees.length && !this.employeesLoading) this.fetchEmployees(); });
+    else this.fetchEmployees();
     this.doctorshow = localStorage.getItem("type");
     this.opts.locale = localStorage.appLang === "en" ? null : arLocale;
-    console.log(this.$route.params.id);
     this.event.child_id = parseInt(this.$route.params.id);
   },
 };
 </script>
 <style scoped>
+.required-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.75rem;
+}
+.required-strip-label {
+  font-weight: 600;
+  color: #135c65;
+}
 :deep(.fc-day-unavailable) {
   background: repeating-linear-gradient(135deg, #f3f4f6, #f3f4f6 6px, #e5e7eb 6px, #e5e7eb 12px);
   opacity: 0.55;
