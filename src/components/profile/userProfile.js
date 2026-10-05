@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// The three profile tabs read the same `api/users/{id}` payload; share one request between them.
+// Profile details, evaluation requests, and results share the same user payload.
 let cached = null;
 export const USER_PROFILE_INVALIDATED_EVENT = "sawa:user-profile-invalidated";
 

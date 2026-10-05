@@ -22,6 +22,7 @@ const evaluations = ref([]);
 const evaluationsLoading = ref(false);
 const picked = ref([]);
 const panel = ref(null);
+const reportTypes = ref([]);
 
 const totalEvaluations = computed(() => children.value.reduce((sum, child) => sum + child.evaluations_count, 0));
 
@@ -86,10 +87,10 @@ function toggle(item, group) {
 }
 
 function openReport() {
-  if (!picked.value.length) return;
+  if (!picked.value.length || !reportTypes.value.length) return;
   // Keep the list's order (newest first).
   const items = evaluations.value.filter((item) => picked.value.includes(item.key)).map((item) => item.key);
-  router.push({ name: "evaluation-report", params: { childId: selectedChild.value.id }, query: { items: items.join(",") } });
+  router.push({ name: "evaluation-report", params: { childId: selectedChild.value.id }, query: { items: items.join(","), types: reportTypes.value.join(",") } });
 }
 
 onMounted(loadChildren);
@@ -250,9 +251,19 @@ onMounted(loadChildren);
             </section>
           </div>
 
+          <fieldset class="rp-report-types">
+            <legend>{{ $t("ereport.output_types") }}</legend>
+            <p>{{ $t("ereport.output_types_hint") }}</p>
+            <label v-for="type in ['report', 'plan', 'tracking']" :key="type" class="rp-output-type" :class="{ 'is-disabled': type === 'tracking' }">
+              <Checkbox v-model="reportTypes" :value="type" :disabled="type === 'tracking'" />
+              <span>{{ $t('ereport.output_' + type) }}</span>
+              <small v-if="type === 'tracking'">{{ $t("ereport.coming_soon") }}</small>
+            </label>
+          </fieldset>
+
           <footer class="rp-panel-foot">
             <span class="rp-picked">{{ picked.length ? $t("ereport.selected_n", { n: picked.length }) : $t("ereport.choose_one") }}</span>
-            <Button :label="$t('ereport.create_report')" icon="pi pi-file-export" :disabled="!picked.length" @click="openReport" />
+            <Button :label="$t('ereport.create_report')" icon="pi pi-file-export" :disabled="!picked.length || !reportTypes.length" @click="openReport" />
           </footer>
         </template>
       </aside>
@@ -612,6 +623,19 @@ onMounted(loadChildren);
   color: var(--sawa-muted);
   font-size: 0.78rem;
 }
+.rp-report-types {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+}
+.rp-report-types legend { font-weight: 700; color: var(--sawa-primary); }
+.rp-report-types p { margin: 0; font-size: 0.8rem; color: var(--sawa-muted); }
+.rp-output-type { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
+.rp-output-type.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.rp-output-type small { margin-inline-start: auto; }
 .rp-panel-foot {
   display: flex;
   flex-wrap: wrap;
