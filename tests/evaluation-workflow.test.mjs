@@ -24,10 +24,10 @@ test('milestone loads a flat question response including an empty age-zero respo
   await view.methods.getage.call(state);
   assert.equal(state.answer.child_age, 0);
   assert.equal(state.allquestion.length, 1);
-  const grouped = view.computed.questionGroups.call(state);
-  assert.equal(grouped[0].title, 'Domain');
-  assert.equal(grouped[0].goals[0].title, 'Goal');
-  assert.equal(grouped[0].goals[0].questions[0].id, 17);
+  const grouped = view.computed.levelGroups.call(state);
+  assert.equal(grouped[0].blocks[0].title, 'Domain');
+  assert.equal(grouped[0].blocks[0].goals[0].title, 'Goal');
+  assert.equal(grouped[0].blocks[0].goals[0].questions[0].id, 17);
   questions = [];
   await view.methods.getage.call(state);
   assert.equal(state.allquestion.length, 0);
@@ -35,18 +35,47 @@ test('milestone loads a flat question response including an empty age-zero respo
   assert.equal(state.alert_text, '');
 });
 
+test('milestone saves only selected levels and ignores hidden EESA validation', async () => {
+  let payload;
+  const view = component('../src/views/evaluation/milestone-evalution/index.vue', {
+    post: async (url, data) => { payload = data; },
+  });
+  const state = { ...view.data(), selectedLevelIds: [1, 3],
+    levelGroups: [{ id: 1 }, { id: 2 }, { id: 3 }],
+    eesa: { show: true, levels: [{ level_id: 1 }, { level_id: 2 }] },
+    eesaBoxes: { 1: { g1_1: '1' }, 2: { g1_1: 'invalid' } },
+    questionLevels: { 11: 1, 22: 2, 33: 3 },
+    answers: { student_program_id: null, answers: [
+      { question_id: 11, score: 1 }, { question_id: 22, score: 0.5 }, { question_id: 33, score: 0 },
+    ] }, answer: { child_id: 7, evaluation_id: 10 },
+    $route: { query: {} }, $router: { push: async () => {} }, $t: key => key,
+    levelColor: () => '00B8D9',
+  };
+  state.selectedLevelGroups = view.computed.selectedLevelGroups.call(state);
+  state.selectedEesaLevels = view.computed.selectedEesaLevels.call(state);
+  state.eesaInvalidLevels = view.computed.eesaInvalidLevels.call(state);
+  assert.equal(state.selectedLevelGroups.map(level => level.id).join(','), '1,3');
+  assert.equal(state.eesaInvalidLevels.length, 0);
+  await view.methods.getanswer.call(state);
+  assert.equal(payload.answers.map(answer => answer.question_id).join(','), '11,33');
+  assert.deepEqual(payload.selected_level_ids, [1, 3]);
+  assert.equal(Object.keys(payload.eesa.levels).join(','), '1');
+  assert.equal(state.saving, false);
+});
+
 test('milestone groups interleaved questions by domain and goal', () => {
   const view = component('../src/views/evaluation/milestone-evalution/index.vue', {});
-  const state = { $t: key => key, allquestion: [
+  const state = { ...view.data(), $t: key => key, allquestion: [
     { id: 1, question_type_id: 2, subtest_id: 8 },
     { id: 2, question_type_id: 3, subtest_id: 9 },
     { id: 3, question_type_id: 2, subtest_id: 8 },
     { id: 4, question_type_id: 2, subtest_id: 10 },
   ] };
-  const groups = view.computed.questionGroups.call(state);
-  assert.equal(groups.length, 2);
-  assert.equal(groups[0].goals.length, 2);
-  assert.equal(groups[0].goals[0].questions.map(q => q.id).join(','), '1,3');
+  const groups = view.computed.levelGroups.call(state);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].blocks.length, 2);
+  assert.equal(groups[0].blocks[0].goals.length, 2);
+  assert.equal(groups[0].blocks[0].goals[0].questions.map(q => q.id).join(','), '1,3');
 });
 
 test('side profile waits for basal persistence and submits the exact request context', async () => {
