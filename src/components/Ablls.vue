@@ -3,7 +3,7 @@ import NavTabs from "./common/NavTabs.vue";
 
 const items = [
   { to: { name: 'ablls' }, label: 'ablls', perm: 'able category list' },
-  { to: { name: 'missions' }, label: 'missions', perm: 'able mission list' },
+  { to: { name: 'missions' }, label: 'ablls_ui.missions_count', perm: 'able mission list' },
 ];
 </script>
 

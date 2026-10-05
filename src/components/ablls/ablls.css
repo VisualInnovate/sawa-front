@@ -290,3 +290,78 @@
     max-width: none;
   }
 }
+
+/* Domain type tabs (academic preparation, math, reading, spelling). */
+.ab-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.ab-type-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.ab-type-tab:hover {
+  border-color: var(--sawa-primary);
+  color: var(--sawa-primary);
+}
+.ab-type-tab.is-active {
+  background: var(--sawa-primary);
+  border-color: var(--sawa-primary);
+  color: #fff;
+}
+.ab-type-tab .ab-type-count {
+  min-width: 1.4rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--sawa-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+.ab-type-tab.is-active .ab-type-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.ab-type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Criterion numbers (1/2/3/4). */
+.ab-criteria {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  direction: ltr;
+}
+.ab-criteria > span {
+  display: grid;
+  place-items: center;
+  min-width: 1.45rem;
+  height: 1.45rem;
+  padding: 0 0.3rem;
+  border-radius: 6px;
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
