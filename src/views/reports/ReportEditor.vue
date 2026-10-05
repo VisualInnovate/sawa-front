@@ -456,7 +456,7 @@ function back() {
           <template v-if="showPlan">
           <!-- Strengths and weaknesses of the newest chosen test: each level starts its own page -->
           <section
-            v-for="(table, t) in milestoneExtras[section.group].summary.length ? milestoneExtras[section.group].summary : [null]"
+            v-for="table in milestoneExtras[section.group].summary.length ? milestoneExtras[section.group].summary : [null]"
             :key="'summary-' + (table?.key ?? 'none')"
             class="rx-page"
           >
@@ -465,21 +465,21 @@ function back() {
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
 
-            <p v-if="t === 0" class="rx-summary-intro">{{ $t(female ? "ereport.summary_intro_female" : "ereport.summary_intro_male") }}</p>
-
             <template v-if="table">
             <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
             <template v-for="kind in ['strengths', 'weaknesses']" :key="kind">
-              <h3 class="rx-summary-level">{{ $t('ereport.' + kind) }}</h3>
+              <h3 class="rx-summary-level">{{ $t('ereport.' + kind + '_intro') }}</h3>
               <table class="rx-table rx-summary">
                 <thead>
                   <tr>
+                    <th class="rx-sum-num">{{ $t('ereport.number') }}</th>
                     <th>{{ $t('ereport.' + kind) }}</th>
                     <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(row, r) in table.rows" :key="r" :class="{ 'rx-plan-empty-row': !row[kind].length }">
+                    <td class="rx-sum-num">{{ row[kind].length ? table.rows.slice(0, r + 1).filter(item => item[kind].length).length : "" }}</td>
                     <td>
                       <ul class="rx-plan-points">
                         <li v-for="(point, p) in row[kind]" :key="point.id">
@@ -492,7 +492,7 @@ function back() {
                     <td class="rx-sum-symbol"><EditableText v-model="row.symbol" block bold :placeholder="$t('ereport.target_symbol')" /></td>
                   </tr>
                   <tr v-if="!table.rows.some(row => row[kind].length)">
-                    <td colspan="2" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
+                    <td colspan="3" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
                   </tr>
                 </tbody>
               </table>
