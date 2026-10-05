@@ -84,7 +84,7 @@
           <Button
             @click="createevalutae"
             :loading="starting"
-            :disabled="questionsLoading || !allquestion.length || strart_evaluate"
+            :disabled="questionsLoading || !selectedLevelGroups.length || strart_evaluate"
             class="w-full"
             :label="$t('strart_evaluate')"
           ></Button>
@@ -92,9 +92,27 @@
 
         <Message v-if="questionsLoading" class="lg:col-span-2">{{ $t('loading') }}</Message>
         <Message v-else-if="answer.child_age != null && !allquestion.length" severity="warn" class="lg:col-span-2">{{ $t('no_records_found') }}</Message>
+        <fieldset v-if="!questionsLoading && levelGroups.length" class="level-picker lg:col-span-2" :disabled="strart_evaluate || starting">
+          <legend>{{ $t('milestone_choose_levels') }}</legend>
+          <p>{{ $t('milestone_choose_levels_hint') }}</p>
+          <div class="level-picker-options">
+            <label v-for="level in levelGroups" :key="level.id">
+              <Checkbox v-model="selectedLevelIds" :value="level.id" />
+              <span>{{ level.title }}</span>
+            </label>
+          </div>
+        </fieldset>
         <template v-if="strart_evaluate">
+          <!-- What each answer means and how it shows in the results chart. -->
+          <div class="score-legend lg:col-span-2">
+            <span class="score-legend-title">{{ $t("milestone_score_legend") }}</span>
+            <span v-for="score in [0, 0.5, 1]" :key="score" class="score-legend-item">
+              <span class="score-box" :class="'score-box-' + String(score).replace('.', '_')" aria-hidden="true"><i /><i /></span>
+              {{ $t('milestone_score_box_' + String(score).replace('.', '_')) }}
+            </span>
+          </div>
           <!-- Each level is its own card with its own color; answers are saved with their level's color. -->
-          <section v-for="level in levelGroups" :key="level.id" class="milestone-level lg:col-span-2"
+          <section v-for="level in selectedLevelGroups" :key="level.id" class="milestone-level lg:col-span-2"
             :style="{ '--level-color': '#' + levelColor(level.id) }">
             <header class="milestone-level-header">
               <h2>{{ level.title }}</h2>
@@ -126,10 +144,14 @@
                   <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
                     <p>{{ question.title }}</p>
                     <div class="milestone-scores">
-                      <label v-for="score in [0, 0.5, 1]" :key="score">
+                      <!-- Each answer with the box it draws in the results chart: 0 empty, 0.5 lower half, 1 full. -->
+                      <label v-for="score in [0, 0.5, 1]" :key="score" :title="$t('milestone_score_box_' + String(score).replace('.', '_'))">
                         <input type="radio" required :name="'question-' + question.id" :value="score"
                           @change="collectanswer($event, question.id)" />
                         <span>{{ score }}</span>
+                        <span class="score-box" :class="'score-box-' + String(score).replace('.', '_')" aria-hidden="true">
+                          <i /><i />
+                        </span>
                       </label>
                     </div>
                   </div>
@@ -212,6 +234,7 @@ export default {
       answer: {},
       allquestion: [],
       levels: [],
+      selectedLevelIds: [],
       colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
       // level id -> chosen color (hex without #)
       levelColors: {},
@@ -233,8 +256,14 @@ export default {
   },
 
   computed: {
+    selectedLevelGroups() {
+      return this.levelGroups.filter(level => this.selectedLevelIds.map(String).includes(String(level.id)))
+    },
+    selectedEesaLevels() {
+      return this.eesa.levels.filter(level => this.selectedLevelIds.map(String).includes(String(level.level_id)))
+    },
     eesaInvalidLevels() {
-      return this.eesa.levels
+      return this.selectedEesaLevels
         .filter((level) => eesaInvalidKeys(this.eesaBoxes[level.level_id] || {}).length)
         .map((level) => level.level_id);
     },
@@ -300,7 +329,7 @@ export default {
     },
     submit() {},
     async createevalutae() {
-      if (this.starting || this.strart_evaluate || this.questionsLoading || !this.allquestion.length) return
+      if (this.starting || this.strart_evaluate || this.questionsLoading || !this.selectedLevelGroups.length) return
       this.starting = true
       this.error = {}
       try {
@@ -324,6 +353,7 @@ export default {
       if (!this.answer.date || this.strart_evaluate) return
       this.questionsLoading = true
       this.allquestion = []
+      this.selectedLevelIds = []
       this.alert_text = ''
       try {
         const { data: age } = await axios.post('api/milestone-answers/get-age-child', {
@@ -359,7 +389,7 @@ export default {
     },
 
     async getanswer() {
-      if (this.saving) return;
+      if (this.saving || !this.selectedLevelGroups.length) return;
       if (this.eesaInvalidLevels.length) {
         this.alert_text = this.$t('eesa_invalid_boxes');
         return;
@@ -368,14 +398,15 @@ export default {
       this.error = {};
       try {
         const answers = this.answers.answers
-          .filter(Boolean)
+          .filter(answer => answer && this.selectedLevelIds.map(String).includes(String(this.questionLevels[answer.question_id])))
           .map((answer) => ({ ...answer, color: this.levelColor(this.questionLevels[answer.question_id]) }));
         await axios.post("/api/milestone-answers", {
           student_program_id: this.answers.student_program_id,
           request_id: this.$route.query.requestId || null,
           answers,
-          ...(this.eesa.show ? {
-            eesa: { levels: Object.fromEntries(this.eesa.levels.map((level) => [level.level_id, eesaScores(this.eesaBoxes[level.level_id] || {})])) },
+          selected_level_ids: this.selectedLevelIds,
+          ...(this.selectedEesaLevels.length ? {
+            eesa: { levels: Object.fromEntries(this.selectedEesaLevels.map((level) => [level.level_id, eesaScores(this.eesaBoxes[level.level_id] || {})])) },
           } : {}),
         });
         resetUserProfile();
@@ -461,6 +492,12 @@ export default {
 </script>
 
 <style scoped>
+.level-picker { border: 1px solid var(--sawa-border); border-radius: 12px; padding: 1rem; }
+.level-picker legend { font-weight: 700; color: var(--sawa-primary); }
+.level-picker p { margin: 0 0 .75rem; color: var(--sawa-muted); }
+.level-picker-options { display: flex; flex-wrap: wrap; gap: 1rem; }
+.level-picker-options label { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.level-picker:disabled .level-picker-options label { cursor: default; }
 .milestone-level { border: 2px solid var(--level-color); border-radius: 16px; overflow: hidden; }
 .milestone-level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding: 1rem 1.25rem; background: var(--level-color); color: #fff; }
 .milestone-level-header h2 { margin: 0; font-weight: 700; font-size: 1.25rem; }
@@ -483,7 +520,16 @@ export default {
 .milestone-question { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--sawa-border); padding: 1rem 0; }
 .milestone-question p { flex: 1 1 20rem; }
 .milestone-scores { display: flex; gap: .6rem; }
-.milestone-scores label { display: flex; gap: .4rem; padding: .5rem .8rem; border: 1px solid var(--sawa-border); border-radius: 8px; cursor: pointer; }
+.milestone-scores label { display: flex; align-items: center; gap: .4rem; padding: .5rem .8rem; border: 1px solid var(--sawa-border); border-radius: 8px; cursor: pointer; }
+.score-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.25rem; padding: .75rem 1rem; border: 1px dashed var(--sawa-border); border-radius: 12px; background: #f8fafc; color: #334155; font-size: .9rem; }
+.score-legend-title { font-weight: 700; color: var(--sawa-primary, #135c65); }
+.score-legend-item { display: inline-flex; align-items: center; gap: .45rem; }
+/* The chart box for each answer, in the level's color: upper half for 1, lower half for 0.5 and 1. */
+.score-box { display: grid; grid-template-rows: 1fr 1fr; width: 22px; height: 22px; margin-inline-start: .15rem; border: 1.5px solid var(--level-color, #135c65); background: #fff; }
+.score-box i + i { border-top: 1px dotted var(--level-color, #135c65); }
+.score-box-0_5 i:last-child,
+.score-box-1 i { background: var(--level-color, #135c65); }
+.score-box-1 i + i { border-top-color: rgba(255, 255, 255, .7); }
 
 /* Add custom styles for the name input field */
 .name-input {

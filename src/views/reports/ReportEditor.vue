@@ -13,6 +13,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
+import { createSummaryTables, newSummaryPoint, restoreSummaryTables } from "@/components/reports/summaryDraft";
 import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
@@ -101,6 +102,10 @@ function defaults(data) {
     caseText: { level: "", skills: "" },
     // VB-MAPP levels left out of the report (their charts and strengths/weaknesses tables), by level id.
     hiddenLevels: [],
+    summaries: Object.fromEntries(groupItems(data.items).filter(group => group.type === MILESTONE).map(group => {
+      const newest = [...group.items].sort(byDate).at(-1);
+      return [group.group, createSummaryTables(newest)];
+    })),
     cases: Object.fromEntries(groupItems(data.items).map((group) => [group.group, { scores: ["", "", "", ""] }])),
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
   };
@@ -125,6 +130,9 @@ function applyDraft(base, saved) {
   for (const key of Object.keys(base.cases)) {
     if (Array.isArray(saved.cases?.[key]?.scores)) base.cases[key].scores = saved.cases[key].scores;
     if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
+  }
+  for (const key of Object.keys(base.summaries)) {
+    base.summaries[key] = restoreSummaryTables(base.summaries[key], saved.summaries?.[key]);
   }
   return base;
 }
@@ -235,36 +243,13 @@ const caseAge = (item) => (item ? ageWords(ageOn(child.value.birth_date, item.da
 // The age in the case description: at the newest chosen VB-MAPP test, or else the newest chosen evaluation.
 const caseItem = computed(() => sections.value.find((section) => section.type === MILESTONE)?.newest ?? items.value[0] ?? null);
 
-// The newest chosen test's strengths and weaknesses: one table per level (the first level first), one row per
-// target symbol. Weaknesses are numbered inside their row: M-1, M-2...
-const summaryRows = (goals) => {
-  const rows = new Map();
-  for (const goal of goals) {
-    const key = goal.symbol || goal.general_goal;
-    // The weaknesses are named by the goal's domain (older results without it fall back to the general goal).
-    if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.domain || goal.general_goal || "", strengths: [], weaknesses: [] });
-    const row = rows.get(key);
-    row.strengths.push(...(goal.strength ?? []).map((point) => point.question).filter(Boolean));
-    row.weaknesses.push(...(goal.weak ?? []).map((point) => point.question).filter(Boolean));
-  }
-  return [...rows.values()].map((row) => ({
-    ...row,
-    weaknesses: row.weaknesses.map((text, i) => ({ code: [row.symbol, i + 1].filter(Boolean).join("-"), text })),
-  }));
-};
-const summaryTables = (section) => {
-  const names = new Map((section.newest?.result?.levels ?? []).map((level) => [String(level.level_id), level.level_name]));
-  const levels = new Map();
-  for (const goal of section.newest?.result?.summary ?? []) {
-    const key = String(goal.level_id ?? "");
-    if (!levels.has(key)) levels.set(key, []);
-    levels.get(key).push(goal);
-  }
-  return [...levels.entries()]
-    .filter(([key]) => isLevelShown(key))
-    .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([key, goals]) => ({ key, title: names.get(key) ?? "", rows: summaryRows(goals) }));
-};
+// Plan edits are kept independently from evaluation results in the local report draft.
+const summaryTables = (section) => (edits.value?.summaries?.[section.group] ?? [])
+  .filter(table => isLevelShown(table.key));
+
+function addSummaryRow(table, kind) {
+  table.rows.push({ symbol: "", strengths: [], weaknesses: [], [kind]: [newSummaryPoint()] });
+}
 
 const milestoneExtras = computed(() => Object.fromEntries(sections.value
   .filter((section) => section.type === MILESTONE)
@@ -427,8 +412,8 @@ function back() {
         <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
       </section>
 
-      <!-- 3. Case description: always the third page, before any chart -->
-      <section class="rx-page">
+      <!-- Case description belongs to the report output. -->
+      <section v-if="showCharts" class="rx-page">
         <header class="rx-head">
           <img :src="sawaLogo" alt="Sawa" />
           <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
@@ -449,7 +434,7 @@ function back() {
       <template v-for="section in sections" :key="section.group">
         <template v-if="section.type === MILESTONE">
           <!-- The VB-MAPP form: test columns = the chosen tests only; chart = the newest one -->
-          <section class="rx-page">
+          <section v-if="showCharts" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -494,17 +479,24 @@ function back() {
                   </tr>
                 </thead>
                 <tbody>
-                  <template v-for="(row, r) in table.rows" :key="r">
-                    <tr v-for="(point, p) in row[kind]" :key="p">
-                      <td>{{ kind === 'strengths' ? point : point.text }}</td>
-                      <td class="rx-sum-symbol"><b class="ltr">{{ kind === 'strengths' ? row.symbol : point.code }}</b></td>
-                    </tr>
-                  </template>
+                  <tr v-for="(row, r) in table.rows" :key="r" :class="{ 'rx-plan-empty-row': !row[kind].length }">
+                    <td>
+                      <ul class="rx-plan-points">
+                        <li v-for="(point, p) in row[kind]" :key="point.id">
+                          <EditableText v-model="point.text" block :placeholder="$t('ereport.point_text')" />
+                          <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')" @click="row[kind].splice(p, 1)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                        </li>
+                      </ul>
+                      <button type="button" class="rx-plan-control rx-add-point" @click="row[kind].push(newSummaryPoint())"><i class="pi pi-plus" aria-hidden="true" /> {{ $t('ereport.add_point') }}</button>
+                    </td>
+                    <td class="rx-sum-symbol"><EditableText v-model="row.symbol" block bold :placeholder="$t('ereport.target_symbol')" /></td>
+                  </tr>
                   <tr v-if="!table.rows.some(row => row[kind].length)">
                     <td colspan="2" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
                   </tr>
                 </tbody>
               </table>
+              <button type="button" class="rx-plan-control rx-add-point" @click="addSummaryRow(table, kind)"><i class="pi pi-plus" aria-hidden="true" /> {{ $t('ereport.add_symbol') }}</button>
             </template>
             </template>
             <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
@@ -560,6 +552,18 @@ function back() {
 </template>
 
 <style scoped>
+.rx-plan-points { margin: 0; padding: 0; list-style: none; }
+.rx-plan-points li { display: flex; align-items: start; gap: .5rem; margin-bottom: .4rem; }
+.rx-plan-points :deep(.rx-edit) { flex: 1; }
+.rx-plan-control { border: 0; border-radius: 5px; padding: .3rem .5rem; cursor: pointer; font: inherit; font-size: 9pt; }
+.rx-remove-point { color: #b91c1c; background: #fef2f2; flex: none; }
+.rx-add-point { color: var(--sawa-primary); background: #edf7f5; margin-top: .4rem; }
+@media print {
+  .rx-plan-control, .rx-plan-empty-row { display: none !important; }
+  .rx-plan-points { list-style: disc; padding-inline-start: 1.1em; }
+  .rx-plan-points li { display: list-item; }
+}
+
 .rx-root {
   min-height: 100vh;
   background: #e8edef;
