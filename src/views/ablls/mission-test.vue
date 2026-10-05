@@ -46,39 +46,87 @@
                   </div>
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.color">{{ error.color[0] }}</div>
               </div> 
-              <div v-if="strart_evaluate" class="col-span-2" >
-                <a  style="color: blue;" class="text-xl mx-[2%] underline" v-for="que,index in qustions" :href="'#'+index">{{ que.category }}</a>
-                
+              <div v-if="strart_evaluate" class="col-span-2 at-nav">
+                <template v-for="(que, index) in qustions" :key="index"><a v-if="que.missions?.length" class="at-nav-link" :href="'#ablls-domain-' + index">
+                  <span class="ab-symbol is-sm">{{ que.symbol }}</span>{{ que.category }}
+                </a></template>
+                <span class="at-progress">{{ $t('ablls_ui.answered_n', { n: answeredCount, total: totalMissions }) }}</span>
               </div>
-              
-              <div v-if="strart_evaluate" v-for="que,index in qustions" class="col-span-2 flex flex-column gap-2">
-                <div style="border: 1px solid black" class="p-2">
-                  <a :id="index" class="text-xl font-bold underline text-blue-900 py-1" >{{ que.category }}</a>
-                <div v-for=" q,ind in que.missions">
-                  
-                  <h3 class="text-base font-semibold ">{{q.question}}</h3>
-                
-                  
-                  <div class="py-2 px-4" >
-                      <Rating required @change="getanswerscore($event,q.id,ind)" v-model="score[q.id]" :cancel="false" :stars="q?.benchmarks?.length">
 
-                            <template #onicon>
-                                <img src="../frontend/image/hhh.jfif" height="30" width="30" />
-                            </template>
-                            <template #officon>
-                                <img src="../frontend/image/nnn.png" height="34" width="34" />
-                            </template>
-                        </Rating>
-                     
-                  </div>
-                </div>
-                </div>
-                
-            
-                         
-              
-            
-              </div> 
+              <template v-if="strart_evaluate">
+                <template v-for="g in groupedByType" :key="g.type">
+                  <h2 class="col-span-2 at-type">
+                    <i :class="typeIcon(g.type)" aria-hidden="true" />{{ $t(`ablls_ui.types.${g.type}`) }}
+                  </h2>
+                  <section v-for="que in g.items" :id="'ablls-domain-' + que.index" :key="que.index" class="col-span-2 at-domain">
+                    <header class="at-domain-head">
+                      <span class="ab-symbol">{{ que.symbol }}</span>
+                      <h3>{{ que.category }}</h3>
+                    </header>
+
+                    <article v-for="q in que.missions" :key="q.id" class="at-skill" :class="{ 'is-answered': isAnswered(q.id) }">
+                      <div class="at-skill-head">
+                        <span class="ab-key">{{ q.key }}</span>
+                        <h4>{{ q.name }}</h4>
+                        <span v-if="q.criteria?.length" class="at-criteria">
+                          {{ $t('ablls_ui.criteria') }}:
+                          <span class="ab-criteria"><span v-for="n in q.criteria" :key="n">{{ n }}</span></span>
+                        </span>
+                      </div>
+
+                      <!-- academic preparation: the questions; math / reading / spelling: the goals -->
+                      <template v-if="isAcademic(que)">
+                        <ol class="at-list">
+                          <li v-for="(item, i) in listOf(q, 'questions', 'question')" :key="i">
+                            <span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}
+                          </li>
+                        </ol>
+                        <details v-if="(q.goals || []).length || (q.strengths || []).length" class="at-details">
+                          <summary>{{ $t('ablls_ui.show_details') }}</summary>
+                          <div v-if="(q.goals || []).length">
+                            <b>{{ $t('ablls_ui.goals') }}</b>
+                            <ol class="at-list">
+                              <li v-for="(item, i) in q.goals" :key="i"><span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}</li>
+                            </ol>
+                          </div>
+                          <div v-if="(q.strengths || []).length">
+                            <b>{{ $t('ablls_ui.strengths') }}</b>
+                            <ol class="at-list">
+                              <li v-for="(item, i) in q.strengths" :key="i"><span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}</li>
+                            </ol>
+                          </div>
+                        </details>
+                      </template>
+                      <template v-else>
+                        <p v-if="q.long_term_goal" class="at-ltg"><b>{{ $t('ablls_ui.long_term_goal') }}:</b> {{ q.long_term_goal }}</p>
+                        <ol class="at-list">
+                          <li v-for="(item, i) in q.sub_goals || []" :key="i">
+                            <span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}
+                          </li>
+                        </ol>
+                      </template>
+
+                      <div class="at-scores" role="radiogroup" :aria-label="$t('ablls_ui.score')">
+                        <span class="at-scores-label">{{ $t('ablls_ui.score') }}</span>
+                        <button
+                          v-for="n in scoreOptions(q)"
+                          :key="n"
+                          type="button"
+                          role="radio"
+                          :aria-checked="score[q.id] === n"
+                          class="at-score"
+                          :class="{ 'is-active': score[q.id] === n, 'is-zero': n === 0 }"
+                          :style="score[q.id] === n && n > 0 ? { background: '#' + answer.color, borderColor: '#' + answer.color } : null"
+                          :title="n === 0 ? $t('ablls_ui.not_achieved') : null"
+                          @click="setScore(q.id, n)"
+                        >
+                          {{ n }}
+                        </button>
+                      </div>
+                    </article>
+                  </section>
+                </template>
+              </template>
               <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
                 <Button @click="getanswer"  class="m-auto w-full" :label='$t("submit")'></Button>
@@ -101,6 +149,8 @@
 
 <script>
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+import { isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
+import "@/components/ablls/ablls.css";
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
 
@@ -120,7 +170,7 @@ export default {
       },
       type:4,
       
-         score:[],
+      score:{},
       colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
       answer:{
           color:"00B8D9",
@@ -138,7 +188,38 @@ export default {
   },
 
 
+  computed: {
+    // Domains grouped by type (academic preparation, math, reading, spelling), keeping each domain's index for the links.
+    groupedByType() {
+      const groups = [];
+      (Array.isArray(this.qustions) ? this.qustions : []).forEach((que, index) => {
+        if (!que.missions?.length) return;
+        const type = typeOf(que);
+        let group = groups.find((g) => g.type === type);
+        if (!group) groups.push((group = { type, items: [] }));
+        group.items.push({ ...que, index });
+      });
+      return groups.sort((a, b) => typeOrder(a.type) - typeOrder(b.type));
+    },
+    totalMissions() {
+      return (Array.isArray(this.qustions) ? this.qustions : []).reduce((n, que) => n + (que.missions?.length || 0), 0);
+    },
+    answeredCount() {
+      return Object.keys(this.score).length;
+    },
+  },
   methods: {
+    isAcademic,
+    listOf,
+    scoreOptions,
+    typeIcon,
+    isAnswered(id) {
+      return this.score[id] !== undefined;
+    },
+    setScore(id, value) {
+      this.score = { ...this.score, [id]: value };
+      this.getanswerscore({ value }, id);
+    },
     // ... existing methods ...
     Therapeutic (){
       this.$router.push({ name: 'answer' });
@@ -399,4 +480,32 @@ export default {
 /* Add additional CSS for animation or other styling as needed */
 
 /* Add any other custom styles here */
+
+/* ABLLS skills: domains grouped by type, each skill with its questions / goals and its score buttons. */
+.at-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.at-nav-link { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .6rem; border: 1px solid var(--sawa-border); border-radius: 999px; background: #fff; color: #334155; font-size: .85rem; font-weight: 600; text-decoration: none; }
+.at-nav-link:hover { border-color: var(--sawa-primary); color: var(--sawa-primary); }
+.at-progress { margin-inline-start: auto; color: var(--sawa-muted); font-size: .85rem; font-weight: 700; }
+.at-type { display: flex; align-items: center; gap: .5rem; margin: .75rem 0 0; color: var(--sawa-primary); font-size: 1.15rem; font-weight: 800; }
+.at-domain { display: grid; gap: .75rem; padding: 1rem; background: #fff; border: 1px solid var(--sawa-border); border-radius: var(--sawa-radius); scroll-margin-top: 1rem; }
+.at-domain-head { display: flex; align-items: center; gap: .6rem; }
+.at-domain-head h3 { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--sawa-text); }
+.at-skill { display: grid; gap: .6rem; padding: .85rem 1rem; border: 1px solid var(--sawa-border); border-inline-start: 4px solid #cbd5e1; border-radius: 10px; background: #fbfcfd; }
+.at-skill.is-answered { border-inline-start-color: var(--sawa-primary); background: #fff; }
+.at-skill-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.at-skill-head h4 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--sawa-text); }
+.at-criteria { display: inline-flex; align-items: center; gap: .35rem; margin-inline-start: auto; color: var(--sawa-muted); font-size: .8rem; font-weight: 600; }
+.at-list { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.at-list li { display: flex; align-items: flex-start; gap: .5rem; line-height: 1.7; font-size: .92rem; color: #334155; }
+.at-code { flex: none; padding: .05rem .4rem; border-radius: 6px; background: #f1f5f9; color: #475569; font-size: .75rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; margin-top: .2rem; }
+.at-ltg { margin: 0; line-height: 1.7; color: #334155; }
+.at-details { font-size: .9rem; }
+.at-details summary { cursor: pointer; color: var(--sawa-primary); font-weight: 600; }
+.at-details > div { display: grid; gap: .35rem; margin-top: .5rem; }
+.at-scores { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding-top: .5rem; border-top: 1px dashed var(--sawa-border); }
+.at-scores-label { color: var(--sawa-muted); font-size: .82rem; font-weight: 700; margin-inline-end: .25rem; }
+.at-score { min-width: 2.4rem; height: 2.4rem; border: 1px solid var(--sawa-border); border-radius: 10px; background: #fff; color: #334155; font: inherit; font-weight: 800; cursor: pointer; transition: background-color .15s, border-color .15s, color .15s; }
+.at-score:hover { border-color: var(--sawa-primary); color: var(--sawa-primary); }
+.at-score.is-active { background: var(--sawa-primary); border-color: var(--sawa-primary); color: #fff; }
+.at-score.is-zero.is-active { background: #64748b; border-color: #64748b; }
 </style>

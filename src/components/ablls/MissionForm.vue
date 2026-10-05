@@ -1,107 +1,143 @@
 <script setup>
-// Create / edit form of one ABLLS mission (used by mission-create and mission-update).
-import { computed, nextTick, onMounted, ref } from 'vue'
+// Create / edit form of one ABLLS skill (used by mission-create and mission-update). The inputs follow the
+// domain type: academic preparation keeps strengths/weaknesses, goals and questions; math, reading and
+// spelling keep one long-term goal and sub goals. Every skill has a criterion (the scores it can get).
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import BackButton from '@/components/common/BackButton.vue'
+import ListEditor from './ListEditor.vue'
+import { CRITERIA_OPTIONS, isAcademic, listOf, nextSkillKey, typeIcon, typeOf, typeOrder } from './abllsTypes'
 import './ablls.css'
 
 const props = defineProps({ id: { type: [String, Number], default: null } })
 
 const { t } = useI18n()
 const toast = useToast()
+const route = useRoute()
 const router = useRouter()
 
 const isEdit = computed(() => !!props.id)
 const loading = ref(true)
 const saving = ref(false)
 const categories = ref([])
+const missions = ref([])
 const errors = ref({})
-const mission = ref({ category_id: null, name: '', goal: '', question: '', sample: '', note: '', benchmarks: [] })
-const draft = ref('')
-const benchmarkInput = ref(null)
-
-const selectedCategory = computed(() => categories.value.find((c) => c.id === mission.value.category_id))
-const keyPreview = computed(() => {
-  if (isEdit.value && mission.value.key) return mission.value.key
-  return selectedCategory.value ? `${selectedCategory.value.symbol}-…` : t('ablls_ui.auto_key')
+const legacy = ref(false)
+const original = ref(null)
+const mission = ref({
+  category_id: null,
+  key: '',
+  name: '',
+  criteria: [],
+  strengths: [],
+  goals: [],
+  questions: [],
+  long_term_goal: '',
+  sub_goals: [],
 })
-const degrees = computed(() => Array.from({ length: mission.value.benchmarks.length + 1 }, (_, i) => i))
+const editors = ref([])
 
-const firstError = (field) => errors.value?.[field]?.[0]
-const benchmarkError = computed(
-  () => firstError('benchmarks') || Object.entries(errors.value || {}).find(([k]) => k.startsWith('benchmarks.'))?.[1]?.[0]
+const sortedCategories = computed(() =>
+  [...categories.value].sort((a, b) => typeOrder(typeOf(a)) - typeOrder(typeOf(b)))
 )
+const selectedCategory = computed(() => categories.value.find((c) => c.id === mission.value.category_id))
+const academic = computed(() => isAcademic(selectedCategory.value))
+
+// The code the backend gives when the field is left empty.
+const suggestedKey = computed(() => {
+  const cat = selectedCategory.value
+  if (!cat) return t('ablls_ui.auto_key')
+  if (isEdit.value && original.value?.category_id === cat.id && original.value.key) return original.value.key
+  const keys = missions.value.filter((m) => m.category_id === cat.id && m.id !== original.value?.id).map((m) => m.key)
+  return nextSkillKey(cat, keys)
+})
+const codePrefix = computed(() => (mission.value.key || '').trim() || (selectedCategory.value ? suggestedKey.value : ''))
+const scale = computed(() => [0, ...[...mission.value.criteria].sort((a, b) => a - b)])
+
+const firstError = (field) =>
+  errors.value?.[field]?.[0] || Object.entries(errors.value || {}).find(([k]) => k.startsWith(`${field}.`))?.[1]?.[0]
 
 onMounted(async () => {
   try {
-    const requests = [axios.get('/api/able-category')]
+    const requests = [
+      axios.get('/api/able-category'),
+      axios.get('/api/able-mission').catch(() => ({ data: { data: [] } })),
+    ]
     if (isEdit.value) requests.push(axios.get(`/api/able-mission/${props.id}`))
-    const [cats, one] = await Promise.all(requests)
+    const [cats, all, one] = await Promise.all(requests)
     categories.value = cats.data.data || []
+    missions.value = all.data.data || []
     if (one) {
       const data = one.data.data
+      original.value = data
+      const criteria = (data.criteria || []).map(Number)
+      legacy.value = !criteria.length
+      const benchmarks = (data.benchmarks || []).length || Math.max(0, String(data.degree || '').length - 1)
       mission.value = {
-        ...data,
-        sample: data.sample ?? '',
-        note: data.note ?? '',
-        benchmarks: (data.benchmarks || []).map((b) => ({ body: b.body })),
+        category_id: data.category_id,
+        key: data.key || '',
+        name: data.name || '',
+        criteria: criteria.length ? criteria : Array.from({ length: Math.min(benchmarks, 9) }, (_, i) => i + 1),
+        strengths: [...(data.strengths || [])],
+        goals: listOf(data, 'goals', 'goal'),
+        questions: listOf(data, 'questions', 'question'),
+        long_term_goal: data.long_term_goal || (data.goal && !(data.goals || []).length ? data.goal : '') || '',
+        sub_goals: [...(data.sub_goals || [])],
       }
-    } else if (categories.value.length === 1) {
-      mission.value.category_id = categories.value[0].id
+    } else {
+      const fromQuery = Number(route.query.category)
+      if (categories.value.some((c) => c.id === fromQuery)) mission.value.category_id = fromQuery
+      else if (categories.value.length === 1) mission.value.category_id = categories.value[0].id
     }
   } finally {
     loading.value = false
   }
 })
 
-const addBenchmark = () => {
-  const body = draft.value.trim()
-  if (!body) return
-  mission.value.benchmarks.push({ body })
-  draft.value = ''
-  delete errors.value.benchmarks
-  nextTick(() => benchmarkInput.value?.$el?.focus?.())
+const toggleCriterion = (n) => {
+  const list = mission.value.criteria
+  mission.value.criteria = list.includes(n) ? list.filter((x) => x !== n) : [...list, n].sort((a, b) => a - b)
+  delete errors.value.criteria
 }
-const removeBenchmark = (i) => mission.value.benchmarks.splice(i, 1)
-const moveBenchmark = (i, dir) => {
-  const list = mission.value.benchmarks
-  const j = i + dir
-  if (j < 0 || j >= list.length) return
-  ;[list[i], list[j]] = [list[j], list[i]]
+
+const clearError = (field) => {
+  delete errors.value[field]
 }
 
 const validate = () => {
   const e = {}
-  for (const f of ['category_id', 'name', 'goal', 'question']) {
-    const v = mission.value[f]
-    if (v === null || v === undefined || String(v).trim() === '') e[f] = [t('ablls_ui.required')]
-  }
-  const list = mission.value.benchmarks.filter((b) => b.body.trim())
-  if (!list.length) e.benchmarks = [t('ablls_ui.benchmarks_required')]
+  const m = mission.value
+  if (!m.category_id) e.category_id = [t('ablls_ui.required')]
+  if (!m.name.trim()) e.name = [t('ablls_ui.required')]
+  if (!m.criteria.length) e.criteria = [t('ablls_ui.criteria_required')]
+  const lists = academic.value ? ['strengths', 'goals', 'questions'] : ['sub_goals']
+  for (const f of lists) if (!m[f].some((x) => x.trim())) e[f] = [t('ablls_ui.list_required')]
+  if (!academic.value && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
   errors.value = e
   return !Object.keys(e).length
 }
 
 const save = async () => {
   if (saving.value) return
-  if (draft.value.trim()) addBenchmark()
+  editors.value.forEach((ed) => ed?.flush?.())
   if (!validate()) {
     toast.add({ severity: 'warn', summary: t('ablls_ui.fix_errors'), life: 3000 })
     return
   }
   saving.value = true
   const m = mission.value
+  const clean = (list) => list.map((x) => x.trim()).filter(Boolean)
   const payload = {
     category_id: m.category_id,
+    key: m.key.trim() || null,
     name: m.name.trim(),
-    goal: m.goal.trim(),
-    question: m.question.trim(),
-    sample: m.sample?.trim() || null,
-    note: m.note?.trim() || null,
-    benchmarks: m.benchmarks.map((b) => ({ body: b.body.trim() })).filter((b) => b.body),
+    criteria: m.criteria,
+    ...(academic.value
+      ? { strengths: clean(m.strengths), goals: clean(m.goals), questions: clean(m.questions) }
+      : { long_term_goal: m.long_term_goal.trim(), sub_goals: clean(m.sub_goals) }),
   }
   try {
     if (isEdit.value) await axios.put(`/api/able-mission/${props.id}`, payload)
@@ -110,6 +146,7 @@ const save = async () => {
     router.push({ name: 'missions', query: { category: payload.category_id } })
   } catch (e) {
     errors.value = e.response?.data?.errors || {}
+    if (!e.response?.data?.errors) toast.add({ severity: 'error', summary: t('error'), detail: e.response?.data?.message || e.message, life: 4000 })
   } finally {
     saving.value = false
   }
@@ -134,7 +171,7 @@ const save = async () => {
         <div class="mf-card"><Skeleton height="9rem" /></div>
         <div class="mf-card"><Skeleton height="16rem" /></div>
       </div>
-      <div class="mf-side"><div class="mf-card"><Skeleton height="20rem" /></div></div>
+      <div class="mf-side"><div class="mf-card"><Skeleton height="14rem" /></div></div>
     </div>
 
     <form v-else class="mf-layout" novalidate @submit.prevent="save">
@@ -150,28 +187,32 @@ const save = async () => {
           </div>
 
           <div class="mf-grid">
-            <div class="ab-field">
-              <label for="mf-category">{{ $t('category') }}<span class="ab-req">*</span></label>
+            <div class="ab-field mf-span">
+              <label for="mf-category">{{ $t('ablls_ui.domain') }}<span class="ab-req">*</span></label>
               <Select
                 v-model="mission.category_id"
                 input-id="mf-category"
-                :options="categories"
+                :options="sortedCategories"
                 option-value="id"
                 option-label="title"
                 filter
+                :filter-fields="['title', 'symbol']"
                 :placeholder="$t('ablls_ui.choose_category')"
                 :invalid="!!firstError('category_id')"
                 fluid
+                @change="clearError('category_id')"
               >
                 <template #value="{ value, placeholder }">
                   <span v-if="selectedCategory && value" class="mf-cat-option">
                     <span class="ab-symbol is-sm">{{ selectedCategory.symbol }}</span>{{ selectedCategory.title }}
+                    <span class="ab-type-tag">{{ $t(`ablls_ui.types.${typeOf(selectedCategory)}`) }}</span>
                   </span>
                   <span v-else>{{ placeholder }}</span>
                 </template>
                 <template #option="{ option }">
                   <span class="mf-cat-option">
                     <span class="ab-symbol is-sm">{{ option.symbol }}</span>{{ option.title }}
+                    <span class="ab-type-tag"><i :class="typeIcon(typeOf(option))" aria-hidden="true" />{{ $t(`ablls_ui.types.${typeOf(option)}`) }}</span>
                   </span>
                 </template>
               </Select>
@@ -179,103 +220,135 @@ const save = async () => {
             </div>
 
             <div class="ab-field">
-              <label>{{ $t('ablls_ui.key') }}</label>
-              <div class="mf-key">
-                <i class="pi pi-key" aria-hidden="true" />
-                <span :class="{ ltr: selectedCategory || isEdit }">{{ keyPreview }}</span>
-              </div>
+              <label for="mf-name">{{ $t('ablls_ui.mission_name') }}<span class="ab-req">*</span></label>
+              <InputText id="mf-name" v-model="mission.name" :placeholder="$t('ablls_ui.mission_name_ph')" :invalid="!!firstError('name')" fluid @input="clearError('name')" />
+              <small v-if="firstError('name')" class="ab-error">{{ firstError('name') }}</small>
             </div>
 
-            <div class="ab-field mf-span">
-              <label for="mf-name">{{ $t('ablls_ui.mission_name') }}<span class="ab-req">*</span></label>
-              <InputText id="mf-name" v-model="mission.name" :placeholder="$t('ablls_ui.mission_name_ph')" :invalid="!!firstError('name')" fluid />
-              <small v-if="firstError('name')" class="ab-error">{{ firstError('name') }}</small>
+            <div class="ab-field">
+              <label for="mf-key">{{ $t('ablls_ui.key') }}</label>
+              <IconField>
+                <InputIcon class="pi pi-key" />
+                <InputText id="mf-key" v-model="mission.key" class="ltr" maxlength="50" :placeholder="suggestedKey" :disabled="!selectedCategory" :invalid="!!firstError('key')" fluid />
+              </IconField>
+              <small v-if="firstError('key')" class="ab-error">{{ firstError('key') }}</small>
+              <small v-else class="ab-hint">{{ $t('ablls_ui.key_hint') }}</small>
             </div>
           </div>
         </section>
 
-        <!-- details -->
+        <!-- type-specific details -->
         <section class="mf-card">
           <div class="mf-card-head">
             <span class="mf-step">2</span>
             <div>
-              <h2>{{ $t('ablls_ui.details') }}</h2>
-              <p>{{ $t('ablls_ui.details_hint') }}</p>
+              <h2>
+                {{ $t('ablls_ui.details') }}
+                <span v-if="selectedCategory" class="ab-type-tag">
+                  <i :class="typeIcon(typeOf(selectedCategory))" aria-hidden="true" />{{ $t(`ablls_ui.types.${typeOf(selectedCategory)}`) }}
+                </span>
+              </h2>
+              <p>{{ selectedCategory ? $t(`ablls_ui.types_hint.${typeOf(selectedCategory)}`) : $t('ablls_ui.choose_category_first') }}</p>
             </div>
           </div>
 
-          <div class="mf-grid">
+          <Message v-if="legacy" severity="info" size="small" :closable="false">{{ $t('ablls_ui.legacy_note') }}</Message>
+
+          <div v-if="!selectedCategory" class="mf-placeholder">
+            <i class="pi pi-arrow-up" aria-hidden="true" />
+            {{ $t('ablls_ui.choose_category_first') }}
+          </div>
+
+          <div v-else-if="academic" class="mf-lists">
+            <ListEditor
+              :ref="(el) => (editors[0] = el)"
+              v-model="mission.strengths"
+              :label="$t('ablls_ui.strengths')"
+              icon="pi pi-chart-bar"
+              :placeholder="$t('ablls_ui.strengths_ph')"
+              :prefix="codePrefix"
+              :error="firstError('strengths')"
+              required
+              @change="clearError('strengths')"
+            />
+            <ListEditor
+              :ref="(el) => (editors[1] = el)"
+              v-model="mission.goals"
+              :label="$t('ablls_ui.goals')"
+              icon="pi pi-flag"
+              :placeholder="$t('ablls_ui.goals_ph')"
+              :prefix="codePrefix"
+              :error="firstError('goals')"
+              required
+              @change="clearError('goals')"
+            />
+            <ListEditor
+              :ref="(el) => (editors[2] = el)"
+              v-model="mission.questions"
+              :label="$t('ablls_ui.questions')"
+              icon="pi pi-question-circle"
+              :placeholder="$t('ablls_ui.questions_ph')"
+              :prefix="codePrefix"
+              :error="firstError('questions')"
+              required
+              @change="clearError('questions')"
+            />
+          </div>
+
+          <div v-else class="mf-lists">
             <div class="ab-field">
-              <label for="mf-goal"><i class="pi pi-flag mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.goal') }}<span class="ab-req">*</span></label>
-              <Textarea id="mf-goal" v-model="mission.goal" rows="3" auto-resize :placeholder="$t('ablls_ui.goal_ph')" :invalid="!!firstError('goal')" fluid />
-              <small v-if="firstError('goal')" class="ab-error">{{ firstError('goal') }}</small>
+              <label for="mf-ltg"><i class="pi pi-flag mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.long_term_goal') }}<span class="ab-req">*</span></label>
+              <div class="mf-ltg">
+                <span class="mf-ltg-code">{{ codePrefix }}</span>
+                <Textarea id="mf-ltg" v-model="mission.long_term_goal" rows="2" auto-resize :placeholder="$t('ablls_ui.long_term_goal_ph')" :invalid="!!firstError('long_term_goal')" fluid @input="clearError('long_term_goal')" />
+              </div>
+              <small v-if="firstError('long_term_goal')" class="ab-error">{{ firstError('long_term_goal') }}</small>
             </div>
-            <div class="ab-field">
-              <label for="mf-question"><i class="pi pi-comment mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.question') }}<span class="ab-req">*</span></label>
-              <Textarea id="mf-question" v-model="mission.question" rows="3" auto-resize :placeholder="$t('ablls_ui.question_ph')" :invalid="!!firstError('question')" fluid />
-              <small v-if="firstError('question')" class="ab-error">{{ firstError('question') }}</small>
-            </div>
-            <div class="ab-field">
-              <label for="mf-sample"><i class="pi pi-lightbulb mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.sample') }}<span class="ab-opt">({{ $t('ablls_ui.optional') }})</span></label>
-              <Textarea id="mf-sample" v-model="mission.sample" rows="3" auto-resize :placeholder="$t('ablls_ui.sample_ph')" fluid />
-              <small v-if="firstError('sample')" class="ab-error">{{ firstError('sample') }}</small>
-            </div>
-            <div class="ab-field">
-              <label for="mf-note"><i class="pi pi-bookmark mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.note') }}<span class="ab-opt">({{ $t('ablls_ui.optional') }})</span></label>
-              <Textarea id="mf-note" v-model="mission.note" rows="3" auto-resize :placeholder="$t('ablls_ui.note_ph')" fluid />
-              <small v-if="firstError('note')" class="ab-error">{{ firstError('note') }}</small>
-            </div>
+            <ListEditor
+              :ref="(el) => (editors[0] = el)"
+              v-model="mission.sub_goals"
+              :label="$t('ablls_ui.sub_goals')"
+              icon="pi pi-sitemap"
+              :placeholder="$t('ablls_ui.sub_goals_ph')"
+              :prefix="codePrefix"
+              :error="firstError('sub_goals')"
+              required
+              @change="clearError('sub_goals')"
+            />
           </div>
         </section>
       </div>
 
-      <!-- benchmarks -->
+      <!-- criterion -->
       <aside class="mf-side">
         <section class="mf-card mf-sticky">
           <div class="mf-card-head">
             <span class="mf-step">3</span>
             <div>
-              <h2>
-                {{ $t('ablls_ui.benchmarks') }}<span class="ab-req">*</span>
-                <span class="mf-count">{{ mission.benchmarks.length }}</span>
-              </h2>
-              <p>{{ $t('ablls_ui.benchmarks_hint') }}</p>
+              <h2>{{ $t('ablls_ui.criteria') }}<span class="ab-req">*</span></h2>
+              <p>{{ $t('ablls_ui.criteria_hint') }}</p>
             </div>
           </div>
 
-          <div class="mf-add">
-            <InputText
-              ref="benchmarkInput"
-              v-model="draft"
-              :placeholder="$t('ablls_ui.benchmark_ph')"
-              :invalid="!!benchmarkError"
-              fluid
-              @keydown.enter.prevent="addBenchmark"
-            />
-            <Button type="button" icon="pi pi-plus" :aria-label="$t('ablls_ui.add_benchmark')" v-tooltip.top="$t('ablls_ui.add_benchmark')" :disabled="!draft.trim()" @click="addBenchmark" />
+          <div class="mf-criteria" role="group" :aria-label="$t('ablls_ui.criteria')">
+            <button
+              v-for="n in CRITERIA_OPTIONS"
+              :key="n"
+              type="button"
+              class="mf-criterion"
+              :class="{ 'is-active': mission.criteria.includes(n) }"
+              :aria-pressed="mission.criteria.includes(n)"
+              @click="toggleCriterion(n)"
+            >
+              {{ n }}
+            </button>
           </div>
-          <small v-if="benchmarkError" class="ab-error">{{ benchmarkError }}</small>
-
-          <ol v-if="mission.benchmarks.length" class="mf-list">
-            <li v-for="(b, i) in mission.benchmarks" :key="i" class="mf-item">
-              <span class="mf-item-num">{{ i + 1 }}</span>
-              <Textarea v-model="b.body" rows="1" auto-resize class="mf-item-input" :aria-label="`${$t('ablls_ui.benchmarks')} ${i + 1}`" />
-              <div class="mf-item-actions">
-                <Button type="button" icon="pi pi-chevron-up" text rounded size="small" severity="secondary" :disabled="i === 0" :aria-label="$t('ablls_ui.move_up')" @click="moveBenchmark(i, -1)" />
-                <Button type="button" icon="pi pi-chevron-down" text rounded size="small" severity="secondary" :disabled="i === mission.benchmarks.length - 1" :aria-label="$t('ablls_ui.move_down')" @click="moveBenchmark(i, 1)" />
-                <Button type="button" icon="pi pi-times" text rounded size="small" severity="danger" :aria-label="$t('ablls_ui.remove')" @click="removeBenchmark(i)" />
-              </div>
-            </li>
-          </ol>
-          <div v-else class="mf-list-empty">
-            <i class="pi pi-list" aria-hidden="true" />
-            {{ $t('ablls_ui.no_benchmarks') }}
-          </div>
+          <small v-if="firstError('criteria')" class="ab-error">{{ firstError('criteria') }}</small>
 
           <div class="mf-scale">
             <span>{{ $t('ablls_ui.degree_scale') }}</span>
             <div class="mf-scale-dots">
-              <span v-for="d in degrees" :key="d" class="mf-dot" :class="{ 'is-zero': d === 0, 'is-max': d > 0 && d === degrees.length - 1 }">{{ d }}</span>
+              <span v-for="d in scale" :key="d" class="mf-dot" :class="{ 'is-zero': d === 0, 'is-max': d > 0 && d === scale[scale.length - 1] }">{{ d }}</span>
             </div>
           </div>
 
@@ -336,7 +409,7 @@ const save = async () => {
 }
 @media (min-width: 1100px) {
   .mf-layout {
-    grid-template-columns: minmax(0, 1.7fr) minmax(20rem, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
   }
   .mf-sticky {
     position: sticky;
@@ -368,8 +441,9 @@ const save = async () => {
 }
 .mf-card-head h2 {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.35rem 0.5rem;
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
@@ -393,19 +467,11 @@ const save = async () => {
   font-weight: 800;
   font-size: 0.9rem;
 }
-.mf-count {
-  margin-inline-start: 0.35rem;
-  padding: 0 0.5rem;
-  border-radius: 999px;
-  background: var(--sawa-primary-soft);
-  color: var(--sawa-primary);
-  font-size: 0.78rem;
-}
 
 .mf-grid {
   display: grid;
   gap: 1rem 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
 }
 .mf-span {
   grid-column: 1 / -1;
@@ -417,102 +483,72 @@ const save = async () => {
 }
 .mf-cat-option {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-}
-.mf-key {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.6rem;
-  padding: 0 0.85rem;
-  border: 1px dashed #cbd5e1;
-  border-radius: 6px;
-  background: #f8fafc;
-  color: #334155;
-  font-weight: 700;
-}
-.mf-key .pi {
-  color: var(--sawa-muted);
-  font-size: 0.85rem;
 }
 
-.mf-add {
-  display: flex;
-  gap: 0.5rem;
-}
-.mf-add .p-button {
-  flex: none;
-}
-.mf-list {
+.mf-lists {
   display: grid;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  max-height: 26rem;
-  overflow-y: auto;
+  gap: 1.5rem;
 }
-.mf-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.4rem;
-  border: 1px solid var(--sawa-border);
-  border-radius: 10px;
-  background: #fbfcfd;
-  transition: border-color 0.15s;
-}
-.mf-item:focus-within {
-  border-color: var(--sawa-primary);
-  background: #fff;
-}
-.mf-item-num {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.8rem;
-  height: 1.8rem;
-  margin-top: 0.3rem;
-  border-radius: 8px;
-  background: var(--sawa-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.82rem;
-}
-.mf-item-input {
-  flex: 1;
-  min-width: 0;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  resize: none;
-}
-.mf-item-input:focus {
-  border-color: transparent;
-  box-shadow: none;
-}
-.mf-item-actions {
-  display: flex;
-  flex: none;
-}
-.mf-item-actions .p-button {
-  width: 1.9rem;
-  height: 1.9rem;
-}
-.mf-list-empty {
+.mf-placeholder {
   display: grid;
   justify-items: center;
   gap: 0.4rem;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
   border: 1px dashed #cbd5e1;
   border-radius: 10px;
   color: var(--sawa-muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
-.mf-list-empty .pi {
-  font-size: 1.4rem;
-  color: #94a3b8;
+.mf-ltg {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.mf-ltg-code {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 2.4rem;
+  height: 2.4rem;
+  padding: 0 0.4rem;
+  border-radius: 8px;
+  background: var(--sawa-primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.mf-criteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+  gap: 0.4rem;
+  direction: ltr;
+}
+.mf-criterion {
+  height: 2.6rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.mf-criterion:hover {
+  border-color: var(--sawa-primary);
+  color: var(--sawa-primary);
+}
+.mf-criterion.is-active {
+  background: var(--sawa-primary);
+  border-color: var(--sawa-primary);
+  color: #fff;
 }
 
 .mf-scale {

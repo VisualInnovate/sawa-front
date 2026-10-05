@@ -35,6 +35,24 @@
           <InputIcon class="pi pi-search" />
           <InputText v-model="search" :placeholder="$t('ablls_ui.search_categories')" />
         </IconField>
+        <div class="ab-types" role="tablist">
+          <button type="button" class="ab-type-tab" :class="{ 'is-active': !activeType }" @click="setType(null)">
+            {{ $t('ablls_ui.all') }}
+            <span class="ab-type-count">{{ categories.length }}</span>
+          </button>
+          <button
+            v-for="type in ABLLS_TYPES"
+            :key="type.value"
+            type="button"
+            class="ab-type-tab"
+            :class="{ 'is-active': activeType === type.value }"
+            @click="setType(type.value)"
+          >
+            <i :class="type.icon" aria-hidden="true" />
+            {{ $t(`ablls_ui.types.${type.value}`) }}
+            <span class="ab-type-count">{{ typeCount(type.value) }}</span>
+          </button>
+        </div>
       </div>
 
       <!-- loading -->
@@ -67,7 +85,7 @@
           <div class="cat-top">
             <span class="ab-symbol is-lg">{{ item.symbol }}</span>
             <div class="cat-info">
-              <span class="cat-index">#{{ item.order }}</span>
+              <span class="ab-type-tag"><i :class="typeIcon(typeOf(item))" aria-hidden="true" />{{ $t(`ablls_ui.types.${typeOf(item)}`) }}</span>
               <h3 :title="item.title">{{ item.title }}</h3>
             </div>
             <div class="ab-actions">
@@ -123,6 +141,25 @@
 
       <form class="grid gap-4" @submit.prevent="save">
         <div class="ab-field">
+          <label>{{ $t('ablls_ui.type') }}<span class="ab-req">*</span></label>
+          <div class="cat-type-pick" role="radiogroup">
+            <button
+              v-for="type in ABLLS_TYPES"
+              :key="type.value"
+              type="button"
+              role="radio"
+              :aria-checked="form.type === type.value"
+              class="cat-type-option"
+              :class="{ 'is-active': form.type === type.value }"
+              @click="form.type = type.value"
+            >
+              <i :class="type.icon" aria-hidden="true" />
+              {{ $t(`ablls_ui.types.${type.value}`) }}
+            </button>
+          </div>
+          <small class="ab-hint">{{ $t(`ablls_ui.types_hint.${form.type || 'academic'}`) }}</small>
+        </div>
+        <div class="ab-field">
           <label for="cat-title">{{ $t('ablls_ui.category_title') }}<span class="ab-req">*</span></label>
           <InputText id="cat-title" v-model="form.title" :placeholder="$t('ablls_ui.category_title_ph')" :invalid="!!errors.title" autofocus />
           <small v-if="errors.title" class="ab-error">{{ errors.title[0] }}</small>
@@ -140,7 +177,7 @@
             <span class="ab-symbol is-lg">{{ form.symbol || '?' }}</span>
             <div class="cat-info">
               <h3>{{ form.title || $t('ablls_ui.category_title') }}</h3>
-              <span class="ab-key">{{ (form.symbol || '?') + '-1' }}</span>
+              <span class="ab-key">{{ nextSkillKey({ ...form, symbol: form.symbol || '?' }) }}</span>
             </div>
           </div>
         </div>
@@ -173,16 +210,21 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import Ablls from '../../components/Ablls.vue'
+import { useRoute, useRouter } from 'vue-router'
 import { can } from '@/utils/permissions'
+import { ABLLS_TYPES, nextSkillKey, typeIcon, typeOf, typeOrder } from '@/components/ablls/abllsTypes'
 import '@/components/ablls/ablls.css'
 
 const { t } = useI18n()
 const toast = useToast()
+const route = useRoute()
+const router = useRouter()
 
 const categories = ref([])
 const missionCounts = ref(null)
 const loading = ref(true)
 const search = ref('')
+const activeType = ref(ABLLS_TYPES.some((t) => t.value === route.query.type) ? route.query.type : null)
 
 const formDialog = ref(false)
 const form = ref({})
@@ -195,18 +237,27 @@ const deleting = ref(false)
 
 const totalMissions = computed(() => Object.values(missionCounts.value || {}).reduce((a, b) => a + b, 0))
 
+const typeCount = (type) => categories.value.filter((c) => typeOf(c) === type).length
+
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
-  if (!q) return categories.value
-  return categories.value.filter(
-    (c) => (c.title || '').toLowerCase().includes(q) || (c.symbol || '').toLowerCase().includes(q)
-  )
+  return categories.value.filter((c) => {
+    if (activeType.value && typeOf(c) !== activeType.value) return false
+    return !q || (c.title || '').toLowerCase().includes(q) || (c.symbol || '').toLowerCase().includes(q)
+  })
 })
+
+const setType = (type) => {
+  activeType.value = type
+  router.replace({ query: { ...route.query, type: type ?? undefined } })
+}
 
 const fetchData = async () => {
   try {
     const res = await axios.get('/api/able-category')
-    categories.value = (res.data.data || []).map((c, i) => ({ ...c, order: i + 1 }))
+    categories.value = (res.data.data || [])
+      .map((c, i) => ({ ...c, order: i }))
+      .sort((a, b) => typeOrder(typeOf(a)) - typeOrder(typeOf(b)) || a.order - b.order)
   } finally {
     loading.value = false
   }
@@ -231,13 +282,13 @@ onMounted(() => {
 })
 
 const openCreate = () => {
-  form.value = { title: '', symbol: '' }
+  form.value = { title: '', symbol: '', type: activeType.value || 'academic' }
   errors.value = {}
   formDialog.value = true
 }
 
 const openEdit = (item) => {
-  form.value = { id: item.id, title: item.title, symbol: item.symbol }
+  form.value = { id: item.id, title: item.title, symbol: item.symbol, type: typeOf(item) }
   errors.value = {}
   formDialog.value = true
 }
@@ -250,7 +301,7 @@ const save = async () => {
   if (Object.keys(errors.value).length) return
 
   saving.value = true
-  const payload = { title: form.value.title.trim(), symbol: form.value.symbol.trim() }
+  const payload = { title: form.value.title.trim(), symbol: form.value.symbol.trim(), type: form.value.type || 'academic' }
   try {
     if (form.value.id) await axios.put(`/api/able-category/${form.value.id}`, payload)
     else await axios.post('/api/able-category', payload)
@@ -331,10 +382,35 @@ const remove = async () => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.cat-index {
-  font-size: 0.75rem;
-  color: var(--sawa-muted);
-  font-weight: 600;
+.cat-type-pick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.cat-type-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.cat-type-option:hover {
+  border-color: var(--sawa-primary);
+}
+.cat-type-option.is-active {
+  border-color: var(--sawa-primary);
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  box-shadow: inset 0 0 0 1px var(--sawa-primary);
 }
 .cat-footer {
   display: flex;

@@ -35,13 +35,32 @@
         <InputText v-model="search" :placeholder="$t('ablls_ui.search_missions')" />
       </IconField>
 
+      <div class="ab-types" role="tablist">
+        <button type="button" class="ab-type-tab" :class="{ 'is-active': !activeType }" @click="setType(null)">
+          {{ $t('ablls_ui.all') }}
+          <span class="ab-type-count">{{ missions.length }}</span>
+        </button>
+        <button
+          v-for="type in ABLLS_TYPES"
+          :key="type.value"
+          type="button"
+          class="ab-type-tab"
+          :class="{ 'is-active': activeType === type.value }"
+          @click="setType(type.value)"
+        >
+          <i :class="type.icon" aria-hidden="true" />
+          {{ $t(`ablls_ui.types.${type.value}`) }}
+          <span class="ab-type-count">{{ typeCount(type.value) }}</span>
+        </button>
+      </div>
+
       <div class="ms-chips" role="tablist">
         <button type="button" class="ms-chip" :class="{ 'is-active': !activeCategory }" @click="setCategory(null)">
           {{ $t('ablls_ui.all') }}
-          <span class="ms-chip-count">{{ missions.length }}</span>
+          <span class="ms-chip-count">{{ visibleCategories.reduce((n, c) => n + countFor(c.id), 0) }}</span>
         </button>
         <button
-          v-for="cat in categories"
+          v-for="cat in visibleCategories"
           :key="cat.id"
           type="button"
           class="ms-chip"
@@ -79,6 +98,7 @@
       <header class="ms-group-head">
         <span class="ab-symbol">{{ group.symbol }}</span>
         <h2>{{ group.title }}</h2>
+        <span class="ab-type-tag"><i :class="typeIcon(group.type)" aria-hidden="true" />{{ $t(`ablls_ui.types.${group.type}`) }}</span>
         <span class="ms-group-count">{{ $t('ablls_ui.missions_n', { n: group.items.length }) }}</span>
       </header>
 
@@ -111,13 +131,24 @@
           </div>
 
           <h3 class="ms-name" :title="m.name">{{ m.name }}</h3>
-          <p v-if="m.goal" class="ms-goal" :title="m.goal">{{ m.goal }}</p>
+          <p v-if="summaryOf(m)" class="ms-goal" :title="summaryOf(m)">{{ summaryOf(m) }}</p>
+          <div class="ms-counts">
+            <span v-for="c in countsOf(m)" :key="c.label"><i :class="c.icon" aria-hidden="true" />{{ c.n }} {{ c.label }}</span>
+          </div>
 
           <div class="ms-card-foot">
-            <span class="ms-foot-label">{{ $t('ablls_ui.degrees') }}</span>
-            <div class="ms-degrees" :aria-label="$t('ablls_ui.degree_scale')">
-              <span v-for="d in degreesOf(m)" :key="d" class="ms-degree">{{ d }}</span>
-            </div>
+            <template v-if="m.criteria?.length">
+              <span class="ms-foot-label">{{ $t('ablls_ui.criteria') }}</span>
+              <div class="ab-criteria">
+                <span v-for="n in m.criteria" :key="n">{{ n }}</span>
+              </div>
+            </template>
+            <template v-else>
+              <span class="ms-foot-label">{{ $t('ablls_ui.degrees') }}</span>
+              <div class="ms-degrees" :aria-label="$t('ablls_ui.degree_scale')">
+                <span v-for="d in degreesOf(m)" :key="d" class="ms-degree">{{ d }}</span>
+              </div>
+            </template>
           </div>
         </article>
       </div>
@@ -145,6 +176,7 @@ import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import Ablls from '../../components/Ablls.vue'
 import '@/components/ablls/ablls.css'
+import { ABLLS_TYPES, isAcademic, listOf, typeIcon, typeOf, typeOrder } from '@/components/ablls/abllsTypes'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -156,14 +188,36 @@ const categories = ref([])
 const loading = ref(true)
 const search = ref('')
 const activeCategory = ref(route.query.category ? Number(route.query.category) : null)
+const activeType = ref(ABLLS_TYPES.some((t) => t.value === route.query.type) ? route.query.type : null)
 
 const deleteDialog = ref(false)
 const toDelete = ref(null)
 const deleting = ref(false)
 
 const countFor = (id) => missions.value.filter((m) => m.category_id === id).length
+const categoryOf = (m) => categories.value.find((c) => c.id === m.category_id) || m.category || {}
+const typeCount = (type) => missions.value.filter((m) => typeOf(categoryOf(m)) === type).length
 
-// "B-12" sorts after "B-2".
+const sortedCategories = computed(() =>
+  categories.value
+    .map((c, i) => ({ ...c, order: i }))
+    .sort((a, b) => typeOrder(typeOf(a)) - typeOrder(typeOf(b)) || a.order - b.order)
+)
+const visibleCategories = computed(() =>
+  sortedCategories.value.filter((c) => !activeType.value || typeOf(c) === activeType.value)
+)
+
+const summaryOf = (m) => (isAcademic(categoryOf(m)) ? listOf(m, 'goals', 'goal')[0] : m.long_term_goal || m.goal) || ''
+const countsOf = (m) =>
+  isAcademic(categoryOf(m))
+    ? [
+        { icon: 'pi pi-chart-bar', n: (m.strengths || []).length, label: t('ablls_ui.strengths') },
+        { icon: 'pi pi-flag', n: listOf(m, 'goals', 'goal').length, label: t('ablls_ui.goals') },
+        { icon: 'pi pi-question-circle', n: listOf(m, 'questions', 'question').length, label: t('ablls_ui.questions') },
+      ]
+    : [{ icon: 'pi pi-sitemap', n: (m.sub_goals || []).length, label: t('ablls_ui.sub_goals') }]
+
+// "B-12" sorts after "B-2", "R10" after "R9".
 const keyNumber = (key) => Number(String(key || '').match(/\d+$/)?.[0] ?? 0)
 
 // Degree is stored as the digits of the scale ("01234"); fall back to 0..1.
@@ -176,19 +230,22 @@ const groups = computed(() => {
   const q = search.value.trim().toLowerCase()
   const list = missions.value.filter((m) => {
     if (activeCategory.value && m.category_id !== activeCategory.value) return false
+    if (activeType.value && typeOf(categoryOf(m)) !== activeType.value) return false
     if (!q) return true
-    return [m.name, m.key, m.goal, m.category?.title].some((v) => String(v || '').toLowerCase().includes(q))
+    return [m.name, m.key, m.goal, m.long_term_goal, m.category?.title, ...(m.goals || []), ...(m.sub_goals || [])].some((v) =>
+      String(v || '').toLowerCase().includes(q)
+    )
   })
 
   const byCat = new Map()
   for (const m of list) {
     if (!byCat.has(m.category_id)) {
-      const cat = categories.value.find((c) => c.id === m.category_id) || m.category || {}
-      byCat.set(m.category_id, { id: m.category_id, title: cat.title || '—', symbol: cat.symbol || '?', items: [] })
+      const cat = categoryOf(m)
+      byCat.set(m.category_id, { id: m.category_id, title: cat.title || '—', symbol: cat.symbol || '?', type: typeOf(cat), items: [] })
     }
     byCat.get(m.category_id).items.push(m)
   }
-  const order = categories.value.map((c) => c.id)
+  const order = sortedCategories.value.map((c) => c.id)
   return [...byCat.values()]
     .sort((a, b) => {
       const ia = order.indexOf(a.id)
@@ -201,6 +258,12 @@ const groups = computed(() => {
 const setCategory = (id) => {
   activeCategory.value = id
   router.replace({ query: { ...route.query, category: id ?? undefined } })
+}
+
+const setType = (type) => {
+  activeType.value = type
+  activeCategory.value = null
+  router.replace({ query: { ...route.query, type: type ?? undefined, category: undefined } })
 }
 
 const fetchData = async () => {
@@ -218,7 +281,7 @@ const fetchData = async () => {
 
 onMounted(fetchData)
 
-const create = () => router.push({ name: 'mission-create' })
+const create = () => router.push({ name: 'mission-create', query: activeCategory.value ? { category: activeCategory.value } : {} })
 const edit = (id) => router.push({ name: 'mission-update', params: { id } })
 
 const askDelete = (m) => {
@@ -396,6 +459,23 @@ const remove = async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+.ms-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  color: var(--sawa-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.ms-counts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.ms-counts .pi {
+  font-size: 0.75rem;
+  color: var(--sawa-primary);
 }
 .ms-card-foot {
   display: flex;

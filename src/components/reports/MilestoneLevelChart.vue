@@ -49,6 +49,9 @@ const legendItems = computed(() => {
       </span>
     </header>
     <div class="mc-columns">
+      <div class="mc-strip mc-axis">
+        <span v-for="row in rows" :key="row" class="mc-row-number">{{ row }}</span>
+      </div>
       <div v-for="(subtest, i) in subtests" :key="i" class="mc-column">
         <span class="mc-symbol" :class="{ 'is-empty': !subtest.subtest_symbol }">{{ subtest.subtest_symbol || " " }}</span>
         <span class="mc-domain">{{ subtest.subtest_name }}</span>
@@ -68,7 +71,8 @@ const legendItems = computed(() => {
 <style scoped>
 .mc {
   --box: 24px;
-  border-inline-end: 2px solid var(--level);
+  margin-inline-start: 24px;
+  border-inline-start: 2px solid var(--level);
   border-bottom: 2px solid var(--level);
   break-inside: avoid;
   page-break-inside: avoid;
@@ -120,6 +124,7 @@ const legendItems = computed(() => {
 }
 /* One column per domain from the right (Mand first); a level with fewer domains keeps them on the right. */
 .mc-columns {
+  position: relative;
   display: flex;
   justify-content: flex-start;
   gap: 2px;
@@ -169,6 +174,20 @@ const legendItems = computed(() => {
   flex-direction: column-reverse;
   justify-content: flex-start;
   height: calc(var(--rows) * var(--box));
+}
+.mc-axis {
+  position: absolute;
+  inset-inline-start: -26px;
+  bottom: 6px;
+  width: 20px;
+}
+.mc-row-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--box);
+  color: #374151;
+  font-size: 8pt;
+  font-weight: 700;
 }
 .mc-box {
   display: grid;
