@@ -32,6 +32,12 @@ const router = useRouter();
 // The child and the chosen evaluations come from the URL (a new selection reloads the report).
 const childId = computed(() => String(route.params.childId));
 const keys = computed(() => String(route.query.items ?? "").split(",").map((key) => key.trim()).filter(Boolean));
+// Older report links keep both sections; tracking never enables content.
+const outputTypes = computed(() => route.query.types === undefined
+  ? ['report', 'plan']
+  : String(route.query.types).split(',').filter(type => ['report', 'plan'].includes(type)));
+const showCharts = computed(() => outputTypes.value.includes('report'));
+const showPlan = computed(() => outputTypes.value.includes('plan'));
 const draftKey = computed(() => `ereport-draft:${childId.value}:${[...keys.value].sort().join(",")}`);
 
 const loading = ref(true);
@@ -236,15 +242,13 @@ const summaryRows = (goals) => {
   for (const goal of goals) {
     const key = goal.symbol || goal.general_goal;
     // The weaknesses are named by the goal's domain (older results without it fall back to the general goal).
-    if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.domain || goal.general_goal || "", statuses: new Set(), strengths: [], weaknesses: [] });
+    if (!rows.has(key)) rows.set(key, { symbol: goal.symbol ?? "", name: goal.domain || goal.general_goal || "", strengths: [], weaknesses: [] });
     const row = rows.get(key);
-    if (goal.status) row.statuses.add(goal.status);
     row.strengths.push(...(goal.strength ?? []).map((point) => point.question).filter(Boolean));
     row.weaknesses.push(...(goal.weak ?? []).map((point) => point.question).filter(Boolean));
   }
   return [...rows.values()].map((row) => ({
     ...row,
-    status: [...row.statuses].join("، "),
     weaknesses: row.weaknesses.map((text, i) => ({ code: [row.symbol, i + 1].filter(Boolean).join("-"), text })),
   }));
 };
@@ -456,7 +460,7 @@ function back() {
 
             <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
 
-            <div class="vb-levels">
+            <div v-if="showCharts" class="vb-levels">
               <MilestoneLevelChart v-for="level in mergedLevels(section.tests)" :key="level.level_id" :level="level" />
               <p v-if="!mergedLevels(section.tests).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
             </div>
@@ -464,6 +468,7 @@ function back() {
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
 
+          <template v-if="showPlan">
           <!-- Strengths and weaknesses of the newest chosen test: each level starts its own page -->
           <section
             v-for="(table, t) in milestoneExtras[section.group].summary.length ? milestoneExtras[section.group].summary : [null]"
@@ -479,42 +484,34 @@ function back() {
 
             <template v-if="table">
             <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
-            <table class="rx-table rx-summary">
-              <thead>
-                <tr>
-                  <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
-                  <th>{{ $t("ereport.strengths") }}</th>
-                  <th>{{ $t("ereport.weaknesses") }}</th>
-                  <th class="rx-sum-status">{{ $t("ereport.goal_status") }}</th>
-                  <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, r) in table.rows" :key="r">
-                  <td class="rx-sum-num">{{ r + 1 }}</td>
-                  <td>
-                    <ul v-if="row.strengths.length" class="rx-points">
-                      <li v-for="(point, p) in row.strengths" :key="p">{{ point }}</li>
-                    </ul>
-                  </td>
-                  <td>
-                    <template v-if="row.weaknesses.length">
-                      <strong class="rx-weak-name">{{ row.name }}:</strong>
-                      <p v-for="point in row.weaknesses" :key="point.code" class="rx-weak">
-                        <b class="ltr">{{ point.code }}</b> {{ point.text }}
-                      </p>
-                    </template>
-                  </td>
-                  <td class="rx-sum-status">{{ row.status }}</td>
-                  <td class="rx-sum-symbol"><b class="ltr">{{ row.symbol }}</b></td>
-                </tr>
-              </tbody>
-            </table>
+            <template v-for="kind in ['strengths', 'weaknesses']" :key="kind">
+              <h3 class="rx-summary-level">{{ $t('ereport.' + kind) }}</h3>
+              <table class="rx-table rx-summary">
+                <thead>
+                  <tr>
+                    <th>{{ $t('ereport.' + kind) }}</th>
+                    <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="(row, r) in table.rows" :key="r">
+                    <tr v-for="(point, p) in row[kind]" :key="p">
+                      <td>{{ kind === 'strengths' ? point : point.text }}</td>
+                      <td class="rx-sum-symbol"><b class="ltr">{{ kind === 'strengths' ? row.symbol : point.code }}</b></td>
+                    </tr>
+                  </template>
+                  <tr v-if="!table.rows.some(row => row[kind].length)">
+                    <td colspan="2" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </template>
             </template>
             <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
+          </template>
         </template>
 
         <!-- Any other type: the same test tables, then its chart as on its results page -->
@@ -529,10 +526,13 @@ function back() {
 
           <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
 
+          <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
           <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
           <CarolinaChart v-else-if="section.type === CAROLINA" :tests="section.tests" />
           <SideProfileChart v-else-if="section.type === SIDE_PROFILE" :tests="section.tests" />
+
+          </template>
 
           <template v-if="section.behavioural">
             <h2 class="rx-band rx-band-soft rx-space">{{ $t("ereport.behaviors") }}</h2>
@@ -1045,10 +1045,6 @@ function back() {
 }
 .rx-sum-num {
   width: 7%;
-  text-align: center !important;
-}
-.rx-sum-status {
-  width: 12%;
   text-align: center !important;
 }
 .rx-sum-symbol {

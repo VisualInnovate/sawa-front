@@ -32,6 +32,18 @@ export const buildMenu = () => [
     ],
   },
   {
+    key: "my-evaluations",
+    icon: "mdi-clipboard-list-outline",
+    label: "evaluation_order",
+    to: { name: "my-evaluations" },
+  },
+  {
+    key: "my-evaluation-results",
+    icon: "mdi-chart-box-outline",
+    label: "evaluation_results",
+    to: { name: "my-evaluation-results" },
+  },
+  {
     key: "evaluations",
     icon: "mdi-help-box-multiple-outline",
     label: "evaluations",
@@ -79,6 +91,7 @@ export const buildMenu = () => [
     children: [
       { label: "bookings", to: { name: "ShowBooking" }, perm: "bookings list" },
       { label: "required_evaluations", to: { name: "required-evaluations" }, perm: "required evaluations list" },
+      { label: "consultant_children", to: { name: "consultant-children" }, perm: ["consultant children list", "child list"] },
       { label: "Consultation_Settings", to: { name: "recommendations" }, perm: "consultation settings list" },
       { label: "Working_hours", to: { name: "working-hours" }, perm: "working hours list" },
     ],

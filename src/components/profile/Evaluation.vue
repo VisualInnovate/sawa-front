@@ -3,7 +3,7 @@
     
   <div class="sawa-card evaluation-board">
       <header class="evaluation-toolbar">
-        <div><h2>{{ $t("Consultations_evaluations") }}</h2><p>{{ $t("completed_evaluations_hint") }}</p></div>
+        <div><h2>{{ $t("evaluation_results") }}</h2><p>{{ $t("completed_evaluations_hint") }}</p></div>
         <div class="evaluation-tools">
           <Tag :value="$t('requests_count', { count: details.length })" severity="secondary" />
           <IconField><InputIcon class="pi pi-search" /><InputText v-model="search" :placeholder="$t('child_name')" :aria-label="$t('search')" /></IconField>
