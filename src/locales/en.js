@@ -1431,6 +1431,8 @@ export default {
     test_date: "Test date",
     results_of: "{name} results",
     no_result_data: "No result data for this evaluation.",
+    strengths_intro: "Responses to the scale's items showed the following strengths:",
+    weaknesses_intro: "Responses to the scale's items showed the following weaknesses:",
     summary_intro_male: "His responses to the scale's items showed the following strengths and weaknesses:",
     summary_intro_female: "Her responses to the scale's items showed the following strengths and weaknesses:",
     strengths: "Strengths",
