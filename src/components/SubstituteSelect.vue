@@ -4,8 +4,8 @@ let cached = null;
 </script>
 
 <script setup>
-// Picks the employee who stands in for another (information only): every employee, searchable by name.
-// v-model is the substitute's user id (null = none); `exclude` hides the employee themself.
+// Picks the employees who stand in for another (information only): every employee, searchable by name.
+// v-model is the substitutes' user ids ([] = none); `exclude` hides the employee themself.
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 
@@ -14,7 +14,7 @@ const props = defineProps({
   inputId: { type: String, default: "substitute-employee" },
   disabled: Boolean,
 });
-const model = defineModel({ type: [Number, null], default: null });
+const model = defineModel({ type: Array, default: () => [] });
 
 const employees = ref([]);
 const loading = ref(false);
@@ -38,7 +38,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Select v-model="model" :inputId="inputId" :options="options" optionLabel="label" optionValue="id" filter showClear
-    :loading="loading" :disabled="disabled" :placeholder="$t('substitute_employee_pick')" :filterPlaceholder="$t('search')"
-    :emptyFilterMessage="$t('no_records_found')" class="w-full" />
+  <MultiSelect v-model="model" :inputId="inputId" :options="options" optionLabel="label" optionValue="id" filter
+    display="chip" :loading="loading" :disabled="disabled" :placeholder="$t('substitute_employee_pick')"
+    :filterPlaceholder="$t('search')" :emptyFilterMessage="$t('no_records_found')" class="w-full" />
 </template>

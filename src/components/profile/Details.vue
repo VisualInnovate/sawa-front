@@ -199,7 +199,7 @@
        <Toast />
      </form>
 
-     <!-- Every user picks the employee who stands in for them (information only). -->
+     <!-- Every user picks the employees who stand in for them (information only). -->
      <section v-if="!loading" class="password-section substitute-section">
        <div>
          <h3>{{ $t('substitute_employee') }}</h3>
@@ -208,10 +208,10 @@
        <form class="substitute-form" @submit.prevent="saveSubstitute">
          <div class="flex flex-column gap-2">
            <label for="profile-substitute">{{ $t('substitute_employee') }}</label>
-           <SubstituteSelect v-model="substituteId" inputId="profile-substitute" :exclude="employee_id" />
+           <SubstituteSelect v-model="substituteIds" inputId="profile-substitute" :exclude="employee_id" />
          </div>
          <Button type="submit" icon="pi pi-check" :label="$t('save')" :loading="substituteSaving"
-           :disabled="substituteSaving || substituteId === savedSubstituteId" />
+           :disabled="substituteSaving || !substitutesChanged" />
        </form>
      </section>
      <section v-if="!loading" class="password-section">
@@ -285,8 +285,8 @@
           ,passwordForm: { current_password: '', password: '', password_confirmation: '' }
           ,passwordErrors: {}
           ,passwordLoading: false
-          ,substituteId: null
-          ,savedSubstituteId: null
+          ,substituteIds: []
+          ,savedSubstituteIds: []
           ,substituteSaving: false
         // Add other validation rules for the title field
       };
@@ -296,6 +296,10 @@
     computed: {
       canEditProfile() {
         return can('employees edit')
+      },
+      substitutesChanged() {
+        const sorted = (ids) => [...ids].map(Number).sort((a, b) => a - b).join(',')
+        return sorted(this.substituteIds) !== sorted(this.savedSubstituteIds)
       },
       passwordMismatch() {
         return Boolean(this.passwordForm.password_confirmation) &&
@@ -372,7 +376,8 @@
           
       
               this.employee.image = response.data.user.image          
-              this.substituteId = this.savedSubstituteId = response.data.user.substitute_id ?? null
+              this.savedSubstituteIds = (response.data.user.substitute_ids ?? []).map(Number)
+              this.substituteIds = [...this.savedSubstituteIds]
               if (!this.canEditProfile) {
                 this.positions = response.data.user.position ? [response.data.user.position] : []
                 this.shifts = response.data.user.shift ? [response.data.user.shift] : []
@@ -465,11 +470,13 @@
         if (this.substituteSaving) return
         this.substituteSaving = true
         try {
-          const { data } = await axios.post('/api/users/profile/substitute', { substitute_id: this.substituteId })
-          this.substituteId = this.savedSubstituteId = data?.substitute?.id ?? null
+          const { data } = await axios.post('/api/users/profile/substitutes', { substitute_ids: this.substituteIds })
+          this.savedSubstituteIds = (data?.substitutes ?? []).map((user) => Number(user.id))
+          this.substituteIds = [...this.savedSubstituteIds]
           this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('substitute_employee_saved'), life: 3000 })
         } catch (error) {
-          const detail = error.response?.data?.errors?.substitute_id?.[0] ?? this.$t('request_failed_retry')
+          const errors = error.response?.data?.errors ?? {}
+          const detail = Object.values(errors).flat()[0] ?? this.$t('request_failed_retry')
           this.$toast.add({ severity: 'error', summary: this.$t('error'), detail, life: 4000 })
         } finally {
           this.substituteSaving = false

@@ -11,6 +11,15 @@ const toast = useToast()
 const { t } = useI18n()
 const router = useRouter()
 const deduction_types=ref([])
+// Deduction type categories with their types: the form picks the category, then one of its types.
+const categories=ref([])
+const typesOf=(categoryId)=>categories.value.find((category)=>category.id===categoryId)?.types ?? []
+const categoryOfType=(typeId)=>deduction_types.value.find((type)=>type.id===typeId)?.category_id ?? null
+const categoryTitle=(typeId)=>categories.value.find((category)=>category.id===categoryOfType(typeId))?.title ?? ''
+const pickCategory=(categoryId)=>{
+  deduction.value.category_id=categoryId
+  if (!typesOf(categoryId).some((type)=>type.id===deduction.value.deduction_type_id)) deduction.value.deduction_type_id=null
+}
 const loading = ref(true)
 const user = ref({})
 const error = ref('')
@@ -41,8 +50,12 @@ onBeforeMount(() => {
   axios.get("/api/deduction-types").then((res)=>{
     loading.value= false
     deduction_types.value= res.data.data
-   
 
+
+  });
+
+  axios.get("/api/deduction-categories").then((res)=>{
+    categories.value= (res.data.data ?? []).map((category)=>({ ...category, types: category.types ?? [] }))
   });
   
   axios.get("/api/deductions").then((res)=>{
@@ -72,7 +85,7 @@ fetchData()
 const edit=(id)=>{
     axios.get(`/api/deductions/${id}`).then((res)=>{
     loading.value= false
-    deduction.value= res.data.data
+    deduction.value= { ...res.data.data, category_id: categoryOfType(res.data.data.deduction_type_id) }
 
 
   });
@@ -135,17 +148,24 @@ const createskill=()=>{
       error.value = el.response.data.errors
     })
 }
+const deleting = ref(false)
 const deleteAction = () => {
+  if (deleting.value) return
+  deleting.value = true
   axios
-    .delete(`/api/deduction-types/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
+    .delete(`/api/deductions/${confir_id.value}`)
+    .then(() => {
       deleteDialog.value=false
       fetchData()
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
+      toast.add({severity: 'success', summary: t('success_message'), detail: t('element_delet_success'), life: 3000})
     })
-    .catch(() => {})
-
+    .catch((error) => {
+      const status = error.response?.status
+      const detail = status === 403 ? t('no_permission_action') : status === 404 ? t('deduction_already_deleted') : t('mission_error')
+      toast.add({severity: 'error', summary: t('error'), detail, life: 5000})
+      if (status === 404) { deleteDialog.value=false; fetchData() }
+    })
+    .finally(() => { deleting.value = false })
 }
 
 
@@ -218,7 +238,8 @@ const initFilters = () => {
            </Column>
            <Column field="deduction_type.title" :header='$t("deduction_type")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.deduction_type.title }}
+              <small v-if="categoryTitle(slotProps.data.deduction_type_id)" class="block text-gray-500">{{ categoryTitle(slotProps.data.deduction_type_id) }}</small>
+              {{ slotProps.data.deduction_type?.title }}
             </template>
            </Column>
            <Column field="amount" :header='$t("deduction_mount")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
@@ -257,14 +278,11 @@ const initFilters = () => {
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
+            <span>{{ $t('remove_item') }}?</span>
           </div>
           <template #footer>
             <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
+            <Button  :label='$t("yes")' icon="pi pi-check" :loading="deleting" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
@@ -275,8 +293,12 @@ const initFilters = () => {
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.employee_id">{{ error.employee_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
+                  <label style="text-align: right !important;">{{ $t('deduction_category') }}</label>
+                  <Select :modelValue="deduction.category_id" @update:modelValue="pickCategory" option-value="id" filter :options="categories" optionLabel="title" :placeholder='$t("deduction_category")' class="w-full" />
+              </div>
+              <div class="flex flex-column gap-2">
                   <label style="text-align: right !important;" for="username">{{ $t('deduction_type') }}</label>
-                  <Select required  v-model="deduction.deduction_type_id"  option-value="id" filter :options="deduction_types" optionLabel="title" :placeholder='$t("deduction_type")' class="w-full" />
+                  <Select required  v-model="deduction.deduction_type_id" :disabled="!deduction.category_id" option-value="id" filter :options="typesOf(deduction.category_id)" optionLabel="title" :placeholder='deduction.category_id ? $t("deduction_type") : $t("deduction_pick_category_first")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.deduction_type_id">{{ error.deduction_type_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
@@ -305,8 +327,12 @@ const initFilters = () => {
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.employee_id">{{ error.employee_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
+                  <label style="text-align: right !important;">{{ $t('deduction_category') }}</label>
+                  <Select :modelValue="deduction.category_id" @update:modelValue="pickCategory" option-value="id" filter :options="categories" optionLabel="title" :placeholder='$t("deduction_category")' class="w-full" />
+              </div>
+              <div class="flex flex-column gap-2">
                   <label style="text-align: right !important;" for="username">{{ $t('deduction_type') }}</label>
-                  <Select required  v-model="deduction.deduction_type_id"  option-value="id" filter :options="deduction_types" optionLabel="title" :placeholder='$t("deduction_type")' class="w-full" />
+                  <Select required  v-model="deduction.deduction_type_id" :disabled="!deduction.category_id" option-value="id" filter :options="typesOf(deduction.category_id)" optionLabel="title" :placeholder='deduction.category_id ? $t("deduction_type") : $t("deduction_pick_category_first")' class="w-full" />
                     <div class="mt-1 mb-5 text-red-500" v-if="error?.deduction_type_id">{{ error.deduction_type_id[0] }}</div>
               </div> 
               <div class="flex flex-column gap-2">
