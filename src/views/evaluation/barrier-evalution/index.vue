@@ -151,6 +151,13 @@
             <span class="be-option-text">{{ question.title }}</span>
           </label>
         </div>
+
+        <!-- Some barriers take an example: it is written in parentheses after «مثال» in the chosen answer. -->
+        <div v-if="takesExample(ind) && selected[ind] !== undefined" class="be-example">
+          <label :for="'be-example-' + ind">{{ $t("barrier_ui.example") }}</label>
+          <InputText :id="'be-example-' + ind" v-model="examples[ind]" :placeholder="$t('barrier_ui.example_hint')" fluid />
+          <p v-if="(examples[ind] || '').trim()" class="be-example-preview">{{ withExample(chosenText(barrier, ind), examples[ind]) }}</p>
+        </div>
       </section>
 
       <footer class="be-footer">
@@ -169,6 +176,17 @@ import axios from "axios";
 import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
 import { formatChildAge, toDateOnly } from "../../../utils/childAge";
 
+// The barriers (by their number) whose answer takes the evaluator's example (as the backend's BarrierAnswers).
+const EXAMPLE_POSITIONS = [1, 19, 21, 24];
+
+// The example in parentheses right after «مثال» (replacing an empty pair there), or «مثال (…)» added at the end.
+function withExample(text, example) {
+  const value = String(example ?? "").trim();
+  if (!value) return text;
+  if (String(text).includes("مثال")) return String(text).replace(/مثال(\s*\([\s._…-]*\))?/u, `مثال (${value})`);
+  return `${String(text).trimEnd()} مثال (${value})`;
+}
+
 // The colors every evaluation screen offers (VB-MAPP, ABLLS, Carolina use the same ones).
 const COLOR_OPTIONS = ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"];
 
@@ -186,6 +204,8 @@ export default {
       answer: { color: COLOR_OPTIONS[0], child_id: parseInt(this.$route.params.id) || parseInt(localStorage.getItem("child_id")) || null },
       // barrier position -> the chosen option's score
       selected: {},
+      // barrier position -> the evaluator's example (only the barriers in EXAMPLE_POSITIONS)
+      examples: {},
       score: [],
       allquestion: [],
       childName: "",
@@ -214,6 +234,13 @@ export default {
   },
   methods: {
     formatChildAge,
+    withExample,
+    takesExample(ind) {
+      return EXAMPLE_POSITIONS.includes(ind + 1);
+    },
+    chosenText(barrier, ind) {
+      return barrier.options.find((option) => option.index === this.selected[ind])?.title ?? "";
+    },
     createevalutae() {
       this.starting = true;
       axios
@@ -278,7 +305,7 @@ export default {
         return;
       }
       this.saving = true;
-      this.answer.scores = this.score;
+      this.answer.scores = this.score.map((score, ind) => (score && this.takesExample(ind) ? { ...score, example: this.examples[ind] || null } : score));
       const payload = { ...this.answer, date: toDateOnly(this.answer.date) };
       // The request being closed: the one opened from the requests list (same id either way).
       const requestId = this.$route.query.requestId || localStorage.getItem("eavl_id");
@@ -575,6 +602,9 @@ export default {
   font-size: 0.82rem;
   white-space: nowrap;
 }
+.be-example { display: grid; gap: .4rem; margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed var(--sawa-border); }
+.be-example label { font-weight: 700; font-size: .9rem; }
+.be-example-preview { margin: 0; padding: .5rem .75rem; border-radius: 8px; background: #f1f5f9; color: #334155; font-size: .9rem; }
 .be-options {
   display: grid;
   gap: 0.5rem;

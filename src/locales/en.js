@@ -1252,6 +1252,10 @@ export default {
     "file": "File"
   },
   ablls_ui: {
+    criteria_auto_questions: "Computed: one criterion per question of the skill.",
+    criteria_auto_sub_goals: "Computed: one criterion per sub goal.",
+    criteria_add_questions: "Add questions to compute the criterion.",
+    criteria_add_sub_goals: "Add sub goals to compute the criterion.",
     categories_title: "ABLLS Academy domains",
     categories_subtitle: "Domains come in four types. Each domain has a base code its skills take (C13.1, R1 ...).",
     missions_title: "ABLLS Academy skills",
@@ -1367,6 +1371,9 @@ export default {
   },
   ereport: {
     levels_shown: "Levels shown",
+    barrier_domain: "Domain",
+    barrier_answer: "Answer",
+    barrier_answer_number: "Answer no.",
     case_title: "Case description of",
     case_pick_hint: "Pick the level description that prints (one only). Optional extra text below.",
     case_free: "Write the child's case description here",
@@ -1491,6 +1498,8 @@ export default {
       join: "{a} and {b}",
     },
     side: {
+      sub_name: "Sub evaluation",
+      main_name: "Main evaluation",
       child_age: "Child age (months)",
       grow_age: "Developmental age",
       diff_age: "Age difference",
@@ -1505,6 +1514,13 @@ export default {
     carolina_response: "Response",
   },
   barrier_ui: {
+    answers_table: "Answers of the latest evaluation",
+    number: "No.",
+    question: "Question",
+    answer: "Answer",
+    answer_number: "Answer number",
+    example: "Example (optional)",
+    example_hint: "Write the example; it shows in the answer in parentheses after «مثال»",
     title: "Barriers evaluation",
     answered: "answered",
     details: "Evaluation details",

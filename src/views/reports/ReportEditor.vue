@@ -24,7 +24,7 @@ import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
 import CarolinaChart from "@/components/reports/CarolinaChart.vue";
-import SideProfileChart from "@/components/reports/SideProfileChart.vue";
+import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import {
   ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
   isBehavioural, isFemale, typeIcon, typeLabel, ymd,
@@ -69,6 +69,17 @@ const sections = computed(() =>
     return { ...group, tests, newest: tests[tests.length - 1], behavioural: isBehavioural(group.label) };
   })
 );
+
+// Side profile: every chosen result of every dimension in one table (dimension order, then date), printed once
+// where the first dimension's section would be.
+const sideProfileTests = computed(() => sections.value
+  .filter((section) => section.type === SIDE_PROFILE)
+  .sort((a, b) => Number(String(a.group).slice(1)) - Number(String(b.group).slice(1)))
+  .flatMap((section) => section.tests.map((test) => ({ ...test, title: section.label }))));
+const firstSideProfile = computed(() => sections.value.find((section) => section.type === SIDE_PROFILE)?.group ?? null);
+
+// Barriers: the newest chosen test's answers (barrier, chosen answer, its number) under the chart.
+const barrierAnswers = (section) => [...(section.newest?.result ?? [])].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
 
 // Cover: one card per evaluation family; side-profile dimensions are rows of one card.
 const coverCards = computed(() => {
@@ -807,7 +818,19 @@ function back() {
         </template>
 
         <!-- Any other type (in the report): barriers with their test tables, then each type's chart -->
-        <section v-else-if="showCharts" class="rx-page">
+        <!-- Side profile: one page with every chosen dimension result -->
+        <section v-else-if="showCharts && section.type === SIDE_PROFILE && section.group === firstSideProfile" class="rx-page">
+          <header class="rx-head">
+            <img :src="sawaLogo" alt="Sawa" />
+            <span>Side Profile</span>
+          </header>
+          <h2 class="rx-sp-title ltr">Side Profile</h2>
+          <p class="rx-sp-child"><b>{{ child.name }}</b><br /><span class="ltr">{{ child.birth_date }}</span></p>
+          <SideProfileTable :tests="sideProfileTests" />
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
+        <section v-else-if="showCharts && section.type !== SIDE_PROFILE" class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -823,7 +846,24 @@ function back() {
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
           <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
           <CarolinaChart v-else-if="section.type === CAROLINA" :tests="section.tests" />
-          <SideProfileChart v-else-if="section.type === SIDE_PROFILE" :tests="section.tests" />
+
+          <!-- The newest chosen barriers test as a table: barrier, the chosen answer, its number. -->
+          <table v-if="section.type === BARRIER && barrierAnswers(section).length" class="rx-table rx-barrier-answers">
+            <thead>
+              <tr>
+                <th>{{ $t("ereport.barrier_domain") }}</th>
+                <th>{{ $t("ereport.barrier_answer") }}</th>
+                <th class="rx-sum-num">{{ $t("ereport.barrier_answer_number") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in barrierAnswers(section)" :key="row.number + '-' + row.subtest">
+                <td><b>{{ row.subtest }}</b></td>
+                <td>{{ row.answer }}</td>
+                <td class="rx-sum-num">{{ row.score }}</td>
+              </tr>
+            </tbody>
+          </table>
 
           </template>
 
@@ -860,6 +900,10 @@ function back() {
 .rx-remove-point { color: #b91c1c; background: #fef2f2; flex: none; }
 .rx-add-point { color: var(--sawa-primary); background: #edf7f5; margin-top: .4rem; }
 /* screen-only controls and the parts left out of the print */
+.rx-sp-title { margin: 4mm 0 2mm; text-align: center; font-size: 22pt; font-weight: 700; color: #334155; }
+.rx-sp-child { margin: 0 0 5mm; text-align: start; font-size: 12pt; line-height: 1.8; }
+.rx-barrier-answers { margin-top: 6mm; font-size: 9pt; }
+.rx-barrier-answers td { vertical-align: top; }
 .rx-save-state { font-size: .85rem; color: #166534; }
 .rx-save-state.is-dirty { color: #b45309; }
 .rx-save-state.is-error { color: #b91c1c; }

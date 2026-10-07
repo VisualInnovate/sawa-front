@@ -11,7 +11,7 @@ const props = defineProps({
 
 const categories = computed(() => (props.tests[0]?.result ?? []).filter((category) => category.missions?.length));
 
-const boxes = (mission) => Math.max(0, String(mission.mission_degree ?? "").length - 1);
+const boxes = (mission) => Number(mission.mission_max) || Math.max(0, String(mission.mission_degree ?? "").length - 1);
 
 const boxColor = (categoryIndex, missionIndex, box) => {
   for (const test of props.tests) {

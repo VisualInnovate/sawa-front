@@ -20,10 +20,10 @@
                 <p class="px-2 w-16 text-sm font-medium text-gray-700 truncate">{{ count.mission_key }}</p>
                 <div 
                   class="bg-white rounded-md grid overflow-hidden"
-                  :class="[`grid-cols-${count.mission_degree.length-1}`]"
+                  :class="[`grid-cols-${count.mission_max || count.mission_degree.length-1}`]"
                 >
                   <div 
-                    v-for="(x, index) in count.mission_degree.length-1" 
+                    v-for="(x, index) in (count.mission_max || count.mission_degree.length-1)" 
                     :key="index"
                     class="h-8 w-9 flex items-center justify-center transition-all duration-500"
                     :style="{ 

@@ -1288,6 +1288,10 @@ export default {
     file: "ملف",
   },
   ablls_ui: {
+    criteria_auto_questions: "يُحسب تلقائياً: معيار لكل سؤال من أسئلة المهارة.",
+    criteria_auto_sub_goals: "يُحسب تلقائياً: معيار لكل هدف فرعي.",
+    criteria_add_questions: "أضف أسئلة ليُحسب المعيار.",
+    criteria_add_sub_goals: "أضف أهدافاً فرعية ليُحسب المعيار.",
     categories_title: "مجالات ABLLS Academy",
     categories_subtitle: "المجالات مقسّمة إلى أربعة أنواع، ولكل مجال رمز أساسي تأخذه مهاراته مع رقمها، مثل C13.1 و R1.",
     missions_title: "مهارات ABLLS Academy",
@@ -1403,6 +1407,9 @@ export default {
   },
   ereport: {
     levels_shown: "المستويات الظاهرة",
+    barrier_domain: "المجال",
+    barrier_answer: "الإجابة",
+    barrier_answer_number: "رقم الإجابة",
     case_title: "وصف حالة",
     case_pick_hint: "اختر وصف المستوى الذي يظهر في الطباعة (وصف واحد فقط). تحته نص إضافي اختياري.",
     case_free: "اكتب وصف حالة الطفل هنا",
@@ -1528,6 +1535,8 @@ export default {
       join: "{a} و{b}",
     },
     side: {
+      sub_name: "اسم التقييم الفرعي",
+      main_name: "اسم التقييم الرئيسي",
       child_age: "عمر الطفل (بالأشهر)",
       grow_age: "العمر النمائي",
       diff_age: "فرق العمر",
@@ -1542,6 +1551,13 @@ export default {
     carolina_response: "الاستجابة",
   },
   barrier_ui: {
+    answers_table: "إجابات أحدث تقييم",
+    number: "الرقم",
+    question: "السؤال",
+    answer: "الإجابة",
+    answer_number: "رقم الإجابة",
+    example: "مثال (اختياري)",
+    example_hint: "اكتب المثال، يظهر في الإجابة بين قوسين بعد كلمة «مثال»",
     title: "تقييم العوائق",
     answered: "تمت الإجابة",
     details: "بيانات التقييم",
