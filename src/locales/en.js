@@ -1367,6 +1367,7 @@ export default {
   },
   ereport: {
     levels_shown: "Levels shown",
+    case_title: "Case description of",
     case_pick_hint: "Pick the level description that prints (one only). Optional extra text below.",
     case_free: "Write the child's case description here",
     case_free_more: "Extra notes (optional) — printed when written",

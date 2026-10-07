@@ -618,8 +618,8 @@ function back() {
           <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
         </header>
 
-        <h2 class="rx-band">{{ $t("ereport.case_description", { name: shortName }) }}</h2>
-        <!-- With VB-MAPP: the three level descriptions; exactly one (picked here) prints. -->
+        <h2 v-if="!milestoneSection" class="rx-band">{{ $t("ereport.case_description", { name: shortName }) }}</h2>
+        <!-- With VB-MAPP: the three level descriptions; exactly one (picked here) prints, styled as the centre's form. -->
         <template v-if="milestoneSection">
           <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.case_pick_hint") }}</p>
           <label v-for="level in CASE_LEVELS" :key="level" class="rx-case-option" :class="{ 'is-picked': caseLevel === level }">
@@ -627,7 +627,14 @@ function back() {
               <input type="radio" name="rx-case-level" :value="level" :checked="caseLevel === level" @change="edits.caseLevel = level" />
               {{ $t("level_n", { n: level }) }}
             </span>
-            <p v-for="(paragraph, i) in caseParagraphs(level)" :key="i" class="rx-case">{{ paragraph }}</p>
+            <div class="rx-case-card">
+              <h2 class="rx-case-title"><u>{{ $t("ereport.case_title") }}</u> <mark>{{ shortName }}</mark> <u>:</u></h2>
+              <div class="rx-case-body">
+                <p v-for="(paragraph, i) in caseParagraphs(level)" :key="i">
+                  <template v-for="(part, j) in paragraph" :key="j"><b v-if="part.bold">{{ part.text }}</b><template v-else>{{ part.text }}</template></template>
+                </p>
+              </div>
+            </div>
           </label>
         </template>
         <div class="rx-case-free" :class="{ 'is-empty': !edits.caseFree.trim() }">
@@ -640,8 +647,8 @@ function back() {
       <!-- 4+. One section per evaluation type -->
       <template v-for="section in sections" :key="section.group">
         <template v-if="section.type === MILESTONE">
-          <!-- One VB-MAPP form page per chosen test, oldest first: its tables (a row per level) and its own charts -->
-          <section v-for="test in showCharts ? section.tests : []" :key="'vb-' + test.key" class="rx-page">
+          <!-- One VB-MAPP form page per chosen test, newest first: its tables (a row per level) and its own charts -->
+          <section v-for="test in showCharts ? [...section.tests].reverse() : []" :key="'vb-' + test.key" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(test.date) }}</span></span>
@@ -862,7 +869,15 @@ function back() {
 .rx-case-option { display: block; margin-bottom: .75rem; padding: .5rem .75rem; border: 1px dashed #cbd5e1; border-radius: 10px; cursor: pointer; opacity: .55; }
 .rx-case-option.is-picked { border: 2px solid var(--sawa-primary); opacity: 1; }
 .rx-case-pick { display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .3rem; font-weight: 800; color: var(--sawa-primary); }
-.rx-case-option .rx-case { margin: 0 0 .45rem; }
+/* The VB-MAPP case description as on the centre's form: a blue title bar, the name highlighted, a dark body. */
+.rx-case-card { border: 1px solid #2f5d7c; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rx-case-title { margin: 0; padding: 4px 10px; background: #3c6e91; color: #fff; font-size: 13pt; font-weight: 800; }
+.rx-case-title u { text-underline-offset: 4px; }
+.rx-case-title mark { padding: 0 6px; background: #6b5d00; color: #fff; }
+.rx-case-body { padding: 8px 12px; background: #595959; color: #fff; font-size: 11pt; line-height: 1.7; text-align: justify; }
+.rx-case-body p { margin: 0 0 .7rem; }
+.rx-case-body p:last-child { margin-bottom: 0; }
+.rx-case-body b { font-weight: 800; }
 .rx-case-free { margin-top: .5rem; }
 .rx-plan-points.is-static { list-style: disc; padding-inline-start: 1.1em; }
 .rx-plan-points.is-static li { display: list-item; }
