@@ -57,6 +57,7 @@ export const buildMenu = () => [
         children: [
           { text: "Milestones", to: { name: "levels" }, perm: "milestone level list" },
           { text: "Barriers", to: { name: "barrier-subtest" }, perm: "barrier subtest list" },
+          { text: "Transition", to: { name: "transition-questions" }, perm: "transition question list" },
         ],
       },
     ],

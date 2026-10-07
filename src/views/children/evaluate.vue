@@ -50,6 +50,7 @@
                 'carolina answer list',
                 'milestone answer list',
                 'barrier answer list',
+                'transition answer list',
               ]"
               @click="go_evaluate(evalu)"
               icon="pi pi-chart-bar"
@@ -247,6 +248,7 @@ export default {
         { name: "barrier", id: 3 },
         { name: "ABLLS Academy", id: 4 },
         { name: "carolina", id: 5 },
+        { name: "Transition", id: 6 },
       ],
     };
   },
@@ -325,6 +327,7 @@ export default {
         3: { name: "barrier-resulte", params: { id: childId } },
         4: { name: "ablls-resulte", params: { id: evalu.id } },
         5: { name: "carolina-resulte", params: { id: evalu.id } },
+        6: { name: "transition-result", params: { id: childId, evaluation: evalu.id } },
       };
       this.$router.push(routes[type] || {
         name: "showChildResult",

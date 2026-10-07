@@ -256,10 +256,9 @@ onMounted(loadChildren);
           <fieldset class="rp-report-types">
             <legend>{{ $t("ereport.output_types") }}</legend>
             <p>{{ $t("ereport.output_types_hint") }}</p>
-            <label v-for="type in ['report', 'plan', 'tracking']" :key="type" class="rp-output-type" :class="{ 'is-disabled': type === 'tracking' }">
-              <Checkbox v-model="reportTypes" :value="type" :disabled="type === 'tracking'" />
+            <label v-for="type in ['report', 'plan', 'tracking']" :key="type" class="rp-output-type">
+              <Checkbox v-model="reportTypes" :value="type" />
               <span>{{ $t('ereport.output_' + type) }}</span>
-              <small v-if="type === 'tracking'">{{ $t("ereport.coming_soon") }}</small>
             </label>
           </fieldset>
 
