@@ -83,6 +83,31 @@
        </tbody>
    </table>
   </div> -->
+
+  <!-- The child's latest barriers evaluation: each barrier with the chosen answer and its number. -->
+  <section v-if="answersTable.rows.length" class="ba-card">
+    <h2>{{ $t("barrier_ui.answers_table") }} <small v-if="answersTable.evaluation">· <span dir="ltr">{{ String(answersTable.evaluation.date).slice(0, 10) }}</span></small></h2>
+    <div class="ba-wrap">
+      <table class="ba-table">
+        <thead>
+          <tr>
+            <th>{{ $t("barrier_ui.number") }}</th>
+            <th>{{ $t("barrier_ui.question") }}</th>
+            <th>{{ $t("barrier_ui.answer") }}</th>
+            <th>{{ $t("barrier_ui.answer_number") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in answersTable.rows" :key="row.subtest_id">
+            <td class="ba-num">{{ row.number }}</td>
+            <td>{{ row.subtest }}</td>
+            <td>{{ row.answer }}</td>
+            <td class="ba-num">{{ row.score }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
   </template>
   
   <script>
@@ -93,7 +118,8 @@
    return {
      color:'bg-[red]',
      mainSquares: [],
-     table_resulte:[]
+     table_resulte:[],
+     answersTable: { evaluation: null, rows: [] }
    };
   },
   methods:{
@@ -126,12 +152,25 @@
   },
   mounted() {
     this.getresulte()
+    // Without the endpoint (older server) the page shows the chart only.
+    axios.get(`api/barrier-subtest/latest-answers/${this.$route.params.id}`)
+      .then(({ data }) => { this.answersTable = { evaluation: data?.evaluation ?? null, rows: data?.rows ?? [] }; })
+      .catch(() => {});
     localStorage.getItem("child_id")
    },
   };
   </script>
   
   <style>
+  .ba-card { margin-top: 2rem; padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
+  .ba-card h2 { margin: 0 0 1rem; font-size: 1.1rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
+  .ba-card h2 small { color: #64748b; font-weight: 600; }
+  .ba-wrap { overflow-x: auto; }
+  .ba-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  .ba-table th, .ba-table td { padding: .55rem .7rem; border: 1px solid #cbd5e1; vertical-align: top; }
+  .ba-table th { background: #f1f5f9; font-weight: 800; }
+  .ba-table td { text-align: start !important; }
+  .ba-table td.ba-num { text-align: center !important; font-weight: 800; width: 5rem; }
   th,td{
   text-align: center !important;
   }

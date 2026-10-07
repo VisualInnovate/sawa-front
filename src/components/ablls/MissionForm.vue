@@ -9,7 +9,7 @@ import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import BackButton from '@/components/common/BackButton.vue'
 import ListEditor from './ListEditor.vue'
-import { CRITERIA_OPTIONS, isAcademic, listOf, nextSkillKey, typeIcon, typeOf, typeOrder } from './abllsTypes'
+import { isAcademic, listOf, nextSkillKey, typeIcon, typeOf, typeOrder } from './abllsTypes'
 import './ablls.css'
 
 const props = defineProps({ id: { type: [String, Number], default: null } })
@@ -55,7 +55,13 @@ const suggestedKey = computed(() => {
   return nextSkillKey(cat, keys)
 })
 const codePrefix = computed(() => (mission.value.key || '').trim() || (selectedCategory.value ? suggestedKey.value : ''))
-const scale = computed(() => [0, ...[...mission.value.criteria].sort((a, b) => a - b)])
+// The criterion follows the skill: one score per question (academic preparation) or per sub goal (the other types).
+const autoCriteria = computed(() => {
+  const list = (academic.value ? mission.value.questions : mission.value.sub_goals) || []
+  const count = list.filter((x) => String(x || '').trim()).length
+  return Array.from({ length: count }, (_, i) => i + 1)
+})
+const scale = computed(() => [0, ...autoCriteria.value])
 
 const firstError = (field) =>
   errors.value?.[field]?.[0] || Object.entries(errors.value || {}).find(([k]) => k.startsWith(`${field}.`))?.[1]?.[0]
@@ -97,12 +103,6 @@ onMounted(async () => {
   }
 })
 
-const toggleCriterion = (n) => {
-  const list = mission.value.criteria
-  mission.value.criteria = list.includes(n) ? list.filter((x) => x !== n) : [...list, n].sort((a, b) => a - b)
-  delete errors.value.criteria
-}
-
 const clearError = (field) => {
   delete errors.value[field]
 }
@@ -112,7 +112,6 @@ const validate = () => {
   const m = mission.value
   if (!m.category_id) e.category_id = [t('ablls_ui.required')]
   if (!m.name.trim()) e.name = [t('ablls_ui.required')]
-  if (!m.criteria.length) e.criteria = [t('ablls_ui.criteria_required')]
   const lists = academic.value ? ['strengths', 'goals', 'questions'] : ['sub_goals']
   for (const f of lists) if (!m[f].some((x) => x.trim())) e[f] = [t('ablls_ui.list_required')]
   if (!academic.value && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
@@ -134,7 +133,7 @@ const save = async () => {
     category_id: m.category_id,
     key: m.key.trim() || null,
     name: m.name.trim(),
-    criteria: m.criteria,
+    criteria: autoCriteria.value,
     ...(academic.value
       ? { strengths: clean(m.strengths), goals: clean(m.goals), questions: clean(m.questions) }
       : { long_term_goal: m.long_term_goal.trim(), sub_goals: clean(m.sub_goals) }),
@@ -325,25 +324,16 @@ const save = async () => {
           <div class="mf-card-head">
             <span class="mf-step">3</span>
             <div>
-              <h2>{{ $t('ablls_ui.criteria') }}<span class="ab-req">*</span></h2>
-              <p>{{ $t('ablls_ui.criteria_hint') }}</p>
+              <h2>{{ $t('ablls_ui.criteria') }}</h2>
+              <p>{{ $t(academic ? 'ablls_ui.criteria_auto_questions' : 'ablls_ui.criteria_auto_sub_goals') }}</p>
             </div>
           </div>
 
+          <!-- Computed: one criterion per question / sub goal. -->
           <div class="mf-criteria" role="group" :aria-label="$t('ablls_ui.criteria')">
-            <button
-              v-for="n in CRITERIA_OPTIONS"
-              :key="n"
-              type="button"
-              class="mf-criterion"
-              :class="{ 'is-active': mission.criteria.includes(n) }"
-              :aria-pressed="mission.criteria.includes(n)"
-              @click="toggleCriterion(n)"
-            >
-              {{ n }}
-            </button>
+            <span v-for="n in autoCriteria" :key="n" class="mf-criterion is-active">{{ n }}</span>
+            <small v-if="!autoCriteria.length" class="mf-criteria-empty">{{ $t(academic ? 'ablls_ui.criteria_add_questions' : 'ablls_ui.criteria_add_sub_goals') }}</small>
           </div>
-          <small v-if="firstError('criteria')" class="ab-error">{{ firstError('criteria') }}</small>
 
           <div class="mf-scale">
             <span>{{ $t('ablls_ui.degree_scale') }}</span>
