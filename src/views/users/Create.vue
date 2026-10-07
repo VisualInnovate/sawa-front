@@ -123,6 +123,7 @@ const evaluate_types =ref( [
                       { name: t('barriers'), id: 3 },
                       { name: t('ablls_eval'), id: 4 },
                       { name: t('carolaina'), id: 5 },
+                      { name: t('evaluation_transition'), id: 6 },
    
                   ])
 const days = ref([

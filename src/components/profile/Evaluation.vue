@@ -40,7 +40,7 @@
           </dl>
           <footer class="evaluation-actions">
             <Button v-can="'evaluations delete'" icon="pi pi-trash" @click="deleteevalution(evalu)" severity="danger" variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-            <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
+            <Button v-can="['evaluation results list', 'able answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list', 'transition answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
           </footer>
         </article>
       </div>
@@ -205,6 +205,9 @@ export default {
       }
       if(type==5){
         this.$router.push({ name: 'carolina-resulte', params:{'id':id}});
+      }
+      if(type==6){
+        this.$router.push({ name: 'transition-result', params:{'id':child_id,'evaluation':id}});
       }
     },
 

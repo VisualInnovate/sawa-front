@@ -86,6 +86,25 @@ const vb = [
       meta: { permission: ["barrier answer create"] },
       component: () => import("../views/evaluation/barrier-evalution/index.vue")
     },
+    // VB-MAPP Transition: its questions, the evaluation and its results
+    {
+      path: '/transition-questions',
+      name: 'transition-questions',
+      meta: { permission: ["transition question list"] },
+      component: () => import("../views/vb/transition/Questions.vue")
+    },
+    {
+      path: '/transition-evaluation/:id',
+      name: 'transition-evaluation',
+      meta: { permission: ["transition answer create"] },
+      component: () => import("../views/evaluation/transition-evaluation/index.vue")
+    },
+    {
+      path: '/transition-result/:id/:evaluation',
+      name: 'transition-result',
+      meta: { permission: ["transition answer list", "transition answer create"] },
+      component: () => import("../views/evaluation/transition-evaluation/result.vue")
+    },
     //  sesions
     {
       path: '/sessions', 

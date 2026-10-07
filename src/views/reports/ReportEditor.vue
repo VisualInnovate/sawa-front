@@ -3,17 +3,21 @@
 // directly on the page (kept as a draft on this device) and "Print" prints the pages only.
 //
 // Pages: 1 cover (logo, child, evaluations) · 2 personal info + team signatures (newest chosen evaluation)
-// · then one section per evaluation type (at most four evaluations each): VB-MAPP = case description page
-// and one form page per chosen test (its own tables, one row per level, and its own level charts; a test still
-// waiting for levels shows the ones it has), then a strengths/weaknesses table of the newest chosen test (the EESA
-// form never appears in the report); barriers = the test tables (one row per chosen test) and the chart; any other
-// type = its chart only. The behaviour-problems table belongs to a behavioural evaluation only.
+// · then what the chosen outputs ask for:
+//   report   = case description page (with VB-MAPP: the description of one level, picked on screen, plus free text;
+//              otherwise free text), one VB-MAPP form page per chosen test (its tables, a row per level, and its own
+//              level charts) with the newest test's strengths/weaknesses (read only), and the other types' charts
+//              (barriers with their test tables). The behaviour-problems table belongs to a behavioural evaluation.
+//   plan     = the newest chosen VB-MAPP test's weaknesses, each with its goal, edited here and saved on the server.
+//   tracking = the goals of the chosen tests' saved plans, as the centre's tracking form: one table per general goal,
+//              the days each goal was tried (prop) and the trial columns; saving (or printing) records today.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
-import { createSummaryTables, newSummaryPoint, restoreSummaryTables } from "@/components/reports/summaryDraft";
+import { createSummaryTables } from "@/components/reports/summaryDraft";
+import { CASE_LEVELS, caseDescription } from "@/components/reports/caseDescriptions";
 import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
@@ -23,7 +27,7 @@ import CarolinaChart from "@/components/reports/CarolinaChart.vue";
 import SideProfileChart from "@/components/reports/SideProfileChart.vue";
 import {
   ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
-  isBehavioural, isFemale, typeIcon, typeLabel,
+  isBehavioural, isFemale, typeIcon, typeLabel, ymd,
 } from "@/components/reports/reportUtils";
 
 const { t } = useI18n();
@@ -33,12 +37,13 @@ const router = useRouter();
 // The child and the chosen evaluations come from the URL (a new selection reloads the report).
 const childId = computed(() => String(route.params.childId));
 const keys = computed(() => String(route.query.items ?? "").split(",").map((key) => key.trim()).filter(Boolean));
-// Older report links keep both sections; tracking never enables content.
+// Older report links keep the report and the plan.
 const outputTypes = computed(() => route.query.types === undefined
   ? ['report', 'plan']
-  : String(route.query.types).split(',').filter(type => ['report', 'plan'].includes(type)));
+  : String(route.query.types).split(',').filter(type => ['report', 'plan', 'tracking'].includes(type)));
 const showCharts = computed(() => outputTypes.value.includes('report'));
 const showPlan = computed(() => outputTypes.value.includes('plan'));
+const showTracking = computed(() => outputTypes.value.includes('tracking'));
 const draftKey = computed(() => `ereport-draft:${childId.value}:${[...keys.value].sort().join(",")}`);
 
 const loading = ref(true);
@@ -100,16 +105,13 @@ function defaults(data) {
       { name: team.therapist?.name ?? "", specialty: therapistSpecialty },
       { name: team.parent?.name ?? "", specialty: team.parent?.relation ?? "" },
     ],
-    // Per section (evaluation type): the case-description blanks and VB-MAPP scores, and the behaviour table.
-    // The case description page's two blanks (one page per report).
-    caseText: { level: "", skills: "" },
+    // The case description: the VB-MAPP level whose description prints (null = the highest level done), and free text.
+    caseLevel: null,
+    caseFree: "",
     // VB-MAPP levels left out of the report (their charts and strengths/weaknesses tables), by level id.
     hiddenLevels: [],
-    summaries: Object.fromEntries(groupItems(data.items).filter(group => group.type === MILESTONE).map(group => {
-      const newest = [...group.items].sort(byDate).at(-1);
-      return [group.group, createSummaryTables(newest)];
-    })),
-    cases: Object.fromEntries(groupItems(data.items).map((group) => [group.group, { scores: ["", "", "", ""] }])),
+    // Tracking: the goals left out of the print, by goal id.
+    trackingHidden: [],
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
   };
 }
@@ -126,16 +128,12 @@ function readDraft() {
 function applyDraft(base, saved) {
   if (!saved) return base;
   if (Array.isArray(saved.team)) base.team = base.team.map((row, i) => ({ ...row, ...(saved.team[i] ?? {}) }));
-  // Drafts from before the case page moved kept its blanks with the VB-MAPP section.
-  const oldCase = Object.values(saved.cases ?? {}).find((value) => value?.level || value?.skills);
-  base.caseText = { ...base.caseText, ...(oldCase ? { level: oldCase.level ?? "", skills: oldCase.skills ?? "" } : {}), ...(saved.caseText ?? {}) };
+  if (CASE_LEVELS.includes(Number(saved.caseLevel))) base.caseLevel = Number(saved.caseLevel);
+  if (typeof saved.caseFree === "string") base.caseFree = saved.caseFree;
   if (Array.isArray(saved.hiddenLevels)) base.hiddenLevels = saved.hiddenLevels.map(String);
-  for (const key of Object.keys(base.cases)) {
-    if (Array.isArray(saved.cases?.[key]?.scores)) base.cases[key].scores = saved.cases[key].scores;
+  if (Array.isArray(saved.trackingHidden)) base.trackingHidden = saved.trackingHidden.map(Number);
+  for (const key of Object.keys(base.behaviors)) {
     if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
-  }
-  for (const key of Object.keys(base.summaries)) {
-    base.summaries[key] = restoreSummaryTables(base.summaries[key], saved.summaries?.[key]);
   }
   return base;
 }
@@ -168,6 +166,8 @@ async function load() {
     report.value = data;
     edits.value = applyDraft(defaults(data), readDraft());
     document.title = `${t("ereport.report_title")} - ${data.child?.name ?? ""}`;
+    if (showPlan.value) loadPlan();
+    if (showTracking.value) loadTracking();
   } catch {
     loadError.value = true;
   } finally {
@@ -180,6 +180,8 @@ function open() {
   window.scrollTo(0, 0);
   report.value = null;
   edits.value = null;
+  plan.value = null;
+  tracking.value = null;
   if (!keys.value.length) {
     loading.value = false;
     loadError.value = true;
@@ -272,25 +274,182 @@ function toggleLevel(levelId, shown) {
   edits.value.hiddenLevels = [...hidden];
 }
 const caseAge = (item) => (item ? ageWords(ageOn(child.value.birth_date, item.date), t) : "");
+const milestoneSection = computed(() => sections.value.find((section) => section.type === MILESTONE) ?? null);
 // The age in the case description: at the newest chosen VB-MAPP test, or else the newest chosen evaluation.
-const caseItem = computed(() => sections.value.find((section) => section.type === MILESTONE)?.newest ?? items.value[0] ?? null);
+const caseItem = computed(() => milestoneSection.value?.newest ?? items.value[0] ?? null);
+// The case description's level: the one picked, or else the highest level the newest VB-MAPP test reached.
+const highestLevel = computed(() => Math.min(3, Math.max(1, ...(milestoneSection.value?.newest?.result?.levels ?? [])
+  .map((level) => Number(level.level_age) || 0))));
+const caseLevel = computed(() => edits.value?.caseLevel ?? (milestoneSection.value?.newest?.result?.levels?.length ? highestLevel.value : 1));
+const caseParagraphs = (level) => caseDescription(level, { female: female.value, name: shortName.value, age: caseAge(caseItem.value) });
 
-// Plan edits are kept independently from evaluation results in the local report draft.
-const summaryTables = (section) => (edits.value?.summaries?.[section.group] ?? [])
-  .filter(table => isLevelShown(table.key));
+// The report's strengths/weaknesses of the newest VB-MAPP test, as the evaluation gave them (read only).
+const reportSummary = computed(() => milestoneSection.value
+  ? createSummaryTables(milestoneSection.value.newest).filter((table) => isLevelShown(table.key)) : []);
 
-function addSummaryRow(table, kind) {
-  table.rows.push({ symbol: "", strengths: [], weaknesses: [], [kind]: [newSummaryPoint()] });
+// ---- plan (saved on the server, per VB-MAPP evaluation) --------------------------------------------
+
+// { evaluationId, goals: [{ id?, level_id, general_goal_id, general_goal, domain, domain_symbol, symbol, weakness, goal }],
+//   saved: bool (from the server), dirty, saving, error, savedAt }
+const plan = ref(null);
+let planKey = 0;
+const planGoal = (goal) => ({ key: `g${planKey++}`, ...goal });
+
+// The newest test's weaknesses, each with the goal written for the same answer.
+function planFromSummary(test) {
+  return (test?.result?.summary ?? []).flatMap((group) => (group.weak ?? []).filter((point) => point.question).map((point) => planGoal({
+    level_id: group.level_id ?? null, general_goal_id: group.general_goal_id ?? null, general_goal: group.general_goal ?? "",
+    domain: group.domain ?? "", domain_symbol: group.domain_symbol ?? "", symbol: group.symbol ?? "",
+    weakness: point.question, goal: point.goal ?? "",
+  })));
 }
 
-const milestoneExtras = computed(() => Object.fromEntries(sections.value
-  .filter((section) => section.type === MILESTONE)
-  .map((section) => [section.group, { summary: summaryTables(section) }])));
+async function loadPlan() {
+  const test = milestoneSection.value?.newest;
+  if (!test) return;
+  plan.value = { evaluationId: test.id, goals: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+  try {
+    const { data } = await axios.get(`api/reports/plans/${test.id}`);
+    plan.value.goals = data.plan ? data.plan.goals.map(planGoal) : planFromSummary(test);
+    plan.value.saved = Boolean(data.plan);
+    plan.value.savedAt = data.plan?.updated_at ?? null;
+  } catch {
+    plan.value.goals = planFromSummary(test);
+  } finally {
+    plan.value.loading = false;
+  }
+}
+
+// The plan by level (lowest first), then by general goal, numbered inside it (M-1, M-2...).
+const planLevels = computed(() => {
+  if (!plan.value) return [];
+  const names = new Map((milestoneSection.value?.newest?.result?.levels ?? []).map((level) => [String(level.level_id), level]));
+  const levels = new Map();
+  for (const goal of plan.value.goals) {
+    const levelKey = String(goal.level_id ?? "");
+    if (!levels.has(levelKey)) levels.set(levelKey, { key: levelKey, title: names.get(levelKey)?.level_name ?? "", age: Number(names.get(levelKey)?.level_age) || 0, groups: new Map() });
+    const groups = levels.get(levelKey).groups;
+    const groupKey = String(goal.general_goal_id ?? goal.symbol ?? "");
+    if (!groups.has(groupKey)) groups.set(groupKey, { key: groupKey, general_goal: goal.general_goal, domain: goal.domain, symbol: goal.symbol, goals: [] });
+    groups.get(groupKey).goals.push(goal);
+  }
+  return [...levels.values()].filter((level) => isLevelShown(level.key))
+    .sort((a, b) => a.age - b.age || Number(a.key) - Number(b.key))
+    .map((level) => ({ ...level, groups: [...level.groups.values()] }));
+});
+const goalCode = (group, index) => [group.symbol, index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-");
+
+function touchPlan() {
+  if (plan.value) plan.value.dirty = true;
+}
+function addPlanGoal(group) {
+  const last = group.goals[group.goals.length - 1];
+  const at = plan.value.goals.indexOf(last) + 1;
+  plan.value.goals.splice(at, 0, planGoal({ ...last, id: undefined, weakness: "", goal: "" }));
+  touchPlan();
+}
+function removePlanGoal(goal) {
+  plan.value.goals.splice(plan.value.goals.indexOf(goal), 1);
+  touchPlan();
+}
+
+async function savePlan() {
+  if (!plan.value || plan.value.saving) return;
+  plan.value.saving = true;
+  plan.value.error = false;
+  try {
+    const goals = plan.value.goals.filter((goal) => goal.weakness.trim()).map(({ key, code, attempts, cells, achieved_at, ...goal }) => goal);
+    const { data } = await axios.put(`api/reports/plans/${plan.value.evaluationId}`, { goals });
+    plan.value.goals = data.plan.goals.map(planGoal);
+    plan.value.saved = true;
+    plan.value.dirty = false;
+    plan.value.savedAt = data.plan.updated_at;
+    // The tracking reads the saved plans.
+    if (showTracking.value) loadTracking();
+  } catch {
+    plan.value.error = true;
+  } finally {
+    plan.value.saving = false;
+  }
+}
+
+// ---- tracking (the saved plans' goals of the chosen VB-MAPP tests) ---------------------------------
+
+// { plans: [{ evaluation_id, evaluation_date, goals: [...] }], achieved: { [id]: bool }, cells: { [id]: {...} }, date,
+//   saving, error, savedAt }
+const tracking = ref(null);
+const TRIAL_COLUMNS = ["mt", "sp", "rr", "ext"];
+
+async function loadTracking() {
+  const tests = milestoneSection.value?.tests ?? [];
+  if (!tests.length) return;
+  tracking.value = { plans: [], achieved: {}, cells: {}, date: todayIso, loading: true, saving: false, error: false };
+  try {
+    const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: tests.map((test) => test.id) } });
+    setTrackingPlans(data.plans ?? []);
+  } catch {
+    tracking.value.error = true;
+  } finally {
+    tracking.value.loading = false;
+  }
+}
+
+function setTrackingPlans(plans) {
+  tracking.value.plans = plans;
+  for (const goal of plans.flatMap((item) => item.goals)) {
+    tracking.value.achieved[goal.id] = Boolean(goal.achieved_at);
+    tracking.value.cells[goal.id] = Object.fromEntries(TRIAL_COLUMNS.flatMap((column) => ["start", "end"].map((end) => [`${column}_${end}`, goal.cells?.[`${column}_${end}`] ?? ""])));
+  }
+}
+
+// Each plan's goals by general goal (the centre's form has one table per goal), numbered inside it.
+const trackingGroups = (item) => {
+  const groups = new Map();
+  for (const goal of item.goals) {
+    const key = String(goal.general_goal_id ?? goal.symbol ?? "");
+    if (!groups.has(key)) groups.set(key, { key, general_goal: goal.general_goal, domain: goal.domain, domain_symbol: goal.domain_symbol, symbol: goal.symbol, goals: [] });
+    groups.get(key).goals.push(goal);
+  }
+  return [...groups.values()];
+};
+const isTracked = (goal) => !(edits.value?.trackingHidden ?? []).includes(Number(goal.id));
+function toggleTracked(goal, shown) {
+  const hidden = new Set((edits.value.trackingHidden ?? []).map(Number));
+  if (shown) hidden.delete(Number(goal.id));
+  else hidden.add(Number(goal.id));
+  edits.value.trackingHidden = [...hidden];
+}
+
+// Records today for the goals that print: achieved or not, and their trial columns.
+async function saveTracking() {
+  if (!tracking.value || tracking.value.saving) return true;
+  const goals = tracking.value.plans.flatMap((item) => item.goals).filter(isTracked);
+  if (!goals.length) return true;
+  tracking.value.saving = true;
+  tracking.value.error = false;
+  try {
+    await axios.post(`api/reports/children/${childId.value}/tracking`, {
+      date: tracking.value.date,
+      goals: goals.map((goal) => ({ id: goal.id, achieved: Boolean(tracking.value.achieved[goal.id]), cells: tracking.value.cells[goal.id] })),
+    });
+    const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: (milestoneSection.value?.tests ?? []).map((test) => test.id) } });
+    setTrackingPlans(data.plans ?? []);
+    tracking.value.savedAt = new Date().toLocaleTimeString();
+    return true;
+  } catch {
+    tracking.value.error = true;
+    return false;
+  } finally {
+    tracking.value.saving = false;
+  }
+}
 
 // ---- actions ---------------------------------------------------------------------------------------
 
-function print() {
+// Printing the tracking records today for the goals it shows.
+async function print() {
   document.activeElement?.blur?.();
+  if (showTracking.value) await saveTracking();
   window.print();
 }
 
@@ -318,6 +477,14 @@ function back() {
         </label>
       </fieldset>
       <div class="rx-toolbar-actions">
+        <span v-if="plan && !plan.loading" class="rx-save-state" :class="{ 'is-dirty': plan.dirty || !plan.saved, 'is-error': plan.error }">
+          {{ plan.error ? $t("ereport.save_failed") : plan.dirty || !plan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}
+        </span>
+        <Button v-if="plan && !plan.loading" :label="$t('ereport.save_plan')" icon="pi pi-save" :loading="plan.saving" data-no-request-spinner @click="savePlan" />
+        <template v-if="tracking && !tracking.loading && tracking.plans.length">
+          <label class="rx-track-date">{{ $t("date") }} <input v-model="tracking.date" type="date" /></label>
+          <Button :label="$t('ereport.save_tracking')" icon="pi pi-save" :loading="tracking.saving" severity="secondary" data-no-request-spinner @click="saveTracking" />
+        </template>
         <Button v-if="report" :label="$t('ereport.reset')" icon="pi pi-refresh" severity="secondary" variant="text" @click="resetEdits" />
         <Button :label="$t('ereport.print')" icon="pi pi-print" :disabled="!report" data-no-request-spinner @click="print" />
       </div>
@@ -452,12 +619,20 @@ function back() {
         </header>
 
         <h2 class="rx-band">{{ $t("ereport.case_description", { name: shortName }) }}</h2>
-        <p class="rx-case">
-          {{ $t(female ? "ereport.case_text_female" : "ereport.case_text_male", { name: shortName, age: caseAge(caseItem) }) }}
-          <EditableText v-model="edits.caseText.level" bold :placeholder="$t('ereport.blank')" />
-          {{ $t(female ? "ereport.case_text_2_female" : "ereport.case_text_2_male") }}
-          <EditableText v-model="edits.caseText.skills" :placeholder="$t('ereport.blank')" />.
-        </p>
+        <!-- With VB-MAPP: the three level descriptions; exactly one (picked here) prints. -->
+        <template v-if="milestoneSection">
+          <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.case_pick_hint") }}</p>
+          <label v-for="level in CASE_LEVELS" :key="level" class="rx-case-option" :class="{ 'is-picked': caseLevel === level }">
+            <span class="rx-case-pick rx-screen-only">
+              <input type="radio" name="rx-case-level" :value="level" :checked="caseLevel === level" @change="edits.caseLevel = level" />
+              {{ $t("level_n", { n: level }) }}
+            </span>
+            <p v-for="(paragraph, i) in caseParagraphs(level)" :key="i" class="rx-case">{{ paragraph }}</p>
+          </label>
+        </template>
+        <div class="rx-case-free" :class="{ 'is-empty': !edits.caseFree.trim() }">
+          <EditableText v-model="edits.caseFree" block multiline :placeholder="$t(milestoneSection ? 'ereport.case_free_more' : 'ereport.case_free')" />
+        </div>
 
         <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
       </section>
@@ -485,61 +660,147 @@ function back() {
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
 
-          <template v-if="showPlan">
-          <!-- Strengths and weaknesses of the newest chosen test: each level starts its own page -->
-          <section
-            v-for="table in milestoneExtras[section.group].summary.length ? milestoneExtras[section.group].summary : [null]"
-            :key="'summary-' + (table?.key ?? 'none')"
-            class="rx-page"
-          >
+          <!-- Report: the newest test's strengths and weaknesses as the evaluation gave them; each level its own page -->
+          <template v-if="showCharts">
+          <section v-for="table in reportSummary.length ? reportSummary : [null]" :key="'summary-' + (table?.key ?? 'none')" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
-
             <template v-if="table">
-            <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
-            <template v-for="kind in ['strengths', 'weaknesses']" :key="kind">
-              <h3 class="rx-summary-level">{{ $t('ereport.' + kind + '_intro') }}</h3>
-              <table class="rx-table rx-summary">
+              <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
+              <template v-for="kind in ['strengths', 'weaknesses']" :key="kind">
+                <h3 class="rx-summary-level">{{ $t('ereport.' + kind + '_intro') }}</h3>
+                <table class="rx-table rx-summary">
+                  <thead>
+                    <tr>
+                      <th class="rx-sum-num">{{ $t('ereport.number') }}</th>
+                      <th>{{ $t('ereport.' + kind) }}</th>
+                      <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, r) in table.rows.filter((item) => item[kind].length)" :key="r">
+                      <td class="rx-sum-num">{{ r + 1 }}</td>
+                      <td><ul class="rx-plan-points is-static"><li v-for="point in row[kind]" :key="point.id">{{ point.text }}</li></ul></td>
+                      <td class="rx-sum-symbol"><b>{{ row.symbol }}</b></td>
+                    </tr>
+                    <tr v-if="!table.rows.some(row => row[kind].length)">
+                      <td colspan="3" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+            </template>
+            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+          </section>
+          </template>
+
+          <!-- Plan: the weaknesses with their goals, edited here and saved on the server; each level its own page -->
+          <template v-if="showPlan && plan">
+          <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')" class="rx-page">
+            <header class="rx-head">
+              <img :src="sawaLogo" alt="Sawa" />
+              <span>{{ $t("ereport.plan_title") }} · VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+            </header>
+            <h2 class="rx-band">{{ $t("ereport.plan_title") }}<template v-if="level?.title"> — {{ level.title }}</template></h2>
+            <p v-if="plan.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+            <table v-else-if="level" class="rx-table rx-summary rx-plan">
+              <thead>
+                <tr>
+                  <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
+                  <th>{{ $t("ereport.weaknesses") }}</th>
+                  <th>{{ $t("ereport.plan_goal") }}</th>
+                  <th class="rx-plan-control-col rx-screen-only" />
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="group in level.groups" :key="group.key">
+                  <tr class="rx-plan-group">
+                    <th colspan="4">{{ group.domain }}<template v-if="group.symbol"> ({{ group.symbol }})</template><template v-if="group.general_goal"> — {{ group.general_goal }}</template></th>
+                  </tr>
+                  <tr v-for="(goal, g) in group.goals" :key="goal.key">
+                    <td class="rx-sum-num ltr">{{ goalCode(group, g) }}</td>
+                    <td><EditableText v-model="goal.weakness" block multiline :placeholder="$t('ereport.point_text')" @update:modelValue="touchPlan" /></td>
+                    <td><EditableText v-model="goal.goal" block multiline :placeholder="$t('ereport.plan_goal')" @update:modelValue="touchPlan" /></td>
+                    <td class="rx-plan-control-col rx-screen-only">
+                      <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')" @click="removePlanGoal(goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                    </td>
+                  </tr>
+                  <tr class="rx-screen-only">
+                    <td colspan="4"><button type="button" class="rx-plan-control rx-add-point" @click="addPlanGoal(group)"><i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}</button></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+          </section>
+          </template>
+
+          <!-- Tracking: the saved plans' goals, one table per general goal as on the centre's form -->
+          <template v-if="showTracking && tracking">
+          <section v-for="item in tracking.plans.length ? tracking.plans : [null]" :key="'track-' + (item?.evaluation_id ?? 'none')" class="rx-page">
+            <header class="rx-head">
+              <img :src="sawaLogo" alt="Sawa" />
+              <span>{{ $t("ereport.tracking_title") }}<template v-if="item"> · VB-MAPP · <span class="ltr">{{ dmy(item.evaluation_date) }}</span></template></span>
+            </header>
+            <h2 class="rx-band">{{ $t("ereport.tracking_title") }}</h2>
+            <p v-if="tracking.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+            <p v-else-if="!item" class="rx-empty">{{ $t("ereport.tracking_no_plan") }}</p>
+            <template v-else>
+              <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.tracking_hint") }}</p>
+              <table v-for="group in trackingGroups(item)" :key="group.key" class="rx-table rx-track"
+                :class="{ 'rx-print-hidden': !group.goals.some(isTracked) }">
                 <thead>
+                  <tr class="rx-track-domain"><th colspan="11">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
+                  <tr class="rx-track-goal"><th colspan="11">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
                   <tr>
-                    <th class="rx-sum-num">{{ $t('ereport.number') }}</th>
-                    <th>{{ $t('ereport.' + kind) }}</th>
-                    <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
+                    <th rowspan="2" class="rx-track-num">{{ $t("ereport.number") }}</th>
+                    <th rowspan="2">{{ $t("ereport.tracking_short_goals") }}</th>
+                    <th class="rx-track-prop">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
+                    <th v-for="column in TRIAL_COLUMNS" :key="column" colspan="2">{{ $t("ereport.trial_" + column) }}<br /><span class="ltr">{{ column.toUpperCase() }}</span></th>
+                  </tr>
+                  <tr>
+                    <th class="rx-track-prop">{{ $t("ereport.tracking_date") }}</th>
+                    <template v-for="column in TRIAL_COLUMNS" :key="column">
+                      <th class="rx-track-cell">{{ $t("ereport.trial_start") }}</th>
+                      <th class="rx-track-cell">{{ $t("ereport.trial_end") }}</th>
+                    </template>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(row, r) in table.rows" :key="r" :class="{ 'rx-plan-empty-row': !row[kind].length }">
-                    <td class="rx-sum-num">{{ row[kind].length ? table.rows.slice(0, r + 1).filter(item => item[kind].length).length : "" }}</td>
+                  <tr v-for="(goal, g) in group.goals" :key="goal.id" :class="{ 'rx-print-hidden': !isTracked(goal), 'is-off': !isTracked(goal) }">
+                    <td class="rx-track-num ltr"><b>{{ goal.code || goalCode(group, g) }}</b></td>
                     <td>
-                      <ul class="rx-plan-points">
-                        <li v-for="(point, p) in row[kind]" :key="point.id">
-                          <EditableText v-model="point.text" block :placeholder="$t('ereport.point_text')" />
-                          <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')" @click="row[kind].splice(p, 1)"><i class="pi pi-trash" aria-hidden="true" /></button>
-                        </li>
-                      </ul>
-                      <button type="button" class="rx-plan-control rx-add-point" @click="row[kind].push(newSummaryPoint())"><i class="pi pi-plus" aria-hidden="true" /> {{ $t('ereport.add_point') }}</button>
+                      {{ goal.goal || goal.weakness }}
+                      <span class="rx-track-controls rx-screen-only">
+                        <label><input type="checkbox" :checked="isTracked(goal)" @change="toggleTracked(goal, $event.target.checked)" /> {{ $t("ereport.tracking_print") }}</label>
+                        <label><input v-model="tracking.achieved[goal.id]" type="checkbox" :disabled="!isTracked(goal)" /> {{ $t("ereport.tracking_achieved") }}</label>
+                      </span>
                     </td>
-                    <td class="rx-sum-symbol"><EditableText v-model="row.symbol" block bold :placeholder="$t('ereport.target_symbol')" /></td>
-                  </tr>
-                  <tr v-if="!table.rows.some(row => row[kind].length)">
-                    <td colspan="3" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
+                    <td class="rx-track-prop">
+                      <span v-for="attempt in goal.attempts" :key="attempt.date" class="rx-attempt ltr" :class="{ 'is-achieved': attempt.achieved }">
+                        {{ ymd(attempt.date) }} {{ attempt.achieved ? "✓" : "" }}
+                      </span>
+                    </td>
+                    <template v-for="column in TRIAL_COLUMNS" :key="column">
+                      <td v-for="end in ['start', 'end']" :key="end" class="rx-track-cell">
+                        <EditableText v-model="tracking.cells[goal.id][column + '_' + end]" block />
+                      </td>
+                    </template>
                   </tr>
                 </tbody>
               </table>
-              <button type="button" class="rx-plan-control rx-add-point" @click="addSummaryRow(table, kind)"><i class="pi pi-plus" aria-hidden="true" /> {{ $t('ereport.add_symbol') }}</button>
             </template>
-            </template>
-            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
-
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
           </template>
         </template>
 
-        <!-- Any other type: the same test tables, then its chart as on its results page -->
-        <section v-else class="rx-page">
+        <!-- Any other type (in the report): barriers with their test tables, then each type's chart -->
+        <section v-else-if="showCharts" class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -591,6 +852,41 @@ function back() {
 .rx-plan-control { border: 0; border-radius: 5px; padding: .3rem .5rem; cursor: pointer; font: inherit; font-size: 9pt; }
 .rx-remove-point { color: #b91c1c; background: #fef2f2; flex: none; }
 .rx-add-point { color: var(--sawa-primary); background: #edf7f5; margin-top: .4rem; }
+/* screen-only controls and the parts left out of the print */
+.rx-save-state { font-size: .85rem; color: #166534; }
+.rx-save-state.is-dirty { color: #b45309; }
+.rx-save-state.is-error { color: #b91c1c; }
+.rx-track-date { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; }
+.rx-track-date input { padding: .3rem .4rem; border: 1px solid var(--sawa-border); border-radius: 6px; font: inherit; }
+.rx-case-hint { margin: 0 0 .6rem; padding: .5rem .75rem; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 9.5pt; }
+.rx-case-option { display: block; margin-bottom: .75rem; padding: .5rem .75rem; border: 1px dashed #cbd5e1; border-radius: 10px; cursor: pointer; opacity: .55; }
+.rx-case-option.is-picked { border: 2px solid var(--sawa-primary); opacity: 1; }
+.rx-case-pick { display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .3rem; font-weight: 800; color: var(--sawa-primary); }
+.rx-case-option .rx-case { margin: 0 0 .45rem; }
+.rx-case-free { margin-top: .5rem; }
+.rx-plan-points.is-static { list-style: disc; padding-inline-start: 1.1em; }
+.rx-plan-points.is-static li { display: list-item; }
+.rx-plan-group th { background: #edf7f5; text-align: start; font-weight: 800; }
+.rx-plan-control-col { width: 2.5rem; text-align: center; }
+.rx-track { margin-bottom: 6mm; font-size: 8.5pt; break-inside: avoid; page-break-inside: avoid; }
+.rx-track th, .rx-track td { padding: 3px 4px; text-align: center; vertical-align: middle; }
+.rx-track td:nth-child(2) { text-align: start; }
+.rx-table.rx-track .rx-track-domain th { background: #c4b5fd; color: #1e293b; text-align: start; font-size: 10pt; }
+.rx-table.rx-track .rx-track-goal th { background: #e2e8f0; color: #1e293b; text-align: start; font-weight: 700; }
+.rx-track-symbol { float: inline-end; font-weight: 800; }
+.rx-track-num { width: 11mm; }
+.rx-track-prop { width: 22mm; }
+.rx-track-cell { width: 10mm; background: #f8fafc; }
+.rx-track thead .rx-track-cell { background: #f1f5f9; }
+.rx-attempt { display: block; white-space: nowrap; }
+.rx-attempt.is-achieved { color: #166534; font-weight: 800; }
+.rx-track-controls { display: flex; flex-wrap: wrap; gap: .25rem .75rem; margin-top: .3rem; font-size: 8pt; color: #475569; }
+.rx-track-controls label { display: inline-flex; align-items: center; gap: .25rem; cursor: pointer; }
+.rx-track tr.is-off td { opacity: .45; }
+@media print {
+  .rx-screen-only, .rx-print-hidden, .rx-case-option:not(.is-picked), .rx-case-free.is-empty { display: none !important; }
+  .rx-case-option { border: 0 !important; padding: 0 !important; opacity: 1 !important; }
+}
 @media print {
   .rx-plan-control, .rx-plan-empty-row { display: none !important; }
   .rx-plan-points { list-style: disc; padding-inline-start: 1.1em; }
