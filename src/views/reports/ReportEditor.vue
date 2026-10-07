@@ -4,10 +4,10 @@
 //
 // Pages: 1 cover (logo, child, evaluations) · 2 personal info + team signatures (newest chosen evaluation)
 // · then one section per evaluation type (at most four evaluations each): VB-MAPP = case description page
-// and one VB-MAPP form page whose test columns are the chosen tests only, then a strengths/weaknesses table of the
-// newest chosen test (the EESA form never appears in the report); any
-// other type = its results,
-// one block per chosen evaluation. The behaviour-problems table belongs to a behavioural evaluation only.
+// and one form page per chosen test (its own tables, one row per level, and its own level charts; a test still
+// waiting for levels shows the ones it has), then a strengths/weaknesses table of the newest chosen test (the EESA
+// form never appears in the report); barriers = the test tables (one row per chosen test) and the chart; any other
+// type = its chart only. The behaviour-problems table belongs to a behavioural evaluation only.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -51,7 +51,10 @@ const items = computed(() => report.value?.items ?? []);
 const female = computed(() => isFemale(child.value.gender));
 const shortName = computed(() => firstName(child.value.name));
 const birth = computed(() => dateParts(child.value.birth_date));
-const dates = computed(() => items.value.map((item) => item.date).filter(Boolean).sort());
+// A VB-MAPP test may have been completed level by level, on several days.
+const dates = computed(() => items.value
+  .flatMap((item) => [item.date, ...(item.form?.levels ?? []).map((level) => level.date)])
+  .filter(Boolean).sort());
 
 // One section per evaluation type, newest type first; inside, oldest to newest (1st test ... 4th test).
 const byDate = (a, b) => String(a.date).localeCompare(String(b.date)) || a.id - b.id;
@@ -219,6 +222,35 @@ const mergedLevels = (tests) => {
     .filter((level) => isLevelShown(level.level_id))
     .sort((a, b) => (Number(b.level_age) || 0) - (Number(a.level_age) || 0) || Number(b.level_id) - Number(a.level_id));
 };
+
+// ---- test tables (VB-MAPP types only) ----------------------------------------------------------------
+
+const TEST_KEYS = ["1st test", "2nd test", "3rd test", "4th test"];
+
+// Barriers: one row per chosen test, oldest first (always four rows).
+const barrierRows = (tests) => TEST_KEYS.map((key, i) => ({
+  n: i + 1,
+  key,
+  date: tests[i]?.date ?? null,
+  age_months: tests[i]?.form?.age_months,
+  testers: tests[i]?.form?.testers ?? [],
+  colors: tests[i]?.form?.colors ?? [],
+  score: tests[i]?.form?.score,
+  boxes_total: tests[i]?.form?.boxes_total,
+}));
+
+// One VB-MAPP test: one row per level (each may be evaluated on its own day); a missing level is an empty row.
+// The score is the boxes colored up to that level out of all the form's boxes.
+const milestoneRows = (test) => (test.form?.levels ?? []).map((level) => ({
+  n: level.age || level.level_id,
+  key: `Level ${level.age || level.level_id}`,
+  date: level.date,
+  age_months: level.age_months,
+  testers: level.tester ? [level.tester] : [],
+  colors: level.color ? [level.color] : [],
+  score: level.cumulative_score,
+  boxes_total: test.form?.boxes_total,
+}));
 
 // The VB-MAPP levels in the chosen tests (lowest first) for the toolbar's level picker.
 const milestoneLevels = computed(() => {
@@ -433,21 +465,21 @@ function back() {
       <!-- 4+. One section per evaluation type -->
       <template v-for="section in sections" :key="section.group">
         <template v-if="section.type === MILESTONE">
-          <!-- The VB-MAPP form: test columns = the chosen tests only; chart = the newest one -->
-          <section v-if="showCharts" class="rx-page">
+          <!-- One VB-MAPP form page per chosen test, oldest first: its tables (a row per level) and its own charts -->
+          <section v-for="test in showCharts ? section.tests : []" :key="'vb-' + test.key" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
-              <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+              <span>VB-MAPP · <span class="ltr">{{ dmy(test.date) }}</span></span>
             </header>
 
             <p class="rx-kicker">{{ $t("ereport.special_education") }}</p>
             <p class="rx-intro">{{ $t("ereport.form_intro", { name: child.name, evaluation: "VB-MAPP" }) }}</p>
 
-            <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
+            <TestTables :child="child" :rows="milestoneRows(test)" />
 
-            <div v-if="showCharts" class="vb-levels">
-              <MilestoneLevelChart v-for="level in mergedLevels(section.tests)" :key="level.level_id" :level="level" />
-              <p v-if="!mergedLevels(section.tests).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+            <div class="vb-levels">
+              <MilestoneLevelChart v-for="level in mergedLevels([test])" :key="level.level_id" :level="level" :legend="false" />
+              <p v-if="!mergedLevels([test]).length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
             </div>
 
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
@@ -516,7 +548,8 @@ function back() {
           <h2 class="rx-band">{{ $t("ereport.results_of", { name: section.label }) }}</h2>
           <p class="rx-intro">{{ $t("ereport.form_intro", { name: child.name, evaluation: section.label }) }}</p>
 
-          <TestTables :child="child" :tests="section.tests" :scores="edits.cases[section.group].scores" />
+          <!-- The test tables belong to the VB-MAPP family only (barriers here). -->
+          <TestTables v-if="section.type === BARRIER" :child="child" :rows="barrierRows(section.tests)" />
 
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />

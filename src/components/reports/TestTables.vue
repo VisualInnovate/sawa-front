@@ -1,18 +1,17 @@
 <script setup>
-// The two tables above every chart in the report: the child with the age at each test, and the tests
-// (tester, colors, date, score, key). Rows are the chosen tests only, oldest first; unused rows stay empty.
-import EditableText from "./EditableText.vue";
+// The two tables above a VB-MAPP chart in the report (milestones and barriers only): the child with the age at
+// each row, and the rows (tester, color, date, score, key). The score is computed: the colored boxes (½ counts
+// half) out of all the boxes of the form.
 import { shortAge, ymd } from "./reportUtils";
 
 defineProps({
   child: { type: Object, required: true },
-  // [{ date, form: { testers, colors, age_months } }], oldest first, at most four
-  tests: { type: Array, required: true },
-  // The report's editable scores for this section (one per row).
-  scores: { type: Array, required: true },
+  // [{ n, key, age_months, testers: [], colors: [], date, score, boxes_total }]; a row without a date stays empty.
+  rows: { type: Array, required: true },
 });
 
-const KEYS = ["1st test", "2nd test", "3rd test", "4th test"];
+const number = (value) => String(Math.round(Number(value) * 10) / 10);
+const score = (row) => (row?.score === null || row?.score === undefined || !row?.boxes_total ? "" : `${number(row.score)} / ${row.boxes_total}`);
 </script>
 
 <template>
@@ -27,10 +26,10 @@ const KEYS = ["1st test", "2nd test", "3rd test", "4th test"];
           <th class="tone-b">Date of birth</th>
           <td colspan="2"><span class="ltr">{{ ymd(child.birth_date) }}</span></td>
         </tr>
-        <tr v-for="(key, i) in KEYS" :key="key">
-          <th v-if="i === 0" :rowspan="KEYS.length" class="tone-c">Age at testing</th>
-          <th class="tone-c tt-n">{{ i + 1 }}</th>
-          <td><span class="ltr">{{ tests[i] ? shortAge(tests[i].form?.age_months) : "" }}</span></td>
+        <tr v-for="(row, i) in rows" :key="row.key">
+          <th v-if="i === 0" :rowspan="rows.length" class="tone-c">Age at testing</th>
+          <th class="tone-c tt-n">{{ row.n }}</th>
+          <td><span class="ltr">{{ row.date ? shortAge(row.age_months) : "" }}</span></td>
         </tr>
       </tbody>
     </table>
@@ -46,16 +45,16 @@ const KEYS = ["1st test", "2nd test", "3rd test", "4th test"];
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(key, i) in KEYS" :key="key">
-          <td>{{ tests[i]?.form?.testers?.join(" / ") ?? "" }}</td>
+        <tr v-for="row in rows" :key="row.key">
+          <td>{{ row.date ? (row.testers ?? []).join(" / ") : "" }}</td>
           <td>
-            <span class="tt-swatches">
-              <i v-for="color in tests[i]?.form?.colors ?? []" :key="color" :style="{ background: '#' + color }" />
+            <span v-if="row.date" class="tt-swatches">
+              <i v-for="color in row.colors ?? []" :key="color" :style="{ background: '#' + color }" />
             </span>
           </td>
-          <td><span class="ltr">{{ ymd(tests[i]?.date) }}</span></td>
-          <td><EditableText v-if="tests[i]" v-model="scores[i]" block /></td>
-          <th class="tone-e"><span class="ltr">{{ key }}</span></th>
+          <td><span class="ltr">{{ ymd(row.date) }}</span></td>
+          <td><span class="ltr">{{ row.date ? score(row) : "" }}</span></td>
+          <th class="tone-e"><span class="ltr">{{ row.key }}</span></th>
         </tr>
       </tbody>
     </table>

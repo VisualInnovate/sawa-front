@@ -4,6 +4,8 @@ const { t } = useI18n();
 import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import Barrier from '../../../../components/Barrier.vue'
+import GenderTextField from '../../../../components/GenderTextField.vue'
+import NameTokenHint from '../../../../components/NameTokenHint.vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -22,7 +24,7 @@ const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const createdialog=ref(false)
-const levels=ref({})
+const levels=ref({ wording: { male: '', female: '' } })
 const updatedialog=ref(false)
 const all_levels=ref([])
 onBeforeMount(() => {
@@ -59,7 +61,8 @@ alllevel()
 const edit=(id)=>{
     axios.get(`/api/barrier-question/${id}`).then((res)=>{
     loading.value= false
-    levels.value= res.data.data
+    levels.value= { ...res.data.data, wording: { male: res.data.data.wording?.male ?? res.data.data.title ?? '', female: res.data.data.wording?.female ?? res.data.data.title ?? '' } }
+    error.value = ''
     console.log(users.value)
 
   });
@@ -72,13 +75,13 @@ const edit=(id)=>{
 
 const editescrud=()=>{
     axios
-    .post(`/api/barrier-question/${confir_id.value}`,levels.value)
+    .post(`/api/barrier-question/${confir_id.value}`,{ ...levels.value, title: levels.value.wording.male })
     .then((res) => {
       console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = {}
+      levels.value = { wording: { male: '', female: '' } }
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -86,7 +89,7 @@ const editescrud=()=>{
 }
 
 const openNew = () => {
-    levels.value = {}
+    levels.value = { wording: { male: '', female: '' } }
     error.value = ''
     createdialog.value=!(createdialog.value)
 }
@@ -102,13 +105,13 @@ const confirmDelete = (id) => {
 
 const createcrude=()=>{
     axios
-    .post('/api/barrier-question',levels.value)
+    .post('/api/barrier-question',{ ...levels.value, title: levels.value.wording.male })
     .then((res) => {
       console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = {}
+      levels.value = { wording: { male: '', female: '' } }
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -185,11 +188,14 @@ const initFilters = () => {
 
         
          
-           <Column field="name" :header='$t("name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="wording.male" :header="`${$t('barrier_wording.paragraph')} — ${$t('male')}`" :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.title }}
+              {{ slotProps.data.wording?.male ?? slotProps.data.title }}
             </template>
            </Column> 
+           <Column field="wording.female" :header="`${$t('barrier_wording.paragraph')} — ${$t('female')}`" sortable>
+             <template #body="{ data }">{{ data.wording?.female ?? data.title }}</template>
+           </Column>
            <Column field="index" :header='$t("question_number")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.index }}
@@ -214,7 +220,7 @@ const initFilters = () => {
 
 
         </DataTable>
-        <Dialog v-model:visible="deleteDialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
+        <Dialog v-model:visible="deleteDialog" :style="{ width: '650px', maxWidth: '95vw' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
             <span v-if="user"
@@ -227,11 +233,11 @@ const initFilters = () => {
             <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
           </template>
         </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
+        <Dialog v-model:visible="createdialog" :style="{ width: '650px', maxWidth: '95vw' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+<NameTokenHint :text="$t('barrier_wording.name_hint')" />
+                <GenderTextField v-model="levels.wording" :label="$t('barrier_wording.paragraph')" inputId="barrier-paragraph" :showErrors="!!error?.wording || !!error?.['wording.male'] || !!error?.['wording.female']" />
+                <small v-for="key in ['title', 'wording', 'wording.male', 'wording.female']" :key="key" class="text-red-500">{{ error?.[key]?.[0] }}</small>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('Subtest_id') }}</label>
@@ -248,11 +254,11 @@ const initFilters = () => {
             <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
+        <Dialog v-model:visible="updatedialog" :style="{ width: '650px', maxWidth: '95vw' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+<NameTokenHint :text="$t('barrier_wording.name_hint')" />
+                <GenderTextField v-model="levels.wording" :label="$t('barrier_wording.paragraph')" inputId="barrier-paragraph" :showErrors="!!error?.wording || !!error?.['wording.male'] || !!error?.['wording.female']" />
+                <small v-for="key in ['title', 'wording', 'wording.male', 'wording.female']" :key="key" class="text-red-500">{{ error?.[key]?.[0] }}</small>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('Subtest_id') }}</label>

@@ -244,6 +244,8 @@ onMounted(loadChildren);
                     <span class="rp-eval-text">
                       <strong class="ltr">{{ dmy(item.date) }}</strong>
                       <small v-if="item.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ item.specialist.name }}</small>
+                      <!-- A VB-MAPP evaluation still waiting for levels: reported with the levels it has. -->
+                      <small v-if="item.complete === false" class="rp-incomplete"><i class="pi pi-hourglass" aria-hidden="true" /> {{ $t("ereport.incomplete") }}</small>
                     </span>
                   </label>
                 </li>
@@ -615,6 +617,10 @@ onMounted(loadChildren);
   color: var(--sawa-text);
   font-weight: 700;
   font-size: 0.93rem;
+}
+.rp-eval-text small.rp-incomplete {
+  color: #b45309;
+  font-weight: 700;
 }
 .rp-eval-text small {
   display: flex;

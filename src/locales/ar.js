@@ -1,4 +1,5 @@
 export default {
+  barrier_wording: { paragraph: "الفقرة", name_hint: "داخل الفقرة ليظهر الاسم الأول للطفل، وتُعرض صيغة الذكر أو الأنثى بحسب جنس الطفل." },
   change_password: "تغيير كلمة المرور",
   current_password: "كلمة المرور الحالية",
   change_own_password_hint:
@@ -1402,6 +1403,7 @@ export default {
   },
   ereport: {
     levels_shown: "المستويات الظاهرة",
+    incomplete: "غير مكتمل",
     menu: "التقارير",
     title: "تقارير التقييم",
     subtitle: "اختر طفلًا لعرض تقييماته المنتهية، ثم حدّد التقييمات التي تريد إعداد تقرير لها.",
@@ -1595,4 +1597,13 @@ export default {
   milestone_choose_levels: "مستويات التقييم",
   milestone_choose_levels_hint: "اختر مستوى واحدًا أو أكثر قبل بدء التقييم. ستظهر أسئلة المستويات المختارة فقط.",
   milestone_score_legend: "معنى الإجابات في الرسم البياني:",
+  milestone_pending_status: "بانتظار التقييم",
+  milestone_continue: "إكمال التقييم",
+  milestone_continuing: "إكمال تقييم بدأ بتاريخ {date}. تظهر المستويات التي لم تُقيَّم بعد فقط.",
+  milestone_done_levels: "المستويات المنجزة:",
+  milestone_level_on: "{level} بتاريخ {date}",
+  milestone_incomplete_result: "هذا التقييم غير مكتمل. المستويات المتبقية: {levels}",
+  milestone_pending_exists: "لدى الطفل تقييم لم يكتمل بعد، يمكنك إكماله بدلاً من بدء تقييم جديد:",
+  milestone_pending_item: "بدأ بتاريخ {date} — المتبقي: {levels}",
+  milestone_nothing_missing: "كل مستويات هذا التقييم مكتملة.",
 };

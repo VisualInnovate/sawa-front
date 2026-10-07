@@ -12,8 +12,24 @@
         @submit.prevent="getanswer"
         class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4"
       >
-        <!-- ... existing code ... -->
-
+        <!-- Continuing an evaluation that still misses levels: what was done, and only the missing levels below. -->
+        <Message v-if="continuing" severity="info" :closable="false" class="lg:col-span-2">
+          <p class="m-0">{{ $t("milestone_continuing", { date: day(continuing.date) }) }}</p>
+          <p v-if="doneLevels.length" class="mt-2 mb-0">
+            {{ $t("milestone_done_levels") }}
+            <span v-for="(level, i) in doneLevels" :key="level.level_id">
+              <span v-if="i">، </span>{{ $t("milestone_level_on", { level: level.title, date: level.date }) }}
+            </span>
+          </p>
+        </Message>
+        <!-- Starting a new one while another still waits for levels: offer to continue it instead. -->
+        <Message v-else-if="pending.length" severity="warn" :closable="false" class="lg:col-span-2">
+          <p class="m-0">{{ $t("milestone_pending_exists") }}</p>
+          <div v-for="item in pending" :key="item.evaluation_id" class="pending-item">
+            <span>{{ $t("milestone_pending_item", { date: day(item.date), levels: missingTitles(item) }) }}</span>
+            <Button size="small" icon="pi pi-play" :label="$t('milestone_continue')" @click="continueEvaluation(item.evaluation_id)" />
+          </div>
+        </Message>
 
         <div class="flex flex-column gap-2">
           <label for="username">{{ $t("child_name") }}</label>
@@ -86,11 +102,12 @@
             :loading="starting"
             :disabled="questionsLoading || !selectedLevelGroups.length || strart_evaluate"
             class="w-full"
-            :label="$t('strart_evaluate')"
+            :label="continuing ? $t('milestone_continue') : $t('strart_evaluate')"
           ></Button>
         </div>
 
         <Message v-if="questionsLoading" class="lg:col-span-2">{{ $t('loading') }}</Message>
+        <Message v-else-if="continuing && !continuing.missing_level_ids.length" severity="success" class="lg:col-span-2">{{ $t('milestone_nothing_missing') }}</Message>
         <Message v-else-if="answer.child_age != null && !allquestion.length" severity="warn" class="lg:col-span-2">{{ $t('no_records_found') }}</Message>
         <fieldset v-if="!questionsLoading && levelGroups.length" class="level-picker lg:col-span-2" :disabled="strart_evaluate || starting">
           <legend>{{ $t('milestone_choose_levels') }}</legend>
@@ -246,6 +263,10 @@ export default {
       // level id -> { g1_1: "1", ... }
       eesaBoxes: {},
       childs: [],
+      // The progress of the evaluation being continued (?evaluation=id): its start age and missing levels.
+      continuing: null,
+      // The child's other evaluations still waiting for levels (offered when starting a new one).
+      pending: [],
       qustions: {},
       error: {},
       maxDate: new Date(),
@@ -256,6 +277,9 @@ export default {
   },
 
   computed: {
+    doneLevels() {
+      return (this.continuing?.levels ?? []).filter(level => level.done)
+    },
     selectedLevelGroups() {
       return this.levelGroups.filter(level => this.selectedLevelIds.map(String).includes(String(level.id)))
     },
@@ -295,6 +319,8 @@ export default {
           }
           return { ...level, title: level.title || this.$t('level_n', { n: index + 1 }), blocks }
         })
+        // Continuing: only the levels this evaluation still misses.
+        .filter(level => !this.continuing || this.continuing.missing_level_ids.map(String).includes(String(level.id)))
     },
     questionLevels() {
       return Object.fromEntries(this.allquestion.map(question => [question.id, question.subtest?.level_id ?? 'other']))
@@ -328,8 +354,22 @@ export default {
       this.levelColors = { ...this.levelColors, [levelId]: color };
     },
     submit() {},
+    day(value) {
+      return String(value ?? '').slice(0, 10)
+    },
+    missingTitles(progress) {
+      return progress.levels.filter(level => progress.missing_level_ids.includes(level.level_id)).map(level => level.title).join('، ')
+    },
+    continueEvaluation(evaluationId) {
+      this.$router.push({ name: 'milestone-evaluation', params: { id: this.answer.child_id }, query: { ...this.$route.query, evaluation: evaluationId } })
+    },
     async createevalutae() {
       if (this.starting || this.strart_evaluate || this.questionsLoading || !this.selectedLevelGroups.length) return
+      // Continuing: the evaluation exists already.
+      if (this.continuing) {
+        this.strart_evaluate = true
+        return
+      }
       this.starting = true
       this.error = {}
       try {
@@ -360,10 +400,12 @@ export default {
           date: moment(this.answer.date).format('YYYY-MM-DD'), child_id: this.answer.child_id,
         })
         this.answer.child_age = Number(age)
+        // The levels are those of the child's age when the evaluation started, however late it is continued.
+        const levelAge = this.continuing?.start_age ?? age
         const [{ data }, { data: eesa }] = await Promise.all([
-          axios.get(`api/milestone-answers/sub-goals/${age}`, { params: { child_id: this.answer.child_id } }),
+          axios.get(`api/milestone-answers/sub-goals/${levelAge}`, { params: { child_id: this.answer.child_id } }),
           // Without the EESA endpoint (older server) the evaluation still loads, just without the form.
-          axios.get(`api/milestone-answers/eesa/${age}`, { params: { child_id: this.answer.child_id } }).catch(() => ({ data: null })),
+          axios.get(`api/milestone-answers/eesa/${levelAge}`, { params: { child_id: this.answer.child_id } }).catch(() => ({ data: null })),
         ])
         this.allquestion = Array.isArray(data) ? data : (data.data || [])
         // An older server returns one form without levels: it belongs to the first level.
@@ -371,6 +413,8 @@ export default {
           : eesa?.show ? [{ level_id: this.allquestion[0]?.subtest?.level_id, previous: eesa.previous ?? [] }] : []
         this.eesa = { show: eesaLevels.length > 0, domain: eesa?.domain ?? null, levels: eesaLevels }
         this.eesaBoxes = {}
+        // Continuing: the missing levels are chosen to start with.
+        if (this.continuing) this.selectedLevelIds = this.levelGroups.map(level => level.id)
       } catch (error) {
         this.alert_text = error.response?.data?.message || this.$t('request_failed_retry')
       } finally { this.questionsLoading = false }
@@ -427,12 +471,30 @@ export default {
         this.saving = false;
       }
     },
+    // The evaluation to continue (?evaluation=id), or else the child's evaluations still waiting for levels.
+    async loadProgress() {
+      const evaluationId = Number(this.$route.query.evaluation) || null
+      try {
+        if (evaluationId) {
+          const { data } = await axios.get(`api/milestone-answers/progress/${evaluationId}`)
+          if (Number(data.child_id) === Number(this.answer.child_id)) {
+            this.continuing = data
+            this.answer.evaluation_id = evaluationId
+          }
+        } else {
+          const { data } = await axios.get(`api/milestone-answers/pending/${this.answer.child_id}`)
+          this.pending = data?.data ?? []
+        }
+      } catch {
+        // Without the endpoints (older server) a new evaluation starts as before.
+      }
+    },
     getusers() {
-      axios.get("api/child").then((response) => {
-        console.log(localStorage.getItem("child_id"));
+      axios.get("api/child").then(async (response) => {
         this.childs = response.data.children;
         this.answer.child_id = Number(this.$route.params.id || localStorage.getItem("child_id"));
         this.answer.date = new Date();
+        await this.loadProgress();
         this.getage();
         // Without the endpoint (older server) every color stays available.
         axios
@@ -457,7 +519,6 @@ export default {
           .catch(() => {
             this.alert_text = this.$t("request_failed_retry");
           });
-        this.answer.evaluation_id = parseInt(this.$route.params.evaluation);
       });
     },
 
@@ -488,10 +549,19 @@ export default {
   mounted() {
     this.getusers();
   },
+  watch: {
+    // "Continue" opens the same screen with ?evaluation=id: start over with that evaluation.
+    "$route.query.evaluation"(value, before) {
+      if (value === before || this.$route.name !== "milestone-evaluation") return;
+      Object.assign(this.$data, this.$options.data.call(this));
+      this.getusers();
+    },
+  },
 };
 </script>
 
 <style scoped>
+.pending-item { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-top: .6rem; }
 .level-picker { border: 1px solid var(--sawa-border); border-radius: 12px; padding: 1rem; }
 .level-picker legend { font-weight: 700; color: var(--sawa-primary); }
 .level-picker p { margin: 0 0 .75rem; color: var(--sawa-muted); }
