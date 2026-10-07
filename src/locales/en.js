@@ -1,4 +1,5 @@
 export default {
+  barrier_wording: { paragraph: "Paragraph", name_hint: "in the paragraph to display the child's first name; the wording follows the child's gender." },
   change_password: "Change password",
   current_password: "Current password",
   change_own_password_hint: "You can change your account password after confirming the current password.",
@@ -1366,6 +1367,7 @@ export default {
   },
   ereport: {
     levels_shown: "Levels shown",
+    incomplete: "Incomplete",
     menu: "Reports",
     title: "Evaluation reports",
     subtitle: "Pick a child to see their finished evaluations, then choose the ones to include in a report.",
@@ -1558,4 +1560,13 @@ export default {
   milestone_choose_levels: "Assessment levels",
   milestone_choose_levels_hint: "Choose one or more levels before starting. Only the selected levels will be assessed.",
   milestone_score_legend: "What the answers mean in the chart:",
+  milestone_pending_status: "Waiting for evaluation",
+  milestone_continue: "Continue evaluation",
+  milestone_continuing: "Continuing an evaluation started on {date}. Only the levels not evaluated yet are shown.",
+  milestone_done_levels: "Levels done:",
+  milestone_level_on: "{level} on {date}",
+  milestone_incomplete_result: "This evaluation is not complete. Levels left: {levels}",
+  milestone_pending_exists: "The child has an evaluation that is not complete yet; you can continue it instead of starting a new one:",
+  milestone_pending_item: "Started {date} — left: {levels}",
+  milestone_nothing_missing: "Every level of this evaluation is done.",
 };

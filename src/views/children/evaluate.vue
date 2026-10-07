@@ -25,7 +25,7 @@
               class="evaluation-status"
               :class="evalu.status == 1 ? 'is-finished' : 'is-pending'"
             >
-              {{ evalu.status == 1 ? $t("status_finished") : $t("status_under_evaluation") }}
+              {{ evalu.status == 1 ? $t("status_finished") : Number(evalu.type) === 2 ? $t("milestone_pending_status") : $t("status_under_evaluation") }}
             </span>
           </header>
 
@@ -55,6 +55,15 @@
               icon="pi pi-chart-bar"
               :label="$t('evaluation_results')"
               class="evaluation-results-btn"
+            />
+            <!-- A VB-MAPP evaluation waiting for levels: continue it with the missing levels. -->
+            <Button
+              v-if="!isSideProfile(evalu) && Number(evalu.type) === 2 && evalu.status == 0"
+              v-can="'milestone answer create'"
+              icon="pi pi-play"
+              :label="$t('milestone_continue')"
+              severity="warn"
+              @click="continueMilestone(evalu)"
             />
             <!-- Side profile rows are shared evaluation templates: deleting one would remove it for every child. -->
             <Button
@@ -291,6 +300,11 @@ export default {
       return {
         1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap",
       }[this.typeTone(evalu)] || "pi pi-file";
+    },
+
+    continueMilestone(evalu) {
+      const childId = evalu?.pivot?.child_id || evalu?.child_id || Number(localStorage.getItem("child_id"));
+      this.$router.push({ name: "milestone-evaluation", params: { id: childId }, query: { evaluation: evalu.id } });
     },
 
     go_evaluate(evalu) {

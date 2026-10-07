@@ -19,6 +19,7 @@ const LEVEL_COLORS = { 1: "#d64545", 2: "#3f9b3f", 3: "#4b4fc4" };
 const subtests = computed(() => props.level?.subtests ?? []);
 const rows = computed(() => Math.max(1, ...subtests.value.map((s) => s.questions?.length || 0)));
 const levelNumber = computed(() => Number(props.level?.level_age) || null);
+const rowOffset = computed(() => Math.max(0, (levelNumber.value ?? 1) - 1) * 5);
 const color = computed(() => LEVEL_COLORS[levelNumber.value] ?? "#135c65");
 
 // The tests (oldest first) whose score reached this half: 1 for the upper half, 0.5 for the lower one.
@@ -50,14 +51,14 @@ const legendItems = computed(() => {
     </header>
     <div class="mc-columns">
       <div class="mc-strip mc-axis">
-        <span v-for="row in rows" :key="row" class="mc-row-number">{{ row }}</span>
+        <span v-for="row in rows" :key="row" class="mc-row-number">{{ rowOffset + row }}</span>
       </div>
       <div v-for="(subtest, i) in subtests" :key="i" class="mc-column">
         <span class="mc-symbol" :class="{ 'is-empty': !subtest.subtest_symbol }">{{ subtest.subtest_symbol || " " }}</span>
         <span class="mc-domain">{{ subtest.subtest_name }}</span>
         <!-- Milestone 1 at the bottom: the strip grows upwards. -->
         <div class="mc-strip">
-          <span v-for="(question, q) in subtest.questions ?? []" :key="q" class="mc-box" :title="(q + 1) + ' - ' + (question.question ?? '')">
+          <span v-for="(question, q) in subtest.questions ?? []" :key="q" class="mc-box" :title="(rowOffset + q + 1) + ' - ' + (question.question ?? '')">
             <span v-for="threshold in [1, 0.5]" :key="threshold" class="mc-half">
               <i v-for="mark in reached(question, threshold)" :key="mark.n" :style="{ background: '#' + mark.color }" />
             </span>

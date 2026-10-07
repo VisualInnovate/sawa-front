@@ -189,6 +189,7 @@ export default {
       score: [],
       allquestion: [],
       childName: "",
+      childGender: "0",
       error: {},
       minDate: new Date(),
     };
@@ -198,7 +199,10 @@ export default {
     barriers() {
       return this.allquestion.map((barrier) => ({
         ...barrier,
-        options: [...(barrier.barriers_questiont ?? [])].sort((a, b) => Number(a.index) - Number(b.index)),
+        options: (barrier.barriers_questiont ?? []).map(question => ({
+          ...question,
+          title: String(question.wording?.[String(this.childGender) === '1' ? 'female' : 'male'] ?? question.title ?? '').replaceAll('{{name}}', this.childName.trim().split(/\s+/)[0] || ''),
+        })).sort((a, b) => Number(a.index) - Number(b.index)),
       }));
     },
     answeredCount() {
@@ -255,7 +259,9 @@ export default {
       axios
         .get("api/child")
         .then(({ data }) => {
-          this.childName = (data?.children ?? []).find((child) => child.id === this.answer.child_id)?.name ?? "";
+          const child = (data?.children ?? []).find((child) => Number(child.id) === this.answer.child_id);
+          this.childName = child?.name ?? "";
+          this.childGender = child?.gender ?? "0";
         })
         .catch(() => {});
     },

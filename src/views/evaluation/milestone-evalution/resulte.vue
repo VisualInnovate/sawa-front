@@ -22,6 +22,12 @@
       </div>
     </div>
 
+    <!-- Not every level of the evaluation is done yet: the missing ones can be completed later. -->
+    <div v-if="missingLevels.length" class="incomplete-note print:hidden">
+      <span><i class="pi pi-hourglass" aria-hidden="true"></i> {{ $t("milestone_incomplete_result", { levels: missingLevels.map(level => level.title).join("، ") }) }}</span>
+      <Button v-can="'milestone answer create'" icon="pi pi-play" :label="$t('milestone_continue')" severity="warn" @click="continueEvaluation" />
+    </div>
+
     <!-- Levels Grid -->
     <div class="space-y-12 print:space-y-6">
       <div v-for="(level, index) in mainSquares" :key="index" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border">
@@ -170,11 +176,17 @@ export default {
       eesa: { domain: null, results: [] },
       mainSquares: [],
       table_resulte: [],
+      // Level by level: done or still missing (api/milestone-answers/progress).
+      progress: null,
       loading: true,
       loadError: false,
     };
   },
   computed: {
+    missingLevels() {
+      const missing = (this.progress?.missing_level_ids ?? []).map(String);
+      return (this.progress?.levels ?? []).filter((level) => missing.includes(String(level.level_id)));
+    },
     unplacedEesa() {
       return this.eesa.results.filter((item) => !this.mainSquares.some((level, index) => this.eesaForLevel(level, index) === item));
     },
@@ -203,6 +215,9 @@ export default {
         })),
       };
     },
+    continueEvaluation() {
+      this.$router.push({ name: "milestone-evaluation", params: { id: this.$route.params.id }, query: { evaluation: this.$route.params.evla_id } });
+    },
     async getresulte() {
       this.loading = true;
       this.loadError = false;
@@ -212,6 +227,10 @@ export default {
         axios.get(`api/evaluations/report/${this.$route.params.evla_id}`),
         axios.get(`api/milestone-answers/eesa/result/${this.$route.params.evla_id}`),
       ]);
+      // Without the endpoint (older server) the page shows the results as before.
+      axios.get(`api/milestone-answers/progress/${this.$route.params.evla_id}`)
+        .then(({ data }) => { this.progress = data; })
+        .catch(() => {});
 
       // An evaluation without the EESA (or an older server) simply shows no form.
       if (eesaResult.status === "fulfilled") {
@@ -288,6 +307,8 @@ export default {
 </script>
 
 <style>
+.incomplete-note { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.5rem; padding: .85rem 1rem; border: 1px solid #fcd34d; border-radius: 12px; background: #fffbeb; color: #92400e; font-weight: 600; }
+.incomplete-note .pi { margin-inline-end: .35rem; }
 /* Base styles */
 th, td {
   text-align: center !important;
