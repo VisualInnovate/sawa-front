@@ -1,18 +1,16 @@
 <script setup>
-// "Type {{name}} ..." hint with a copy button, for forms whose text gets the child's name.
+// "Type {{name}} ..." hint with a copy button, for forms whose text gets the child's name (or another token).
 import { onBeforeUnmount, ref } from "vue";
 
-defineProps({ text: { type: String, required: true } });
-
-const token = "{{name}}";
+const props = defineProps({ text: { type: String, required: true }, token: { type: String, default: "{{name}}" } });
 const copied = ref(false);
 let timer;
 async function copy() {
   try {
-    await navigator.clipboard.writeText(token);
+    await navigator.clipboard.writeText(props.token);
   } catch {
     const input = document.createElement("textarea");
-    input.value = token;
+    input.value = props.token;
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy");

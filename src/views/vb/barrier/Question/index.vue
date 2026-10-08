@@ -236,6 +236,7 @@ const initFilters = () => {
         <Dialog v-model:visible="createdialog" :style="{ width: '650px', maxWidth: '95vw' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
 <NameTokenHint :text="$t('barrier_wording.name_hint')" />
+<NameTokenHint token="{{example}}" :text="$t('barrier_wording.example_hint')" />
                 <GenderTextField v-model="levels.wording" :label="$t('barrier_wording.paragraph')" inputId="barrier-paragraph" :showErrors="!!error?.wording || !!error?.['wording.male'] || !!error?.['wording.female']" />
                 <small v-for="key in ['title', 'wording', 'wording.male', 'wording.female']" :key="key" class="text-red-500">{{ error?.[key]?.[0] }}</small>
             </div>
@@ -257,6 +258,7 @@ const initFilters = () => {
         <Dialog v-model:visible="updatedialog" :style="{ width: '650px', maxWidth: '95vw' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
 <NameTokenHint :text="$t('barrier_wording.name_hint')" />
+<NameTokenHint token="{{example}}" :text="$t('barrier_wording.example_hint')" />
                 <GenderTextField v-model="levels.wording" :label="$t('barrier_wording.paragraph')" inputId="barrier-paragraph" :showErrors="!!error?.wording || !!error?.['wording.male'] || !!error?.['wording.female']" />
                 <small v-for="key in ['title', 'wording', 'wording.male', 'wording.female']" :key="key" class="text-red-500">{{ error?.[key]?.[0] }}</small>
             </div>
