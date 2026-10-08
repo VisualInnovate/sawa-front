@@ -131,6 +131,12 @@
           </span>
         </header>
 
+        <!-- Some barriers take an example: typed above the answers, it shows at once in parentheses after «مثال» in each answer. -->
+        <div v-if="takesExample(ind)" class="be-example">
+          <label :for="'be-example-' + ind">{{ $t("barrier_ui.example") }}</label>
+          <InputText :id="'be-example-' + ind" v-model="examples[ind]" :placeholder="$t('barrier_ui.example_hint')" fluid />
+        </div>
+
         <div class="be-options" role="radiogroup" :aria-label="barrier.title">
           <label
             v-for="question in barrier.options"
@@ -148,16 +154,10 @@
               @change="getscore(ind, question.id, question.subtest_id, question.index)"
             />
             <span class="be-option-score">{{ question.index }}</span>
-            <span class="be-option-text">{{ question.title }}</span>
+            <span class="be-option-text">{{ takesExample(ind) ? withExample(question.title, examples[ind]) : question.title }}</span>
           </label>
         </div>
 
-        <!-- Some barriers take an example: it is written in parentheses after «مثال» in the chosen answer. -->
-        <div v-if="takesExample(ind) && selected[ind] !== undefined" class="be-example">
-          <label :for="'be-example-' + ind">{{ $t("barrier_ui.example") }}</label>
-          <InputText :id="'be-example-' + ind" v-model="examples[ind]" :placeholder="$t('barrier_ui.example_hint')" fluid />
-          <p v-if="(examples[ind] || '').trim()" class="be-example-preview">{{ withExample(chosenText(barrier, ind), examples[ind]) }}</p>
-        </div>
       </section>
 
       <footer class="be-footer">
@@ -237,9 +237,6 @@ export default {
     withExample,
     takesExample(ind) {
       return EXAMPLE_POSITIONS.includes(ind + 1);
-    },
-    chosenText(barrier, ind) {
-      return barrier.options.find((option) => option.index === this.selected[ind])?.title ?? "";
     },
     createevalutae() {
       this.starting = true;
@@ -602,9 +599,9 @@ export default {
   font-size: 0.82rem;
   white-space: nowrap;
 }
-.be-example { display: grid; gap: .4rem; margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed var(--sawa-border); }
+.be-example { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .4rem .75rem; margin-bottom: .9rem; padding-bottom: .9rem; border-bottom: 1px dashed var(--sawa-border); }
+@media (max-width: 640px) { .be-example { grid-template-columns: 1fr; } }
 .be-example label { font-weight: 700; font-size: .9rem; }
-.be-example-preview { margin: 0; padding: .5rem .75rem; border-radius: 8px; background: #f1f5f9; color: #334155; font-size: .9rem; }
 .be-options {
   display: grid;
   gap: 0.5rem;
