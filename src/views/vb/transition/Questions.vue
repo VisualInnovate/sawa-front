@@ -1,10 +1,12 @@
 <script setup>
-// Transition questions: an area (title), its place in the form and five answers (scores 1-5 in order).
-// The automatic ones (answered from Milestones / Barriers) are fixed: shown, never edited or deleted.
-import { ref, onMounted } from "vue";
+// Transition questions: an area (title), its place in the form and five answers (scores 1-5 in order); the title
+// and each answer worded for a boy and a girl ({{name}} = the child's first name). The automatic ones (answered from Milestones / Barriers) are fixed: shown, never edited or deleted.
+import { computed, ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import axios from "axios";
+import GenderTextField from "../../../components/GenderTextField.vue";
+import NameTokenHint from "../../../components/NameTokenHint.vue";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -18,7 +20,16 @@ const form = ref(null);
 const errors = ref({});
 const deleteTarget = ref(null);
 
-const blank = () => ({ id: null, title: "", display_order: nextOrder(), answers: ["", "", "", "", ""] });
+const titleHasError = computed(() => !!(errors.value.wording || errors.value["wording.male"] || errors.value["wording.female"]));
+const titleError = computed(() => (errors.value.wording || errors.value["wording.male"] || errors.value["wording.female"])?.[0]);
+const answerHasError = (i) => !!(errors.value[`answers.${i}`] || errors.value[`answers.${i}.male`] || errors.value[`answers.${i}.female`]);
+const answersError = computed(() => (errors.value.answers
+  || Object.entries(errors.value).find(([key]) => key.startsWith("answers."))?.[1])?.[0]);
+
+const blankAnswer = () => ({ male: "", female: "" });
+const blank = () => ({ id: null, title: blankAnswer(), display_order: nextOrder(), answers: [1, 2, 3, 4, 5].map(blankAnswer) });
+// A title or answer saved before the boy/girl wording has only its text: both start from it.
+const answerWording = (answer) => ({ male: answer?.wording?.male ?? answer?.text ?? "", female: answer?.wording?.female ?? answer?.text ?? "" });
 const nextOrder = () => Math.max(0, ...questions.value.map((q) => Number(q.display_order) || 0)) + 1;
 
 async function load() {
@@ -41,9 +52,9 @@ function openEdit(question) {
   errors.value = {};
   form.value = {
     id: question.id,
-    title: question.title,
+    title: { male: question.wording?.male ?? question.title ?? "", female: question.wording?.female ?? question.title ?? "" },
     display_order: question.display_order,
-    answers: [1, 2, 3, 4, 5].map((score) => question.answers?.find((answer) => answer.score === score)?.text ?? ""),
+    answers: [1, 2, 3, 4, 5].map((score) => answerWording(question.answers?.find((answer) => answer.score === score))),
   };
   dialog.value = true;
 }
@@ -51,7 +62,7 @@ function openEdit(question) {
 async function save() {
   saving.value = true;
   errors.value = {};
-  const payload = { title: form.value.title, display_order: form.value.display_order, answers: form.value.answers };
+  const payload = { wording: form.value.title, display_order: form.value.display_order, answers: form.value.answers };
   try {
     if (form.value.id) await axios.put(`/api/transition-questions/${form.value.id}`, payload);
     else await axios.post("/api/transition-questions", payload);
@@ -100,7 +111,11 @@ onMounted(load);
       <Column field="display_order" :header="$t('transition.display_order')" style="width: 7rem" />
       <Column field="title" :header="$t('transition.question_title')">
         <template #body="{ data }">
-          <span class="tq-title">{{ data.title }}</span>
+          <span v-if="data.wording" class="tq-title tq-wording">
+            <span><em>{{ $t("male") }}:</em> {{ data.wording.male }}</span>
+            <span><em>{{ $t("female") }}:</em> {{ data.wording.female }}</span>
+          </span>
+          <span v-else class="tq-title">{{ data.title }}</span>
           <Tag v-if="data.is_auto" class="tq-auto" icon="pi pi-lock" severity="secondary" :value="$t('transition.auto')" />
         </template>
       </Column>
@@ -116,18 +131,26 @@ onMounted(load);
       </Column>
       <template #expansion="{ data }">
         <ol class="tq-answers">
-          <li v-for="answer in data.answers" :key="answer.id"><b>{{ answer.score }}</b> {{ answer.text }}</li>
+          <li v-for="answer in data.answers" :key="answer.id">
+            <b>{{ answer.score }}</b>
+            <span v-if="answer.wording" class="tq-wording">
+              <span><em>{{ $t("male") }}:</em> {{ answer.wording.male }}</span>
+              <span><em>{{ $t("female") }}:</em> {{ answer.wording.female }}</span>
+            </span>
+            <span v-else>{{ answer.text }}</span>
+          </li>
         </ol>
       </template>
     </DataTable>
 
     <Dialog v-model:visible="dialog" :header="form?.id ? $t('transition.edit') : $t('transition.add')" modal :style="{ width: '640px' }" :breakpoints="{ '700px': '95vw' }">
       <form v-if="form" class="tq-form" @submit.prevent="save">
+        <NameTokenHint :text="$t('barrier_wording.name_hint')" />
         <div class="tq-row">
           <div class="tq-field tq-grow">
-            <label for="tq-title">{{ $t("transition.question_title") }}</label>
-            <InputText id="tq-title" v-model="form.title" required />
-            <small v-if="errors.title" class="tq-error">{{ errors.title[0] }}</small>
+            <GenderTextField v-model="form.title" :label="$t('transition.question_title')" inputId="tq-title" :rows="1"
+              :showErrors="titleHasError" />
+            <small v-if="titleError" class="tq-error">{{ titleError }}</small>
           </div>
           <div class="tq-field tq-order">
             <label for="tq-order">{{ $t("transition.display_order") }}</label>
@@ -140,10 +163,10 @@ onMounted(load);
           <small class="tq-hint">{{ $t("transition.answers_hint") }}</small>
           <div v-for="(answer, i) in form.answers" :key="i" class="tq-answer">
             <span class="tq-score">{{ i + 1 }}</span>
-            <Textarea v-model="form.answers[i]" rows="2" autoResize required :aria-label="$t('transition.answer_n', { n: i + 1 })"
-              :placeholder="$t('transition.answer_n', { n: i + 1 })" />
+            <GenderTextField v-model="form.answers[i]" class="tq-answer-text" :label="$t('transition.answer_n', { n: i + 1 })"
+              :inputId="'tq-answer-' + i" :rows="2" :showErrors="answerHasError(i)" />
           </div>
-          <small v-if="errors.answers || errors['answers.0']" class="tq-error">{{ (errors.answers || errors['answers.0'])[0] }}</small>
+          <small v-if="answersError" class="tq-error">{{ answersError }}</small>
         </fieldset>
         <div class="tq-actions">
           <Button type="button" :label="$t('cancel')" severity="secondary" variant="text" @click="dialog = false" />
@@ -178,7 +201,9 @@ onMounted(load);
 .tq-grow { flex: 1 1 16rem; }
 .tq-order { width: 8rem; }
 .tq-answer { display: flex; align-items: flex-start; gap: .5rem; }
-.tq-answer :deep(textarea) { flex: 1; width: 100%; }
+.tq-answer-text { flex: 1; min-width: 0; }
+.tq-wording { display: inline-grid; gap: .2rem; vertical-align: top; }
+.tq-wording em { font-style: normal; color: var(--sawa-muted); }
 .tq-score { display: grid; place-items: center; flex: none; width: 2rem; height: 2.4rem; border-radius: 8px; background: var(--sawa-primary, #135c65); color: #fff; font-weight: 800; }
 .tq-error { color: #dc2626; }
 .tq-actions { display: flex; justify-content: flex-end; gap: .5rem; }

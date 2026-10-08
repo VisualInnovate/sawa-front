@@ -8,7 +8,7 @@
 //              otherwise free text), one VB-MAPP form page per chosen test (its tables, a row per level, and its own
 //              level charts) with the newest test's strengths/weaknesses (read only), and the other types' charts
 //              (barriers with their test tables). The behaviour-problems table belongs to a behavioural evaluation.
-//   plan     = the newest chosen VB-MAPP test's weaknesses, each with its goal, edited here and saved on the server.
+//   plan     = the goals written for the newest chosen VB-MAPP test's weaknesses (only the goals are shown), edited here and saved on the server.
 //   tracking = the goals of the chosen tests' saved plans, as the centre's tracking form: one table per general goal,
 //              the days each goal was tried (prop) and the trial columns; saving (or printing) records today.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
@@ -369,7 +369,9 @@ async function savePlan() {
   plan.value.saving = true;
   plan.value.error = false;
   try {
-    const goals = plan.value.goals.filter((goal) => goal.weakness.trim()).map(({ key, code, attempts, cells, achieved_at, ...goal }) => goal);
+    // The plan shows goals only; a goal added here has no weakness, so the server's required weakness takes the goal text.
+    const goals = plan.value.goals.filter((goal) => (goal.goal || goal.weakness).trim())
+      .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness.trim() ? goal.weakness : goal.goal }));
     const { data } = await axios.put(`api/reports/plans/${plan.value.evaluationId}`, { goals });
     plan.value.goals = data.plan.goals.map(planGoal);
     plan.value.saved = true;
@@ -715,7 +717,7 @@ function back() {
           </section>
           </template>
 
-          <!-- Plan: the weaknesses with their goals, edited here and saved on the server; each level its own page -->
+          <!-- Plan: the goals only (weaknesses are not shown), edited here and saved on the server; each level its own page -->
           <template v-if="showPlan && plan">
           <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')" class="rx-page">
             <header class="rx-head">
@@ -728,7 +730,6 @@ function back() {
               <thead>
                 <tr>
                   <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
-                  <th>{{ $t("ereport.weaknesses") }}</th>
                   <th>{{ $t("ereport.plan_goal") }}</th>
                   <th class="rx-plan-control-col rx-screen-only" />
                 </tr>
@@ -736,18 +737,17 @@ function back() {
               <tbody>
                 <template v-for="group in level.groups" :key="group.key">
                   <tr class="rx-plan-group">
-                    <th colspan="4">{{ group.domain }}<template v-if="group.symbol"> ({{ group.symbol }})</template><template v-if="group.general_goal"> — {{ group.general_goal }}</template></th>
+                    <th colspan="3">{{ group.domain }}<template v-if="group.symbol"> ({{ group.symbol }})</template><template v-if="group.general_goal"> — {{ group.general_goal }}</template></th>
                   </tr>
                   <tr v-for="(goal, g) in group.goals" :key="goal.key">
                     <td class="rx-sum-num ltr">{{ goalCode(group, g) }}</td>
-                    <td><EditableText v-model="goal.weakness" block multiline :placeholder="$t('ereport.point_text')" @update:modelValue="touchPlan" /></td>
                     <td><EditableText v-model="goal.goal" block multiline :placeholder="$t('ereport.plan_goal')" @update:modelValue="touchPlan" /></td>
                     <td class="rx-plan-control-col rx-screen-only">
                       <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')" @click="removePlanGoal(goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
                     </td>
                   </tr>
                   <tr class="rx-screen-only">
-                    <td colspan="4"><button type="button" class="rx-plan-control rx-add-point" @click="addPlanGoal(group)"><i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}</button></td>
+                    <td colspan="3"><button type="button" class="rx-plan-control rx-add-point" @click="addPlanGoal(group)"><i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}</button></td>
                   </tr>
                 </template>
               </tbody>
