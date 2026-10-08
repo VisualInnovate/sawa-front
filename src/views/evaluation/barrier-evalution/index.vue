@@ -131,7 +131,7 @@
           </span>
         </header>
 
-        <!-- Some barriers take an example: typed above the answers, it shows at once in parentheses after «مثال» in each answer. -->
+        <!-- Some barriers take an example: typed above the answers, it shows at once in parentheses in the chosen answer only. -->
         <div v-if="takesExample(ind)" class="be-example">
           <label :for="'be-example-' + ind">{{ $t("barrier_ui.example") }}</label>
           <InputText :id="'be-example-' + ind" v-model="examples[ind]" :placeholder="$t('barrier_ui.example_hint')" fluid />
@@ -154,7 +154,7 @@
               @change="getscore(ind, question.id, question.subtest_id, question.index)"
             />
             <span class="be-option-score">{{ question.index }}</span>
-            <span class="be-option-text">{{ takesExample(ind) ? withExample(question.title, examples[ind]) : question.title }}</span>
+            <span class="be-option-text">{{ takesExample(ind) && selected[ind] === question.index ? withExample(question.title, examples[ind]) : question.title }}</span>
           </label>
         </div>
 
@@ -176,13 +176,17 @@ import axios from "axios";
 import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
 import { formatChildAge, toDateOnly } from "../../../utils/childAge";
 
-// The barriers (by their number) whose answer takes the evaluator's example (as the backend's BarrierAnswers).
+// As the backend's BarrierAnswers: the barriers (by their number) that take the evaluator's example, besides any
+// barrier whose answers carry the {{example}} token.
 const EXAMPLE_POSITIONS = [1, 19, 21, 24];
+const EXAMPLE_TOKEN = "{{example}}";
 
-// The example in parentheses right after «مثال» (replacing an empty pair there), or «مثال (…)» added at the end.
+// The example in parentheses in place of {{example}}; in an answer without the token (written before it), right
+// after «مثال» (replacing an empty pair there) or «مثال (…)» added at the end. No example: the text as it is.
 function withExample(text, example) {
   const value = String(example ?? "").trim();
   if (!value) return text;
+  if (String(text).includes(EXAMPLE_TOKEN)) return String(text).replaceAll(EXAMPLE_TOKEN, `(${value})`);
   if (String(text).includes("مثال")) return String(text).replace(/مثال(\s*\([\s._…-]*\))?/u, `مثال (${value})`);
   return `${String(text).trimEnd()} مثال (${value})`;
 }
@@ -236,7 +240,8 @@ export default {
     formatChildAge,
     withExample,
     takesExample(ind) {
-      return EXAMPLE_POSITIONS.includes(ind + 1);
+      return EXAMPLE_POSITIONS.includes(ind + 1)
+        || !!this.barriers[ind]?.options?.some((option) => String(option.title ?? "").includes(EXAMPLE_TOKEN));
     },
     createevalutae() {
       this.starting = true;
