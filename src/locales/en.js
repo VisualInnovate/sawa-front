@@ -1,5 +1,5 @@
 export default {
-  barrier_wording: { paragraph: "Paragraph", name_hint: "in the paragraph to display the child's first name; the wording follows the child's gender.", example_hint: "where the example goes in the paragraph: during the evaluation the chosen answer shows the evaluator's example there in parentheses." },
+  barrier_wording: { paragraph: "Paragraph", name_hint: "in the paragraph to display the child's first name; the wording follows the child's gender.", example_hint: "where the example goes in the paragraph: during the evaluation the answers show the evaluator's example there in parentheses." },
   change_password: "Change password",
   current_password: "Current password",
   change_own_password_hint: "You can change your account password after confirming the current password.",
@@ -1520,7 +1520,7 @@ export default {
     answer: "Answer",
     answer_number: "Answer number",
     example: "Example (optional)",
-    example_hint: "Write the example; it shows in parentheses in the chosen answer",
+    example_hint: "Write the example; it shows in parentheses in the answers",
     title: "Barriers evaluation",
     answered: "answered",
     details: "Evaluation details",

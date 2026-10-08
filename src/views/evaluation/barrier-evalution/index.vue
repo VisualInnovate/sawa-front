@@ -131,7 +131,7 @@
           </span>
         </header>
 
-        <!-- Some barriers take an example: typed above the answers, it shows at once in parentheses in the chosen answer only. -->
+        <!-- Some barriers take an example: typed above the answers, it shows at once in parentheses in every answer. -->
         <div v-if="takesExample(ind)" class="be-example">
           <label :for="'be-example-' + ind">{{ $t("barrier_ui.example") }}</label>
           <InputText :id="'be-example-' + ind" v-model="examples[ind]" :placeholder="$t('barrier_ui.example_hint')" fluid />
@@ -154,7 +154,7 @@
               @change="getscore(ind, question.id, question.subtest_id, question.index)"
             />
             <span class="be-option-score">{{ question.index }}</span>
-            <span class="be-option-text">{{ takesExample(ind) && selected[ind] === question.index ? withExample(question.title, examples[ind]) : question.title }}</span>
+            <span class="be-option-text">{{ takesExample(ind) ? withExample(question.title, examples[ind]) : question.title }}</span>
           </label>
         </div>
 
