@@ -176,19 +176,14 @@ import axios from "axios";
 import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
 import { formatChildAge, toDateOnly } from "../../../utils/childAge";
 
-// As the backend's BarrierAnswers: the barriers (by their number) that take the evaluator's example, besides any
-// barrier whose answers carry the {{example}} token.
-const EXAMPLE_POSITIONS = [1, 19, 21, 24];
+// As the backend's BarrierAnswers: a barrier whose answers carry the {{example}} token takes the evaluator's example.
 const EXAMPLE_TOKEN = "{{example}}";
 
-// The example in parentheses in place of {{example}}; in an answer without the token (written before it), right
-// after «مثال» (replacing an empty pair there) or «مثال (…)» added at the end. No example: the text as it is.
+// «(مثال: …)» in place of {{example}}; an answer without the token is left as it is, and so is any answer while
+// no example is written.
 function withExample(text, example) {
   const value = String(example ?? "").trim();
-  if (!value) return text;
-  if (String(text).includes(EXAMPLE_TOKEN)) return String(text).replaceAll(EXAMPLE_TOKEN, `(${value})`);
-  if (String(text).includes("مثال")) return String(text).replace(/مثال(\s*\([\s._…-]*\))?/u, `مثال (${value})`);
-  return `${String(text).trimEnd()} مثال (${value})`;
+  return value ? String(text).replaceAll(EXAMPLE_TOKEN, `(مثال: ${value})`) : text;
 }
 
 // The colors every evaluation screen offers (VB-MAPP, ABLLS, Carolina use the same ones).
@@ -208,7 +203,7 @@ export default {
       answer: { color: COLOR_OPTIONS[0], child_id: parseInt(this.$route.params.id) || parseInt(localStorage.getItem("child_id")) || null },
       // barrier position -> the chosen option's score
       selected: {},
-      // barrier position -> the evaluator's example (only the barriers in EXAMPLE_POSITIONS)
+      // barrier position -> the evaluator's example (only the barriers whose answers carry {{example}})
       examples: {},
       score: [],
       allquestion: [],
@@ -240,8 +235,7 @@ export default {
     formatChildAge,
     withExample,
     takesExample(ind) {
-      return EXAMPLE_POSITIONS.includes(ind + 1)
-        || !!this.barriers[ind]?.options?.some((option) => String(option.title ?? "").includes(EXAMPLE_TOKEN));
+      return !!this.barriers[ind]?.options?.some((option) => String(option.title ?? "").includes(EXAMPLE_TOKEN));
     },
     createevalutae() {
       this.starting = true;
