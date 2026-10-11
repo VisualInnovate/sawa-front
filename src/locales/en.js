@@ -431,6 +431,7 @@ export default {
   calendar_no_employees: "No therapists are available for this evaluation.",
   calendar_no_slots: "No appointments are available for this therapist.",
   calendar_select_slot: "Please select an available slot for the chosen therapist before confirming.",
+  calendar_tap_hint: "Tap an available (green) day, then the time you want to book.",
   calendar_past_slot: "Past appointment times cannot be booked. Please choose an upcoming slot.",
   student_program_choose_slots: "Choose session times",
   student_program_choose_slots_hint: "Select a time to add it, or select it again to remove it.",

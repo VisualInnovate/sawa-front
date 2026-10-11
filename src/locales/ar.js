@@ -465,6 +465,7 @@ export default {
   calendar_no_employees: "لا يوجد معالجون متاحون لهذا التقييم.",
   calendar_no_slots: "لا توجد مواعيد متاحة لهذا المعالج.",
   calendar_select_slot: "يرجى اختيار موعد متاح للمعالج المحدد قبل التأكيد.",
+  calendar_tap_hint: "اضغط على يوم متاح (أخضر)، ثم على الوقت المناسب لحجز الموعد.",
   calendar_past_slot: "لا يمكن حجز موعد انتهى وقته. يرجى اختيار موعد قادم.",
   student_program_choose_slots: "اختر مواعيد الجلسات",
   student_program_choose_slots_hint: "اضغط على الموعد لإضافته أو إلغاء تحديده.",

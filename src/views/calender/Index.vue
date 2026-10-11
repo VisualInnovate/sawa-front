@@ -1,8 +1,8 @@
 <template>
-  <div class="sawa-card p-[1%] bg-slate-50">
+  <div class="sawa-card calendar-page p-[1%] bg-slate-50">
     <Toolbar>
       <template #start>
-        <div class="flex">
+        <div class="calendar-filters">
           <Select
             @update:model-value="fetchEmployees($event)"
             required
@@ -11,7 +11,6 @@
             option-value="id"
             :options="evaluate_types"
             optionLabel="name"
-            class="mx-2"
           />
           <Select
             @update:model-value="getTimes($event)"
@@ -25,10 +24,9 @@
             filter
             :options="employees"
             optionLabel="name"
-            class="mx-2"
           />
           <Select
-            class="invisible"
+            class="hidden"
             :loading="!event.evaluation_type"
             disabled
             @update:model-value="getTimes"
@@ -60,6 +58,7 @@
       <span v-else-if="!event.employee_id">{{ $t('select_evaluation_employee') }}</span>
       <span v-else-if="!avalible_day.length">{{ $t('calendar_no_slots') }}</span>
     </p>
+    <p v-if="isMobile && event.employee_id && avalible_day.length" class="calendar-hint">{{ $t('calendar_tap_hint') }}</p>
     <FullCalendar
       :options="opts"
       ref="fullCalendar"
@@ -70,9 +69,14 @@
       modal
       :header="$t('submit')"
       :style="{ width: '40vw' }"
+      :breakpoints="{ '960px': '75vw', '640px': '95vw' }"
     >
       <form @submit.prevent="create" class="">
-        <p>{{ $t('employee_name') }}: {{ employees.find(employee => employee.id === event.employee_id)?.name }}</p>
+        <div v-if="opts.event" class="slot-summary">
+          <i class="pi pi-calendar" />
+          <span>{{ slotLabel }}</span>
+        </div>
+        <p class="dialog-line">{{ $t('employee_name') }}: {{ employees.find(employee => employee.id === event.employee_id)?.name }}</p>
         <div class="flex flex-column gap-1">
           <label class="text-start" for="evaluation-notes">{{ $t("notes") }} ({{ $t("optional") }})</label>
           <Textarea id="evaluation-notes" v-model="event.notes" rows="3" autoResize maxlength="2000" />
@@ -101,7 +105,7 @@
             :loading="saving"
             :disabled="!event.employee_id || calendarLoading || saving || !opts.event"
             @click="submitted = true"
-            class="m-auto w-[50%] my-4"
+            class="m-auto w-full sm:w-[50%] my-4"
             :label="$t('submit')"></Button>
         </div>
       </form>
@@ -112,6 +116,7 @@
       modal
       :header="modal_text"
       :style="{ width: '40vw' }"
+      :breakpoints="{ '960px': '75vw', '640px': '95vw' }"
     >
       <form>
         <h2 class="font-bold text-xl text-center py-1">{{ event.title }}</h2>
@@ -128,9 +133,10 @@
       modal
       :header="modal_text"
       :style="{ width: '40vw' }"
+      :breakpoints="{ '960px': '75vw', '640px': '95vw' }"
     >
       <form>
-        <p>{{ $t("no_open_positions") }}</p>
+        <p class="dialog-line">{{ $t("no_open_positions") }}</p>
       </form>
     </Dialog>
   </div>
@@ -164,6 +170,8 @@ export default {
     return {
       filter: {},
       bookingId: Number(this.$route.query.bookingId) || null,
+      isMobile: false,
+      mobileQuery: null,
       required: null,
       not_find: false,
       childreen: [],
@@ -225,6 +233,8 @@ export default {
         events: [],
         event: null,
         validRange: { start: new Date() },
+        // On a phone a tap books (dateClick); a short press also selects.
+        selectLongPressDelay: 300,
         headerToolbar: {
           left: "title",
           center: "prev next today",
@@ -233,14 +243,28 @@ export default {
         selectAllow: this.canSelectSlot.bind(this),
 
         eventClick: this.handleEventClick.bind(this),
-        dateClick: this.handleDateClick,
+        dateClick: this.handleDateClick.bind(this),
         datesSet: this.handleDatesSet.bind(this),
         select: this.handleSelect.bind(this),
         dayCellClassNames: () => [],
       },
     };
   },
+  computed: {
+    slotLabel() {
+      const slot = this.opts.event;
+      if (!slot) return '';
+      return `${moment(slot.start).format('YYYY-MM-DD')} · ${this.$t('from')} ${moment(slot.start).format('HH:mm')} ${this.$t('to')} ${moment(slot.end).format('HH:mm')}`;
+    },
+  },
   methods: {
+    applyLayout() {
+      // Phones get a shorter toolbar and fewer views.
+      this.isMobile = Boolean(this.mobileQuery?.matches);
+      this.opts.headerToolbar = this.isMobile
+        ? { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridDay' }
+        : { left: 'title', center: 'prev next today', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' };
+    },
     // The consultation this calendar books for (?bookingId=), and the next evaluation it still needs.
     async loadRequired({ selectNext = true } = {}) {
       try {
@@ -495,8 +519,19 @@ export default {
       this.updateevent = true;
     },
     handleDateClick(info) {
-      if (info.view.type !== 'dayGridMonth' || !this.canSelectSlot({ ...info, start: info.date, allDay: true })) return;
-      this.$refs.fullCalendar.getApi().changeView('timeGridDay', info.date);
+      if (info.view.type === 'dayGridMonth') {
+        if (!this.canSelectSlot({ ...info, start: info.date, allDay: true })) return;
+        this.$refs.fullCalendar.getApi().changeView('timeGridDay', info.date);
+        return;
+      }
+      // A tap on a free time books the half hour starting there (on touch screens a tap never fires `select`).
+      if (info.allDay || this.visible) return;
+      const slot = { start: info.date, end: moment(info.date).add(30, 'minutes').toDate(), allDay: false };
+      if (!this.canSelectSlot(slot)) {
+        this.$toast.add({ severity: 'warn', summary: this.$t('error'), detail: this.$t('calendar_select_slot'), life: 3000 });
+        return;
+      }
+      this.handleSelect(slot);
     },
     handleSelect(event) {
       if (!this.canSelectSlot(event)) return;
@@ -552,12 +587,18 @@ export default {
     },
   },
   mounted() {
+    this.mobileQuery = window.matchMedia('(max-width: 640px)');
+    this.mobileQuery.addEventListener?.('change', this.applyLayout);
+    this.applyLayout();
     this.getClidreen();
     if (this.bookingId) this.loadRequired().then(() => { if (!this.employees.length && !this.employeesLoading) this.fetchEmployees(); });
     else this.fetchEmployees();
     this.doctorshow = localStorage.getItem("type");
     this.opts.locale = localStorage.appLang === "en" ? null : arLocale;
     this.event.child_id = parseInt(this.$route.params.id);
+  },
+  beforeUnmount() {
+    this.mobileQuery?.removeEventListener?.('change', this.applyLayout);
   },
 };
 </script>
@@ -595,10 +636,78 @@ input {
   padding: 8px;
   border: 2px solid #8284a8;
 }
-p {
+.calendar-status {
   color: red;
   font-size: 20px;
   text-align: center;
   margin: 5px 0;
+}
+.calendar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.calendar-filters > :deep(.p-select:not(.hidden)) {
+  min-width: 12rem;
+}
+.calendar-hint {
+  text-align: center;
+  color: #135c65;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem;
+}
+.slot-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-weight: 600;
+}
+.dialog-line {
+  margin: 0.25rem 0;
+}
+@media (max-width: 640px) {
+  .calendar-page {
+    padding: 0.5rem;
+  }
+  .calendar-page :deep(.p-toolbar) {
+    padding: 0.5rem;
+  }
+  .calendar-page :deep(.p-toolbar-start),
+  .calendar-filters,
+  .calendar-filters > :deep(.p-select:not(.hidden)) {
+    width: 100%;
+    min-width: 0;
+  }
+  .calendar-status {
+    font-size: 15px;
+  }
+  .calendar-page :deep(.fc .fc-toolbar) {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .calendar-page :deep(.fc .fc-toolbar-title) {
+    font-size: 1.05rem;
+  }
+  .calendar-page :deep(.fc .fc-button) {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.8rem;
+  }
+  .calendar-page :deep(.fc .fc-col-header-cell-cushion),
+  .calendar-page :deep(.fc .fc-daygrid-day-number) {
+    font-size: 0.75rem;
+    padding: 2px;
+  }
+  .calendar-page :deep(.fc .fc-timegrid-slot) {
+    height: 2.75rem;
+  }
+  .calendar-page :deep(.fc .fc-daygrid-event) {
+    font-size: 0.65rem;
+  }
 }
 </style>
