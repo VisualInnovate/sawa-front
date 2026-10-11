@@ -83,7 +83,8 @@ async function remove() {
   const question = deleteTarget.value;
   deleteTarget.value = null;
   try {
-    await axios.delete(`/api/transition-questions/${question.id}`);
+    // An answered question goes with its answers in those evaluations (the backend asks for `with_results`).
+    await axios.delete(`/api/transition-questions/${question.id}`, { params: question.results_count ? { with_results: 1 } : {} });
     toast.add({ severity: "success", summary: t("success_message"), detail: t("successful"), life: 3000 });
     load();
   } catch (error) {
@@ -177,6 +178,9 @@ onMounted(load);
 
     <Dialog :visible="!!deleteTarget" :header="$t('submit')" modal :style="{ width: '420px' }" @update:visible="deleteTarget = null">
       <p>{{ $t("transition.delete_confirm") }} <b>{{ deleteTarget?.title }}</b></p>
+      <Message v-if="deleteTarget?.results_count" severity="warn" :closable="false">
+        {{ $t("transition.delete_with_results", { count: deleteTarget.results_count }) }}
+      </Message>
       <template #footer>
         <Button :label="$t('no')" icon="pi pi-times" variant="text" severity="secondary" @click="deleteTarget = null" />
         <Button :label="$t('yes')" icon="pi pi-check" severity="danger" @click="remove" />

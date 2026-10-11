@@ -1616,6 +1616,7 @@ export default {
     add: "Add question",
     edit: "Edit question",
     delete_confirm: "Delete this question?",
+    delete_with_results: "This question is answered in {count} evaluation(s). It will be deleted with its answers there; their other answers stay.",
     no_questions: "No questions yet.",
     details: "Evaluation details",
     details_hint: "Pick the date and the color, then start.",
