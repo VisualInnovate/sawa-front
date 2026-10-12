@@ -1671,11 +1671,11 @@ export default {
     practice_text: "Practice",
     gender_tabs: "Item wording by gender",
     name_hint_after: "in any field to put the child's name there; the boy's or girl's wording is shown by the child's gender.",
-    details: "Evaluation details",
-    details_hint: "Pick the evaluation date and color, then start the evaluation.",
     answered_of: "{n} of {total} answered",
     no_items: "There are no Carolina items yet.",
     result_title: "Carolina evaluation result",
     no_results: "This evaluation has no answers.",
+    choose_sections: "Sections to evaluate",
+    choose_sections_hint: "Choose the main sections this evaluation covers.",
   },
 };
