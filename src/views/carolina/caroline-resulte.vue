@@ -1,6 +1,6 @@
 <script setup>
-// One Carolina evaluation's results (/carolina-resulte/:id): per general goal, the age, symbol, strength,
-// response and note of each item.
+// One Carolina evaluation's results (/carolina-resulte/:id): per general goal, the age range, symbol, skill and
+// response of each item.
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
@@ -61,13 +61,12 @@ watch(() => route.params.id, (value, before) => {
       <div v-for="(goal, g) in section.goals" :key="g" class="cr-table-wrap">
         <table class="cr-table">
           <thead>
-            <tr><th colspan="5" class="cr-goal">{{ $t("carolina_ui.general_goal") }}: {{ goal.category }}</th></tr>
+            <tr><th colspan="4" class="cr-goal">{{ $t("carolina_ui.general_goal") }}: {{ goal.category }}</th></tr>
             <tr>
               <th>{{ $t("age_range") }}</th>
               <th>{{ $t("carolina_ui.symbol") }}</th>
               <th>{{ $t("carolina_ui.skill") }}</th>
               <th>{{ $t("carolina_ui.response") }}</th>
-              <th>{{ $t("notes") }}</th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +75,6 @@ watch(() => route.params.id, (value, before) => {
               <td class="cr-center" dir="ltr">{{ row.symbol }}</td>
               <td>{{ row.skill }}</td>
               <td class="cr-center cr-response">{{ row.response }}</td>
-              <td>{{ row.note }}</td>
             </tr>
           </tbody>
         </table>

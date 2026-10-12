@@ -1,8 +1,8 @@
-// The five wordings of a Carolina item (boy's and girl's); `label` is an i18n key. `skill` is the strength
-// the evaluator reads beside the symbol.
+// The five wordings of a Carolina item (boy's and girl's); `label` is an i18n key. `skill` is what the
+// evaluator reads beside the symbol.
 export const carolinaFields = [
-  { key: 'general_goal', label: 'carolina_ui.general_goal_text' },
   { key: 'skill', label: 'carolina_ui.skill_text' },
+  { key: 'strength', label: 'carolina_ui.strength_text' },
   { key: 'weakness', label: 'carolina_ui.weakness_text' },
   { key: 'plan_goal', label: 'carolina_ui.plan_goal_text' },
   { key: 'practice', label: 'carolina_ui.practice_text' },

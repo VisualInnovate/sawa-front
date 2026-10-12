@@ -1,7 +1,6 @@
 <script setup>
 // The Carolina evaluation of one child (/carolina-test/:id). The evaluator picks the date and color, starts the
-// evaluation, then gives every item (main section → general goal → age range → symbol and strength) a response,
-// with an optional note.
+// evaluation, then gives every item (main section → general goal → age range → symbol and skill) a response.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -32,9 +31,8 @@ const starting = ref(false);
 const saving = ref(false);
 const showMissing = ref(false);
 const alertText = ref("");
-// item id -> answer type id / note
+// item id -> answer type id
 const selected = ref({});
-const notes = ref({});
 
 // Main section → general goal → age range → items, each item worded for the child.
 const tree = computed(() => sections.value.map((section) => ({
@@ -127,7 +125,6 @@ async function save() {
         ...common,
         test_id: item.id,
         answer_type_id: selected.value[item.id],
-        note: notes.value[item.id]?.trim() || null,
       })),
     });
     if (requestId) axios.post(`api/evaluation-request/change-status/${requestId}`, { status: "1" }).catch(() => {});
@@ -147,7 +144,6 @@ watch(childId, (value, before) => {
   if (value && value !== before && route.name === "carolina-test") {
     evaluationId.value = null;
     selected.value = {};
-    notes.value = {};
     showMissing.value = false;
     load();
   }
@@ -233,7 +229,6 @@ watch(childId, (value, before) => {
                     {{ response.name }}
                   </label>
                 </div>
-                <InputText v-model="notes[item.id]" class="ce-note" :placeholder="$t('notes')" :aria-label="$t('notes')" />
               </div>
             </div>
           </article>
@@ -279,7 +274,7 @@ watch(childId, (value, before) => {
 .ce-goal-head h3 { margin: 0; font-size: 1.05rem; font-weight: 800; }
 .ce-age { display: grid; gap: .5rem; }
 .ce-age-label { display: inline-flex; align-items: center; gap: .4rem; width: fit-content; padding: .2rem .7rem; border-radius: 999px; background: #edf7f5; color: var(--sawa-primary, #135c65); font-size: .85rem; }
-.ce-item { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(10rem, 14rem); align-items: center; gap: .75rem; padding: .7rem .85rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 12px; }
+.ce-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .75rem; padding: .7rem .85rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 12px; }
 .ce-item.is-done { border-inline-start: 4px solid var(--pick); }
 .ce-item.is-missing { border-color: #f87171; box-shadow: 0 0 0 2px #fecaca; }
 .ce-item-main { display: flex; align-items: flex-start; gap: .6rem; }

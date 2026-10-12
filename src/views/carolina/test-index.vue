@@ -98,7 +98,7 @@ onMounted(async () => {
     <CarolianaTab />
     <Toast />
     <DataTable :value="visibleRows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
-      :filters="filters" :globalFilterFields="['symbol', 'wording.male.skill', 'wording.female.skill', 'wording.male.general_goal', 'skill', 'category.title', 'main_title', 'age_group.name']"
+      :filters="filters" :globalFilterFields="['symbol', 'wording.male.skill', 'wording.female.skill', 'skill', 'category.title', 'main_title', 'age_group.name']"
       v-can="'carolina test list'">
       <template #header>
         <div class="flex flex-wrap items-center gap-3 justify-between">
