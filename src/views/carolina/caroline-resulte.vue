@@ -1,6 +1,58 @@
+<template>
+  <div class="p-6 bg-gray-50 min-h-screen container mx-auto print:p-0 print:w-full print:max-w-full print:mx-0">
+    <div class="flex justify-between items-center mb-8 print:hidden">
+      <h1 class="text-3xl font-bold text-gray-800">{{ $t("carolina_ui.result_title") }}</h1>
+      <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2" @click="printPage">
+        <i class="pi pi-print" aria-hidden="true"></i>
+        {{ $t("print_report") }}
+      </button>
+    </div>
+
+    <div class="hidden print:block py-4 border-b border-gray-200 mb-4">
+      <h1 class="text-3xl font-bold text-gray-800 text-center">{{ $t("carolina_ui.result_title") }}</h1>
+      <div class="text-center text-gray-600 mt-2">{{ $t("generated_on") }}: {{ new Date().toLocaleDateString() }}</div>
+    </div>
+
+    <div v-if="loading || failed || !sections.length" class="bg-white rounded-xl shadow-md px-6 py-10 text-center text-gray-500">
+      {{ loading ? $t("loading") : failed ? $t("request_failed_retry") : $t("carolina_ui.no_results") }}
+    </div>
+
+    <div v-else class="space-y-12 print:space-y-6">
+      <div v-for="(section, s) in sections" :key="s" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
+          <h2 class="text-xl font-bold text-white">{{ section.title || $t("carolina_ui.title") }}</h2>
+        </div>
+        <section v-for="(goal, g) in section.goals" :key="g" class="carolina-goal print:break-inside-avoid">
+          <h3 class="carolina-goal-title">{{ $t("carolina_ui.general_goal") }}: {{ goal.category }}</h3>
+          <div class="carolina-table-wrap">
+            <table class="carolina-table">
+              <thead>
+                <tr>
+                  <th>{{ $t("age_range") }}</th>
+                  <th>{{ $t("carolina_ui.symbol") }}</th>
+                  <th>{{ $t("carolina_ui.skill") }}</th>
+                  <th>{{ $t("carolina_ui.response") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, r) in goal.rows" :key="r">
+                  <td v-if="row.first" :rowspan="row.span" class="carolina-age" dir="ltr">{{ row.age }}</td>
+                  <td class="carolina-center" dir="ltr">{{ row.symbol }}</td>
+                  <td>{{ row.skill }}</td>
+                  <td class="carolina-center carolina-response">{{ row.response }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
-// One Carolina evaluation's results (/carolina-resulte/:id): per general goal, the age range, symbol, skill and
-// response of each item.
+// One Carolina evaluation's results (/carolina-resulte/:id), laid out like the Milestones report: a card per main
+// section and, per general goal, the age range, symbol, skill and response of each item.
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
@@ -10,7 +62,7 @@ const loading = ref(true);
 const failed = ref(false);
 const result = ref([]);
 
-// Consecutive general goals of one main section share its heading.
+// Consecutive general goals of one main section share its card.
 const sections = computed(() => {
   const list = [];
   for (const goal of result.value) {
@@ -44,61 +96,14 @@ watch(() => route.params.id, (value, before) => {
 });
 </script>
 
-<template>
-  <div class="cr-page">
-    <header class="cr-head">
-      <h1>{{ $t("carolina_ui.result_title") }}</h1>
-      <Button icon="pi pi-print" :label="$t('print_report')" severity="secondary" variant="outlined" class="print:hidden" @click="printPage" />
-    </header>
-
-    <div v-if="loading" class="cr-state"><ProgressSpinner style="width: 40px; height: 40px" /></div>
-    <Message v-else-if="failed" severity="error" :closable="false">{{ $t("request_failed_retry") }}</Message>
-    <Message v-else-if="!sections.length" severity="info" :closable="false">{{ $t("carolina_ui.no_results") }}</Message>
-
-    <template v-else>
-    <section v-for="(section, s) in sections" :key="s" class="cr-card">
-      <h2 v-if="section.title">{{ section.title }}</h2>
-      <div v-for="(goal, g) in section.goals" :key="g" class="cr-table-wrap">
-        <table class="cr-table">
-          <thead>
-            <tr><th colspan="4" class="cr-goal">{{ $t("carolina_ui.general_goal") }}: {{ goal.category }}</th></tr>
-            <tr>
-              <th>{{ $t("age_range") }}</th>
-              <th>{{ $t("carolina_ui.symbol") }}</th>
-              <th>{{ $t("carolina_ui.skill") }}</th>
-              <th>{{ $t("carolina_ui.response") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, r) in goal.rows" :key="r">
-              <td v-if="row.first" :rowspan="row.span" class="cr-center" dir="ltr">{{ row.age }}</td>
-              <td class="cr-center" dir="ltr">{{ row.symbol }}</td>
-              <td>{{ row.skill }}</td>
-              <td class="cr-center cr-response">{{ row.response }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-    </template>
-  </div>
-</template>
-
 <style scoped>
-.cr-page { display: grid; gap: 1rem; }
-.cr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
-.cr-head h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
-.cr-state { display: grid; place-items: center; padding: 3rem; }
-.cr-card { display: grid; gap: 1rem; padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
-.cr-card h2 { margin: 0; font-size: 1.1rem; font-weight: 800; }
-.cr-table-wrap { overflow-x: auto; }
-.cr-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-.cr-table th, .cr-table td { border: 1px solid #cbd5e1; padding: .5rem .6rem; vertical-align: middle; text-align: start; }
-.cr-table th { background: #f1f5f9; font-weight: 800; text-align: center; }
-.cr-table th.cr-goal { background: #edf7f5; color: var(--sawa-primary, #135c65); text-align: start; }
-.cr-center { text-align: center !important; white-space: nowrap; }
-.cr-response { font-weight: 800; }
-@media print {
-  .cr-card { border: 0; padding: 0; }
-}
+.carolina-goal + .carolina-goal { border-top: 1px solid #e5e7eb; }
+.carolina-goal-title { margin: 0; padding: .85rem 1.25rem; background: #eff6ff; color: #1d4ed8; font-size: 1.1rem; font-weight: 700; }
+.carolina-table-wrap { overflow-x: auto; padding: 1rem 1.25rem; }
+.carolina-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.carolina-table th, .carolina-table td { border: 1px solid #e2e8f0; padding: .6rem .75rem; vertical-align: middle; text-align: start; }
+.carolina-table th { background: #f8fafc; color: #334155; font-weight: 700; text-align: center; }
+.carolina-center, .carolina-age { text-align: center !important; white-space: nowrap; }
+.carolina-age { background: #f8fafc; font-weight: 700; }
+.carolina-response { font-size: 1.1rem; font-weight: 800; color: #1e293b; }
 </style>
