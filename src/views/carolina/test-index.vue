@@ -1,314 +1,142 @@
-<template>
-    <CarolianaTab></CarolianaTab>
-    <div class="sawa-card p-[1%]" >
-        <Button v-can="'carolina test create'" :label='$t("create_button")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
-
-          <div class="grid grid-cols-1 lg:grid-cols-3 ">
-             <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
-               <div class="col-span-2">
-                <div class="flex">
-                      <h3 class="text-base font-bold " >  {{ $t("index") }}</h3>
-                      <p> : {{ index +1}}</p>
-                   </div>
-                   <div style="overflow: hidden !important;" class="flex max-w-full">
-                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("parent_category") }}</h3>
-                      <p >: {{ data.category.title }}</p>
-                   </div>
-                   <div style="overflow: hidden !important;" class="flex max-w-full">
-                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("skills") }}</h3>
-                      <p >: {{ data.skill }}</p>
-                   </div>
-                   <div style="overflow: hidden !important;" class="flex max-w-full">
-                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("sympol") }}</h3>
-                      <p >: {{ data.symbol }}</p>
-                   </div>
-               </div>
-               <div class="flex">
-                <Button v-can="'carolina test edit'" icon="pi pi-pencil" class="m-auto" @click="edit(data.id)" rounded severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
-                <Button v-can="'carolina test delete'"  icon="pi pi-trash" class="m-auto" @click="confirmDelete(data.id)" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-               </div>
-             </div>
-
-             <!-- delete and create -->
-             <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
-          </div>
-          <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
-          </template>
-        </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-               
-                <div class="flex flex-column gap-2">
-                    <label class="text-start" for="username">{{ $t('parent_category') }}</label>
-                    <Select @update:model-value="getage_range"  required v-model="levels.category_id"  option-value="id" :options="allcat" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center" />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.category_id">{{ error.category_id[0] }}</div>
-                </div>
-                <div class="flex flex-column gap-2">
-                    <label class="text-start" for="username">{{ $t('age_range') }}</label>
-                    <Select required v-model="levels.age_group_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center" />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.age_group_id">{{ error.age_group_id[0] }}</div>
-                </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('skills') }}</label>
-                <InputText required class="text-center" v-model="levels.skill" :placeholder='$t("skills")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
-            </div>
-
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
-            </div>
-            <div class="flex">
-                <div class="flex flex-column gap-2 ">
-                  <label  class="invisible w-full text-start" for="username">{{ $t('goal') }}</label>
-                  <Button   @click="addarry"  class="my-auto mx-2" icon="pi pi-plus"></Button>
-                </div>
-
-                <div class="flex flex-column gap-2 w-[89%]">
-                    <label class="w-full text-start" for="username">{{ $t('goal') }}</label>
-                    <InputText required class="text-center" v-model="levels.goal" :placeholder='$t("goal")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
-                </div>
-            </div>
-            
-            <div class="flex flex-col col-span-2 gap-2 my-5">
-                    <div class="flex relative bg-slate-200 rounded-md p-4 h-14" v-for=" mou,index in levels.goals">
-                        <span class="my-auto ">{{ index+1 }} - </span>
-                        <span>{{ $t("from") }}</span>
-                        <p class="px-1 text-green-500 text-xl  w-full" style="text-align: center;">{{ index+1 }} - {{ mou.body }}</p>
-                        <Button   @click="deletearray(index)"  class="m-auto absolute top-1 ltr:right-2 rtl:left-2" icon="pi pi-minus" severity="danger"></Button>
-                    </div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-           
-            <div class="flex flex-column gap-2">
-                    <label class="text-start" for="username">{{ $t('parent_category') }}</label>
-                    <Select @update:model-value="getage_range"  required v-model="levels.category_id"  option-value="id" :options="allcat" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center" />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.category_id">{{ error.category_id[0] }}</div>
-                </div>
-                <div class="flex flex-column gap-2">
-                    <label class="text-start" for="username">{{ $t('age_range') }}</label>
-                    <Select required v-model="levels.age_group_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center" />
-                      <div class="mt-1 mb-5 text-red-500" v-if="error?.age_group_id">{{ error.age_group_id[0] }}</div>
-                </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('skills') }}</label>
-                <InputText required class="text-center" v-model="levels.skill" :placeholder='$t("skills")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
-            </div>
-
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
-            </div>
-            <div class="flex">
-                <div class="flex flex-column gap-2 ">
-                  <label  class="invisible w-full text-start" for="username">{{ $t('goal') }}</label>
-                  <Button   @click="addarry"  class="my-auto mx-2" icon="pi pi-plus"></Button>
-                </div>
-
-                <div class="flex flex-column gap-2 w-[89%]">
-                    <label class="w-full text-start" for="username">{{ $t('goal') }}</label>
-                    <InputText required class="text-center" v-model="levels.goal" :placeholder='$t("goal")' />
-                    <div class="mt-1 mb-5 text-red-500" v-if="error?.skill">{{ error.skill[0] }}</div>
-                </div>
-            </div>
-            
-            <div class="flex flex-col col-span-2 gap-2 my-5">
-                    <div class="flex relative bg-slate-200 rounded-md p-4 h-14" v-for=" mou,index in levels.goals">
-                        <span class="my-auto ">{{ index+1 }} - </span>
-                        <span>{{ $t("from") }}</span>
-                        <p class="px-1 text-green-500 text-xl  w-full" style="text-align: center;">{{ index+1 }} - {{ mou.body }}</p>
-                        <Button   @click="deletearray(index)"  class="m-auto absolute top-1 ltr:right-2 rtl:left-2" icon="pi pi-minus" severity="danger"></Button>
-                    </div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-
-             <div>
-
-             </div>
-            
-          </div>
-    </div>
-  </template>
-
 <script setup>
+// Carolina items: each one under a general goal (a sub-category) and an age range, with its symbol and the five
+// wordings for a boy and for a girl.
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
+import axios from 'axios';
+import CarolianaTab from '@/components/CarolianaTab.vue';
+import CarolinaItemForm from '@/components/carolina/CarolinaItemForm.vue';
+import { emptyCarolinaWording } from '@/utils/carolina';
+
 const { t } = useI18n();
-import {FilterMatchMode} from '@primevue/core/api'
-import {ref, onMounted, onBeforeMount} from 'vue'
-// import ProductService from '@/service/ProductService';
-import CarolianaTab from '../../components/CarolianaTab.vue'
-import {useToast} from 'primevue/usetoast'
-import axios from "axios";
-import {useRouter} from "vue-router";
-const toast = useToast()
-const router = useRouter()
-const allcat=ref([])
-const loading = ref(true)
-const user = ref({})
-const error = ref('')
-const users = ref(null)
-const age_range=ref([])
-const productDialog = ref(false)
-const deleteDialog = ref(false)
-const confir_id=ref('')
-const selectedProducts = ref(null)
-const dt = ref(null)
-const filters = ref({})
-const createdialog=ref(false)
-const levels=ref({
-    goals:[]
-})
-const updatedialog=ref(false)
+const toast = useToast();
+const rows = ref([]), categories = ref([]);
+const loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
+const selectedMain = ref(null);
+const errors = ref({});
+const form = ref({ wording: emptyCarolinaWording() });
+const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
+const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
 
-onBeforeMount(() => {
-  initFilters()
-})
+const mains = computed(() => categories.value.filter(category => !category.parent_id));
+const parentOf = (categoryId) => categories.value.find(category => Number(category.id) === Number(categoryId))?.parent_id ?? null;
+const titleOf = (categoryId) => categories.value.find(category => Number(category.id) === Number(categoryId))?.title ?? '';
+const visibleRows = computed(() => rows.value
+  .map(row => ({ ...row, main_title: row.category?.parent?.title ?? titleOf(parentOf(row.category_id)) }))
+  .filter(row => !selectedMain.value || Number(row.category?.parent_id ?? parentOf(row.category_id)) === Number(selectedMain.value)));
 
- const fetchData= ()=>{
-
-
-  axios.get("/api/carolina-test").then((res)=>{
-    loading.value= false
-    users.value= res.data.data
-    console.log(users.value)
-
-  });
-
+async function fetchRows() {
+  loading.value = true;
+  try {
+    const { data } = await axios.get('/api/carolina-test');
+    rows.value = data.data ?? [];
+  } catch { notifyError(); }
+  finally { loading.value = false; }
 }
-const getallcatogray=()=>{
-    axios.get("/api/carolina-category/list/sub").then((res)=>{
-    loading.value= false
-    allcat.value= res.data.data
-    console.log(users.value)
-
-  }); 
+function openNew() {
+  form.value = { main_id: selectedMain.value, category_id: null, age_group_id: null, symbol: '', wording: emptyCarolinaWording() };
+  errors.value = {};
+  dialog.value = true;
 }
-
-const getage_range=(id)=>{
-  axios.post(`/api/carolina-category/get-age-groups/${id}`).then((res)=>{
-    age_range.value=res.data.data
-    
-  });
+async function edit(id) {
+  try {
+    const { data } = await axios.get(`/api/carolina-test/${id}`);
+    const item = data.data, wording = emptyCarolinaWording();
+    for (const gender of ['male', 'female']) Object.assign(wording[gender], item.wording?.[gender] || {});
+    // Items saved before the wordings had only their skill.
+    if (!wording.male.skill && item.skill) wording.male.skill = item.skill;
+    form.value = {
+      id: item.id,
+      main_id: item.category?.parent_id ?? parentOf(item.category_id),
+      category_id: item.category_id,
+      age_group_id: item.age_group_id,
+      symbol: item.symbol ?? '',
+      wording,
+    };
+    errors.value = {};
+    dialog.value = true;
+  } catch { notifyError(); }
 }
-
-
-
-onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
-fetchData()
-
-getallcatogray()
-
-})
-const edit=(id)=>{
-    axios.get(`/api/carolina-test/${id}`).then((res)=>{
-        
-        levels.value.category_id=res.data.data.category_id
-   
-
-        
-   
- 
-
-  });
-    confir_id.value=id
-    updatedialog.value=!(updatedialog.value)
+async function save() {
+  if (saving.value) return;
+  saving.value = true;
+  errors.value = {};
+  const { main_id, ...payload } = form.value;
+  try {
+    if (payload.id) await axios.put(`/api/carolina-test/${payload.id}`, payload);
+    else await axios.post('/api/carolina-test', payload);
+    dialog.value = false;
+    toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 });
+    await fetchRows();
+  } catch (error) {
+    if (error.response?.status === 422) errors.value = error.response.data.errors || {};
+    else notifyError();
+  } finally { saving.value = false; }
 }
-const addarry=()=>{
-    
-    levels.value.goals.push({ body: `${levels.value.goal}`})
+async function remove() {
+  if (saving.value || !deleting.value) return;
+  saving.value = true;
+  try {
+    await axios.delete(`/api/carolina-test/${deleting.value.id}`);
+    deleting.value = null;
+    await fetchRows();
+  } catch { notifyError(); }
+  finally { saving.value = false; }
 }
-const deletearray=(index)=>{
-    levels.value.goals.splice(index,1)
-}
-
-
-
-///// update
-
-const editescrud=()=>{
-    axios
-    .put(`/api/carolina-test/${confir_id.value}`,levels.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-
-const openNew = () => {
-    createdialog.value=!(createdialog.value)
-}
-
-const confirmDelete = (id) => {
-  console.log(id)
-  deleteDialog.value = true
-  confir_id.value=id
- 
-
-}
-
-const createcrude=()=>{
-    axios.post('/api/carolina-test',levels.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-const deleteAction = () => {
-  axios
-    .delete(`/api/carolina-test/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
-      deleteDialog.value=false
-      fetchData()
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-    })
-    .catch(() => {})
-
-}
-
-
-
-
-const initFilters = () => {
-  filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-  }
-}
+onMounted(async () => {
+  await Promise.all([
+    fetchRows(),
+    axios.get('/api/carolina-category').then(({ data }) => { categories.value = data.data ?? []; }).catch(notifyError),
+  ]);
+});
 </script>
 
-  
-  <style scoped>
-  /* Additional styling if needed */
-  </style>
-  
+<template>
+  <section>
+    <CarolianaTab />
+    <Toast />
+    <DataTable :value="visibleRows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
+      :filters="filters" :globalFilterFields="['symbol', 'wording.male.skill', 'wording.female.skill', 'skill', 'category.title', 'main_title', 'age_group.name']"
+      v-can="'carolina test list'">
+      <template #header>
+        <div class="flex flex-wrap items-center gap-3 justify-between">
+          <h1 class="text-lg font-semibold">{{ $t('carolina_ui.items') }}</h1>
+          <Button v-can="'carolina test create'" :label="$t('create_button')" icon="pi pi-plus" @click="openNew" />
+          <Select v-model="selectedMain" :options="mains" optionLabel="title" optionValue="id" showClear
+            :placeholder="$t('carolina_ui.main_section')" />
+          <InputText v-model="filters.global.value" :placeholder="$t('search')" />
+        </div>
+      </template>
+      <Column field="main_title" :header="$t('carolina_ui.main_section')" sortable />
+      <Column field="category.title" :header="$t('carolina_ui.general_goal')" sortable />
+      <Column field="age_group.name" :header="$t('age_range')" sortable />
+      <Column field="symbol" :header="$t('carolina_ui.symbol')" sortable>
+        <template #body="{ data }"><span dir="ltr">{{ data.symbol }}</span></template>
+      </Column>
+      <Column :header="$t('carolina_ui.skill')">
+        <template #body="{ data }">{{ data.wording?.male?.skill || data.skill }}</template>
+      </Column>
+      <Column>
+        <template #body="{ data }">
+          <div class="table-actions">
+            <Button v-can="'carolina test edit'" icon="pi pi-pencil" :aria-label="$t('edit')" @click="edit(data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" />
+            <Button v-can="'carolina test delete'" icon="pi pi-trash" :aria-label="$t('delete')" @click="deleting = data" rounded severity="danger" variant="outlined" v-tooltip.top="$t('delete')" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+    <Dialog v-model:visible="dialog" :style="{ width: '860px', maxWidth: '95vw' }" :header="$t('carolina_ui.item')"
+      modal :closable="!saving" :closeOnEscape="!saving">
+      <CarolinaItemForm v-if="dialog" v-model="form" :categories="categories" :errors="errors" :saving="saving" @submit="save" />
+    </Dialog>
+    <Dialog :visible="Boolean(deleting)" @update:visible="deleting = null" :style="{ width: '450px', maxWidth: '95vw' }" :header="$t('submit')" modal>
+      <p>{{ $t('remove_item') }}</p>
+      <template #footer>
+        <Button :label="$t('no')" :disabled="saving" @click="deleting = null" variant="text" severity="secondary" />
+        <Button :label="$t('yes')" :loading="saving" @click="remove" severity="danger" />
+      </template>
+    </Dialog>
+  </section>
+</template>
