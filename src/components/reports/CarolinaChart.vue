@@ -1,32 +1,32 @@
 <script setup>
-// Carolina as on its results page: domain, age, symbol, skill and the response — one response column per
-// chosen test. Skills no chosen test answered are left out (the full list runs to many pages).
+// Carolina as on its results page: general goal, age range, symbol, skill and the response — one response column
+// per chosen test. Each result lists only the skills that test answered, so rows are matched by symbol.
 import { computed } from "vue";
 
 const props = defineProps({
-  // [{ result: [{ category, groups: [{ age, tests: [{ symbol, skill, response, note }] }] }] }], oldest first
+  // [{ result: [{ category, groups: [{ age, tests: [{ symbol, skill, response }] }] }] }], oldest first
   tests: { type: Array, required: true },
 });
 
-const NO_ANSWER = "لا توجد اجابه";
 const KEYS = ["1st test", "2nd test", "3rd test", "4th test"];
-const answered = (value) => value && value !== NO_ANSWER;
 
-const rows = computed(() =>
-  (props.tests[0]?.result ?? [])
-    .map((category, c) => ({
-      category: category.category,
-      rows: (category.groups ?? []).flatMap((group, g) =>
-        (group.tests ?? []).map((skill, s) => ({
-          age: group.age,
-          symbol: skill.symbol,
-          skill: skill.skill,
-          responses: props.tests.map((test) => test.result?.[c]?.groups?.[g]?.tests?.[s]?.response ?? ""),
-        }))
-      ).filter((row) => row.responses.some(answered)),
-    }))
-    .filter((category) => category.rows.length)
-);
+const rows = computed(() => {
+  const categories = [];
+  props.tests.forEach((test, t) => {
+    for (const goal of test.result ?? []) {
+      let category = categories.find((entry) => entry.category === goal.category);
+      if (!category) categories.push((category = { category: goal.category, rows: [] }));
+      for (const group of goal.groups ?? []) {
+        for (const skill of group.tests ?? []) {
+          let row = category.rows.find((entry) => entry.symbol === skill.symbol);
+          if (!row) category.rows.push((row = { age: group.age, symbol: skill.symbol, skill: skill.skill, responses: props.tests.map(() => "") }));
+          row.responses[t] = skill.response ?? "";
+        }
+      }
+    }
+  });
+  return categories.filter((category) => category.rows.length);
+});
 </script>
 
 <template>
@@ -49,7 +49,7 @@ const rows = computed(() =>
           <td class="cc-nowrap">{{ row.age }}</td>
           <td class="cc-nowrap"><span class="ltr">{{ row.symbol }}</span></td>
           <td>{{ row.skill }}</td>
-          <td v-for="(response, i) in row.responses" :key="i" class="cc-nowrap">{{ answered(response) ? response : "" }}</td>
+          <td v-for="(response, i) in row.responses" :key="i" class="cc-nowrap">{{ response }}</td>
         </tr>
       </template>
       <tr v-if="!rows.length">

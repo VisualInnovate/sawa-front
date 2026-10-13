@@ -1,204 +1,135 @@
-<template>
-    <CarolianaTab></CarolianaTab>
-    <div class="sawa-card p-[1%]" >
-        <Button v-can="'carolina age range create'" :label='$t("create_button")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
-
-          <div class="grid grid-cols-1 lg:grid-cols-3 ">
-             <div v-for="data,index in users" class="grid grid-cols-3 m-[1%] shadow-md p-[2%] bg-gray-200 rounded-md">
-               <div class="col-span-2">
-                <div class="flex">
-                      <h3 class="text-base font-bold " >  {{ $t("index") }}</h3>
-                      <p> : {{ index +1}}</p>
-                   </div>
-                   <div style="overflow: hidden !important;" class="flex max-w-full">
-                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("name") }}</h3>
-                      <p >: {{ data.name }}</p>
-                   </div>
-                 
-               </div>
-               <div class="flex">
-                <Button v-can="'carolina age range edit'" icon="pi pi-pencil" class="m-auto" @click="edit(data.id)" rounded severity="info" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
-                <Button v-can="'carolina age range delete'"  icon="pi pi-trash" class="m-auto" @click="confirmDelete(data.id)" rounded severity="danger" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-               </div>
-             </div>
-
-             <!-- delete and create -->
-             <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
-          </div>
-          <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
-          </template>
-        </Dialog>
-        <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-        <Dialog v-model:visible="updatedialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('title') }}</label>
-                <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
-            </div>
-            <div class="flex flex-column gap-2">
-                  <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
-                <InputText required class="text-center" v-model="levels.symbol" :placeholder='$t("sympol")' />
-                <div class="mt-1 mb-5 text-red-500" v-if="error?.symbol">{{ error.symbol[0] }}</div>
-            </div>
-           <div class="w-full text-center">
-            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
-           </div>
-        </Dialog>
-
-             <div>
-
-             </div>
-            
-          </div>
-    </div>
-  </template>
-
 <script setup>
+// Carolina age ranges, in months (e.g. 24-30). The general goals pick theirs; deleting a range deletes its skills.
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
+import axios from 'axios';
+import CarolianaTab from '@/components/CarolianaTab.vue';
+
 const { t } = useI18n();
-import {FilterMatchMode} from '@primevue/core/api'
-import {ref, onMounted, onBeforeMount} from 'vue'
-// import ProductService from '@/service/ProductService';
-import CarolianaTab from '../../components/CarolianaTab.vue'
-import {useToast} from 'primevue/usetoast'
-import axios from "axios";
-import {useRouter} from "vue-router";
-const toast = useToast()
-const router = useRouter()
+const toast = useToast();
+const rows = ref([]);
+const loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
+const errors = ref({});
+const form = ref({ from_month: null, to_month: null });
+const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
+const firstError = (key) => Array.isArray(errors.value[key]) ? errors.value[key][0] : errors.value[key];
 
-const loading = ref(true)
-const user = ref({})
-const error = ref('')
-const users = ref(null)
-const productDialog = ref(false)
-const deleteDialog = ref(false)
-const confir_id=ref('')
-const selectedProducts = ref(null)
-const dt = ref(null)
-const filters = ref({})
-const createdialog=ref(false)
-const levels=ref({})
-const updatedialog=ref(false)
-
-onBeforeMount(() => {
-  initFilters()
-})
-
- const fetchData= ()=>{
-
-
-  axios.get("/api/carolina-age-range").then((res)=>{
-    loading.value= false
-    users.value= res.data.data
-    console.log(users.value)
-
-  });
-
-
+async function fetchRows() {
+  loading.value = true;
+  try {
+    rows.value = (await axios.get('/api/carolina-age-range')).data.data ?? [];
+  } catch { notifyError(); }
+  finally { loading.value = false; }
 }
-
-
-
-onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
-fetchData()
-
-})
-const edit=(id)=>{
-  router.push({name:'agerange-update' , params:{'id':id}})
+function openNew() {
+  // A new range usually starts where the last one ended.
+  const last = rows.value[rows.value.length - 1];
+  form.value = { from_month: last?.to_month ?? null, to_month: null };
+  errors.value = {};
+  dialog.value = true;
 }
-
-
-///// update
-
-const editescrud=()=>{
-    axios
-    .put(`/api/able-category/${confir_id.value}`,levels.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = ref({})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
+function edit(row) {
+  form.value = { id: row.id, from_month: row.from_month, to_month: row.to_month };
+  errors.value = {};
+  dialog.value = true;
 }
-
-const openNew = () => {
-    router.push({name:'agerange-create'})
+async function save() {
+  if (saving.value) return;
+  saving.value = true;
+  errors.value = {};
+  try {
+    if (form.value.id) await axios.put(`/api/carolina-age-range/${form.value.id}`, form.value);
+    else await axios.post('/api/carolina-age-range', form.value);
+    dialog.value = false;
+    toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 });
+    await fetchRows();
+  } catch (error) {
+    if (error.response?.status === 422) errors.value = error.response.data.errors || {};
+    else notifyError();
+  } finally { saving.value = false; }
 }
-
-
-const confirmDelete = (id) => {
-  console.log(id)
-  deleteDialog.value = true
-  confir_id.value=id
- 
-
+async function remove() {
+  if (saving.value || !deleting.value) return;
+  saving.value = true;
+  try {
+    await axios.delete(`/api/carolina-age-range/${deleting.value.id}`);
+    deleting.value = null;
+    toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 });
+    await fetchRows();
+  } catch { notifyError(); }
+  finally { saving.value = false; }
 }
-
-const createcrude=()=>{
-    axios
-    .post('/api/able-category',levels.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      createdialog.value=!(createdialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-    })
-    .catch((el)=>{
-      error.value = el.response.data.errors
-    })
-}
-const deleteAction = () => {
-  axios
-    .delete(`/api/carolina-age-range/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
-      deleteDialog.value=false
-      fetchData()
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-    })
-    .catch(() => {})
-
-}
-
-
-
-
-const initFilters = () => {
-  filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-  }
-}
+onMounted(fetchRows);
 </script>
 
-  
-  <style scoped>
-  /* Additional styling if needed */
-  </style>
-  
+<template>
+  <section>
+    <CarolianaTab />
+    <Toast />
+    <DataTable :value="rows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
+      v-can="'carolina age range list'">
+      <template #header>
+        <div class="carolina-table-header">
+          <h1>{{ $t('carolina_ui.age_ranges') }}</h1>
+          <Button v-can="'carolina age range create'" :label="$t('create_button')" icon="pi pi-plus" @click="openNew" />
+        </div>
+      </template>
+      <template #empty>{{ $t('carolina_ui.no_age_ranges') }}</template>
+      <Column :header="$t('carolina_ui.age_range')">
+        <template #body="{ data }"><b dir="ltr">{{ data.name }}</b> {{ $t('carolina_ui.months') }}</template>
+      </Column>
+      <Column :header="$t('carolina_ui.general_goals')">
+        <template #body="{ data }">
+          <div class="range-chips">
+            <Tag v-for="goal in data.general_goals" :key="goal.id" severity="secondary" :value="goal.title" />
+            <span v-if="!data.general_goals?.length" class="muted">—</span>
+          </div>
+        </template>
+      </Column>
+      <Column field="skills_count" :header="$t('carolina_ui.skills_count')" style="width: 9rem" />
+      <Column style="width: 8rem">
+        <template #body="{ data }">
+          <div class="table-actions">
+            <Button v-can="'carolina age range edit'" icon="pi pi-pencil" :aria-label="$t('edit')" @click="edit(data)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" />
+            <Button v-can="'carolina age range delete'" icon="pi pi-trash" :aria-label="$t('delete')" @click="deleting = data" rounded severity="danger" variant="outlined" v-tooltip.top="$t('delete')" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="dialog" :style="{ width: '480px', maxWidth: '95vw' }" :header="$t('carolina_ui.age_range')"
+      modal :closable="!saving" :closeOnEscape="!saving">
+      <form class="carolina-form" data-no-request-spinner @submit.prevent="save">
+        <div class="field-row">
+          <div class="form-field">
+            <label for="range-from">{{ $t('carolina_ui.from_month') }}</label>
+            <InputNumber inputId="range-from" v-model="form.from_month" :min="0" :max="1000" fluid :disabled="saving"
+              :invalid="Boolean(errors.from_month)" :suffix="' ' + $t('carolina_ui.months')" />
+            <small v-if="errors.from_month" class="field-error">{{ firstError('from_month') }}</small>
+          </div>
+          <div class="form-field">
+            <label for="range-to">{{ $t('carolina_ui.to_month') }}</label>
+            <InputNumber inputId="range-to" v-model="form.to_month" :min="0" :max="1000" fluid :disabled="saving"
+              :invalid="Boolean(errors.to_month)" :suffix="' ' + $t('carolina_ui.months')" />
+            <small v-if="errors.to_month" class="field-error">{{ firstError('to_month') }}</small>
+          </div>
+        </div>
+        <div class="form-actions">
+          <Button type="submit" :loading="saving" :label="$t('submit')" icon="pi pi-check" />
+        </div>
+      </form>
+    </Dialog>
+
+    <Dialog :visible="Boolean(deleting)" @update:visible="deleting = null" :style="{ width: '460px', maxWidth: '95vw' }" :header="$t('delete')" modal>
+      <p>{{ $t('remove_item') }} <b dir="ltr">{{ deleting?.name }}</b>؟</p>
+      <Message v-if="deleting?.skills_count" severity="warn" :closable="false">{{ $t('carolina_ui.delete_cascade', { n: deleting.skills_count }) }}</Message>
+      <template #footer>
+        <Button :label="$t('no')" :disabled="saving" @click="deleting = null" variant="text" severity="secondary" />
+        <Button :label="$t('yes')" :loading="saving" @click="remove" severity="danger" />
+      </template>
+    </Dialog>
+  </section>
+</template>
+
+<style scoped src="./carolina-admin.css"></style>

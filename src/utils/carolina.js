@@ -12,10 +12,9 @@ export const emptyCarolinaWording = () => Object.fromEntries(
   ['male', 'female'].map(gender => [gender, Object.fromEntries(carolinaFields.map(field => [field.key, '']))])
 );
 
-// One wording of an item for the child: the child's gender ('1' is a girl) and first name in place of {{name}}.
-// Items saved before the wordings fall back to their old `skill`.
-export function carolinaText(item, key, child = {}) {
+// One wording of a skill for the child: the child's gender ('1' is a girl) and first name in place of {{name}}.
+export function carolinaText(skill, key, child = {}) {
   const gender = String(child.gender) === '1' ? 'female' : 'male';
-  const text = item?.wording?.[gender]?.[key] || item?.wording?.male?.[key] || (key === 'skill' ? item?.skill : '') || '';
+  const text = skill?.wording?.[gender]?.[key] || '';
   return String(text).replace(/\{\{.*?\}\}/g, String(child.name ?? '').trim().split(/\s+/)[0] || '');
 }

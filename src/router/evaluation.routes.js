@@ -84,34 +84,22 @@ const evaluationRoutes = [
     component: () => import("../views/carolina/agerange-index.vue")
   },
   {
-    path: '/agerange-update/:id', // Define the path for your addRoom route
-    name: 'agerange-update',
-    meta: { permission: ["carolina age range edit"] },
-    component: () => import("../views/carolina/agerange-update.vue")
-  },
-  {
     path: '/answer_type', // Define the path for your addRoom route
     name: 'answer_type',
     meta: { permission: ["carolina answer type list"] },
     component: () => import("../views/carolina/answer-type.vue")
   },
   {
-    path: '/agerange-create', // Define the path for your addRoom route
-    name: 'agerange-create',
-    meta: { permission: ["carolina age range create"] },
-    component: () => import("../views/carolina/agerange-create.vue")
+    path: '/carolina-symbols',
+    name: 'carolina-symbols',
+    meta: { permission: ["carolina symbol list"] },
+    component: () => import("../views/carolina/symbols.vue")
   },
   {
-    path: '/category', // Define the path for your addRoom route
-    name: 'category',
-    meta: { permission: ["carolina category list"] },
-    component: () => import("../views/carolina/category-index.vue")
-  },
-  {
-    path: '/test', // Define the path for your addRoom route
-    name: 'test',
-    meta: { permission: ["carolina test list"] },
-    component: () => import("../views/carolina/test-index.vue")
+    path: '/carolina-skills',
+    name: 'carolina-skills',
+    meta: { permission: ["carolina skill list"] },
+    component: () => import("../views/carolina/skills.vue")
   },
   {
     path: '/carolina-general-goals',

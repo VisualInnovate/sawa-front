@@ -1,0 +1,16 @@
+/* The Carolina setup pages (general goals, age ranges, symbols, skills): table header, chips and dialog forms. */
+.carolina-table-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }
+.carolina-table-header h1 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.carolina-table-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.range-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ltr-chip :deep(.p-tag-label) { direction: ltr; unicode-bidi: isolate; }
+.muted { color: #94a3b8; }
+.carolina-form { display: grid; gap: 1rem; }
+.form-field { display: grid; gap: .35rem; align-content: start; }
+.form-field label { font-weight: 600; text-align: start; }
+.field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.field-error { color: #dc2626; }
+.form-hint { color: #64748b; font-size: .9rem; }
+.form-actions { display: flex; justify-content: center; }
+.form-actions .p-button { min-width: 12rem; }
+@media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
