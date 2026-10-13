@@ -14,6 +14,10 @@
                       <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("title") }}</h3>
                       <p >: {{ data.title }}</p>
                    </div>
+                   <div v-if="goalTitle(data.general_goal_id)" style="overflow: hidden !important;" class="flex max-w-full">
+                      <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("carolina_ui.general_goal") }}</h3>
+                      <p >: {{ goalTitle(data.general_goal_id) }}</p>
+                   </div>
                    <div style="overflow: hidden !important;" class="flex max-w-full">
                       <h3 class="text-base font-bold " style="word-wrap: break-word;" >{{ $t("sympol") }}</h3>
                       <p >: {{ data.symbol }}</p>
@@ -50,6 +54,11 @@
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.parent_id">{{ error.parent_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
+                    <label class="text-start" for="username">{{ $t('carolina_ui.general_goal') }}</label>
+                    <Select v-model="levels.general_goal_id" option-value="id" :options="generalGoals" optionLabel="title" filter :placeholder='$t("carolina_ui.general_goal")' class="w-full text-center" />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.general_goal_id">{{ error.general_goal_id[0] }}</div>
+                </div>
+                <div class="flex flex-column gap-2">
                     <label class="text-start" for="username">{{ $t('age_range') }}</label>
                     <Select required v-model="levels.age_range_id"  option-value="id" :options="age_range" optionLabel="name" :placeholder='$t("age_range")' class="w-full text-center" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.age_range_id">{{ error.age_range_id[0] }}</div>
@@ -77,6 +86,11 @@
                     <label class="text-start" for="username">{{ $t('parent_category') }}</label>
                     <Select required v-model="levels.parent_id"  option-value="id" :options="users" optionLabel="title" :placeholder='$t("parent_category")' class="w-full text-center" />
                       <div class="mt-1 mb-5 text-red-500" v-if="error?.parent_id">{{ error.parent_id[0] }}</div>
+                </div>
+                <div class="flex flex-column gap-2">
+                    <label class="text-start" for="username">{{ $t('carolina_ui.general_goal') }}</label>
+                    <Select v-model="levels.general_goal_id" option-value="id" :options="generalGoals" optionLabel="title" filter :placeholder='$t("carolina_ui.general_goal")' class="w-full text-center" />
+                      <div class="mt-1 mb-5 text-red-500" v-if="error?.general_goal_id">{{ error.general_goal_id[0] }}</div>
                 </div>
                 <div class="flex flex-column gap-2">
                     <label class="text-start" for="username">{{ $t('age_range') }}</label>
@@ -124,6 +138,8 @@ const user = ref({})
 const error = ref('')
 const users = ref([])
 const age_range=ref([])
+const generalGoals=ref([])
+const goalTitle=(id)=>generalGoals.value.find(goal=>Number(goal.id)===Number(id))?.title ?? ''
 const productDialog = ref(false)
 const deleteDialog = ref(false)
 const confir_id=ref('')
@@ -165,6 +181,7 @@ onMounted(() => {
   // productService.getProducts().then((data) => (products.value = data));
 fetchData()
 getage_range()
+axios.get("/api/carolina-general-goals").then((res)=>{ generalGoals.value= res.data.data ?? [] }).catch(()=>{})
 
 })
 const edit=(id)=>{
@@ -192,7 +209,7 @@ const editescrud=()=>{
       fetchData()
       updatedialog.value=!(updatedialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      levels.value = ref({})
+      levels.value = {}
     })
     .catch((el)=>{
       error.value = el.response.data.errors
@@ -200,6 +217,8 @@ const editescrud=()=>{
 }
 
 const openNew = () => {
+    levels.value = {}
+    error.value = ''
     createdialog.value=!(createdialog.value)
 }
 

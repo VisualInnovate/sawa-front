@@ -23,7 +23,7 @@
           <h2 class="text-xl font-bold text-white">{{ section.title || $t("carolina_ui.title") }}</h2>
         </div>
         <section v-for="(goal, g) in section.goals" :key="g" class="carolina-goal print:break-inside-avoid">
-          <h3 class="carolina-goal-title">{{ $t("carolina_ui.general_goal") }}: {{ goal.category }}</h3>
+          <h3 class="carolina-goal-title">{{ $t("carolina_ui.domain") }}: {{ goal.category }}</h3>
           <div class="carolina-table-wrap">
             <table class="carolina-table">
               <thead>
@@ -51,8 +51,8 @@
 </template>
 
 <script setup>
-// One Carolina evaluation's results (/carolina-resulte/:id), laid out like the Milestones report: a card per main
-// section and, per general goal, the age range, symbol, skill and response of each item.
+// One Carolina evaluation's results (/carolina-resulte/:id), laid out like the Milestones report: a card per general
+// goal and, per domain, the age range, symbol, skill and response of each skill.
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
@@ -62,7 +62,7 @@ const loading = ref(true);
 const failed = ref(false);
 const result = ref([]);
 
-// Consecutive general goals of one main section share its card.
+// Consecutive domains of one general goal share its card.
 const sections = computed(() => {
   const list = [];
   for (const goal of result.value) {
