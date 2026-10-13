@@ -1,6 +1,6 @@
 <script setup>
-// Carolina general goals: each one under a main section; the items are written under them.
-import { computed, onMounted, ref } from 'vue';
+// Carolina general goals: the top level, each one holding its domains (the categories) and their skills.
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
@@ -9,20 +9,14 @@ import CarolianaTab from '@/components/CarolianaTab.vue';
 
 const { t } = useI18n();
 const toast = useToast();
-const rows = ref([]), categories = ref([]);
+const rows = ref([]);
 const loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
-const selectedMain = ref(null);
 const errors = ref({});
 const form = ref({});
 const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
 const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
 const firstError = (key) => Array.isArray(errors.value[key]) ? errors.value[key][0] : errors.value[key];
 
-const mains = computed(() => categories.value.filter(category => !category.parent_id));
-const mainTitle = (id) => mains.value.find(category => Number(category.id) === Number(id))?.title ?? '';
-const visibleRows = computed(() => rows.value
-  .map(row => ({ ...row, main_title: row.category?.title ?? mainTitle(row.category_id) }))
-  .filter(row => !selectedMain.value || Number(row.category_id) === Number(selectedMain.value)));
 
 async function fetchRows() {
   loading.value = true;
@@ -33,12 +27,12 @@ async function fetchRows() {
   finally { loading.value = false; }
 }
 function openNew() {
-  form.value = { category_id: selectedMain.value, title: '' };
+  form.value = { title: '' };
   errors.value = {};
   dialog.value = true;
 }
 function edit(row) {
-  form.value = { id: row.id, category_id: row.category_id, title: row.title ?? '' };
+  form.value = { id: row.id, title: row.title ?? '' };
   errors.value = {};
   dialog.value = true;
 }
@@ -65,36 +59,28 @@ async function remove() {
     deleting.value = null;
     await fetchRows();
   } catch (error) {
-    // A goal that still has items is refused (422) with the reason.
+    // A goal that still has domains is refused (422) with the reason.
     toast.add({ severity: 'error', summary: t('error'), detail: error.response?.data?.message || t('request_failed_retry'), life: 5000 });
   } finally { saving.value = false; }
 }
-onMounted(async () => {
-  await Promise.all([
-    fetchRows(),
-    axios.get('/api/carolina-category').then(({ data }) => { categories.value = data.data ?? []; }).catch(notifyError),
-  ]);
-});
+onMounted(fetchRows);
 </script>
 
 <template>
   <section>
     <CarolianaTab />
     <Toast />
-    <DataTable :value="visibleRows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
-      :filters="filters" :globalFilterFields="['title', 'main_title']" v-can="'carolina general goal list'">
+    <DataTable :value="rows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
+      :filters="filters" :globalFilterFields="['title']" v-can="'carolina general goal list'">
       <template #header>
         <div class="flex flex-wrap items-center gap-3 justify-between">
           <h1 class="text-lg font-semibold">{{ $t('carolina_ui.general_goals') }}</h1>
           <Button v-can="'carolina general goal create'" :label="$t('create_button')" icon="pi pi-plus" @click="openNew" />
-          <Select v-model="selectedMain" :options="mains" optionLabel="title" optionValue="id" showClear
-            :placeholder="$t('carolina_ui.main_section')" />
           <InputText v-model="filters.global.value" :placeholder="$t('search')" />
         </div>
       </template>
       <Column field="title" :header="$t('carolina_ui.general_goal')" sortable />
-      <Column field="main_title" :header="$t('carolina_ui.main_section')" sortable />
-      <Column field="tests_count" :header="$t('carolina_ui.items')" sortable />
+      <Column field="categories_count" :header="$t('carolina_ui.domains')" sortable />
       <Column>
         <template #body="{ data }">
           <div class="table-actions">
@@ -108,12 +94,6 @@ onMounted(async () => {
     <Dialog v-model:visible="dialog" :style="{ width: '520px', maxWidth: '95vw' }" :header="$t('carolina_ui.general_goal')"
       modal :closable="!saving" :closeOnEscape="!saving">
       <form class="goal-form" data-no-request-spinner @submit.prevent="save">
-        <div class="form-field">
-          <label for="goal-main">{{ $t('carolina_ui.main_section') }}</label>
-          <Select inputId="goal-main" v-model="form.category_id" :options="mains" optionLabel="title" optionValue="id" filter fluid
-            :disabled="saving" :invalid="Boolean(errors.category_id)" :placeholder="$t('carolina_ui.main_section')" />
-          <small v-if="errors.category_id" class="field-error">{{ firstError('category_id') }}</small>
-        </div>
         <div class="form-field">
           <label for="goal-title">{{ $t('carolina_ui.general_goal') }}</label>
           <InputText id="goal-title" v-model="form.title" fluid :disabled="saving" :invalid="Boolean(errors.title)" />

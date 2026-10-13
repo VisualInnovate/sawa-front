@@ -30,7 +30,7 @@
       <Message v-else-if="loadError" severity="error" :closable="false" class="lg:col-span-2">{{ loadError }}</Message>
       <Message v-else-if="!tree.length" severity="warn" :closable="false" class="lg:col-span-2">{{ $t("carolina_ui.no_items") }}</Message>
 
-      <!-- The main sections this evaluation covers. -->
+      <!-- The general goals this evaluation covers. -->
       <fieldset v-if="!loading && tree.length" class="level-picker lg:col-span-2" :disabled="started || starting">
         <legend>{{ $t("carolina_ui.choose_sections") }}</legend>
         <p>{{ $t("carolina_ui.choose_sections_hint") }}</p>
@@ -43,7 +43,7 @@
       </fieldset>
 
       <template v-if="started">
-        <!-- Each main section is its own card with its own color; its answers are saved with that color. -->
+        <!-- Each general goal is its own card with its own color; its answers are saved with that color. -->
         <section v-for="section in selectedSections" :key="section.id" class="milestone-level lg:col-span-2"
           :style="{ '--level-color': '#' + sectionColor(section.id) }">
           <header class="milestone-level-header">
@@ -84,8 +84,8 @@
 
 <script setup>
 // The Carolina evaluation of one child (/carolina-test/:id), laid out like the Milestones one: the child, date
-// and age, the main sections to cover, then a colored card per section with its general goals, age ranges and
-// items, each answered with one of the responses.
+// and age, the general goals to cover, then a colored card per general goal with its domains, age ranges and
+// skills, each answered with one of the responses.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -123,7 +123,7 @@ const alertText = ref("");
 // item id -> answer type id
 const selected = ref({});
 
-// Main section → general goal → age range → items, each item worded for the child.
+// General goal → domain → age range → skills, each skill worded for the child.
 const tree = computed(() => sections.value.map((section) => ({
   ...section,
   goals: (section.children ?? []).map((goal) => {
@@ -141,7 +141,7 @@ const selectedSections = computed(() => tree.value.filter((section) => selectedI
 const items = computed(() => selectedSections.value.flatMap((section) => section.goals.flatMap((goal) => goal.ages.flatMap((age) => age.items))));
 const answeredCount = computed(() => items.value.filter((item) => selected.value[item.id]).length);
 
-// A different default color for each section, as the Milestones levels.
+// A different default color for each general goal, as the Milestones levels.
 const sectionColor = (id) => colors.value[id] ?? COLOR_OPTIONS[Math.max(0, tree.value.findIndex((section) => section.id === id)) % COLOR_OPTIONS.length];
 const errorText = (error) => Object.values(error.response?.data?.errors ?? {}).flat().join(" ") || error.response?.data?.message || t("request_failed_retry");
 

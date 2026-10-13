@@ -1,6 +1,6 @@
 <script setup>
-// Carolina items: each one under a main section, a general goal and an age range, with its symbol and the five
-// wordings for a boy and for a girl.
+// Carolina skills: each one under a general goal, one of its domains and an age range, with its symbol and the
+// five wordings for a boy and for a girl.
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FilterMatchMode } from '@primevue/core/api';
@@ -14,21 +14,23 @@ const { t } = useI18n();
 const toast = useToast();
 const rows = ref([]), categories = ref([]), generalGoals = ref([]);
 const loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
-const selectedMain = ref(null);
+const selectedGoal = ref(null);
 const errors = ref({});
 const form = ref({ wording: emptyCarolinaWording() });
 const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
 const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
 
-const mains = computed(() => categories.value.filter(category => !category.parent_id));
-const titleOf = (list, id) => list.find(entry => Number(entry.id) === Number(id))?.title ?? '';
+const find = (list, id) => list.find(entry => Number(entry.id) === Number(id));
+// A skill's general goal is its domain's.
+const goalOf = (item) => item.category?.general_goal_id ?? find(categories.value, item.category_id)?.general_goal_id ?? null;
 const visibleRows = computed(() => rows.value
   .map(row => ({
     ...row,
-    main_title: row.category?.title ?? titleOf(categories.value, row.category_id),
-    goal_title: row.general_goal?.title ?? titleOf(generalGoals.value, row.general_goal_id),
+    goal_id: goalOf(row),
+    domain_title: row.category?.title ?? find(categories.value, row.category_id)?.title ?? '',
+    goal_title: row.category?.general_goal?.title ?? find(generalGoals.value, goalOf(row))?.title ?? '',
   }))
-  .filter(row => !selectedMain.value || Number(row.category_id) === Number(selectedMain.value)));
+  .filter(row => !selectedGoal.value || Number(row.goal_id) === Number(selectedGoal.value)));
 
 async function fetchRows() {
   loading.value = true;
@@ -39,7 +41,7 @@ async function fetchRows() {
   finally { loading.value = false; }
 }
 function openNew() {
-  form.value = { category_id: selectedMain.value, general_goal_id: null, age_group_id: null, symbol: '', wording: emptyCarolinaWording() };
+  form.value = { general_goal_id: selectedGoal.value, category_id: null, age_group_id: null, symbol: '', wording: emptyCarolinaWording() };
   errors.value = {};
   dialog.value = true;
 }
@@ -52,8 +54,8 @@ async function edit(id) {
     if (!wording.male.skill && item.skill) wording.male.skill = item.skill;
     form.value = {
       id: item.id,
+      general_goal_id: goalOf(item),
       category_id: item.category_id,
-      general_goal_id: item.general_goal_id,
       age_group_id: item.age_group_id,
       symbol: item.symbol ?? '',
       wording,
@@ -102,19 +104,19 @@ onMounted(async () => {
     <CarolianaTab />
     <Toast />
     <DataTable :value="visibleRows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
-      :filters="filters" :globalFilterFields="['symbol', 'wording.male.skill', 'wording.female.skill', 'skill', 'goal_title', 'main_title', 'age_group.name']"
+      :filters="filters" :globalFilterFields="['symbol', 'wording.male.skill', 'wording.female.skill', 'skill', 'goal_title', 'domain_title', 'age_group.name']"
       v-can="'carolina test list'">
       <template #header>
         <div class="flex flex-wrap items-center gap-3 justify-between">
           <h1 class="text-lg font-semibold">{{ $t('carolina_ui.items') }}</h1>
           <Button v-can="'carolina test create'" :label="$t('create_button')" icon="pi pi-plus" @click="openNew" />
-          <Select v-model="selectedMain" :options="mains" optionLabel="title" optionValue="id" showClear
-            :placeholder="$t('carolina_ui.main_section')" />
+          <Select v-model="selectedGoal" :options="generalGoals" optionLabel="title" optionValue="id" showClear
+            :placeholder="$t('carolina_ui.general_goal')" />
           <InputText v-model="filters.global.value" :placeholder="$t('search')" />
         </div>
       </template>
-      <Column field="main_title" :header="$t('carolina_ui.main_section')" sortable />
       <Column field="goal_title" :header="$t('carolina_ui.general_goal')" sortable />
+      <Column field="domain_title" :header="$t('carolina_ui.domain')" sortable />
       <Column field="age_group.name" :header="$t('age_range')" sortable />
       <Column field="symbol" :header="$t('carolina_ui.symbol')" sortable>
         <template #body="{ data }"><span dir="ltr">{{ data.symbol }}</span></template>

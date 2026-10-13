@@ -1,6 +1,11 @@
 <template>
     <div>
         <div class="sawa-card grid grid-cols-1 lg:grid-cols-2 gap-4 p-2 bg-slate-100">
+            <div class="flex flex-column gap-2 lg:col-span-2">
+                    <label for="age-range-name">{{ $t('name') }}</label>
+                    <InputText id="age-range-name" required v-model="carolina.name" :placeholder='$t("name")' />
+                    <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
+                </div>
             <div class="flex flex-column gap-2">
                     <label for="username">{{ $t('from') }} ({{ $t('years_unit') }})</label>
                     <InputNumber  required v-model="carolina.from" :placeholder='$t("from")' />
