@@ -114,6 +114,12 @@ const evaluationRoutes = [
     component: () => import("../views/carolina/test-index.vue")
   },
   {
+    path: '/carolina-general-goals',
+    name: 'carolina-general-goals',
+    meta: { permission: ["carolina general goal list"] },
+    component: () => import("../views/carolina/general-goals.vue")
+  },
+  {
     path: '/carolina-test/:id', // Define the path for your addRoom route
     name: 'carolina-test',
     meta: { permission: ["carolina answer create"] },
