@@ -54,10 +54,9 @@
                 :style="{ backgroundColor: '#' + color }" :aria-label="'#' + color" @click="colors = { ...colors, [section.id]: color }"></button>
             </div>
           </header>
-          <section v-for="goal in section.goals" :key="goal.id" class="milestone-domain">
-            <h3 class="milestone-domain-title">{{ goal.title }}</h3>
-            <section v-for="age in goal.ages" :key="age.key" class="milestone-goal">
-              <h4>{{ $t("age_range") }}: <span dir="ltr">{{ age.name }}</span></h4>
+          <section v-for="age in section.ages" :key="age.id" class="milestone-domain">
+            <h3 class="milestone-domain-title">{{ $t("carolina_ui.age_range") }}: <span dir="ltr">{{ age.name }}</span> {{ $t("carolina_ui.months") }}</h3>
+            <div class="milestone-goal">
               <div v-for="item in age.items" :id="'ci-' + item.id" :key="item.id" class="milestone-question"
                 :class="{ 'is-missing': showMissing && !selected[item.id] }">
                 <p><span class="carolina-symbol" dir="ltr">{{ item.symbol }}</span>{{ item.text }}</p>
@@ -69,7 +68,7 @@
                   </label>
                 </div>
               </div>
-            </section>
+            </div>
           </section>
         </section>
 
@@ -84,8 +83,8 @@
 
 <script setup>
 // The Carolina evaluation of one child (/carolina-test/:id), laid out like the Milestones one: the child, date
-// and age, the general goals to cover, then a colored card per general goal with its domains, age ranges and
-// skills, each answered with one of the responses.
+// and age, the general goals to cover, then a colored card per general goal with its age ranges and skills, each
+// answered with one of the responses.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -123,22 +122,16 @@ const alertText = ref("");
 // item id -> answer type id
 const selected = ref({});
 
-// General goal → domain → age range → skills, each skill worded for the child.
+// General goal → age range → skills, each skill worded for the child.
 const tree = computed(() => sections.value.map((section) => ({
   ...section,
-  goals: (section.children ?? []).map((goal) => {
-    const ages = [];
-    for (const item of goal.tests ?? []) {
-      const key = item.age_group?.id ?? item.age_group_id ?? 0;
-      let age = ages.find((entry) => entry.key === key);
-      if (!age) ages.push((age = { key, name: item.age_group?.name ?? "", items: [] }));
-      age.items.push({ ...item, section_id: section.id, text: carolinaText(item, "skill", child.value) });
-    }
-    return { ...goal, ages };
-  }).filter((goal) => goal.ages.length),
-})).filter((section) => section.goals.length));
+  ages: (section.ages ?? []).map((age) => ({
+    ...age,
+    items: (age.skills ?? []).map((skill) => ({ ...skill, section_id: section.id, text: carolinaText(skill, "skill", child.value) })),
+  })),
+})));
 const selectedSections = computed(() => tree.value.filter((section) => selectedIds.value.includes(section.id)));
-const items = computed(() => selectedSections.value.flatMap((section) => section.goals.flatMap((goal) => goal.ages.flatMap((age) => age.items))));
+const items = computed(() => selectedSections.value.flatMap((section) => section.ages.flatMap((age) => age.items)));
 const answeredCount = computed(() => items.value.filter((item) => selected.value[item.id]).length);
 
 // A different default color for each general goal, as the Milestones levels.
@@ -150,7 +143,7 @@ async function load() {
   loadError.value = "";
   try {
     const [tests, types, list] = await Promise.all([
-      axios.get("api/carolina-category/list/tests"),
+      axios.get("api/carolina-skills/evaluation-tree"),
       axios.get("api/carolina-answer-type"),
       axios.get("api/child").catch(() => ({ data: {} })),
     ]);
@@ -205,16 +198,18 @@ async function save() {
   }
   saving.value = true;
   alertText.value = "";
-  const common = { child_id: childId.value, date: toDateOnly(date.value), child_age: childAge.value, evaluation_id: evaluationId.value };
   // The request being closed: the one opened from the requests list (same id either way).
   const requestId = route.query.requestId || localStorage.getItem("eavl_id");
   try {
     await axios.post("api/carolina-answer", {
+      evaluation_id: evaluationId.value,
+      child_id: childId.value,
+      date: toDateOnly(date.value),
+      child_age: childAge.value == null ? null : String(childAge.value),
       answers: items.value.map((item) => ({
-        ...common,
-        color: sectionColor(item.section_id),
-        test_id: item.id,
+        skill_id: item.id,
         answer_type_id: selected.value[item.id],
+        color: sectionColor(item.section_id),
       })),
     });
     if (requestId) axios.post(`api/evaluation-request/change-status/${requestId}`, { status: "1" }).catch(() => {});

@@ -23,6 +23,8 @@ if (tryRun(`git fetch origin ${BRANCH}`)) {
   sh(`git worktree add -B ${BRANCH} "${worktree}" origin/${BRANCH}`);
 } else {
   sh(`git worktree add --detach "${worktree}"`);
+  // The remote branch is gone: drop a stale local copy so the orphan branch can be recreated.
+  tryRun(`git branch -D ${BRANCH}`);
   sh(`git checkout --orphan ${BRANCH}`, worktree);
 }
 

@@ -20,10 +20,9 @@
     <div v-else class="space-y-12 print:space-y-6">
       <div v-for="(section, s) in sections" :key="s" class="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border">
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 print:bg-blue-600">
-          <h2 class="text-xl font-bold text-white">{{ section.title || $t("carolina_ui.title") }}</h2>
+          <h2 class="text-xl font-bold text-white">{{ section.title }}</h2>
         </div>
-        <section v-for="(goal, g) in section.goals" :key="g" class="carolina-goal print:break-inside-avoid">
-          <h3 class="carolina-goal-title">{{ $t("carolina_ui.domain") }}: {{ goal.category }}</h3>
+        <section class="carolina-goal">
           <div class="carolina-table-wrap">
             <table class="carolina-table">
               <thead>
@@ -35,7 +34,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, r) in goal.rows" :key="r">
+                <tr v-for="(row, r) in section.rows" :key="r">
                   <td v-if="row.first" :rowspan="row.span" class="carolina-age" dir="ltr">{{ row.age }}</td>
                   <td class="carolina-center" dir="ltr">{{ row.symbol }}</td>
                   <td>{{ row.skill }}</td>
@@ -52,7 +51,7 @@
 
 <script setup>
 // One Carolina evaluation's results (/carolina-resulte/:id), laid out like the Milestones report: a card per general
-// goal and, per domain, the age range, symbol, skill and response of each skill.
+// goal with the age range, symbol, skill and response of each skill answered.
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
@@ -62,27 +61,17 @@ const loading = ref(true);
 const failed = ref(false);
 const result = ref([]);
 
-// Consecutive domains of one general goal share its card.
-const sections = computed(() => {
-  const list = [];
-  for (const goal of result.value) {
-    const title = goal.main_category ?? "";
-    let section = list[list.length - 1];
-    if (!section || section.title !== title) list.push((section = { title, goals: [] }));
-    section.goals.push({
-      ...goal,
-      rows: (goal.groups ?? []).flatMap((group) => (group.tests ?? []).map((test, i) => ({ ...test, age: group.age, first: i === 0, span: group.tests.length }))),
-    });
-  }
-  return list;
-});
+const sections = computed(() => result.value.map((goal) => ({
+  title: goal.category,
+  rows: (goal.groups ?? []).flatMap((group) => (group.tests ?? []).map((test, i) => ({ ...test, age: group.age, first: i === 0, span: group.tests.length }))),
+})));
 const printPage = () => window.print();
 
 async function load() {
   loading.value = true;
   failed.value = false;
   try {
-    result.value = (await axios.get(`api/carolina-category/flow-chart/${route.params.id}`)).data.data ?? [];
+    result.value = (await axios.get(`api/carolina-answer/result/${route.params.id}`)).data.data ?? [];
   } catch {
     failed.value = true;
   } finally {
