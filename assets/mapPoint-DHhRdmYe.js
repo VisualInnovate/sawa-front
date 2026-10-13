@@ -1,0 +1,1 @@
+const t={lat:31.9539,lng:35.9106},u=e=>{const s=parseFloat(e==null?void 0:e.latitude),r=parseFloat(e==null?void 0:e.longitude);return Number.isFinite(s)&&Number.isFinite(r)?{lat:s,lng:r}:t};export{u as m};
