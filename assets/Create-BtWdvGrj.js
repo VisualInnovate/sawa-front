@@ -1,1 +1,0 @@
-import{R as r}from"./RoleForm-baixtrBQ.js";import{k as t,o,D as a,ag as c}from"./main-DQJ22kD8.js";import"./PermissionCards-4tgEBiIg.js";const p={__name:"Create",setup(s){return(i,n)=>{const e=c("can");return t((o(),a(r,null,null,512)),[[e,"roles create"]])}}};export{p as default};
