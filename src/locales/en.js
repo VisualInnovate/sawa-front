@@ -1661,6 +1661,8 @@ export default {
     item: "Carolina item",
     main_section: "Main section",
     general_goal: "General goal",
+    general_goals: "General goals",
+    no_general_goals: "This section has no general goals; add them in the General goals tab.",
     symbol: "Symbol",
     skill: "Skill",
     response: "Response",

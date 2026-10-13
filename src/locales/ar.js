@@ -1698,6 +1698,8 @@ export default {
     item: "بند كارولينا",
     main_section: "القسم الرئيسي",
     general_goal: "الهدف العام",
+    general_goals: "الأهداف العامة",
+    no_general_goals: "لا توجد أهداف عامة لهذا القسم، أضفها من تبويب الأهداف العامة.",
     symbol: "الرمز",
     skill: "المهارة",
     response: "الاستجابة",

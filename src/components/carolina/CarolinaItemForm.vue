@@ -1,7 +1,7 @@
 <script setup>
-// A Carolina item: main section, general goal (its sub-category), age range and symbol, then the five wordings
-// for a boy and for a girl (with {{name}} for the child's name). v-model is
-// { main_id, category_id, age_group_id, symbol, wording: { male, female } }.
+// A Carolina item: main section, general goal (from the general goals tab), age range and symbol, then the five
+// wordings for a boy and for a girl (with {{name}} for the child's name). v-model is
+// { category_id (the main section), general_goal_id, age_group_id, symbol, wording: { male, female } }.
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import axios from 'axios';
 import NameTokenHint from '@/components/NameTokenHint.vue';
@@ -9,8 +9,9 @@ import { carolinaFields } from '@/utils/carolina';
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
-  // Every Carolina category: main sections have no parent_id, general goals point to theirs.
+  // Every Carolina category (the main sections are those without a parent) and every general goal.
   categories: { type: Array, default: () => [] },
+  generalGoals: { type: Array, default: () => [] },
   errors: { type: Object, default: () => ({}) },
   saving: Boolean,
 });
@@ -20,7 +21,7 @@ const gender = ref('male');
 const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male'));
 
 const mains = computed(() => props.categories.filter(category => !category.parent_id));
-const goals = computed(() => props.categories.filter(category => category.parent_id && Number(category.parent_id) === Number(props.modelValue.main_id)));
+const goals = computed(() => props.generalGoals.filter(goal => Number(goal.category_id) === Number(props.modelValue.category_id)));
 const ageGroups = ref([]);
 const loadingAges = ref(false);
 
@@ -31,7 +32,7 @@ const updateText = (key, value) => update({
   wording: { ...props.modelValue.wording, [gender.value]: { ...props.modelValue.wording[gender.value], [key]: value } },
 });
 
-// The age ranges of the chosen general goal.
+// The age ranges of the chosen main section.
 async function loadAges(categoryId) {
   ageGroups.value = [];
   if (!categoryId) return;
@@ -47,8 +48,7 @@ async function loadAges(categoryId) {
 }
 watch(() => props.modelValue.category_id, loadAges, { immediate: true });
 
-const changeMain = (value) => update({ main_id: value, category_id: null, age_group_id: null });
-const changeGoal = (value) => update({ category_id: value, age_group_id: null });
+const changeMain = (value) => update({ category_id: value, general_goal_id: null, age_group_id: null });
 
 watch(() => props.errors, errors => {
   const key = Object.keys(errors).find(key => key.startsWith('wording.'));
@@ -83,15 +83,18 @@ onBeforeUnmount(() => clearTimeout(undoTimer));
     <div class="selection-fields">
       <div class="form-field">
         <label for="carolina-main">{{ $t('carolina_ui.main_section') }}</label>
-        <Select inputId="carolina-main" :modelValue="modelValue.main_id" :options="mains" optionLabel="title" optionValue="id"
-          filter fluid :disabled="saving" :placeholder="$t('carolina_ui.main_section')" @update:modelValue="changeMain" />
+        <Select inputId="carolina-main" :modelValue="modelValue.category_id" :options="mains" optionLabel="title" optionValue="id"
+          filter fluid :disabled="saving" :invalid="Boolean(errors.category_id)" :placeholder="$t('carolina_ui.main_section')"
+          @update:modelValue="changeMain" />
+        <small v-if="errors.category_id" class="field-error">{{ firstError('category_id') }}</small>
       </div>
       <div class="form-field">
         <label for="carolina-goal">{{ $t('carolina_ui.general_goal') }}</label>
-        <Select inputId="carolina-goal" :modelValue="modelValue.category_id" :options="goals" optionLabel="title" optionValue="id"
-          filter fluid :disabled="saving || !modelValue.main_id" :invalid="Boolean(errors.category_id)"
-          :placeholder="$t('carolina_ui.general_goal')" @update:modelValue="changeGoal" />
-        <small v-if="errors.category_id" class="field-error">{{ firstError('category_id') }}</small>
+        <Select inputId="carolina-goal" :modelValue="modelValue.general_goal_id" :options="goals" optionLabel="title" optionValue="id"
+          filter fluid :disabled="saving || !modelValue.category_id" :invalid="Boolean(errors.general_goal_id)"
+          :placeholder="$t('carolina_ui.general_goal')" :emptyMessage="$t('carolina_ui.no_general_goals')"
+          @update:modelValue="update({ general_goal_id: $event })" />
+        <small v-if="errors.general_goal_id" class="field-error">{{ firstError('general_goal_id') }}</small>
       </div>
       <div class="form-field">
         <label for="carolina-age">{{ $t('age_range') }}</label>
