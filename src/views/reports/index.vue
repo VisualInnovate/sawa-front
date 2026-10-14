@@ -471,6 +471,7 @@ onMounted(loadChildren);
 .type-3 { --tone: #b45309; --tone-soft: #fef3c7; }
 .type-4 { --tone: #4f46e5; --tone-soft: #e0e7ff; }
 .type-5 { --tone: #0369a1; --tone-soft: #e0f2fe; }
+.type-6 { --tone: #9d174d; --tone-soft: #fce7f3; }
 .rp-type[class*="type-"] {
   background: var(--tone-soft);
   color: var(--tone);

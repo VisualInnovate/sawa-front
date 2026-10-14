@@ -7,6 +7,7 @@ export const MILESTONE = 2;
 export const BARRIER = 3;
 export const ABLLS = 4;
 export const CAROLINA = 5;
+export const TRANSITION = 6;
 
 /** A report takes at most this many evaluations of one type (the VB-MAPP form has four test columns). */
 export const MAX_PER_GROUP = 4;
@@ -78,7 +79,7 @@ export const typeLabel = (type, t) =>
   Number(type) === SIDE_PROFILE ? t("ereport.side_profile") : Number(type) === MILESTONE ? "VB-MAPP" : getEvaluationTypeLabel(type, t, "");
 
 export const typeIcon = (type) =>
-  ({ 1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap" })[Number(type)] || "pi pi-file";
+  ({ 1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap", 6: "pi pi-directions" })[Number(type)] || "pi pi-file";
 
 /**
  * Items in blocks per type — `group` from the API: "t2" for a type, "s8" for one side-profile dimension —

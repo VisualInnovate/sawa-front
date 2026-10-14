@@ -1513,6 +1513,7 @@ export default {
     point_text: "اكتب النقطة هنا",
     remove_point: "حذف النقطة",
     add_point: "إضافة نقطة",
+    transition_points: "تفسير النقاط",
     add_symbol: "إضافة رمز جديد",
     output_types: "نوع المحتوى",
     output_types_hint: "اختر تقريرًا أو خطة أو كليهما قبل إعداد التقرير.",
