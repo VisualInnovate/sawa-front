@@ -1476,6 +1476,7 @@ export default {
     point_text: "Write the point here",
     remove_point: "Delete point",
     add_point: "Add point",
+    transition_points: "Score interpretation",
     add_symbol: "Add new symbol",
     output_types: "Content type",
     output_types_hint: "Choose a report, a plan, or both before preparing the report.",

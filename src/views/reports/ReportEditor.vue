@@ -24,9 +24,10 @@ import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
 import CarolinaChart from "@/components/reports/CarolinaChart.vue";
+import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import {
-  ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
   isBehavioural, isFemale, typeIcon, typeLabel, ymd,
 } from "@/components/reports/reportUtils";
 
@@ -124,7 +125,20 @@ function defaults(data) {
     // Tracking: the goals left out of the print, by goal id.
     trackingHidden: [],
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
+    // Transition: the points of the newest chosen evaluation ("حصل في السؤال: الإجابة"), editable.
+    transitionPoints: Object.fromEntries(groupItems(data.items).filter((group) => group.type === TRANSITION)
+      .map((group) => [group.group, transitionPoints(newestOf(group.items), data.child)])),
   };
+}
+
+const newestOf = (list) => [...list].sort(byDate).slice(-1)[0];
+
+function transitionPoints(item, person) {
+  const verb = isFemale(person?.gender) ? "حصلت" : "حصل";
+  return [...(item?.result ?? [])]
+    .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0) || a.id - b.id)
+    .filter((row) => row.answer)
+    .map((row) => `${verb} في ${row.title}: ${row.answer}`);
 }
 
 function readDraft() {
@@ -145,6 +159,9 @@ function applyDraft(base, saved) {
   if (Array.isArray(saved.trackingHidden)) base.trackingHidden = saved.trackingHidden.map(Number);
   for (const key of Object.keys(base.behaviors)) {
     if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
+  }
+  for (const key of Object.keys(base.transitionPoints)) {
+    if (Array.isArray(saved.transitionPoints?.[key])) base.transitionPoints[key] = saved.transitionPoints[key].map(String);
   }
   return base;
 }
@@ -840,12 +857,13 @@ function back() {
           <p class="rx-intro">{{ $t("ereport.form_intro", { name: child.name, evaluation: section.label }) }}</p>
 
           <!-- The test tables belong to the VB-MAPP family only (barriers here). -->
-          <TestTables v-if="section.type === BARRIER" :child="child" :rows="barrierRows(section.tests)" />
+          <TestTables v-if="section.type === BARRIER || section.type === TRANSITION" :child="child" :rows="barrierRows(section.tests)" />
 
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
           <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
           <CarolinaChart v-else-if="section.type === CAROLINA" :tests="section.tests" />
+          <TransitionChart v-else-if="section.type === TRANSITION" :tests="section.tests" />
 
           <!-- The newest chosen barriers test as a table: barrier, the chosen answer, its number. -->
           <table v-if="section.type === BARRIER && barrierAnswers(section).length" class="rx-table rx-barrier-answers">
@@ -884,6 +902,28 @@ function back() {
               </tbody>
             </table>
           </template>
+
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
+        <!-- Transition: what each answer of the newest chosen test means. -->
+        <section v-if="showCharts && section.type === TRANSITION && edits.transitionPoints?.[section.group]" class="rx-page">
+          <header class="rx-head">
+            <img :src="sawaLogo" alt="Sawa" />
+            <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+
+          <h2 class="rx-band">{{ $t("ereport.transition_points") }}</h2>
+          <ul class="rx-plan-points rx-transition-points">
+            <li v-for="(point, p) in edits.transitionPoints[section.group]" :key="p">
+              <EditableText v-model="edits.transitionPoints[section.group][p]" block multiline />
+              <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
+                @click="edits.transitionPoints[section.group].splice(p, 1)"><i class="pi pi-trash" aria-hidden="true" /></button>
+            </li>
+          </ul>
+          <button type="button" class="rx-plan-control rx-add-point" @click="edits.transitionPoints[section.group].push('')">
+            <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
+          </button>
 
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
