@@ -1,1 +1,0 @@
-import{R as r}from"./RoleForm-DNFU2WqV.js";import{k as t,o,D as a,ag as c}from"./main-Ds5Af5Qw.js";import"./PermissionCards-YgCf69qf.js";const p={__name:"Create",setup(s){return(i,n)=>{const e=c("can");return t((o(),a(r,null,null,512)),[[e,"roles create"]])}}};export{p as default};

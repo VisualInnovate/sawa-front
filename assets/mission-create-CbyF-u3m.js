@@ -1,0 +1,1 @@
+import{M as o}from"./MissionForm-Ctf1Mq4o.js";import{o as r,D as e}from"./main-D0F0w4q6.js";import"./ablls-CxmLk8WI.js";const n={__name:"mission-create",setup(s){return(t,a)=>(r(),e(o))}};export{n as default};
