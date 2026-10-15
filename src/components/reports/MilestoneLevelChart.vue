@@ -31,7 +31,8 @@ const legendItems = computed(() => {
   const seen = new Map();
   for (const subtest of subtests.value) {
     for (const question of subtest.questions ?? []) {
-      for (const mark of question.marks ?? []) if (mark.color && !seen.has(mark.n)) seen.set(mark.n, mark.color);
+      // A re-asked sub-goal's earlier ½ (n - 0.5) belongs to the evaluation before, not to a numbered test.
+      for (const mark of question.marks ?? []) if (mark.color && Number.isInteger(mark.n) && !seen.has(mark.n)) seen.set(mark.n, mark.color);
     }
   }
   return [...seen.entries()].sort((a, b) => a[0] - b[0]).map(([n, color]) => ({ n, color }));

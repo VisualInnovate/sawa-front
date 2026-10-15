@@ -21,6 +21,12 @@ const barriers = computed(() => {
 });
 
 const answer = (column, barrier) => (props.tests[column]?.result ?? []).find((row) => row.subtest === barrier) ?? null;
+const color = (column, row) => `#${String(row?.color || props.tests[column]?.form?.colors?.[0] || "135c65").replace("#", "")}`;
+// A chosen test that scored this barrier 0: the number under its column is tinted (faded) in its color.
+const zero = (column, barrier) => {
+  const row = answer(column, barrier);
+  return Boolean(row) && Number(row.score) === 0;
+};
 const fill = (column, barrier, level) => {
   const row = answer(column, barrier);
   return row && Number(row.score) >= level ? `#${row.color || props.tests[column]?.form?.colors?.[0] || "135c65"}` : "transparent";
@@ -37,7 +43,10 @@ const fill = (column, barrier, level) => {
           <span v-for="column in COLUMNS" :key="column" class="bc-cell" :style="{ background: fill(column, barrier, level) }" />
         </template>
         <span />
-        <span v-for="column in COLUMNS" :key="'k' + column" class="bc-test">{{ column + 1 }}</span>
+        <span v-for="column in COLUMNS" :key="'k' + column" class="bc-test">
+          <i v-if="zero(column, barrier)" class="bc-zero" :style="{ background: color(column, answer(column, barrier)) }" />
+          <b>{{ column + 1 }}</b>
+        </span>
       </div>
     </section>
   </div>
@@ -93,6 +102,16 @@ const fill = (column, barrier, level) => {
   margin: 0 -1px -1px 0;
 }
 .bc-test {
+  position: relative;
   padding-top: 2px;
+}
+.bc-test b {
+  position: relative;
+  font-weight: inherit;
+}
+.bc-zero {
+  position: absolute;
+  inset: 2px 1px 0;
+  opacity: 0.4;
 }
 </style>

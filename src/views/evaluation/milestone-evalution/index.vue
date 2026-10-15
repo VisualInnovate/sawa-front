@@ -92,6 +92,19 @@
   
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.notes">{{ error.notes[0] }}</div>
               </div>  -->
+        <!-- One color for the whole evaluation (all its levels, also when continued); the last evaluation's color is locked. -->
+        <div v-if="answer.child_id && answer.child_age != null" class="flex flex-column gap-2">
+          <label>{{ $t("color") }}</label>
+          <div class="milestone-colors">
+            <button v-for="option in colorOptions" :key="option" type="button"
+              :class="{ selected: color === option, blocked: isBlockedColor(option) }"
+              :style="{ backgroundColor: '#' + option }" :disabled="isBlockedColor(option) || colorLocked || strart_evaluate"
+              :title="isBlockedColor(option) ? $t('milestone_color_used_last') : ''"
+              :aria-label="'#' + option + (isBlockedColor(option) ? ' — ' + $t('milestone_color_used_last') : '')"
+              @click="color = option"></button>
+          </div>
+          <small v-if="colorLocked" class="text-gray-500">{{ $t("milestone_color_kept") }}</small>
+        </div>
         <div
           v-if="answer.child_id && answer.child_age != null"
           class="flex flex-column gap-2"
@@ -100,12 +113,16 @@
           <Button
             @click="createevalutae"
             :loading="starting"
-            :disabled="questionsLoading || !selectedLevelGroups.length || strart_evaluate"
+            :disabled="questionsLoading || !selectedLevelGroups.length || strart_evaluate || !color"
             class="w-full"
             :label="continuing ? $t('milestone_continue') : $t('strart_evaluate')"
           ></Button>
         </div>
 
+        <!-- Only what the last evaluation scored 0 or ½ (or never asked) is asked again; its 1s are carried over. -->
+        <Message v-if="!questionsLoading && carriedCount" severity="info" :closable="false" class="lg:col-span-2">
+          {{ $t("milestone_carried_hint", { count: carriedCount }) }}
+        </Message>
         <Message v-if="questionsLoading" class="lg:col-span-2">{{ $t('loading') }}</Message>
         <Message v-else-if="continuing && !continuing.missing_level_ids.length" severity="success" class="lg:col-span-2">{{ $t('milestone_nothing_missing') }}</Message>
         <Message v-else-if="answer.child_age != null && !allquestion.length" severity="warn" class="lg:col-span-2">{{ $t('no_records_found') }}</Message>
@@ -128,22 +145,13 @@
               {{ $t('milestone_score_box_' + String(score).replace('.', '_')) }}
             </span>
           </div>
-          <!-- Each level is its own card with its own color; answers are saved with their level's color. -->
+          <!-- Each level is its own card, all in the evaluation's one color. -->
           <section v-for="level in selectedLevelGroups" :key="level.id" class="milestone-level lg:col-span-2"
-            :style="{ '--level-color': '#' + levelColor(level.id) }">
+            :style="{ '--level-color': '#' + color }">
             <header class="milestone-level-header">
               <h2>{{ level.title }}</h2>
-              <div class="milestone-level-colors">
-                <span>{{ $t("color") }}</span>
-                <!-- The color of the last evaluation in this level is locked, so the report tells the tests apart. -->
-                <button v-for="color in colorOptions" :key="color" type="button"
-                  :class="{ selected: levelColor(level.id) === color, blocked: isBlockedColor(level.id, color) }"
-                  :style="{ backgroundColor: '#' + color }" :disabled="isBlockedColor(level.id, color)"
-                  :title="isBlockedColor(level.id, color) ? $t('milestone_color_used_last') : ''"
-                  :aria-label="'#' + color + (isBlockedColor(level.id, color) ? ' — ' + $t('milestone_color_used_last') : '')"
-                  @click="setLevelColor(level.id, color)"></button>
-              </div>
             </header>
+            <p v-if="!level.blocks.length" class="milestone-all-carried">{{ $t("milestone_level_all_carried") }}</p>
             <template v-for="block in level.blocks" :key="block.key">
               <!-- The EESA domain is scored through its form, once in each level, in the domain's place. -->
               <section v-if="block.eesa" class="milestone-domain">
@@ -159,7 +167,12 @@
                 <section v-for="goal in block.goals" :key="goal.id" class="milestone-goal">
                   <h4>{{ goal.title }}</h4>
                   <div v-for="question in goal.questions" :key="question.id" class="milestone-question">
-                    <p>{{ question.title }}</p>
+                    <p>
+                      {{ question.title }}
+                      <span v-if="question.previous" class="milestone-previous" :style="{ '--prev': '#' + (question.previous.color || '94a3b8') }">
+                        {{ $t("milestone_previous_answer", { score: question.previous.score }) }}
+                      </span>
+                    </p>
                     <div class="milestone-scores">
                       <!-- Each answer with the box it draws in the results chart: 0 empty, 0.5 lower half, 1 full. -->
                       <label v-for="score in [0, 0.5, 1]" :key="score" :title="$t('milestone_score_box_' + String(score).replace('.', '_'))">
@@ -253,10 +266,10 @@ export default {
       levels: [],
       selectedLevelIds: [],
       colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
-      // level id -> chosen color (hex without #)
-      levelColors: {},
-      // level id -> the color the child's last evaluation used in that level (not allowed again)
-      lastColors: {},
+      // The evaluation's one color (hex without #), for every level.
+      color: null,
+      // The color of the child's last evaluation (not allowed again).
+      lastColor: null,
       // The EESA form, when the child's levels include its domain.
       // levels: [{ level_id, title, previous }], one form per level.
       eesa: { show: false, domain: null, levels: [] },
@@ -298,6 +311,8 @@ export default {
         const levelId = question.subtest?.level_id ?? 'other'
         if (!levels.has(levelId)) levels.set(levelId, { id: levelId, title: titles.get(levelId), domains: new Map() })
         const level = levels.get(levelId)
+        // Scored 1 in the last evaluation: carried over, not asked again.
+        if (question.carried) continue
         const domainId = question.question_type_id ?? 'other'
         if (!level.domains.has(domainId)) level.domains.set(domainId, { id: domainId, title: question.question_type?.title || this.$t('milestone_domains'), goals: new Map() })
         const domain = level.domains.get(domainId)
@@ -322,6 +337,14 @@ export default {
         // Continuing: only the levels this evaluation still misses.
         .filter(level => !this.continuing || this.continuing.missing_level_ids.map(String).includes(String(level.id)))
     },
+    carriedCount() {
+      const levels = this.continuing ? this.continuing.missing_level_ids.map(String) : null
+      return this.allquestion.filter(question => question.carried && (!levels || levels.includes(String(question.subtest?.level_id)))).length
+    },
+    // The evaluation being continued keeps the color it was started with.
+    colorLocked() {
+      return Boolean(this.continuing?.color)
+    },
     questionLevels() {
       return Object.fromEntries(this.allquestion.map(question => [question.id, question.subtest?.level_id ?? 'other']))
     },
@@ -336,22 +359,16 @@ export default {
       if (!option) return "";
       return option.program?.name || option.name || "";
     },
-    // Until one is chosen, each level gets a different default color.
-    levelColor(levelId) {
-      if (this.levelColors[levelId] && !this.isBlockedColor(levelId, this.levelColors[levelId])) return this.levelColors[levelId];
-      const index = Math.max(0, this.levelGroups.findIndex(level => level.id === levelId));
-      const free = this.colorOptions.filter(color => !this.isBlockedColor(levelId, color));
-      return free[index % free.length] ?? this.colorOptions[index % this.colorOptions.length];
+    isBlockedColor(color) {
+      return !this.colorLocked && String(this.lastColor ?? '').toUpperCase() === String(color).toUpperCase();
     },
-    isBlockedColor(levelId, color) {
-      return String(this.lastColors[levelId] ?? '').toUpperCase() === String(color).toUpperCase();
+    // The first color the last evaluation did not use, until one is chosen.
+    defaultColor() {
+      if (this.color && !this.isBlockedColor(this.color)) return
+      this.color = this.colorOptions.find(option => !this.isBlockedColor(option)) ?? this.colorOptions[0]
     },
     setEesaBoxes(levelId, boxes) {
       this.eesaBoxes = { ...this.eesaBoxes, [levelId]: boxes };
-    },
-    setLevelColor(levelId, color) {
-      if (this.isBlockedColor(levelId, color)) return;
-      this.levelColors = { ...this.levelColors, [levelId]: color };
     },
     submit() {},
     day(value) {
@@ -403,7 +420,7 @@ export default {
         // The levels are those of the child's age when the evaluation started, however late it is continued.
         const levelAge = this.continuing?.start_age ?? age
         const [{ data }, { data: eesa }] = await Promise.all([
-          axios.get(`api/milestone-answers/sub-goals/${levelAge}`, { params: { child_id: this.answer.child_id } }),
+          axios.get(`api/milestone-answers/sub-goals/${levelAge}`, { params: { child_id: this.answer.child_id, evaluation_id: this.continuing ? this.answer.evaluation_id : undefined } }),
           // Without the EESA endpoint (older server) the evaluation still loads, just without the form.
           axios.get(`api/milestone-answers/eesa/${levelAge}`, { params: { child_id: this.answer.child_id } }).catch(() => ({ data: null })),
         ])
@@ -441,9 +458,14 @@ export default {
       this.saving = true;
       this.error = {};
       try {
-        const answers = this.answers.answers
-          .filter(answer => answer && this.selectedLevelIds.map(String).includes(String(this.questionLevels[answer.question_id])))
-          .map((answer) => ({ ...answer, color: this.levelColor(this.questionLevels[answer.question_id]) }));
+        const inSelected = (questionId) => this.selectedLevelIds.map(String).includes(String(this.questionLevels[questionId]));
+        // The carried 1s go along as 1 (the server keeps them in the color they were scored in).
+        const carried = this.allquestion.filter(question => question.carried && inSelected(question.id)).map(question => ({
+          question_id: question.id, score: 1, child_id: this.answer.child_id, date: moment(this.answer.date).format("YYYY-MM-DD"),
+          child_age: this.answer.child_age, evaluation_id: this.answer.evaluation_id,
+        }));
+        const answers = [...this.answers.answers.filter(answer => answer && inSelected(answer.question_id)), ...carried]
+          .map((answer) => ({ ...answer, color: this.color }));
         await axios.post("/api/milestone-answers", {
           student_program_id: this.answers.student_program_id,
           request_id: this.$route.query.requestId || null,
@@ -465,7 +487,7 @@ export default {
         this.error = error.response?.data?.errors || {};
         this.alert_text =
           Object.values(this.error).flat().join(" ") ||
-          (error.response?.status === 422 && error.response?.data?.data?.level_id ? this.$t("milestone_color_used_last_error") : "") ||
+          (error.response?.status === 422 && error.response?.data?.data?.color ? this.$t("milestone_color_used_last_error") : "") ||
           this.$t("request_failed_retry");
       } finally {
         this.saving = false;
@@ -480,6 +502,7 @@ export default {
           if (Number(data.child_id) === Number(this.answer.child_id)) {
             this.continuing = data
             this.answer.evaluation_id = evaluationId
+            if (data.color) this.color = String(data.color).replace('#', '').toUpperCase()
           }
         } else {
           const { data } = await axios.get(`api/milestone-answers/pending/${this.answer.child_id}`)
@@ -499,8 +522,8 @@ export default {
         // Without the endpoint (older server) every color stays available.
         axios
           .get(`api/milestone-answers/last-colors/${this.answer.child_id}`)
-          .then(({ data }) => { this.lastColors = data?.levels ?? {}; })
-          .catch(() => {});
+          .then(({ data }) => { this.lastColor = data?.color ?? null; this.defaultColor(); })
+          .catch(() => { this.defaultColor(); });
         axios
           .get("api/mileston-levels")
           .then(({ data }) => {
@@ -571,6 +594,15 @@ export default {
 .milestone-level { border: 2px solid var(--level-color); border-radius: 16px; overflow: hidden; }
 .milestone-level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding: 1rem 1.25rem; background: var(--level-color); color: #fff; }
 .milestone-level-header h2 { margin: 0; font-weight: 700; font-size: 1.25rem; }
+.milestone-colors { display: flex; align-items: center; gap: .5rem; min-height: 2.6rem; }
+.milestone-colors button { width: 30px; height: 30px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }
+.milestone-colors button:hover:not(:disabled) { transform: scale(1.1); }
+.milestone-colors button.selected { border-color: #333; box-shadow: 0 0 0 2px #fff inset; }
+.milestone-colors button:disabled:not(.selected) { opacity: .5; cursor: default; }
+.milestone-colors button.blocked { position: relative; cursor: not-allowed; opacity: .35; }
+.milestone-colors button.blocked::after { content: ""; position: absolute; inset: 45% -2px auto; height: 2px; background: #333; transform: rotate(-45deg); }
+.milestone-all-carried { margin: 0; padding: 1rem 1.25rem; color: var(--sawa-muted); }
+.milestone-previous { display: inline-block; margin-inline-start: .5rem; padding: .1rem .5rem; border-radius: 999px; border: 1px solid var(--prev); color: #334155; font-size: .8rem; white-space: nowrap; }
 .milestone-level-colors { display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem; border-radius: 10px; background: rgba(255, 255, 255, .9); color: #333; }
 .milestone-level-colors span { font-size: .85rem; margin-inline-end: .25rem; }
 .milestone-level-colors button { width: 26px; height: 26px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }

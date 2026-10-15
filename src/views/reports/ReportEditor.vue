@@ -6,7 +6,7 @@
 // · then what the chosen outputs ask for:
 //   report   = case description page (with VB-MAPP: the description of one level, picked on screen, plus free text;
 //              otherwise free text), one VB-MAPP form page per chosen test (its tables, a row per level, and its own
-//              level charts) with the newest test's strengths/weaknesses (read only), and the other types' charts
+//              level charts) with the newest test's strengths/weaknesses (edited here, saved on the server), and the other types' charts
 //              (barriers with their test tables). The behaviour-problems table belongs to a behavioural evaluation.
 //   plan     = the goals written for the newest chosen VB-MAPP test's weaknesses (only the goals are shown), edited here and saved on the server.
 //   tracking = the goals of the chosen tests' saved plans, as the centre's tracking form: one table per general goal,
@@ -16,7 +16,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
-import { createSummaryTables } from "@/components/reports/summaryDraft";
+import { createSummaryTables, newSummaryPoint } from "@/components/reports/summaryDraft";
 import { CASE_LEVELS, caseDescription } from "@/components/reports/caseDescriptions";
 import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
@@ -28,7 +28,7 @@ import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import {
   ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
-  isBehavioural, isFemale, typeIcon, typeLabel, ymd,
+  isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel, ymd,
 } from "@/components/reports/reportUtils";
 
 const { t } = useI18n();
@@ -194,6 +194,7 @@ async function load() {
     report.value = data;
     edits.value = applyDraft(defaults(data), readDraft());
     document.title = `${t("ereport.report_title")} - ${data.child?.name ?? ""}`;
+    if (showCharts.value) loadSummary();
     if (showPlan.value) loadPlan();
     if (showTracking.value) loadTracking();
   } catch {
@@ -208,6 +209,7 @@ function open() {
   window.scrollTo(0, 0);
   report.value = null;
   edits.value = null;
+  summary.value = null;
   plan.value = null;
   tracking.value = null;
   if (!keys.value.length) {
@@ -243,7 +245,7 @@ const mergedLevels = (tests) => {
         if (!domain) target.subtests.push((domain = { subtest_name: subtest.subtest_name, subtest_symbol: subtest.subtest_symbol, questions: [] }));
         (subtest.questions ?? []).forEach((question, q) => {
           domain.questions[q] ??= { question: question.question, marks: [] };
-          domain.questions[q].marks.push({ n: index + 1, color: question.answer_color, score: question.answer_score });
+          domain.questions[q].marks.push(...milestoneMarks(question, index + 1));
         });
       }
     }
@@ -311,9 +313,75 @@ const highestLevel = computed(() => Math.min(3, Math.max(1, ...(milestoneSection
 const caseLevel = computed(() => edits.value?.caseLevel ?? (milestoneSection.value?.newest?.result?.levels?.length ? highestLevel.value : 1));
 const caseParagraphs = (level) => caseDescription(level, { female: female.value, name: shortName.value, age: caseAge(caseItem.value) });
 
-// The report's strengths/weaknesses of the newest VB-MAPP test, as the evaluation gave them (read only).
-const reportSummary = computed(() => milestoneSection.value
-  ? createSummaryTables(milestoneSection.value.newest).filter((table) => isLevelShown(table.key)) : []);
+// ---- strengths/weaknesses (saved on the server, per VB-MAPP evaluation) ----------------------------
+
+// The newest VB-MAPP test's strengths/weaknesses: as edited and saved for it, or else as the evaluation gave them.
+// { evaluationId, tables: [{ key, title, rows: [{ symbol, strengths: [point], weaknesses: [point] }] }], saved, dirty, saving, error, loading }
+const summary = ref(null);
+
+const summaryFromServer = (tables) => tables.map((table) => ({
+  key: String(table.key ?? ""), title: table.title ?? "",
+  rows: (table.rows ?? []).map((row) => ({
+    symbol: row.symbol ?? "",
+    strengths: (row.strengths ?? []).map((text) => newSummaryPoint(text)),
+    weaknesses: (row.weaknesses ?? []).map((text) => newSummaryPoint(text)),
+  })),
+}));
+
+async function loadSummary() {
+  const test = milestoneSection.value?.newest;
+  if (!test) return;
+  summary.value = { evaluationId: test.id, tables: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+  try {
+    const { data } = await axios.get(`api/reports/summaries/${test.id}`);
+    summary.value.tables = data.summary ? summaryFromServer(data.summary.tables) : createSummaryTables(test);
+    summary.value.saved = Boolean(data.summary);
+  } catch {
+    summary.value.tables = createSummaryTables(test);
+  } finally {
+    summary.value.loading = false;
+  }
+}
+
+const reportSummary = computed(() => (summary.value?.tables ?? []).filter((table) => isLevelShown(table.key)));
+
+function touchSummary() {
+  if (summary.value) summary.value.dirty = true;
+}
+function addSummaryPoint(row, kind) {
+  row[kind].push(newSummaryPoint(""));
+  touchSummary();
+}
+function removeSummaryPoint(row, kind, point) {
+  row[kind].splice(row[kind].indexOf(point), 1);
+  touchSummary();
+}
+// The rows that print for a kind (those with points), numbered in order.
+const summaryNumber = (table, kind, row) => table.rows.filter((item) => item[kind].length).indexOf(row) + 1;
+
+async function saveSummary() {
+  if (!summary.value || summary.value.saving) return;
+  summary.value.saving = true;
+  summary.value.error = false;
+  try {
+    const tables = summary.value.tables.map((table) => ({
+      key: table.key, title: table.title,
+      rows: table.rows.map((row) => ({
+        symbol: row.symbol,
+        strengths: row.strengths.map((point) => point.text).filter((text) => text.trim()),
+        weaknesses: row.weaknesses.map((point) => point.text).filter((text) => text.trim()),
+      })),
+    }));
+    const { data } = await axios.put(`api/reports/summaries/${summary.value.evaluationId}`, { tables });
+    summary.value.tables = summaryFromServer(data.summary.tables);
+    summary.value.saved = true;
+    summary.value.dirty = false;
+  } catch {
+    summary.value.error = true;
+  } finally {
+    summary.value.saving = false;
+  }
+}
 
 // ---- plan (saved on the server, per VB-MAPP evaluation) --------------------------------------------
 
@@ -507,6 +575,10 @@ function back() {
         </label>
       </fieldset>
       <div class="rx-toolbar-actions">
+        <span v-if="summary && !summary.loading" class="rx-save-state" :class="{ 'is-dirty': summary.dirty || !summary.saved, 'is-error': summary.error }">
+          {{ summary.error ? $t("ereport.save_failed") : summary.dirty || !summary.saved ? $t("ereport.summary_unsaved") : $t("ereport.summary_saved") }}
+        </span>
+        <Button v-if="summary && !summary.loading" :label="$t('ereport.save_summary')" icon="pi pi-save" :loading="summary.saving" data-no-request-spinner @click="saveSummary" />
         <span v-if="plan && !plan.loading" class="rx-save-state" :class="{ 'is-dirty': plan.dirty || !plan.saved, 'is-error': plan.error }">
           {{ plan.error ? $t("ereport.save_failed") : plan.dirty || !plan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}
         </span>
@@ -697,7 +769,7 @@ function back() {
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
 
-          <!-- Report: the newest test's strengths and weaknesses as the evaluation gave them; each level its own page -->
+          <!-- Report: the newest test's strengths and weaknesses, edited here and saved on the server; each level its own page -->
           <template v-if="showCharts">
           <section v-for="table in reportSummary.length ? reportSummary : [null]" :key="'summary-' + (table?.key ?? 'none')" class="rx-page">
             <header class="rx-head">
@@ -717,9 +789,21 @@ function back() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(row, r) in table.rows.filter((item) => item[kind].length)" :key="r">
-                      <td class="rx-sum-num">{{ r + 1 }}</td>
-                      <td><ul class="rx-plan-points is-static"><li v-for="point in row[kind]" :key="point.id">{{ point.text }}</li></ul></td>
+                    <!-- A row without points shows on screen only (to add one) and is left out of the print. -->
+                    <tr v-for="(row, r) in table.rows" :key="r" :class="{ 'rx-screen-only': !row[kind].length }">
+                      <td class="rx-sum-num">{{ row[kind].length ? summaryNumber(table, kind, row) : "" }}</td>
+                      <td>
+                        <ul class="rx-plan-points">
+                          <li v-for="point in row[kind]" :key="point.id">
+                            <EditableText v-model="point.text" block multiline @update:modelValue="touchSummary" />
+                            <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
+                              @click="removeSummaryPoint(row, kind, point)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                          </li>
+                        </ul>
+                        <button type="button" class="rx-plan-control rx-add-point rx-screen-only" @click="addSummaryPoint(row, kind)">
+                          <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
+                        </button>
+                      </td>
                       <td class="rx-sum-symbol"><b>{{ row.symbol }}</b></td>
                     </tr>
                     <tr v-if="!table.rows.some(row => row[kind].length)">
@@ -963,6 +1047,7 @@ function back() {
 .rx-case-body p:last-child { margin-bottom: 0; }
 .rx-case-body b { font-weight: 800; }
 .rx-case-free { margin-top: .5rem; }
+@media screen { .rx-summary .rx-plan-points li::before { content: "•"; flex: none; line-height: 1.6; } }
 .rx-plan-points.is-static { list-style: disc; padding-inline-start: 1.1em; }
 .rx-plan-points.is-static li { display: list-item; }
 .rx-plan-group th { background: #edf7f5; text-align: start; font-weight: 800; }
