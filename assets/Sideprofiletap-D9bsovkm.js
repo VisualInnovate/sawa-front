@@ -1,0 +1,1 @@
+import{N as a}from"./NavTabs-CP-5IjmK.js";import{o as s,D as r}from"./main-6Vws8vNG.js";const m={__name:"Sideprofiletap",setup(t){const e=[{to:{name:"SideProfiles"},label:"side_profile_page_title",perm:"side profiles list"},{to:{name:"Headers"},label:"headers",perm:"evaluation headers list"}];return(o,i)=>(s(),r(a,{items:e}))}};export{m as _};

@@ -1,1 +1,0 @@
-import{R as o}from"./RoleForm-CyiAszjN.js";import{k as t,o as a,D as i,ag as s}from"./main-D0F0w4q6.js";import"./PermissionCards-C05izw5G.js";const _={__name:"Show",setup(c){return(e,l)=>{const r=s("can");return t((a(),i(o,{"role-id":e.$route.params.id},null,8,["role-id"])),[[r,"roles edit"]])}}};export{_ as default};

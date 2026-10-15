@@ -1,1 +1,0 @@
-import{N as a}from"./NavTabs-Djzj7USy.js";import{o as e,D as o}from"./main-D0F0w4q6.js";const n={__name:"Ablls",setup(l){const s=[{to:{name:"ablls"},label:"ablls",perm:"able category list"},{to:{name:"missions"},label:"ablls_ui.missions_count",perm:"able mission list"}];return(t,m)=>(e(),o(a,{items:s}))}};export{n as _};
