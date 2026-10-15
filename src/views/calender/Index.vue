@@ -25,18 +25,6 @@
             :options="employees"
             optionLabel="name"
           />
-          <Select
-            class="hidden"
-            :loading="!event.evaluation_type"
-            disabled
-            @update:model-value="getTimes"
-            :placeholder="$t('type_work')"
-            v-model="event.type"
-            option-value="id"
-            filter
-            :options="event_types"
-            optionLabel="name"
-          />
         </div>
       </template>
 
@@ -188,10 +176,6 @@ export default {
         { name: "البعد الاجتماعي", id: 104 },
         { name: "البعد الاتصالي", id: 105 },
       ],
-      event_types: [
-        { name: "تقيممات", id: 1 },
-        { name: this.$t('event_type.meetings'), id: 2 },
-      ],
       users: [],
       business_hours: [],
       langStore: useAppLangStore(),
@@ -199,6 +183,7 @@ export default {
       updateevent: false,
       event: {
         employee_id: null,
+        // The calendar's work type: this page books evaluations only (1).
         type: 1,
         color: "87ceeb",
         evaluation_type: 2,

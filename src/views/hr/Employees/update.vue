@@ -297,6 +297,11 @@
             <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
             <SubstituteSelect v-model="employee.substitute_ids" :exclude="employee.user_id" />
           </div>
+          <!-- Optional: inclusion, day and/or clinics (evening); inclusion and day exclude each other. -->
+          <div class="flex flex-column gap-2 py-1">
+            <label class="text-start" for="work-types">{{ $t("work_types") }}</label>
+            <WorkTypeSelect v-model="employee.work_types" />
+          </div>
         </div>
         <div class="text-center">
           <Button @click="previousStep" :label="$t('Back')"></Button>
@@ -312,12 +317,14 @@
 <script>
 import axios from "axios";
 import SubstituteSelect from "@/components/SubstituteSelect.vue";
+import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
+import { workTypesValue } from "@/utils/employeeWorkTypes";
 import InputNumber from "primevue/inputnumber";
 import moment from "moment";
 
 import { useToast } from "primevue/usetoast";
 export default {
-  components: { SubstituteSelect },
+  components: { SubstituteSelect, WorkTypeSelect },
   data() {
     return {
       evaluate_types: [
@@ -427,6 +434,7 @@ export default {
         this.employee.title = response.data.data.user.title;
         this.employee.role = response.data.data.user.roles[0].id;
         this.employee.substitute_ids = (response.data.data.user.substitutes ?? []).map((user) => Number(user.id));
+        this.employee.work_types = response.data.data.work_types ?? [];
         this.employee.national_id = parseInt(response.data.data.national_id);
         this.employee.skills = [];
         for (let i = 0; i < response.data.data.user.skills.length; i++) {
@@ -531,6 +539,8 @@ export default {
       if (this.employee.role) body.append("role", this.employee.role);
       // Always sent: an empty value clears the substitutes.
       body.append("substitute_ids", this.employee.substitute_ids ?? []);
+      // Always sent too: an empty value clears the work types.
+      body.append("work_types", workTypesValue(this.employee.work_types));
       if (this.employee.evaluation)
         body.append("evaluations", this.employee.evaluation);
       if (this.employee.treatments)

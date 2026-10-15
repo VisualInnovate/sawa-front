@@ -8,6 +8,7 @@ import { useToast } from "primevue/usetoast";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import printPlugin from "vue3-print-nb";
+import { workTypeLabel } from "@/utils/employeeWorkTypes";
 const toast = useToast();
 const router = useRouter();
 const allusers = ref([]);
@@ -278,6 +279,14 @@ const initFilters = () => {
             <Column field="shift.title" :header="$t('shift_title')" :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.shift?.title || 'N/A'" severity="info" />
+              </template>
+            </Column>
+
+            <Column field="work_types" :header="$t('work_types')">
+              <template #body="slotProps">
+                <div class="flex flex-wrap gap-1">
+                  <Tag v-for="type in slotProps.data.work_types ?? []" :key="type" :value="workTypeLabel(t, type)" severity="secondary" class="whitespace-nowrap" />
+                </div>
               </template>
             </Column>
 

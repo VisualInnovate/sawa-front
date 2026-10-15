@@ -1,6 +1,6 @@
 <script setup>
-// The Early Echoic Skills Assessment as printed (VB-MAPP EESA), with a box to type 1, 0.5 or nothing next to
-// each item. The sub-totals and the total fill the column of this assessment; earlier ones show theirs.
+// The Early Echoic Skills Assessment as printed (VB-MAPP EESA), with a box next to each item that drops down the
+// form's marks: blank (0), / (½) and X (1); group 5 scores no ½. The sub-totals and the total fill the column of this assessment; earlier ones show theirs.
 import { computed } from "vue";
 import { EESA_GROUPS, EESA_SCORING_1_3, eesaRuns, eesaTotals, eesaValue } from "@/utils/eesa";
 
@@ -23,6 +23,14 @@ const emit = defineEmits(["update:modelValue"]);
 const totals = computed(() => eesaTotals(props.modelValue));
 const set = (key, value) => emit("update:modelValue", { ...props.modelValue, [key]: value });
 const invalid = (key, group) => eesaValue(props.modelValue[key], group.halfPoint) === undefined;
+// The marks of the printed form and the scores they stand for (kept as the box text "", "0.5", "1").
+const MARKS = [{ value: "", mark: "", title: "0" }, { value: "0.5", mark: "/", title: "½" }, { value: "1", mark: "X", title: "1" }];
+const marksFor = (group) => MARKS.filter((option) => group.halfPoint || option.value !== "0.5");
+const boxValue = (key, group) => {
+  const value = eesaValue(props.modelValue[key], group.halfPoint);
+  return value === 1 ? "1" : value === 0.5 ? "0.5" : "";
+};
+const markOf = (key, group) => MARKS.find((option) => option.value === boxValue(key, group))?.mark ?? "";
 
 const ordinal = (n) => `${n}${[, "st", "nd", "rd"][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] || "th"}`;
 const format = (value) => (value === null || value === undefined ? "" : Number(value).toLocaleString("en", { maximumFractionDigits: 1 }));
@@ -82,9 +90,11 @@ const columns = computed(() => {
           <div v-if="group.columns" class="eesa-items" :class="{ prosody: group.number === 4 }">
             <div v-for="(column, c) in group.columns" :key="c" class="eesa-column">
               <label v-for="item in column" :key="item.key" class="eesa-item">
-                <input :value="modelValue[item.key] ?? ''" :disabled="disabled" :readonly="readonly" :tabindex="readonly ? -1 : undefined" :class="{ invalid: invalid(item.key, group) }"
-                  inputmode="decimal" maxlength="3" :aria-label="item.text.replaceAll('*', '')"
-                  @input="set(item.key, $event.target.value)" />
+                <span v-if="readonly" class="eesa-box" :aria-label="item.text.replaceAll('*', '')">{{ markOf(item.key, group) }}</span>
+                <select v-else class="eesa-box" :value="boxValue(item.key, group)" :disabled="disabled" :class="{ invalid: invalid(item.key, group) }"
+                  :aria-label="item.text.replaceAll('*', '')" @change="set(item.key, $event.target.value)">
+                  <option v-for="option in marksFor(group)" :key="option.value" :value="option.value" :title="option.title">{{ option.mark }}</option>
+                </select>
                 <span>
                   <template v-for="(run, index) in eesaRuns(item.text)" :key="index"><b v-if="run.bold && run.italic"><i>{{ run.text }}</i></b><b v-else-if="run.bold">{{ run.text }}</b><i v-else-if="run.italic">{{ run.text }}</i><template v-else>{{ run.text }}</template></template>
                 </span>
@@ -97,9 +107,11 @@ const columns = computed(() => {
               <p class="eesa-line-heading">{{ section.heading }}</p>
               <div class="eesa-line">
                 <label v-for="item in section.items" :key="item.key" class="eesa-item">
-                  <input :value="modelValue[item.key] ?? ''" :disabled="disabled" :readonly="readonly" :tabindex="readonly ? -1 : undefined" :class="{ invalid: invalid(item.key, group) }"
-                    inputmode="decimal" maxlength="3" :aria-label="item.text.replaceAll('*', '')"
-                    @input="set(item.key, $event.target.value)" />
+                  <span v-if="readonly" class="eesa-box" :aria-label="item.text.replaceAll('*', '')">{{ markOf(item.key, group) }}</span>
+                  <select v-else class="eesa-box" :value="boxValue(item.key, group)" :disabled="disabled" :class="{ invalid: invalid(item.key, group) }"
+                    :aria-label="item.text.replaceAll('*', '')" @change="set(item.key, $event.target.value)">
+                    <option v-for="option in marksFor(group)" :key="option.value" :value="option.value" :title="option.title">{{ option.mark }}</option>
+                  </select>
                   <span>
                     <template v-for="(run, index) in eesaRuns(item.text)" :key="index"><b v-if="run.bold && run.italic"><i>{{ run.text }}</i></b><b v-else-if="run.bold">{{ run.text }}</b><i v-else-if="run.italic">{{ run.text }}</i><template v-else>{{ run.text }}</template></template>
                   </span>
@@ -177,18 +189,20 @@ const columns = computed(() => {
 .eesa-model { color: #231f20; font-weight: 400; font-size: 0.95rem; }
 .eesa-items { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 0.4rem; margin-top: 0.55rem; }
 .eesa-column { display: grid; gap: 0.18rem; align-content: start; }
-.eesa-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; cursor: text; white-space: nowrap; }
+.eesa-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; white-space: nowrap; }
 .eesa-items.prosody .eesa-item { font-size: 0.85rem; }
 .eesa-items.prosody b { font-size: 1.05rem; }
-.eesa-item input {
-  width: 1.55rem; height: 1.45rem; flex-shrink: 0; padding: 0; text-align: center;
-  border: 1px solid #231f20; border-radius: 0; background: #fff; font: inherit; font-weight: 700; font-size: 0.78rem;
+/* The box shows the chosen mark only (no arrow), like the printed form; clicking it drops the marks down. */
+.eesa-box {
+  display: inline-grid; place-items: center; width: 1.55rem; height: 1.45rem; flex-shrink: 0; padding: 0; text-align: center; text-align-last: center;
+  border: 1px solid #231f20; border-radius: 0; background: #fff; color: #231f20; font: inherit; font-weight: 700; font-size: 0.85rem;
+  appearance: none; -webkit-appearance: none; cursor: pointer;
 }
-.eesa-item input:focus { outline: 2px solid var(--eesa-orange); outline-offset: 0; }
-.eesa-item input.invalid { border-color: #dc2626; background: #fee2e2; }
-.eesa.readonly .eesa-item,
-.eesa.readonly .eesa-item input { cursor: default; }
-.eesa.readonly .eesa-item input:focus { outline: none; }
+select.eesa-box option { font-weight: 700; text-align: center; }
+.eesa-box:focus { outline: 2px solid var(--eesa-orange); outline-offset: 0; }
+.eesa-box.invalid { border-color: #dc2626; background: #fee2e2; }
+.eesa-box:disabled { cursor: default; opacity: 0.7; }
+.eesa.readonly .eesa-box { cursor: default; }
 .eesa-lines { margin-top: 0.3rem; }
 .eesa-line-heading { margin: 0.35rem 0 0.15rem 1.9rem; font-weight: 700; font-size: 0.85rem; }
 .eesa-line { display: flex; flex-wrap: wrap; gap: 0.25rem 1.2rem; }

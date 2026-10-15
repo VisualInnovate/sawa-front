@@ -99,14 +99,17 @@ export const groupItems = (items, t) => {
 export const isBehavioural = (label) => /سلوك|behavio/i.test(String(label ?? ""));
 
 /**
- * A VB-MAPP chart box's marks for one test (number `n`): its answer, and when the sub-goal was asked again, the last
- * evaluation's ½ in that evaluation's color beside it (drawn first). A carried 1 already has its original color.
+ * A VB-MAPP chart box's marks for one test (number `n`), one color per half: the lower half keeps the color of an
+ * earlier ½ (continuing an evaluation), otherwise the answer's; the upper half takes the answer's color when it is 1.
  */
 export function milestoneMarks(question, n) {
-  const marks = [];
-  if (question?.previous_color && Number(question.previous_score) > 0) {
-    marks.push({ n: n - 0.5, color: question.previous_color, score: Number(question.previous_score) });
-  }
-  if (question?.answer_color) marks.push({ n, color: question.answer_color, score: question.answer_score });
-  return marks;
+  const score = Number(question?.answer_score ?? 0);
+  const color = question?.answer_color;
+  const lower = Number(question?.previous_score) >= 0.5 && question?.previous_color ? question.previous_color : score >= 0.5 ? color : null;
+  const upper = score >= 1 ? color : null;
+  if (lower && upper && lower === upper) return [{ n, color: upper, score: 1 }];
+  return [
+    ...(lower ? [{ n: n - 0.5, color: lower, score: 0.5, half: "lower" }] : []),
+    ...(upper ? [{ n, color: upper, score: 1, half: "upper" }] : []),
+  ];
 }
