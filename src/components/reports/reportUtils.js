@@ -97,3 +97,16 @@ export const groupItems = (items, t) => {
 
 /** Behaviour problems are described only on a behavioural evaluation. */
 export const isBehavioural = (label) => /سلوك|behavio/i.test(String(label ?? ""));
+
+/**
+ * A VB-MAPP chart box's marks for one test (number `n`): its answer, and when the sub-goal was asked again, the last
+ * evaluation's ½ in that evaluation's color beside it (drawn first). A carried 1 already has its original color.
+ */
+export function milestoneMarks(question, n) {
+  const marks = [];
+  if (question?.previous_color && Number(question.previous_score) > 0) {
+    marks.push({ n: n - 0.5, color: question.previous_color, score: Number(question.previous_score) });
+  }
+  if (question?.answer_color) marks.push({ n, color: question.answer_color, score: question.answer_score });
+  return marks;
+}

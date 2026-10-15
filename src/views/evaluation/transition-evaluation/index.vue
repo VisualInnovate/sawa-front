@@ -39,7 +39,12 @@ const lastColor = computed(() => String(context.value?.last_color ?? "").toUpper
 const previous = computed(() => context.value?.previous ?? []);
 // This evaluation's column: right after the earlier ones.
 const currentColumn = computed(() => Math.min(previous.value.length, COLUMNS - 1));
-const answeredCount = computed(() => manualQuestions.value.filter((question) => selected.value[question.id]).length);
+// 0 («not assessed») is an answer too.
+const isAnswered = (question) => selected.value[question.id] !== undefined && selected.value[question.id] !== null;
+const answeredCount = computed(() => manualQuestions.value.filter(isAnswered).length);
+// The ordinary questions' answers, after their own five: 0 «not assessed» (the automatic ones have no 0).
+const optionsOf = (question) => question.is_auto ? question.answers
+  : [...question.answers, { id: "zero-" + question.id, score: 0, text: t("transition.not_assessed"), zero: true }];
 
 const isBlocked = (value) => value.toUpperCase() === lastColor.value;
 const scoreOf = (question, column) => {
@@ -77,7 +82,7 @@ function scrollTo(questionId) {
 }
 
 async function save() {
-  const missing = manualQuestions.value.find((question) => !selected.value[question.id]);
+  const missing = manualQuestions.value.find((question) => !isAnswered(question));
   if (missing) {
     showMissing.value = true;
     alertText.value = t("transition.answer_all");
@@ -180,10 +185,10 @@ watch(childId, (value, before) => {
             <p>{{ $t("transition.auto_section_hint") }}</p>
           </header>
           <section v-for="question in group.list" :id="'tq-' + question.id" :key="question.id" class="te-card te-question"
-            :class="{ 'is-auto': question.is_auto, 'is-missing': showMissing && !question.is_auto && !selected[question.id] }">
+            :class="{ 'is-auto': question.is_auto, 'is-missing': showMissing && !question.is_auto && !isAnswered(question) }">
             <div class="te-question-main">
               <header class="te-question-head">
-                <span class="te-num" :style="(question.is_auto || selected[question.id]) ? { background: '#' + color, color: '#fff' } : null">{{ question.display_order }}</span>
+                <span class="te-num" :style="(question.is_auto || isAnswered(question)) ? { background: '#' + color, color: '#fff' } : null">{{ question.display_order }}</span>
                 <h3>{{ question.title }}</h3>
               </header>
               <p v-if="question.is_auto && autoById[question.id]" class="te-auto-value">
@@ -191,8 +196,8 @@ watch(childId, (value, before) => {
                 {{ $t(autoById[question.id].source.type === 'barrier' ? 'transition.auto_value_barrier' : 'transition.auto_value_milestone', { value: fmt(autoById[question.id].value) }) }}
               </p>
               <div class="te-options" role="radiogroup" :aria-label="question.title">
-                <label v-for="answer in question.answers" :key="answer.id" class="te-option"
-                  :class="{ 'is-picked': (question.is_auto ? autoById[question.id]?.score : selected[question.id]) === answer.score, 'is-locked': question.is_auto }"
+                <label v-for="answer in optionsOf(question)" :key="answer.id" class="te-option"
+                  :class="{ 'is-zero': answer.zero, 'is-picked': (question.is_auto ? autoById[question.id]?.score : selected[question.id]) === answer.score, 'is-locked': question.is_auto }"
                   :style="(question.is_auto ? autoById[question.id]?.score : selected[question.id]) === answer.score ? { '--pick': '#' + color } : null">
                   <input type="radio" class="te-radio" :name="'q-' + question.id" :value="answer.score" :disabled="question.is_auto"
                     :checked="(question.is_auto ? autoById[question.id]?.score : selected[question.id]) === answer.score"
@@ -271,6 +276,8 @@ watch(childId, (value, before) => {
 .te-options { display: grid; gap: .45rem; }
 .te-option { display: flex; align-items: flex-start; gap: .6rem; padding: .6rem .75rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 10px; cursor: pointer; }
 .te-option.is-locked { cursor: default; }
+/* 0 «not assessed»: set apart from the question's own five answers. */
+.te-option.is-zero { border-style: dashed; color: var(--sawa-muted, #64748b); }
 .te-option.is-picked { border-color: var(--pick); background: color-mix(in srgb, var(--pick) 12%, #fff); }
 .te-radio { position: absolute; opacity: 0; pointer-events: none; }
 .te-option:focus-within { outline: 2px solid var(--sawa-primary, #135c65); outline-offset: 2px; }

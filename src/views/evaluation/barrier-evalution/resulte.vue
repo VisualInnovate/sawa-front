@@ -18,7 +18,11 @@
           <div   class="grid grid-cols-1   m-auto text-center "  v-for="m,ind in  5" >
               <p   class=" text-center pt-7 w-16 h-16 " style="border: 1px solid black;" :style="{backgroundColor: mainSquares[top]?.questions[index].score >= mainSquares[top]?.questions.length - ind ? `#${mainSquares[top]?.questions[index].color}` : ''  }" ></p>
           </div>
-          <p class="text-center pt-">{{ index+1  }}</p>
+          <!-- A test that scored this barrier 0: its number on a faded background in the test's color. -->
+          <p class="text-center ba-test" :class="{ 'is-zero': isZero(mainSquares[top]?.questions[index]) }"
+            :style="isZero(mainSquares[top]?.questions[index]) ? { '--zero': '#' + mainSquares[top].questions[index].color } : null">
+            <b>{{ index+1 }}</b>
+          </p>
        </div>
       
       
@@ -123,6 +127,9 @@
    };
   },
   methods:{
+   isZero(test){
+     return Boolean(test && !test.empty && test.color && Number(test.score) === 0)
+   },
    getresulte(){
      axios
          .get(`api/barrier-subtest/result/${this.$route.params.id}`)
@@ -135,7 +142,7 @@
                       if(this.mainSquares[i].questions[x]){
                         
                       }else{
-                        this.mainSquares[i].questions[x]={score:0,color:"FFFFFF"}
+                        this.mainSquares[i].questions[x]={score:0,color:"FFFFFF",empty:true}
                       }
                     
                               
@@ -162,6 +169,9 @@
   </script>
   
   <style>
+  .ba-test { position: relative; margin: 2px 2px 0; }
+  .ba-test b { position: relative; font-weight: inherit; }
+  .ba-test.is-zero::before { content: ""; position: absolute; inset: 0; border-radius: 3px; background: var(--zero); opacity: .4; }
   .ba-card { margin-top: 2rem; padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
   .ba-card h2 { margin: 0 0 1rem; font-size: 1.1rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
   .ba-card h2 small { color: #64748b; font-weight: 600; }

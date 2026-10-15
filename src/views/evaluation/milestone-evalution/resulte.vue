@@ -165,6 +165,7 @@
 import axios from "axios";
 import EesaForm from "../../../components/milestone/EesaForm.vue";
 import MilestoneLevelChart from "../../../components/reports/MilestoneLevelChart.vue";
+import { milestoneMarks } from "../../../components/reports/reportUtils";
 
 export default {
   name: 'SquareGrid',
@@ -210,7 +211,7 @@ export default {
           ...subtest,
           questions: (subtest.questions || []).map((question) => ({
             question: question.question,
-            marks: question.answer_color ? [{ n: 1, color: question.answer_color, score: question.answer_score }] : [],
+            marks: milestoneMarks(question, 1),
           })),
         })),
       };
