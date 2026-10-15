@@ -1,0 +1,1 @@
+import{o as r,D as a,d as s,u as e}from"./main-D4HgQHCI.js";import{M as t}from"./MissionForm-BEU9Uzvy.js";import"./ablls-CxmLk8WI.js";const _={__name:"mission-update",setup(i){const o=e();return(m,n)=>(r(),a(t,{id:s(o).params.id,key:s(o).params.id},null,8,["id"]))}};export{_ as default};

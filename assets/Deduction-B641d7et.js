@@ -1,0 +1,1 @@
+import{N as t}from"./NavTabs-BXmFJdLW.js";import{o,D as s}from"./main-D4HgQHCI.js";const r={__name:"Deduction",setup(c){const e=[{to:{name:"deduction"},label:"deductions",perm:"deduction list"},{to:{name:"deduction-types"},label:"deduction_types",perm:"deduction type list"}];return(n,a)=>(o(),s(t,{items:e}))}};export{r as _};
