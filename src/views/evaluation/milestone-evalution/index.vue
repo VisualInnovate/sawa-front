@@ -22,14 +22,32 @@
             </span>
           </p>
         </Message>
-        <!-- Starting a new one while another still waits for levels: offer to continue it instead. -->
-        <Message v-else-if="pending.length" severity="warn" :closable="false" class="lg:col-span-2">
-          <p class="m-0">{{ $t("milestone_pending_exists") }}</p>
-          <div v-for="item in pending" :key="item.evaluation_id" class="pending-item">
-            <span>{{ $t("milestone_pending_item", { date: day(item.date), levels: missingTitles(item) }) }}</span>
-            <Button size="small" icon="pi pi-play" :label="$t('milestone_continue')" @click="continueEvaluation(item.evaluation_id)" />
+        <!-- The kind of evaluation chosen in the dialog: new (every question) or continuing the last one. -->
+        <Message v-else-if="mode && lastEvaluation" :severity="mode === 'continue' ? 'info' : 'secondary'" :closable="false" class="lg:col-span-2">
+          <div class="mode-banner">
+            <span>{{ mode === 'continue' ? $t('milestone_mode_continue_on', { date: day(lastEvaluation.date) }) : $t('milestone_mode_new_on') }}</span>
+            <Button v-if="!strart_evaluate" size="small" variant="text" icon="pi pi-sync" :label="$t('milestone_mode_change')" @click="modeDialog = true" />
           </div>
         </Message>
+
+        <!-- Before a new evaluation of a child who has one already: start over, continue the last one, or finish the
+             levels an unfinished evaluation still misses. -->
+        <Dialog v-model:visible="modeDialog" modal :closable="Boolean(mode)" :header="$t('milestone_mode_title')" :style="{ width: 'min(36rem, 94vw)' }">
+          <div class="mode-options">
+            <button type="button" class="mode-option" @click="chooseMode('new')">
+              <i class="pi pi-plus-circle" aria-hidden="true" />
+              <span><b>{{ $t('milestone_mode_new') }}</b><small>{{ $t('milestone_mode_new_hint') }}</small></span>
+            </button>
+            <button v-if="lastEvaluation" type="button" class="mode-option" @click="chooseMode('continue')">
+              <i class="pi pi-forward" aria-hidden="true" />
+              <span><b>{{ $t('milestone_mode_continue', { date: day(lastEvaluation.date) }) }}</b><small>{{ $t('milestone_mode_continue_hint') }}</small></span>
+            </button>
+            <button v-for="item in pending" :key="item.evaluation_id" type="button" class="mode-option" @click="continueEvaluation(item.evaluation_id)">
+              <i class="pi pi-hourglass" aria-hidden="true" />
+              <span><b>{{ $t('milestone_mode_missing', { date: day(item.date) }) }}</b><small>{{ $t('milestone_mode_missing_hint', { levels: missingTitles(item) }) }}</small></span>
+            </button>
+          </div>
+        </Dialog>
 
         <div class="flex flex-column gap-2">
           <label for="username">{{ $t("child_name") }}</label>
@@ -172,14 +190,21 @@
                       <span v-if="question.previous" class="milestone-previous" :style="{ '--prev': '#' + (question.previous.color || '94a3b8') }">
                         {{ $t("milestone_previous_answer", { score: question.previous.score }) }}
                       </span>
+                      <small v-if="isHalfBefore(question)" class="milestone-half-hint">{{ $t("milestone_half_hint") }}</small>
                     </p>
                     <div class="milestone-scores">
-                      <!-- Each answer with the box it draws in the results chart: 0 empty, 0.5 lower half, 1 full. -->
-                      <label v-for="score in [0, 0.5, 1]" :key="score" :title="$t('milestone_score_box_' + String(score).replace('.', '_'))">
+                      <!-- Each answer with the box it draws in the results chart: 0 empty, 0.5 lower half, 1 full. After a ½
+                           (lower half in the old color) only 0 (it stays) or 0.5 (the upper half in this color). -->
+                      <label v-for="score in question.options || [0, 0.5, 1]" :key="score"
+                        :title="isHalfBefore(question) ? $t('milestone_half_box_' + String(score).replace('.', '_')) : $t('milestone_score_box_' + String(score).replace('.', '_'))">
                         <input type="radio" required :name="'question-' + question.id" :value="score"
                           @change="collectanswer($event, question.id)" />
                         <span>{{ score }}</span>
-                        <span class="score-box" :class="'score-box-' + String(score).replace('.', '_')" aria-hidden="true">
+                        <span v-if="isHalfBefore(question)" class="score-box score-box-after-half" :class="{ completes: score === 0.5 }"
+                          :style="{ '--prev': '#' + (question.previous.color || '94a3b8') }" aria-hidden="true">
+                          <i /><i />
+                        </span>
+                        <span v-else class="score-box" :class="'score-box-' + String(score).replace('.', '_')" aria-hidden="true">
                           <i /><i />
                         </span>
                       </label>
@@ -268,8 +293,13 @@ export default {
       colorOptions: ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"],
       // The evaluation's one color (hex without #), for every level.
       color: null,
-      // The color of the child's last evaluation (not allowed again).
+      // The color of the child's last evaluation (not allowed again when continuing it).
       lastColor: null,
+      // The child's latest milestone evaluation ({ id, date, status }), which a new one may continue.
+      lastEvaluation: null,
+      // "new": every question; "continue": only what the last evaluation scored 0 or ½. Chosen in the dialog.
+      mode: null,
+      modeDialog: false,
       // The EESA form, when the child's levels include its domain.
       // levels: [{ level_id, title, previous }], one form per level.
       eesa: { show: false, domain: null, levels: [] },
@@ -359,8 +389,19 @@ export default {
       if (!option) return "";
       return option.program?.name || option.name || "";
     },
+    // Only continuing may not reuse the color of the evaluation it continues.
     isBlockedColor(color) {
-      return !this.colorLocked && String(this.lastColor ?? '').toUpperCase() === String(color).toUpperCase();
+      return this.mode === 'continue' && !this.colorLocked && String(this.lastColor ?? '').toUpperCase() === String(color).toUpperCase();
+    },
+    isHalfBefore(question) {
+      return Number(question.previous?.score) === 0.5 && (question.options || []).length === 2;
+    },
+    chooseMode(mode) {
+      this.modeDialog = false;
+      if (this.mode === mode) return;
+      this.mode = mode;
+      this.defaultColor();
+      this.getage();
     },
     // The first color the last evaluation did not use, until one is chosen.
     defaultColor() {
@@ -407,7 +448,7 @@ export default {
       console.log(val);
     },
     async getage() {
-      if (!this.answer.date || this.strart_evaluate) return
+      if (!this.answer.date || this.strart_evaluate || !this.mode) return
       this.questionsLoading = true
       this.allquestion = []
       this.selectedLevelIds = []
@@ -420,7 +461,7 @@ export default {
         // The levels are those of the child's age when the evaluation started, however late it is continued.
         const levelAge = this.continuing?.start_age ?? age
         const [{ data }, { data: eesa }] = await Promise.all([
-          axios.get(`api/milestone-answers/sub-goals/${levelAge}`, { params: { child_id: this.answer.child_id, evaluation_id: this.continuing ? this.answer.evaluation_id : undefined } }),
+          axios.get(`api/milestone-answers/sub-goals/${levelAge}`, { params: { child_id: this.answer.child_id, evaluation_id: this.continuing ? this.answer.evaluation_id : undefined, mode: this.mode } }),
           // Without the EESA endpoint (older server) the evaluation still loads, just without the form.
           axios.get(`api/milestone-answers/eesa/${levelAge}`, { params: { child_id: this.answer.child_id } }).catch(() => ({ data: null })),
         ])
@@ -469,6 +510,7 @@ export default {
         await axios.post("/api/milestone-answers", {
           student_program_id: this.answers.student_program_id,
           request_id: this.$route.query.requestId || null,
+          mode: this.mode,
           answers,
           selected_level_ids: this.selectedLevelIds,
           ...(this.selectedEesaLevels.length ? {
@@ -503,6 +545,8 @@ export default {
             this.continuing = data
             this.answer.evaluation_id = evaluationId
             if (data.color) this.color = String(data.color).replace('#', '').toUpperCase()
+            // Its kind was fixed when it was first saved.
+            this.mode = data.based_on_evaluation_id ? 'continue' : 'new'
           }
         } else {
           const { data } = await axios.get(`api/milestone-answers/pending/${this.answer.child_id}`)
@@ -518,12 +562,21 @@ export default {
         this.answer.child_id = Number(this.$route.params.id || localStorage.getItem("child_id"));
         this.answer.date = new Date();
         await this.loadProgress();
+        // Without the endpoint (older server) every color stays available and the evaluation is new.
+        try {
+          const { data } = await axios.get(`api/milestone-answers/last-colors/${this.answer.child_id}`);
+          this.lastColor = data?.color ?? null;
+          this.lastEvaluation = data?.last ?? null;
+        } catch {
+          // keep the defaults
+        }
+        if (!this.mode) {
+          // A child with an earlier evaluation: ask whether to start over or continue it.
+          if (this.lastEvaluation || this.pending.length) this.modeDialog = true;
+          else this.mode = 'new';
+        }
+        this.defaultColor();
         this.getage();
-        // Without the endpoint (older server) every color stays available.
-        axios
-          .get(`api/milestone-answers/last-colors/${this.answer.child_id}`)
-          .then(({ data }) => { this.lastColor = data?.color ?? null; this.defaultColor(); })
-          .catch(() => { this.defaultColor(); });
         axios
           .get("api/mileston-levels")
           .then(({ data }) => {
@@ -584,6 +637,17 @@ export default {
 </script>
 
 <style scoped>
+.mode-banner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+.mode-options { display: grid; gap: .75rem; }
+.mode-option { display: flex; align-items: flex-start; gap: .85rem; width: 100%; padding: .9rem 1rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 12px; background: #fff; text-align: start; cursor: pointer; font: inherit; }
+.mode-option:hover, .mode-option:focus-visible { border-color: var(--sawa-primary, #135c65); background: #edf7f5; }
+.mode-option i { font-size: 1.3rem; color: var(--sawa-primary, #135c65); margin-top: .1rem; }
+.mode-option span { display: grid; gap: .2rem; }
+.mode-option small { color: var(--sawa-muted, #64748b); }
+.milestone-half-hint { display: block; margin-top: .25rem; color: var(--sawa-muted, #64748b); font-size: .8rem; }
+/* After a ½: the lower half already in the old color; 0.5 adds the upper half in this evaluation's color. */
+.score-box-after-half i:last-child { background: var(--prev); }
+.score-box-after-half.completes i:first-child { background: var(--level-color, #135c65); }
 .pending-item { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-top: .6rem; }
 .level-picker { border: 1px solid var(--sawa-border); border-radius: 12px; padding: 1rem; }
 .level-picker legend { font-weight: 700; color: var(--sawa-primary); }

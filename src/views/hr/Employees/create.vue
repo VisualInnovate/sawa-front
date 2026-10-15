@@ -547,6 +547,11 @@
             <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
             <SubstituteSelect v-model="employee.substitute_ids" />
           </div>
+          <!-- Optional: inclusion, day and/or clinics (evening); inclusion and day exclude each other. -->
+          <div class="flex flex-column gap-2 py-1">
+            <label class="text-start" for="work-types">{{ $t("work_types") }}</label>
+            <WorkTypeSelect v-model="employee.work_types" />
+          </div>
         </div>
         <div class="text-center">
           <Button
@@ -567,10 +572,12 @@
 <script>
 import axios from "axios";
 import SubstituteSelect from "@/components/SubstituteSelect.vue";
+import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
+import { workTypesValue } from "@/utils/employeeWorkTypes";
 import moment from "moment";
 import Treatment from "../../Treatment/Treatment.vue";
 export default {
-  components: { SubstituteSelect },
+  components: { SubstituteSelect, WorkTypeSelect },
   data() {
     return {
       evaluate_types: [
@@ -704,6 +711,7 @@ export default {
         body.append("evaluations", this.employee.evaluation);
       if (this.employee.role) body.append("role", this.employee.role);
       if (this.employee.substitute_ids?.length) body.append("substitute_ids", this.employee.substitute_ids);
+      if (this.employee.work_types?.length) body.append("work_types", workTypesValue(this.employee.work_types));
       if (this.employee.treatments)
         body.append("treatments", this.employee.treatments);
       if (this.employee.skills) body.append("skills", this.employee.skills);

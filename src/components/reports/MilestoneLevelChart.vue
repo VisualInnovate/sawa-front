@@ -23,8 +23,10 @@ const rowOffset = computed(() => Math.max(0, (levelNumber.value ?? 1) - 1) * 5);
 const color = computed(() => LEVEL_COLORS[levelNumber.value] ?? "#135c65");
 
 // The tests (oldest first) whose score reached this half: 1 for the upper half, 0.5 for the lower one.
+// A mark tied to one half (`half`: "lower" / "upper") colors that half only.
 const reached = (question, threshold) =>
-  [...(question?.marks ?? [])].sort((a, b) => a.n - b.n).filter((mark) => mark.color && Number(mark.score) >= threshold);
+  [...(question?.marks ?? [])].sort((a, b) => a.n - b.n).filter((mark) => mark.color && Number(mark.score) >= threshold
+    && (!mark.half || mark.half === (threshold === 1 ? "upper" : "lower")));
 
 // The tests' colors at this level.
 const legendItems = computed(() => {
