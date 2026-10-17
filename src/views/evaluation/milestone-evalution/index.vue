@@ -44,7 +44,13 @@
             </button>
             <button v-for="item in pending" :key="item.evaluation_id" type="button" class="mode-option" @click="continueEvaluation(item.evaluation_id)">
               <i class="pi pi-hourglass" aria-hidden="true" />
-              <span><b>{{ $t('milestone_mode_missing', { date: day(item.date) }) }}</b><small>{{ $t('milestone_mode_missing_hint', { levels: missingTitles(item) }) }}</small></span>
+              <!-- Several can share a date: each tells what it already has, who evaluated it, and its number. -->
+              <span>
+                <b>{{ $t('milestone_mode_missing', { date: day(item.date) }) }}</b>
+                <small>{{ $t('milestone_mode_missing_hint', { levels: missingTitles(item) }) }}</small>
+                <small v-if="doneTitles(item)">{{ $t('milestone_mode_missing_done', { levels: doneTitles(item) }) }}</small>
+                <small class="mode-option-id">{{ $t('milestone_mode_evaluation_no', { id: item.evaluation_id }) }}</small>
+              </span>
             </button>
           </div>
         </Dialog>
@@ -415,6 +421,12 @@ export default {
     day(value) {
       return String(value ?? '').slice(0, 10)
     },
+    // The levels already done, each with its date and evaluator.
+    doneTitles(progress) {
+      return progress.levels.filter(level => level.done)
+        .map(level => [level.title, [this.day(level.date), level.tester].filter(Boolean).join('، ')].filter(Boolean).join(' ('))
+        .map(text => text.includes(' (') ? text + ')' : text).join(' · ')
+    },
     missingTitles(progress) {
       return progress.levels.filter(level => progress.missing_level_ids.includes(level.level_id)).map(level => level.title).join('، ')
     },
@@ -644,6 +656,7 @@ export default {
 .mode-option i { font-size: 1.3rem; color: var(--sawa-primary, #135c65); margin-top: .1rem; }
 .mode-option span { display: grid; gap: .2rem; }
 .mode-option small { color: var(--sawa-muted, #64748b); }
+.mode-option .mode-option-id { font-size: .75rem; opacity: .8; }
 .milestone-half-hint { display: block; margin-top: .25rem; color: var(--sawa-muted, #64748b); font-size: .8rem; }
 /* After a ½: the lower half already in the old color; 0.5 adds the upper half in this evaluation's color. */
 .score-box-after-half i:last-child { background: var(--prev); }
