@@ -17,3 +17,6 @@ export function isWorkTypeBlocked(type, picked) {
 export function workTypesValue(picked) {
   return WORK_TYPES.filter((type) => (picked ?? []).includes(type)).join(",");
 }
+
+// The periods a room works in use the same names as the employee work types: day (classes) and clinics (evening).
+export const ROOM_PERIODS = ["day", "clinics"];

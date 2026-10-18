@@ -112,6 +112,20 @@ const vb = [
       meta: { permission: ["sessions list"] },
       component: () => import("../views/evaluation/sessions/index.vue")
     },
+    // «رسوم البرامج»: the fee tables and the calculator
+    {
+      path: '/program-fees',
+      name: 'program-fees',
+      meta: { permission: ["program fees edit"] },
+      component: () => import("../views/programFees/Index.vue")
+    },
+    // «أوقات البرامج»: the weekly hours of inclusion, day and clinics
+    {
+      path: '/program-hours',
+      name: 'program-hours',
+      meta: { permission: ["program hours edit"] },
+      component: () => import("../views/programHours/Index.vue")
+    },
 
     {
       path: '/sessions-create', 
