@@ -18,6 +18,7 @@ import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 import { createSummaryTables, newSummaryPoint } from "@/components/reports/summaryDraft";
 import { CASE_LEVELS, caseDescription } from "@/components/reports/caseDescriptions";
+import Popover from "primevue/popover";
 import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
@@ -182,6 +183,7 @@ function resetEdits() {
     // ignore
   }
   edits.value = defaults(report.value);
+  restoreAllPages();
 }
 
 // ---- data ------------------------------------------------------------------------------------------
@@ -542,6 +544,86 @@ async function saveTracking() {
   }
 }
 
+// ---- deleted pages (left out of the print only; nothing is saved, a reload brings them back) --------
+
+// Every page registers itself (v-page="{ key, title }"): the toolbar lists them in page order.
+const pages = ref([]);
+const pageEls = new Map();
+const deletedPages = ref(new Set());
+const isDeleted = (key) => deletedPages.value.has(key);
+function deletePage(key) {
+  deletedPages.value = new Set([...deletedPages.value, key]);
+}
+function restorePage(key) {
+  const next = new Set(deletedPages.value);
+  next.delete(key);
+  deletedPages.value = next;
+}
+function restoreAllPages() {
+  deletedPages.value = new Set();
+}
+function setPageShown(key, shown) {
+  if (shown) restorePage(key);
+  else deletePage(key);
+}
+// Page order as on screen; a page that left the report (another output, a level hidden) leaves the list.
+const orderedPages = computed(() => [...pages.value].sort((a, b) => {
+  const elA = pageEls.get(a.key);
+  const elB = pageEls.get(b.key);
+  if (!elA || !elB) return 0;
+  return elA.compareDocumentPosition(elB) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+}));
+const deletedCount = computed(() => pages.value.filter((page) => isDeleted(page.key)).length);
+const pagesMenu = ref(null);
+
+function registerPage(el, { key, title }) {
+  pageEls.set(key, el);
+  const index = pages.value.findIndex((page) => page.key === key);
+  if (index === -1) pages.value = [...pages.value, { key, title }];
+  else if (pages.value[index].title !== title) pages.value = pages.value.map((page, i) => (i === index ? { key, title } : page));
+}
+function unregisterPage(key) {
+  pageEls.delete(key);
+  pages.value = pages.value.filter((page) => page.key !== key);
+}
+
+// v-page: registers the page, adds its delete button (screen only) and hides it while deleted.
+const vPage = {
+  mounted(el, binding) {
+    el.__page = { ...binding.value };
+    registerPage(el, el.__page);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "rx-page-delete";
+    button.innerHTML = '<i class="pi pi-trash" aria-hidden="true"></i>';
+    button.addEventListener("click", () => deletePage(el.__page.key));
+    el.__deleteButton = button;
+    el.appendChild(button);
+    el.__stop = watch([deletedPages, () => t("ereport.delete_page")], ([, label]) => {
+      el.classList.toggle("is-deleted", isDeleted(el.__page.key));
+      button.title = label;
+      button.setAttribute("aria-label", `${label}: ${el.__page.title}`);
+    }, { immediate: true });
+  },
+  updated(el, binding) {
+    if (binding.value.key !== el.__page.key) {
+      unregisterPage(el.__page.key);
+      el.__page = { ...binding.value };
+      registerPage(el, el.__page);
+      el.classList.toggle("is-deleted", isDeleted(el.__page.key));
+    } else if (binding.value.title !== el.__page.title) {
+      el.__page = { ...binding.value };
+      registerPage(el, el.__page);
+    }
+    // Keep the button last if Vue re-rendered the page's children.
+    if (el.__deleteButton && el.lastElementChild !== el.__deleteButton) el.appendChild(el.__deleteButton);
+  },
+  unmounted(el) {
+    el.__stop?.();
+    unregisterPage(el.__page.key);
+  },
+};
+
 // ---- actions ---------------------------------------------------------------------------------------
 
 // Printing the tracking records today for the goals it shows.
@@ -587,6 +669,24 @@ function back() {
           <label class="rx-track-date">{{ $t("date") }} <input v-model="tracking.date" type="date" /></label>
           <Button :label="$t('ereport.save_tracking')" icon="pi pi-save" :loading="tracking.saving" severity="secondary" data-no-request-spinner @click="saveTracking" />
         </template>
+        <!-- Pages: untick (or the trash on a page) to leave it out of the print; nothing is saved. -->
+        <Button v-if="report" type="button" icon="pi pi-clone" variant="outlined"
+          :label="deletedCount ? $t('ereport.pages_deleted', { n: deletedCount }) : $t('ereport.pages')"
+          :severity="deletedCount ? 'danger' : 'secondary'" aria-haspopup="true"
+          @click="pagesMenu.toggle($event)" />
+        <Popover ref="pagesMenu">
+          <div class="rx-pages-menu">
+            <p class="rx-pages-menu-hint">{{ $t("ereport.pages_hint") }}</p>
+            <ol>
+              <li v-for="(page, i) in orderedPages" :key="page.key" :class="{ 'is-off': isDeleted(page.key) }">
+                <Checkbox :modelValue="!isDeleted(page.key)" binary :inputId="'rx-page-' + i" @update:modelValue="setPageShown(page.key, $event)" />
+                <label :for="'rx-page-' + i">{{ page.title }}</label>
+                <button v-if="isDeleted(page.key)" type="button" class="rx-pages-restore" @click="restorePage(page.key)">{{ $t("ereport.restore_page") }}</button>
+              </li>
+            </ol>
+            <Button v-if="deletedCount" size="small" icon="pi pi-undo" :label="$t('ereport.restore_all_pages')" severity="secondary" @click="restoreAllPages" />
+          </div>
+        </Popover>
         <Button v-if="report" :label="$t('ereport.reset')" icon="pi pi-refresh" severity="secondary" variant="text" @click="resetEdits" />
         <Button :label="$t('ereport.print')" icon="pi pi-print" :disabled="!report" data-no-request-spinner @click="print" />
       </div>
@@ -604,7 +704,7 @@ function back() {
 
     <main v-else class="rx-pages" :class="{ 'is-female': female }">
       <!-- 1. Cover -->
-      <section class="rx-page rx-cover">
+      <section v-page="{ key: 'cover', title: $t('ereport.page_cover') }" class="rx-page rx-cover">
         <div class="rx-cover-top">
           <img :src="sawaLogo" alt="Sawa" class="rx-cover-logo" />
           <p class="rx-cover-academy">{{ $t("ereport.academy") }}</p>
@@ -647,7 +747,7 @@ function back() {
       </section>
 
       <!-- 2. Personal information and team -->
-      <section class="rx-page">
+      <section v-page="{ key: 'info', title: $t('ereport.page_info') }" class="rx-page">
         <header class="rx-head">
           <img :src="sawaLogo" alt="Sawa" />
           <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
@@ -714,7 +814,7 @@ function back() {
       </section>
 
       <!-- Case description belongs to the report output. -->
-      <section v-if="showCharts" class="rx-page">
+      <section v-if="showCharts" v-page="{ key: 'case', title: $t('ereport.page_case') }" class="rx-page">
         <header class="rx-head">
           <img :src="sawaLogo" alt="Sawa" />
           <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
@@ -750,7 +850,8 @@ function back() {
       <template v-for="section in sections" :key="section.group">
         <template v-if="section.type === MILESTONE">
           <!-- One VB-MAPP form page per chosen test, newest first: its tables (a row per level) and its own charts -->
-          <section v-for="test in showCharts ? [...section.tests].reverse() : []" :key="'vb-' + test.key" class="rx-page">
+          <section v-for="test in showCharts ? [...section.tests].reverse() : []" :key="'vb-' + test.key"
+            v-page="{ key: 'vb-' + test.key, title: 'VB-MAPP · ' + dmy(test.date) }" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(test.date) }}</span></span>
@@ -771,7 +872,8 @@ function back() {
 
           <!-- Report: the newest test's strengths and weaknesses, edited here and saved on the server; each level its own page -->
           <template v-if="showCharts">
-          <section v-for="table in reportSummary.length ? reportSummary : [null]" :key="'summary-' + (table?.key ?? 'none')" class="rx-page">
+          <section v-for="table in reportSummary.length ? reportSummary : [null]" :key="'summary-' + (table?.key ?? 'none')"
+            v-page="{ key: 'summary-' + (table?.key ?? 'none'), title: [$t('ereport.page_summary'), table?.title].filter(Boolean).join(' · ') }" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -820,7 +922,8 @@ function back() {
 
           <!-- Plan: the goals only (weaknesses are not shown), edited here and saved on the server; each level its own page -->
           <template v-if="showPlan && plan">
-          <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')" class="rx-page">
+          <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')"
+            v-page="{ key: 'plan-' + (level?.key ?? 'none'), title: [$t('ereport.plan_title'), level?.title].filter(Boolean).join(' · ') }" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>{{ $t("ereport.plan_title") }} · VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -860,7 +963,8 @@ function back() {
 
           <!-- Tracking: the saved plans' goals, one table per general goal as on the centre's form -->
           <template v-if="showTracking && tracking">
-          <section v-for="item in tracking.plans.length ? tracking.plans : [null]" :key="'track-' + (item?.evaluation_id ?? 'none')" class="rx-page">
+          <section v-for="item in tracking.plans.length ? tracking.plans : [null]" :key="'track-' + (item?.evaluation_id ?? 'none')"
+            v-page="{ key: 'track-' + (item?.evaluation_id ?? 'none'), title: [$t('ereport.tracking_title'), item ? dmy(item.evaluation_date) : ''].filter(Boolean).join(' · ') }" class="rx-page">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>{{ $t("ereport.tracking_title") }}<template v-if="item"> · VB-MAPP · <span class="ltr">{{ dmy(item.evaluation_date) }}</span></template></span>
@@ -920,7 +1024,8 @@ function back() {
 
         <!-- Any other type (in the report): barriers with their test tables, then each type's chart -->
         <!-- Side profile: one page with every chosen dimension result -->
-        <section v-else-if="showCharts && section.type === SIDE_PROFILE && section.group === firstSideProfile" class="rx-page">
+        <section v-else-if="showCharts && section.type === SIDE_PROFILE && section.group === firstSideProfile"
+          v-page="{ key: 'side-profile', title: 'Side Profile' }" class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
             <span>Side Profile</span>
@@ -931,7 +1036,8 @@ function back() {
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
 
-        <section v-else-if="showCharts && section.type !== SIDE_PROFILE" class="rx-page">
+        <section v-else-if="showCharts && section.type !== SIDE_PROFILE"
+          v-page="{ key: 'type-' + section.group, title: section.label + ' · ' + dmy(section.newest.date) }" class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -991,7 +1097,8 @@ function back() {
         </section>
 
         <!-- Transition: what each answer of the newest chosen test means. -->
-        <section v-if="showCharts && section.type === TRANSITION && edits.transitionPoints?.[section.group]" class="rx-page">
+        <section v-if="showCharts && section.type === TRANSITION && edits.transitionPoints?.[section.group]"
+          v-page="{ key: 'points-' + section.group, title: $t('ereport.transition_points') + ' · ' + section.label }" class="rx-page">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -1161,6 +1268,74 @@ function back() {
   padding: 28px 12px 64px;
   overflow-x: auto;
   counter-reset: rx-page;
+}
+/* A page deleted from the report: gone from the screen and the print (it does not count in the page numbers). */
+.rx-page.is-deleted {
+  display: none !important;
+}
+/* The delete button is added by v-page outside the template: scoped styles reach it through :deep(). */
+.rx-page :deep(.rx-page-delete) {
+  position: absolute;
+  top: 6px;
+  inset-inline-end: 6px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  z-index: 2;
+}
+.rx-page:hover :deep(.rx-page-delete),
+.rx-page :deep(.rx-page-delete:focus-visible) {
+  opacity: 1;
+}
+.rx-pages-menu {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 22rem;
+}
+.rx-pages-menu-hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+.rx-pages-menu ol {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 55vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.rx-pages-menu li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rx-pages-menu li label {
+  flex: 1;
+  cursor: pointer;
+}
+.rx-pages-menu li.is-off label {
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+.rx-pages-restore {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  background: #edf7f5;
+  color: var(--sawa-primary, #135c65);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
 }
 .rx-page {
   position: relative;
@@ -1638,12 +1813,16 @@ function back() {
     min-height: 296mm !important;
     margin: 0 !important;
     box-shadow: none !important;
-    break-after: page;
-    page-break-after: always;
-  }
-  .rx-page:last-child {
     break-after: auto;
     page-break-after: auto;
+  }
+  /* A new sheet before every printed page that follows another one (deleted pages print nothing). */
+  .rx-page:not(.is-deleted) ~ .rx-page:not(.is-deleted) {
+    break-before: page;
+    page-break-before: always;
+  }
+  .rx-page :deep(.rx-page-delete) {
+    display: none !important;
   }
 }
 </style>
