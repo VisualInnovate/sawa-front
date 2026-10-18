@@ -7,6 +7,7 @@ import {ref, onMounted, onBeforeMount} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { workTypeLabel } from "@/utils/employeeWorkTypes";
 const toast = useToast()
 const router = useRouter()
 
@@ -162,6 +163,14 @@ const initFilters = () => {
            <Column field="name" :header='$t("roomnumber")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.name }}
+            </template>
+           </Column>
+
+           <Column field="periods" :header='$t("room_periods")' header-style="min-width:10rem;">
+            <template #body="slotProps">
+              <div class="flex flex-wrap gap-1">
+                <Tag v-for="period in slotProps.data.periods ?? []" :key="period" :value="workTypeLabel(t, period)" severity="secondary" class="whitespace-nowrap" />
+              </div>
             </template>
            </Column>
 

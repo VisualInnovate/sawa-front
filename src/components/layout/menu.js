@@ -77,6 +77,8 @@ export const buildMenu = () => [
       { label: "addTherapeutic", to: { name: "AllTherapeutic" }, perm: "program list" },
       { label: "student_programe", to: { name: "student-programe" }, perm: "student program list" },
       { label: "sessions", to: { name: "sessions" }, perm: "sessions list" },
+      { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
+      { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },
     ],
   },
   {
