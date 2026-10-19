@@ -8,8 +8,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import BackButton from '@/components/common/BackButton.vue'
+import NameTokenHint from '@/components/NameTokenHint.vue'
 import ListEditor from './ListEditor.vue'
-import { isAcademic, listOf, nextSkillKey, typeIcon, typeOf, typeOrder } from './abllsTypes'
+import { isAcademic, listOf, nextSkillKey } from './abllsTypes'
+import { apiOf, assessmentOf, useDomainTypes } from './assessment'
 import './ablls.css'
 
 const props = defineProps({ id: { type: [String, Number], default: null } })
@@ -18,6 +20,10 @@ const { t } = useI18n()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
+
+// ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+const assessment = assessmentOf(route)
+const { load: loadTypes, keyOf, labelOf, iconOf, orderOf, hintOf } = useDomainTypes(assessment, t)
 
 const isEdit = computed(() => !!props.id)
 const loading = ref(true)
@@ -35,13 +41,50 @@ const mission = ref({
   strengths: [],
   goals: [],
   questions: [],
+  goals_female: [],
+  questions_female: [],
   long_term_goal: '',
   sub_goals: [],
 })
 const editors = ref([])
 
+// Goals and questions have a boy's wording (goals, questions) and a girl's (goals_female, questions_female),
+// item by item; both may hold {{name}}.
+const genders = ['male', 'female']
+const gender = ref('male')
+const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male'))
+const fieldOf = (field, g = gender.value) => (g === 'male' ? field : `${field}_female`)
+const genderHasError = (g) => !!(firstError(fieldOf('goals', g)) || firstError(fieldOf('questions', g)))
+const flushWording = () => [editors.value[1], editors.value[2]].forEach((ed) => ed?.flush?.())
+const switchGender = (g) => {
+  if (!g || g === gender.value) return
+  flushWording()
+  gender.value = g
+  undo.value = null
+}
+
+// Copy the other gender's goals and questions into the open one, with an undo while the notice is shown.
+const undo = ref(null)
+const otherHasText = computed(() => ['goals', 'questions'].some((f) => mission.value[fieldOf(f, otherGender.value)].some((x) => String(x || '').trim())))
+const copyFromOther = () => {
+  flushWording()
+  const m = mission.value
+  undo.value = { gender: gender.value, goals: [...m[fieldOf('goals')]], questions: [...m[fieldOf('questions')]] }
+  for (const f of ['goals', 'questions']) {
+    m[fieldOf(f)] = [...m[fieldOf(f, otherGender.value)]]
+    clearError(fieldOf(f))
+  }
+}
+const undoCopy = () => {
+  if (!undo.value) return
+  const { gender: g, goals, questions } = undo.value
+  mission.value[fieldOf('goals', g)] = goals
+  mission.value[fieldOf('questions', g)] = questions
+  undo.value = null
+}
+
 const sortedCategories = computed(() =>
-  [...categories.value].sort((a, b) => typeOrder(typeOf(a)) - typeOrder(typeOf(b)))
+  [...categories.value].sort((a, b) => orderOf(keyOf(a)) - orderOf(keyOf(b)))
 )
 const selectedCategory = computed(() => categories.value.find((c) => c.id === mission.value.category_id))
 const academic = computed(() => isAcademic(selectedCategory.value))
@@ -68,11 +111,12 @@ const firstError = (field) =>
 
 onMounted(async () => {
   try {
+    loadTypes().catch(() => {})
     const requests = [
-      axios.get('/api/able-category'),
-      axios.get('/api/able-mission').catch(() => ({ data: { data: [] } })),
+      axios.get(apiOf(assessment, 'category')),
+      axios.get(apiOf(assessment, 'mission')).catch(() => ({ data: { data: [] } })),
     ]
-    if (isEdit.value) requests.push(axios.get(`/api/able-mission/${props.id}`))
+    if (isEdit.value) requests.push(axios.get(`${apiOf(assessment, 'mission')}/${props.id}`))
     const [cats, all, one] = await Promise.all(requests)
     categories.value = cats.data.data || []
     missions.value = all.data.data || []
@@ -90,6 +134,8 @@ onMounted(async () => {
         strengths: [...(data.strengths || [])],
         goals: listOf(data, 'goals', 'goal'),
         questions: listOf(data, 'questions', 'question'),
+        goals_female: [...(data.goals_female || [])],
+        questions_female: [...(data.questions_female || [])],
         long_term_goal: data.long_term_goal || (data.goal && !(data.goals || []).length ? data.goal : '') || '',
         sub_goals: [...(data.sub_goals || [])],
       }
@@ -114,8 +160,19 @@ const validate = () => {
   if (!m.name.trim()) e.name = [t('ablls_ui.required')]
   const lists = academic.value ? ['strengths', 'goals', 'questions'] : ['sub_goals']
   for (const f of lists) if (!m[f].some((x) => x.trim())) e[f] = [t('ablls_ui.list_required')]
+  if (academic.value) {
+    // The girl's wording needs one item for each of the boy's goals / questions.
+    for (const f of ['goals', 'questions']) {
+      const count = m[f].filter((x) => x.trim()).length
+      const female = m[`${f}_female`].filter((x) => x.trim()).length
+      if (!female) e[`${f}_female`] = [t('ablls_ui.list_required')]
+      else if (count && female !== count) e[`${f}_female`] = [t('ablls_ui.female_count_mismatch', { n: count })]
+    }
+  }
   if (!academic.value && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
   errors.value = e
+  // Show the wording that has the error.
+  if (academic.value && !genderHasError(gender.value) && genderHasError(otherGender.value)) switchGender(otherGender.value)
   return !Object.keys(e).length
 }
 
@@ -135,14 +192,20 @@ const save = async () => {
     name: m.name.trim(),
     criteria: autoCriteria.value,
     ...(academic.value
-      ? { strengths: clean(m.strengths), goals: clean(m.goals), questions: clean(m.questions) }
+      ? {
+          strengths: clean(m.strengths),
+          goals: clean(m.goals),
+          questions: clean(m.questions),
+          goals_female: clean(m.goals_female),
+          questions_female: clean(m.questions_female),
+        }
       : { long_term_goal: m.long_term_goal.trim(), sub_goals: clean(m.sub_goals) }),
   }
   try {
-    if (isEdit.value) await axios.put(`/api/able-mission/${props.id}`, payload)
-    else await axios.post('/api/able-mission', payload)
+    if (isEdit.value) await axios.put(`${apiOf(assessment, 'mission')}/${props.id}`, payload)
+    else await axios.post(apiOf(assessment, 'mission'), payload)
     toast.add({ severity: 'success', summary: t('success_message'), detail: t('ablls_ui.saved'), life: 3000 })
-    router.push({ name: 'missions', query: { category: payload.category_id } })
+    router.push({ name: assessment.routes.missions, query: { category: payload.category_id } })
   } catch (e) {
     errors.value = e.response?.data?.errors || {}
     if (!e.response?.data?.errors) toast.add({ severity: 'error', summary: t('error'), detail: e.response?.data?.message || e.message, life: 4000 })
@@ -159,10 +222,10 @@ const save = async () => {
         <span class="mf-head-icon"><i :class="['pi', isEdit ? 'pi-pencil' : 'pi-plus']" aria-hidden="true" /></span>
         <div>
           <h1>{{ isEdit ? $t('ablls_ui.edit_mission') : $t('ablls_ui.new_mission') }}</h1>
-          <p>{{ $t('ablls_ui.missions_title') }}</p>
+          <p>{{ $t(assessment.title) }} · {{ $t('ablls_ui.missions_title') }}</p>
         </div>
       </div>
-      <BackButton :to="{ name: 'missions' }" />
+      <BackButton :to="{ name: assessment.routes.missions }" />
     </header>
 
     <div v-if="loading" class="mf-layout">
@@ -204,14 +267,14 @@ const save = async () => {
                 <template #value="{ value, placeholder }">
                   <span v-if="selectedCategory && value" class="mf-cat-option">
                     <span class="ab-symbol is-sm">{{ selectedCategory.symbol }}</span>{{ selectedCategory.title }}
-                    <span class="ab-type-tag">{{ $t(`ablls_ui.types.${typeOf(selectedCategory)}`) }}</span>
+                    <span class="ab-type-tag">{{ labelOf(keyOf(selectedCategory)) }}</span>
                   </span>
                   <span v-else>{{ placeholder }}</span>
                 </template>
                 <template #option="{ option }">
                   <span class="mf-cat-option">
                     <span class="ab-symbol is-sm">{{ option.symbol }}</span>{{ option.title }}
-                    <span class="ab-type-tag"><i :class="typeIcon(typeOf(option))" aria-hidden="true" />{{ $t(`ablls_ui.types.${typeOf(option)}`) }}</span>
+                    <span class="ab-type-tag"><i :class="iconOf(keyOf(option))" aria-hidden="true" />{{ labelOf(keyOf(option)) }}</span>
                   </span>
                 </template>
               </Select>
@@ -244,10 +307,10 @@ const save = async () => {
               <h2>
                 {{ $t('ablls_ui.details') }}
                 <span v-if="selectedCategory" class="ab-type-tag">
-                  <i :class="typeIcon(typeOf(selectedCategory))" aria-hidden="true" />{{ $t(`ablls_ui.types.${typeOf(selectedCategory)}`) }}
+                  <i :class="iconOf(keyOf(selectedCategory))" aria-hidden="true" />{{ labelOf(keyOf(selectedCategory)) }}
                 </span>
               </h2>
-              <p>{{ selectedCategory ? $t(`ablls_ui.types_hint.${typeOf(selectedCategory)}`) : $t('ablls_ui.choose_category_first') }}</p>
+              <p>{{ selectedCategory ? hintOf(keyOf(selectedCategory)) : $t('ablls_ui.choose_category_first') }}</p>
             </div>
           </div>
 
@@ -270,28 +333,54 @@ const save = async () => {
               required
               @change="clearError('strengths')"
             />
-            <ListEditor
-              :ref="(el) => (editors[1] = el)"
-              v-model="mission.goals"
-              :label="$t('ablls_ui.goals')"
-              icon="pi pi-flag"
-              :placeholder="$t('ablls_ui.goals_ph')"
-              :prefix="codePrefix"
-              :error="firstError('goals')"
-              required
-              @change="clearError('goals')"
-            />
-            <ListEditor
-              :ref="(el) => (editors[2] = el)"
-              v-model="mission.questions"
-              :label="$t('ablls_ui.questions')"
-              icon="pi pi-question-circle"
-              :placeholder="$t('ablls_ui.questions_ph')"
-              :prefix="codePrefix"
-              :error="firstError('questions')"
-              required
-              @change="clearError('questions')"
-            />
+            <div class="mf-wording">
+              <div class="mf-wording-bar">
+                <span class="mf-wording-title"><i class="pi pi-users mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.wording') }}</span>
+                <div class="mf-wording-tools">
+                  <SelectButton :model-value="gender" :options="genders" :allow-empty="false" size="small" :aria-label="$t('ablls_ui.wording')" @update:model-value="switchGender">
+                    <template #option="{ option }">
+                      <span>{{ $t(option) }}</span>
+                      <span v-if="genderHasError(option)" class="mf-error-marker" :title="$t('ablls_ui.fix_errors')">!</span>
+                    </template>
+                  </SelectButton>
+                  <Button type="button" size="small" severity="secondary" variant="outlined" icon="pi pi-clone"
+                    :label="$t(`gender_text.copy_from_${otherGender}`)" :disabled="!otherHasText"
+                    v-tooltip.top="$t('gender_text.copy_hint')" @click="copyFromOther" />
+                </div>
+              </div>
+              <Message v-if="undo" severity="success" size="small" :closable="false" class="mf-undo">
+                <span>{{ $t(`gender_text.copied_from_${otherGender}`) }}</span>
+                <Button type="button" size="small" variant="link" :label="$t('undo')" @click="undoCopy" />
+              </Message>
+              <NameTokenHint :text="$t('ablls_ui.name_hint_after')" />
+
+              <ListEditor
+                :ref="(el) => (editors[1] = el)"
+                v-model="mission[fieldOf('goals')]"
+                :label="`${$t('ablls_ui.goals')} (${$t(gender)})`"
+                icon="pi pi-flag"
+                :placeholder="$t('ablls_ui.goals_ph')"
+                :prefix="codePrefix"
+                :error="firstError(fieldOf('goals'))"
+                :reference="mission[fieldOf('goals', otherGender)]"
+                :reference-label="$t(otherGender)"
+                required
+                @change="clearError(fieldOf('goals'))"
+              />
+              <ListEditor
+                :ref="(el) => (editors[2] = el)"
+                v-model="mission[fieldOf('questions')]"
+                :label="`${$t('ablls_ui.questions')} (${$t(gender)})`"
+                icon="pi pi-question-circle"
+                :placeholder="$t('ablls_ui.questions_ph')"
+                :prefix="codePrefix"
+                :error="firstError(fieldOf('questions'))"
+                :reference="mission[fieldOf('questions', otherGender)]"
+                :reference-label="$t(otherGender)"
+                required
+                @change="clearError(fieldOf('questions'))"
+              />
+            </div>
           </div>
 
           <div v-else class="mf-lists">
@@ -343,7 +432,7 @@ const save = async () => {
           </div>
 
           <div class="mf-submit">
-            <Button type="button" :label="$t('cancel')" severity="secondary" variant="outlined" @click="router.push({ name: 'missions' })" />
+            <Button type="button" :label="$t('cancel')" severity="secondary" variant="outlined" @click="router.push({ name: assessment.routes.missions })" />
             <Button type="submit" :label="$t('save')" icon="pi pi-check" :loading="saving" data-no-request-spinner />
           </div>
         </section>
@@ -481,6 +570,47 @@ const save = async () => {
 .mf-lists {
   display: grid;
   gap: 1.5rem;
+}
+.mf-wording {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 12px;
+  background: #fcfdfd;
+}
+.mf-wording-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.mf-wording-title {
+  font-weight: 700;
+  color: var(--sawa-text);
+}
+.mf-wording-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mf-error-marker {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-inline-start: 0.4rem;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.75rem;
+}
+.mf-undo :deep(.p-message-text) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .mf-placeholder {
   display: grid;

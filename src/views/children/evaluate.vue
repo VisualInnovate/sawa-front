@@ -47,6 +47,7 @@
               v-can="[
                 'evaluation results list',
                 'able answer list',
+                'skills answer list',
                 'carolina answer list',
                 'milestone answer list',
                 'barrier answer list',
@@ -249,6 +250,7 @@ export default {
         { name: "ABLLS Academy", id: 4 },
         { name: "carolina", id: 5 },
         { name: "Transition", id: 6 },
+        { name: "ABLLS Skills", id: 7 },
       ],
     };
   },
@@ -328,6 +330,7 @@ export default {
         4: { name: "ablls-resulte", params: { id: evalu.id } },
         5: { name: "carolina-resulte", params: { id: evalu.id } },
         6: { name: "transition-result", params: { id: childId, evaluation: evalu.id } },
+        7: { name: "skills-result", params: { id: evalu.id } },
       };
       this.$router.push(routes[type] || {
         name: "showChildResult",

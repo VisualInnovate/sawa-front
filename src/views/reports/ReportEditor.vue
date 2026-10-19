@@ -28,7 +28,7 @@ import CarolinaChart from "@/components/reports/CarolinaChart.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import {
-  ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
   isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel, ymd,
 } from "@/components/reports/reportUtils";
 
@@ -1051,7 +1051,7 @@ function back() {
 
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
-          <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
+          <AbllsChart v-else-if="section.type === ABLLS || section.type === ABLLS_SKILLS" :tests="section.tests" />
           <CarolinaChart v-else-if="section.type === CAROLINA" :tests="section.tests" />
           <TransitionChart v-else-if="section.type === TRANSITION" :tests="section.tests" />
 

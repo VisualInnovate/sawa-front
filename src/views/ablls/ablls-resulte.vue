@@ -50,6 +50,7 @@
 
 <script>
 import axios from "axios";
+import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 export default {
   name: 'SquareGrid',
   data() {
@@ -63,7 +64,7 @@ export default {
       try {
         // allSettled: a failing report request must not hide the flow chart.
         const [response1, response2] = await Promise.allSettled([
-          axios.get(`api/able-category/flow-chart/${this.$route.params.id}`),
+          axios.get(`${apiOf(assessmentOf(this.$route), "category")}/flow-chart/${this.$route.params.id}`),
           axios.get(`api/evaluations/report/${this.$route.params.id}`)
         ]);
 

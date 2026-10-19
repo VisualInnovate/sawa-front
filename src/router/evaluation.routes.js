@@ -5,6 +5,10 @@ const Show = () => import("../views/evaluations/Show.vue");
 const Edit = () => import("../views/evaluations/Edit.vue");
 const Create = () => import("../views/evaluations/Create.vue");
 
+// A copy of an ABLLS page for ABLLS Skills: a different component object, so moving between the two evaluations
+// mounts the page again instead of reusing it with the other evaluation's settings.
+const skillsPage = (load) => () => load().then((module) => ({ ...module.default }));
+
 const evaluationRoutes = [
   {
     path: "evaluations",
@@ -76,6 +80,43 @@ const evaluationRoutes = [
     name: 'ablls-resulte',
     meta: { permission: ["able answer list"] },
     component: () => import("../views/ablls/ablls-resulte.vue")
+  },
+  // ABLLS Skills: the ABLLS pages with meta.assessment "skills" (its own API, permissions and domain types).
+  {
+    path: '/ablls-skills',
+    name: 'ablls-skills',
+    meta: { permission: ["skills category list"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/index.vue"))
+  },
+  {
+    path: '/ablls-skills/missions',
+    name: 'skills-missions',
+    meta: { permission: ["skills mission list"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/missions.vue"))
+  },
+  {
+    path: '/ablls-skills/mission-create',
+    name: 'skills-mission-create',
+    meta: { permission: ["skills mission create"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/mission-create.vue"))
+  },
+  {
+    path: '/ablls-skills/mission-update/:id',
+    name: 'skills-mission-update',
+    meta: { permission: ["skills mission edit"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/mission-update.vue"))
+  },
+  {
+    path: '/ablls-skills/test/:id',
+    name: 'skills-test',
+    meta: { permission: ["skills answer create"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/mission-test.vue"))
+  },
+  {
+    path: '/ablls-skills/result/:id',
+    name: 'skills-result',
+    meta: { permission: ["skills answer list"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/ablls-resulte.vue"))
   },
   {
     path: '/agerange', // Define the path for your addRoom route

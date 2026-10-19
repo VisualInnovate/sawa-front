@@ -7,7 +7,7 @@
         <span class="ab-hero-icon"><i class="pi pi-list-check" aria-hidden="true" /></span>
         <div>
           <h1>{{ $t('ablls_ui.missions_title') }}</h1>
-          <p>{{ $t('ablls_ui.missions_subtitle') }}</p>
+          <p>{{ $t(assessment.title) }} · {{ $t('ablls_ui.missions_subtitle') }}</p>
         </div>
       </div>
       <div class="ab-hero-side">
@@ -20,7 +20,7 @@
           <span>{{ $t('ablls_ui.categories_count') }}</span>
         </div>
         <Button
-          v-can="'able mission create'"
+          v-can="perm('mission', 'create')"
           class="ab-hero-action"
           :label="$t('ablls_ui.new_mission')"
           icon="pi pi-plus"
@@ -41,7 +41,7 @@
           <span class="ab-type-count">{{ missions.length }}</span>
         </button>
         <button
-          v-for="type in ABLLS_TYPES"
+          v-for="type in types"
           :key="type.value"
           type="button"
           class="ab-type-tab"
@@ -49,7 +49,7 @@
           @click="setType(type.value)"
         >
           <i :class="type.icon" aria-hidden="true" />
-          {{ $t(`ablls_ui.types.${type.value}`) }}
+          {{ type.label }}
           <span class="ab-type-count">{{ typeCount(type.value) }}</span>
         </button>
       </div>
@@ -91,14 +91,14 @@
       <i class="pi pi-inbox" aria-hidden="true" />
       <h3>{{ $t('ablls_ui.empty_missions') }}</h3>
       <p>{{ $t('ablls_ui.empty_missions_hint') }}</p>
-      <Button v-can="'able mission create'" :label="$t('ablls_ui.new_mission')" icon="pi pi-plus" @click="create" />
+      <Button v-can="perm('mission', 'create')" :label="$t('ablls_ui.new_mission')" icon="pi pi-plus" @click="create" />
     </div>
 
     <section v-for="group in groups" v-else :key="group.id" class="ms-group">
       <header class="ms-group-head">
         <span class="ab-symbol">{{ group.symbol }}</span>
         <h2>{{ group.title }}</h2>
-        <span class="ab-type-tag"><i :class="typeIcon(group.type)" aria-hidden="true" />{{ $t(`ablls_ui.types.${group.type}`) }}</span>
+        <span class="ab-type-tag"><i :class="iconOf(group.type)" aria-hidden="true" />{{ labelOf(group.type) }}</span>
         <span class="ms-group-count">{{ $t('ablls_ui.missions_n', { n: group.items.length }) }}</span>
       </header>
 
@@ -108,7 +108,7 @@
             <span class="ab-key"><i class="pi pi-key" aria-hidden="true" />{{ m.key }}</span>
             <div class="ab-actions">
               <Button
-                v-can="'able mission edit'"
+                v-can="perm('mission', 'edit')"
                 icon="pi pi-pencil"
                 text
                 rounded
@@ -118,7 +118,7 @@
                 @click="edit(m.id)"
               />
               <Button
-                v-can="'able mission delete'"
+                v-can="perm('mission', 'delete')"
                 icon="pi pi-trash"
                 text
                 rounded
@@ -176,19 +176,25 @@ import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import Ablls from '../../components/Ablls.vue'
 import '@/components/ablls/ablls.css'
-import { ABLLS_TYPES, isAcademic, listOf, typeIcon, typeOf, typeOrder } from '@/components/ablls/abllsTypes'
+import { isAcademic, listOf } from '@/components/ablls/abllsTypes'
+import { apiOf, assessmentOf, permOf, useDomainTypes } from '@/components/ablls/assessment'
 
 const { t } = useI18n()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
+// ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+const assessment = assessmentOf(route)
+const perm = (resource, action) => permOf(assessment, resource, action)
+const { types, load: loadTypes, keyOf, labelOf, iconOf, orderOf } = useDomainTypes(assessment, t)
+
 const missions = ref([])
 const categories = ref([])
 const loading = ref(true)
 const search = ref('')
 const activeCategory = ref(route.query.category ? Number(route.query.category) : null)
-const activeType = ref(ABLLS_TYPES.some((t) => t.value === route.query.type) ? route.query.type : null)
+const activeType = ref(route.query.type || null)
 
 const deleteDialog = ref(false)
 const toDelete = ref(null)
@@ -196,15 +202,15 @@ const deleting = ref(false)
 
 const countFor = (id) => missions.value.filter((m) => m.category_id === id).length
 const categoryOf = (m) => categories.value.find((c) => c.id === m.category_id) || m.category || {}
-const typeCount = (type) => missions.value.filter((m) => typeOf(categoryOf(m)) === type).length
+const typeCount = (type) => missions.value.filter((m) => keyOf(categoryOf(m)) === type).length
 
 const sortedCategories = computed(() =>
   categories.value
     .map((c, i) => ({ ...c, order: i }))
-    .sort((a, b) => typeOrder(typeOf(a)) - typeOrder(typeOf(b)) || a.order - b.order)
+    .sort((a, b) => orderOf(keyOf(a)) - orderOf(keyOf(b)) || a.order - b.order)
 )
 const visibleCategories = computed(() =>
-  sortedCategories.value.filter((c) => !activeType.value || typeOf(c) === activeType.value)
+  sortedCategories.value.filter((c) => !activeType.value || keyOf(c) === activeType.value)
 )
 
 const summaryOf = (m) => (isAcademic(categoryOf(m)) ? listOf(m, 'goals', 'goal')[0] : m.long_term_goal || m.goal) || ''
@@ -230,7 +236,7 @@ const groups = computed(() => {
   const q = search.value.trim().toLowerCase()
   const list = missions.value.filter((m) => {
     if (activeCategory.value && m.category_id !== activeCategory.value) return false
-    if (activeType.value && typeOf(categoryOf(m)) !== activeType.value) return false
+    if (activeType.value && keyOf(categoryOf(m)) !== activeType.value) return false
     if (!q) return true
     return [m.name, m.key, m.goal, m.long_term_goal, m.category?.title, ...(m.goals || []), ...(m.sub_goals || [])].some((v) =>
       String(v || '').toLowerCase().includes(q)
@@ -241,7 +247,7 @@ const groups = computed(() => {
   for (const m of list) {
     if (!byCat.has(m.category_id)) {
       const cat = categoryOf(m)
-      byCat.set(m.category_id, { id: m.category_id, title: cat.title || '—', symbol: cat.symbol || '?', type: typeOf(cat), items: [] })
+      byCat.set(m.category_id, { id: m.category_id, title: cat.title || '—', symbol: cat.symbol || '?', type: keyOf(cat), items: [] })
     }
     byCat.get(m.category_id).items.push(m)
   }
@@ -269,8 +275,9 @@ const setType = (type) => {
 const fetchData = async () => {
   try {
     const [m, c] = await Promise.all([
-      axios.get('/api/able-mission'),
-      axios.get('/api/able-category').catch(() => ({ data: { data: [] } })),
+      axios.get(apiOf(assessment, 'mission')),
+      axios.get(apiOf(assessment, 'category')).catch(() => ({ data: { data: [] } })),
+      loadTypes().catch(() => {}),
     ])
     missions.value = m.data.data || []
     categories.value = c.data.data || []
@@ -281,8 +288,8 @@ const fetchData = async () => {
 
 onMounted(fetchData)
 
-const create = () => router.push({ name: 'mission-create', query: activeCategory.value ? { category: activeCategory.value } : {} })
-const edit = (id) => router.push({ name: 'mission-update', params: { id } })
+const create = () => router.push({ name: assessment.routes.create, query: activeCategory.value ? { category: activeCategory.value } : {} })
+const edit = (id) => router.push({ name: assessment.routes.update, params: { id } })
 
 const askDelete = (m) => {
   toDelete.value = m
@@ -292,7 +299,7 @@ const askDelete = (m) => {
 const remove = async () => {
   deleting.value = true
   try {
-    await axios.delete(`/api/able-mission/${toDelete.value.id}`)
+    await axios.delete(`${apiOf(assessment, 'mission')}/${toDelete.value.id}`)
     deleteDialog.value = false
     toast.add({ severity: 'success', summary: t('success_message'), detail: t('ablls_ui.deleted'), life: 3000 })
     fetchData()
