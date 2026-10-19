@@ -1,220 +1,116 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
-import {FilterMatchMode} from '@primevue/core/api'
-import {ref, onMounted, onBeforeMount} from 'vue'
-// import ProductService from '@/service/ProductService';
-import {useToast} from 'primevue/usetoast'
+// The student programs' sessions by day, with their status; only a session's own therapist starts it.
+// closed: its time has not come · waiting: it began, not started · late: 5 minutes and not started ·
+// ongoing: started · missed: it ended without being started.
 import axios from "axios";
-import {useRouter} from "vue-router";
-const toast = useToast()
-const router = useRouter()
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useToast } from "primevue/usetoast";
+import { useAuthStore } from "@/stores/Auth";
+import { SESSION_STATUS_SEVERITY, isoDate, sessionKindLabel, timeRange } from "@/utils/studentPrograms";
+import moment from "moment";
 
-const loading = ref(true)
-const user = ref({})
-const error = ref('')
-const users = ref(null)
-const productDialog = ref(false)
-const deleteDialog = ref(false)
-const confir_id=ref('')
-const selectedProducts = ref(null)
-const dt = ref(null)
-const filters = ref({})
+const { t } = useI18n();
+const toast = useToast();
+const auth = useAuthStore();
 
+const range = ref([new Date(), new Date()]);
+const sessions = ref([]);
+const loading = ref(false);
+const status = ref(null);
+const starting = ref(null);
 
+const statuses = computed(() => [
+  { value: null, label: t("sp_all") },
+  ...Object.keys(SESSION_STATUS_SEVERITY).map((value) => ({ value, label: t(`session_status_${value}`) })),
+]);
+const shown = computed(() => sessions.value.filter((session) => !status.value || session.status === status.value));
+const counts = computed(() => sessions.value.reduce((all, session) => ({ ...all, [session.status]: (all[session.status] ?? 0) + 1 }), {}));
 
-
-onBeforeMount(() => {
-  initFilters()
-})
-
- const fetchData= ()=>{
-
-
-  axios.get("/api/session").then((res)=>{
-    loading.value= false
-    users.value= res.data.data
-    
-
-  });
-
-
-}
-
-
-
-onMounted(() => {
-  // productService.getProducts().then((data) => (products.value = data));
-fetchData()
-
-})
-const edit=(id)=>{
-  router.push({name:'sessions-update',params:{'id':id} })
-}
-
-
-const openNew = () => {
-  router.push({name:'sessions-create'})
-}
-
-const confirmDelete = (id) => {
-  console.log(id)
-  deleteDialog.value = true
-  confir_id.value=id
- 
-
-}
-
-const deleteAction = () => {
-  axios
-    .delete(`/api/session/${confir_id.value}`)
-    .then((res) => {
-      console.log(res.data)
-      deleteDialog.value=false
-      fetchData()
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-    })
-    .catch(() => {})
-
-}
-
-
-const exportCSV = () => {
-  dt.value.exportCSV()
-}
-
-
-const initFilters = () => {
-  filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+async function load() {
+  const [from, to] = range.value ?? [];
+  if (!from) return;
+  loading.value = true;
+  try {
+    const { data } = await axios.get("api/program-sessions", { params: { from: isoDate(from), to: isoDate(to ?? from) } });
+    sessions.value = data.data;
+  } finally {
+    loading.value = false;
   }
 }
+
+const canStart = (session) => Number(session.therapist_id) === Number(auth.user_id) && ["waiting", "late"].includes(session.status);
+
+async function start(session) {
+  starting.value = session.id;
+  try {
+    await axios.post(`api/program-sessions/${session.id}/start`);
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("session_started"), life: 2500 });
+    await load();
+  } catch (e) {
+    toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message ?? t("session_not_started"), life: 3500 });
+  } finally {
+    starting.value = null;
+  }
+}
+
+watch(range, (value) => {
+  if (value?.[0] && (value[1] || value.length === 1)) load();
+});
+
+// Statuses move with the clock: refresh every minute.
+let timer = null;
+onMounted(() => {
+  load();
+  timer = setInterval(load, 60000);
+});
+onBeforeUnmount(() => clearInterval(timer));
 </script>
 
 <template>
-  <div class="grid" style="max-height: 90vh !important; overflow-y: scroll;">
-    <div class="col-12">
-      <div class="page">
-        <Toolbar>
-          <template #start>
-            <div class="my-2">
-            <Button  v-can="'sessions create'" :label='$t("add_session")' icon="pi pi-plus" class="mr-2" @click="openNew"></Button>
-<!--              <Button-->
-<!--                label="Delete"-->
-<!--                icon="pi pi-trash"-->
-<!--                class="p-button-danger"-->
-<!--                :disabled="!selectedProducts || !selectedProducts.length"-->
-<!--                @click="confirmDeleteSelected"-->
-<!--              />-->
-            </div>
-          </template>
-
-          <template #end>
-<!--            <FileUpload-->
-<!--              mode="basic"-->
-<!--              accept="image/*"-->
-<!--              :max-file-size="1000000"-->
-<!--              label="Import"-->
-<!--              choose-label="Import"-->
-<!--              class="mr-2 inline-block"-->
-<!--            />-->
-            <Button v-can="'sessions list'" :label='$t("export")' icon="pi pi-upload" @click="exportCSV($event)" severity="secondary" variant="outlined" />
-          </template>
-        </Toolbar>
-
-        <Toast/>
-
-
-      <div>
-        <DataTable
-          ref="dt"
-          v-model:selection="selectedProducts"
-          :value="users"
-          :loading="loading"
-          data-key="id"
-          :paginator="true"
-          :rows="10"
-          :filters="filters"
-          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rows-per-page-options="[5, 10, 25]"
-          :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('products')}`"
-          responsive-layout="scroll"
-          v-can="'sessions list'"
-        
-        >
-          <template #header>
-            <div class="flex w-full  justify-between align-items-center">
-              <h5 class="page-title">{{ $t("sessions") }}</h5>
-             <div>
-              <IconField class="table-search mt-2 md:mt-0">
-                <InputIcon class="pi pi-search" />
-                <InputText v-model="filters['global'].value" :placeholder='$t("search")'/>
-              </IconField>
-              </div>
-            </div>
-          </template>
-
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-         
-
-        
-         
-           <Column field="child.name" :header='$t("roomdoctor")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-                {{ slotProps.data.specialists.name }}
-            </template>
-           </Column>
-
-           <Column field="child.name" :header='$t("child_name")' :sortable="true" header-style="width:14%; min-width:14rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-                {{ slotProps.data.child.name }}
-            </template>
-           </Column>
-        
-           <Column field="date" :header='$t("sesion_date")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-                {{ slotProps.data.date }}
-            </template>
-           </Column>
-         
-
-
-        
-          <Column header-style="min-width:10rem;">
-            <template #body="slotProps">
-              <div class="table-actions">
-                <Button
-                v-can="'sessions edit'"
-                icon="pi pi-pencil"
-                @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
-                <Button
-                v-can="'sessions delete'"
-                icon="pi pi-trash"
-                @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-              </div>
-            </template>
-          </Column>
-
-
-
-        </DataTable>
-        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="user"
-            >{{ $t('remove_item') }} <b>{{ user.first_name }}</b
-            >?</span
-            >
-          </div>
-          <template #footer>
-            <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
-          </template>
-        </Dialog>
-      </div>
+  <div class="sawa-card p-3">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+      <p class="text-xl text-[#135C65] font-bold">{{ $t("sessions") }}</p>
+      <div class="flex flex-wrap items-center gap-2">
+        <DatePicker v-model="range" selectionMode="range" dateFormat="yy-mm-dd" showIcon :manualInput="false" :aria-label="$t('sp_period')" />
+        <Button icon="pi pi-refresh" variant="outlined" :loading="loading" v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" @click="load" />
       </div>
     </div>
+    <div class="flex flex-wrap gap-2 mb-3">
+      <Button v-for="option in statuses" :key="String(option.value)" size="small" :variant="status === option.value ? undefined : 'outlined'"
+        :label="option.value ? `${option.label} (${counts[option.value] ?? 0})` : `${option.label} (${sessions.length})`" @click="status = option.value" />
+    </div>
+    <DataTable :value="shown" :loading="loading" dataKey="id" paginator :rows="20" stripedRows>
+      <Column :header="$t('sp_date')">
+        <template #body="{ data }"><span class="whitespace-nowrap">{{ moment(data.starts_at).format("YYYY-MM-DD") }}</span></template>
+      </Column>
+      <Column :header="$t('sp_hour')">
+        <template #body="{ data }"><span class="whitespace-nowrap">{{ timeRange(moment(data.starts_at).format("HH:mm"), moment(data.ends_at).format("HH:mm")) }}</span></template>
+      </Column>
+      <Column :header="$t('sp_student')">
+        <template #body="{ data }">{{ data.child?.name }}</template>
+      </Column>
+      <Column :header="$t('sp_treatment')">
+        <template #body="{ data }">{{ data.treatment?.name }} <span class="text-xs text-color-secondary">({{ sessionKindLabel(t, data.session_kind) }})</span></template>
+      </Column>
+      <Column :header="$t('sp_room')">
+        <template #body="{ data }">{{ data.room?.name }}</template>
+      </Column>
+      <Column :header="$t('sp_therapist')">
+        <template #body="{ data }">{{ data.therapist?.name }}</template>
+      </Column>
+      <Column :header="$t('sp_status')">
+        <template #body="{ data }">
+          <Tag :severity="SESSION_STATUS_SEVERITY[data.status]" :value="$t(`session_status_${data.status}`)" class="whitespace-nowrap" />
+          <div v-if="data.started_at" class="text-xs text-color-secondary mt-1">{{ $t("session_started_at", { time: moment(data.started_at).format("HH:mm") }) }}</div>
+        </template>
+      </Column>
+      <Column header-style="width:8rem">
+        <template #body="{ data }">
+          <Button v-if="canStart(data)" icon="pi pi-play" size="small" :label="$t('session_start')" :loading="starting === data.id" @click="start(data)" />
+        </template>
+      </Column>
+    </DataTable>
+    <Toast />
   </div>
 </template>
-
-<style scoped lang="scss"></style>

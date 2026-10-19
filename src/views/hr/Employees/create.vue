@@ -575,7 +575,6 @@ import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
 import moment from "moment";
-import Treatment from "../../Treatment/Treatment.vue";
 export default {
   components: { SubstituteSelect, WorkTypeSelect },
   data() {

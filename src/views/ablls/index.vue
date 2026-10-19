@@ -7,7 +7,7 @@
         <div class="ab-hero-main">
           <span class="ab-hero-icon"><i class="pi pi-th-large" aria-hidden="true" /></span>
           <div>
-            <h1>{{ $t('ablls_ui.categories_title') }}</h1>
+            <h1>{{ $t('ablls_ui.categories_title', { name: $t(assessment.title) }) }}</h1>
             <p>{{ $t(assessment.title) }} · {{ $t('ablls_ui.categories_subtitle') }}</p>
           </div>
         </div>
