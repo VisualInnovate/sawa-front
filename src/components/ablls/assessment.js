@@ -1,4 +1,4 @@
-// The ABLLS pages serve two evaluations on the same tables: ABLLS Academy (four fixed domain types) and ABLLS Skills
+// The ABLLS pages serve two evaluations on the same tables: ABLLS Academy (four fixed domain types) and Ablls OT
 // (domain types the staff add and delete; every type keeps the long-term goal + sub goals inputs). A route's
 // `meta.assessment` picks one; each has its own API prefix, permissions, route names and evaluation type.
 import { computed, ref } from 'vue'
@@ -48,12 +48,12 @@ export const permOf = (assessment, resource, action) => `${assessment.perm} ${re
 /** "/api/able-category" / "/api/skills-category" */
 export const apiOf = (assessment, resource) => `/api/${assessment.api}-${resource}`
 
-/** The `type` an ABLLS Skills domain always has: long-term goal + sub goals. */
+/** The `type` an Ablls OT domain always has: long-term goal + sub goals. */
 export const CUSTOM_TYPE = 'custom'
 
 /**
  * The domain types of an evaluation as { value, id, label, icon, count }. ABLLS has its four fixed types (value =
- * the category's `type`); ABLLS Skills loads its types (value = "t<id>", the category's `type_id`).
+ * the category's `type`); Ablls OT loads its types (value = "t<id>", the category's `type_id`).
  */
 export function useDomainTypes(assessment, t) {
   const loaded = ref([])

@@ -1,5 +1,5 @@
 <script setup>
-// ABLLS Skills: add, rename and delete its domain types. Every type keeps the long-term goal + sub goals inputs.
+// Ablls OT: add, rename and delete its domain types. Every type keeps the long-term goal + sub goals inputs.
 // A type that still has domains cannot be deleted (the server refuses too).
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'

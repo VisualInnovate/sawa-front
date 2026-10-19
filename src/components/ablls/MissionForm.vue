@@ -8,8 +8,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import BackButton from '@/components/common/BackButton.vue'
-import NameTokenHint from '@/components/NameTokenHint.vue'
 import ListEditor from './ListEditor.vue'
+import WordingBar from './WordingBar.vue'
 import { isAcademic, listOf, nextSkillKey } from './abllsTypes'
 import { apiOf, assessmentOf, useDomainTypes } from './assessment'
 import './ablls.css'
@@ -21,7 +21,7 @@ const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
-// ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+// ABLLS Academy or Ablls OT (the route's meta.assessment).
 const assessment = assessmentOf(route)
 const { load: loadTypes, keyOf, labelOf, iconOf, orderOf, hintOf } = useDomainTypes(assessment, t)
 
@@ -45,17 +45,20 @@ const mission = ref({
   questions_female: [],
   long_term_goal: '',
   sub_goals: [],
+  long_term_goal_female: '',
+  sub_goals_female: [],
 })
 const editors = ref([])
 
-// Goals and questions have a boy's wording (goals, questions) and a girl's (goals_female, questions_female),
-// item by item; both may hold {{name}}.
-const genders = ['male', 'female']
+// A boy's and a girl's wording (the field and "<field>_female"), item by item; both may hold {{name}}: an academic
+// skill's goals and questions, and an Ablls OT skill's long-term goal and sub goals.
 const gender = ref('male')
 const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male'))
-const fieldOf = (field, g = gender.value) => (g === 'male' ? field : `${field}_female`)
-const genderHasError = (g) => !!(firstError(fieldOf('goals', g)) || firstError(fieldOf('questions', g)))
-const flushWording = () => [editors.value[1], editors.value[2]].forEach((ed) => ed?.flush?.())
+const gendered = computed(() => academic.value || (assessment.customTypes && !!selectedCategory.value))
+const wordingFields = computed(() => (academic.value ? ['goals', 'questions'] : ['long_term_goal', 'sub_goals']))
+const fieldOf = (field, g = gender.value) => (g === 'male' || !gendered.value ? field : `${field}_female`)
+const genderHasError = (g) => wordingFields.value.some((f) => firstError(fieldOf(f, g)))
+const flushWording = () => editors.value.forEach((ed) => ed?.flush?.())
 const switchGender = (g) => {
   if (!g || g === gender.value) return
   flushWording()
@@ -63,23 +66,23 @@ const switchGender = (g) => {
   undo.value = null
 }
 
-// Copy the other gender's goals and questions into the open one, with an undo while the notice is shown.
+// Copy the other gender's wording into the open one, with an undo while the notice is shown.
 const undo = ref(null)
-const otherHasText = computed(() => ['goals', 'questions'].some((f) => mission.value[fieldOf(f, otherGender.value)].some((x) => String(x || '').trim())))
+const copyOf = (value) => (Array.isArray(value) ? [...value] : value)
+const hasText = (value) => (Array.isArray(value) ? value.some((x) => String(x || '').trim()) : !!String(value || '').trim())
+const otherHasText = computed(() => wordingFields.value.some((f) => hasText(mission.value[fieldOf(f, otherGender.value)])))
 const copyFromOther = () => {
   flushWording()
   const m = mission.value
-  undo.value = { gender: gender.value, goals: [...m[fieldOf('goals')]], questions: [...m[fieldOf('questions')]] }
-  for (const f of ['goals', 'questions']) {
-    m[fieldOf(f)] = [...m[fieldOf(f, otherGender.value)]]
+  undo.value = { gender: gender.value, values: Object.fromEntries(wordingFields.value.map((f) => [f, copyOf(m[fieldOf(f)])])) }
+  for (const f of wordingFields.value) {
+    m[fieldOf(f)] = copyOf(m[fieldOf(f, otherGender.value)])
     clearError(fieldOf(f))
   }
 }
 const undoCopy = () => {
   if (!undo.value) return
-  const { gender: g, goals, questions } = undo.value
-  mission.value[fieldOf('goals', g)] = goals
-  mission.value[fieldOf('questions', g)] = questions
+  for (const [f, value] of Object.entries(undo.value.values)) mission.value[fieldOf(f, undo.value.gender)] = value
   undo.value = null
 }
 
@@ -138,6 +141,8 @@ onMounted(async () => {
         questions_female: [...(data.questions_female || [])],
         long_term_goal: data.long_term_goal || (data.goal && !(data.goals || []).length ? data.goal : '') || '',
         sub_goals: [...(data.sub_goals || [])],
+        long_term_goal_female: data.long_term_goal_female || '',
+        sub_goals_female: [...(data.sub_goals_female || [])],
       }
     } else {
       const fromQuery = Number(route.query.category)
@@ -170,9 +175,17 @@ const validate = () => {
     }
   }
   if (!academic.value && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
+  if (!academic.value && gendered.value) {
+    // Ablls OT: the girl's long-term goal and one girl's sub goal for each of the boy's.
+    if (!m.long_term_goal_female.trim()) e.long_term_goal_female = [t('ablls_ui.required')]
+    const count = m.sub_goals.filter((x) => x.trim()).length
+    const female = m.sub_goals_female.filter((x) => x.trim()).length
+    if (!female) e.sub_goals_female = [t('ablls_ui.list_required')]
+    else if (count && female !== count) e.sub_goals_female = [t('ablls_ui.female_count_mismatch', { n: count })]
+  }
   errors.value = e
   // Show the wording that has the error.
-  if (academic.value && !genderHasError(gender.value) && genderHasError(otherGender.value)) switchGender(otherGender.value)
+  if (gendered.value && !genderHasError(gender.value) && genderHasError(otherGender.value)) switchGender(otherGender.value)
   return !Object.keys(e).length
 }
 
@@ -199,7 +212,11 @@ const save = async () => {
           goals_female: clean(m.goals_female),
           questions_female: clean(m.questions_female),
         }
-      : { long_term_goal: m.long_term_goal.trim(), sub_goals: clean(m.sub_goals) }),
+      : {
+          long_term_goal: m.long_term_goal.trim(),
+          sub_goals: clean(m.sub_goals),
+          ...(gendered.value ? { long_term_goal_female: m.long_term_goal_female.trim(), sub_goals_female: clean(m.sub_goals_female) } : {}),
+        }),
   }
   try {
     if (isEdit.value) await axios.put(`${apiOf(assessment, 'mission')}/${props.id}`, payload)
@@ -334,25 +351,9 @@ const save = async () => {
               @change="clearError('strengths')"
             />
             <div class="mf-wording">
-              <div class="mf-wording-bar">
-                <span class="mf-wording-title"><i class="pi pi-users mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.wording') }}</span>
-                <div class="mf-wording-tools">
-                  <SelectButton :model-value="gender" :options="genders" :allow-empty="false" size="small" :aria-label="$t('ablls_ui.wording')" @update:model-value="switchGender">
-                    <template #option="{ option }">
-                      <span>{{ $t(option) }}</span>
-                      <span v-if="genderHasError(option)" class="mf-error-marker" :title="$t('ablls_ui.fix_errors')">!</span>
-                    </template>
-                  </SelectButton>
-                  <Button type="button" size="small" severity="secondary" variant="outlined" icon="pi pi-clone"
-                    :label="$t(`gender_text.copy_from_${otherGender}`)" :disabled="!otherHasText"
-                    v-tooltip.top="$t('gender_text.copy_hint')" @click="copyFromOther" />
-                </div>
-              </div>
-              <Message v-if="undo" severity="success" size="small" :closable="false" class="mf-undo">
-                <span>{{ $t(`gender_text.copied_from_${otherGender}`) }}</span>
-                <Button type="button" size="small" variant="link" :label="$t('undo')" @click="undoCopy" />
-              </Message>
-              <NameTokenHint :text="$t('ablls_ui.name_hint_after')" />
+              <WordingBar :gender="gender" :title="$t('ablls_ui.wording')" :hint="$t('ablls_ui.name_hint_after')"
+                :has-error="genderHasError" :other-has-text="otherHasText" :undone-gender="undo?.gender"
+                @switch="switchGender" @copy="copyFromOther" @undo="undoCopy" />
 
               <ListEditor
                 :ref="(el) => (editors[1] = el)"
@@ -384,25 +385,34 @@ const save = async () => {
           </div>
 
           <div v-else class="mf-lists">
-            <div class="ab-field">
-              <label for="mf-ltg"><i class="pi pi-flag mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.long_term_goal') }}<span class="ab-req">*</span></label>
-              <div class="mf-ltg">
-                <span class="mf-ltg-code">{{ codePrefix }}</span>
-                <Textarea id="mf-ltg" v-model="mission.long_term_goal" rows="2" auto-resize :placeholder="$t('ablls_ui.long_term_goal_ph')" :invalid="!!firstError('long_term_goal')" fluid @input="clearError('long_term_goal')" />
+            <!-- Ablls OT keeps a boy's and a girl's wording of the long-term goal and sub goals. -->
+            <div :class="gendered ? 'mf-wording' : 'mf-lists'">
+              <WordingBar v-if="gendered" :gender="gender" :title="$t('ablls_ui.wording_goals')" :hint="$t('ablls_ui.name_hint_goals')"
+                :has-error="genderHasError" :other-has-text="otherHasText" :undone-gender="undo?.gender"
+                @switch="switchGender" @copy="copyFromOther" @undo="undoCopy" />
+              <div class="ab-field">
+                <label for="mf-ltg"><i class="pi pi-flag mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.long_term_goal') }}<template v-if="gendered"> ({{ $t(gender) }})</template><span class="ab-req">*</span></label>
+                <div class="mf-ltg">
+                  <span class="mf-ltg-code">{{ codePrefix }}</span>
+                  <Textarea id="mf-ltg" v-model="mission[fieldOf('long_term_goal')]" rows="2" auto-resize :placeholder="$t('ablls_ui.long_term_goal_ph')" :invalid="!!firstError(fieldOf('long_term_goal'))" fluid @input="clearError(fieldOf('long_term_goal'))" />
+                </div>
+                <small v-if="gendered && mission[fieldOf('long_term_goal', otherGender)]" class="mf-ref"><b>{{ $t(otherGender) }}:</b> {{ mission[fieldOf('long_term_goal', otherGender)] }}</small>
+                <small v-if="firstError(fieldOf('long_term_goal'))" class="ab-error">{{ firstError(fieldOf('long_term_goal')) }}</small>
               </div>
-              <small v-if="firstError('long_term_goal')" class="ab-error">{{ firstError('long_term_goal') }}</small>
+              <ListEditor
+                :ref="(el) => (editors[0] = el)"
+                v-model="mission[fieldOf('sub_goals')]"
+                :label="gendered ? `${$t('ablls_ui.sub_goals')} (${$t(gender)})` : $t('ablls_ui.sub_goals')"
+                icon="pi pi-sitemap"
+                :placeholder="$t('ablls_ui.sub_goals_ph')"
+                :prefix="codePrefix"
+                :error="firstError(fieldOf('sub_goals'))"
+                :reference="gendered ? mission[fieldOf('sub_goals', otherGender)] : []"
+                :reference-label="$t(otherGender)"
+                required
+                @change="clearError(fieldOf('sub_goals'))"
+              />
             </div>
-            <ListEditor
-              :ref="(el) => (editors[0] = el)"
-              v-model="mission.sub_goals"
-              :label="$t('ablls_ui.sub_goals')"
-              icon="pi pi-sitemap"
-              :placeholder="$t('ablls_ui.sub_goals_ph')"
-              :prefix="codePrefix"
-              :error="firstError('sub_goals')"
-              required
-              @change="clearError('sub_goals')"
-            />
           </div>
         </section>
       </div>
@@ -579,38 +589,11 @@ const save = async () => {
   border-radius: 12px;
   background: #fcfdfd;
 }
-.mf-wording-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-.mf-wording-title {
-  font-weight: 700;
-  color: var(--sawa-text);
-}
-.mf-wording-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-.mf-error-marker {
-  display: inline-grid;
-  place-items: center;
-  width: 1.1rem;
-  height: 1.1rem;
-  margin-inline-start: 0.4rem;
-  border-radius: 50%;
-  background: #dc2626;
-  color: #fff;
-  font-size: 0.75rem;
-}
-.mf-undo :deep(.p-message-text) {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.mf-ref {
+  padding-inline-start: 2.9rem;
+  color: var(--sawa-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
 }
 .mf-placeholder {
   display: grid;
