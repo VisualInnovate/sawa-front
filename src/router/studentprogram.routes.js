@@ -17,6 +17,12 @@ const studentprograme = [
         component: () => import("../views/studentprogram/create.vue")
       },
       {
+        path: '/student-programe/:id',
+        name: 'show-studentprograme',
+        meta: { permission: ["student program list"] },
+        component: () => import("../views/studentprogram/show.vue")
+      },
+      {
         path: '/edit-studentprograme/:id',
         name: 'update-studentprograme',
         meta: { permission: ["student program edit"] },

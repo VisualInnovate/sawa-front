@@ -239,7 +239,7 @@ const save = async () => {
         <span class="mf-head-icon"><i :class="['pi', isEdit ? 'pi-pencil' : 'pi-plus']" aria-hidden="true" /></span>
         <div>
           <h1>{{ isEdit ? $t('ablls_ui.edit_mission') : $t('ablls_ui.new_mission') }}</h1>
-          <p>{{ $t(assessment.title) }} · {{ $t('ablls_ui.missions_title') }}</p>
+          <p>{{ $t('ablls_ui.missions_title', { name: $t(assessment.title) }) }}</p>
         </div>
       </div>
       <BackButton :to="{ name: assessment.routes.missions }" />
