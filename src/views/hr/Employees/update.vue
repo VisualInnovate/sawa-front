@@ -346,7 +346,7 @@ export default {
             { name: "ABLLS Academy", id: 4 },
             { name: "carolina", id: 5 },
             { name: "Transition", id: 6 },
-            { name: "ABLLS Skills", id: 7 },
+            { name: "Ablls OT", id: 7 },
           ],
         },
       ],

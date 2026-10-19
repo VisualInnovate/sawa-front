@@ -50,7 +50,7 @@ export const buildMenu = () => [
     children: [
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },
       { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
-      { text: "ABLLS Skills", to: { name: "ablls-skills" }, perm: "skills category list" },
+      { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
       { text: "carolina", to: { name: "carolina-general-goals" }, perm: "carolina general goal list" },
       {
         key: "vb-mapp",

@@ -747,7 +747,7 @@ export default {
   // Added: keys used in components that had no translation
   multiple: "متعدد",
   ablls: "ABLLS Academy",
-  ablls_skills: "ABLLS Skills",
+  ablls_skills: "Ablls OT",
   forgot_password: "نسيت كلمة المرور؟",
   send_link: "إرسال الرابط",
   "side profile": "تقييم الصورة الجانبية",
@@ -941,7 +941,7 @@ export default {
   "Site Logo": "شعار الموقع",
   "Site Cover": "غلاف الموقع",
   ablls_eval: "تقييم ABLLS Academy",
-  ablls_skills_eval: "تقييم ABLLS Skills",
+  ablls_skills_eval: "تقييم Ablls OT",
   check_booking_failed: "تعذر التحقق من حجز الطفل. حاول مرة أخرى.",
   code_sent_to: "أرسلنا رمز التفعيل إلى",
   account_created_check_email:
@@ -1386,6 +1386,8 @@ export default {
     questions: "الأسئلة",
     questions_ph: "اكتب سؤالاً ثم اضغط Enter",
     wording: "صياغة الأهداف والأسئلة",
+    wording_goals: "صياغة الهدف طويل المدى والأهداف الفرعية",
+    name_hint_goals: "في الهدف طويل المدى أو أي هدف فرعي ليُستبدل تلقائيًا باسم الطفل، وتظهر في التقييم صياغة الذكر أو الأنثى حسب جنس الطفل.",
     manage_types: "الأنواع",
     choose_type: "اختر النوع",
     type_title_ph: "اسم النوع، مثال: مهارات الرياضيات",

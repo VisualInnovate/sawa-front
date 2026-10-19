@@ -184,7 +184,7 @@ const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
-// ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+// ABLLS Academy or Ablls OT (the route's meta.assessment).
 const assessment = assessmentOf(route)
 const perm = (resource, action) => permOf(assessment, resource, action)
 const { types, load: loadTypes, keyOf, labelOf, iconOf, orderOf } = useDomainTypes(assessment, t)

@@ -98,9 +98,9 @@
                         </details>
                       </template>
                       <template v-else>
-                        <p v-if="q.long_term_goal" class="at-ltg"><b>{{ $t('ablls_ui.long_term_goal') }}:</b> {{ q.long_term_goal }}</p>
+                        <p v-if="q.long_term_goal" class="at-ltg"><b>{{ $t('ablls_ui.long_term_goal') }}:</b> {{ childTextOf(q, 'long_term_goal', child) }}</p>
                         <ol class="at-list">
-                          <li v-for="(item, i) in q.sub_goals || []" :key="i">
+                          <li v-for="(item, i) in childListOf(q, 'sub_goals', null, child)" :key="i">
                             <span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}
                           </li>
                         </ol>
@@ -149,7 +149,7 @@
 
 <script>
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
-import { childListOf, isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
+import { childListOf, childTextOf, isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import "@/components/ablls/ablls.css";
 import axios from "axios";
@@ -190,12 +190,12 @@ export default {
 
 
   computed: {
-    // ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+    // ABLLS Academy or Ablls OT (the route's meta.assessment).
     assessment() {
       return assessmentOf(this.$route);
     },
     // Domains grouped by type, keeping each domain's index for the links: ABLLS in its fixed type order (academic
-    // preparation, math, reading, spelling); ABLLS Skills by its own types, in the server's order.
+    // preparation, math, reading, spelling); Ablls OT by its own types, in the server's order.
     groupedByType() {
       const custom = this.assessment.customTypes;
       const groups = [];
@@ -228,6 +228,7 @@ export default {
   },
   methods: {
     childListOf,
+    childTextOf,
     isAcademic,
     listOf,
     scoreOptions,

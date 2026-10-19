@@ -47,9 +47,16 @@ export const listOf = (mission, field, legacy) => {
 
 // A goal / question list as the child reads it: the girl's wording for a girl ('1' is a girl) when the skill has
 // one, else the boy's, with the child's first name in place of {{name}}.
+const withName = (text, child) => String(text).replace(/\{\{.*?\}\}/g, String(child?.name ?? '').trim().split(/\s+/)[0] || '')
+
 export const childListOf = (mission, field, legacy, child = {}) => {
   const female = String(child?.gender) === '1' ? listOf(mission, `${field}_female`) : []
   const list = female.length ? female : listOf(mission, field, legacy)
-  const name = String(child?.name ?? '').trim().split(/\s+/)[0] || ''
-  return list.map((text) => String(text).replace(/\{\{.*?\}\}/g, name))
+  return list.map((text) => withName(text, child))
+}
+
+// One text (the long-term goal) as the child reads it, the same way.
+export const childTextOf = (mission, field, child = {}) => {
+  const female = String(child?.gender) === '1' ? String(mission?.[`${field}_female`] || '').trim() : ''
+  return withName(female || mission?.[field] || '', child)
 }

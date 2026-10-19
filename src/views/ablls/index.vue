@@ -213,7 +213,7 @@
       </template>
     </Dialog>
 
-    <!-- ABLLS Skills: its domain types -->
+    <!-- Ablls OT: its domain types -->
     <TypesDialog v-if="assessment.customTypes" v-model:visible="typesDialog" :assessment="assessment" @changed="loadTypes" />
   </div>
 </template>
@@ -236,7 +236,7 @@ const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
-// ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+// ABLLS Academy or Ablls OT (the route's meta.assessment).
 const assessment = assessmentOf(route)
 const perm = (resource, action) => permOf(assessment, resource, action)
 const { types, load: loadTypes, keyOf, labelOf, iconOf, orderOf, hintOf } = useDomainTypes(assessment, t)

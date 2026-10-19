@@ -5,7 +5,7 @@ const Show = () => import("../views/evaluations/Show.vue");
 const Edit = () => import("../views/evaluations/Edit.vue");
 const Create = () => import("../views/evaluations/Create.vue");
 
-// A copy of an ABLLS page for ABLLS Skills: a different component object, so moving between the two evaluations
+// A copy of an ABLLS page for Ablls OT: a different component object, so moving between the two evaluations
 // mounts the page again instead of reusing it with the other evaluation's settings.
 const skillsPage = (load) => () => load().then((module) => ({ ...module.default }));
 
@@ -81,7 +81,7 @@ const evaluationRoutes = [
     meta: { permission: ["able answer list"] },
     component: () => import("../views/ablls/ablls-resulte.vue")
   },
-  // ABLLS Skills: the ABLLS pages with meta.assessment "skills" (its own API, permissions and domain types).
+  // Ablls OT: the ABLLS pages with meta.assessment "skills" (its own API, permissions and domain types).
   {
     path: '/ablls-skills',
     name: 'ablls-skills',
