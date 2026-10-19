@@ -11,6 +11,9 @@ const props = defineProps({
   prefix: { type: String, default: '' },
   required: { type: Boolean, default: false },
   error: { type: String, default: '' },
+  // The matching item of another wording (the boy's text under the girl's), shown under each item.
+  reference: { type: Array, default: () => [] },
+  referenceLabel: { type: String, default: '' },
 })
 const emit = defineEmits(['change'])
 
@@ -74,7 +77,10 @@ defineExpose({ flush })
     <ol v-if="items.length" class="le-list">
       <li v-for="(item, i) in items" :key="i" class="le-item">
         <span class="le-num" :class="{ 'is-code': prefix }">{{ prefix ? `${prefix}-${i + 1}` : i + 1 }}</span>
-        <Textarea :model-value="item" rows="1" auto-resize class="le-input" :aria-label="`${label} ${i + 1}`" @update:model-value="update(i, $event)" />
+        <div class="le-body">
+          <Textarea :model-value="item" rows="1" auto-resize class="le-input" :aria-label="`${label} ${i + 1}`" @update:model-value="update(i, $event)" />
+          <small v-if="reference[i]" class="le-ref"><b>{{ referenceLabel }}:</b> {{ reference[i] }}</small>
+        </div>
         <div class="le-actions">
           <Button type="button" icon="pi pi-chevron-up" text rounded size="small" severity="secondary" :disabled="i === 0" :aria-label="$t('ablls_ui.move_up')" @click="move(i, -1)" />
           <Button type="button" icon="pi pi-chevron-down" text rounded size="small" severity="secondary" :disabled="i === items.length - 1" :aria-label="$t('ablls_ui.move_down')" @click="move(i, 1)" />
@@ -158,6 +164,17 @@ defineExpose({ flush })
 .le-num.is-code {
   background: var(--sawa-primary-soft);
   color: var(--sawa-primary);
+}
+.le-body {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+.le-ref {
+  padding: 0 0.75rem 0.3rem;
+  color: var(--sawa-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
 }
 .le-input {
   flex: 1;

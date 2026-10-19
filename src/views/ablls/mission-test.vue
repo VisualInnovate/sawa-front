@@ -56,7 +56,7 @@
               <template v-if="strart_evaluate">
                 <template v-for="g in groupedByType" :key="g.type">
                   <h2 class="col-span-2 at-type">
-                    <i :class="typeIcon(g.type)" aria-hidden="true" />{{ $t(`ablls_ui.types.${g.type}`) }}
+                    <i :class="g.icon" aria-hidden="true" />{{ g.label }}
                   </h2>
                   <section v-for="que in g.items" :id="'ablls-domain-' + que.index" :key="que.index" class="col-span-2 at-domain">
                     <header class="at-domain-head">
@@ -77,7 +77,7 @@
                       <!-- academic preparation: the questions; math / reading / spelling: the goals -->
                       <template v-if="isAcademic(que)">
                         <ol class="at-list">
-                          <li v-for="(item, i) in listOf(q, 'questions', 'question')" :key="i">
+                          <li v-for="(item, i) in childListOf(q, 'questions', 'question', child)" :key="i">
                             <span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}
                           </li>
                         </ol>
@@ -86,7 +86,7 @@
                           <div v-if="(q.goals || []).length">
                             <b>{{ $t('ablls_ui.goals') }}</b>
                             <ol class="at-list">
-                              <li v-for="(item, i) in q.goals" :key="i"><span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}</li>
+                              <li v-for="(item, i) in childListOf(q, 'goals', null, child)" :key="i"><span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}</li>
                             </ol>
                           </div>
                           <div v-if="(q.strengths || []).length">
@@ -149,7 +149,8 @@
 
 <script>
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
-import { isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
+import { childListOf, isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
+import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import "@/components/ablls/ablls.css";
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
@@ -189,26 +190,44 @@ export default {
 
 
   computed: {
-    // Domains grouped by type (academic preparation, math, reading, spelling), keeping each domain's index for the links.
+    // ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+    assessment() {
+      return assessmentOf(this.$route);
+    },
+    // Domains grouped by type, keeping each domain's index for the links: ABLLS in its fixed type order (academic
+    // preparation, math, reading, spelling); ABLLS Skills by its own types, in the server's order.
     groupedByType() {
+      const custom = this.assessment.customTypes;
       const groups = [];
       (Array.isArray(this.qustions) ? this.qustions : []).forEach((que, index) => {
         if (!que.missions?.length) return;
-        const type = typeOf(que);
+        const type = custom ? `t${que.type_id}` : typeOf(que);
         let group = groups.find((g) => g.type === type);
-        if (!group) groups.push((group = { type, items: [] }));
+        if (!group) {
+          groups.push((group = {
+            type,
+            label: custom ? que.type_title || "—" : this.$t(`ablls_ui.types.${type}`),
+            icon: custom ? "pi pi-tag" : typeIcon(type),
+            items: [],
+          }));
+        }
         group.items.push({ ...que, index });
       });
-      return groups.sort((a, b) => typeOrder(a.type) - typeOrder(b.type));
+      return custom ? groups : groups.sort((a, b) => typeOrder(a.type) - typeOrder(b.type));
     },
     totalMissions() {
       return (Array.isArray(this.qustions) ? this.qustions : []).reduce((n, que) => n + (que.missions?.length || 0), 0);
+    },
+    // The evaluated child: the goals and questions are shown in their gender's wording with their name.
+    child() {
+      return (this.childs || []).find((c) => c.id === this.answer.child_id) || {};
     },
     answeredCount() {
       return Object.keys(this.score).length;
     },
   },
   methods: {
+    childListOf,
     isAcademic,
     listOf,
     scoreOptions,
@@ -239,8 +258,8 @@ export default {
       
       axios
         .post(`api/evaluations/create`,{
-          type:4,
-          title: getEvaluationTypeLabel(4, this.$t, this.$t("evaluation_results")),
+          type: this.assessment.evaluationType,
+          title: getEvaluationTypeLabel(this.assessment.evaluationType, this.$t, this.$t("evaluation_results")),
           child_id:this.answer.child_id,
           specialist_id:localStorage.getItem("user_id"),
           date:this.answer.date,
@@ -288,10 +307,10 @@ export default {
       this.answers.answers.forEach((answer) => {
         if (answer) answer.color = this.answer.color;
       });
-      axios.post("/api/able-answer",this.answers).then((res) => {
+      axios.post(apiOf(this.assessment, "answer"),this.answers).then((res) => {
         this.change_status
         axios.post(`/api/evaluation-request/change-status/${localStorage.getItem("eavl_id")}`,this.change)
-        this.$router.push({ name: 'ablls-resulte', params:{'id':this.answer.evaluation_id}});
+        this.$router.push({ name: this.assessment.routes.result, params:{'id':this.answer.evaluation_id}});
         
       }).catch((el)=>{
           this.alert_text=this.$t('answer_all_questions')
@@ -318,7 +337,7 @@ export default {
           this.answer.evaluation_id=parseInt(this.$route.params.evaluation)
         })
         axios
-        .get("api/able-category/grouped/category")
+        .get(`${apiOf(this.assessment, "category")}/grouped/category`)
         .then((response) => {
           console.log(response.data.data)
           this.qustions = response.data.data

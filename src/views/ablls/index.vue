@@ -2,13 +2,13 @@
   <div class="ab-page">
     <Ablls />
 
-    <template v-if="$can('able category list')">
+    <template v-if="$can(perm('category', 'list'))">
       <header class="ab-hero">
         <div class="ab-hero-main">
           <span class="ab-hero-icon"><i class="pi pi-th-large" aria-hidden="true" /></span>
           <div>
             <h1>{{ $t('ablls_ui.categories_title') }}</h1>
-            <p>{{ $t('ablls_ui.categories_subtitle') }}</p>
+            <p>{{ $t(assessment.title) }} · {{ $t('ablls_ui.categories_subtitle') }}</p>
           </div>
         </div>
         <div class="ab-hero-side">
@@ -21,7 +21,16 @@
             <span>{{ $t('ablls_ui.missions_count') }}</span>
           </div>
           <Button
-            v-can="'able category create'"
+            v-if="assessment.customTypes"
+            v-can="[perm('type', 'list'), perm('type', 'create')]"
+            class="ab-hero-action"
+            severity="secondary"
+            :label="$t('ablls_ui.manage_types')"
+            icon="pi pi-tags"
+            @click="typesDialog = true"
+          />
+          <Button
+            v-can="perm('category', 'create')"
             class="ab-hero-action"
             :label="$t('ablls_ui.new_category')"
             icon="pi pi-plus"
@@ -41,7 +50,7 @@
             <span class="ab-type-count">{{ categories.length }}</span>
           </button>
           <button
-            v-for="type in ABLLS_TYPES"
+            v-for="type in types"
             :key="type.value"
             type="button"
             class="ab-type-tab"
@@ -49,7 +58,7 @@
             @click="setType(type.value)"
           >
             <i :class="type.icon" aria-hidden="true" />
-            {{ $t(`ablls_ui.types.${type.value}`) }}
+            {{ type.label }}
             <span class="ab-type-count">{{ typeCount(type.value) }}</span>
           </button>
         </div>
@@ -72,7 +81,8 @@
         <i class="pi pi-folder-open" aria-hidden="true" />
         <h3>{{ $t('ablls_ui.empty_categories') }}</h3>
         <p>{{ $t('ablls_ui.empty_categories_hint') }}</p>
-        <Button v-can="'able category create'" :label="$t('ablls_ui.new_category')" icon="pi pi-plus" @click="openCreate" />
+        <Button v-if="assessment.customTypes && !types.length" v-can="perm('type', 'create')" :label="$t('ablls_ui.manage_types')" icon="pi pi-tags" @click="typesDialog = true" />
+        <Button v-else v-can="perm('category', 'create')" :label="$t('ablls_ui.new_category')" icon="pi pi-plus" @click="openCreate" />
       </div>
 
       <div v-else-if="!filtered.length" class="ab-empty">
@@ -85,12 +95,12 @@
           <div class="cat-top">
             <span class="ab-symbol is-lg">{{ item.symbol }}</span>
             <div class="cat-info">
-              <span class="ab-type-tag"><i :class="typeIcon(typeOf(item))" aria-hidden="true" />{{ $t(`ablls_ui.types.${typeOf(item)}`) }}</span>
+              <span class="ab-type-tag"><i :class="iconOf(keyOf(item))" aria-hidden="true" />{{ labelOf(keyOf(item)) }}</span>
               <h3 :title="item.title">{{ item.title }}</h3>
             </div>
             <div class="ab-actions">
               <Button
-                v-can="'able category edit'"
+                v-can="perm('category', 'edit')"
                 icon="pi pi-pencil"
                 text
                 rounded
@@ -100,7 +110,7 @@
                 @click="openEdit(item)"
               />
               <Button
-                v-can="'able category delete'"
+                v-can="perm('category', 'delete')"
                 icon="pi pi-trash"
                 text
                 rounded
@@ -118,8 +128,8 @@
               {{ missionCounts[item.id] ? $t('ablls_ui.missions_n', { n: missionCounts[item.id] }) : $t('ablls_ui.no_missions') }}
             </span>
             <router-link
-              v-if="$can('able mission list')"
-              :to="{ name: 'missions', query: { category: item.id } }"
+              v-if="$can(perm('mission', 'list'))"
+              :to="{ name: assessment.routes.missions, query: { category: item.id } }"
               class="cat-link"
             >
               {{ $t('ablls_ui.view_missions') }}
@@ -144,7 +154,7 @@
           <label>{{ $t('ablls_ui.type') }}<span class="ab-req">*</span></label>
           <div class="cat-type-pick" role="radiogroup">
             <button
-              v-for="type in ABLLS_TYPES"
+              v-for="type in types"
               :key="type.value"
               type="button"
               role="radio"
@@ -154,10 +164,11 @@
               @click="form.type = type.value"
             >
               <i :class="type.icon" aria-hidden="true" />
-              {{ $t(`ablls_ui.types.${type.value}`) }}
+              {{ type.label }}
             </button>
           </div>
-          <small class="ab-hint">{{ $t(`ablls_ui.types_hint.${form.type || 'academic'}`) }}</small>
+          <small v-if="errors.type_id" class="ab-error">{{ errors.type_id[0] }}</small>
+          <small class="ab-hint">{{ hintOf(form.type) }}</small>
         </div>
         <div class="ab-field">
           <label for="cat-title">{{ $t('ablls_ui.category_title') }}<span class="ab-req">*</span></label>
@@ -177,7 +188,7 @@
             <span class="ab-symbol is-lg">{{ form.symbol || '?' }}</span>
             <div class="cat-info">
               <h3>{{ form.title || $t('ablls_ui.category_title') }}</h3>
-              <span class="ab-key">{{ nextSkillKey({ ...form, symbol: form.symbol || '?' }) }}</span>
+              <span class="ab-key">{{ nextSkillKey({ type: assessment.customTypes ? CUSTOM_TYPE : form.type, symbol: form.symbol || '?' }) }}</span>
             </div>
           </div>
         </div>
@@ -201,6 +212,9 @@
         <Button :label="$t('delete')" icon="pi pi-trash" severity="danger" :loading="deleting" data-no-request-spinner @click="remove" />
       </template>
     </Dialog>
+
+    <!-- ABLLS Skills: its domain types -->
+    <TypesDialog v-if="assessment.customTypes" v-model:visible="typesDialog" :assessment="assessment" @changed="loadTypes" />
   </div>
 </template>
 
@@ -210,9 +224,11 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import Ablls from '../../components/Ablls.vue'
+import TypesDialog from '@/components/ablls/TypesDialog.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { can } from '@/utils/permissions'
-import { ABLLS_TYPES, nextSkillKey, typeIcon, typeOf, typeOrder } from '@/components/ablls/abllsTypes'
+import { nextSkillKey } from '@/components/ablls/abllsTypes'
+import { CUSTOM_TYPE, apiOf, assessmentOf, permOf, useDomainTypes } from '@/components/ablls/assessment'
 import '@/components/ablls/ablls.css'
 
 const { t } = useI18n()
@@ -220,11 +236,17 @@ const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
+// ABLLS Academy or ABLLS Skills (the route's meta.assessment).
+const assessment = assessmentOf(route)
+const perm = (resource, action) => permOf(assessment, resource, action)
+const { types, load: loadTypes, keyOf, labelOf, iconOf, orderOf, hintOf } = useDomainTypes(assessment, t)
+const typesDialog = ref(false)
+
 const categories = ref([])
 const missionCounts = ref(null)
 const loading = ref(true)
 const search = ref('')
-const activeType = ref(ABLLS_TYPES.some((t) => t.value === route.query.type) ? route.query.type : null)
+const activeType = ref(route.query.type || null)
 
 const formDialog = ref(false)
 const form = ref({})
@@ -237,12 +259,12 @@ const deleting = ref(false)
 
 const totalMissions = computed(() => Object.values(missionCounts.value || {}).reduce((a, b) => a + b, 0))
 
-const typeCount = (type) => categories.value.filter((c) => typeOf(c) === type).length
+const typeCount = (type) => categories.value.filter((c) => keyOf(c) === type).length
 
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
   return categories.value.filter((c) => {
-    if (activeType.value && typeOf(c) !== activeType.value) return false
+    if (activeType.value && keyOf(c) !== activeType.value) return false
     return !q || (c.title || '').toLowerCase().includes(q) || (c.symbol || '').toLowerCase().includes(q)
   })
 })
@@ -254,10 +276,10 @@ const setType = (type) => {
 
 const fetchData = async () => {
   try {
-    const res = await axios.get('/api/able-category')
+    const [res] = await Promise.all([axios.get(apiOf(assessment, 'category')), loadTypes()])
     categories.value = (res.data.data || [])
       .map((c, i) => ({ ...c, order: i }))
-      .sort((a, b) => typeOrder(typeOf(a)) - typeOrder(typeOf(b)) || a.order - b.order)
+      .sort((a, b) => orderOf(keyOf(a)) - orderOf(keyOf(b)) || a.order - b.order)
   } finally {
     loading.value = false
   }
@@ -265,9 +287,9 @@ const fetchData = async () => {
 
 // Mission counts per category (only when the user may list missions).
 const fetchCounts = async () => {
-  if (!can('able mission list')) return
+  if (!can(perm('mission', 'list'))) return
   try {
-    const res = await axios.get('/api/able-mission')
+    const res = await axios.get(apiOf(assessment, 'mission'))
     const counts = {}
     for (const m of res.data.data || []) counts[m.category_id] = (counts[m.category_id] || 0) + 1
     missionCounts.value = counts
@@ -282,13 +304,13 @@ onMounted(() => {
 })
 
 const openCreate = () => {
-  form.value = { title: '', symbol: '', type: activeType.value || 'academic' }
+  form.value = { title: '', symbol: '', type: activeType.value || types.value[0]?.value || '' }
   errors.value = {}
   formDialog.value = true
 }
 
 const openEdit = (item) => {
-  form.value = { id: item.id, title: item.title, symbol: item.symbol, type: typeOf(item) }
+  form.value = { id: item.id, title: item.title, symbol: item.symbol, type: keyOf(item) }
   errors.value = {}
   formDialog.value = true
 }
@@ -298,13 +320,16 @@ const save = async () => {
   errors.value = {}
   if (!form.value.title?.trim()) errors.value.title = [t('ablls_ui.required')]
   if (!form.value.symbol?.trim()) errors.value.symbol = [t('ablls_ui.required')]
+  if (assessment.customTypes && !form.value.type) errors.value.type_id = [t('ablls_ui.choose_type')]
   if (Object.keys(errors.value).length) return
 
   saving.value = true
-  const payload = { title: form.value.title.trim(), symbol: form.value.symbol.trim(), type: form.value.type || 'academic' }
+  const payload = { title: form.value.title.trim(), symbol: form.value.symbol.trim() }
+  if (assessment.customTypes) payload.type_id = Number(String(form.value.type).slice(1))
+  else payload.type = form.value.type || 'academic'
   try {
-    if (form.value.id) await axios.put(`/api/able-category/${form.value.id}`, payload)
-    else await axios.post('/api/able-category', payload)
+    if (form.value.id) await axios.put(`${apiOf(assessment, 'category')}/${form.value.id}`, payload)
+    else await axios.post(apiOf(assessment, 'category'), payload)
     formDialog.value = false
     toast.add({ severity: 'success', summary: t('success_message'), detail: t('ablls_ui.saved'), life: 3000 })
     fetchData()
@@ -323,7 +348,7 @@ const askDelete = (item) => {
 const remove = async () => {
   deleting.value = true
   try {
-    await axios.delete(`/api/able-category/${toDelete.value.id}`)
+    await axios.delete(`${apiOf(assessment, 'category')}/${toDelete.value.id}`)
     deleteDialog.value = false
     toast.add({ severity: 'success', summary: t('success_message'), detail: t('ablls_ui.deleted'), life: 3000 })
     fetchData()
