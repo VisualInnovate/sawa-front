@@ -51,10 +51,10 @@ const mission = ref({
 const editors = ref([])
 
 // A boy's and a girl's wording (the field and "<field>_female"), item by item; both may hold {{name}}: an academic
-// skill's goals and questions, and an Ablls OT skill's long-term goal and sub goals.
+// skill's goals and questions, and a math / reading / spelling (or Ablls OT) skill's long-term goal and sub goals.
 const gender = ref('male')
 const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male'))
-const gendered = computed(() => academic.value || (assessment.customTypes && !!selectedCategory.value))
+const gendered = computed(() => academic.value || !!selectedCategory.value)
 const wordingFields = computed(() => (academic.value ? ['goals', 'questions'] : ['long_term_goal', 'sub_goals']))
 const fieldOf = (field, g = gender.value) => (g === 'male' || !gendered.value ? field : `${field}_female`)
 const genderHasError = (g) => wordingFields.value.some((f) => firstError(fieldOf(f, g)))
@@ -176,7 +176,7 @@ const validate = () => {
   }
   if (!academic.value && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
   if (!academic.value && gendered.value) {
-    // Ablls OT: the girl's long-term goal and one girl's sub goal for each of the boy's.
+    // The girl's long-term goal and one girl's sub goal for each of the boy's.
     if (!m.long_term_goal_female.trim()) e.long_term_goal_female = [t('ablls_ui.required')]
     const count = m.sub_goals.filter((x) => x.trim()).length
     const female = m.sub_goals_female.filter((x) => x.trim()).length

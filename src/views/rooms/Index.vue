@@ -176,7 +176,20 @@ const initFilters = () => {
 
            <Column field="admin.name" :header='$t("roomdoctor")' :sortable="true" header-style="width:14%; min-width:14rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.admin.name }}
+              <!-- The admins of each period; rooms saved before that show their one admin. -->
+              <div v-if="slotProps.data.admins?.length" class="flex flex-column gap-1">
+                <span v-for="admin in slotProps.data.admins" :key="`${admin.id}-${admin.pivot?.period}`">
+                  {{ admin.name }} <span class="text-xs text-color-secondary">({{ workTypeLabel(t, admin.pivot?.period) }})</span>
+                </span>
+              </div>
+              <template v-else>{{ slotProps.data.admin?.name }}</template>
+            </template>
+           </Column>
+           <Column :header='$t("room_treatments")' header-style="min-width:10rem;">
+            <template #body="slotProps">
+              <div class="flex flex-wrap gap-1">
+                <Tag v-for="treatment in slotProps.data.treatments ?? []" :key="treatment.id" :value="treatment.name" severity="info" class="whitespace-nowrap" />
+              </div>
             </template>
            </Column>
            <Column field="type" :header='$t("typeroom")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
