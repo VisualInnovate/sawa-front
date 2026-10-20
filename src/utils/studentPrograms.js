@@ -23,7 +23,7 @@ export function timeRange(start, end) {
   return `${start ?? ""} – ${end ?? ""}`;
 }
 
-// The program kind's label: «دمج» / «نهاري (الصفوف)» / «عيادات (مسائي)».
+// The program kind's label: «دمج» / «نهاري (الصفوف)» / «عيادات».
 export function programName(t, program) {
   if (program.kind !== "inclusion") return t(`work_type_${program.kind}`);
   const type = program.inclusion_type === "supervision" ? t("sp_inclusion_supervision") : t("sp_inclusion_program");
