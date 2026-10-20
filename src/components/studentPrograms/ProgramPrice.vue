@@ -18,9 +18,6 @@ defineProps({
       <Column v-else :header="$t('sp_days_of_month')">
         <template #body="{ data }">{{ data.days }} / {{ data.days_in_month }}</template>
       </Column>
-      <Column v-if="price.kind !== 'clinics'" :header="$t('sp_monthly_price')">
-        <template #body="{ data }">{{ money(data.monthly_price) }}</template>
-      </Column>
       <Column :header="$t('fees_discount')">
         <template #body="{ data }">{{ data.discount > 0 ? money(data.discount) : "" }}</template>
       </Column>

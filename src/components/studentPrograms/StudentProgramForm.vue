@@ -1,6 +1,6 @@
 <script setup>
 // Adds or edits a student program:
-// 1. the kind (دمج / نهاري (الصفوف) / عيادات (مسائي)), the student, a therapist of that kind and the dates;
+// 1. the kind (دمج / نهاري (الصفوف) / عيادات), the student, a therapist of that kind and the dates;
 // 2. day / clinics: the weekly quota split into individual rows (one treatment each) and group sessions (no
 //    treatment), the days; «توزيع» spreads it, places every session in a room and prices it; counts per day and
 //    rooms can change;
@@ -16,6 +16,10 @@ import { GROUP_KINDS, dayLabel, isoDate, sessionKindLabel, timeRange } from "@/u
 import WeekTimetable from "./WeekTimetable.vue";
 import ProgramPrice from "./ProgramPrice.vue";
 
+function endOfYear(date) {
+  return new Date(new Date(date).getFullYear(), 11, 31);
+}
+
 const props = defineProps({
   programId: { type: [Number, String], default: null },
 });
@@ -30,9 +34,14 @@ const therapists = ref([]);
 const loading = ref(true);
 
 const form = ref({
-  child_id: null, kind: null, therapist_id: null, start_date: null, end_date: null,
+  // The end date starts at the end of the year; it follows the start date's year until changed by hand.
+  child_id: null, kind: null, therapist_id: null, start_date: null, end_date: endOfYear(new Date()),
   weekly_sessions: null, individual_rows: [], group_sessions: 0, days: [],
   inclusion_type: "inclusion", inclusion_english: false, hours: {},
+});
+const endTouched = ref(!!props.programId);
+watch(() => form.value.start_date, (start) => {
+  if (start && !endTouched.value) form.value.end_date = endOfYear(start);
 });
 const preview = ref(null);
 const plan = ref(null);
@@ -276,6 +285,7 @@ onMounted(async () => {
 function slotStatus(slot) {
   if (slot.available) return null;
   if (slot.reason === "no_room") return t("sp_no_room");
+  if (slot.reason === "room_not_suitable") return t("sp_room_not_suitable");
   return slot.available_from ? t("sp_no_vacancy_from", { date: slot.available_from }) : t("sp_no_vacancy");
 }
 </script>
@@ -310,7 +320,8 @@ function slotStatus(slot) {
       </div>
       <div class="flex flex-column gap-2">
         <label for="sp-end">{{ $t("sp_end_date") }}</label>
-        <DatePicker v-model="form.end_date" inputId="sp-end" dateFormat="yy-mm-dd" showIcon :minDate="form.start_date" :invalid="!!errors.end_date" />
+        <DatePicker v-model="form.end_date" inputId="sp-end" dateFormat="yy-mm-dd" showIcon :minDate="form.start_date" :invalid="!!errors.end_date"
+          @update:modelValue="endTouched = true" />
       </div>
     </div>
 
