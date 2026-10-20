@@ -91,7 +91,10 @@ onBeforeUnmount(() => clearInterval(timer));
         <template #body="{ data }">{{ data.child?.name }}</template>
       </Column>
       <Column :header="$t('sp_treatment')">
-        <template #body="{ data }">{{ data.treatment?.name }} <span class="text-xs text-color-secondary">({{ sessionKindLabel(t, data.session_kind) }})</span></template>
+        <template #body="{ data }">
+          <template v-if="data.treatment">{{ data.treatment.name }} <span class="text-xs text-color-secondary">({{ sessionKindLabel(t, data.session_kind) }})</span></template>
+          <template v-else>{{ sessionKindLabel(t, data.session_kind) }}</template>
+        </template>
       </Column>
       <Column :header="$t('sp_room')">
         <template #body="{ data }">{{ data.room?.name }}</template>

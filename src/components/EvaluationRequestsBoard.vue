@@ -56,6 +56,7 @@ const name = row => getEvaluationTypeLabel(row.evaluation_type, t, row.title || 
           <div class="request-description">
             <h4>{{ name(row) }}</h4>
             <span v-if="row.start_time" class="request-date"><i class="pi pi-clock" /><span dir="ltr">{{ row.start_time.slice(0, 5) }} – {{ row.end_time?.slice(0, 5) }}</span></span>
+            <span v-else class="request-date"><i class="pi pi-clock" />{{ t("evaluation_without_appointment") }}</span>
           </div>
           <Tag :severity="requestStatus(row.status).severity" :value="t(requestStatus(row.status).key)" />
           <div class="request-actions">

@@ -3,6 +3,14 @@
     <ChildTaps></ChildTaps>
 
     <div class="sawa-card evaluations-page">
+      <!-- A new evaluation: booked in a specialist's calendar, or for a specialist without an appointment. -->
+      <div class="evaluations-toolbar">
+        <Button v-can="'evaluation request create'" icon="pi pi-calendar-plus" :label="$t('evaluation_with_appointment')"
+          @click="$router.push({ name: 'Calender', params: { id: child_id } })" />
+        <Button v-can="'evaluation request without appointment create'" icon="pi pi-plus" :label="$t('evaluation_without_appointment_add')"
+          severity="secondary" variant="outlined" @click="openUnscheduled" />
+      </div>
+
       <div v-if="loading" class="evaluations-empty">
         <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
         <p>{{ $t("loading") }}</p>
@@ -123,89 +131,27 @@
       </template>
     </Dialog>
 
-    <Dialog
-      v-model:visible="updatedialog"
-      :style="{ width: '450px' }"
-      :header="$t('submit')"
-      :modal="true"
-    >
-      <form @submit.prevent="create" class="">
-        <div class="flex flex-column gap-2 py-1">
-          <label class="w-full text-start" for="username">{{
-            $t("evalute_type")
-          }}</label>
-          <Select
-            @update:model-value="getdoctor_evalte"
-            required
-            v-model="evalate.evaluation_type"
-            option-value="id"
-            filter
-            :options="evaluate_types"
-            optionLabel="name"
-            class="w-full"
-            :class="{ 'p-invalid': submitted && !evalate.evaluation_type }"
-          />
+    <Dialog v-model:visible="unscheduled.visible" modal :header="$t('evaluation_without_appointment_add')" :style="{ width: '30rem' }"
+      :breakpoints="{ '640px': '94vw' }">
+      <form class="flex flex-column gap-3" @submit.prevent="createUnscheduled">
+        <div class="flex flex-column gap-2">
+          <label for="unscheduled-type">{{ $t("evalute_type") }}</label>
+          <Select v-model="unscheduled.evaluation_type" inputId="unscheduled-type" :options="evaluate_types" optionLabel="name" optionValue="id"
+            filter :invalid="unscheduled.submitted && !unscheduled.evaluation_type" @update:modelValue="loadSpecialists" />
         </div>
-        <div v-if="evalate.evaluation_type" class="flex flex-column gap-2 py-1">
-          <label class="w-full text-start" for="username">{{
-            $t("Name_evaluator")
-          }}</label>
-          <Select
-            @update:model-value="getDays"
-            required
-            v-model="evalate.specialist_id"
-            option-value="id"
-            filter
-            :options="doctors"
-            optionLabel="name"
-            class="w-full"
-            :class="{ 'p-invalid': submitted && !evalate.specialist_id }"
-          />
+        <div class="flex flex-column gap-2">
+          <label for="unscheduled-specialist">{{ $t("Name_evaluator") }}</label>
+          <Select v-model="unscheduled.employee_id" inputId="unscheduled-specialist" :options="specialists" optionLabel="name" optionValue="id"
+            filter :disabled="!unscheduled.evaluation_type" :loading="unscheduled.loading"
+            :placeholder="unscheduled.evaluation_type && !unscheduled.loading && !specialists.length ? $t('no_evaluators_for_type') : ''"
+            :invalid="unscheduled.submitted && !unscheduled.employee_id" />
         </div>
-        <div v-if="evalate.specialist_id" class="flex flex-column gap-2">
-          <label class="w-full text-start" for="username">{{
-            $t("Evaluation_date")
-          }}</label>
-          <DatePicker
-            @update:model-value="gettimes($event)"
-            :disabledDays="filteredDays"
-            style="width: 100%"
-            showButtonBar
-            v-model.number="evalate.date"
-            showIcon
-            :class="{ 'p-invalid': submitted && !evalate.date }"
-            :minDate="maxDate"
-          />
-          <div class="mt-1 mb-5 text-red-500" v-if="error?.date">
-            {{ error.date[0] }}
-          </div>
+        <div class="flex flex-column gap-2">
+          <label for="unscheduled-notes">{{ $t("notes") }}</label>
+          <Textarea id="unscheduled-notes" v-model="unscheduled.notes" rows="3" autoResize />
         </div>
-        <div v-if="evalate.date" class="flex flex-column gap-2 py-1">
-          <label class="w-full text-start" for="username">{{
-            $t("hour_evaluator")
-          }}</label>
-          <Select
-            required
-            v-model="evalate.Session_time"
-            filter
-            :options="slots"
-            optionLabel="key"
-            :class="{ 'p-invalid': submitted && !evalate.Session_time }"
-            class="w-full"
-          />
-          <div class="mt-1 mb-5 text-red-500" v-if="error?.specialist_id">
-            {{ error.specialist_id[0] }}
-          </div>
-        </div>
-
-        <div class="w-full text-center">
-          <Button
-            type="submit"
-            @click="submitted = true"
-            class="m-auto w-[50%] my-4"
-            :label="$t('submit')"
-          ></Button>
-        </div>
+        <small class="text-color-secondary">{{ $t("evaluation_without_appointment_hint") }}</small>
+        <Button type="submit" icon="pi pi-check" :label="$t('submit')" :loading="unscheduled.saving" class="w-full" />
       </form>
     </Dialog>
 
@@ -217,7 +163,6 @@
 import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from "../../components/ChildTaps.vue";
-import moment from "moment";
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
 
 export default {
@@ -229,62 +174,60 @@ export default {
       maxDate: new Date(),
       details: {},
       evaluations: [],
-      evalate: {},
-      error: {},
-      days: [0, 1, 2, 3, 4, 5, 6],
-      business_hours: [],
-      submitted: false,
-      slots: [],
       delete_id: 0,
-      doctors: [],
+      specialists: [],
+      unscheduled: { visible: false },
       deleteDialog: false,
       loading: true,
       first: 0,
       per_page: 6,
       total_records: 0,
-      updatedialog: false,
-      evaluate_types: [
-        { name: "side profile", id: 1 },
-        { name: "milestone", id: 2 },
-        { name: "barrier", id: 3 },
-        { name: "ABLLS Academy", id: 4 },
-        { name: "carolina", id: 5 },
-        { name: "Transition", id: 6 },
-        { name: "Ablls OT", id: 7 },
-      ],
     };
   },
 
   methods: {
-    opennew() {
-      this.updatedialog = !this.updatedialog;
+    openUnscheduled() {
+      this.specialists = [];
+      this.unscheduled = { visible: true, evaluation_type: null, employee_id: null, notes: "", submitted: false, loading: false, saving: false };
     },
 
-    getdoctor_evalte(id) {
-      axios
-        .post(`api/evaluation-doctors`, {
-          evaluation_type: id,
-        })
-        .then((response) => {
-          this.doctors = response.data.doctors;
+    // The specialists who do this evaluation (as the booking calendar lists them).
+    async loadSpecialists(type) {
+      this.unscheduled.employee_id = null;
+      this.specialists = [];
+      if (!type) return;
+      this.unscheduled.loading = true;
+      try {
+        const { data } = await axios.get(`api/employees/get/with/${type}`);
+        if (this.unscheduled.evaluation_type !== type) return;
+        const list = data.data?.employees;
+        this.specialists = (Array.isArray(list) ? list : Object.values(list ?? {})).map((row) => ({ id: Number(row.id), name: row.name }));
+      } catch {
+        this.specialists = [];
+      } finally {
+        this.unscheduled.loading = false;
+      }
+    },
+
+    async createUnscheduled() {
+      this.unscheduled.submitted = true;
+      if (!this.unscheduled.evaluation_type || !this.unscheduled.employee_id) return;
+      this.unscheduled.saving = true;
+      try {
+        await axios.post("api/evaluation-request/unscheduled", {
+          child_id: this.child_id,
+          employee_id: this.unscheduled.employee_id,
+          evaluation_type: this.unscheduled.evaluation_type,
+          notes: this.unscheduled.notes?.trim() || null,
         });
-    },
-
-    getDays(id) {
-      this.business_hours =
-        this.doctors.find((item) => item.id == id)?.business_hours || [];
-    },
-
-    gettimes(e) {
-      axios
-        .post(`api/users/available/slots`, {
-          user_id: this.evalate.specialist_id,
-          evaluation_type: this.evalate.evaluation_type,
-          date: moment(e).format("Y-MM-DD"),
-        })
-        .then((response) => {
-          this.slots = response.data.slots;
-        });
+        this.unscheduled.visible = false;
+        this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: this.$t("element_add_success"), life: 3000 });
+        this.$router.push({ name: "children-request" });
+      } catch (e) {
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: e.response?.data?.message || this.$t("mission_error"), life: 3000 });
+      } finally {
+        this.unscheduled.saving = false;
+      }
     },
 
     // Side profile rows come from the evaluation_results pivot and have no type;
@@ -342,37 +285,6 @@ export default {
       });
     },
 
-    create() {
-      axios
-        .post(`api/evaluation-request`, {
-          child_id: localStorage.getItem("child_id"),
-          consultant_id: localStorage.getItem("user_id"),
-          evaluation_type: this.evalate.evaluation_type,
-          date: moment(this.evalate.date).format("Y-MM-DD"),
-          specialist_id: this.evalate?.specialist_id,
-          start_time: this.evalate?.Session_time?.start,
-          end_time: this.evalate?.Session_time?.end,
-        })
-        .then((response) => {
-          this.updatedialog = !this.updatedialog;
-          this.$toast.add({
-            severity: "success",
-            summary: this.$t("success_message"),
-            detail: `${this.$t("element_add_success")}`,
-            life: 3000,
-          });
-          this.$router.push({ name: "children-request" });
-        })
-        .catch((el) => {
-          this.$toast.add({
-            severity: "error",
-            summary: this.$t("error"),
-            detail: `${this.$t("mission_error")}`,
-            life: 3000,
-          });
-        });
-    },
-
     getusers(page = 1) {
       this.loading = true;
       axios
@@ -415,20 +327,12 @@ export default {
         });
     },
 
-    getdoctors() {
-      axios
-        .get(`api/doctors`)
-        .then((response) => {
-          this.doctors = response.data.doctors;
-        })
-        .catch((error) => {});
-    },
   },
 
   computed: {
-    filteredDays() {
-      const usedDays = this.business_hours.map((entry) => entry.day);
-      return this.days.filter((day) => !usedDays.includes(day));
+    // The types the booking calendar books: the evaluations and the side profile dimensions.
+    evaluate_types() {
+      return [2, 3, 4, 5, 6, 7, 101, 102, 103, 104, 105].map((id) => ({ id, name: getEvaluationTypeLabel(id, this.$t) }));
     },
   },
 
@@ -441,14 +345,15 @@ export default {
 
   mounted() {
     this.getusers();
-    this.getdoctors();
-    this.child_id = localStorage.getItem("child_id");
+    this.child_id = Number(localStorage.getItem("child_id"));
   },
 };
 </script>
 
 <style scoped>
 .evaluations-page { padding: 1.25rem; }
+.evaluations-toolbar { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; margin-bottom: 1rem; }
+.evaluations-toolbar:empty { display: none; }
 .evaluations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1rem; }
 .evaluation-card {
   --tone: #135c65; --tone-soft: #e6f4f3;

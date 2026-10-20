@@ -38,7 +38,7 @@ onMounted(async () => {
       <div v-if="program.next_session"><span class="text-color-secondary">{{ $t("sp_next_session") }}:</span> <span class="whitespace-nowrap">{{ program.next_session.starts_at.slice(0, 16) }}</span></div>
       <div v-if="program.student_program_details?.length" class="md:col-span-3 flex flex-wrap gap-2">
         <Tag v-for="row in program.student_program_details" :key="row.id" severity="secondary"
-          :value="`${row.treatment?.name} · ${sessionKindLabel(t, row.session_kind)} · ${row.sessions_numbers}`" />
+          :value="[row.treatment?.name, sessionKindLabel(t, row.session_kind), row.sessions_numbers].filter(Boolean).join(' · ')" />
       </div>
       <div v-if="program.inclusion_hours?.length" class="md:col-span-3 flex flex-wrap gap-3 text-sm">
         <span v-for="row in program.inclusion_hours" :key="row.day">{{ dayLabel(t, row.day) }}: {{ timeRange(row.start, row.end) }}</span>

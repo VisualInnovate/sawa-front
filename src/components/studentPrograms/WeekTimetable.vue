@@ -52,8 +52,9 @@ function treatment(slot) {
           <td v-for="day in days" :key="day" class="p-1">
             <div v-if="cell(day, hour)" class="rounded-lg p-2 flex flex-column gap-1"
               :class="cell(day, hour).available === false ? 'bg-[#FDECEC]' : cell(day, hour).session_kind === 'individual' ? 'bg-[#E8F3F4]' : 'bg-[#F3EFE6]'">
-              <span class="font-semibold">{{ treatment(cell(day, hour)) }}</span>
-              <span class="text-xs">{{ sessionKindLabel(t, cell(day, hour).session_kind) }}</span>
+              <!-- Group sessions have no treatment: their kind is the title. -->
+              <span class="font-semibold">{{ treatment(cell(day, hour)) || sessionKindLabel(t, cell(day, hour).session_kind) }}</span>
+              <span v-if="treatment(cell(day, hour))" class="text-xs">{{ sessionKindLabel(t, cell(day, hour).session_kind) }}</span>
               <span class="text-xs text-color-secondary">
                 {{ cell(day, hour).room_name ?? cell(day, hour).room?.name }} · {{ cell(day, hour).therapist_name ?? cell(day, hour).therapist?.name }}
               </span>

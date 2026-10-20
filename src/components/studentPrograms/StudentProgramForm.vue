@@ -1,8 +1,9 @@
 <script setup>
 // Adds or edits a student program:
 // 1. the kind (دمج / نهاري (الصفوف) / عيادات (مسائي)), the student, a therapist of that kind and the dates;
-// 2. day / clinics: the weekly quota, ONE individual treatment, the rest as group rows (each with its treatment),
-//    the days; «توزيع» spreads it, places every session in a room and prices it; counts per day and rooms can change;
+// 2. day / clinics: the weekly quota split into individual rows (one treatment each) and group sessions (no
+//    treatment), the days; «توزيع» spreads it, places every session in a room and prices it; counts per day and
+//    rooms can change;
 // 3. inclusion: supervision or inclusion (+ English), the student's from–to each day, a therapist free all that time.
 // Nothing is saved until «حفظ»; the backend checks everything again.
 import axios from "axios";
@@ -30,7 +31,7 @@ const loading = ref(true);
 
 const form = ref({
   child_id: null, kind: null, therapist_id: null, start_date: null, end_date: null,
-  weekly_sessions: null, individual: { treatment_id: null, sessions: 0 }, group_rows: [], days: [],
+  weekly_sessions: null, individual_rows: [], group_sessions: 0, days: [],
   inclusion_type: "inclusion", inclusion_english: false, hours: {},
 });
 const preview = ref(null);
@@ -44,19 +45,20 @@ const treatmentNames = computed(() => Object.fromEntries(treatments.value.map((r
 const hoursOf = (kind) => programHours.value.filter((row) => row.program === kind);
 const openDays = computed(() => hoursOf(form.value.kind).map((row) => row.day));
 const isInclusion = computed(() => form.value.kind === "inclusion");
-const groupKinds = computed(() => GROUP_KINDS.map((value) => ({ value, label: sessionKindLabel(t, value) })));
 const inclusionTypes = computed(() => [
   { value: "supervision", label: t("sp_inclusion_supervision") },
   { value: "inclusion", label: t("sp_inclusion_program") },
 ]);
 
-const remaining = computed(() => (form.value.weekly_sessions ?? 0) - (form.value.individual.sessions ?? 0)
-  - form.value.group_rows.reduce((sum, row) => sum + (row.sessions ?? 0), 0));
+const remaining = computed(() => (form.value.weekly_sessions ?? 0) - (form.value.group_sessions ?? 0)
+  - form.value.individual_rows.reduce((sum, row) => sum + (row.sessions ?? 0), 0));
+// One row per treatment: a treatment already in another row is not offered again.
+const treatmentOptions = (row) => treatments.value.filter((treatment) => treatment.id === row.treatment_id
+  || !form.value.individual_rows.some((other) => other.treatment_id === treatment.id));
 
 const basicsReady = computed(() => form.value.child_id && form.value.kind && form.value.therapist_id && form.value.start_date && form.value.end_date);
 const quotaReady = computed(() => form.value.weekly_sessions > 0 && remaining.value === 0 && form.value.days.length > 0
-  && (!(form.value.individual.sessions > 0) || form.value.individual.treatment_id)
-  && form.value.group_rows.every((row) => row.session_kind && row.treatment_id && row.sessions > 0));
+  && form.value.individual_rows.every((row) => row.treatment_id && row.sessions > 0));
 const inclusionHours = computed(() => Object.entries(form.value.hours).filter(([, row]) => row.on)
   .map(([day, row]) => ({ day: Number(day), start: row.start, end: row.end })));
 const inclusionReady = computed(() => inclusionHours.value.length > 0 && inclusionHours.value.every((row) => row.start && row.end && row.end > row.start));
@@ -72,8 +74,7 @@ function body(extra = {}) {
   }
   return {
     ...base, weekly_sessions: form.value.weekly_sessions, days: [...form.value.days].sort(),
-    individual: form.value.individual.sessions > 0 ? form.value.individual : null,
-    group_rows: form.value.group_rows, ...extra,
+    individual_rows: form.value.individual_rows, group_sessions: form.value.group_sessions ?? 0, ...extra,
   };
 }
 
@@ -148,11 +149,14 @@ watch(() => [JSON.stringify(body()), basicsReady.value], () => {
   timer = setTimeout(() => runPreview(), 500);
 });
 // Changing the quota or the days makes the shown distribution stale.
-watch(() => JSON.stringify([form.value.weekly_sessions, form.value.individual, form.value.group_rows, form.value.days, form.value.therapist_id, isoDate(form.value.start_date), isoDate(form.value.end_date)]), () => {
+watch(() => JSON.stringify([form.value.weekly_sessions, form.value.individual_rows, form.value.group_sessions, form.value.days, form.value.therapist_id, isoDate(form.value.start_date), isoDate(form.value.end_date)]), () => {
   if (!loading.value && !isInclusion.value) preview.value = null;
 });
 
-const addGroupRow = () => form.value.group_rows.push({ session_kind: "group", treatment_id: null, sessions: Math.max(remaining.value, 1) });
+const addIndividualRow = () => form.value.individual_rows.push({ treatment_id: null, sessions: Math.max(remaining.value, 1) });
+const restAsGroup = () => { form.value.group_sessions = (form.value.group_sessions ?? 0) + remaining.value; };
+// A row or a session's treatment, or «جماعي» for group sessions (they have none).
+const rowLabel = (row) => (row.session_kind === "individual" ? treatmentNames.value[row.treatment_id] ?? row.treatment_name : sessionKindLabel(t, "group"));
 
 // Per-day counts the user may change: rows × days.
 const planRows = computed(() => preview.value?.rows ?? []);
@@ -175,13 +179,13 @@ async function openRooms(index) {
   roomDialog.value = { index, slot };
   roomOptions.value = [];
   const { data } = await axios.post("api/student-program/room-options", {
-    ...body(), day: slot.day, start: slot.start, session_kind: slot.session_kind, treatment_id: slot.treatment_id,
+    ...body(), day: slot.day, start: slot.start, session_kind: slot.session_kind, treatment_id: slot.treatment_id ?? undefined,
     slot_therapist_id: slot.therapist_id ?? form.value.therapist_id,
   });
   roomOptions.value = data.data;
 }
 function chooseRoom(option) {
-  const slots = preview.value.slots.map((slot, i) => (i === roomDialog.value.index ? { ...slot, room_id: option.room_id } : slot));
+  const slots = preview.value.slots.map((slot, i) => (i === roomDialog.value.index ? { ...slot, room_id: option.room_id, therapist_id: option.therapist_id } : slot));
   roomDialog.value = null;
   keepSlots(slots);
 }
@@ -207,14 +211,15 @@ async function loadProgram() {
   const { data } = await axios.get(`api/student-program/${props.programId}`);
   const program = data.data;
   const details = program.student_program_details ?? [];
-  const individual = details.find((row) => row.session_kind === "individual");
+
   Object.assign(form.value, {
     child_id: program.student_id, kind: program.kind, therapist_id: program.therapist_id,
     start_date: new Date(program.start_date), end_date: new Date(program.end_date),
     weekly_sessions: program.weekly_sessions,
-    individual: individual ? { treatment_id: individual.treatment_id, sessions: individual.sessions_numbers } : { treatment_id: null, sessions: 0 },
-    group_rows: details.filter((row) => GROUP_KINDS.includes(row.session_kind))
-      .map((row) => ({ session_kind: row.session_kind, treatment_id: row.treatment_id, sessions: row.sessions_numbers })),
+    individual_rows: details.filter((row) => row.session_kind === "individual")
+      .map((row) => ({ treatment_id: row.treatment_id, sessions: row.sessions_numbers })),
+    // Saved «جماعي وفردي» rows count as group (that kind is gone).
+    group_sessions: details.filter((row) => GROUP_KINDS.includes(row.session_kind)).reduce((sum, row) => sum + row.sessions_numbers, 0),
     days: program.days ?? [],
     inclusion_type: program.inclusion_type ?? "inclusion", inclusion_english: !!program.inclusion_english,
   });
@@ -226,13 +231,13 @@ async function loadProgram() {
 }
 
 function planFromWeek(week) {
-  // Rows: "individual" then "g0", "g1"… in the form's order; each saved slot goes to the first row with room left.
-  const rows = [];
-  if (form.value.individual.sessions > 0) rows.push({ key: "individual", session_kind: "individual", treatment_id: form.value.individual.treatment_id, left: form.value.individual.sessions });
-  form.value.group_rows.forEach((row, i) => rows.push({ key: `g${i}`, session_kind: row.session_kind, treatment_id: row.treatment_id, left: row.sessions }));
+  // Rows: "i0", "i1"… in the form's order, then "group"; each saved slot goes to the first row with room left.
+  const rows = form.value.individual_rows.map((row, i) => ({ key: `i${i}`, session_kind: "individual", treatment_id: row.treatment_id, left: row.sessions }));
+  if (form.value.group_sessions > 0) rows.push({ key: "group", session_kind: "group", treatment_id: null, left: form.value.group_sessions });
   const result = {};
   week.forEach((slot) => {
-    const row = rows.find((candidate) => candidate.left > 0 && candidate.session_kind === slot.session_kind && candidate.treatment_id === slot.treatment_id);
+    const row = rows.find((candidate) => candidate.left > 0 && candidate.session_kind === slot.session_kind
+      && (slot.session_kind === "group" || candidate.treatment_id === slot.treatment_id));
     if (!row) return;
     row.left--;
     result[slot.day] ??= {};
@@ -255,7 +260,12 @@ onMounted(async () => {
     if (program.kind === "inclusion") {
       await runPreview();
     } else {
-      const week = (program.week ?? []).map((slot) => ({ day: slot.day, start: slot.start, session_kind: slot.session_kind, treatment_id: slot.treatment_id, room_id: slot.room_id }));
+      // Saved «جماعي وفردي» sessions come back as group ones without a treatment (their room may need changing).
+      const week = (program.week ?? []).map((slot) => {
+        const group = GROUP_KINDS.includes(slot.session_kind);
+        return { day: slot.day, start: slot.start, session_kind: group ? "group" : slot.session_kind, treatment_id: group ? null : slot.treatment_id,
+          room_id: slot.room_id, therapist_id: slot.therapist_id };
+      });
       await runPreview({ plan: planFromWeek(week), slots: week });
     }
   } else {
@@ -313,39 +323,33 @@ function slotStatus(slot) {
           <small class="text-color-secondary">{{ $t("sp_session_hour") }}</small>
         </div>
         <div class="flex flex-column gap-2">
-          <label for="sp-individual-treatment">{{ $t("sp_individual_treatment") }}</label>
-          <Select v-model="form.individual.treatment_id" inputId="sp-individual-treatment" :options="treatments" optionLabel="name" optionValue="id" filter showClear />
-          <small class="text-color-secondary">{{ $t("sp_individual_hint") }}</small>
+          <label for="sp-group-sessions">{{ $t("sp_group_sessions") }}</label>
+          <InputNumber v-model="form.group_sessions" inputId="sp-group-sessions" :min="0" />
+          <small class="text-color-secondary">{{ $t("sp_group_hint") }}</small>
         </div>
-        <div class="flex flex-column gap-2">
-          <label for="sp-individual-sessions">{{ $t("sp_individual_sessions") }}</label>
-          <InputNumber v-model="form.individual.sessions" inputId="sp-individual-sessions" :min="0" />
+        <div class="flex flex-column gap-2 justify-center">
+          <Tag :severity="remaining === 0 ? 'success' : remaining > 0 ? 'warn' : 'danger'"
+            :value="remaining === 0 ? $t('sp_all_assigned') : remaining > 0 ? $t('sp_waiting_treatment', { count: remaining }) : $t('sp_over_quota', { count: -remaining })" />
+          <Button v-if="remaining > 0" icon="pi pi-users" :label="$t('sp_rest_as_group')" variant="text" size="small" class="w-fit" @click="restAsGroup" />
         </div>
       </div>
 
       <div class="flex flex-column gap-2">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="font-semibold">{{ $t("sp_group_sessions") }}</span>
-          <Tag :severity="remaining === 0 ? 'success' : remaining > 0 ? 'warn' : 'danger'"
-            :value="remaining === 0 ? $t('sp_all_assigned') : remaining > 0 ? $t('sp_waiting_treatment', { count: remaining }) : $t('sp_over_quota', { count: -remaining })" />
-        </div>
-        <div v-for="(row, index) in form.group_rows" :key="index" class="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr_auto] gap-2 items-end">
+        <span class="font-semibold">{{ $t("sp_individual_sessions") }}</span>
+        <small class="text-color-secondary">{{ $t("sp_individual_hint") }}</small>
+        <div v-for="(row, index) in form.individual_rows" :key="index" class="grid grid-cols-1 md:grid-cols-[2fr_1fr_auto] gap-2 items-end">
           <div class="flex flex-column gap-1">
-            <label :for="`sp-group-kind-${index}`" class="text-sm">{{ $t("sp_session_type") }}</label>
-            <Select v-model="row.session_kind" :inputId="`sp-group-kind-${index}`" :options="groupKinds" optionLabel="label" optionValue="value" />
-          </div>
-          <div class="flex flex-column gap-1">
-            <label :for="`sp-group-treatment-${index}`" class="text-sm">{{ $t("sp_treatment") }}</label>
-            <Select v-model="row.treatment_id" :inputId="`sp-group-treatment-${index}`" :options="treatments" optionLabel="name" optionValue="id" filter
+            <label :for="`sp-individual-treatment-${index}`" class="text-sm">{{ $t("sp_treatment") }}</label>
+            <Select v-model="row.treatment_id" :inputId="`sp-individual-treatment-${index}`" :options="treatmentOptions(row)" optionLabel="name" optionValue="id" filter
               :invalid="!row.treatment_id" />
           </div>
           <div class="flex flex-column gap-1">
-            <label :for="`sp-group-sessions-${index}`" class="text-sm">{{ $t("fees_sessions") }}</label>
-            <InputNumber v-model="row.sessions" :inputId="`sp-group-sessions-${index}`" :min="1" />
+            <label :for="`sp-individual-sessions-${index}`" class="text-sm">{{ $t("fees_sessions") }}</label>
+            <InputNumber v-model="row.sessions" :inputId="`sp-individual-sessions-${index}`" :min="1" />
           </div>
-          <Button icon="pi pi-trash" severity="danger" variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="form.group_rows.splice(index, 1)" />
+          <Button icon="pi pi-trash" severity="danger" variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="form.individual_rows.splice(index, 1)" />
         </div>
-        <Button icon="pi pi-plus" :label="$t('sp_add_group_row')" variant="outlined" class="w-fit" :disabled="remaining <= 0" @click="addGroupRow" />
+        <Button icon="pi pi-plus" :label="$t('sp_add_individual_row')" variant="outlined" class="w-fit" :disabled="remaining <= 0" @click="addIndividualRow" />
       </div>
 
       <div class="flex flex-column gap-2">
@@ -408,10 +412,10 @@ function slotStatus(slot) {
           </thead>
           <tbody>
             <tr v-for="row in planRows" :key="row.key" class="border-b border-[#EEF1F2]">
-              <td class="p-2">{{ row.treatment_name }} <span class="text-xs text-color-secondary">({{ sessionKindLabel(t, row.session_kind) }})</span></td>
+              <td class="p-2">{{ rowLabel(row) }} <span v-if="row.session_kind === 'individual'" class="text-xs text-color-secondary">({{ sessionKindLabel(t, row.session_kind) }})</span></td>
               <td v-for="day in planDays" :key="day" class="p-1">
                 <InputNumber :modelValue="plan?.[day]?.[row.key] ?? 0" :min="0" :max="10" inputClass="w-[4rem]"
-                  :aria-label="`${row.treatment_name} ${dayLabel(t, day)}`" @update:modelValue="setCount(day, row.key, $event)" />
+                  :aria-label="`${rowLabel(row)} ${dayLabel(t, day)}`" @update:modelValue="setCount(day, row.key, $event)" />
               </td>
               <td class="p-2" :class="rowTotal(row.key) === row.sessions ? '' : 'text-red-500 font-semibold'">{{ rowTotal(row.key) }} / {{ row.sessions }}</td>
             </tr>
@@ -437,7 +441,7 @@ function slotStatus(slot) {
           <template #body="{ data }">{{ data.start ? timeRange(data.start, data.end) : "—" }}</template>
         </Column>
         <Column :header="$t('sp_treatment')">
-          <template #body="{ data }">{{ treatmentNames[data.treatment_id] }} <span class="text-xs text-color-secondary">({{ sessionKindLabel(t, data.session_kind) }})</span></template>
+          <template #body="{ data }">{{ rowLabel(data) }} <span v-if="data.session_kind === 'individual'" class="text-xs text-color-secondary">({{ sessionKindLabel(t, data.session_kind) }})</span></template>
         </Column>
         <Column :header="$t('sp_room')">
           <template #body="{ data }">{{ data.room_name ?? "—" }}</template>
@@ -478,18 +482,19 @@ function slotStatus(slot) {
 
     <Dialog :visible="!!roomDialog" modal :header="$t('sp_change_room')" :style="{ width: '36rem' }" :breakpoints="{ '640px': '94vw' }" @update:visible="roomDialog = null">
       <p v-if="roomDialog" class="text-sm text-color-secondary mb-3">
-        {{ dayLabel(t, roomDialog.slot.day) }} {{ timeRange(roomDialog.slot.start, roomDialog.slot.end) }} — {{ treatmentNames[roomDialog.slot.treatment_id] }}
+        {{ dayLabel(t, roomDialog.slot.day) }} {{ timeRange(roomDialog.slot.start, roomDialog.slot.end) }} — {{ rowLabel(roomDialog.slot) }}
       </p>
       <div v-if="!roomOptions.length" class="text-color-secondary">{{ $t("sp_no_rooms") }}</div>
-      <div v-for="option in roomOptions" :key="option.room_id" class="flex flex-wrap items-center justify-between gap-2 border-b border-[#EEF1F2] py-2">
+      <div v-for="option in roomOptions" :key="`${option.room_id}-${option.therapist_id}`" class="flex flex-wrap items-center justify-between gap-2 border-b border-[#EEF1F2] py-2">
         <div class="flex flex-column">
-          <span class="font-semibold">{{ $t("sp_room") }} {{ option.room_name }} — {{ option.therapist_name }}</span>
+          <span class="font-semibold">{{ $t("sp_room") }} {{ option.room_name }} — {{ option.therapist_name }}
+            <span class="text-xs text-color-secondary">({{ option.room_type === 1 ? $t("typeroom1") : $t("typeroom2") }})</span></span>
           <span class="text-xs text-color-secondary">{{ $t(`sp_source_${option.source}`) }}</span>
         </div>
         <div class="flex items-center gap-2">
           <Tag v-if="option.available" severity="success" :value="$t('sp_available')" />
           <Tag v-else severity="danger" :value="option.available_from ? $t('sp_no_vacancy_from', { date: option.available_from }) : $t('sp_no_vacancy')" />
-          <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || option.room_id === roomDialog?.slot.room_id" @click="chooseRoom(option)" />
+          <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || (option.room_id === roomDialog?.slot.room_id && option.therapist_id === roomDialog?.slot.therapist_id)" @click="chooseRoom(option)" />
         </div>
       </div>
     </Dialog>
