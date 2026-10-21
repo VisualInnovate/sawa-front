@@ -8,7 +8,6 @@ import hr from "./hr.routes";
 import parentsRoutes from "./parents.routes";
 import siteRoutes from "./settings.routes";
 import rooms from "./room.routes";
-import reinforcer from "./reinforcers.routes";
 import childrenRoutes from "./children.routes";
 import QuestionHeadersRoutes from "./question-headers.routes";
 import EvaluationsRoutes from "./evaluation.routes";
@@ -294,7 +293,6 @@ const routes = [
       ...Object.values(treatment_type),
       ...Object.values(inputs),
       ...Object.values(hr),
-      ...Object.values(reinforcer),
       ...Object.values(sideProfileRoutes),
       ...Object.values(calender),
       ...Object.values(parentsRoutes),
@@ -321,6 +319,14 @@ const routes = [
     path: "/password-reset/:token",
     name: "ResetPassword",
     component: () => import("@/components/ResetPassword.vue"),
+  },
+  {
+    // A running session, full screen, outside the dashboard layout.
+    path: "/session-run/:id",
+    name: "session-run",
+    beforeEnter: auth,
+    meta: { permission: ["sessions list"] },
+    component: () => import("@/views/sessions/SessionRun.vue"),
   },
   {
     // The printable evaluation report (A4 pages with editable fields), outside the dashboard layout.
