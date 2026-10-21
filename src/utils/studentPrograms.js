@@ -12,8 +12,8 @@ export function sessionKindLabel(t, kind) {
   return t(`sp_session_${kind}`);
 }
 
-// closed / waiting / late / ongoing / missed, as the backend computes them.
-export const SESSION_STATUS_SEVERITY = { closed: "secondary", waiting: "info", late: "warn", ongoing: "success", missed: "danger" };
+// closed / waiting / late / ongoing / finished / missed, as the backend computes them.
+export const SESSION_STATUS_SEVERITY = { closed: "secondary", waiting: "info", late: "warn", ongoing: "success", finished: "contrast", missed: "danger" };
 
 export function isoDate(value) {
   return value ? moment(value).format("YYYY-MM-DD") : null;

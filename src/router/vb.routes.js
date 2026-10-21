@@ -127,17 +127,19 @@ const vb = [
       component: () => import("../views/programHours/Index.vue")
     },
 
+    // Before a session starts: its break schedule (two tables).
     {
-      path: '/sessions-create', 
-      name: 'sessions-create',
-      meta: { permission: ["sessions create"] },
-      component: () => import("../views/evaluation/sessions/create.vue")
+      path: '/sessions/:id/break-schedule',
+      name: 'session-break-schedule',
+      meta: { permission: ["session break schedule edit"] },
+      component: () => import("../views/sessions/BreakSchedule.vue")
     },
+    // What happened in a session (break tables, reinforcer tests, DTT sheets).
     {
-      path: '/sessions-update/:id/:program_id', 
-      name: 'sessions-update',
-      meta: { permission: ["sessions edit"] },
-      component: () => import("../views/evaluation/sessions/update.vue")
+      path: '/sessions/:id/results',
+      name: 'session-results',
+      meta: { permission: ["sessions list"] },
+      component: () => import("../views/sessions/SessionResults.vue")
     },
 
 
