@@ -226,9 +226,9 @@ async function loadProgram() {
     start_date: new Date(program.start_date), end_date: new Date(program.end_date),
     weekly_sessions: program.weekly_sessions,
     individual_rows: details.filter((row) => row.session_kind === "individual")
-      .map((row) => ({ treatment_id: row.treatment_id, sessions: row.sessions_numbers })),
+      .map((row) => ({ treatment_id: row.treatment_id, sessions: row.sessions })),
     // Saved «جماعي وفردي» rows count as group (that kind is gone).
-    group_sessions: details.filter((row) => GROUP_KINDS.includes(row.session_kind)).reduce((sum, row) => sum + row.sessions_numbers, 0),
+    group_sessions: details.filter((row) => GROUP_KINDS.includes(row.session_kind)).reduce((sum, row) => sum + row.sessions, 0),
     days: program.days ?? [],
     inclusion_type: program.inclusion_type ?? "inclusion", inclusion_english: !!program.inclusion_english,
   });
