@@ -50,7 +50,7 @@ onMounted(async () => {
 
         <div v-if="program.student_program_details?.length" class="flex flex-wrap gap-2">
           <Tag v-for="row in program.student_program_details" :key="row.id" severity="secondary"
-            :value="[row.treatment?.name, sessionKindLabel(t, row.session_kind), row.sessions_numbers].filter(Boolean).join(' · ')" />
+            :value="[row.treatment?.name, sessionKindLabel(t, row.session_kind), row.sessions].filter(Boolean).join(' · ')" />
         </div>
         <div v-if="program.inclusion_hours?.length" class="flex flex-wrap gap-3 text-sm">
           <span v-for="row in program.inclusion_hours" :key="row.day">{{ dayLabel(t, row.day) }}: {{ timeRange(row.start, row.end) }}</span>
