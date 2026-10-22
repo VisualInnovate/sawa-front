@@ -166,7 +166,11 @@
         days:[0,1,2,3,4,5,6],
         doctorshow: "",
         create_visible: false,
-        event_id: null,     
+        event_id: null,
+        // The employee's own events, and their student-program times (shown busy, read only).
+        calendarEvents: [],
+        programEvents: [],
+        visibleRange: null,
         opts: {
           plugins: [dayGridPlugin, interactionPlugin, TimeGridPlugin, listPlugin],
           initialView: "dayGridMonth",
@@ -225,6 +229,8 @@
           .catch((error) => console.error("Error retrieving doctors:", error));
       },
       handleDatesSet(event){
+        this.visibleRange = { start: event.start, end: event.end }
+        this.loadProgramBusy()
         if(this.business_hours.length >= 1){
             const clickedDate = new Date(event.startStr); 
   
@@ -235,7 +241,7 @@
       updateEvents() {
         axios.get(`/api/event-calendar?employee_id=${this.event.employee_id}`,).then((res) => {
   
-          this.opts.events = res.data.data.map(event => ({
+          this.calendarEvents = res.data.data.map(event => ({
               
               title: event.title,
               start: event.start,
@@ -246,10 +252,36 @@
               backgroundColor:'#'+event.color,
              
             }));
-          
-         
-          
+          this.showEvents()
         });
+      },
+      // The student-program sessions (and inclusion time) of the visible weeks: busy, not clickable.
+      loadProgramBusy() {
+        if (!this.event.employee_id || !this.visibleRange) return
+        axios.get('api/event-calendar/program-busy', { params: {
+          employee_id: this.event.employee_id,
+          from: moment(this.visibleRange.start).format('YYYY-MM-DD'),
+          to: moment(this.visibleRange.end).format('YYYY-MM-DD'),
+        } }).then((res) => {
+          this.programEvents = (res.data.data ?? []).map((busy, i) => ({
+            id: `program-${i}`,
+            title: [this.$t('calendar_program_busy'), busy.child, busy.treatment].filter(Boolean).join(' · '),
+            start: busy.start,
+            end: busy.end,
+            backgroundColor: '#94a3b8',
+            borderColor: '#64748b',
+            editable: false,
+            extendedProps: { program: true },
+          }))
+          this.showEvents()
+        }).catch(() => {})
+      },
+      showEvents() {
+        this.opts.events = [...this.calendarEvents, ...this.programEvents]
+      },
+      // The server refuses (or skips) events over the employee's program sessions.
+      programOverlapMessage(message) {
+        return /program sessions/i.test(message ?? '') ? this.$t('calendar_program_overlap') : message
       },
       getTimes(id){
         axios
@@ -258,6 +290,7 @@
            
             this.business_hours = response.data.data.days
            this.updateEvents()
+           this.loadProgramBusy()
            
           })
       },
@@ -266,6 +299,7 @@
     
     
       handleEventClick(event) {
+        if (event.event.extendedProps?.program) return
         if (!this.$can('working hours edit', 'working hours delete')) return
         this.event_id=event.event.id
         this.event.title = event.event.title
@@ -306,13 +340,16 @@
           end:this.event.end,
           color:this.event.color,
           repeat:this.event.repeate
-        }).then(() => {
+        }).then((res) => {
           this.updateEvents();
           this.visible=false
           this.$toast.add({ severity: 'success', summary: this.$t("success_message"), detail: `${this.$t("element_add_success")}`, life: 3000 });
+          if (/program sessions/i.test(res.data?.message ?? '')) {
+            this.$toast.add({ severity: 'warn', summary: this.$t("calendar_program_busy"), detail: this.$t('calendar_program_skipped'), life: 5000 });
+          }
 
         }) .catch((el)=>{
-          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${el.response.data.message}`, life: 3000 });
+          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.programOverlapMessage(el.response?.data?.message)}`, life: 4000 });
 
         });
       },
@@ -332,6 +369,8 @@
          }).then(() => {
        this.updateevent=false
           this.updateEvents();
+        }).catch((el) => {
+          this.$toast.add({ severity: 'error', summary: this.$t("error"), detail: `${this.programOverlapMessage(el.response?.data?.message)}`, life: 4000 });
         });
       },
       deleteEvent() {

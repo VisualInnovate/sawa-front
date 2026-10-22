@@ -115,7 +115,9 @@ const keepSlots = (slots) => runPreview({ plan: preview.value.plan, slots });
 
 async function loadTherapists() {
   if (!form.value.kind) return;
-  const payload = { kind: form.value.kind, program_id: props.programId ?? undefined };
+  // The child and start date let the server warn about therapists outside the child's age.
+  const payload = { kind: form.value.kind, program_id: props.programId ?? undefined, child_id: form.value.child_id ?? undefined,
+    start_date: isoDate(form.value.start_date) ?? undefined };
   if (isInclusion.value && inclusionReady.value && form.value.start_date && form.value.end_date) {
     Object.assign(payload, { child_id: form.value.child_id, start_date: isoDate(form.value.start_date), end_date: isoDate(form.value.end_date), hours: inclusionHours.value });
   }
@@ -130,6 +132,8 @@ const therapistOptions = computed(() => therapists.value.map((row) => ({
     : row.name,
   disabled: row.available === false,
 })));
+// Age ranges only warn (the room or therapist is still used).
+const chosenTherapistAgeWarning = computed(() => therapists.value.find((row) => row.id === form.value.therapist_id)?.age_warning);
 
 function defaultHours() {
   form.value.hours = Object.fromEntries(hoursOf("inclusion").map((row) => [row.day, { on: true, start: row.start, end: row.end }]));
@@ -146,7 +150,7 @@ watch(() => form.value.kind, (kind, old) => {
 
 let timer = null;
 watch(() => [JSON.stringify(inclusionHours.value), isoDate(form.value.start_date), isoDate(form.value.end_date), form.value.child_id], () => {
-  if (loading.value || !isInclusion.value) return;
+  if (loading.value || !form.value.kind) return;
   clearTimeout(timer);
   timer = setTimeout(loadTherapists, 400);
 });
@@ -286,6 +290,7 @@ function slotStatus(slot) {
   if (slot.available) return null;
   if (slot.reason === "no_room") return t("sp_no_room");
   if (slot.reason === "room_not_suitable") return t("sp_room_not_suitable");
+  if (slot.reason === "outside_shift") return t("sp_outside_shift");
   return slot.available_from ? t("sp_no_vacancy_from", { date: slot.available_from }) : t("sp_no_vacancy");
 }
 </script>
@@ -311,7 +316,13 @@ function slotStatus(slot) {
         <label for="sp-therapist">{{ $t("sp_therapist") }}</label>
         <Select v-model="form.therapist_id" inputId="sp-therapist" :options="therapistOptions" optionLabel="label" optionValue="id"
           optionDisabled="disabled" filter :disabled="!form.kind" :placeholder="form.kind ? $t('sp_pick_therapist') : $t('sp_pick_kind_first')"
-          :invalid="!!errors.therapist_id" />
+          :invalid="!!errors.therapist_id">
+          <template #option="{ option }">
+            <span>{{ option.label }}</span>
+            <i v-if="option.age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-2" v-tooltip.top="$t('age_ranges.therapist_short')" />
+          </template>
+        </Select>
+        <small v-if="chosenTherapistAgeWarning" class="text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}</small>
         <small v-if="isInclusion" class="text-color-secondary">{{ $t("sp_inclusion_therapist_hint") }}</small>
       </div>
       <div class="flex flex-column gap-2">
@@ -455,10 +466,16 @@ function slotStatus(slot) {
           <template #body="{ data }">{{ rowLabel(data) }} <span v-if="data.session_kind === 'individual'" class="text-xs text-color-secondary">({{ sessionKindLabel(t, data.session_kind) }})</span></template>
         </Column>
         <Column :header="$t('sp_room')">
-          <template #body="{ data }">{{ data.room_name ?? "—" }}</template>
+          <template #body="{ data }">
+            {{ data.room_name ?? "—" }}
+            <i v-if="data.room_age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-1" v-tooltip.top="$t('age_ranges.room_warning')" :aria-label="$t('age_ranges.room_warning')" />
+          </template>
         </Column>
         <Column :header="$t('sp_therapist')">
-          <template #body="{ data }">{{ data.therapist_name ?? "—" }}</template>
+          <template #body="{ data }">
+            {{ data.therapist_name ?? "—" }}
+            <i v-if="data.therapist_age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-1" v-tooltip.top="$t('age_ranges.therapist_short')" :aria-label="$t('age_ranges.therapist_short')" />
+          </template>
         </Column>
         <Column :header="$t('sp_status')">
           <template #body="{ data }">
@@ -501,10 +518,13 @@ function slotStatus(slot) {
           <span class="font-semibold">{{ $t("sp_room") }} {{ option.room_name }} — {{ option.therapist_name }}
             <span class="text-xs text-color-secondary">({{ option.room_type === 1 ? $t("typeroom1") : $t("typeroom2") }})</span></span>
           <span class="text-xs text-color-secondary">{{ $t(`sp_source_${option.source}`) }}</span>
+          <span v-if="option.room_age_warning" class="text-xs text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.room_warning") }}</span>
+          <span v-if="option.therapist_age_warning" class="text-xs text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}</span>
         </div>
         <div class="flex items-center gap-2">
           <Tag v-if="option.available" severity="success" :value="$t('sp_available')" />
-          <Tag v-else severity="danger" :value="option.available_from ? $t('sp_no_vacancy_from', { date: option.available_from }) : $t('sp_no_vacancy')" />
+          <Tag v-else severity="danger" :value="option.reason === 'outside_shift' ? $t('sp_outside_shift')
+            : option.available_from ? $t('sp_no_vacancy_from', { date: option.available_from }) : $t('sp_no_vacancy')" />
           <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || (option.room_id === roomDialog?.slot.room_id && option.therapist_id === roomDialog?.slot.therapist_id)" @click="chooseRoom(option)" />
         </div>
       </div>

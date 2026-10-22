@@ -52,6 +52,7 @@ export const buildMenu = () => [
       { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
       { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
       { text: "carolina", to: { name: "carolina-general-goals" }, perm: "carolina general goal list" },
+      { label: "age_ranges.evaluation_page", to: { name: "evaluation-age-ranges" }, perm: "evaluation age ranges edit" },
       {
         key: "vb-mapp",
         text: "VB Mapp",
@@ -77,6 +78,8 @@ export const buildMenu = () => [
     children: [
       { label: "student_programe", to: { name: "student-programe" }, perm: "student program list" },
       { label: "sessions", to: { name: "sessions" }, perm: "sessions list" },
+      { label: "session_log", to: { name: "session-log" }, perm: "session log list" },
+      { label: "program_logs", to: { name: "student-program-logs" }, perm: "student program log list" },
       { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
       { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },
     ],

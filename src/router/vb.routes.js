@@ -112,6 +112,20 @@ const vb = [
       meta: { permission: ["sessions list"] },
       component: () => import("../views/evaluation/sessions/index.vue")
     },
+    // «الفئات العمرية للتقييمات»: one age range per evaluation type.
+    {
+      path: '/evaluation-age-ranges',
+      name: 'evaluation-age-ranges',
+      meta: { permission: ["evaluation age ranges edit"] },
+      component: () => import("../views/evaluationAges/Index.vue")
+    },
+    // «سجل الجلسات»: what ran, was missed (and what was done) or was postponed.
+    {
+      path: '/session-log',
+      name: 'session-log',
+      meta: { permission: ["session log list"] },
+      component: () => import("../views/sessions/SessionLog.vue")
+    },
     // «رسوم البرامج»: the fee tables and the calculator
     {
       path: '/program-fees',

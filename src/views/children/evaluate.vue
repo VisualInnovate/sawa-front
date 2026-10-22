@@ -112,7 +112,7 @@
     >
       <div class="flex align-items-center justify-content-center">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span>{{ $t("هل انت متاكد من ازالة هذا العنصر") }} ?</span>
+        <span>{{ $t("evaluation_delete_confirm") }}</span>
       </div>
       <template #footer>
         <Button
@@ -144,8 +144,16 @@
           <Select v-model="unscheduled.employee_id" inputId="unscheduled-specialist" :options="specialists" optionLabel="name" optionValue="id"
             filter :disabled="!unscheduled.evaluation_type" :loading="unscheduled.loading"
             :placeholder="unscheduled.evaluation_type && !unscheduled.loading && !specialists.length ? $t('no_evaluators_for_type') : ''"
-            :invalid="unscheduled.submitted && !unscheduled.employee_id" />
+            :invalid="unscheduled.submitted && !unscheduled.employee_id">
+            <template #option="{ option }">
+              <span>{{ option.name }}</span>
+              <i v-if="!fitsAge(option.age_from_months, option.age_to_months, childAgeMonths)" class="pi pi-exclamation-triangle text-orange-500 ms-2"
+                v-tooltip.top="$t('age_ranges.therapist_short')" />
+            </template>
+          </Select>
         </div>
+        <!-- Age ranges only warn. -->
+        <Message v-for="warning in unscheduledWarnings" :key="warning" severity="warn" :closable="false">{{ warning }}</Message>
         <div class="flex flex-column gap-2">
           <label for="unscheduled-notes">{{ $t("notes") }}</label>
           <Textarea id="unscheduled-notes" v-model="unscheduled.notes" rows="3" autoResize />
@@ -164,6 +172,8 @@ import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from "../../components/ChildTaps.vue";
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+import { childMonths, fitsAge, formatAgeRange } from "../../utils/ageRange";
+import { formatChildAge } from "../../utils/childAge";
 
 export default {
   components: { ChildTaps },
@@ -177,6 +187,7 @@ export default {
       delete_id: 0,
       specialists: [],
       unscheduled: { visible: false },
+      typeAges: [],
       deleteDialog: false,
       loading: true,
       first: 0,
@@ -186,7 +197,9 @@ export default {
   },
 
   methods: {
+    fitsAge,
     openUnscheduled() {
+      if (!this.typeAges.length) axios.get("api/evaluation-type-ages").then(({ data }) => { this.typeAges = data.data ?? []; }).catch(() => {});
       this.specialists = [];
       this.unscheduled = { visible: true, evaluation_type: null, employee_id: null, notes: "", submitted: false, loading: false, saving: false };
     },
@@ -201,7 +214,8 @@ export default {
         const { data } = await axios.get(`api/employees/get/with/${type}`);
         if (this.unscheduled.evaluation_type !== type) return;
         const list = data.data?.employees;
-        this.specialists = (Array.isArray(list) ? list : Object.values(list ?? {})).map((row) => ({ id: Number(row.id), name: row.name }));
+        this.specialists = (Array.isArray(list) ? list : Object.values(list ?? {}))
+          .map((row) => ({ id: Number(row.id), name: row.name, age_from_months: row.age_from_months ?? null, age_to_months: row.age_to_months ?? null }));
       } catch {
         this.specialists = [];
       } finally {
@@ -330,6 +344,24 @@ export default {
   },
 
   computed: {
+    childAgeMonths() {
+      return childMonths(this.details?.birth_date);
+    },
+    // The evaluation type's and the evaluator's age ranges against the child's age (warnings only).
+    unscheduledWarnings() {
+      if (!this.unscheduled.visible || this.childAgeMonths === null) return [];
+      const age = formatChildAge(this.details.birth_date, null, this.$t);
+      const warnings = [];
+      const range = this.typeAges.find((row) => row.type === Number(this.unscheduled.evaluation_type));
+      if (range && !fitsAge(range.from_months, range.to_months, this.childAgeMonths)) {
+        warnings.push(this.$t("age_ranges.evaluation_warning", { age, range: formatAgeRange(this.$t, range.from_months, range.to_months) }));
+      }
+      const specialist = this.specialists.find((row) => row.id === this.unscheduled.employee_id);
+      if (specialist && !fitsAge(specialist.age_from_months, specialist.age_to_months, this.childAgeMonths)) {
+        warnings.push(this.$t("age_ranges.therapist_warning", { age, range: formatAgeRange(this.$t, specialist.age_from_months, specialist.age_to_months) }));
+      }
+      return warnings;
+    },
     // The types the booking calendar books: the evaluations and the side profile dimensions.
     evaluate_types() {
       return [2, 3, 4, 5, 6, 7, 101, 102, 103, 104, 105].map((id) => ({ id, name: getEvaluationTypeLabel(id, this.$t) }));

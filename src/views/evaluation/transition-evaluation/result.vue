@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import TransitionGrid from "@/components/transition/TransitionGrid.vue";
+import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 
 const route = useRoute();
 const loading = ref(true);
@@ -51,7 +52,10 @@ watch(() => route.params.evaluation, (value, before) => {
             <span v-if="data.evaluation.specialist"> · <i class="pi pi-user" aria-hidden="true" /> {{ data.evaluation.specialist }}</span>
           </p>
         </div>
-        <Button icon="pi pi-print" :label="$t('print_report')" severity="secondary" variant="outlined" class="print:hidden" @click="printPage" />
+        <div class="flex gap-2 print:hidden">
+          <Button icon="pi pi-print" :label="$t('print_report')" severity="secondary" variant="outlined" @click="printPage" />
+          <DeleteEvaluationButton :evaluation-id="data.evaluation.id" />
+        </div>
       </header>
 
       <section class="tr-card">

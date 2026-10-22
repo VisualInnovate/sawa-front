@@ -7,6 +7,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { formatChildAge } from "@/utils/childAge";
 import { MAX_PER_GROUP, dmy, groupItems, isFemale, typeIcon, typeLabel } from "@/components/reports/reportUtils";
+import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -75,6 +76,18 @@ async function selectChild(child, scroll = true) {
     evaluationsLoading.value = false;
   }
   if (scroll && window.innerWidth < 1100) nextTick(() => panel.value?.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+
+// A deleted evaluation leaves the list; a child without finished evaluations leaves the children list.
+function evaluationDeleted(item) {
+  evaluations.value = evaluations.value.filter((row) => row.key !== item.key);
+  picked.value = picked.value.filter((key) => key !== item.key);
+  const child = children.value.find((row) => row.id === selectedChild.value?.id);
+  if (child) child.evaluations_count = evaluations.value.length;
+  if (!evaluations.value.length) {
+    children.value = children.value.filter((row) => row.id !== selectedChild.value?.id);
+    selectedChild.value = null;
+  }
 }
 
 function toggleAll() {
@@ -248,6 +261,8 @@ onMounted(loadChildren);
                       <small v-if="item.complete === false" class="rp-incomplete"><i class="pi pi-hourglass" aria-hidden="true" /> {{ $t("ereport.incomplete") }}</small>
                     </span>
                   </label>
+                  <DeleteEvaluationButton :evaluation-id="item.id" :side-profile-result="item.key.startsWith('s')" :label="false" size="small"
+                    class="rp-eval-delete" @deleted="evaluationDeleted(item)" />
                 </li>
               </ul>
             </section>
@@ -576,6 +591,18 @@ onMounted(loadChildren);
   padding: 0;
   list-style: none;
 }
+.rp-evals li {
+  position: relative;
+}
+/* The delete button sits in the item's corner, over the label (a two-root component: no scope id). */
+.rp-evals li :deep(.rp-eval-delete.p-button) {
+  position: absolute;
+  inset-block-start: 0.3rem;
+  inset-inline-end: 0.3rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+}
 .rp-eval {
   display: flex;
   align-items: center;
@@ -584,6 +611,7 @@ onMounted(loadChildren);
   border: 1px solid var(--sawa-border);
   border-radius: 10px;
   background: #fbfcfd;
+  padding-inline-end: 2.4rem;
   cursor: pointer;
   transition: border-color 0.15s, background-color 0.15s;
 }

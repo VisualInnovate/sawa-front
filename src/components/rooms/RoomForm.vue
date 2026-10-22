@@ -8,6 +8,7 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { ROOM_PERIODS, workTypeLabel } from "@/utils/employeeWorkTypes";
+import AgeRangeField from "@/components/common/AgeRangeField.vue";
 
 const props = defineProps({
   roomId: { type: [Number, String], default: null },
@@ -17,7 +18,7 @@ const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
 
-const room = ref({ periods: [], treatments: [], day_admin_id: null, clinics_admin_ids: [] });
+const room = ref({ periods: [], treatments: [], day_admin_id: null, clinics_admin_ids: [], age_from_months: null, age_to_months: null });
 const treatments = ref([]);
 const admins = ref({ day: [], clinics: [] });
 const loadingAdmins = ref({ day: false, clinics: false });
@@ -83,11 +84,12 @@ onMounted(async () => {
   treatments.value = treatmentData.data ?? [];
   if (!props.roomId) return;
   const { data } = await axios.get(`/api/room/${props.roomId}`);
-  const { id, name, admin_id, type, type_tow, capacity, periods, admins: roomAdmins = [], treatments: roomTreatments = [] } = data.data;
+  const { id, name, admin_id, type, type_tow, capacity, periods, admins: roomAdmins = [], treatments: roomTreatments = [],
+    age_from_months = null, age_to_months = null } = data.data;
   const of = (period) => roomAdmins.filter((admin) => admin.pivot?.period === period).map((admin) => admin.id);
   savedType.value = type;
   room.value = {
-    id, name, type, type_tow, capacity, periods: periods ?? [],
+    id, name, type, type_tow, capacity, periods: periods ?? [], age_from_months, age_to_months,
     treatments: roomTreatments.map((row) => row.id),
     // Rooms saved before admins per period: their one admin.
     day_admin_id: of("day")[0] ?? (periods?.includes("day") ? admin_id : null),
@@ -174,6 +176,11 @@ async function save() {
       <div v-if="showCapacity" class="flex flex-column gap-2">
         <label for="room-capacity">{{ $t("roomsnumber") }}</label>
         <InputNumber v-model="room.capacity" inputId="room-capacity" :invalid="submitted && !room.capacity" />
+      </div>
+      <!-- The ages the room suits; placing a child outside them only warns. -->
+      <div class="lg:col-span-2">
+        <AgeRangeField v-model:from="room.age_from_months" v-model:to="room.age_to_months" :label="$t('age_ranges.room_label')" />
+        <small class="text-red-500" v-if="error?.age_to_months">{{ error.age_to_months[0] }}</small>
       </div>
       <div class="lg:col-span-2 text-center">
         <Button type="submit" :loading="saving" class="w-full lg:w-[50%]" icon="pi pi-check" :label="$t('submit')" />

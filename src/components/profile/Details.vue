@@ -214,6 +214,17 @@
            :disabled="substituteSaving || !substitutesChanged" />
        </form>
      </section>
+     <!-- A therapist sets the ages they specialise in (choosing them for a child outside it only warns). -->
+     <section v-if="!loading && Number(employee.type) === 2" class="password-section substitute-section">
+       <div>
+         <h3>{{ $t('age_ranges.therapist_label') }}</h3>
+         <p>{{ $t('age_ranges.hint') }}</p>
+       </div>
+       <form class="substitute-form" @submit.prevent="saveAgeRange">
+         <AgeRangeField v-model:from="ageRange.from" v-model:to="ageRange.to" />
+         <Button type="submit" icon="pi pi-check" :label="$t('save')" :loading="ageRange.saving" :disabled="ageRange.saving" />
+       </form>
+     </section>
      <section v-if="!loading" class="password-section">
        <div>
          <h3>{{ $t('change_password') }}</h3>
@@ -253,10 +264,11 @@
   import { fetchUserProfile } from "./userProfile";
   import { can } from "../../utils/permissions";
   import SubstituteSelect from "../SubstituteSelect.vue";
+  import AgeRangeField from "../common/AgeRangeField.vue";
   
     import {useToast} from 'primevue/usetoast'
   export default {
-    components: { SubstituteSelect },
+    components: { SubstituteSelect, AgeRangeField },
   
   
     data() {
@@ -288,6 +300,7 @@
           ,substituteIds: []
           ,savedSubstituteIds: []
           ,substituteSaving: false
+          ,ageRange: { from: null, to: null, saving: false }
         // Add other validation rules for the title field
       };
   
@@ -378,6 +391,8 @@
               this.employee.image = response.data.user.image          
               this.savedSubstituteIds = (response.data.user.substitute_ids ?? []).map(Number)
               this.substituteIds = [...this.savedSubstituteIds]
+              this.ageRange.from = response.data.user.age_from_months ?? null
+              this.ageRange.to = response.data.user.age_to_months ?? null
               if (!this.canEditProfile) {
                 this.positions = response.data.user.position ? [response.data.user.position] : []
                 this.shifts = response.data.user.shift ? [response.data.user.shift] : []
@@ -480,6 +495,21 @@
           this.$toast.add({ severity: 'error', summary: this.$t('error'), detail, life: 4000 })
         } finally {
           this.substituteSaving = false
+        }
+      },
+      async saveAgeRange() {
+        if (this.ageRange.saving) return
+        this.ageRange.saving = true
+        try {
+          const { data } = await axios.post('/api/users/profile/age-range', { age_from_months: this.ageRange.from, age_to_months: this.ageRange.to })
+          this.ageRange.from = data.age_from_months
+          this.ageRange.to = data.age_to_months
+          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('age_ranges.saved'), life: 3000 })
+        } catch (error) {
+          const errors = error.response?.data?.errors ?? {}
+          this.$toast.add({ severity: 'error', summary: this.$t('error'), detail: Object.values(errors).flat()[0] ?? this.$t('request_failed_retry'), life: 4000 })
+        } finally {
+          this.ageRange.saving = false
         }
       },
       async updatePassword() {

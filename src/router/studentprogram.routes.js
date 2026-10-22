@@ -28,6 +28,13 @@ const studentprograme = [
         meta: { permission: ["student program edit"] },
         component: () => import("../views/studentprogram/update.vue")
         },
+      // «سجل البرامج»: what was created and changed in every program.
+      {
+        path: '/student-programe-logs',
+        name: 'student-program-logs',
+        meta: { permission: ["student program log list"] },
+        component: () => import("../views/studentprogram/ProgramLogs.vue")
+      },
     
 ];
 

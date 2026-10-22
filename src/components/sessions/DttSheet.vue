@@ -1,7 +1,8 @@
 <script setup>
 // The DTT sheet of one MT step of a goal, as the paper form: Date and Trainer filled in (editable), Phase and SD/SΔ
-// empty, 10 trials with a Response (C, I, P or NR), prompt and notes, then % correct and Next. Saving goes back to
-// the goals table; leaving the session time saves it too.
+// empty, 10 trials with a Response (C, I, P or NR), prompt and notes, then % correct and Next. A VB-MAPP (milestone)
+// goal also has the paper's Approx table beside it: 10 rows of Approx, C, P and date, all free text. Saving goes back
+// to the goals table; leaving the session time saves it too.
 import axios from "axios";
 import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -26,18 +27,22 @@ const saving = ref(false);
 const dirty = ref(false);
 const url = () => `api/program-sessions/${props.sessionId}/goals/${props.goal.id}/dtt/${props.step}`;
 
+const milestone = ref(Boolean(props.goal.milestone));
+const blankApprox = () => Array.from({ length: 10 }, () => ({ approx: "", c: "", p: "", date: "" }));
 const blank = () => ({
   date: moment().format("YYYY-MM-DD"), trainer: props.therapist, phase: "", sd: "", percent_correct: "", next: "",
   trials: Array.from({ length: 10 }, () => ({ response: null, prompt: "", notes: "" })),
+  approx: blankApprox(),
 });
 
 onMounted(async () => {
   try {
     const { data } = await axios.get(url());
     const saved = data.data;
+    milestone.value = Boolean(data.milestone ?? props.goal.milestone);
     sheet.value = saved
       ? { date: saved.date, trainer: saved.trainer ?? "", phase: saved.phase ?? "", sd: saved.sd ?? "", percent_correct: saved.percent_correct ?? "",
-        next: saved.next ?? "", trials: saved.trials }
+        next: saved.next ?? "", trials: saved.trials, approx: saved.approx?.length ? saved.approx : blankApprox() }
       : blank();
   } finally {
     loading.value = false;
@@ -55,7 +60,7 @@ const setResponse = (row, value) => {
 async function save(close = true) {
   saving.value = true;
   try {
-    const { data } = await axios.put(url(), sheet.value);
+    const { data } = await axios.put(url(), { ...sheet.value, approx: milestone.value ? sheet.value.approx : null });
     dirty.value = false;
     emit("saved", data.mt);
     toast.add({ severity: "success", summary: t("success_message"), detail: t("dtt_saved", { step: props.step }), life: 2000 });
@@ -90,7 +95,7 @@ defineExpose({ saveIfDirty });
         </div>
       </header>
 
-      <div class="dtt-paper" dir="ltr">
+      <div class="dtt-paper" :class="{ 'has-approx': milestone }" dir="ltr">
         <div class="dtt-fields">
           <label>Date: <input v-model="sheet.date" type="date" :disabled="!canEdit" /></label>
           <label>Trainer: <input v-model="sheet.trainer" :disabled="!canEdit" /></label>
@@ -123,6 +128,21 @@ defineExpose({ saveIfDirty });
             </tr>
           </tbody>
         </table>
+        <!-- VB-MAPP goals: the paper's Approx table, every cell free text. -->
+        <table v-if="milestone" class="dtt-table dtt-approx">
+          <thead>
+            <tr><th>Approx</th><th class="dtt-cp">C</th><th class="dtt-cp">P</th><th class="dtt-date">date</th><th class="dtt-num" /></tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, i) in sheet.approx" :key="i" :style="{ '--d': `${i * 30}ms` }">
+              <td><input v-model="row.approx" :disabled="!canEdit" :aria-label="`Approx ${i + 1}`" /></td>
+              <td class="dtt-cp"><input v-model="row.c" :disabled="!canEdit" :aria-label="`C ${i + 1}`" /></td>
+              <td class="dtt-cp"><input v-model="row.p" :disabled="!canEdit" :aria-label="`P ${i + 1}`" /></td>
+              <td class="dtt-date"><input v-model="row.date" :disabled="!canEdit" :aria-label="`date ${i + 1}`" /></td>
+              <td class="dtt-num"><b>{{ i + 1 }}</b></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </template>
   </div>
@@ -140,6 +160,14 @@ defineExpose({ saveIfDirty });
 .dtt-paper { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: .5rem; padding: .8rem 1rem; border-radius: 16px; background: #fff;
   border: 1px solid #e2e8f0; box-shadow: 0 14px 40px -28px rgb(15 23 42 / .7); overflow: hidden; max-width: 64rem; width: 100%; margin-inline: auto; }
 .dtt-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem 1rem; }
+/* A milestone goal: the DTT table and the Approx table side by side (the run page does not scroll). */
+.dtt-paper.has-approx { grid-template-columns: minmax(0, 1fr) minmax(15rem, 22rem); max-width: 86rem; column-gap: .8rem; }
+.dtt-paper.has-approx .dtt-fields { grid-column: 1 / -1; }
+.dtt-approx { animation: dtt-pop .35s .1s cubic-bezier(.34, 1.56, .64, 1) both; }
+.dtt-approx .dtt-cp { width: 2.6rem; text-align: center; }
+.dtt-approx .dtt-cp input { text-align: center; font-weight: 800; }
+.dtt-approx .dtt-date { width: 5.5rem; }
+.dtt-approx .dtt-num { width: 2.2rem; text-align: center; background: #f8fafc; }
 .dtt-fields label { display: flex; align-items: center; gap: .4rem; font-weight: 700; color: #0f3d43; font-size: .85rem; white-space: nowrap; }
 .dtt-fields input { flex: 1; min-width: 0; border: 0; border-bottom: 1.5px solid #94a3b8; padding: .2rem .1rem; font: inherit; font-weight: 500; background: transparent; outline: none; }
 .dtt-fields input:focus { border-color: #0f8a7e; }

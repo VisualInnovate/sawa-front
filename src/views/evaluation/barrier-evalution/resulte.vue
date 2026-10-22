@@ -90,7 +90,11 @@
 
   <!-- The child's latest barriers evaluation: each barrier with the chosen answer and its number. -->
   <section v-if="answersTable.rows.length" class="ba-card">
-    <h2>{{ $t("barrier_ui.answers_table") }} <small v-if="answersTable.evaluation">· <span dir="ltr">{{ String(answersTable.evaluation.date).slice(0, 10) }}</span></small></h2>
+    <div class="ba-card-head">
+      <h2>{{ $t("barrier_ui.answers_table") }} <small v-if="answersTable.evaluation">· <span dir="ltr">{{ String(answersTable.evaluation.date).slice(0, 10) }}</span></small></h2>
+      <!-- Deletes the evaluation this table shows (the child's latest); the chart then shows the others. -->
+      <DeleteEvaluationButton v-if="answersTable.evaluation?.id" :evaluation-id="answersTable.evaluation.id" @deleted="reload" />
+    </div>
     <div class="ba-wrap">
       <table class="ba-table">
         <thead>
@@ -116,8 +120,10 @@
   
   <script>
   import axios from "axios";
+  import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
   export default {
   name: 'SquareGrid',
+  components: { DeleteEvaluationButton },
   data() {
    return {
      color:'bg-[red]',
@@ -129,6 +135,14 @@
   methods:{
    isZero(test){
      return Boolean(test && !test.empty && test.color && Number(test.score) === 0)
+   },
+   reload(){
+     this.getresulte()
+     // Without the endpoint (older server) the page shows the chart only.
+     this.answersTable = { evaluation: null, rows: [] }
+     axios.get(`api/barrier-subtest/latest-answers/${this.$route.params.id}`)
+       .then(({ data }) => { this.answersTable = { evaluation: data?.evaluation ?? null, rows: data?.rows ?? [] }; })
+       .catch(() => {});
    },
    getresulte(){
      axios
@@ -158,12 +172,7 @@
    }
   },
   mounted() {
-    this.getresulte()
-    // Without the endpoint (older server) the page shows the chart only.
-    axios.get(`api/barrier-subtest/latest-answers/${this.$route.params.id}`)
-      .then(({ data }) => { this.answersTable = { evaluation: data?.evaluation ?? null, rows: data?.rows ?? [] }; })
-      .catch(() => {});
-    localStorage.getItem("child_id")
+    this.reload()
    },
   };
   </script>
@@ -173,6 +182,8 @@
   .ba-test b { position: relative; font-weight: inherit; }
   .ba-test.is-zero::before { content: ""; position: absolute; inset: 0; border-radius: 3px; background: var(--zero); opacity: .4; }
   .ba-card { margin-top: 2rem; padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
+  .ba-card-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .ba-card-head h2 { margin: 0 !important; }
   .ba-card h2 { margin: 0 0 1rem; font-size: 1.1rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
   .ba-card h2 small { color: #64748b; font-weight: 600; }
   .ba-wrap { overflow-x: auto; }

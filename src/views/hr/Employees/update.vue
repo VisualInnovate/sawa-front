@@ -302,6 +302,10 @@
             <label class="text-start" for="work-types">{{ $t("work_types") }}</label>
             <WorkTypeSelect v-model="employee.work_types" />
           </div>
+          <!-- Therapists: the ages they specialise in (choosing them for a child outside it only warns). -->
+          <div v-if="employee.type == 2" class="flex flex-column gap-2 py-1">
+            <AgeRangeField v-model:from="employee.age_from_months" v-model:to="employee.age_to_months" :label="$t('age_ranges.therapist_label')" />
+          </div>
         </div>
         <div class="text-center">
           <Button @click="previousStep" :label="$t('Back')"></Button>
@@ -318,13 +322,14 @@
 import axios from "axios";
 import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
+import AgeRangeField from "@/components/common/AgeRangeField.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
 import InputNumber from "primevue/inputnumber";
 import moment from "moment";
 
 import { useToast } from "primevue/usetoast";
 export default {
-  components: { SubstituteSelect, WorkTypeSelect },
+  components: { SubstituteSelect, WorkTypeSelect, AgeRangeField },
   data() {
     return {
       evaluate_types: [
@@ -436,6 +441,8 @@ export default {
         this.employee.role = response.data.data.user.roles[0].id;
         this.employee.substitute_ids = (response.data.data.user.substitutes ?? []).map((user) => Number(user.id));
         this.employee.work_types = response.data.data.work_types ?? [];
+        this.employee.age_from_months = response.data.data.user?.age_from_months ?? null;
+        this.employee.age_to_months = response.data.data.user?.age_to_months ?? null;
         this.employee.national_id = parseInt(response.data.data.national_id);
         this.employee.skills = [];
         for (let i = 0; i < response.data.data.user.skills.length; i++) {
@@ -542,6 +549,10 @@ export default {
       body.append("substitute_ids", this.employee.substitute_ids ?? []);
       // Always sent too: an empty value clears the work types.
       body.append("work_types", workTypesValue(this.employee.work_types));
+      if (this.employee.type == 2) {
+        body.append("age_from_months", this.employee.age_from_months ?? "");
+        body.append("age_to_months", this.employee.age_to_months ?? "");
+      }
       if (this.employee.evaluation)
         body.append("evaluations", this.employee.evaluation);
       if (this.employee.treatments)
