@@ -24,13 +24,20 @@
             filter
             :options="employees"
             optionLabel="name"
-          />
+          >
+            <template #option="{ option }">
+              <span>{{ option.name }}</span>
+              <i v-if="!employeeFits(option)" class="pi pi-exclamation-triangle text-orange-500 ms-2" v-tooltip.top="$t('age_ranges.therapist_short')" />
+            </template>
+          </Select>
         </div>
       </template>
 
       <template #end> </template>
     </Toolbar>
 <h2 class="text-xl text-center">{{ childreen.find(child => child.id === event.child_id)?.name }}</h2>
+    <!-- Age ranges only warn: the booking goes on. -->
+    <Message v-for="warning in ageWarnings" :key="warning" severity="warn" :closable="false" class="age-warning">{{ warning }}</Message>
     <!-- Opened for a consultation: what it asked for and what is already booked. -->
     <div v-if="required" class="required-strip" role="status">
       <span class="required-strip-label">{{ $t("required_evaluations") }}:</span>
@@ -143,6 +150,8 @@ import listPlugin from "@fullcalendar/list";
 import DatePicker from 'primevue/datepicker';
 import InputText from "primevue/inputtext";
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+import { childMonths, fitsAge, formatAgeRange } from "../../utils/ageRange";
+import { formatChildAge } from "../../utils/childAge";
 import { useAppLangStore } from "../../stores/AppLangStore";
 import { Toast } from "flowbite-vue";
 import { watch } from "vue";
@@ -161,6 +170,7 @@ export default {
       isMobile: false,
       mobileQuery: null,
       required: null,
+      typeAges: [],
       not_find: false,
       childreen: [],
       modal_text: false,
@@ -237,6 +247,27 @@ export default {
     };
   },
   computed: {
+    child() {
+      return this.childreen.find(child => child.id === this.event.child_id) ?? null;
+    },
+    childMonths() {
+      return childMonths(this.child?.birth_date);
+    },
+    // The evaluation type's and the chosen evaluator's age ranges against the child's age (warnings only).
+    ageWarnings() {
+      if (this.childMonths === null) return [];
+      const age = formatChildAge(this.child.birth_date, null, this.$t);
+      const warnings = [];
+      const range = this.typeAges.find(row => row.type === Number(this.event.evaluation_type));
+      if (range && !fitsAge(range.from_months, range.to_months, this.childMonths)) {
+        warnings.push(this.$t('age_ranges.evaluation_warning', { age, range: formatAgeRange(this.$t, range.from_months, range.to_months) }));
+      }
+      const employee = this.employees.find(row => row.id === this.event.employee_id);
+      if (employee && !this.employeeFits(employee)) {
+        warnings.push(this.$t('age_ranges.therapist_warning', { age, range: formatAgeRange(this.$t, employee.age_from_months, employee.age_to_months) }));
+      }
+      return warnings;
+    },
     slotLabel() {
       const slot = this.opts.event;
       if (!slot) return '';
@@ -244,6 +275,9 @@ export default {
     },
   },
   methods: {
+    employeeFits(employee) {
+      return fitsAge(employee?.age_from_months, employee?.age_to_months, this.childMonths);
+    },
     applyLayout() {
       // Phones get a shorter toolbar and fewer views.
       this.isMobile = Boolean(this.mobileQuery?.matches);
@@ -577,6 +611,7 @@ export default {
     this.mobileQuery.addEventListener?.('change', this.applyLayout);
     this.applyLayout();
     this.getClidreen();
+    axios.get('api/evaluation-type-ages').then(({ data }) => { this.typeAges = data.data ?? []; }).catch(() => {});
     if (this.bookingId) this.loadRequired().then(() => { if (!this.employees.length && !this.employeesLoading) this.fetchEmployees(); });
     else this.fetchEmployees();
     this.doctorshow = localStorage.getItem("type");
@@ -589,6 +624,7 @@ export default {
 };
 </script>
 <style scoped>
+.age-warning { max-width: 48rem; margin: 0 auto .5rem; }
 .required-strip {
   display: flex;
   flex-wrap: wrap;

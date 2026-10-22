@@ -79,7 +79,8 @@ onMounted(async () => {
             <i :class="openSheet === sheet.id ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" />
           </button>
           <Transition name="sr-open">
-            <table v-if="openSheet === sheet.id" class="sr-table" dir="ltr">
+            <div v-if="openSheet === sheet.id" class="sr-sheet-body" dir="ltr">
+            <table class="sr-table">
               <thead><tr><th>Trial</th><th>Response</th><th>prompt</th><th>Notes</th></tr></thead>
               <tbody>
                 <tr v-for="(row, i) in sheet.trials" :key="i"><td>{{ i + 1 }}</td><td><b>{{ row.response ?? "" }}</b></td><td>{{ row.prompt }}</td><td>{{ row.notes }}</td></tr>
@@ -87,6 +88,14 @@ onMounted(async () => {
                 <tr><td colspan="2"><b>% correct</b> {{ sheet.percent_correct }}</td><td colspan="2"><b>Next</b> {{ sheet.next }}</td></tr>
               </tbody>
             </table>
+            <!-- A VB-MAPP goal's Approx table. -->
+            <table v-if="sheet.approx?.length" class="sr-table sr-approx">
+              <thead><tr><th>Approx</th><th>C</th><th>P</th><th>date</th><th /></tr></thead>
+              <tbody>
+                <tr v-for="(row, i) in sheet.approx" :key="i"><td>{{ row.approx }}</td><td><b>{{ row.c }}</b></td><td><b>{{ row.p }}</b></td><td>{{ row.date }}</td><td>{{ i + 1 }}</td></tr>
+              </tbody>
+            </table>
+            </div>
           </Transition>
         </div>
       </section>
@@ -103,6 +112,9 @@ onMounted(async () => {
 .sr-bar { height: .45rem; border-radius: 9px; background: #e2e8f0; overflow: hidden; }
 .sr-bar span { display: block; height: 100%; background: #0f8a7e; }
 .sr-sheet { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: .5rem; overflow: hidden; }
+.sr-sheet-body { display: flex; flex-wrap: wrap; gap: .75rem; align-items: start; }
+.sr-sheet-body .sr-table { flex: 1 1 26rem; }
+.sr-sheet-body .sr-approx { flex: 0 1 20rem; }
 .sr-sheet-head { width: 100%; display: flex; align-items: center; gap: .7rem; padding: .6rem .8rem; border: 0; background: #fff; cursor: pointer; font: inherit; }
 .sr-sheet-head:hover { background: #f8fafc; }
 .sr-mt { padding: .2rem .5rem; border-radius: 8px; background: #135c65; color: #fff; font-weight: 800; }

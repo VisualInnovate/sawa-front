@@ -2,10 +2,13 @@
   <div class="p-6 bg-gray-50 min-h-screen container mx-auto print:p-0 print:w-full print:max-w-full print:mx-0">
     <div class="flex justify-between items-center mb-8 print:hidden">
       <h1 class="text-3xl font-bold text-gray-800">{{ $t("carolina_ui.result_title") }}</h1>
-      <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2" @click="printPage">
-        <i class="pi pi-print" aria-hidden="true"></i>
-        {{ $t("print_report") }}
-      </button>
+      <div class="flex items-center gap-2">
+        <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2" @click="printPage">
+          <i class="pi pi-print" aria-hidden="true"></i>
+          {{ $t("print_report") }}
+        </button>
+        <DeleteEvaluationButton :evaluation-id="$route.params.id" />
+      </div>
     </div>
 
     <div class="hidden print:block py-4 border-b border-gray-200 mb-4">
@@ -55,6 +58,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
+import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 
 const route = useRoute();
 const loading = ref(true);

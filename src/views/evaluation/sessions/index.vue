@@ -2,14 +2,17 @@
 // The student programs' sessions by day, with their status. A therapist sees their own sessions; whoever prepares
 // sessions sees all, prepares the break schedule and may change the therapist to a substitute before the start.
 // Only a session's therapist starts it (new, or continuing the child's previous session) and runs it on its own page.
-// closed · waiting · late (5 minutes, not started) · ongoing · finished · missed (ended without being started).
+// closed · waiting · late (5 minutes, not started) · ongoing · finished · missed (not started 45 minutes after its
+// start, or on an official holiday). Whoever reschedules sessions sees all, postpones one before it starts, and gives
+// a missed one a new appointment or a compensation, each with its reason.
 import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/Auth";
-import { SESSION_STATUS_SEVERITY, isoDate, sessionKindLabel, timeRange } from "@/utils/studentPrograms";
+import { SESSION_STATUS_SEVERITY, isoDate, reasonText, sessionKindLabel, timeRange } from "@/utils/studentPrograms";
+import SessionRescheduleDialog from "@/components/sessions/SessionRescheduleDialog.vue";
 import moment from "moment";
 
 const { t } = useI18n();
@@ -20,6 +23,7 @@ const auth = useAuthStore();
 const range = ref([new Date(), new Date()]);
 const sessions = ref([]);
 const canManage = ref(false);
+const canReschedule = ref(false);
 const loading = ref(false);
 const status = ref(null);
 const busy = ref(null);
@@ -39,6 +43,7 @@ async function load() {
     const { data } = await axios.get("api/program-sessions", { params: { from: isoDate(from), to: isoDate(to ?? from) } });
     sessions.value = data.data;
     canManage.value = !!data.can_manage;
+    canReschedule.value = !!data.can_reschedule;
   } finally {
     loading.value = false;
   }
@@ -49,6 +54,16 @@ const beforeStart = (session) => ["closed", "waiting", "late"].includes(session.
 const canStart = (session) => isMine(session) && ["waiting", "late"].includes(session.status);
 const canEnter = (session) => isMine(session) && session.status === "ongoing";
 const hasResults = (session) => ["ongoing", "finished"].includes(session.status);
+const openMissed = (session) => session.status === "missed" && !session.resolution;
+const dateTime = (value) => moment(value).format("YYYY-MM-DD HH:mm");
+
+// Postponing / a missed session's new appointment or compensation.
+const reschedule = ref({ session: null, mode: "postpone" });
+const openReschedule = (session, mode) => { reschedule.value = { session, mode }; };
+async function rescheduled() {
+  reschedule.value = { session: null, mode: "postpone" };
+  await load();
+}
 
 // Starting: when the child has an earlier session, the therapist chooses a new one or continuing it.
 const startDialog = ref(null);
@@ -150,7 +165,10 @@ onBeforeUnmount(() => clearInterval(timer));
         </template>
       </Column>
       <Column :header="$t('sp_room')">
-        <template #body="{ data }">{{ data.room?.name }}</template>
+        <template #body="{ data }">
+          {{ data.room?.name }}
+          <i v-if="data.room_age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-1" v-tooltip.top="$t('age_ranges.room_warning')" :aria-label="$t('age_ranges.room_warning')" />
+        </template>
       </Column>
       <Column :header="$t('sp_therapist')">
         <template #body="{ data }">{{ data.therapist?.name }}</template>
@@ -166,6 +184,20 @@ onBeforeUnmount(() => clearInterval(timer));
         <template #body="{ data }">
           <Tag :severity="SESSION_STATUS_SEVERITY[data.status]" :value="$t(`session_status_${data.status}`)" class="whitespace-nowrap" />
           <div v-if="data.started_at" class="text-xs text-color-secondary mt-1">{{ $t("session_started_at", { time: moment(data.started_at).format("HH:mm") }) }}</div>
+          <div v-if="data.holiday && !data.reason_type" class="text-xs text-red-600 mt-1">{{ $t("session_reason_holiday") }}: {{ data.holiday.title }}</div>
+          <div v-if="data.original_starts_at" class="text-xs text-color-secondary mt-1">
+            <i class="pi pi-history" aria-hidden="true" /> {{ $t("session_postponed_from", { time: dateTime(data.original_starts_at) }) }}
+          </div>
+          <div v-if="data.makeup_of" class="text-xs text-color-secondary mt-1">
+            <i class="pi pi-replay" aria-hidden="true" /> {{ $t("session_makeup_of", { time: dateTime(data.makeup_of.starts_at) }) }}
+          </div>
+          <template v-if="data.resolution">
+            <div class="text-xs mt-1 font-semibold text-[#135C65]">
+              <template v-if="data.resolution === 'rescheduled'">{{ $t("session_resolution_rescheduled", { time: data.makeup ? dateTime(data.makeup.starts_at) : "—" }) }}</template>
+              <template v-else>{{ $t("session_resolution_compensated", { amount: data.compensation_amount }) }}</template>
+            </div>
+            <div class="text-xs text-color-secondary">{{ reasonText($t, data.reason_type, data.reason_note) }}</div>
+          </template>
         </template>
       </Column>
       <Column header-style="min-width:12rem">
@@ -177,6 +209,12 @@ onBeforeUnmount(() => clearInterval(timer));
               :aria-label="$t('break_schedule')" @click="router.push({ name: 'session-break-schedule', params: { id: data.id } })" />
             <Button v-if="canManage && beforeStart(data)" icon="pi pi-user-edit" size="small" variant="outlined" severity="secondary"
               v-tooltip.top="$t('session_change_therapist')" :aria-label="$t('session_change_therapist')" @click="openTherapist(data)" />
+            <Button v-if="canReschedule && beforeStart(data)" icon="pi pi-calendar-clock" size="small" variant="outlined" severity="warn"
+              v-tooltip.top="$t('session_postpone')" :aria-label="$t('session_postpone')" @click="openReschedule(data, 'postpone')" />
+            <Button v-if="canReschedule && openMissed(data)" icon="pi pi-calendar-plus" size="small" :label="$t('session_reschedule')"
+              @click="openReschedule(data, 'reschedule')" />
+            <Button v-if="canReschedule && openMissed(data)" icon="pi pi-wallet" size="small" severity="secondary" variant="outlined"
+              :label="$t('session_compensate')" @click="openReschedule(data, 'compensate')" />
             <Button v-if="hasResults(data)" icon="pi pi-chart-bar" size="small" variant="outlined" severity="help" v-tooltip.top="$t('session_results')"
               :aria-label="$t('session_results')" @click="router.push({ name: 'session-results', params: { id: data.id } })" />
           </div>
@@ -199,13 +237,19 @@ onBeforeUnmount(() => clearInterval(timer));
         <p class="text-sm text-color-secondary mb-3">{{ $t("session_therapist_hint") }}</p>
         <Select v-model="therapistDialog.therapist_id" :options="therapistDialog.options" optionLabel="name" optionValue="id" filter
           :loading="therapistDialog.loading" class="w-full mb-3" :aria-label="$t('sp_therapist')">
-          <template #option="{ option }">{{ option.name }} <span v-if="!option.original" class="text-xs text-color-secondary">({{ $t("substitute") }})</span></template>
+          <template #option="{ option }">{{ option.name }} <span v-if="!option.original" class="text-xs text-color-secondary">({{ $t("substitute") }})</span>
+            <i v-if="option.age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-1" v-tooltip.top="$t('age_ranges.therapist_short')" /></template>
         </Select>
         <small v-if="!therapistDialog.loading && therapistDialog.options.length < 2" class="block text-orange-600 mb-3">{{ $t("session_no_substitutes") }}</small>
+        <small v-if="therapistDialog.options.find((row) => row.id === therapistDialog.therapist_id)?.age_warning" class="block text-orange-600 mb-3">
+          <i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}
+        </small>
         <Button icon="pi pi-check" :label="$t('save')" class="w-full" :loading="therapistDialog.saving"
           :disabled="therapistDialog.therapist_id === therapistDialog.session.therapist_id" @click="saveTherapist" />
       </template>
     </Dialog>
+    <SessionRescheduleDialog :session="reschedule.session" :mode="reschedule.mode" @close="reschedule = { session: null, mode: 'postpone' }"
+      @saved="rescheduled" />
     <Toast />
   </div>
 </template>

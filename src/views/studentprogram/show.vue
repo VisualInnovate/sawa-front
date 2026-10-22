@@ -1,5 +1,5 @@
 <script setup>
-// One student program: its details, its week as a timetable and its saved price.
+// One student program: its details, its week as a timetable, its saved price and (with its permission) its change log.
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -8,15 +8,21 @@ import { money } from "@/utils/programFees";
 import { dayLabel, programName, sessionKindLabel, timeRange } from "@/utils/studentPrograms";
 import WeekTimetable from "@/components/studentPrograms/WeekTimetable.vue";
 import ProgramPrice from "@/components/studentPrograms/ProgramPrice.vue";
+import ProgramChangeLog from "@/components/studentPrograms/ProgramChangeLog.vue";
+import { can } from "@/utils/permissions";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const program = ref(null);
+const logs = ref(null);
 
 onMounted(async () => {
   const { data } = await axios.get(`api/student-program/${route.params.id}`);
   program.value = data.data;
+  if (can("student program log list")) {
+    logs.value = (await axios.get(`api/student-program/${route.params.id}/logs`)).data.data;
+  }
 });
 </script>
 
@@ -53,6 +59,11 @@ onMounted(async () => {
     <div class="sawa-card p-4 flex flex-column gap-2">
       <span class="font-semibold">{{ $t("sp_price") }}</span>
       <ProgramPrice :price="program.price_details" />
+    </div>
+
+    <div v-if="logs" class="sawa-card p-4 flex flex-column gap-2">
+      <span class="font-semibold"><i class="pi pi-history" aria-hidden="true" /> {{ $t("program_log_title") }}</span>
+      <ProgramChangeLog :logs="logs" />
     </div>
   </div>
 </template>

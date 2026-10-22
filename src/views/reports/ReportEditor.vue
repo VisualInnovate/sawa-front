@@ -9,6 +9,8 @@
 //              level charts) with the newest test's strengths/weaknesses (edited here, saved on the server), and the other types' charts
 //              (barriers with their test tables). The behaviour-problems table belongs to a behavioural evaluation.
 //   plan     = the goals written for the newest chosen VB-MAPP test's weaknesses (only the goals are shown), edited here and saved on the server.
+//   In the strengths/weaknesses and the plan, a whole row (domain) or table can be deleted; it is saved with them and
+//   listed on its page to be restored.
 //   tracking = the goals of the chosen tests' saved plans, as the centre's tracking form: one table per general goal,
 //              the date each goal was achieved (prop, editable; sessions will set it) and the trial columns MT, EXP
 //              and RR; «اعتماد التراكنج» records it as the one the child's sessions work on.
@@ -323,9 +325,9 @@ const caseParagraphs = (level) => caseDescription(level, { female: female.value,
 const summary = ref(null);
 
 const summaryFromServer = (tables) => tables.map((table) => ({
-  key: String(table.key ?? ""), title: table.title ?? "",
+  key: String(table.key ?? ""), title: table.title ?? "", hidden: [...(table.hidden ?? [])],
   rows: (table.rows ?? []).map((row) => ({
-    symbol: row.symbol ?? "",
+    symbol: row.symbol ?? "", hidden: [...(row.hidden ?? [])],
     strengths: (row.strengths ?? []).map((text) => newSummaryPoint(text)),
     weaknesses: (row.weaknesses ?? []).map((text) => newSummaryPoint(text)),
   })),
@@ -359,8 +361,25 @@ function removeSummaryPoint(row, kind, point) {
   row[kind].splice(row[kind].indexOf(point), 1);
   touchSummary();
 }
-// The rows that print for a kind (those with points), numbered in order.
-const summaryNumber = (table, kind, row) => table.rows.filter((item) => item[kind].length).indexOf(row) + 1;
+// Deleted rows and tables (per kind: strengths / weaknesses), restorable from their page.
+const isHidden = (item, kind) => (item?.hidden ?? []).includes(kind);
+const summaryRows = (table, kind) => table.rows.filter((row) => !isHidden(row, kind));
+function setHidden(item, kind, hidden) {
+  const list = new Set(item.hidden ?? []);
+  if (hidden) list.add(kind);
+  else list.delete(kind);
+  item.hidden = [...list];
+  touchSummary();
+}
+// What a summary page has deleted: [{ label, restore() }].
+const summaryDeleted = (table) => ["strengths", "weaknesses"].flatMap((kind) => [
+  ...(isHidden(table, kind) ? [{ key: `t-${kind}`, label: t(`ereport.${kind}`), restore: () => setHidden(table, kind, false) }] : []),
+  ...table.rows.filter((row) => isHidden(row, kind))
+    .map((row) => ({ key: `r-${kind}-${row.symbol}`, label: `${row.symbol || "—"} · ${t(`ereport.${kind}`)}`, restore: () => setHidden(row, kind, false) })),
+]);
+const summaryAllHidden = (table) => isHidden(table, "strengths") && isHidden(table, "weaknesses");
+// The rows that print for a kind (shown, with points), numbered in order.
+const summaryNumber = (table, kind, row) => summaryRows(table, kind).filter((item) => item[kind].length).indexOf(row) + 1;
 
 async function saveSummary() {
   if (!summary.value || summary.value.saving) return;
@@ -368,9 +387,9 @@ async function saveSummary() {
   summary.value.error = false;
   try {
     const tables = summary.value.tables.map((table) => ({
-      key: table.key, title: table.title,
+      key: table.key, title: table.title, hidden: table.hidden ?? [],
       rows: table.rows.map((row) => ({
-        symbol: row.symbol,
+        symbol: row.symbol, hidden: row.hidden ?? [],
         strengths: row.strengths.map((point) => point.text).filter((text) => text.trim()),
         weaknesses: row.weaknesses.map((point) => point.text).filter((text) => text.trim()),
       })),
@@ -406,10 +425,11 @@ function planFromSummary(test) {
 async function loadPlan() {
   const test = milestoneSection.value?.newest;
   if (!test) return;
-  plan.value = { evaluationId: test.id, goals: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+  plan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
   try {
     const { data } = await axios.get(`api/reports/plans/${test.id}`);
     plan.value.goals = data.plan ? data.plan.goals.map(planGoal) : planFromSummary(test);
+    plan.value.hidden = [...(data.plan?.hidden ?? [])];
     plan.value.saved = Boolean(data.plan);
     plan.value.savedAt = data.plan?.updated_at ?? null;
   } catch {
@@ -432,10 +452,28 @@ const planLevels = computed(() => {
     if (!groups.has(groupKey)) groups.set(groupKey, { key: groupKey, general_goal: goal.general_goal, domain: goal.domain, symbol: goal.symbol, goals: [] });
     groups.get(groupKey).goals.push(goal);
   }
+  // A deleted table (level) or group stays listed on its page to be restored; the server keeps them out of the tracking.
+  const hidden = new Set(plan.value.hidden);
   return [...levels.values()].filter((level) => isLevelShown(level.key))
     .sort((a, b) => a.age - b.age || Number(a.key) - Number(b.key))
-    .map((level) => ({ ...level, groups: [...level.groups.values()] }));
+    .map((level) => {
+      const groups = [...level.groups.values()];
+      const levelHidden = hidden.has(`level:${level.key}`);
+      const hiddenGroups = groups.filter((group) => hidden.has(`group:${level.key}|${group.key}`));
+      return { ...level, hidden: levelHidden, groups: groups.filter((group) => !hiddenGroups.includes(group)),
+        deleted: [
+          ...(levelHidden ? [{ key: `level:${level.key}`, label: t("ereport.whole_table") }] : []),
+          ...hiddenGroups.map((group) => ({ key: `group:${level.key}|${group.key}`, label: [group.domain, group.symbol && `(${group.symbol})`].filter(Boolean).join(" ") || "—" })),
+        ] };
+    });
 });
+function setPlanHidden(key, hidden) {
+  const list = new Set(plan.value.hidden);
+  if (hidden) list.add(key);
+  else list.delete(key);
+  plan.value.hidden = [...list];
+  touchPlan();
+}
 const goalCode = (group, index) => [group.symbol, index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-");
 
 function touchPlan() {
@@ -460,8 +498,9 @@ async function savePlan() {
     // The plan shows goals only; a goal added here has no weakness, so the server's required weakness takes the goal text.
     const goals = plan.value.goals.filter((goal) => (goal.goal || goal.weakness).trim())
       .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness.trim() ? goal.weakness : goal.goal }));
-    const { data } = await axios.put(`api/reports/plans/${plan.value.evaluationId}`, { goals });
+    const { data } = await axios.put(`api/reports/plans/${plan.value.evaluationId}`, { goals, hidden: plan.value.hidden });
     plan.value.goals = data.plan.goals.map(planGoal);
+    plan.value.hidden = [...(data.plan.hidden ?? [])];
     plan.value.saved = true;
     plan.value.dirty = false;
     plan.value.savedAt = data.plan.updated_at;
@@ -894,15 +933,28 @@ function back() {
           <!-- Report: the newest test's strengths and weaknesses, edited here and saved on the server; each level its own page -->
           <template v-if="showCharts">
           <section v-for="table in reportSummary.length ? reportSummary : [null]" :key="'summary-' + (table?.key ?? 'none')"
-            v-page="{ key: 'summary-' + (table?.key ?? 'none'), title: [$t('ereport.page_summary'), table?.title].filter(Boolean).join(' · ') }" class="rx-page">
+            v-page="{ key: 'summary-' + (table?.key ?? 'none'), title: [$t('ereport.page_summary'), table?.title].filter(Boolean).join(' · ') }" class="rx-page"
+            :class="{ 'rx-print-hidden': table && summaryAllHidden(table) }">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
             <template v-if="table">
               <h3 v-if="table.title" class="rx-summary-level">{{ table.title }}</h3>
+              <div v-if="summaryDeleted(table).length" class="rx-deleted rx-screen-only">
+                <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+                <button v-for="item in summaryDeleted(table)" :key="item.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="item.restore()">
+                  <i class="pi pi-undo" aria-hidden="true" /> {{ item.label }}
+                </button>
+              </div>
               <template v-for="kind in ['strengths', 'weaknesses']" :key="kind">
-                <h3 class="rx-summary-level">{{ $t('ereport.' + kind + '_intro') }}</h3>
+                <template v-if="!isHidden(table, kind)">
+                <div class="rx-table-head">
+                  <h3 class="rx-summary-level">{{ $t('ereport.' + kind + '_intro') }}</h3>
+                  <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" @click="setHidden(table, kind, true)">
+                    <i class="pi pi-trash" aria-hidden="true" /> {{ $t("ereport.delete_table") }}
+                  </button>
+                </div>
                 <table class="rx-table rx-summary">
                   <thead>
                     <tr>
@@ -913,7 +965,7 @@ function back() {
                   </thead>
                   <tbody>
                     <!-- A row without points shows on screen only (to add one) and is left out of the print. -->
-                    <tr v-for="(row, r) in table.rows" :key="r" :class="{ 'rx-screen-only': !row[kind].length }">
+                    <tr v-for="row in summaryRows(table, kind)" :key="table.rows.indexOf(row)" :class="{ 'rx-screen-only': !row[kind].length }">
                       <td class="rx-sum-num">{{ row[kind].length ? summaryNumber(table, kind, row) : "" }}</td>
                       <td>
                         <ul class="rx-plan-points">
@@ -927,13 +979,18 @@ function back() {
                           <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
                         </button>
                       </td>
-                      <td class="rx-sum-symbol"><b>{{ row.symbol }}</b></td>
+                      <td class="rx-sum-symbol">
+                        <b>{{ row.symbol }}</b>
+                        <button type="button" class="rx-plan-control rx-remove-point rx-row-delete rx-screen-only" :aria-label="$t('ereport.delete_row')"
+                          :title="$t('ereport.delete_row')" @click="setHidden(row, kind, true)"><i class="pi pi-times" aria-hidden="true" /></button>
+                      </td>
                     </tr>
-                    <tr v-if="!table.rows.some(row => row[kind].length)">
+                    <tr v-if="!summaryRows(table, kind).some(row => row[kind].length)">
                       <td colspan="3" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
                     </tr>
                   </tbody>
                 </table>
+                </template>
               </template>
             </template>
             <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
@@ -944,14 +1001,27 @@ function back() {
           <!-- Plan: the goals only (weaknesses are not shown), edited here and saved on the server; each level its own page -->
           <template v-if="showPlan && plan">
           <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')"
-            v-page="{ key: 'plan-' + (level?.key ?? 'none'), title: [$t('ereport.plan_title'), level?.title].filter(Boolean).join(' · ') }" class="rx-page">
+            v-page="{ key: 'plan-' + (level?.key ?? 'none'), title: [$t('ereport.plan_title'), level?.title].filter(Boolean).join(' · ') }" class="rx-page"
+            :class="{ 'rx-print-hidden': level && (level.hidden || !level.groups.length) }">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>{{ $t("ereport.plan_title") }} · VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
             <h2 class="rx-band">{{ $t("ereport.plan_title") }}<template v-if="level?.title"> — {{ level.title }}</template></h2>
+            <div v-if="level?.deleted.length" class="rx-deleted rx-screen-only">
+              <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+              <button v-for="item in level.deleted" :key="item.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="setPlanHidden(item.key, false)">
+                <i class="pi pi-undo" aria-hidden="true" /> {{ item.label }}
+              </button>
+            </div>
             <p v-if="plan.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
-            <table v-else-if="level" class="rx-table rx-summary rx-plan">
+            <div v-else-if="level && !level.hidden && level.groups.length" class="rx-table-head rx-screen-only">
+              <span />
+              <button type="button" class="rx-plan-control rx-remove-point" @click="setPlanHidden(`level:${level.key}`, true)">
+                <i class="pi pi-trash" aria-hidden="true" /> {{ $t("ereport.delete_table") }}
+              </button>
+            </div>
+            <table v-if="!plan.loading && level && !level.hidden && level.groups.length" class="rx-table rx-summary rx-plan">
               <thead>
                 <tr>
                   <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
@@ -962,7 +1032,11 @@ function back() {
               <tbody>
                 <template v-for="group in level.groups" :key="group.key">
                   <tr class="rx-plan-group">
-                    <th colspan="3">{{ group.domain }}<template v-if="group.symbol"> ({{ group.symbol }})</template><template v-if="group.general_goal"> — {{ group.general_goal }}</template></th>
+                    <th colspan="3">
+                      {{ group.domain }}<template v-if="group.symbol"> ({{ group.symbol }})</template><template v-if="group.general_goal"> — {{ group.general_goal }}</template>
+                      <button type="button" class="rx-plan-control rx-remove-point rx-row-delete rx-screen-only" :aria-label="$t('ereport.delete_row')"
+                        :title="$t('ereport.delete_row')" @click="setPlanHidden(`group:${level.key}|${group.key}`, true)"><i class="pi pi-times" aria-hidden="true" /></button>
+                    </th>
                   </tr>
                   <tr v-for="(goal, g) in group.goals" :key="goal.key">
                     <td class="rx-sum-num ltr">{{ goalCode(group, g) }}</td>
@@ -977,7 +1051,7 @@ function back() {
                 </template>
               </tbody>
             </table>
-            <p v-else class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
+            <p v-else-if="!plan.loading && !level?.deleted.length" class="rx-empty">{{ $t("ereport.no_result_data") }}</p>
             <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
           </section>
           </template>
@@ -1179,6 +1253,12 @@ function back() {
 .rx-plan-points.is-static li { display: list-item; }
 .rx-plan-group th { background: #edf7f5; text-align: start; font-weight: 800; }
 .rx-plan-control-col { width: 2.5rem; text-align: center; }
+/* Deleting a row / table and the list of what was deleted (screen only). */
+.rx-table-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.rx-row-delete { margin-inline-start: .35rem; padding: .1rem .3rem; font-size: 8pt; vertical-align: middle; }
+.rx-deleted { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: 0 0 .6rem; padding: .45rem .6rem; border: 1px dashed #f59e0b; border-radius: 8px; background: #fffbeb; color: #92400e; font-size: 9pt; }
+.rx-restore { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .5rem; border: 1px solid #fcd34d; border-radius: 999px; background: #fff; color: #92400e; font: inherit; cursor: pointer; }
+.rx-restore:hover { background: #fef3c7; }
 .rx-track { margin-bottom: 6mm; font-size: 8.5pt; break-inside: avoid; page-break-inside: avoid; }
 .rx-track th, .rx-track td { padding: 3px 4px; text-align: center; vertical-align: middle; }
 .rx-track td:nth-child(2) { text-align: start; }

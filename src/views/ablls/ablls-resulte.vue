@@ -1,5 +1,8 @@
 <template>
   <div class="sawa-card p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg">
+    <div class="flex justify-end mb-4">
+      <DeleteEvaluationButton :evaluation-id="$route.params.id" />
+    </div>
     <div class="grid md:grid-cols-3 grid-cols-2 lg:grid-cols-5 gap-6">
       <transition-group name="fade" tag="div" class="contents">
         <div 
@@ -51,8 +54,10 @@
 <script>
 import axios from "axios";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
+import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 export default {
   name: 'SquareGrid',
+  components: { DeleteEvaluationButton },
   data() {
     return {
       mainSquares: [],

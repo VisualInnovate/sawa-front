@@ -20,9 +20,23 @@
         <InputText id="carolina-age" :modelValue="childAge ?? ''" readonly :placeholder="$t('age')" />
       </div>
 
+      <!-- One color for the whole evaluation, picked before it starts; the child's last Carolina evaluation's color is locked. -->
+      <div v-if="date" class="flex flex-column gap-2">
+        <label>{{ $t("color") }}</label>
+        <div class="carolina-colors">
+          <button v-for="option in COLOR_OPTIONS" :key="option" type="button"
+            :class="{ selected: color === option, blocked: isBlocked(option) }"
+            :style="{ backgroundColor: '#' + option }" :disabled="isBlocked(option) || started"
+            :title="isBlocked(option) ? $t('carolina_ui.color_used_last') : ''"
+            :aria-label="'#' + option + (isBlocked(option) ? ' — ' + $t('carolina_ui.color_used_last') : '')"
+            @click="color = option"></button>
+        </div>
+        <small v-if="lastEvaluation?.color" class="text-gray-500">{{ $t("carolina_ui.color_last_hint", { date: lastEvaluation.date }) }}</small>
+      </div>
+
       <div v-if="date" class="flex flex-column gap-2">
         <label style="visibility: hidden">{{ $t("strart_evaluate") }}</label>
-        <Button :loading="starting" :disabled="loading || !selectedSections.length || started" class="w-full"
+        <Button :loading="starting" :disabled="loading || !selectedSections.length || started || !color" class="w-full"
           :label="$t('strart_evaluate')" @click="start" />
       </div>
 
@@ -43,16 +57,11 @@
       </fieldset>
 
       <template v-if="started">
-        <!-- Each general goal is its own card with its own color; its answers are saved with that color. -->
+        <!-- Each general goal is its own card, all in the evaluation's color. -->
         <section v-for="section in selectedSections" :key="section.id" class="milestone-level lg:col-span-2"
-          :style="{ '--level-color': '#' + sectionColor(section.id) }">
+          :style="{ '--level-color': '#' + color }">
           <header class="milestone-level-header">
             <h2>{{ section.title }}</h2>
-            <div class="milestone-level-colors">
-              <span>{{ $t("color") }}</span>
-              <button v-for="color in COLOR_OPTIONS" :key="color" type="button" :class="{ selected: sectionColor(section.id) === color }"
-                :style="{ backgroundColor: '#' + color }" :aria-label="'#' + color" @click="colors = { ...colors, [section.id]: color }"></button>
-            </div>
           </header>
           <section v-for="age in section.ages" :key="age.id" class="milestone-domain">
             <h3 class="milestone-domain-title">{{ $t("carolina_ui.age_range") }}: <span dir="ltr">{{ age.name }}</span> {{ $t("carolina_ui.months") }}</h3>
@@ -83,8 +92,8 @@
 
 <script setup>
 // The Carolina evaluation of one child (/carolina-test/:id), laid out like the Milestones one: the child, date
-// and age, the general goals to cover, then a colored card per general goal with its age ranges and skills, each
-// answered with one of the responses.
+// and age, the evaluation's one color (not the child's last Carolina evaluation's), the general goals to cover, then
+// a card per general goal with its age ranges and skills, each answered with one of the responses.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -111,8 +120,9 @@ const responses = ref([]);
 const date = ref(new Date());
 const childAge = ref(null);
 const selectedIds = ref([]);
-// section id -> color (hex without #)
-const colors = ref({});
+// The evaluation's color (hex without #) and the child's last Carolina evaluation ({ id, date, color }).
+const color = ref(null);
+const lastEvaluation = ref(null);
 const evaluationId = ref(null);
 const started = computed(() => Boolean(evaluationId.value));
 const starting = ref(false);
@@ -134,8 +144,7 @@ const selectedSections = computed(() => tree.value.filter((section) => selectedI
 const items = computed(() => selectedSections.value.flatMap((section) => section.ages.flatMap((age) => age.items)));
 const answeredCount = computed(() => items.value.filter((item) => selected.value[item.id]).length);
 
-// A different default color for each general goal, as the Milestones levels.
-const sectionColor = (id) => colors.value[id] ?? COLOR_OPTIONS[Math.max(0, tree.value.findIndex((section) => section.id === id)) % COLOR_OPTIONS.length];
+const isBlocked = (option) => String(lastEvaluation.value?.color ?? "").toUpperCase() === option;
 const errorText = (error) => Object.values(error.response?.data?.errors ?? {}).flat().join(" ") || error.response?.data?.message || t("request_failed_retry");
 
 async function load() {
@@ -156,6 +165,19 @@ async function load() {
   } finally {
     loading.value = false;
   }
+}
+
+// The first free color is picked by default.
+async function loadLastColor() {
+  lastEvaluation.value = null;
+  if (!childId.value) return;
+  try {
+    const { data } = await axios.get(`api/carolina-answer/last-color/${childId.value}`);
+    lastEvaluation.value = data.last;
+  } catch {
+    lastEvaluation.value = null;
+  }
+  if (!color.value || isBlocked(color.value)) color.value = COLOR_OPTIONS.find((option) => !isBlocked(option)) ?? null;
 }
 
 async function loadAge() {
@@ -206,11 +228,8 @@ async function save() {
       child_id: childId.value,
       date: toDateOnly(date.value),
       child_age: childAge.value == null ? null : String(childAge.value),
-      answers: items.value.map((item) => ({
-        skill_id: item.id,
-        answer_type_id: selected.value[item.id],
-        color: sectionColor(item.section_id),
-      })),
+      color: color.value,
+      answers: items.value.map((item) => ({ skill_id: item.id, answer_type_id: selected.value[item.id] })),
     });
     if (requestId) axios.post(`api/evaluation-request/change-status/${requestId}`, { status: "1" }).catch(() => {});
     router.push({ name: "carolina-resulte", params: { id: evaluationId.value } });
@@ -225,6 +244,7 @@ async function save() {
 onMounted(() => {
   load();
   loadAge();
+  loadLastColor();
 });
 watch(date, () => { if (!started.value) loadAge(); });
 // Another child on the same screen: start over.
@@ -232,10 +252,11 @@ watch(childId, (value, before) => {
   if (value && value !== before && route.name === "carolina-test") {
     evaluationId.value = null;
     selected.value = {};
-    colors.value = {};
+    color.value = null;
     showMissing.value = false;
     load();
     loadAge();
+    loadLastColor();
   }
 });
 </script>
@@ -250,11 +271,13 @@ watch(childId, (value, before) => {
 .milestone-level { border: 2px solid var(--level-color); border-radius: 16px; overflow: hidden; }
 .milestone-level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding: 1rem 1.25rem; background: var(--level-color); color: #fff; }
 .milestone-level-header h2 { margin: 0; font-weight: 700; font-size: 1.25rem; }
-.milestone-level-colors { display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem; border-radius: 10px; background: rgba(255, 255, 255, .9); color: #333; }
-.milestone-level-colors span { font-size: .85rem; margin-inline-end: .25rem; }
-.milestone-level-colors button { width: 26px; height: 26px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }
-.milestone-level-colors button:hover { transform: scale(1.1); }
-.milestone-level-colors button.selected { border-color: #333; box-shadow: 0 0 0 2px #fff inset; }
+.carolina-colors { display: flex; align-items: center; gap: .5rem; min-height: 2.6rem; }
+.carolina-colors button { width: 30px; height: 30px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }
+.carolina-colors button:hover:not(:disabled) { transform: scale(1.1); }
+.carolina-colors button.selected { border-color: #333; box-shadow: 0 0 0 2px #fff inset; }
+.carolina-colors button:disabled:not(.selected) { opacity: .5; cursor: default; }
+.carolina-colors button.blocked { position: relative; cursor: not-allowed; opacity: .35; }
+.carolina-colors button.blocked::after { content: ""; position: absolute; inset: 45% -2px auto; height: 2px; background: #333; transform: rotate(-45deg); }
 .milestone-domain + .milestone-domain { border-top: 1px solid var(--sawa-border); }
 .milestone-domain-title { margin: 0; padding: .85rem 1.25rem; color: var(--sawa-primary); background: #edf7f5; font-weight: 700; font-size: 1.1rem; }
 .milestone-goal { padding: 1rem 1.25rem; }

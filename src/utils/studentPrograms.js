@@ -15,6 +15,16 @@ export function sessionKindLabel(t, kind) {
 // closed / waiting / late / ongoing / finished / missed, as the backend computes them.
 export const SESSION_STATUS_SEVERITY = { closed: "secondary", waiting: "info", late: "warn", ongoing: "success", finished: "contrast", missed: "danger" };
 
+// Why a session was postponed, missed or compensated (an official holiday is filled in by the system).
+export const SESSION_REASONS = ["family_delay", "therapist_delay", "transport_delay", "other"];
+
+export function reasonText(t, type, note) {
+  if (!type) return "";
+  if (type === "holiday") return `${t("session_reason_holiday")}${note ? `: ${note}` : ""}`;
+  const label = t(`session_reason_${type}`);
+  return type === "other" ? note || label : note ? `${label} — ${note}` : label;
+}
+
 export function isoDate(value) {
   return value ? moment(value).format("YYYY-MM-DD") : null;
 }

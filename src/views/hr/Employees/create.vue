@@ -552,6 +552,10 @@
             <label class="text-start" for="work-types">{{ $t("work_types") }}</label>
             <WorkTypeSelect v-model="employee.work_types" />
           </div>
+          <!-- Therapists: the ages they specialise in (choosing them for a child outside it only warns). -->
+          <div v-if="employee.type == 2" class="flex flex-column gap-2 py-1">
+            <AgeRangeField v-model:from="employee.age_from_months" v-model:to="employee.age_to_months" :label="$t('age_ranges.therapist_label')" />
+          </div>
         </div>
         <div class="text-center">
           <Button
@@ -573,10 +577,11 @@
 import axios from "axios";
 import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
+import AgeRangeField from "@/components/common/AgeRangeField.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
 import moment from "moment";
 export default {
-  components: { SubstituteSelect, WorkTypeSelect },
+  components: { SubstituteSelect, WorkTypeSelect, AgeRangeField },
   data() {
     return {
       evaluate_types: [
@@ -712,6 +717,10 @@ export default {
       if (this.employee.role) body.append("role", this.employee.role);
       if (this.employee.substitute_ids?.length) body.append("substitute_ids", this.employee.substitute_ids);
       if (this.employee.work_types?.length) body.append("work_types", workTypesValue(this.employee.work_types));
+      if (this.employee.type == 2) {
+        body.append("age_from_months", this.employee.age_from_months ?? "");
+        body.append("age_to_months", this.employee.age_to_months ?? "");
+      }
       if (this.employee.treatments)
         body.append("treatments", this.employee.treatments);
       if (this.employee.skills) body.append("skills", this.employee.skills);
