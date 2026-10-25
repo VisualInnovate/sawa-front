@@ -181,6 +181,7 @@ export default {
         { name: "carolina", id: 5 },
         { name: "Transition", id: 6 },
         { name: "Ablls OT", id: 7 },
+        { name: "M-CHAT-R", id: 8 },
         { name: "البعد المعرفي", id: 101 },
         { name: "البعد العنايه الذاتيه", id: 102 },
         { name: "البعد الحركي", id: 103 },

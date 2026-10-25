@@ -36,7 +36,7 @@ const finishedCount = (child) => child.evaluations.filter((evaluation) => evalua
 const openCount = (child) => child.appointments.filter((appointment) => appointment.status !== 1).length;
 
 // The results page of each evaluation type, and the permission it needs.
-const RESULT_PERMISSIONS = { 1: "evaluation results list", 2: "milestone answer list", 3: "barrier answer list", 4: "able answer list", 5: "carolina answer list", 6: "transition answer list", 7: "skills answer list" };
+const RESULT_PERMISSIONS = { 1: "evaluation results list", 2: "milestone answer list", 3: "barrier answer list", 4: "able answer list", 5: "carolina answer list", 6: "transition answer list", 7: "skills answer list", 8: "mchat answer list" };
 const canOpenResult = (evaluation) => evaluation.status === 1 && can(RESULT_PERMISSIONS[evaluation.type] ?? "evaluation results list");
 function openResult(child, evaluation) {
   const routes = {
@@ -46,6 +46,7 @@ function openResult(child, evaluation) {
     5: { name: "carolina-resulte", params: { id: evaluation.id } },
     6: { name: "transition-result", params: { id: child.id, evaluation: evaluation.id } },
     7: { name: "skills-result", params: { id: evaluation.id } },
+    8: { name: "mchat-result", params: { id: child.id, evaluation: evaluation.id } },
   };
   localStorage.setItem("child_id", child.id);
   router.push(routes[evaluation.type] ?? {

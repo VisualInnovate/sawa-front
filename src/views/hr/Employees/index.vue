@@ -9,6 +9,7 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import printPlugin from "vue3-print-nb";
 import { workTypeLabel } from "@/utils/employeeWorkTypes";
+import { formatAgeRange } from "@/utils/ageRange";
 const toast = useToast();
 const router = useRouter();
 const allusers = ref([]);
@@ -203,6 +204,10 @@ const deleteAction = () => {
     .catch(() => { });
 };
 
+// The role and age-range columns are searched, sorted and exported by their text.
+const roleNames = (row) => (row.user?.roles ?? []).map((role) => role.name).join("، ");
+const ageRange = (row) => (Number(row.user?.type) === 2 ? formatAgeRange(t, row.user?.age_from_months, row.user?.age_to_months) : "—");
+
 const exportCSV = () => {
   dt.value.exportCSV();
 };
@@ -270,11 +275,6 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="basic_salary" :header="$t('basic_salary')" :sortable="true">
-              <template #body="slotProps">
-                {{ slotProps.data.basic_salary }}
-              </template>
-            </Column>
 
             <Column field="shift.title" :header="$t('shift_title')" :sortable="true">
               <template #body="slotProps">
@@ -282,11 +282,28 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column field="work_types" :header="$t('work_types')">
+            <Column field="work_types" :header="$t('employee_treatment_kind')">
               <template #body="slotProps">
                 <div class="flex flex-wrap gap-1">
                   <Tag v-for="type in slotProps.data.work_types ?? []" :key="type" :value="workTypeLabel(t, type)" severity="secondary" class="whitespace-nowrap" />
+                  <span v-if="!slotProps.data.work_types?.length" class="text-color-secondary">—</span>
                 </div>
+              </template>
+            </Column>
+
+            <Column :field="roleNames" :header="$t('employee_role')" :sortable="true">
+              <template #body="slotProps">
+                <div class="flex flex-wrap gap-1">
+                  <Tag v-for="role in slotProps.data.user?.roles ?? []" :key="role.id" :value="role.name" severity="info" class="whitespace-nowrap" />
+                  <span v-if="!slotProps.data.user?.roles?.length" class="text-color-secondary">—</span>
+                </div>
+              </template>
+            </Column>
+
+            <!-- The age range a therapist works with (only therapists have one). -->
+            <Column :field="ageRange" :header="$t('age_ranges.label')">
+              <template #body="slotProps">
+                <span class="whitespace-nowrap">{{ ageRange(slotProps.data) }}</span>
               </template>
             </Column>
 

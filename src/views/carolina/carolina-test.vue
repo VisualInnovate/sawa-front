@@ -20,65 +20,96 @@
         <InputText id="carolina-age" :modelValue="childAge ?? ''" readonly :placeholder="$t('age')" />
       </div>
 
-      <!-- One color for the whole evaluation, picked before it starts; the child's last Carolina evaluation's color is locked. -->
-      <div v-if="date" class="flex flex-column gap-2">
+      <!-- One color per evaluation (any color for a new one); continuing locks every color the evaluation used. -->
+      <div v-if="date && mode" class="flex flex-column gap-2">
         <label>{{ $t("color") }}</label>
         <div class="carolina-colors">
           <button v-for="option in COLOR_OPTIONS" :key="option" type="button"
             :class="{ selected: color === option, blocked: isBlocked(option) }"
             :style="{ backgroundColor: '#' + option }" :disabled="isBlocked(option) || started"
-            :title="isBlocked(option) ? $t('carolina_ui.color_used_last') : ''"
-            :aria-label="'#' + option + (isBlocked(option) ? ' — ' + $t('carolina_ui.color_used_last') : '')"
+            :title="isBlocked(option) ? $t('carolina_ui.color_used_in_evaluation') : ''"
+            :aria-label="'#' + option + (isBlocked(option) ? ' — ' + $t('carolina_ui.color_used_in_evaluation') : '')"
             @click="color = option"></button>
         </div>
-        <small v-if="lastEvaluation?.color" class="text-gray-500">{{ $t("carolina_ui.color_last_hint", { date: lastEvaluation.date }) }}</small>
       </div>
 
-      <div v-if="date" class="flex flex-column gap-2">
-        <label style="visibility: hidden">{{ $t("strart_evaluate") }}</label>
-        <Button :loading="starting" :disabled="loading || !selectedSections.length || started || !color" class="w-full"
-          :label="$t('strart_evaluate')" @click="start" />
+      <!-- How this evaluation goes: new, or continuing the latest one on its weaknesses. -->
+      <div v-if="last && mode" class="carolina-mode lg:col-span-2">
+        <span><i :class="mode === 'continue' ? 'pi pi-replay' : 'pi pi-file-plus'" aria-hidden="true" />
+          {{ mode === "continue" ? $t("carolina_ui.mode_continue_on", { date: last.date, n: last.weaknesses_count }) : $t("carolina_ui.mode_new") }}</span>
+        <Button v-if="!started" type="button" :label="$t('carolina_ui.change_mode')" size="small" variant="text" @click="modeDialog = true" />
       </div>
 
       <Message v-if="loading" class="lg:col-span-2">{{ $t("loading") }}</Message>
       <Message v-else-if="loadError" severity="error" :closable="false" class="lg:col-span-2">{{ loadError }}</Message>
       <Message v-else-if="!tree.length" severity="warn" :closable="false" class="lg:col-span-2">{{ $t("carolina_ui.no_items") }}</Message>
 
-      <!-- The general goals this evaluation covers. -->
-      <fieldset v-if="!loading && tree.length" class="level-picker lg:col-span-2" :disabled="started || starting">
-        <legend>{{ $t("carolina_ui.choose_sections") }}</legend>
-        <p>{{ $t("carolina_ui.choose_sections_hint") }}</p>
-        <div class="level-picker-options">
-          <label v-for="section in tree" :key="section.id">
-            <Checkbox v-model="selectedIds" :value="section.id" />
-            <span>{{ section.title }}</span>
-          </label>
+      <!-- A new evaluation: the domains it covers, then their general goals (a goal can be left out). -->
+      <fieldset v-if="!loading && tree.length && mode === 'new'" class="level-picker lg:col-span-2" :disabled="started || starting">
+        <legend>{{ $t("carolina_ui.choose_domains") }}</legend>
+        <p>{{ $t("carolina_ui.choose_domains_hint") }}</p>
+        <div class="domain-picker">
+          <div v-for="domain in domains" :key="domain.key" class="domain-option">
+            <label class="domain-option-head">
+              <Checkbox :modelValue="domainState(domain) === 'all'" :indeterminate="domainState(domain) === 'some'" binary
+                @update:modelValue="toggleDomain(domain, $event)" />
+              <b>{{ domain.title }}</b>
+            </label>
+            <div class="domain-option-goals">
+              <label v-for="goal in domain.goals" :key="goal.id">
+                <Checkbox v-model="selectedIds" :value="goal.id" />
+                <span>{{ goal.title }}</span>
+              </label>
+            </div>
+          </div>
         </div>
       </fieldset>
 
+      <div v-if="date && mode" class="flex flex-column gap-2 lg:col-span-2 carolina-start">
+        <Button v-if="!started" :loading="starting" :disabled="loading || !items.length || !color" class="carolina-start-button"
+          :label="$t('strart_evaluate')" icon="pi pi-play" @click="start" />
+      </div>
+
       <template v-if="started">
-        <!-- Each general goal is its own card, all in the evaluation's color. -->
-        <section v-for="section in selectedSections" :key="section.id" class="milestone-level lg:col-span-2"
-          :style="{ '--level-color': '#' + color }">
-          <header class="milestone-level-header">
-            <h2>{{ section.title }}</h2>
-          </header>
-          <section v-for="age in section.ages" :key="age.id" class="milestone-domain">
-            <h3 class="milestone-domain-title">{{ $t("carolina_ui.age_range") }}: <span dir="ltr">{{ age.name }}</span> {{ $t("carolina_ui.months") }}</h3>
-            <div class="milestone-goal">
-              <div v-for="item in age.items" :id="'ci-' + item.id" :key="item.id" class="milestone-question"
-                :class="{ 'is-missing': showMissing && !selected[item.id] }">
-                <p><span class="carolina-symbol" dir="ltr">{{ item.symbol }}</span>{{ item.text }}</p>
-                <div class="milestone-scores">
-                  <label v-for="response in responses" :key="response.id" :class="{ 'is-picked': selected[item.id] === response.id }">
-                    <input type="radio" :name="'item-' + item.id" :value="response.id" :checked="selected[item.id] === response.id"
-                      @change="selected = { ...selected, [item.id]: response.id }" />
-                    <span>{{ response.name }}</span>
-                  </label>
-                </div>
-              </div>
+        <p v-if="mode === 'continue'" class="carolina-hint lg:col-span-2"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("carolina_ui.continue_hint") }}</p>
+        <!-- Domain above, then each general goal as a bar and a table: age range | symbol | skill | response. -->
+        <section v-for="domain in shownDomains" :key="domain.key" class="carolina-domain lg:col-span-2" :style="{ '--level-color': '#' + color }">
+          <h2 class="carolina-domain-title">{{ domain.title }}</h2>
+          <article v-for="goal in domain.goals" :key="goal.id" class="carolina-goal">
+            <header class="carolina-goal-title">{{ goal.title }}</header>
+            <div class="carolina-table-wrap">
+              <table class="carolina-table">
+                <thead>
+                  <tr>
+                    <th>{{ $t("carolina_ui.age_range") }}</th>
+                    <th>{{ $t("carolina_ui.symbol") }}</th>
+                    <th>{{ $t("carolina_ui.skill") }}</th>
+                    <th v-if="mode === 'continue'">{{ $t("carolina_ui.previous_response") }}</th>
+                    <th>{{ $t("carolina_ui.response") }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in goal.rows" :id="'ci-' + row.id" :key="row.id" :class="{ 'is-missing': showMissing && !selected[row.id] }">
+                    <td v-if="row.first" :rowspan="row.span" class="carolina-age" dir="ltr">{{ row.age }}</td>
+                    <td class="carolina-center" dir="ltr">{{ row.symbol }}</td>
+                    <td>{{ row.text }}</td>
+                    <td v-if="mode === 'continue'" class="carolina-center">
+                      <span class="carolina-previous" dir="ltr">
+                        <i v-if="previous[row.id]?.color" :style="{ background: '#' + previous[row.id].color }" />{{ previous[row.id]?.response }}
+                      </span>
+                    </td>
+                    <td class="carolina-center">
+                      <div class="carolina-responses" role="radiogroup" :aria-label="row.symbol">
+                        <button v-for="response in RESPONSES" :key="response" type="button" role="radio" dir="ltr"
+                          :aria-checked="selected[row.id] === response" :class="{ 'is-picked': selected[row.id] === response }"
+                          @click="selected = { ...selected, [row.id]: response }">{{ response }}</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </section>
+          </article>
         </section>
 
         <div class="flex flex-column gap-2 lg:col-span-2 carolina-submit">
@@ -87,13 +118,32 @@
         </div>
       </template>
     </form>
+
+    <!-- The child has a Carolina evaluation: a new one, or continue the latest on its weaknesses. -->
+    <Dialog v-model:visible="modeDialog" modal :closable="Boolean(mode)" :closeOnEscape="Boolean(mode)":header="$t('carolina_ui.mode_title')" :style="{ width: '520px', maxWidth: '95vw' }">
+      <p class="m-0 mb-3">{{ $t("carolina_ui.mode_intro", { date: last?.date }) }}</p>
+      <div class="carolina-mode-options">
+        <button type="button" class="carolina-mode-option" @click="chooseMode('new')">
+          <i class="pi pi-file-plus" aria-hidden="true" />
+          <span><b>{{ $t("carolina_ui.mode_new") }}</b><small>{{ $t("carolina_ui.mode_new_hint") }}</small></span>
+        </button>
+        <button type="button" class="carolina-mode-option" :disabled="!last?.weaknesses_count" @click="chooseMode('continue')">
+          <i class="pi pi-replay" aria-hidden="true" />
+          <span>
+            <b>{{ $t("carolina_ui.mode_continue") }}</b>
+            <small>{{ last?.weaknesses_count ? $t("carolina_ui.mode_continue_hint", { n: last.weaknesses_count }) : $t("carolina_ui.mode_no_weaknesses") }}</small>
+          </span>
+        </button>
+      </div>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
-// The Carolina evaluation of one child (/carolina-test/:id), laid out like the Milestones one: the child, date
-// and age, the evaluation's one color (not the child's last Carolina evaluation's), the general goals to cover, then
-// a card per general goal with its age ranges and skills, each answered with one of the responses.
+// The Carolina evaluation of one child (/carolina-test/:id). Each skill is answered +, - or +-, in one color.
+// A child with an earlier evaluation first chooses: a new evaluation (pick domains, then their general goals; any
+// color), or continuing the latest one — only its weaknesses (- or +-) are asked again, in a color that evaluation
+// has not used yet. Questions show by domain, then a table per general goal like the result page.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -105,6 +155,7 @@ import { carolinaText } from "@/utils/carolina";
 const CAROLINA = 5;
 // The colors every evaluation screen offers.
 const COLOR_OPTIONS = ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"];
+const RESPONSES = ["+", "-", "+-"];
 
 const { t } = useI18n();
 const route = useRoute();
@@ -115,69 +166,102 @@ const children = ref([]);
 const child = computed(() => children.value.find((entry) => Number(entry.id) === childId.value) ?? { name: "", gender: "0" });
 const loading = ref(true);
 const loadError = ref("");
-const sections = ref([]);
-const responses = ref([]);
+const goals = ref([]);
 const date = ref(new Date());
 const childAge = ref(null);
 const selectedIds = ref([]);
-// The evaluation's color (hex without #) and the child's last Carolina evaluation ({ id, date, color }).
+// The child's latest evaluation ({ id, date, colors, weaknesses: { skillId: { response, color } }, weaknesses_count }).
+const last = ref(null);
+// "new" | "continue"; null until chosen (a child without an evaluation starts a new one).
+const mode = ref(null);
+const modeDialog = ref(false);
 const color = ref(null);
-const lastEvaluation = ref(null);
 const evaluationId = ref(null);
-const started = computed(() => Boolean(evaluationId.value));
+const started = ref(false);
 const starting = ref(false);
 const saving = ref(false);
 const showMissing = ref(false);
 const alertText = ref("");
-// item id -> answer type id
+// skill id -> "+" | "-" | "+-"
 const selected = ref({});
 
-// General goal → age range → skills, each skill worded for the child.
-const tree = computed(() => sections.value.map((section) => ({
-  ...section,
-  ages: (section.ages ?? []).map((age) => ({
+const previous = computed(() => (mode.value === "continue" ? last.value?.weaknesses ?? {} : {}));
+// The general goals by domain (the goals without one last), each goal's skills worded for the child.
+const tree = computed(() => goals.value.map((goal) => ({
+  ...goal,
+  ages: (goal.ages ?? []).map((age) => ({
     ...age,
-    items: (age.skills ?? []).map((skill) => ({ ...skill, section_id: section.id, text: carolinaText(skill, "skill", child.value) })),
+    items: (age.skills ?? []).map((skill) => ({ ...skill, text: carolinaText(skill, "skill", child.value) })),
   })),
 })));
-const selectedSections = computed(() => tree.value.filter((section) => selectedIds.value.includes(section.id)));
-const items = computed(() => selectedSections.value.flatMap((section) => section.ages.flatMap((age) => age.items)));
+const domains = computed(() => {
+  const list = new Map();
+  for (const goal of tree.value) {
+    const key = goal.domain?.id ?? 0;
+    if (!list.has(key)) list.set(key, { key, title: goal.domain?.title ?? t("carolina_ui.no_domain"), goals: [] });
+    list.get(key).goals.push(goal);
+  }
+  return [...list.values()];
+});
+// Whether a skill is asked: a new evaluation asks the chosen goals' skills, continuing asks the weaknesses.
+const isAsked = (goal, item) => (mode.value === "continue" ? Boolean(previous.value[item.id]) : selectedIds.value.includes(goal.id));
+// The shown domains → goals → table rows (the age range cell spans its skills).
+const shownDomains = computed(() => domains.value.map((domain) => ({
+  ...domain,
+  goals: domain.goals.map((goal) => ({
+    ...goal,
+    rows: goal.ages.flatMap((age) => {
+      const asked = age.items.filter((item) => isAsked(goal, item));
+      return asked.map((item, i) => ({ ...item, age: age.name, first: i === 0, span: asked.length }));
+    }),
+  })).filter((goal) => goal.rows.length),
+})).filter((domain) => domain.goals.length));
+const items = computed(() => shownDomains.value.flatMap((domain) => domain.goals.flatMap((goal) => goal.rows)));
 const answeredCount = computed(() => items.value.filter((item) => selected.value[item.id]).length);
 
-const isBlocked = (option) => String(lastEvaluation.value?.color ?? "").toUpperCase() === option;
+const lockedColors = computed(() => (mode.value === "continue" ? (last.value?.colors ?? []).map((value) => String(value).toUpperCase()) : []));
+const isBlocked = (option) => lockedColors.value.includes(option);
 const errorText = (error) => Object.values(error.response?.data?.errors ?? {}).flat().join(" ") || error.response?.data?.message || t("request_failed_retry");
+
+const domainState = (domain) => {
+  const picked = domain.goals.filter((goal) => selectedIds.value.includes(goal.id)).length;
+  return picked === 0 ? "none" : picked === domain.goals.length ? "all" : "some";
+};
+function toggleDomain(domain, on) {
+  const ids = domain.goals.map((goal) => goal.id);
+  selectedIds.value = on ? [...new Set([...selectedIds.value, ...ids])] : selectedIds.value.filter((id) => !ids.includes(id));
+}
+
+function chooseMode(value) {
+  mode.value = value;
+  modeDialog.value = false;
+  selected.value = {};
+  showMissing.value = false;
+  if (!color.value || isBlocked(color.value)) color.value = COLOR_OPTIONS.find((option) => !isBlocked(option)) ?? null;
+}
 
 async function load() {
   loading.value = true;
   loadError.value = "";
+  last.value = null;
+  mode.value = null;
   try {
-    const [tests, types, list] = await Promise.all([
+    const [tests, context, list] = await Promise.all([
       axios.get("api/carolina-skills/evaluation-tree"),
-      axios.get("api/carolina-answer-type"),
+      axios.get(`api/carolina-answer/context/${childId.value}`),
       axios.get("api/child").catch(() => ({ data: {} })),
     ]);
-    sections.value = tests.data.data ?? [];
-    responses.value = types.data.data ?? [];
+    goals.value = tests.data.data ?? [];
     children.value = list.data?.children ?? [];
-    selectedIds.value = tree.value.map((section) => section.id);
+    last.value = context.data.last;
+    // A child evaluated before chooses how to go on; otherwise the evaluation is new.
+    if (last.value) modeDialog.value = true;
+    else chooseMode("new");
   } catch (error) {
     loadError.value = errorText(error);
   } finally {
     loading.value = false;
   }
-}
-
-// The first free color is picked by default.
-async function loadLastColor() {
-  lastEvaluation.value = null;
-  if (!childId.value) return;
-  try {
-    const { data } = await axios.get(`api/carolina-answer/last-color/${childId.value}`);
-    lastEvaluation.value = data.last;
-  } catch {
-    lastEvaluation.value = null;
-  }
-  if (!color.value || isBlocked(color.value)) color.value = COLOR_OPTIONS.find((option) => !isBlocked(option)) ?? null;
 }
 
 async function loadAge() {
@@ -191,9 +275,15 @@ async function loadAge() {
   }
 }
 
+// A new evaluation is created now; continuing answers the latest one.
 async function start() {
-  starting.value = true;
   alertText.value = "";
+  if (mode.value === "continue") {
+    evaluationId.value = last.value.id;
+    started.value = true;
+    return;
+  }
+  starting.value = true;
   try {
     const { data } = await axios.post("api/evaluations/create", {
       type: CAROLINA,
@@ -203,6 +293,7 @@ async function start() {
       date: toDateOnly(date.value),
     });
     evaluationId.value = data.evaluation.id;
+    started.value = true;
   } catch (error) {
     alertText.value = errorText(error);
   } finally {
@@ -228,8 +319,9 @@ async function save() {
       child_id: childId.value,
       date: toDateOnly(date.value),
       child_age: childAge.value == null ? null : String(childAge.value),
+      mode: mode.value,
       color: color.value,
-      answers: items.value.map((item) => ({ skill_id: item.id, answer_type_id: selected.value[item.id] })),
+      answers: items.value.map((item) => ({ skill_id: item.id, response: selected.value[item.id] })),
     });
     if (requestId) axios.post(`api/evaluation-request/change-status/${requestId}`, { status: "1" }).catch(() => {});
     router.push({ name: "carolina-resulte", params: { id: evaluationId.value } });
@@ -241,22 +333,26 @@ async function save() {
   }
 }
 
+function reset() {
+  evaluationId.value = null;
+  started.value = false;
+  selected.value = {};
+  selectedIds.value = [];
+  color.value = null;
+  showMissing.value = false;
+}
+
 onMounted(() => {
   load();
   loadAge();
-  loadLastColor();
 });
 watch(date, () => { if (!started.value) loadAge(); });
 // Another child on the same screen: start over.
 watch(childId, (value, before) => {
   if (value && value !== before && route.name === "carolina-test") {
-    evaluationId.value = null;
-    selected.value = {};
-    color.value = null;
-    showMissing.value = false;
+    reset();
     load();
     loadAge();
-    loadLastColor();
   }
 });
 </script>
@@ -265,12 +361,12 @@ watch(childId, (value, before) => {
 .level-picker { border: 1px solid var(--sawa-border); border-radius: 12px; padding: 1rem; }
 .level-picker legend { font-weight: 700; color: var(--sawa-primary); }
 .level-picker p { margin: 0 0 .75rem; color: var(--sawa-muted); }
-.level-picker-options { display: flex; flex-wrap: wrap; gap: 1rem; }
-.level-picker-options label { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
-.level-picker:disabled .level-picker-options label { cursor: default; }
-.milestone-level { border: 2px solid var(--level-color); border-radius: 16px; overflow: hidden; }
-.milestone-level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding: 1rem 1.25rem; background: var(--level-color); color: #fff; }
-.milestone-level-header h2 { margin: 0; font-weight: 700; font-size: 1.25rem; }
+.domain-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: .75rem; }
+.domain-option { padding: .75rem .9rem; border: 1px solid var(--sawa-border); border-radius: 10px; background: #fff; }
+.domain-option-head { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.domain-option-goals { display: grid; gap: .35rem; margin-top: .55rem; padding-inline-start: 1.6rem; }
+.domain-option-goals label { display: flex; align-items: center; gap: .5rem; cursor: pointer; font-size: .92rem; }
+.level-picker:disabled label { cursor: default; }
 .carolina-colors { display: flex; align-items: center; gap: .5rem; min-height: 2.6rem; }
 .carolina-colors button { width: 30px; height: 30px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: transform .15s; }
 .carolina-colors button:hover:not(:disabled) { transform: scale(1.1); }
@@ -278,18 +374,38 @@ watch(childId, (value, before) => {
 .carolina-colors button:disabled:not(.selected) { opacity: .5; cursor: default; }
 .carolina-colors button.blocked { position: relative; cursor: not-allowed; opacity: .35; }
 .carolina-colors button.blocked::after { content: ""; position: absolute; inset: 45% -2px auto; height: 2px; background: #333; transform: rotate(-45deg); }
-.milestone-domain + .milestone-domain { border-top: 1px solid var(--sawa-border); }
-.milestone-domain-title { margin: 0; padding: .85rem 1.25rem; color: var(--sawa-primary); background: #edf7f5; font-weight: 700; font-size: 1.1rem; }
-.milestone-goal { padding: 1rem 1.25rem; }
-.milestone-goal h4 { margin-bottom: .75rem; font-weight: 700; }
-.milestone-question { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--sawa-border); padding: 1rem 0; }
-.milestone-question.is-missing { margin: 0 -.75rem; padding-inline: .75rem; border-radius: 8px; background: #fef2f2; box-shadow: inset 0 0 0 1px #fca5a5; }
-.milestone-question p { flex: 1 1 20rem; margin: 0; }
-.carolina-symbol { display: inline-block; min-width: 2.6rem; margin-inline-end: .6rem; padding: .1rem .45rem; border-radius: 6px; background: #f1f5f9; font-weight: 700; text-align: center; }
-.milestone-scores { display: flex; flex-wrap: wrap; gap: .6rem; }
-.milestone-scores label { display: flex; align-items: center; gap: .4rem; padding: .5rem .8rem; border: 1px solid var(--sawa-border); border-radius: 8px; cursor: pointer; font-weight: 700; }
-.milestone-scores label.is-picked { border-color: var(--level-color); background: color-mix(in srgb, var(--level-color) 12%, #fff); }
-.milestone-scores input { accent-color: var(--level-color); }
+.carolina-mode { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; padding: .6rem .9rem; border-radius: 10px; background: #f1f5f9; color: #334155; font-weight: 600; }
+.carolina-mode i { margin-inline-end: .35rem; color: var(--sawa-primary); }
+.carolina-start { align-items: flex-end; }
+.carolina-start-button { min-width: 14rem; }
+.carolina-hint { margin: 0; padding: .55rem .8rem; border-radius: 8px; background: #fffbeb; color: #92400e; }
+.carolina-domain { display: grid; gap: .9rem; }
+.carolina-domain-title { margin: .5rem 0 0; padding: .55rem 1rem; border-inline-start: 6px solid var(--level-color); border-radius: 8px; background: #f8fafc; color: #0f172a; font-size: 1.2rem; font-weight: 800; }
+.carolina-goal { overflow: hidden; border: 1px solid var(--sawa-border); border-radius: 14px; background: #fff; }
+.carolina-goal-title { padding: .85rem 1.25rem; background: var(--level-color); color: #fff; font-size: 1.1rem; font-weight: 800; }
+.carolina-table-wrap { overflow-x: auto; padding: 1rem 1.25rem; }
+.carolina-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.carolina-table th, .carolina-table td { border: 1px solid #e2e8f0; padding: .55rem .75rem; vertical-align: middle; text-align: start; }
+.carolina-table th { background: #f8fafc; color: #334155; font-weight: 700; text-align: center; }
+.carolina-table tr.is-missing td:not(.carolina-age) { background: #fef2f2; }
+.carolina-center, .carolina-age { text-align: center !important; white-space: nowrap; }
+.carolina-age { background: #f8fafc; font-weight: 700; }
+.carolina-responses { display: inline-flex; gap: .35rem; }
+/* The signs in a plain font: Cairo draws "+-" as one glyph. */
+.carolina-responses button, .carolina-previous { font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-variant-ligatures: none; }
+.carolina-responses button { min-width: 2.6rem; padding: .35rem .55rem; border: 1px solid var(--sawa-border); border-radius: 8px; background: #fff; font-size: 1.05rem; font-weight: 800; cursor: pointer; }
+.carolina-responses button:hover { border-color: var(--level-color); }
+.carolina-responses button:focus-visible { outline: 2px solid var(--level-color); outline-offset: 2px; }
+.carolina-responses button.is-picked { border-color: var(--level-color); background: var(--level-color); color: #fff; }
+.carolina-previous { display: inline-flex; align-items: center; gap: .35rem; font-weight: 800; }
+.carolina-previous i { width: 10px; height: 10px; border-radius: 2px; }
+.carolina-mode-options { display: grid; gap: .6rem; }
+.carolina-mode-option { display: flex; align-items: center; gap: .8rem; padding: .85rem 1rem; border: 1px solid var(--sawa-border); border-radius: 12px; background: #fff; font: inherit; text-align: start; cursor: pointer; }
+.carolina-mode-option:hover:not(:disabled) { border-color: var(--sawa-primary); background: #f0fdfa; }
+.carolina-mode-option:disabled { opacity: .55; cursor: not-allowed; }
+.carolina-mode-option i { font-size: 1.4rem; color: var(--sawa-primary); }
+.carolina-mode-option span { display: grid; gap: .15rem; }
+.carolina-mode-option small { color: var(--sawa-muted); }
 .carolina-submit { align-items: center; }
 .carolina-count { color: var(--sawa-muted); }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-// Carolina general goals: a title and the age ranges it covers. Deleting a goal, or taking an age range off it,
+// Carolina general goals: a title, its domain (optional) and the age ranges it covers. Deleting a goal, or taking an age range off it,
 // deletes its skills there, so both ask first when skills would go.
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -10,31 +10,34 @@ import CarolianaTab from '@/components/CarolianaTab.vue';
 
 const { t } = useI18n();
 const toast = useToast();
-const rows = ref([]), ageRanges = ref([]);
+const rows = ref([]), ageRanges = ref([]), domains = ref([]);
 const loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null), confirming = ref(null);
 const errors = ref({});
-const form = ref({ title: '', age_range_ids: [] });
+const form = ref({ title: '', domain_id: null, age_range_ids: [] });
 const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
 const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
 const firstError = (key) => Array.isArray(errors.value[key]) ? errors.value[key][0] : errors.value[key];
-const tableRows = computed(() => rows.value.map(row => ({ ...row, ranges_text: (row.age_ranges ?? []).map(range => range.name).join(' ') })));
+const tableRows = computed(() => rows.value.map(row => ({ ...row, domain_title: row.domain?.title ?? '', ranges_text: (row.age_ranges ?? []).map(range => range.name).join(' ') })));
 
 async function fetchRows() {
   loading.value = true;
   try {
-    const [goals, ranges] = await Promise.all([axios.get('/api/carolina-general-goals'), axios.get('/api/carolina-age-range')]);
+    const [goals, ranges, domainList] = await Promise.all([
+      axios.get('/api/carolina-general-goals'), axios.get('/api/carolina-age-range'), axios.get('/api/carolina-domains').catch(() => ({ data: {} })),
+    ]);
     rows.value = goals.data.data ?? [];
     ageRanges.value = ranges.data.data ?? [];
+    domains.value = domainList.data.data ?? [];
   } catch { notifyError(); }
   finally { loading.value = false; }
 }
 function openNew() {
-  form.value = { title: '', age_range_ids: [] };
+  form.value = { title: '', domain_id: null, age_range_ids: [] };
   errors.value = {};
   dialog.value = true;
 }
 function edit(row) {
-  form.value = { id: row.id, title: row.title ?? '', age_range_ids: (row.age_ranges ?? []).map(range => range.id) };
+  form.value = { id: row.id, title: row.title ?? '', domain_id: row.domain_id ?? null, age_range_ids: (row.age_ranges ?? []).map(range => range.id) };
   errors.value = {};
   dialog.value = true;
 }
@@ -87,7 +90,7 @@ onMounted(fetchRows);
     <CarolianaTab />
     <Toast />
     <DataTable :value="tableRows" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
-      :filters="filters" :globalFilterFields="['title', 'ranges_text']" v-can="'carolina general goal list'">
+      :filters="filters" :globalFilterFields="['title', 'domain_title', 'ranges_text']" v-can="'carolina general goal list'">
       <template #header>
         <div class="carolina-table-header">
           <h1>{{ $t('carolina_ui.general_goals') }}</h1>
@@ -102,6 +105,9 @@ onMounted(fetchRows);
       </template>
       <template #empty>{{ $t('carolina_ui.no_general_goals') }}</template>
       <Column field="title" :header="$t('carolina_ui.general_goal')" sortable />
+      <Column field="domain_title" :header="$t('carolina_ui.domain')" sortable>
+        <template #body="{ data }">{{ data.domain?.title || '—' }}</template>
+      </Column>
       <Column :header="$t('carolina_ui.age_ranges')">
         <template #body="{ data }">
           <div class="range-chips">
@@ -128,6 +134,12 @@ onMounted(fetchRows);
           <label for="goal-title">{{ $t('carolina_ui.general_goal') }}</label>
           <InputText id="goal-title" v-model="form.title" fluid :disabled="saving" :invalid="Boolean(errors.title)" />
           <small v-if="errors.title" class="field-error">{{ firstError('title') }}</small>
+        </div>
+        <div class="form-field">
+          <label for="goal-domain">{{ $t('carolina_ui.domain') }}</label>
+          <Select inputId="goal-domain" v-model="form.domain_id" :options="domains" optionLabel="title" optionValue="id" showClear fluid filter
+            :disabled="saving" :invalid="Boolean(errors.domain_id)" :placeholder="$t('carolina_ui.no_domain')" :emptyMessage="$t('carolina_ui.no_domains')" />
+          <small v-if="errors.domain_id" class="field-error">{{ firstError('domain_id') }}</small>
         </div>
         <div class="form-field">
           <label for="goal-ranges">{{ $t('carolina_ui.age_ranges') }}</label>

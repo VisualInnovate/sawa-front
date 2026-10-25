@@ -125,10 +125,10 @@ const evaluationRoutes = [
     component: () => import("../views/carolina/agerange-index.vue")
   },
   {
-    path: '/answer_type', // Define the path for your addRoom route
-    name: 'answer_type',
-    meta: { permission: ["carolina answer type list"] },
-    component: () => import("../views/carolina/answer-type.vue")
+    path: '/carolina-domains',
+    name: 'carolina-domains',
+    meta: { permission: ["carolina domain list"] },
+    component: () => import("../views/carolina/domains.vue")
   },
   {
     path: '/carolina-symbols',
