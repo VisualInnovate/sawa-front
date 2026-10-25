@@ -356,17 +356,18 @@ const barrierRows = (tests) => TEST_KEYS.map((key, i) => ({
   boxes_total: tests[i]?.form?.boxes_total,
 }));
 
-// One VB-MAPP test: one row per level (each may be evaluated on its own day); a missing level is an empty row.
-// The score is the boxes colored up to that level out of all the form's boxes.
-const milestoneRows = (test) => (test.form?.levels ?? []).map((level) => ({
-  n: level.age || level.level_id,
-  key: `Level ${level.age || level.level_id}`,
-  date: level.date,
-  age_months: level.age_months,
-  testers: level.tester ? [level.tester] : [],
-  colors: level.color ? [level.color] : [],
-  score: level.cumulative_score,
-  boxes_total: test.form?.boxes_total,
+// One VB-MAPP evaluation: one row per test up to it — a new evaluation is Test 1, each continuation on its weaknesses
+// the next test (completing missing levels changes the same test). The score is every box the test colored out of
+// all the form's boxes.
+const milestoneRows = (test) => (test.form?.tests ?? []).map((row) => ({
+  n: row.n,
+  key: `Test ${row.n}`,
+  date: row.date,
+  age_months: row.age_months,
+  testers: row.testers ?? [],
+  colors: row.colors ?? [],
+  score: row.score,
+  boxes_total: row.boxes_total,
 }));
 
 // The VB-MAPP levels in the chosen tests (lowest first) for the toolbar's level picker.
@@ -598,17 +599,42 @@ async function savePlan() {
 // ---- tracking (the saved plans' goals of the chosen VB-MAPP tests) ---------------------------------
 
 // { plans: [{ evaluation_id, evaluation_date, goals: [...] }], achieved: { [id]: "YYYY-MM-DD" | "" }, cells: { [id]: {...} },
-//   saving, approving, error, savedAt, approvedAt }
+//   request: the tracking sent for these tests ({ status: pending | approved | rejected, note, goal_ids, … }) or null,
+//   saving, approving, error, savedAt }
+// Columns prop, MT, EXP, RR and GEN, all free text; what a session filled is shown and cannot change, and once the
+// management approved the tracking it is view-only.
 const tracking = ref(null);
 const TRIAL_COLUMNS = ["mt", "exp", "rr"];
+const CELL_KEYS = ["prop_start", "prop_end", ...TRIAL_COLUMNS.flatMap((column) => [`${column}_start`, `${column}_end`]), "gen"];
+const trackingApproved = computed(() => tracking.value?.request?.status === "approved");
+const sessionFilled = (goal, key) => (goal.session_cells ?? []).includes(key);
+const cellLocked = (goal, key) => trackingApproved.value || goal.locked || sessionFilled(goal, key);
+// GEN filled by a session: a summary of its requests.
+function genSummary(goal) {
+  const status = (item) => t(`gen_status_${item.status}`);
+  const people = goal.gen?.people ?? [];
+  return [
+    goal.gen?.classes && `${t("gen_classes")}: ${status(goal.gen.classes)}`,
+    goal.gen?.home && `${t("gen_home")}: ${status(goal.gen.home)}`,
+    people.length && `${t("gen_people")}: ${people.filter((item) => item.status === "approved").length}/${people.length}`,
+  ].filter(Boolean).join(" · ");
+}
+function cellText(goal, key) {
+  if (!sessionFilled(goal, key)) return tracking.value.cells[goal.id]?.[key] ?? "";
+  if (key === "prop_start") return goal.prop_start ? ymd(goal.prop_start) : "";
+  if (key === "prop_end") return goal.achieved_at ? ymd(goal.achieved_at) : "";
+  if (key === "gen") return genSummary(goal);
+  return goal.cells?.[key] ?? "";
+}
 
 async function loadTracking() {
   const tests = milestoneSection.value?.tests ?? [];
   if (!tests.length) return;
-  tracking.value = { plans: [], achieved: {}, cells: {}, loading: true, saving: false, approving: false, error: false };
+  tracking.value = { plans: [], achieved: {}, cells: {}, request: null, loading: true, saving: false, approving: false, error: false };
   try {
     const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: tests.map((test) => test.id) } });
     setTrackingPlans(data.plans ?? []);
+    tracking.value.request = data.request ?? null;
   } catch {
     tracking.value.error = true;
   } finally {
@@ -620,7 +646,7 @@ function setTrackingPlans(plans) {
   tracking.value.plans = plans;
   for (const goal of plans.flatMap((item) => item.goals)) {
     tracking.value.achieved[goal.id] = goal.achieved_at ?? "";
-    tracking.value.cells[goal.id] = Object.fromEntries(TRIAL_COLUMNS.flatMap((column) => ["start", "end"].map((end) => [`${column}_${end}`, goal.cells?.[`${column}_${end}`] ?? ""])));
+    tracking.value.cells[goal.id] = Object.fromEntries(CELL_KEYS.map((key) => [key, goal.cells?.[key] ?? ""]));
   }
 }
 
@@ -634,27 +660,32 @@ const trackingGroups = (item) => {
   }
   return [...groups.values()];
 };
-const isTracked = (goal) => !(edits.value?.trackingHidden ?? []).includes(Number(goal.id));
+// An approved tracking prints the goals it was approved with.
+const isTracked = (goal) => (trackingApproved.value
+  ? tracking.value.request.goal_ids.includes(Number(goal.id))
+  : !(edits.value?.trackingHidden ?? []).includes(Number(goal.id)));
 function toggleTracked(goal, shown) {
+  if (trackingApproved.value) return;
   const hidden = new Set((edits.value.trackingHidden ?? []).map(Number));
   if (shown) hidden.delete(Number(goal.id));
   else hidden.add(Number(goal.id));
   edits.value.trackingHidden = [...hidden];
 }
 
-// Saves the goals that print: their achieved date (prop) and their trial columns.
+// Saves the goals that print: their columns (the server keeps what a session filled and approved goals as they are).
 async function saveTracking() {
-  if (!tracking.value || tracking.value.saving) return true;
-  const goals = tracking.value.plans.flatMap((item) => item.goals).filter(isTracked);
+  if (!tracking.value || tracking.value.saving || trackingApproved.value) return true;
+  const goals = tracking.value.plans.flatMap((item) => item.goals).filter(isTracked).filter((goal) => !goal.locked);
   if (!goals.length) return true;
   tracking.value.saving = true;
   tracking.value.error = false;
   try {
     await axios.post(`api/reports/children/${childId.value}/tracking`, {
-      goals: goals.map((goal) => ({ id: goal.id, achieved_at: tracking.value.achieved[goal.id] || null, cells: tracking.value.cells[goal.id] })),
+      goals: goals.map((goal) => ({ id: goal.id, cells: tracking.value.cells[goal.id] })),
     });
     const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: (milestoneSection.value?.tests ?? []).map((test) => test.id) } });
     setTrackingPlans(data.plans ?? []);
+    tracking.value.request = data.request ?? null;
     tracking.value.savedAt = new Date().toLocaleTimeString();
     return true;
   } catch {
@@ -748,19 +779,20 @@ const vPage = {
   },
 };
 
-// «اعتماد التراكنج»: saves it, then records it (the chosen tests and the goals that print) for the child's sessions.
+// «إرسال للاعتماد»: saves it, then sends it (the chosen tests and the goals that print) to the management; sending a
+// pending one again updates it. Once approved the child's sessions work on it.
 async function approveTracking() {
-  if (!tracking.value || tracking.value.approving) return;
+  if (!tracking.value || tracking.value.approving || trackingApproved.value) return;
   const goals = tracking.value.plans.flatMap((item) => item.goals).filter(isTracked);
   if (!goals.length) return;
   tracking.value.approving = true;
   try {
     if (!(await saveTracking())) return;
-    await axios.post(`api/reports/children/${childId.value}/tracking/approve`, {
+    const { data } = await axios.post(`api/reports/children/${childId.value}/tracking/approve`, {
       evaluations: (milestoneSection.value?.tests ?? []).map((test) => test.id),
       goals: goals.map((goal) => goal.id),
     });
-    tracking.value.approvedAt = new Date().toLocaleTimeString();
+    tracking.value.request = data.tracking;
   } catch {
     tracking.value.error = true;
   } finally {
@@ -817,9 +849,13 @@ function back() {
         </span>
         <Button v-if="plan && !plan.loading" :label="$t('ereport.save_plan')" icon="pi pi-save" :loading="plan.saving" data-no-request-spinner @click="savePlan" />
         <template v-if="tracking && !tracking.loading && tracking.plans.length">
-          <span v-if="tracking.approvedAt" class="rx-save-state">{{ $t("ereport.tracking_approved_at", { time: tracking.approvedAt }) }}</span>
-          <Button :label="$t('ereport.save_tracking')" icon="pi pi-save" :loading="tracking.saving" severity="secondary" data-no-request-spinner @click="saveTracking" />
-          <Button :label="$t('ereport.approve_tracking')" icon="pi pi-verified" :loading="tracking.approving" data-no-request-spinner @click="approveTracking" />
+          <Tag v-if="tracking.request" :severity="{ pending: 'warn', approved: 'success', rejected: 'danger' }[tracking.request.status]"
+            :value="$t(`ereport.tracking_status_${tracking.request.status}`)" />
+          <template v-if="!trackingApproved">
+            <Button :label="$t('ereport.save_tracking')" icon="pi pi-save" :loading="tracking.saving" severity="secondary" data-no-request-spinner @click="saveTracking" />
+            <Button :label="tracking.request?.status === 'pending' ? $t('ereport.resend_tracking') : $t('ereport.send_tracking')" icon="pi pi-send"
+              :loading="tracking.approving" data-no-request-spinner @click="approveTracking" />
+          </template>
         </template>
         <!-- Pages: untick (or the trash on a page) to leave it out of the print; nothing is saved. -->
         <Button v-if="report" type="button" icon="pi pi-clone" variant="outlined"
@@ -1162,19 +1198,30 @@ function back() {
             <p v-else-if="!item" class="rx-empty">{{ $t("ereport.tracking_no_plan") }}</p>
             <template v-else>
               <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.tracking_hint") }}</p>
+              <p v-if="tracking.request?.status === 'rejected'" class="rx-track-state is-rejected rx-screen-only">
+                <i class="pi pi-times-circle" aria-hidden="true" /> {{ $t("ereport.tracking_rejected_note", { note: tracking.request.note || "—" }) }}
+              </p>
+              <p v-else-if="tracking.request?.status === 'pending'" class="rx-track-state is-pending rx-screen-only">
+                <i class="pi pi-clock" aria-hidden="true" /> {{ $t("ereport.tracking_pending_note", { date: tracking.request.requested_at }) }}
+              </p>
+              <p v-else-if="trackingApproved" class="rx-track-state is-approved rx-screen-only">
+                <i class="pi pi-lock" aria-hidden="true" /> {{ $t("ereport.tracking_approved_note", { date: tracking.request.decided_at, name: tracking.request.approver || "" }) }}
+              </p>
               <table v-for="group in trackingGroups(item)" :key="group.key" class="rx-table rx-track"
                 :class="{ 'rx-print-hidden': !group.goals.some(isTracked) }">
                 <thead>
-                  <tr class="rx-track-domain"><th colspan="9">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
-                  <tr class="rx-track-goal"><th colspan="9">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
+                  <tr class="rx-track-domain"><th colspan="11">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
+                  <tr class="rx-track-goal"><th colspan="11">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
                   <tr>
                     <th rowspan="2" class="rx-track-num">{{ $t("ereport.number") }}</th>
                     <th rowspan="2">{{ $t("ereport.tracking_short_goals") }}</th>
-                    <th class="rx-track-prop">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
+                    <th colspan="2" class="rx-track-prop">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
                     <th v-for="column in TRIAL_COLUMNS" :key="column" colspan="2">{{ $t("ereport.trial_" + column) }}<br /><span class="ltr">{{ column.toUpperCase() }}</span></th>
+                    <th rowspan="2" class="rx-track-gen">{{ $t("gen_title") }}<br /><span class="ltr">GEN</span></th>
                   </tr>
                   <tr>
-                    <th class="rx-track-prop">{{ $t("ereport.tracking_date") }}</th>
+                    <th class="rx-track-prop">{{ $t("ereport.trial_start") }}</th>
+                    <th class="rx-track-prop">{{ $t("ereport.trial_end") }}</th>
                     <template v-for="column in TRIAL_COLUMNS" :key="column">
                       <th class="rx-track-cell">{{ $t("ereport.trial_start") }}</th>
                       <th class="rx-track-cell">{{ $t("ereport.trial_end") }}</th>
@@ -1187,19 +1234,15 @@ function back() {
                     <td>
                       {{ goal.goal || goal.weakness }}
                       <span class="rx-track-controls rx-screen-only">
-                        <label><input type="checkbox" :checked="isTracked(goal)" @change="toggleTracked(goal, $event.target.checked)" /> {{ $t("ereport.tracking_print") }}</label>
+                        <label><input type="checkbox" :checked="isTracked(goal)" :disabled="trackingApproved" @change="toggleTracked(goal, $event.target.checked)" /> {{ $t("ereport.tracking_print") }}</label>
                       </span>
                     </td>
-                    <!-- The one date the goal was achieved (sessions will give it); editable here. -->
-                    <td class="rx-track-prop">
-                      <input v-model="tracking.achieved[goal.id]" type="date" class="rx-prop-input rx-screen-only" :aria-label="$t('ereport.tracking_prop')" />
-                      <span class="rx-print-only ltr">{{ tracking.achieved[goal.id] ? ymd(tracking.achieved[goal.id]) : "" }}</span>
+                    <!-- prop, MT, EXP, RR, GEN: free text; a session's value is shown (locked), as is all of an approved tracking. -->
+                    <td v-for="key in CELL_KEYS" :key="key" :class="[key.startsWith('prop') ? 'rx-track-prop' : key === 'gen' ? 'rx-track-gen' : 'rx-track-cell',
+                      { 'is-session': sessionFilled(goal, key) }]">
+                      <span v-if="cellLocked(goal, key)" class="rx-track-locked" :title="sessionFilled(goal, key) ? $t('ereport.tracking_from_session') : undefined">{{ cellText(goal, key) }}</span>
+                      <EditableText v-else v-model="tracking.cells[goal.id][key]" block />
                     </td>
-                    <template v-for="column in TRIAL_COLUMNS" :key="column">
-                      <td v-for="end in ['start', 'end']" :key="end" class="rx-track-cell">
-                        <EditableText v-model="tracking.cells[goal.id][column + '_' + end]" block />
-                      </td>
-                    </template>
                   </tr>
                 </tbody>
               </table>
@@ -1447,7 +1490,14 @@ function back() {
 .rx-table.rx-track .rx-track-goal th { background: #e2e8f0; color: #1e293b; text-align: start; font-weight: 700; }
 .rx-track-symbol { float: inline-end; font-weight: 800; }
 .rx-track-num { width: 11mm; }
-.rx-track-prop { width: 22mm; }
+.rx-track-prop { width: 18mm; }
+.rx-track-gen { width: 22mm; font-size: .8em; }
+.rx-track-locked { display: block; white-space: pre-wrap; }
+.rx-track td.is-session { background: #f0fdfa; }
+.rx-track-state { display: flex; align-items: center; gap: .4rem; margin: .4rem 0; padding: .45rem .7rem; border-radius: 10px; font-weight: 700; }
+.rx-track-state.is-rejected { background: #fef2f2; color: #b91c1c; }
+.rx-track-state.is-pending { background: #fffbeb; color: #b45309; }
+.rx-track-state.is-approved { background: #ecfdf5; color: #047857; }
 .rx-track-cell { width: 10mm; background: #f8fafc; }
 .rx-track thead .rx-track-cell { background: #f1f5f9; }
 .rx-attempt { display: block; white-space: nowrap; }

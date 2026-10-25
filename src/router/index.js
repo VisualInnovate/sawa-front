@@ -204,6 +204,14 @@ const routes = [
     ],
   },
   {
+    path: "/web/generalizations",
+    name: "parent-generalizations",
+    component: () => import("../views/frontend/views/Generalizations.vue"),
+    beforeEnter: [
+      authForNormalUser,
+    ],
+  },
+  {
     path: "/web/more/:event_id/:child_id",
     name: "more",
     props: true,
@@ -327,6 +335,14 @@ const routes = [
     beforeEnter: auth,
     meta: { permission: ["sessions list"] },
     component: () => import("@/views/sessions/SessionRun.vue"),
+  },
+  {
+    // A room's weekly activities as a printable sheet, outside the dashboard layout.
+    path: "/room-activities-print/:roomId",
+    name: "room-activities-print",
+    beforeEnter: auth,
+    meta: { permission: ["room activities list", "room activities edit"] },
+    component: () => import("@/views/activities/RoomActivitiesPrint.vue"),
   },
   {
     // The printable evaluation report (A4 pages with editable fields), outside the dashboard layout.

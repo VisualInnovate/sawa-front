@@ -16,6 +16,13 @@ const rooms = [
       component: () => import("../views/rooms/Index.vue")
     },
     {
+      // «النشاطات»: activities (name + image) and the rooms' weekly activities.
+      path: '/activities',
+      name: 'activities',
+      meta: { permission: ["activities list", "room activities list", "room activities edit"] },
+      component: () => import("../views/activities/Index.vue")
+    },
+    {
       path: '/create-room', 
       name: 'CreateRoom',
       meta: { permission: ["room create"] },

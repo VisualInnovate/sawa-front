@@ -79,6 +79,9 @@ export const buildMenu = () => [
       { label: "student_programe", to: { name: "student-programe" }, perm: "student program list" },
       { label: "sessions", to: { name: "sessions" }, perm: "sessions list" },
       { label: "session_log", to: { name: "session-log" }, perm: "session log list" },
+      { label: "ereport.tracking_approvals", to: { name: "tracking-approvals" }, perm: ["tracking approval list", "tracking approval edit"] },
+      { label: "gen_requests_title", to: { name: "goal-generalizations" }, perm: ["goal generalization list", "goal generalization edit"] },
+      { label: "gen_inbox_title", to: { name: "my-generalizations" } },
       { label: "program_logs", to: { name: "student-program-logs" }, perm: "student program log list" },
       { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
       { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },
@@ -88,7 +91,10 @@ export const buildMenu = () => [
     key: "rooms",
     icon: "mdi-door-open",
     label: "room",
-    children: [{ label: "room", to: { name: "Rooms" }, perm: "room list" }],
+    children: [
+      { label: "room", to: { name: "Rooms" }, perm: "room list" },
+      { label: "activities.title", to: { name: "activities" }, perm: ["activities list", "room activities list", "room activities edit"] },
+    ],
   },
   {
     key: "consulting",

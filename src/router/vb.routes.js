@@ -132,6 +132,26 @@ const vb = [
       meta: { permission: ["evaluation age ranges edit"] },
       component: () => import("../views/evaluationAges/Index.vue")
     },
+    // «طلبات تعميم الأهداف»: the classes' generalization requests, approved or rejected by the management.
+    {
+      path: '/goal-generalizations',
+      name: 'goal-generalizations',
+      meta: { permission: ["goal generalization list", "goal generalization edit"] },
+      component: () => import("../views/sessions/GoalGeneralizations.vue")
+    },
+    // «طلبات التعميم الواردة»: goals other therapists asked me to generalize (everyone sees their own).
+    {
+      path: '/my-generalizations',
+      name: 'my-generalizations',
+      component: () => import("../views/sessions/MyGeneralizations.vue")
+    },
+    // «طلبات اعتماد التراكنج»: the trackings sent to the management.
+    {
+      path: '/tracking-approvals',
+      name: 'tracking-approvals',
+      meta: { permission: ["tracking approval list", "tracking approval edit"] },
+      component: () => import("../views/reports/TrackingApprovals.vue")
+    },
     // «سجل الجلسات»: what ran, was missed (and what was done) or was postponed.
     {
       path: '/session-log',
