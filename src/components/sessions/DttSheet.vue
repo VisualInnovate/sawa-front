@@ -2,7 +2,8 @@
 // The DTT sheet of one MT step of a goal, as the paper form: Date and Trainer filled in (editable), Phase and SD/SΔ
 // empty, 10 trials with a Response (C, I, P or NR), prompt and notes, then % correct and Next. A VB-MAPP (milestone)
 // goal also has the paper's Approx table beside it: 10 rows of Approx, C, P and date, all free text. Saving goes back
-// to the goals table; leaving the session time saves it too.
+// to the goals table; leaving the session time saves it too. With `preset` it only shows a sheet already loaded (a
+// generalization request sent to another therapist), read-only.
 import axios from "axios";
 import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -10,11 +11,13 @@ import { useToast } from "primevue/usetoast";
 import moment from "moment";
 
 const props = defineProps({
-  sessionId: { type: [String, Number], required: true },
+  sessionId: { type: [String, Number], default: null },
   goal: { type: Object, required: true },
   step: { type: Number, required: true },
   canEdit: { type: Boolean, default: false },
   therapist: { type: String, default: "" },
+  preset: { type: Object, default: undefined }, // a saved sheet (or null for an empty one): nothing is loaded
+  forceMilestone: { type: Boolean, default: false },
 });
 const emit = defineEmits(["saved", "close"]);
 const { t } = useI18n();
@@ -27,7 +30,7 @@ const saving = ref(false);
 const dirty = ref(false);
 const url = () => `api/program-sessions/${props.sessionId}/goals/${props.goal.id}/dtt/${props.step}`;
 
-const milestone = ref(Boolean(props.goal.milestone));
+const milestone = ref(props.forceMilestone || Boolean(props.goal.milestone));
 const blankApprox = () => Array.from({ length: 10 }, () => ({ approx: "", c: "", p: "", date: "" }));
 const blank = () => ({
   date: moment().format("YYYY-MM-DD"), trainer: props.therapist, phase: "", sd: "", percent_correct: "", next: "",
@@ -35,15 +38,22 @@ const blank = () => ({
   approx: blankApprox(),
 });
 
+const fromSaved = (saved) => saved
+  ? { date: saved.date, trainer: saved.trainer ?? "", phase: saved.phase ?? "", sd: saved.sd ?? "", percent_correct: saved.percent_correct ?? "",
+    next: saved.next ?? "", trials: saved.trials, approx: saved.approx?.length ? saved.approx : blankApprox() }
+  : blank();
+
 onMounted(async () => {
+  if (props.preset !== undefined) {
+    sheet.value = fromSaved(props.preset);
+    loading.value = false;
+    return;
+  }
   try {
     const { data } = await axios.get(url());
     const saved = data.data;
-    milestone.value = Boolean(data.milestone ?? props.goal.milestone);
-    sheet.value = saved
-      ? { date: saved.date, trainer: saved.trainer ?? "", phase: saved.phase ?? "", sd: saved.sd ?? "", percent_correct: saved.percent_correct ?? "",
-        next: saved.next ?? "", trials: saved.trials, approx: saved.approx?.length ? saved.approx : blankApprox() }
-      : blank();
+    milestone.value = props.forceMilestone || Boolean(data.milestone ?? props.goal.milestone);
+    sheet.value = fromSaved(saved);
   } finally {
     loading.value = false;
     // Only changes after loading count.

@@ -8,6 +8,7 @@ import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
 import { workTypeLabel } from "@/utils/employeeWorkTypes";
+import RoomActivities from "@/components/activities/RoomActivities.vue";
 const toast = useToast()
 const router = useRouter()
 
@@ -53,6 +54,9 @@ const edit=(id)=>{
   router.push({name:'EditRoom',params:{'id':id} })
 }
 
+
+// The room's weekly activities, in a dialog.
+const activitiesRoom = ref(null)
 
 const openNew = () => {
   router.push({name:'CreateRoom'})
@@ -213,6 +217,10 @@ const initFilters = () => {
             <template #body="slotProps">
               <div class="table-actions">
                 <Button
+                v-can="['room activities list', 'room activities edit']"
+                icon="pi pi-calendar"
+                @click="activitiesRoom = slotProps.data" rounded severity="help" variant="outlined" v-tooltip.top="$t('activities.room_activities')" :aria-label="$t('activities.room_activities')" />
+                <Button
                 v-can="'room edit'"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
@@ -227,6 +235,10 @@ const initFilters = () => {
 
 
         </DataTable>
+        <Dialog :visible="Boolean(activitiesRoom)" modal :header="$t('activities.room_activities') + ' — ' + (activitiesRoom?.name ?? '')"
+          :style="{ width: '900px', maxWidth: '96vw' }" @update:visible="activitiesRoom = null">
+          <RoomActivities v-if="activitiesRoom" :room-id="activitiesRoom.id" />
+        </Dialog>
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>

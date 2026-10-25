@@ -107,6 +107,9 @@
           <router-link :to="{ name: 'Following' }" class="font-bold text-lg text-[#2F3843] hover:text-[#FF2A5B] transition-colors duration-300">{{ $t("follow_the_child") }}</router-link>
         </div>
         <div class="my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
+          <router-link :to="{ name: 'parent-generalizations' }" class="font-bold text-lg text-[#2F3843] hover:text-[#FF2A5B] transition-colors duration-300">{{ $t("gen_parent_title") }}</router-link>
+        </div>
+        <div class="my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
           <router-link :to="{ name: 'Edit' }" class="font-bold text-lg text-[#2F3843] hover:text-[#FF2A5B] transition-colors duration-300">{{ $t("evaluation_result") }}</router-link>
         </div>
         <div class="my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">

@@ -1,12 +1,15 @@
 <script setup>
 // Step 3 of a session: the goals of the child's latest approved tracking, one tab per table (domain and general goal)
-// with previous / next. Columns as the tracking: number, short-term goal, prop (the date it was achieved), MT, EXP
-// (extended training stage) and RR, each with start / end. Only MT acts for now: it opens MT1, MT2 and MT3; each
-// is a DTT sheet. MT's start is MT1's date, its end MT3's date once all three are done.
+// with previous / next. Columns as the tracking: number, short-term goal, prop (start: the child's first session after
+// the tracking was approved; end: «تم تحقيق الهدف»), MT, EXP (extended training stage) and RR, each with start / end,
+// then GEN. MT opens MT1, MT2 and MT3, each a DTT sheet (start = MT1's date, end = MT3's once all three are done);
+// EXP and RR take two dates; GEN opens the generalization (GoalGeneralization.vue).
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import DttSheet from "./DttSheet.vue";
+import GoalGeneralization from "./GoalGeneralization.vue";
+import { useToast } from "primevue/usetoast";
 
 const props = defineProps({
   sessionId: { type: [String, Number], required: true },
@@ -16,6 +19,7 @@ const props = defineProps({
   initialTab: { type: Number, default: 0 },
 });
 const { t } = useI18n();
+const toast = useToast();
 
 const tables = computed(() => props.goals.tables ?? []);
 const tab = ref(Math.min(props.initialTab, Math.max(0, tables.value.length - 1)));
@@ -38,9 +42,56 @@ watch(tab, (value) => {
 
 const COLUMNS = computed(() => [
   { key: "mt", title: t("ereport.trial_mt"), code: "MT", active: true },
-  { key: "exp", title: t("ereport.trial_exp"), code: "EXP" },
-  { key: "rr", title: t("ereport.trial_rr"), code: "RR" },
+  { key: "exp", title: t("ereport.trial_exp"), code: "EXP", active: true },
+  { key: "rr", title: t("ereport.trial_rr"), code: "RR", active: true },
 ]);
+const clickable = (key) => key === "mt" || props.canEdit;
+const openCell = (goal, key) => {
+  if (key === "mt") openMt(goal);
+  else if (props.canEdit) openDates(goal, key);
+};
+
+// Replaces a goal's data (achieved, dates, generalizations) everywhere it is shown.
+function updateGoal(data) {
+  for (const item of tables.value.flatMap((row) => row.goals)) {
+    if (item.id === data.id) Object.assign(item, { achieved_at: data.achieved_at, prop_start: data.prop_start, cells: data.cells, gen: data.gen });
+  }
+}
+const busy = ref(false);
+async function call(request) {
+  busy.value = true;
+  try {
+    const { data } = await request();
+    updateGoal(data.data);
+    return true;
+  } catch (e) {
+    toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message ?? t("mission_error"), life: 3000 });
+    return false;
+  } finally {
+    busy.value = false;
+  }
+}
+const goalUrl = (goal, path) => `api/program-sessions/${props.sessionId}/goals/${goal.id}/${path}`;
+
+// prop's end: «تم تحقيق الهدف» (pressed again it is undone).
+const achieve = (goal, achieved) => call(() => axios.put(goalUrl(goal, "achieved"), { achieved }));
+
+// EXP / RR: from and to dates.
+const dates = ref(null); // { goal, key, start, end }
+const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? "");
+const openDates = (goal, key) => {
+  const value = (end) => goal.cells?.[`${key}_${end}`] || "";
+  dates.value = { goal, key, start: isDate(value("start")) ? value("start") : "", end: isDate(value("end")) ? value("end") : "" };
+};
+async function saveDates() {
+  const { goal, key, start, end } = dates.value;
+  if (await call(() => axios.put(goalUrl(goal, "cells"), { column: key, start: start || null, end: end || null }))) dates.value = null;
+}
+
+// GEN: the generalization of a goal; the cell shows one dot per request, coloured by its answer.
+const genGoalId = ref(null);
+const genGoal = computed(() => tables.value.flatMap((row) => row.goals).find((item) => item.id === genGoalId.value) ?? null);
+const genDots = (goal) => [goal.gen?.classes, goal.gen?.home, ...(goal.gen?.people ?? [])].filter(Boolean);
 const cell = (goal, key, end) => (key === "mt" ? goal.mt?.[end] : goal.cells?.[`${key}_${end}`]) || "";
 
 // MT: the steps panel, then a DTT sheet.
@@ -104,20 +155,22 @@ defineExpose({ flush });
             </div>
             <table class="rg-table">
               <colgroup>
-                <col class="rg-col-num" /><col /><col class="rg-col-prop" />
-                <col v-for="n in COLUMNS.length * 2" :key="n" class="rg-col-cell" />
+                <col class="rg-col-num" /><col /><col class="rg-col-prop" /><col class="rg-col-prop" />
+                <col v-for="n in COLUMNS.length * 2" :key="n" class="rg-col-cell" /><col class="rg-col-gen" />
               </colgroup>
               <thead>
                 <tr>
                   <th rowspan="2" class="rg-num">{{ $t("ereport.number") }}</th>
                   <th rowspan="2">{{ $t("ereport.tracking_short_goals") }}</th>
-                  <th class="rg-prop">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
+                  <th colspan="2" class="rg-prop">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
                   <th v-for="column in COLUMNS" :key="column.key" colspan="2" :class="{ 'is-active-col': column.active }">
                     {{ column.title }}<br /><span class="ltr">{{ column.code }}</span>
                   </th>
+                  <th rowspan="2" class="is-active-col">{{ $t("gen_title") }}<br /><span class="ltr">GEN</span></th>
                 </tr>
                 <tr>
-                  <th class="rg-prop">{{ $t("ereport.tracking_date") }}</th>
+                  <th class="rg-prop">{{ $t("ereport.trial_start") }}</th>
+                  <th class="rg-prop">{{ $t("ereport.trial_end") }}</th>
                   <template v-for="column in COLUMNS" :key="column.key">
                     <th class="rg-cell-head">{{ $t("ereport.trial_start") }}</th>
                     <th class="rg-cell-head">{{ $t("ereport.trial_end") }}</th>
@@ -128,17 +181,31 @@ defineExpose({ flush });
                 <tr v-for="(goal, g) in shownGoals" :key="goal.id" :style="{ '--d': `${g * 50}ms` }">
                   <td class="rg-num ltr"><b>{{ goal.code }}</b></td>
                   <td class="rg-text">{{ goal.goal }}</td>
-                  <td class="rg-prop ltr">{{ goal.achieved_at || "" }}</td>
+                  <td class="rg-prop ltr">{{ goal.prop_start || "" }}</td>
+                  <td class="rg-prop">
+                    <span v-if="goal.achieved_at" class="rg-achieved">
+                      <i class="pi pi-check-circle" /><span class="ltr">{{ goal.achieved_at }}</span>
+                      <button v-if="canEdit" type="button" class="rg-undo" :disabled="busy" :title="$t('rg_achieved_undo')" @click="achieve(goal, false)"><i class="pi pi-undo" /></button>
+                    </span>
+                    <button v-else-if="canEdit" type="button" class="rg-achieve" :disabled="busy" @click="achieve(goal, true)">
+                      <i class="pi pi-flag" />{{ $t("rg_achieved") }}
+                    </button>
+                  </td>
                   <template v-for="column in COLUMNS" :key="column.key">
-                    <td v-for="end in ['start', 'end']" :key="end" class="rg-cell ltr" :class="{ 'is-mt': column.active }"
-                      :role="column.active ? 'button' : undefined" :tabindex="column.active ? 0 : undefined"
-                      @click="column.active && openMt(goal)" @keydown.enter="column.active && openMt(goal)">
-                      <template v-if="column.active && end === 'start' && !cell(goal, 'mt', 'start')">
+                    <td v-for="end in ['start', 'end']" :key="end" class="rg-cell ltr" :class="{ 'is-mt': clickable(column.key) }"
+                      :role="clickable(column.key) ? 'button' : undefined" :tabindex="clickable(column.key) ? 0 : undefined"
+                      @click="openCell(goal, column.key)" @keydown.enter="openCell(goal, column.key)">
+                      <template v-if="column.key === 'mt' && end === 'start' && !cell(goal, 'mt', 'start')">
                         <span class="rg-mt-dots"><i v-for="s in goal.mt.steps" :key="s.step" :class="{ 'is-done': s.done }" /></span>
                       </template>
+                      <i v-else-if="column.key !== 'mt' && end === 'start' && canEdit && !cell(goal, column.key, 'start')" class="pi pi-calendar-plus rg-add" />
                       <template v-else>{{ cell(goal, column.key, end) }}</template>
                     </td>
                   </template>
+                  <td class="rg-cell is-mt" role="button" tabindex="0" :aria-label="$t('gen_title')" @click="genGoalId = goal.id" @keydown.enter="genGoalId = goal.id">
+                    <span v-if="genDots(goal).length" class="rg-gen-dots"><i v-for="item in genDots(goal)" :key="item.id" :class="`is-${item.status}`" /></span>
+                    <i v-else class="pi pi-share-alt rg-add" />
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -149,6 +216,26 @@ defineExpose({ flush });
         </Transition>
       </div>
     </Transition>
+
+    <!-- EXP / RR: from and to -->
+    <Dialog :visible="!!dates" modal :header="dates ? `${dates.goal.code} · ${dates.key.toUpperCase()}` : ''" :style="{ width: '28rem' }"
+      :breakpoints="{ '640px': '94vw' }" @update:visible="dates = null">
+      <template v-if="dates">
+        <p class="rg-mt-goal">{{ dates.goal.goal }}</p>
+        <div class="rg-dates">
+          <label>{{ $t("rg_from") }}<input v-model="dates.start" type="date" class="ltr" /></label>
+          <label>{{ $t("rg_to") }}<input v-model="dates.end" type="date" class="ltr" :min="dates.start || undefined" /></label>
+        </div>
+      </template>
+      <template #footer>
+        <Button :label="$t('cancel')" variant="text" severity="secondary" @click="dates = null" />
+        <Button icon="pi pi-save" :label="$t('save')" :loading="busy" :disabled="!!(dates?.start && dates?.end && dates.end < dates.start)" @click="saveDates" />
+      </template>
+    </Dialog>
+
+    <!-- GEN -->
+    <GoalGeneralization v-if="genGoal" :sessionId="sessionId" :goal="genGoal" :kind="goals.kind" :canEdit="canEdit"
+      @updated="updateGoal" @close="genGoalId = null" />
 
     <!-- MT1, MT2, MT3 -->
     <Dialog :visible="!!mtGoal" modal :header="mtGoal ? `${mtGoal.code} · MT` : ''" :style="{ width: '34rem' }" :breakpoints="{ '640px': '94vw' }"
@@ -197,6 +284,21 @@ defineExpose({ flush });
 .rg-col-num { width: 3.8rem; }
 .rg-col-prop { width: 6rem; }
 .rg-col-cell { width: 4.6rem; }
+.rg-col-gen { width: 4.2rem; }
+.rg-achieve { display: inline-flex; align-items: center; gap: .25rem; padding: .25rem .45rem; border-radius: 999px; border: 1px dashed #0f8a7e; background: #f0fdfa;
+  color: #0f766e; font: inherit; font-size: .7rem; font-weight: 700; cursor: pointer; transition: transform .2s, background .2s; }
+.rg-achieve:hover:not(:disabled) { background: #ccfbf1; transform: scale(1.05); }
+.rg-achieved { display: inline-flex; align-items: center; gap: .25rem; font-size: .72rem; color: #047857; font-weight: 700; animation: rg-pop .35s ease both; }
+.rg-undo { border: 0; background: none; color: #94a3b8; cursor: pointer; padding: 0 .15rem; }
+.rg-undo:hover { color: #dc2626; }
+.rg-add { color: #94a3b8; }
+.rg-gen-dots { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: .2rem; }
+.rg-gen-dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #f59e0b; }
+.rg-gen-dots i.is-approved { background: #10b981; }
+.rg-gen-dots i.is-rejected { background: #ef4444; }
+.rg-dates { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.rg-dates label { display: grid; gap: .3rem; font-weight: 700; color: #334155; }
+.rg-dates input { padding: .5rem; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; }
 .rg-text { text-align: start !important; line-height: 1.6; }
 .rg-table tbody tr { animation: rg-row .4s var(--d) ease both; }
 .rg-cell { font-size: .75rem; color: #475569; }

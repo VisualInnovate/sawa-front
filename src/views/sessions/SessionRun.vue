@@ -161,6 +161,14 @@ onBeforeUnmount(() => {
         <div v-if="data" class="run-who">
           <strong>{{ data.session.child?.name }}</strong>
           <small>{{ data.session.treatment?.name ?? $t("sp_session_group") }} · {{ data.session.room?.name }} · {{ data.session.therapist?.name }}</small>
+          <!-- The room's activities during the session. -->
+          <span v-if="data.activities?.length" class="run-activities" :aria-label="$t('activities.during_session')">
+            <span v-for="activity in data.activities" :key="activity.id" class="run-activity" :title="`${activity.name} ${activity.start}–${activity.end}`">
+              <img v-if="activity.image_url" :src="activity.image_url" alt="" />
+              <b>{{ activity.name }}</b>
+              <span dir="ltr" class="run-activity-time">{{ activity.start }}–{{ activity.end }}</span>
+            </span>
+          </span>
         </div>
       </div>
 
@@ -245,6 +253,10 @@ onBeforeUnmount(() => {
 .run-who { display: flex; flex-direction: column; min-width: 0; }
 .run-who strong { color: var(--run-teal); font-size: 1rem; }
 .run-who small { color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22rem; }
+.run-activities { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .25rem; }
+.run-activity { display: inline-flex; align-items: center; gap: .35rem; padding: .1rem .55rem .1rem .15rem; border-radius: 999px; background: #edf7f5; color: #0e464d; font-size: .75rem; white-space: nowrap; }
+.run-activity img { width: 1.4rem; height: 1.4rem; border-radius: 50%; object-fit: cover; }
+.run-activity-time { color: #64748b; }
 .run-steps { position: relative; display: flex; justify-content: center; gap: 2.5rem; }
 .run-steps-track { position: absolute; top: 1.05rem; inset-inline: 18%; height: 3px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
 .run-steps-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--run-accent), #34d399); transition: width .5s cubic-bezier(.65, 0, .35, 1); }
