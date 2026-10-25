@@ -1,6 +1,8 @@
 <script setup>
 // One Transition evaluation's results (/transition-result/:id/:evaluation): the scoring form (a box per question,
 // columns = the child's last four Transition evaluations up to this one, oldest first) and this evaluation's answers.
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
+import TransitionAnswerEditor from "@/components/transition/TransitionAnswerEditor.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
@@ -18,6 +20,13 @@ const answerText = (question) => question.answers?.find((answer) => answer.score
 const columnScore = (question, column) => columns.value[column]?.scores?.[question.id] ?? columns.value[column]?.scores?.[String(question.id)] ?? "";
 const fmt = (value) => String(Math.round(Number(value) * 10) / 10);
 const printPage = () => window.print();
+const approval = ref(null);
+const approvalBanner = ref(null);
+// Edited answers: the result and the approval state are read again.
+function answersEdited() {
+  approvalBanner.value?.reload();
+  load();
+}
 
 async function load() {
   loading.value = true;
@@ -39,6 +48,13 @@ watch(() => route.params.evaluation, (value, before) => {
 
 <template>
   <div class="tr-page">
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.evaluation" @loaded="approval = $event" />
+    <!-- Before approval the answers can still be edited (pending or rejected). -->
+    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+      <TransitionAnswerEditor :evaluation-id="$route.params.evaluation" @saved="answersEdited" />
+    </div>
     <div v-if="loading" class="tr-state"><ProgressSpinner style="width: 40px; height: 40px" /></div>
     <Message v-else-if="failed" severity="error" :closable="false">{{ $t("request_failed_retry") }}</Message>
 

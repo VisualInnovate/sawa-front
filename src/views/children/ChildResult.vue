@@ -3,6 +3,13 @@
     class="min-h-screen bg-gray-50 p-3 md:p-6"
     :dir="locale === 'ar' ? 'rtl' : 'ltr'"
   >
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :child-id="$route.params.child_id" :side-evaluation-id="$route.params.evaluation_id" @loaded="approval = $event" />
+    <!-- Before approval the answers can still be edited (pending or rejected). -->
+    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+      <SideProfileAnswerEditor :result-id="approval.key.slice(1)" @saved="answersEdited" />
+    </div>
     <!-- Header Section -->
     <header class="mb-6 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
       <div
@@ -320,6 +327,8 @@
 </template>
 
 <script setup>
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
+import SideProfileAnswerEditor from "@/components/evaluations/SideProfileAnswerEditor.vue";
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -642,6 +651,13 @@ const showAlert = (message, type) => {
 };
 
 const goBack = () => { router.go(-1); };
+const approval = ref(null);
+const approvalBanner = ref(null);
+// Edited answers: the results and the approval state are read again.
+const answersEdited = () => {
+  approvalBanner.value?.reload();
+  getResults();
+};
 
 onMounted(async () => {
   await Promise.all([getResults(), getSideProfile(), getchildreen()]);

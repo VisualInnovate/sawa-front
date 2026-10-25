@@ -27,7 +27,8 @@ const hr = [
   {
     path: '/Employee-update/:id', 
     name: 'Employee-update',
-    meta: { permission: ["employees edit"] },
+    // «doctor edit» opens therapists only (from the therapists page), without role or salary.
+    meta: { permission: ["employees edit", "doctor edit"] },
     component: () => import("../views/hr/Employees/update.vue")
   },
 

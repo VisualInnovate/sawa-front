@@ -1,5 +1,12 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3  lg:grid-cols-3 gap-y-4">
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast class="col-span-full" />
+    <ApprovalBanner ref="approvalBanner" class="col-span-full" :child-id="$route.params.id" :type="3" @loaded="approval = $event" />
+    <!-- Before approval the answers can still be edited (pending or rejected). -->
+    <div v-if="approval && approval.status !== 'approved'" class="col-span-full flex justify-end print:hidden">
+      <BarrierAnswerEditor :evaluation-id="approval.key.slice(1)" @saved="answersEdited" />
+    </div>
       <div class="" v-for="x,top in mainSquares">
           <p class="font-bold w-full h-20 text-center py-1">{{ x.subtest }}</p>
           <div v-if="mainSquares" class=" flex "  style="border: 1px 1px 0px 0px solid black;">
@@ -119,22 +126,30 @@
   </template>
   
   <script>
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
+import BarrierAnswerEditor from "@/components/barrier/BarrierAnswerEditor.vue";
   import axios from "axios";
   import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
   export default {
   name: 'SquareGrid',
-  components: { DeleteEvaluationButton },
+  components: { ApprovalBanner, BarrierAnswerEditor, DeleteEvaluationButton },
   data() {
    return {
      color:'bg-[red]',
      mainSquares: [],
      table_resulte:[],
-     answersTable: { evaluation: null, rows: [] }
+     answersTable: { evaluation: null, rows: [] },
+     approval: null,
    };
   },
   methods:{
    isZero(test){
      return Boolean(test && !test.empty && test.color && Number(test.score) === 0)
+   },
+   // Edited answers: the result and the approval state are read again.
+   answersEdited(){
+     this.$refs.approvalBanner?.reload();
+     this.reload();
    },
    reload(){
      this.getresulte()

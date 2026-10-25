@@ -32,6 +32,19 @@
         "--strictPort"
       ],
       "port": 3000
+    },
+    {
+      "name": "sawa-local-api",
+      "runtimeExecutable": "C:/xampp/php/php.exe",
+      "runtimeArgs": ["-S", "127.0.0.1:8000", "-t", "C:/Users/User/Documents/GitHub/sys-sawa/public",
+        "C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Documents-GitHub-sawa-front/b64d1a08-1895-4149-bf1e-7204844e1119/scratchpad/laravel_router.php"],
+      "port": 8000
+    },
+    {
+      "name": "sawa-local-front",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--config", "node_modules/.sawa-verify/vite.config.mjs"],
+      "port": 3000
     }
   ]
 }

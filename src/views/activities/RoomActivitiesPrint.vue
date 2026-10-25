@@ -148,7 +148,7 @@ onBeforeUnmount(() => { document.title = previousTitle; });
 .wp-day { padding: 2mm; font-size: 12pt; font-weight: 800; }
 .wp-cell { height: 27mm; padding: 1.5mm; }
 .wp-activity { display: grid; justify-items: center; gap: 1mm; margin: 0; }
-.wp-activity img { max-width: 100%; height: 17mm; object-fit: contain; }
+.wp-activity img { width: 17mm; height: 17mm; object-fit: cover; border-radius: 2mm; }
 .wp-activity figcaption { font-family: "Times New Roman", serif; font-size: 10pt; font-weight: 700; line-height: 1.2; }
 .wp-foot { display: flex; justify-content: space-around; gap: 6mm; margin-top: auto; }
 .wp-stamp { display: grid; justify-items: center; gap: 1mm; min-width: 50mm; padding: 2mm 4mm; border: 2px solid #1d4ed8; border-radius: 3px; color: #1d4ed8; font-size: 9pt; font-weight: 700; }

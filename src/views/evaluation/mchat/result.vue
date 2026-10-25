@@ -1,6 +1,8 @@
 <script setup>
 // One M-CHAT-R evaluation's result (/mchat-result/:id/:evaluation): the risk points out of 20, the risk level with
 // what to do next, the scale, every answer (risk points marked), and the child's other M-CHAT evaluations.
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
+import MchatAnswerEditor from "@/components/mchat/MchatAnswerEditor.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
@@ -15,6 +17,13 @@ const data = ref(null);
 const questions = computed(() => data.value?.questions ?? []);
 const history = computed(() => data.value?.history ?? []);
 const printPage = () => window.print();
+const approval = ref(null);
+const approvalBanner = ref(null);
+// Edited answers: the result and the approval state are read again.
+function answersEdited() {
+  approvalBanner.value?.reload();
+  load();
+}
 
 async function load() {
   loading.value = true;
@@ -36,6 +45,13 @@ watch(() => route.params.evaluation, (value, before) => {
 
 <template>
   <div class="mr-page">
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.evaluation" @loaded="approval = $event" />
+    <!-- Before approval the answers can still be edited (pending or rejected). -->
+    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+      <MchatAnswerEditor :evaluation-id="$route.params.evaluation" @saved="answersEdited" />
+    </div>
     <div v-if="loading" class="mr-state"><ProgressSpinner style="width: 40px; height: 40px" /></div>
     <Message v-else-if="failed" severity="error" :closable="false">{{ $t("request_failed_retry") }}</Message>
 

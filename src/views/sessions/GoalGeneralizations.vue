@@ -6,6 +6,7 @@ import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import DecisionDialog from "@/components/sessions/DecisionDialog.vue";
+import { refreshPendingCounts } from "@/utils/pendingCounts";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -35,6 +36,7 @@ async function decide(answer) {
     toast.add({ severity: "success", summary: t("success_message"), detail: answer.approved ? t("gen_approved_done") : t("gen_rejected_done"), life: 2500 });
     current.value = null;
     await load();
+    refreshPendingCounts();
   } catch (e) {
     toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message ?? t("mission_error"), life: 3000 });
   } finally {

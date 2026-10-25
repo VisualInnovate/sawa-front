@@ -4,9 +4,7 @@ const Index = () => import("../views/children/Index.vue");
 const Show = () => import("../views/children/Show.vue");
 const Edit = () => import("../views/children/Edit.vue");
 const Create = () => import("../views/children/Create.vue");
-const evaluation = () => import("../views/children/ChildEvaluation.vue");
 const result = () => import("../views/children/ChildResult.vue");
-const editResult = () => import("../views/children/evaluationResultEdit.vue");
 const res = () => import("../views/children/Resultr.vue");
 
 const childrenRoutes = [
@@ -43,12 +41,6 @@ const childrenRoutes = [
     name: "resulte",
     meta: { permission: ["evaluation results list"] },
     component: res,
-  },
-  {
-    path: "children/:child_id/:sideProfile_id",
-    name: "showChildEvaluation",
-    meta: { permission: ["evaluation results list"] },
-    component: evaluation,
   },
   {
     path: "children/:child_id/:sideProfile_id/:evaluation_id",
@@ -91,12 +83,6 @@ const childrenRoutes = [
     name: 'children-request',
     meta: { permission: ["child list"] },
     component: () => import("../views/children/requests.vue")
-  },
-  {
-    path: "children/evaluation/:evaluation_result_id",
-    name: "editChildResult",
-    meta: { permission: ["evaluation results edit"] },
-    component: editResult,
   },
 ];
 

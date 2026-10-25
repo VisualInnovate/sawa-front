@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { menuCount } from "@/utils/pendingCounts";
 
 defineOptions({ name: "SideMenuItem" });
 
@@ -33,6 +34,8 @@ const matches = (item) => {
 };
 
 const active = computed(() => matches(props.item));
+// What waits behind this entry (a group: everything inside it).
+const count = computed(() => menuCount(props.item));
 const open = ref(active.value);
 watch(active, (value) => {
   if (value) open.value = true;
@@ -88,6 +91,7 @@ const clearHeight = (el) => {
         <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{
           item.text ?? $t(item.label)
         }}</span>
+        <span v-if="count" class="side-count" :aria-label="$t('pending_count', { n: count })">{{ count > 99 ? "99+" : count }}</span>
         <i
           :class="['mdi', open ? 'mdi-chevron-up' : 'mdi-chevron-down']"
           class="side-caret"
@@ -127,6 +131,7 @@ const clearHeight = (el) => {
       <span class="side-label" :dir="item.text ? 'ltr' : undefined">{{
         item.text ?? $t(item.label)
       }}</span>
+      <span v-if="count" class="side-count" :aria-label="$t('pending_count', { n: count })">{{ count > 99 ? "99+" : count }}</span>
     </router-link>
   </li>
 </template>
@@ -229,6 +234,37 @@ const clearHeight = (el) => {
 }
 [dir="ltr"] .side-label[dir="ltr"] {
   text-align: start;
+}
+.side-count {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #fff;
+  animation: side-count-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.side-link.is-current .side-count {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+.is-compact > .side-link .side-count {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 16px;
+}
+@keyframes side-count-in {
+  from { transform: scale(0.4); opacity: 0; }
 }
 .side-caret {
   flex-shrink: 0;

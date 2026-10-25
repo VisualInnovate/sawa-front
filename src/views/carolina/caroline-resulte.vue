@@ -1,5 +1,12 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen container mx-auto print:p-0 print:w-full print:max-w-full print:mx-0">
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.id" @loaded="approval = $event" />
+    <!-- Before approval the answers can still be edited (pending or rejected). -->
+    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+      <CarolinaAnswerEditor :evaluation-id="$route.params.id" @saved="answersEdited" />
+    </div>
     <div class="flex justify-between items-center mb-6 print:hidden">
       <h1 class="text-3xl font-bold text-gray-800">{{ $t("carolina_ui.result_title") }}</h1>
       <div class="flex items-center gap-2">
@@ -28,17 +35,26 @@
 <script setup>
 // One Carolina evaluation's result (/carolina-resulte/:id) as the paper form: domains and general goals against the
 // age ranges, each skill's symbol showing its response and the color of the round that gave it.
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
+import CarolinaAnswerEditor from "@/components/carolina/CarolinaAnswerEditor.vue";
 
 const route = useRoute();
 const loading = ref(true);
 const failed = ref(false);
 const result = ref(null);
 const printPage = () => window.print();
+const approval = ref(null);
+const approvalBanner = ref(null);
+// Edited answers: the grid and the approval state are read again.
+function answersEdited() {
+  approvalBanner.value?.reload();
+  load();
+}
 
 async function load() {
   loading.value = true;

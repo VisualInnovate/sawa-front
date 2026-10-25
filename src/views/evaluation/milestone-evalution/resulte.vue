@@ -1,5 +1,12 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen container mx-auto print:p-0 print:w-full print:max-w-full print:mx-0">
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.evla_id" @loaded="approval = $event" />
+    <!-- Before approval the answers can still be edited (pending or rejected). -->
+    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+      <MilestoneAnswerEditor :evaluation-id="$route.params.evla_id" @saved="answersEdited" />
+    </div>
     <!-- Header with Print Button -->
     <div class="flex justify-between items-center mb-8 print:hidden">
       <h1 class="text-3xl font-bold text-gray-800">{{ $t("evaluation_report") }}</h1>
@@ -165,6 +172,8 @@
 </template>
 
 <script>
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
+import MilestoneAnswerEditor from "@/components/milestone/MilestoneAnswerEditor.vue";
 import axios from "axios";
 import EesaForm from "../../../components/milestone/EesaForm.vue";
 import DeleteEvaluationButton from "../../../components/evaluation/DeleteEvaluationButton.vue";
@@ -173,9 +182,10 @@ import { milestoneMarks } from "../../../components/reports/reportUtils";
 
 export default {
   name: 'SquareGrid',
-  components: { EesaForm, MilestoneLevelChart, DeleteEvaluationButton },
+  components: { ApprovalBanner, MilestoneAnswerEditor, EesaForm, MilestoneLevelChart, DeleteEvaluationButton },
   data() {
     return {
+      approval: null,
       // { domain, result: { assessment_number, scores, ... } | null, previous }
       // results: [{ level_id, level_title, result: { assessment_number, scores, ... }, previous }]
       eesa: { domain: null, results: [] },
@@ -197,6 +207,11 @@ export default {
     },
   },
   methods: {
+    // Edited answers: the result and the approval state are read again.
+    answersEdited() {
+      this.$refs.approvalBanner?.reload();
+      this.getresulte();
+    },
     // A level's EESA; one saved without a level (older server) belongs to the first level (shown last).
     eesaForLevel(level, index) {
       return this.eesa.results.find((item) => item.level_id != null && item.level_id === level?.level_id)

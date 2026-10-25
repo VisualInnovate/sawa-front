@@ -280,7 +280,7 @@ const initFilters = () => {
               <template #body="slotProps">
                 <div class="table-actions">
                   <Button
-                    v-can="'employees edit'"
+                    v-can="['doctor edit', 'employees edit']"
                     icon="pi pi-pencil"
                     @click="edit(slotProps.data.id)"
                     v-tooltip.top="$t('edit')" :aria-label="$t('edit')" rounded severity="info" variant="outlined" />

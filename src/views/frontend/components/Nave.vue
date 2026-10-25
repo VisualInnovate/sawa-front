@@ -36,6 +36,10 @@
         <p style="display:inline-block; height: 50px;"><LocaleSelect id="local-switcher"></LocaleSelect></p>
         <div style="display: inline-flex; justify-content: center; align-items: center; height: 100%;" v-if="parentStore.isAuthenticated">
        
+          <router-link v-if="waiting" :to="{ name: 'parent-generalizations' }" class="nave-waiting" :title="$t('gen_parent_title')">
+            <i class="pi pi-bell" aria-hidden="true" />
+            <span>{{ $t("gen_parent_waiting", { n: waiting }) }}</span>
+          </router-link>
           <Button
             style="background: linear-gradient(45deg, #FFCF24, #FFCF24); color: white; border: none;"
             class="relative fed text-lg lg:mb-0 px-4 py-2 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
@@ -108,6 +112,7 @@
         </div>
         <div class="my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
           <router-link :to="{ name: 'parent-generalizations' }" class="font-bold text-lg text-[#2F3843] hover:text-[#FF2A5B] transition-colors duration-300">{{ $t("gen_parent_title") }}</router-link>
+          <span v-if="waiting" class="nave-count" :aria-label="$t('pending_count', { n: waiting })">{{ waiting }}</span>
         </div>
         <div class="my-4 pb-2" style="border-bottom: 1px solid #E0E0E0;">
           <router-link :to="{ name: 'Edit' }" class="font-bold text-lg text-[#2F3843] hover:text-[#FF2A5B] transition-colors duration-300">{{ $t("evaluation_result") }}</router-link>
@@ -126,6 +131,7 @@ import { useRouter } from "vue-router";
 import Drawer from 'primevue/drawer';
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import LocaleSelect from "../../../components/LocaleSelect.vue";
+import { pendingCounts, watchPendingCounts } from "@/utils/pendingCounts";
 
 const parentStore = useParentStore();
 const scrollContainer = ref(null);
@@ -158,12 +164,18 @@ const handleScroll = () => {
   isFixed.value = window.scrollY > 100;
 };
 
+// The home generalizations waiting for the parent's answer.
+const waiting = computed(() => Number(pendingCounts.parent.generalizations ?? 0));
+let stopCounts = null;
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
+  if (parentStore.isAuthenticated) stopCounts = watchPendingCounts("parent");
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll);
+  stopCounts?.();
 });
 
 onBeforeUnmount(() => {
@@ -203,5 +215,37 @@ onBeforeUnmount(() => {
 }
 
 .p-sidebar-left .p-sidebar {
+}
+.nave-count {
+  display: inline-block;
+  min-width: 22px;
+  margin-inline-start: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #ff2a5b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 22px;
+  text-align: center;
+}
+.nave-waiting {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-end: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #fff1f4;
+  color: #e11d48;
+  font-weight: 800;
+  text-decoration: none;
+  animation: nave-pulse 2s ease-in-out infinite;
+}
+@keyframes nave-pulse {
+  50% { box-shadow: 0 0 0 6px rgba(255, 42, 91, 0.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nave-waiting { animation: none; }
 }
 </style>

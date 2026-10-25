@@ -1,6 +1,5 @@
 // permissions
 
-const Index = () => import("../views/evaluations/Index.vue");
 const Show = () => import("../views/evaluations/Show.vue");
 const Edit = () => import("../views/evaluations/Edit.vue");
 const Create = () => import("../views/evaluations/Create.vue");
@@ -10,12 +9,6 @@ const Create = () => import("../views/evaluations/Create.vue");
 const skillsPage = (load) => () => load().then((module) => ({ ...module.default }));
 
 const evaluationRoutes = [
-  {
-    path: "evaluations",
-    name: "Evaluations",
-    meta: { permission: ["evaluations list"] },
-    component: Index,
-  },
   // create
   {
     path: "evaluations/create/:sideProfile_id",
@@ -36,6 +29,13 @@ const evaluationRoutes = [
     name: "EditEvaluations",
     meta: { permission: ["evaluations edit"] },
     component: Edit,
+  },
+  // «طلبات اعتماد التقييمات»: every evaluation's result waits for the management.
+  {
+    path: 'evaluation-approvals',
+    name: 'evaluation-approvals',
+    meta: { permission: ["evaluation approval list", "evaluation approval edit"] },
+    component: () => import("../views/evaluations/Approvals.vue")
   },
   // Evaluation reports: children with finished evaluations -> choose evaluations -> report editor (full page, outside the layout).
   {

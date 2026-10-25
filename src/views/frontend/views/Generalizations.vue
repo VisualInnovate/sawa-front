@@ -46,6 +46,7 @@ import axios from "axios";
 import Nave from "../components/Nave.vue";
 import About from "../components/About.vue";
 import DecisionDialog from "@/components/sessions/DecisionDialog.vue";
+import { refreshPendingCounts } from "@/utils/pendingCounts";
 
 export default {
   components: { Nave, About, DecisionDialog },
@@ -67,6 +68,7 @@ export default {
           this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: answer.approved ? this.$t("gen_approved_done") : this.$t("gen_rejected_done"), life: 2500 });
           this.current = null;
           this.load();
+          refreshPendingCounts("parent");
         })
         .catch((e) => this.$toast.add({ severity: "error", summary: this.$t("error"), detail: e.response?.data?.message ?? this.$t("mission_error"), life: 3000 }))
         .finally(() => { this.deciding = false; });

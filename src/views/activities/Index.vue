@@ -53,10 +53,39 @@ function edit(activity) {
   errors.value = {};
   dialog.value = true;
 }
-function pickImage(event) {
-  const file = event.target.files?.[0] ?? null;
+// Activity images are square (1:1): the picked image is cut to its centred square (at most 800 × 800) before upload.
+const SQUARE_MAX = 800;
+function squareImage(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const size = Math.min(side, SQUARE_MAX);
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      canvas.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      // PNG keeps transparency; everything else becomes JPEG.
+      const type = file.type === "image/png" || file.type === "image/gif" ? "image/png" : "image/jpeg";
+      const name = file.name.replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg");
+      canvas.toBlob((blob) => resolve(blob ? new File([blob], name, { type }) : file), type, 0.9);
+    };
+    // Not readable as an image here: upload it as it is (the server checks it).
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+async function pickImage(event) {
+  const picked = event.target.files?.[0] ?? null;
+  if (!picked) return;
+  const file = await squareImage(picked);
   form.value.image = file;
-  if (file) preview.value = URL.createObjectURL(file);
+  preview.value = URL.createObjectURL(file);
 }
 async function save() {
   if (saving.value) return;
@@ -160,6 +189,7 @@ onMounted(load);
             <span v-else><i class="pi pi-cloud-upload" aria-hidden="true" /> {{ $t("activities.choose_image") }}</span>
             <input id="ac-image" type="file" accept="image/*" @change="pickImage" />
           </label>
+          <small class="ac-hint">{{ $t("activities.image_square_hint") }}</small>
           <small v-if="form.id" class="ac-hint">{{ $t("activities.image_keep_hint") }}</small>
           <small v-if="errors.image" class="ac-error">{{ firstError("image") }}</small>
         </div>
@@ -193,7 +223,7 @@ onMounted(load);
 .ac-empty { margin: 0; padding: 2.5rem 1rem; color: var(--sawa-muted, #64748b); text-align: center; }
 .ac-card { position: relative; display: grid; overflow: hidden; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; transition: box-shadow .2s, transform .2s; }
 .ac-card:hover { box-shadow: 0 10px 24px -16px rgba(15, 23, 42, .45); transform: translateY(-2px); }
-.ac-image { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #f1f5f9; color: #94a3b8; font-size: 2rem; }
+.ac-image { display: grid; place-items: center; aspect-ratio: 1 / 1; background: #f1f5f9; color: #94a3b8; font-size: 2rem; }
 .ac-image img { width: 100%; height: 100%; object-fit: cover; }
 .ac-body { padding: .7rem .9rem .8rem; }
 .ac-body h3 { margin: 0; font-size: 1rem; font-weight: 800; color: #0f172a; }
@@ -202,9 +232,9 @@ onMounted(load);
 .ac-form { display: grid; gap: 1rem; }
 .ac-field { display: grid; gap: .4rem; }
 .ac-field > label:first-child { font-weight: 700; }
-.ac-upload { position: relative; display: grid; place-items: center; min-height: 10rem; overflow: hidden; border: 2px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; color: #64748b; cursor: pointer; }
+.ac-upload { position: relative; display: grid; place-items: center; width: min(100%, 14rem); aspect-ratio: 1 / 1; margin-inline: auto; overflow: hidden; border: 2px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; color: #64748b; cursor: pointer; }
 .ac-upload.is-invalid { border-color: #ef4444; }
-.ac-upload img { width: 100%; max-height: 14rem; object-fit: contain; }
+.ac-upload img { width: 100%; height: 100%; object-fit: cover; }
 .ac-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .ac-upload:focus-within { outline: 2px solid var(--sawa-primary, #135c65); outline-offset: 2px; }
 .ac-hint { color: var(--sawa-muted, #64748b); }

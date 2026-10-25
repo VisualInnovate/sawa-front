@@ -1,17 +1,7 @@
 // users
 
-const Index = () => import("@/views/users/Index.vue");
-const Show = () => import("@/views/users/Show.vue");
-const Edit = () => import("@/views/users/Edit.vue");
-const Create = () => import("@/views/users/Create.vue");
 
 const usersRoutes = [
-  {
-    path: "users",
-    name: "Users",
-    meta: { adminOnly: true },
-    component: Index,
-  },
   {
     path: "/profile",
     name: "profile-deltails",
@@ -28,27 +18,6 @@ const usersRoutes = [
     path: "/my-evaluation-results",
     name: "my-evaluation-results",
     component: () => import("../views/users/EvaluationResults.vue"),
-  },
-  // create
-  {
-    path: "users/create",
-    name: "CreateUser",
-    meta: { adminOnly: true },
-    component: Create,
-  },
-  // show
-  {
-    path: 'users/:id',
-    name: "ShowUser",
-    meta: { adminOnly: true },
-    component: Show,
-  },
-  // edit
-  {
-    path: 'user-update/:id',
-    name: "user-update",
-    meta: { adminOnly: true },
-    component: Edit,
   },
 ];
 

@@ -71,13 +71,21 @@ const dates = computed(() => items.value
   .flatMap((item) => [item.date, ...(item.form?.levels ?? []).map((level) => level.date)])
   .filter(Boolean).sort());
 
-// One section per evaluation type, newest type first; inside, oldest to newest (1st test ... 4th test).
+// One section per evaluation type, in the order the evaluations were picked (the type of the first picked one
+// first); inside, oldest to newest (1st test ... 4th test).
 const byDate = (a, b) => String(a.date).localeCompare(String(b.date)) || a.id - b.id;
+const pickIndex = (group) => Math.min(...group.items.map((item) => {
+  const index = keys.value.indexOf(item.key);
+  return index === -1 ? Infinity : index;
+}));
 const sections = computed(() =>
-  groupItems(items.value, t).map((group) => {
-    const tests = [...group.items].sort(byDate).slice(-MAX_PER_GROUP);
-    return { ...group, tests, newest: tests[tests.length - 1], behavioural: isBehavioural(group.label) };
-  })
+  groupItems(items.value, t)
+    .map((group, i) => ({ group, i, pick: pickIndex(group) }))
+    .sort((a, b) => a.pick - b.pick || a.i - b.i)
+    .map(({ group }) => {
+      const tests = [...group.items].sort(byDate).slice(-MAX_PER_GROUP);
+      return { ...group, tests, newest: tests[tests.length - 1], behavioural: isBehavioural(group.label) };
+    })
 );
 
 // Side profile: every chosen result of every dimension in one table (dimension order, then date), printed once
@@ -818,65 +826,92 @@ function back() {
 <template>
   <div class="rx-root">
     <!-- toolbar (not printed) -->
+    <!-- toolbar (not printed): the title and the main actions, then what is saved, each with its state -->
     <header class="rx-toolbar">
-      <Button :label="$t('ereport.back')" icon="pi pi-arrow-right" class="rx-back" severity="secondary" variant="outlined" @click="back" />
-      <div class="rx-toolbar-title">
-        <strong>{{ $t("ereport.report_title") }}<template v-if="child.name"> — {{ child.name }}</template></strong>
-        <small><i class="pi pi-pencil" aria-hidden="true" /> {{ $t("ereport.editor_hint") }}</small>
+      <div class="rx-toolbar-main">
+        <Button :label="$t('ereport.back')" icon="pi pi-arrow-right" class="rx-back" severity="secondary" variant="text" @click="back" />
+        <div class="rx-toolbar-title">
+          <strong>{{ $t("ereport.report_title") }}<template v-if="child.name"> — {{ child.name }}</template></strong>
+          <small><i class="pi pi-pencil" aria-hidden="true" /> {{ $t("ereport.editor_hint") }}</small>
+        </div>
+        <div class="rx-toolbar-end">
+          <!-- Pages: untick (or the trash on a page) to leave it out of the print; nothing is saved. -->
+          <Button v-if="report" type="button" icon="pi pi-clone" variant="outlined"
+            :label="deletedCount ? $t('ereport.pages_deleted', { n: deletedCount }) : $t('ereport.pages')"
+            :severity="deletedCount ? 'danger' : 'secondary'" aria-haspopup="true"
+            @click="pagesMenu.toggle($event)" />
+          <Popover ref="pagesMenu">
+            <div class="rx-pages-menu">
+              <p class="rx-pages-menu-hint">{{ $t("ereport.pages_hint") }}</p>
+              <ol>
+                <li v-for="(page, i) in orderedPages" :key="page.key" :class="{ 'is-off': isDeleted(page.key) }">
+                  <Checkbox :modelValue="!isDeleted(page.key)" binary :inputId="'rx-page-' + i" @update:modelValue="setPageShown(page.key, $event)" />
+                  <label :for="'rx-page-' + i">{{ page.title }}</label>
+                  <button v-if="isDeleted(page.key)" type="button" class="rx-pages-restore" @click="restorePage(page.key)">{{ $t("ereport.restore_page") }}</button>
+                </li>
+              </ol>
+              <Button v-if="deletedCount" size="small" icon="pi pi-undo" :label="$t('ereport.restore_all_pages')" severity="secondary" @click="restoreAllPages" />
+            </div>
+          </Popover>
+          <Button v-if="report" :label="$t('ereport.reset')" icon="pi pi-refresh" severity="secondary" variant="text" @click="resetEdits" />
+          <Button :label="$t('ereport.print')" icon="pi pi-print" :disabled="!report" data-no-request-spinner @click="print" />
+        </div>
       </div>
-      <!-- Which VB-MAPP levels the report shows (charts and strengths/weaknesses); not printed. -->
-      <fieldset v-if="report && milestoneLevels.length" class="rx-levels">
-        <legend>{{ $t("ereport.levels_shown") }}</legend>
-        <label v-for="level in milestoneLevels" :key="level.id" class="rx-level-option">
-          <Checkbox :modelValue="isLevelShown(level.id)" binary :inputId="'rx-level-' + level.id"
-            @update:modelValue="toggleLevel(level.id, $event)" />
-          <span>{{ level.name || $t("level_n", { n: level.age || level.id }) }}</span>
-        </label>
-      </fieldset>
-      <div class="rx-toolbar-actions">
-        <template v-if="report">
-          <span class="rx-save-state" :class="{ 'is-dirty': savedReport.dirty || !savedReport.id, 'is-error': savedReport.error }">
-            {{ savedReport.error ? $t("ereport.save_failed") : !savedReport.id ? $t("ereport.report_unsaved") : savedReport.dirty ? $t("ereport.report_saving") : $t("ereport.report_saved") }}
-          </span>
-          <Button :label="$t('ereport.save_report')" icon="pi pi-bookmark" :loading="savedReport.saving" data-no-request-spinner @click="saveReport()" />
-        </template>
-        <span v-if="summary && !summary.loading" class="rx-save-state" :class="{ 'is-dirty': summary.dirty || !summary.saved, 'is-error': summary.error }">
-          {{ summary.error ? $t("ereport.save_failed") : summary.dirty || !summary.saved ? $t("ereport.summary_unsaved") : $t("ereport.summary_saved") }}
-        </span>
-        <Button v-if="summary && !summary.loading" :label="$t('ereport.save_summary')" icon="pi pi-save" :loading="summary.saving" data-no-request-spinner @click="saveSummary" />
-        <span v-if="plan && !plan.loading" class="rx-save-state" :class="{ 'is-dirty': plan.dirty || !plan.saved, 'is-error': plan.error }">
-          {{ plan.error ? $t("ereport.save_failed") : plan.dirty || !plan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}
-        </span>
-        <Button v-if="plan && !plan.loading" :label="$t('ereport.save_plan')" icon="pi pi-save" :loading="plan.saving" data-no-request-spinner @click="savePlan" />
-        <template v-if="tracking && !tracking.loading && tracking.plans.length">
-          <Tag v-if="tracking.request" :severity="{ pending: 'warn', approved: 'success', rejected: 'danger' }[tracking.request.status]"
-            :value="$t(`ereport.tracking_status_${tracking.request.status}`)" />
-          <template v-if="!trackingApproved">
-            <Button :label="$t('ereport.save_tracking')" icon="pi pi-save" :loading="tracking.saving" severity="secondary" data-no-request-spinner @click="saveTracking" />
-            <Button :label="tracking.request?.status === 'pending' ? $t('ereport.resend_tracking') : $t('ereport.send_tracking')" icon="pi pi-send"
-              :loading="tracking.approving" data-no-request-spinner @click="approveTracking" />
-          </template>
-        </template>
-        <!-- Pages: untick (or the trash on a page) to leave it out of the print; nothing is saved. -->
-        <Button v-if="report" type="button" icon="pi pi-clone" variant="outlined"
-          :label="deletedCount ? $t('ereport.pages_deleted', { n: deletedCount }) : $t('ereport.pages')"
-          :severity="deletedCount ? 'danger' : 'secondary'" aria-haspopup="true"
-          @click="pagesMenu.toggle($event)" />
-        <Popover ref="pagesMenu">
-          <div class="rx-pages-menu">
-            <p class="rx-pages-menu-hint">{{ $t("ereport.pages_hint") }}</p>
-            <ol>
-              <li v-for="(page, i) in orderedPages" :key="page.key" :class="{ 'is-off': isDeleted(page.key) }">
-                <Checkbox :modelValue="!isDeleted(page.key)" binary :inputId="'rx-page-' + i" @update:modelValue="setPageShown(page.key, $event)" />
-                <label :for="'rx-page-' + i">{{ page.title }}</label>
-                <button v-if="isDeleted(page.key)" type="button" class="rx-pages-restore" @click="restorePage(page.key)">{{ $t("ereport.restore_page") }}</button>
-              </li>
-            </ol>
-            <Button v-if="deletedCount" size="small" icon="pi pi-undo" :label="$t('ereport.restore_all_pages')" severity="secondary" @click="restoreAllPages" />
+
+      <div v-if="report" class="rx-toolbar-sub">
+        <!-- Which VB-MAPP levels the report shows (charts and strengths/weaknesses); not printed. -->
+        <fieldset v-if="milestoneLevels.length" class="rx-levels">
+          <legend>{{ $t("ereport.levels_shown") }}</legend>
+          <label v-for="level in milestoneLevels" :key="level.id" class="rx-level-option">
+            <Checkbox :modelValue="isLevelShown(level.id)" binary :inputId="'rx-level-' + level.id"
+              @update:modelValue="toggleLevel(level.id, $event)" />
+            <span>{{ level.name || $t("level_n", { n: level.age || level.id }) }}</span>
+          </label>
+        </fieldset>
+
+        <div class="rx-save-groups">
+          <div class="rx-save-group" :class="savedReport.error ? 'is-error' : savedReport.dirty || !savedReport.id ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_report") }}</b>
+              <small>{{ savedReport.error ? $t("ereport.save_failed") : !savedReport.id ? $t("ereport.report_unsaved") : savedReport.dirty ? $t("ereport.report_saving") : $t("ereport.report_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-bookmark" :label="$t('save')" :loading="savedReport.saving" data-no-request-spinner @click="saveReport()" />
           </div>
-        </Popover>
-        <Button v-if="report" :label="$t('ereport.reset')" icon="pi pi-refresh" severity="secondary" variant="text" @click="resetEdits" />
-        <Button :label="$t('ereport.print')" icon="pi pi-print" :disabled="!report" data-no-request-spinner @click="print" />
+
+          <div v-if="summary && !summary.loading" class="rx-save-group" :class="summary.error ? 'is-error' : summary.dirty || !summary.saved ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_summary") }}</b>
+              <small>{{ summary.error ? $t("ereport.save_failed") : summary.dirty || !summary.saved ? $t("ereport.summary_unsaved") : $t("ereport.summary_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="summary.saving" data-no-request-spinner @click="saveSummary" />
+          </div>
+
+          <div v-if="plan && !plan.loading" class="rx-save-group" :class="plan.error ? 'is-error' : plan.dirty || !plan.saved ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_plan") }}</b>
+              <small>{{ plan.error ? $t("ereport.save_failed") : plan.dirty || !plan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="plan.saving" data-no-request-spinner @click="savePlan" />
+          </div>
+
+          <div v-if="tracking && !tracking.loading && tracking.plans.length" class="rx-save-group"
+            :class="tracking.error ? 'is-error' : tracking.request ? `is-${tracking.request.status}` : 'is-dirty'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_tracking") }}</b>
+              <small>{{ tracking.error ? $t("ereport.save_failed") : tracking.request ? $t(`ereport.tracking_status_${tracking.request.status}`) : $t("ereport.tracking_not_sent") }}</small>
+            </div>
+            <template v-if="!trackingApproved">
+              <Button size="small" icon="pi pi-save" :label="$t('save')" severity="secondary" variant="outlined" :loading="tracking.saving" data-no-request-spinner @click="saveTracking" />
+              <Button size="small" icon="pi pi-send" :label="tracking.request?.status === 'pending' ? $t('ereport.resend_tracking') : $t('ereport.send_tracking')"
+                :loading="tracking.approving" data-no-request-spinner @click="approveTracking" />
+            </template>
+            <i v-else class="pi pi-lock rx-save-lock" v-tooltip.bottom="$t('ereport.tracking_status_approved')" />
+          </div>
+        </div>
       </div>
     </header>
 
@@ -1453,9 +1488,6 @@ function back() {
 .rx-mchat-answers tfoot th { background: #eef8f9; color: #0e464d; }
 .rx-mchat-hint { margin: 3mm 0 0; color: #64748b; font-size: 8.5pt; }
 .rx-barrier-answers td { vertical-align: top; }
-.rx-save-state { font-size: .85rem; color: #166534; }
-.rx-save-state.is-dirty { color: #b45309; }
-.rx-save-state.is-error { color: #b91c1c; }
 .rx-track-date { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; }
 .rx-track-date input { padding: .3rem .4rem; border: 1px solid var(--sawa-border); border-radius: 6px; font: inherit; }
 .rx-case-hint { margin: 0 0 .6rem; padding: .5rem .75rem; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 9.5pt; }
@@ -1529,14 +1561,18 @@ function back() {
   position: sticky;
   top: 0;
   z-index: 20;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.65rem 1.25rem 0.75rem;
+  background: #fff;
+  border-bottom: 1px solid var(--sawa-border);
+  box-shadow: 0 6px 18px -14px rgba(15, 23, 42, 0.45);
+}
+.rx-toolbar-main {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1rem;
-  padding: 0.7rem 1.25rem;
-  background: #fff;
-  border-bottom: 1px solid var(--sawa-border);
-  box-shadow: 0 2px 10px -6px rgba(15, 23, 42, 0.25);
+  gap: 0.5rem 1rem;
 }
 [dir="ltr"] .rx-back :deep(.pi-arrow-right) {
   transform: scaleX(-1);
@@ -1548,16 +1584,72 @@ function back() {
 }
 .rx-toolbar-title strong {
   color: var(--sawa-primary);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 .rx-toolbar-title small {
   color: var(--sawa-muted);
 }
-.rx-toolbar-actions {
+.rx-toolbar-end {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+}
+.rx-toolbar-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--sawa-border);
+}
+.rx-save-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+.rx-save-group {
+  --tone: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.45rem 0.35rem 0.75rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: border-color 0.2s, background 0.2s;
+}
+[dir="rtl"] .rx-save-group {
+  padding: 0.35rem 0.75rem 0.35rem 0.45rem;
+}
+.rx-save-group.is-saved, .rx-save-group.is-approved { --tone: #10b981; }
+.rx-save-group.is-dirty, .rx-save-group.is-pending { --tone: #f59e0b; background: #fffbeb; border-color: #fde68a; }
+.rx-save-group.is-error, .rx-save-group.is-rejected { --tone: #ef4444; background: #fef2f2; border-color: #fecaca; }
+.rx-save-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 20%, transparent);
+}
+.rx-save-text {
+  display: grid;
+  line-height: 1.2;
+  min-width: 6.5rem;
+}
+.rx-save-text b {
+  color: #0f3d43;
+  font-size: 0.85rem;
+}
+.rx-save-text small {
+  color: var(--sawa-muted);
+  font-size: 0.72rem;
+}
+.rx-save-lock {
+  color: #047857;
+  padding-inline: 0.35rem;
 }
 .rx-levels {
   display: flex;
@@ -1565,9 +1657,10 @@ function back() {
   align-items: center;
   gap: 0.35rem 1rem;
   margin: 0;
-  padding: 0.3rem 0.75rem;
+  padding: 0.35rem 0.75rem;
   border: 1px solid var(--sawa-border);
-  border-radius: 10px;
+  border-radius: 12px;
+  background: #f8fafc;
 }
 .rx-levels legend {
   float: inline-start;

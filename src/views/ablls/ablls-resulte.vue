@@ -1,6 +1,12 @@
 <template>
   <div class="sawa-card p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg">
-    <div class="flex justify-end mb-4">
+    <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.id" @loaded="approval = $event" />
+    <div class="flex justify-end gap-2 mb-4">
+      <!-- Before approval the answers can still be edited (pending or rejected). -->
+      <AbleAnswerEditor v-if="approval && approval.status !== 'approved'" :evaluation-id="$route.params.id"
+        :api="assessmentOf($route).api" @saved="answersEdited" />
       <DeleteEvaluationButton :evaluation-id="$route.params.id" />
     </div>
     <div class="grid md:grid-cols-3 grid-cols-2 lg:grid-cols-5 gap-6">
@@ -52,19 +58,28 @@
 </template>
 
 <script>
+import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
 import axios from "axios";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
+import AbleAnswerEditor from "@/components/ablls/AbleAnswerEditor.vue";
 export default {
   name: 'SquareGrid',
-  components: { DeleteEvaluationButton },
+  components: { ApprovalBanner, AbleAnswerEditor, DeleteEvaluationButton },
   data() {
     return {
       mainSquares: [],
-      table_resulte: []
+      table_resulte: [],
+      approval: null,
     };
   },
   methods: {
+    assessmentOf,
+    // Edited answers: the result and the approval state are read again.
+    answersEdited() {
+      this.$refs.approvalBanner?.reload();
+      this.getresulte();
+    },
     async getresulte() {
       try {
         // allSettled: a failing report request must not hide the flow chart.

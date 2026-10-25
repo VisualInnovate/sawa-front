@@ -25,6 +25,11 @@
             </div>
             <Tag :severity="evalu.status == 1 ? 'success' : 'warn'" :value="$t(evalu.status == 1 ? 'status_finished' : 'status_under_evaluation')" />
           </header>
+          <!-- The management's approval of the result; a rejection shows its reason. -->
+          <p v-if="evalu.approval_status" class="evaluation-approval" :class="`is-${evalu.approval_status}`">
+            <i :class="{ pending: 'pi pi-clock', approved: 'pi pi-lock', rejected: 'pi pi-times-circle' }[evalu.approval_status]" aria-hidden="true" />
+            <span>{{ $t(`ea_status_${evalu.approval_status}`) }}<template v-if="evalu.approval_status === 'rejected' && evalu.approval_note">: {{ evalu.approval_note }}</template></span>
+          </p>
           <dl class="evaluation-meta">
             <div v-if="evalu.child_name || evalu.kid?.name">
               <dt><i class="pi pi-user" /> {{ $t("child_name") }}</dt>
@@ -331,4 +336,17 @@ export default {
 .evaluation-actions { justify-content: flex-end; padding: .75rem 1.15rem; border-top: 1px solid var(--sawa-border); gap: .5rem; }
 .evaluation-empty { text-align: center; padding: 3rem; color: var(--sawa-muted); }
 @media (max-width: 600px) { .evaluation-tools { width: 100%; } .evaluation-tools .p-iconfield { flex: 1; } }
+.evaluation-approval {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.evaluation-approval.is-pending { background: #fffbeb; color: #b45309; }
+.evaluation-approval.is-approved { background: #ecfdf5; color: #047857; }
+.evaluation-approval.is-rejected { background: #fef2f2; color: #b91c1c; }
 </style>
