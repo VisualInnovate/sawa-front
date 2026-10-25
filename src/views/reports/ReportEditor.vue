@@ -1,6 +1,8 @@
 <script setup>
 // The printable evaluation report: A4 pages shown as they will print. Highlighted fields are typed in
-// directly on the page (kept as a draft on this device) and "Print" prints the pages only.
+// directly on the page and "Print" prints the pages only. «حفظ التقرير» (and printing) saves the report for the
+// child, with what was typed and the deleted pages, so it opens again from the reports page; until then the
+// values are a draft on this device. A page left with nothing to print (its tables deleted) is not printed.
 //
 // Pages: 1 cover (logo, child, evaluations) · 2 personal info + team signatures (newest chosen evaluation)
 // · then what the chosen outputs ask for:
@@ -14,7 +16,7 @@
 //   tracking = the goals of the chosen tests' saved plans, as the centre's tracking form: one table per general goal,
 //              the date each goal was achieved (prop, editable; sessions will set it) and the trial columns MT, EXP
 //              and RR; «اعتماد التراكنج» records it as the one the child's sessions work on.
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
@@ -27,11 +29,11 @@ import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
-import CarolinaChart from "@/components/reports/CarolinaChart.vue";
+import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import {
-  ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
   isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel, ymd,
 } from "@/components/reports/reportUtils";
 
@@ -50,6 +52,9 @@ const showCharts = computed(() => outputTypes.value.includes('report'));
 const showPlan = computed(() => outputTypes.value.includes('plan'));
 const showTracking = computed(() => outputTypes.value.includes('tracking'));
 const draftKey = computed(() => `ereport-draft:${childId.value}:${[...keys.value].sort().join(",")}`);
+// A report saved for the child (?report=<id>, listed on the reports page) keeps its values on the server; a new
+// one keeps a draft on this device until it is saved (or printed, which saves it).
+const reportId = computed(() => (route.query.report ? Number(route.query.report) : null));
 
 const loading = ref(true);
 const loadError = ref(false);
@@ -82,6 +87,9 @@ const sideProfileTests = computed(() => sections.value
   .sort((a, b) => Number(String(a.group).slice(1)) - Number(String(b.group).slice(1)))
   .flatMap((section) => section.tests.map((test) => ({ ...test, title: section.label }))));
 const firstSideProfile = computed(() => sections.value.find((section) => section.type === SIDE_PROFILE)?.group ?? null);
+
+// M-CHAT-R: one test's answer to a question ({ yes, point }), for the answers page's column of that test.
+const mchatAnswer = (test, number) => (test.result?.questions ?? []).find((question) => question.number === number) ?? null;
 
 // Barriers: the newest chosen test's answers (barrier, chosen answer, its number) under the chart.
 const barrierAnswers = (section) => [...(section.newest?.result ?? [])].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
@@ -172,6 +180,8 @@ function applyDraft(base, saved) {
 
 watch(edits, (value) => {
   if (!value) return;
+  touchReport();
+  if (savedReport.value.id) return;
   try {
     localStorage.setItem(draftKey.value, JSON.stringify(value));
   } catch {
@@ -189,15 +199,79 @@ function resetEdits() {
   restoreAllPages();
 }
 
+// ---- the saved report ------------------------------------------------------------------------------
+
+// { id (null until saved), dirty, saving, error, savedAt }. Once saved, every change saves itself shortly after.
+const savedReport = ref({ id: null, dirty: false, saving: false, error: false, savedAt: null });
+// Loading a report's values is not a change.
+let restoring = false;
+let changes = 0;
+let autosaveTimer = null;
+let saveQueue = Promise.resolve(true);
+
+function touchReport() {
+  if (restoring) return;
+  changes++;
+  savedReport.value.dirty = true;
+  if (!savedReport.value.id) return;
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => saveReport(), 1500);
+}
+
+// One save at a time, so a new report is created once.
+function saveReport(options) {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = null;
+  saveQueue = saveQueue.then(() => sendReport(options), () => sendReport(options));
+  return saveQueue;
+}
+
+async function sendReport({ printed = false } = {}) {
+  if (!report.value || !edits.value) return false;
+  const state = savedReport.value;
+  const version = changes;
+  state.saving = true;
+  state.error = false;
+  const body = { items: keys.value, types: outputTypes.value, edits: { ...edits.value, deletedPages: [...deletedPages.value] }, printed };
+  try {
+    const { data } = state.id
+      ? await axios.put(`api/reports/saved/${state.id}`, body)
+      : await axios.post(`api/reports/children/${childId.value}/saved`, body);
+    if (!state.id) {
+      state.id = data.report.id;
+      // The address now opens this saved report (the watcher below does not reload for it).
+      router.replace({ query: { ...route.query, report: data.report.id } });
+    }
+    if (version === changes) state.dirty = false;
+    state.savedAt = data.report.updated_at;
+    return true;
+  } catch {
+    state.error = true;
+    return false;
+  } finally {
+    state.saving = false;
+  }
+}
+
 // ---- data ------------------------------------------------------------------------------------------
 
 async function load() {
   loading.value = true;
   loadError.value = false;
   try {
-    const { data } = await axios.get(`api/reports/children/${childId.value}/report`, { params: { items: keys.value } });
+    const [{ data }, saved] = await Promise.all([
+      axios.get(`api/reports/children/${childId.value}/report`, { params: { items: keys.value } }),
+      // A saved report that is gone opens as a new one.
+      reportId.value ? axios.get(`api/reports/saved/${reportId.value}`).then((res) => res.data.report).catch(() => null) : null,
+    ]);
+    restoring = true;
     report.value = data;
-    edits.value = applyDraft(defaults(data), readDraft());
+    savedReport.value = { id: saved?.id ?? null, dirty: false, saving: false, error: false, savedAt: saved?.updated_at ?? null };
+    edits.value = applyDraft(defaults(data), saved ? saved.edits : readDraft());
+    deletedPages.value = new Set(saved?.edits?.deletedPages ?? []);
+    nextTick(() => {
+      restoring = false;
+    });
     document.title = `${t("ereport.report_title")} - ${data.child?.name ?? ""}`;
     if (showCharts.value) loadSummary();
     if (showPlan.value) loadPlan();
@@ -225,11 +299,17 @@ function open() {
   load();
 }
 onMounted(open);
-watch(() => route.fullPath, (path, before) => {
-  if (route.name === "evaluation-report" && path !== before) open();
+// A new selection (or another saved report) reloads; saving a new report only adds its id to the address.
+const selectionKey = computed(() => `${childId.value}|${route.query.items ?? ""}|${route.query.types ?? ""}`);
+watch([selectionKey, reportId], ([selection, id], [selectionBefore]) => {
+  if (route.name !== "evaluation-report") return;
+  if (selection === selectionBefore && id === savedReport.value.id) return;
+  open();
 });
 onBeforeUnmount(() => {
   document.title = previousTitle;
+  // A change still waiting to save itself is saved on leaving.
+  if (autosaveTimer) saveReport();
 });
 
 // ---- VB-MAPP helpers -------------------------------------------------------------------------------
@@ -377,7 +457,9 @@ const summaryDeleted = (table) => ["strengths", "weaknesses"].flatMap((kind) => 
   ...table.rows.filter((row) => isHidden(row, kind))
     .map((row) => ({ key: `r-${kind}-${row.symbol}`, label: `${row.symbol || "—"} · ${t(`ereport.${kind}`)}`, restore: () => setHidden(row, kind, false) })),
 ]);
-const summaryAllHidden = (table) => isHidden(table, "strengths") && isHidden(table, "weaknesses");
+// A page whose tables are deleted (or left without points) has nothing to print and is left out of the print.
+const summaryPrintable = (table) => ["strengths", "weaknesses"]
+  .some((kind) => !isHidden(table, kind) && summaryRows(table, kind).some((row) => row[kind].length));
 // The rows that print for a kind (shown, with points), numbered in order.
 const summaryNumber = (table, kind, row) => summaryRows(table, kind).filter((item) => item[kind].length).indexOf(row) + 1;
 
@@ -583,12 +665,13 @@ async function saveTracking() {
   }
 }
 
-// ---- deleted pages (left out of the print only; nothing is saved, a reload brings them back) --------
+// ---- deleted pages (left out of the print; kept with the saved report) -----------------------------
 
 // Every page registers itself (v-page="{ key, title }"): the toolbar lists them in page order.
 const pages = ref([]);
 const pageEls = new Map();
 const deletedPages = ref(new Set());
+watch(deletedPages, () => touchReport());
 const isDeleted = (key) => deletedPages.value.has(key);
 function deletePage(key) {
   deletedPages.value = new Set([...deletedPages.value, key]);
@@ -654,6 +737,8 @@ const vPage = {
       el.__page = { ...binding.value };
       registerPage(el, el.__page);
     }
+    // A changed :class binding rewrites the element's classes, dropping the one added here.
+    el.classList.toggle("is-deleted", isDeleted(el.__page.key));
     // Keep the button last if Vue re-rendered the page's children.
     if (el.__deleteButton && el.lastElementChild !== el.__deleteButton) el.appendChild(el.__deleteButton);
   },
@@ -685,10 +770,11 @@ async function approveTracking() {
 
 // ---- actions ---------------------------------------------------------------------------------------
 
-// Printing the tracking saves it first.
+// Printing saves the tracking and the report (listed then on the reports page) first.
 async function print() {
   document.activeElement?.blur?.();
   if (showTracking.value) await saveTracking();
+  await saveReport({ printed: true });
   window.print();
 }
 
@@ -716,6 +802,12 @@ function back() {
         </label>
       </fieldset>
       <div class="rx-toolbar-actions">
+        <template v-if="report">
+          <span class="rx-save-state" :class="{ 'is-dirty': savedReport.dirty || !savedReport.id, 'is-error': savedReport.error }">
+            {{ savedReport.error ? $t("ereport.save_failed") : !savedReport.id ? $t("ereport.report_unsaved") : savedReport.dirty ? $t("ereport.report_saving") : $t("ereport.report_saved") }}
+          </span>
+          <Button :label="$t('ereport.save_report')" icon="pi pi-bookmark" :loading="savedReport.saving" data-no-request-spinner @click="saveReport()" />
+        </template>
         <span v-if="summary && !summary.loading" class="rx-save-state" :class="{ 'is-dirty': summary.dirty || !summary.saved, 'is-error': summary.error }">
           {{ summary.error ? $t("ereport.save_failed") : summary.dirty || !summary.saved ? $t("ereport.summary_unsaved") : $t("ereport.summary_saved") }}
         </span>
@@ -934,7 +1026,7 @@ function back() {
           <template v-if="showCharts">
           <section v-for="table in reportSummary.length ? reportSummary : [null]" :key="'summary-' + (table?.key ?? 'none')"
             v-page="{ key: 'summary-' + (table?.key ?? 'none'), title: [$t('ereport.page_summary'), table?.title].filter(Boolean).join(' · ') }" class="rx-page"
-            :class="{ 'rx-print-hidden': table && summaryAllHidden(table) }">
+            :class="{ 'rx-print-hidden': table && !summaryPrintable(table) }" :data-print-note="$t('ereport.page_not_printed')">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -1002,7 +1094,7 @@ function back() {
           <template v-if="showPlan && plan">
           <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')"
             v-page="{ key: 'plan-' + (level?.key ?? 'none'), title: [$t('ereport.plan_title'), level?.title].filter(Boolean).join(' · ') }" class="rx-page"
-            :class="{ 'rx-print-hidden': level && (level.hidden || !level.groups.length) }">
+            :class="{ 'rx-print-hidden': level && (level.hidden || !level.groups.length) }" :data-print-note="$t('ereport.page_not_printed')">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>{{ $t("ereport.plan_title") }} · VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -1059,7 +1151,8 @@ function back() {
           <!-- Tracking: the saved plans' goals, one table per general goal as on the centre's form -->
           <template v-if="showTracking && tracking">
           <section v-for="item in tracking.plans.length ? tracking.plans : [null]" :key="'track-' + (item?.evaluation_id ?? 'none')"
-            v-page="{ key: 'track-' + (item?.evaluation_id ?? 'none'), title: [$t('ereport.tracking_title'), item ? dmy(item.evaluation_date) : ''].filter(Boolean).join(' · ') }" class="rx-page">
+            v-page="{ key: 'track-' + (item?.evaluation_id ?? 'none'), title: [$t('ereport.tracking_title'), item ? dmy(item.evaluation_date) : ''].filter(Boolean).join(' · ') }" class="rx-page"
+            :class="{ 'rx-print-hidden': item && !item.goals.some(isTracked) }" :data-print-note="$t('ereport.page_not_printed')">
             <header class="rx-head">
               <img :src="sawaLogo" alt="Sawa" />
               <span>{{ $t("ereport.tracking_title") }}<template v-if="item"> · VB-MAPP · <span class="ltr">{{ dmy(item.evaluation_date) }}</span></template></span>
@@ -1146,8 +1239,39 @@ function back() {
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
           <AbllsChart v-else-if="section.type === ABLLS || section.type === ABLLS_SKILLS" :tests="section.tests" />
-          <CarolinaChart v-else-if="section.type === CAROLINA" :tests="section.tests" />
+          <!-- Carolina: the newest chosen evaluation as the paper form (its rounds' colors in each box). -->
+          <CarolinaGrid v-else-if="section.type === CAROLINA" :result="section.newest.result" :per-table="4" compact />
           <TransitionChart v-else-if="section.type === TRANSITION" :tests="section.tests" />
+
+          <!-- M-CHAT-R: each chosen test's risk points and level (oldest first), then what the newest one means. -->
+          <template v-if="section.type === MCHAT">
+            <table class="rx-table rx-mchat">
+              <thead>
+                <tr>
+                  <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
+                  <th>{{ $t("mchat.test_date") }}</th>
+                  <th>{{ $t("mchat.child_age") }}</th>
+                  <th>{{ $t("mchat.tester") }}</th>
+                  <th>{{ $t("mchat.total") }}</th>
+                  <th>{{ $t("mchat.risk") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(test, i) in section.tests" :key="test.key">
+                  <td class="rx-sum-num">{{ i + 1 }}</td>
+                  <td><span class="ltr">{{ dmy(test.date) }}</span></td>
+                  <td>{{ (test.result?.child_age ?? test.form?.age_months) == null ? "" : $t("mchat.months", { n: test.result?.child_age ?? test.form.age_months }) }}</td>
+                  <td>{{ test.specialist?.name ?? "" }}</td>
+                  <td><b class="ltr">{{ test.result?.total ?? "" }} / {{ test.form?.boxes_total ?? 20 }}</b></td>
+                  <td><span v-if="test.result?.risk" class="rx-mchat-risk" :class="'is-' + test.result.risk">{{ $t("mchat.risk_" + test.result.risk) }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-if="section.newest.result?.risk" class="rx-mchat-meaning" :class="'is-' + section.newest.result.risk">
+              <h3>{{ $t("mchat.risk_" + section.newest.result.risk) }} — <span class="ltr">{{ section.newest.result.total }} / 20</span></h3>
+              <p>{{ section.newest.result.recommendation }}</p>
+            </div>
+          </template>
 
           <!-- The newest chosen barriers test as a table: barrier, the chosen answer, its number. -->
           <table v-if="section.type === BARRIER && barrierAnswers(section).length" class="rx-table rx-barrier-answers">
@@ -1190,9 +1314,49 @@ function back() {
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
 
+        <!-- M-CHAT-R: the 20 answers of every chosen test side by side (oldest first); a risk point is marked. -->
+        <section v-if="showCharts && section.type === MCHAT"
+          v-page="{ key: 'mchat-' + section.group, title: $t('mchat.answers') + ' · ' + section.label }" class="rx-page">
+          <header class="rx-head">
+            <img :src="sawaLogo" alt="Sawa" />
+            <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+
+          <h2 class="rx-band">{{ $t("mchat.answers") }}</h2>
+          <table class="rx-table rx-mchat rx-mchat-answers">
+            <thead>
+              <tr>
+                <th class="rx-sum-num">#</th>
+                <th>{{ $t("mchat.question") }}</th>
+                <th v-for="test in section.tests" :key="test.key" class="rx-mchat-col"><span class="ltr">{{ dmy(test.date) }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="question in section.newest.result?.questions ?? []" :key="question.number">
+                <td class="rx-sum-num">{{ question.number }}</td>
+                <td>{{ question.text }}</td>
+                <td v-for="test in section.tests" :key="test.key" class="rx-mchat-col"
+                  :class="{ 'is-point': mchatAnswer(test, question.number)?.point === 1 }">
+                  {{ mchatAnswer(test, question.number)?.yes == null ? "" : mchatAnswer(test, question.number).yes ? $t("mchat.yes") : $t("mchat.no") }}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="2">{{ $t("mchat.total") }}</th>
+                <th v-for="test in section.tests" :key="test.key" class="rx-mchat-col">{{ test.result?.total ?? "" }}</th>
+              </tr>
+            </tfoot>
+          </table>
+          <p class="rx-mchat-hint">{{ $t("mchat.points_hint") }}</p>
+
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
         <!-- Transition: what each answer of the newest chosen test means. -->
         <section v-if="showCharts && section.type === TRANSITION && edits.transitionPoints?.[section.group]"
-          v-page="{ key: 'points-' + section.group, title: $t('ereport.transition_points') + ' · ' + section.label }" class="rx-page">
+          v-page="{ key: 'points-' + section.group, title: $t('ereport.transition_points') + ' · ' + section.label }" class="rx-page"
+          :class="{ 'rx-print-hidden': !edits.transitionPoints[section.group].some((point) => String(point).trim()) }" :data-print-note="$t('ereport.page_not_printed')">
           <header class="rx-head">
             <img :src="sawaLogo" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -1228,6 +1392,23 @@ function back() {
 .rx-sp-title { margin: 4mm 0 2mm; text-align: center; font-size: 22pt; font-weight: 700; color: #334155; }
 .rx-sp-child { margin: 0 0 5mm; text-align: start; font-size: 12pt; line-height: 1.8; }
 .rx-barrier-answers { margin-top: 6mm; font-size: 9pt; }
+/* M-CHAT-R: the tests table, the newest test's meaning, and the answers page (20 rows on one sheet). */
+.rx-mchat th, .rx-mchat td { text-align: center; }
+.rx-mchat-risk { padding: 1px 8px; border-radius: 999px; font-weight: 800; }
+.rx-mchat-risk.is-low, .rx-mchat-meaning.is-low { --tone: #15803d; --tone-soft: #dcfce7; }
+.rx-mchat-risk.is-medium, .rx-mchat-meaning.is-medium { --tone: #b45309; --tone-soft: #fef3c7; }
+.rx-mchat-risk.is-high, .rx-mchat-meaning.is-high { --tone: #b91c1c; --tone-soft: #fee2e2; }
+.rx-mchat-risk { background: var(--tone-soft); color: var(--tone); }
+.rx-mchat-meaning { margin-top: 6mm; padding: 10px 14px; border-inline-start: 5px solid var(--tone); border-radius: 8px; background: var(--tone-soft); }
+.rx-mchat-meaning h3 { margin: 0 0 4px; color: var(--tone); font-size: 12pt; font-weight: 800; }
+.rx-mchat-meaning p { margin: 0; line-height: 1.8; }
+.rx-mchat-answers { font-size: 9pt; line-height: 1.45; }
+.rx-mchat-answers th, .rx-mchat-answers td { padding: 4px 6px; }
+.rx-mchat-answers td:nth-child(2) { text-align: start; }
+.rx-mchat-col { width: 15mm; }
+.rx-mchat-answers td.is-point { background: #fee2e2; color: #b91c1c; font-weight: 800; }
+.rx-mchat-answers tfoot th { background: #eef8f9; color: #0e464d; }
+.rx-mchat-hint { margin: 3mm 0 0; color: #64748b; font-size: 8.5pt; }
 .rx-barrier-answers td { vertical-align: top; }
 .rx-save-state { font-size: .85rem; color: #166534; }
 .rx-save-state.is-dirty { color: #b45309; }
@@ -1324,6 +1505,8 @@ function back() {
 }
 .rx-toolbar-actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
 .rx-levels {
@@ -1375,6 +1558,27 @@ function back() {
 /* A page deleted from the report: gone from the screen and the print (it does not count in the page numbers). */
 .rx-page.is-deleted {
   display: none !important;
+}
+/* A page with nothing left to print (its tables deleted) stays on screen, to restore them, marked as not printed. */
+@media screen {
+  .rx-page.rx-print-hidden {
+    outline: 2px dashed #f59e0b;
+    outline-offset: -2px;
+  }
+  .rx-page.rx-print-hidden::after {
+    content: attr(data-print-note);
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 12px;
+    border-radius: 999px;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 9pt;
+    font-weight: 700;
+    white-space: nowrap;
+  }
 }
 /* The delete button is added by v-page outside the template: scoped styles reach it through :deep(). */
 .rx-page :deep(.rx-page-delete) {
@@ -1924,7 +2128,8 @@ function back() {
     break-before: page;
     page-break-before: always;
   }
-  .rx-page :deep(.rx-page-delete) {
+  /* The page's delete button (added by v-page; this block is not scoped, so no :deep here). */
+  .rx-page .rx-page-delete {
     display: none !important;
   }
 }

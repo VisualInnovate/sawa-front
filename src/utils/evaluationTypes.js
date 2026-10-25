@@ -6,6 +6,7 @@ const evaluationTypes = {
   5: { translationKey: "evaluation_carolina", routeName: "carolina-test" },
   6: { translationKey: "evaluation_transition", routeName: "transition-evaluation" },
   7: { translationKey: "ablls_skills", routeName: "skills-test" },
+  8: { translationKey: "evaluation_mchat", routeName: "mchat-evaluation" },
   101: { translationKey: "side_profile_cognitive", routeName: "SideProfiles", dimensionIndex: 0 },
   102: { translationKey: "side_profile_self_care", routeName: "SideProfiles", dimensionIndex: 1 },
   103: { translationKey: "side_profile_motor", routeName: "SideProfiles", dimensionIndex: 2 },

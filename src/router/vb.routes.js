@@ -105,6 +105,19 @@ const vb = [
       meta: { permission: ["transition answer list", "transition answer create"] },
       component: () => import("../views/evaluation/transition-evaluation/result.vue")
     },
+    // M-CHAT-R: the parent's 20 yes/no answers and the risk they give
+    {
+      path: '/mchat-evaluation/:id',
+      name: 'mchat-evaluation',
+      meta: { permission: ["mchat answer create"] },
+      component: () => import("../views/evaluation/mchat/index.vue")
+    },
+    {
+      path: '/mchat-result/:id/:evaluation',
+      name: 'mchat-result',
+      meta: { permission: ["mchat answer list", "mchat answer create"] },
+      component: () => import("../views/evaluation/mchat/result.vue")
+    },
     //  sesions
     {
       path: '/sessions', 

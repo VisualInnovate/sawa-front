@@ -1,17 +1,20 @@
 <script setup>
 // Evaluation reports: children with finished evaluations; picking one lists its finished evaluations,
-// and the chosen ones open in the printable report.
+// and the chosen ones open in the printable report. The reports already made for the child (saved from the
+// report) are listed above them, to open again instead of making them anew.
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import axios from "axios";
 import { formatChildAge } from "@/utils/childAge";
-import { MAX_PER_GROUP, dmy, groupItems, isFemale, typeIcon, typeLabel } from "@/components/reports/reportUtils";
+import { MAX_PER_GROUP, dmy, evaluationLabel, groupItems, isFemale, typeIcon, typeLabel } from "@/components/reports/reportUtils";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const children = ref([]);
 const loading = ref(true);
@@ -24,6 +27,15 @@ const evaluationsLoading = ref(false);
 const picked = ref([]);
 const panel = ref(null);
 const reportTypes = ref([]);
+
+// The child's saved reports; each one's evaluations are found in the list below (a deleted one is gone).
+const savedReports = ref([]);
+const savedLoading = ref(false);
+const deletingReport = ref(null);
+const deleteBusy = ref(false);
+const evaluationsByKey = computed(() => new Map(evaluations.value.map((item) => [item.key, item])));
+const reportEvaluations = (saved) => saved.items.map((key) => evaluationsByKey.value.get(key)).filter(Boolean);
+const timeOf = (value) => String(value ?? "").slice(11, 16);
 
 const totalEvaluations = computed(() => children.value.reduce((sum, child) => sum + child.evaluations_count, 0));
 
@@ -63,6 +75,7 @@ async function selectChild(child, scroll = true) {
   evaluations.value = [];
   picked.value = [];
   router.replace({ query: { ...route.query, child: child.id } });
+  loadSaved(child);
   evaluationsLoading.value = true;
   try {
     const { data } = await axios.get(`api/reports/children/${child.id}`);
@@ -87,6 +100,42 @@ function evaluationDeleted(item) {
   if (!evaluations.value.length) {
     children.value = children.value.filter((row) => row.id !== selectedChild.value?.id);
     selectedChild.value = null;
+  }
+}
+
+async function loadSaved(child) {
+  savedReports.value = [];
+  savedLoading.value = true;
+  try {
+    const { data } = await axios.get(`api/reports/children/${child.id}/saved`);
+    if (selectedChild.value?.id === child.id) savedReports.value = data.data ?? [];
+  } catch {
+    savedReports.value = [];
+  } finally {
+    savedLoading.value = false;
+  }
+}
+
+// Opens the saved report with its evaluations that still exist.
+function openSaved(saved) {
+  const items = reportEvaluations(saved).map((item) => item.key);
+  if (!items.length) return;
+  router.push({ name: "evaluation-report", params: { childId: selectedChild.value.id }, query: { items: items.join(","), types: saved.types.join(","), report: saved.id } });
+}
+
+async function deleteSaved() {
+  const saved = deletingReport.value;
+  if (!saved) return;
+  deleteBusy.value = true;
+  try {
+    await axios.delete(`api/reports/saved/${saved.id}`);
+    savedReports.value = savedReports.value.filter((row) => row.id !== saved.id);
+    deletingReport.value = null;
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("ereport.report_deleted"), life: 3000 });
+  } catch (e) {
+    toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message || t("request_failed_retry"), life: 3000 });
+  } finally {
+    deleteBusy.value = false;
   }
 }
 
@@ -217,6 +266,48 @@ onMounted(loadChildren);
             </div>
           </header>
 
+          <!-- reports already made for the child -->
+          <section class="rp-saved">
+            <div class="rp-panel-bar">
+              <h3>{{ $t("ereport.saved_reports") }} <span>{{ savedReports.length }}</span></h3>
+            </div>
+            <div v-if="savedLoading || evaluationsLoading" class="rp-skeletons">
+              <Skeleton height="3.5rem" />
+            </div>
+            <p v-else-if="!savedReports.length" class="rp-limit"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.no_saved_reports") }}</p>
+            <template v-else>
+              <p class="rp-saved-hint">{{ $t("ereport.saved_reports_hint") }}</p>
+              <ul class="rp-saved-list">
+                <li v-for="saved in savedReports" :key="saved.id" class="rp-saved-item">
+                  <div class="rp-saved-text">
+                    <div class="rp-saved-top">
+                      <strong><span class="ltr">{{ dmy(saved.updated_at) }} {{ timeOf(saved.updated_at) }}</span></strong>
+                      <span v-for="type in saved.types" :key="type" class="rp-output-tag">{{ $t("ereport.output_" + type) }}</span>
+                      <span v-if="saved.printed_at" class="rp-printed"><i class="pi pi-print" aria-hidden="true" /> {{ $t("ereport.report_printed") }}</span>
+                    </div>
+                    <div class="rp-types">
+                      <span v-for="item in reportEvaluations(saved)" :key="item.key" class="rp-type" :class="'type-' + item.type">
+                        <i :class="typeIcon(item.type)" aria-hidden="true" />{{ evaluationLabel(item, $t) }} · <span class="ltr">{{ dmy(item.date) }}</span>
+                      </span>
+                    </div>
+                    <small v-if="!reportEvaluations(saved).length" class="rp-incomplete">{{ $t("ereport.report_no_evaluations") }}</small>
+                    <small v-else-if="reportEvaluations(saved).length < saved.items.length" class="rp-incomplete">
+                      {{ $t("ereport.report_missing_evaluations", { n: saved.items.length - reportEvaluations(saved).length }) }}
+                    </small>
+                    <small v-if="saved.updated_by?.name || saved.created_by?.name">
+                      <i class="pi pi-user" aria-hidden="true" /> {{ $t("ereport.report_by", { name: saved.updated_by?.name || saved.created_by?.name }) }}
+                    </small>
+                  </div>
+                  <div class="rp-saved-actions">
+                    <Button :label="$t('ereport.open_report')" icon="pi pi-external-link" size="small" :disabled="!reportEvaluations(saved).length" @click="openSaved(saved)" />
+                    <Button icon="pi pi-trash" size="small" severity="danger" variant="outlined" :aria-label="$t('ereport.delete_report')"
+                      v-tooltip.top="$t('ereport.delete_report')" @click="deletingReport = saved" />
+                  </div>
+                </li>
+              </ul>
+            </template>
+          </section>
+
           <div class="rp-panel-bar">
             <h3>{{ $t("ereport.finished_evaluations") }} <span>{{ evaluations.length }}</span></h3>
             <Button
@@ -284,6 +375,15 @@ onMounted(loadChildren);
         </template>
       </aside>
     </div>
+
+    <Dialog :visible="Boolean(deletingReport)" modal :header="$t('ereport.delete_report')" :style="{ width: '440px', maxWidth: '95vw' }"
+      @update:visible="(open) => { if (!open) deletingReport = null; }">
+      <p class="m-0">{{ $t("ereport.delete_report_confirm") }}</p>
+      <template #footer>
+        <Button :label="$t('cancel')" severity="secondary" variant="text" @click="deletingReport = null" />
+        <Button :label="$t('delete')" icon="pi pi-trash" severity="danger" :loading="deleteBusy" @click="deleteSaved" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -487,6 +587,8 @@ onMounted(loadChildren);
 .type-4 { --tone: #4f46e5; --tone-soft: #e0e7ff; }
 .type-5 { --tone: #0369a1; --tone-soft: #e0f2fe; }
 .type-6 { --tone: #9d174d; --tone-soft: #fce7f3; }
+.type-7 { --tone: #4338ca; --tone-soft: #e0e7ff; }
+.type-8 { --tone: #047857; --tone-soft: #d1fae5; }
 .rp-type[class*="type-"] {
   background: var(--tone-soft);
   color: var(--tone);
@@ -656,6 +758,81 @@ onMounted(loadChildren);
   gap: 0.25rem 0.75rem;
   color: var(--sawa-muted);
   font-size: 0.78rem;
+}
+.rp-saved {
+  display: grid;
+  gap: 0.5rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.rp-saved-hint {
+  margin: 0;
+  color: var(--sawa-muted);
+  font-size: 0.8rem;
+}
+.rp-saved-list {
+  display: grid;
+  gap: 0.45rem;
+  max-height: 18rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.rp-saved-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--sawa-border);
+  border-radius: 10px;
+  background: #fbfcfd;
+}
+.rp-saved-text {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+.rp-saved-text small {
+  color: var(--sawa-muted);
+  font-size: 0.78rem;
+}
+.rp-saved-text small.rp-incomplete {
+  color: #b45309;
+  font-weight: 700;
+}
+.rp-saved-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+}
+.rp-saved-top strong {
+  color: var(--sawa-text);
+  font-size: 0.9rem;
+}
+.rp-output-tag {
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.rp-printed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #166534;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.rp-saved-actions {
+  display: flex;
+  gap: 0.35rem;
 }
 .rp-report-types {
   display: grid;

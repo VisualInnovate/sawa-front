@@ -40,7 +40,7 @@
           </dl>
           <footer class="evaluation-actions">
             <Button v-can="'evaluations delete'" icon="pi pi-trash" @click="deleteevalution(evalu)" severity="danger" variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-            <Button v-can="['evaluation results list', 'able answer list', 'skills answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list', 'transition answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
+            <Button v-can="['evaluation results list', 'able answer list', 'skills answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list', 'transition answer list', 'mchat answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
           </footer>
         </article>
       </div>
@@ -133,6 +133,7 @@ export default {
                     { name: 'carolina', id: 5 },
                     { name: 'Transition', id: 6 },
                     { name: 'Ablls OT', id: 7 },
+                    { name: 'M-CHAT-R', id: 8 },
  
                 ]
      
@@ -213,6 +214,9 @@ export default {
       }
       if(type==6){
         this.$router.push({ name: 'transition-result', params:{'id':child_id,'evaluation':id}});
+      }
+      if(type==8){
+        this.$router.push({ name: 'mchat-result', params:{'id':child_id,'evaluation':id}});
       }
     },
 
