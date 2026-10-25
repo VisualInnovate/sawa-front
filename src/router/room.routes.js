@@ -3,12 +3,6 @@
 
 
 const rooms = [
-    {
-        path: '/add-room', // Define the path for your addRoom route
-        name: 'addRoom',
-        meta: { permission: ["room create"] },
-        component: () => import("../views/rooms/Create.vue")
-      },
     { 
         path: '/rooms',
         name: 'Rooms',
@@ -27,12 +21,6 @@ const rooms = [
       name: 'CreateRoom',
       meta: { permission: ["room create"] },
       component: () => import("../views/rooms/Create.vue")
-    },
-    {
-      path: '/test-room', 
-      name: 'TestRoom',
-      meta: { adminOnly: true },
-      component: () => import("../views/rooms/Test.vue")
     },
     {
     path: '/edit-room/:id',

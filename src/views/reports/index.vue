@@ -48,9 +48,13 @@ const filtered = computed(() => {
 // The list shown in blocks per evaluation type (a side-profile dimension is its own type), newest first.
 const groups = computed(() => groupItems(evaluations.value, t));
 const pickedIn = (group) => group.items.filter((item) => picked.value.includes(item.key)).length;
+// Only an evaluation the management approved makes a report, a plan or a tracking.
+const approved = (item) => (item.approval ?? "approved") === "approved";
+// The order the evaluations were picked in: the report shows their types in this order.
+const pickOrder = (item) => picked.value.indexOf(item.key) + 1;
 const groupFull = (group) => pickedIn(group) >= MAX_PER_GROUP;
 // "Select all" = the newest four of every type.
-const maxPick = computed(() => groups.value.flatMap((group) => group.items.slice(0, MAX_PER_GROUP).map((item) => item.key)));
+const maxPick = computed(() => groups.value.flatMap((group) => group.items.filter(approved).slice(0, MAX_PER_GROUP).map((item) => item.key)));
 const allPicked = computed(() => maxPick.value.length > 0 && maxPick.value.every((key) => picked.value.includes(key)));
 
 async function loadChildren() {
@@ -81,8 +85,9 @@ async function selectChild(child, scroll = true) {
     const { data } = await axios.get(`api/reports/children/${child.id}`);
     if (selectedChild.value?.id !== child.id) return;
     evaluations.value = data.data ?? [];
-    // The newest evaluation is picked by default.
-    picked.value = evaluations.value.length ? [evaluations.value[0].key] : [];
+    // The newest approved evaluation is picked by default.
+    const first = evaluations.value.find(approved);
+    picked.value = first ? [first.key] : [];
   } catch {
     evaluations.value = [];
   } finally {
@@ -144,14 +149,15 @@ function toggleAll() {
 }
 
 function toggle(item, group) {
+  if (!approved(item)) return;
   if (picked.value.includes(item.key)) picked.value = picked.value.filter((key) => key !== item.key);
   else if (!groupFull(group)) picked.value = [...picked.value, item.key];
 }
 
 function openReport() {
   if (!picked.value.length || !reportTypes.value.length) return;
-  // Keep the list's order (newest first).
-  const items = evaluations.value.filter((item) => picked.value.includes(item.key)).map((item) => item.key);
+  // In the order they were picked: the report shows the evaluation types in that order.
+  const items = picked.value.filter((key) => evaluationsByKey.value.has(key));
   router.push({ name: "evaluation-report", params: { childId: selectedChild.value.id }, query: { items: items.join(","), types: reportTypes.value.join(",") } });
 }
 
@@ -336,20 +342,27 @@ onMounted(loadChildren);
                 <li v-for="item in group.items" :key="item.key">
                   <label
                     class="rp-eval"
-                    :class="{ 'is-picked': picked.includes(item.key), 'is-locked': !picked.includes(item.key) && groupFull(group) }"
-                    :title="!picked.includes(item.key) && groupFull(group) ? $t('ereport.limit_reached', { n: MAX_PER_GROUP }) : undefined"
+                    :class="{ 'is-picked': picked.includes(item.key), 'is-locked': !approved(item) || (!picked.includes(item.key) && groupFull(group)) }"
+                    :title="!approved(item) ? $t('ereport.not_approved_hint') : !picked.includes(item.key) && groupFull(group) ? $t('ereport.limit_reached', { n: MAX_PER_GROUP }) : undefined"
                   >
                     <Checkbox
                       :modelValue="picked.includes(item.key)"
                       binary
-                      :disabled="!picked.includes(item.key) && groupFull(group)"
+                      :disabled="!approved(item) || (!picked.includes(item.key) && groupFull(group))"
                       @update:modelValue="toggle(item, group)"
                     />
+                    <Transition name="rp-order">
+                      <span v-if="pickOrder(item)" :key="pickOrder(item)" class="rp-order" :title="$t('ereport.pick_order', { n: pickOrder(item) })">{{ pickOrder(item) }}</span>
+                    </Transition>
                     <span class="rp-eval-text">
                       <strong class="ltr">{{ dmy(item.date) }}</strong>
                       <small v-if="item.specialist?.name"><i class="pi pi-user" aria-hidden="true" /> {{ item.specialist.name }}</small>
                       <!-- A VB-MAPP evaluation still waiting for levels: reported with the levels it has. -->
                       <small v-if="item.complete === false" class="rp-incomplete"><i class="pi pi-hourglass" aria-hidden="true" /> {{ $t("ereport.incomplete") }}</small>
+                      <small v-if="!approved(item)" class="rp-approval" :class="`is-${item.approval}`">
+                        <i :class="item.approval === 'rejected' ? 'pi pi-times-circle' : 'pi pi-clock'" aria-hidden="true" />
+                        {{ $t(`ea_status_${item.approval}`) }}<template v-if="item.approval === 'rejected' && item.approval_note">: {{ item.approval_note }}</template>
+                      </small>
                     </span>
                   </label>
                   <DeleteEvaluationButton :evaluation-id="item.id" :side-profile-result="item.key.startsWith('s')" :label="false" size="small"
@@ -369,7 +382,10 @@ onMounted(loadChildren);
           </fieldset>
 
           <footer class="rp-panel-foot">
-            <span class="rp-picked">{{ picked.length ? $t("ereport.selected_n", { n: picked.length }) : $t("ereport.choose_one") }}</span>
+            <span class="rp-picked">
+              {{ picked.length ? $t("ereport.selected_n", { n: picked.length }) : $t("ereport.choose_one") }}
+              <small v-if="picked.length > 1" class="rp-order-hint">{{ $t("ereport.pick_order_hint") }}</small>
+            </span>
             <Button :label="$t('ereport.create_report')" icon="pi pi-file-export" :disabled="!picked.length || !reportTypes.length" @click="openReport" />
           </footer>
         </template>
@@ -891,5 +907,47 @@ onMounted(loadChildren);
   .rp-stat {
     flex: 1;
   }
+}
+.rp-order {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  background: var(--sawa-primary);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  box-shadow: 0 4px 10px -6px var(--sawa-primary);
+}
+.rp-order-enter-active {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+}
+.rp-order-enter-from {
+  opacity: 0;
+  transform: scale(0.4);
+}
+.rp-order-hint {
+  display: block;
+  color: var(--sawa-muted);
+  font-size: 0.75rem;
+}
+.rp-approval {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.rp-approval.is-pending {
+  background: #fffbeb;
+  color: #b45309;
+}
+.rp-approval.is-rejected {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 </style>

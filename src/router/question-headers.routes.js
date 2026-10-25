@@ -1,7 +1,6 @@
 // permissions
 
 const Index = () => import("../views/QuestionHeaders/Index.vue");
-const Show = () => import("../views/QuestionHeaders/Show.vue");
 const Edit = () => import("../views/QuestionHeaders/Edit.vue");
 const Create = () => import("../views/QuestionHeaders/Create.vue");
 
@@ -18,13 +17,6 @@ const headersRoutes = [
     name: "CreateHeaders",
     meta: { permission: ["evaluation headers create"] },
     component: Create,
-  },
-  // show
-  {
-    path: "headers/:id",
-    name: "ShowHeaders",
-    meta: { permission: ["evaluation headers list"] },
-    component: Show,
   },
   // edit
   {

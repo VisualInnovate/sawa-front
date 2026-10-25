@@ -21,12 +21,6 @@ const inputs = [
   //// area
    
     { 
-        path: '/area',
-        name: 'area',
-        meta: { permission: ["region list"] },
-      component: () => import("../views/inputs/areas/area/index.vue")
-    },
-    { 
       path: '/regin',
       name: 'regin',
       meta: { permission: ["region list"] },
@@ -96,13 +90,6 @@ const inputs = [
   },
 
 
-  ///////
-  {
-    path: '/department', 
-    name: 'department',
-    meta: { permission: ["department list"] },
-    component: () => import("../views/inputs/department/index.vue")
-  },
 
   // custom-files
   {

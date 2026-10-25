@@ -10,6 +10,7 @@ import UserProfileMenu from "./UserProfileMenu.vue";
 import AdminSidebar from "./layout/AdminSidebar.vue";
 import NotificationBell from "./layout/NotificationBell.vue";
 import { buildMenu, visibleMenu } from "./layout/menu";
+import { watchPendingCounts } from "../utils/pendingCounts";
 
 const router = useRouter();
 const route = useRoute();
@@ -39,8 +40,10 @@ const closeOnMobile = () => {
 };
 watch(() => route.fullPath, closeOnMobile);
 
+let stopCounts = null;
 onMounted(async () => {
   desktopQuery.addEventListener("change", onMediaChange);
+  stopCounts = watchPendingCounts("staff");
   await authStore.getUser();
   // The role may have changed since sign-in; leave a page it no longer allows.
   const current = router.currentRoute.value;
@@ -48,7 +51,10 @@ onMounted(async () => {
     router.replace(homeRoute());
   }
 });
-onBeforeUnmount(() => desktopQuery.removeEventListener("change", onMediaChange));
+onBeforeUnmount(() => {
+  desktopQuery.removeEventListener("change", onMediaChange);
+  stopCounts?.();
+});
 </script>
 
 <template>

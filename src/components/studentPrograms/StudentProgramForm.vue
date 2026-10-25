@@ -291,6 +291,7 @@ function slotStatus(slot) {
   if (slot.reason === "no_room") return t("sp_no_room");
   if (slot.reason === "room_not_suitable") return t("sp_room_not_suitable");
   if (slot.reason === "outside_shift") return t("sp_outside_shift");
+  if (slot.reason === "room_activity") return t("sp_room_activity");
   return slot.available_from ? t("sp_no_vacancy_from", { date: slot.available_from }) : t("sp_no_vacancy");
 }
 </script>
@@ -523,7 +524,7 @@ function slotStatus(slot) {
         </div>
         <div class="flex items-center gap-2">
           <Tag v-if="option.available" severity="success" :value="$t('sp_available')" />
-          <Tag v-else severity="danger" :value="option.reason === 'outside_shift' ? $t('sp_outside_shift')
+          <Tag v-else severity="danger" :value="option.reason === 'outside_shift' ? $t('sp_outside_shift') : option.reason === 'room_activity' ? $t('sp_room_activity')
             : option.available_from ? $t('sp_no_vacancy_from', { date: option.available_from }) : $t('sp_no_vacancy')" />
           <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || (option.room_id === roomDialog?.slot.room_id && option.therapist_id === roomDialog?.slot.therapist_id)" @click="chooseRoom(option)" />
         </div>

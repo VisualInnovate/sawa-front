@@ -42,17 +42,20 @@ export const buildMenu = () => [
     icon: "mdi-chart-box-outline",
     label: "evaluation_results",
     to: { name: "my-evaluation-results" },
+    // My evaluations the management sent back (rejected with a reason).
+    badge: "my_rejected_evaluations",
   },
   {
     key: "evaluations",
     icon: "mdi-help-box-multiple-outline",
     label: "evaluations",
     children: [
+      { label: "ea_title", to: { name: "evaluation-approvals" }, perm: ["evaluation approval list", "evaluation approval edit"], badge: "evaluation_approvals" },
+      { label: "age_ranges.evaluation_page", to: { name: "evaluation-age-ranges" }, perm: "evaluation age ranges edit" },
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },
       { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
       { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
       { text: "carolina", to: { name: "carolina-general-goals" }, perm: "carolina general goal list" },
-      { label: "age_ranges.evaluation_page", to: { name: "evaluation-age-ranges" }, perm: "evaluation age ranges edit" },
       {
         key: "vb-mapp",
         text: "VB Mapp",
@@ -79,9 +82,10 @@ export const buildMenu = () => [
       { label: "student_programe", to: { name: "student-programe" }, perm: "student program list" },
       { label: "sessions", to: { name: "sessions" }, perm: "sessions list" },
       { label: "session_log", to: { name: "session-log" }, perm: "session log list" },
-      { label: "ereport.tracking_approvals", to: { name: "tracking-approvals" }, perm: ["tracking approval list", "tracking approval edit"] },
-      { label: "gen_requests_title", to: { name: "goal-generalizations" }, perm: ["goal generalization list", "goal generalization edit"] },
-      { label: "gen_inbox_title", to: { name: "my-generalizations" } },
+      // `badge`: the pending count shown beside the entry (utils/pendingCounts.js).
+      { label: "ereport.tracking_approvals", to: { name: "tracking-approvals" }, perm: ["tracking approval list", "tracking approval edit"], badge: "tracking_approvals" },
+      { label: "gen_requests_title", to: { name: "goal-generalizations" }, perm: ["goal generalization list", "goal generalization edit"], badge: "goal_generalizations" },
+      { label: "gen_inbox_title", to: { name: "my-generalizations" }, badge: "my_generalizations" },
       { label: "program_logs", to: { name: "student-program-logs" }, perm: "student program log list" },
       { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
       { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },

@@ -157,7 +157,7 @@
                   fill="#DA1414" />
               </svg>
             </div>
-            <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid required
+            <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid required :disabled="!$can('employees edit')"
               v-model="employee.basic_salary" :placeholder="$t('basic_salary')"
               :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
           </div>
@@ -212,7 +212,7 @@
               </svg>
             </div>
             <Select
-              v-model="employee.type" option-value="id" filter :options="tpes()" optionLabel="name"
+              v-model="employee.type" option-value="id" filter :options="tpes()" optionLabel="name" :disabled="!$can('employees edit')"
               :class="{ 'p-invalid': submitted && !employee.type }" />
           </div>
           <div v-if="employee.type == 0 || employee.type == 2" class="flex flex-column gap-2">
@@ -288,7 +288,8 @@
                   fill="#DA1414" />
               </svg>
             </div>
-            <Select
+            <!-- Role, salary and type change only with «employees edit» («doctor edit» keeps them). -->
+            <Select :disabled="!$can('employees edit')"
               v-model="employee.role" option-value="id" filter :options="roles" optionLabel="name"
               :class="{ 'p-invalid': submitted && !employee.role }" />
           </div>

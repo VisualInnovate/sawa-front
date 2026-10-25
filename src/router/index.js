@@ -12,7 +12,6 @@ import childrenRoutes from "./children.routes";
 import QuestionHeadersRoutes from "./question-headers.routes";
 import EvaluationsRoutes from "./evaluation.routes";
 import therapeutic from "./therapeutic.routes";
-import appointment from "./appointment-type.routes";
 import studentprogram from "./studentprogram.routes";
 import treatment_type from "./treatment-type.routes";
 import inputs from "./inputs.routes";
@@ -296,7 +295,6 @@ const routes = [
       ...Object.values(QuestionHeadersRoutes),
       ...Object.values(EvaluationsRoutes),
       ...Object.values(therapeutic),
-      ...Object.values(appointment),
       ...Object.values(studentprogram),
       ...Object.values(treatment_type),
       ...Object.values(inputs),
