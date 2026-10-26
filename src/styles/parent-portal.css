@@ -694,6 +694,8 @@
 .pp-field {
   display: grid;
   gap: 0.35rem;
+  /* Two fields side by side keep their inputs at the same height even when one has a help line under it. */
+  align-content: start;
 }
 .pp-field > label {
   font-weight: 800;
@@ -755,6 +757,15 @@
 .pp-shell .p-dialog,
 .pp-auth .p-dialog {
   border-radius: var(--pp-radius);
+}
+/* The sign-in pages fit a laptop screen without scrolling: tighter inputs and rows. */
+.pp-auth .p-inputtext,
+.pp-auth .p-password-input,
+.pp-auth .p-datepicker-input {
+  min-height: 44px;
+}
+.pp-auth .pp-stack {
+  gap: 0.7rem;
 }
 .pp-shell .p-message,
 .pp-auth .p-message {

@@ -63,7 +63,8 @@ function go(action) {
 // The answer arrives as server-sent events (start, delta…, action, done | error) and fills its bubble as it is
 // written. fetch, not axios: axios only hands the body over once it is complete.
 async function stream(body, onEvent) {
-  const token = JSON.parse(localStorage.getItem("parentToken") ?? "null");
+  // The parent store keeps the token as plain text ("1234|…"); read it from the store, not by parsing storage.
+  const token = parentStore.parentToken;
   const response = await fetch(new URL("api/parent/assistant/chat/stream", axios.defaults.baseURL), {
     method: "POST",
     headers: {
