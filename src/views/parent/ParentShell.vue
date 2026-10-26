@@ -167,7 +167,7 @@ watch(() => route.fullPath, () => {
       </button>
     </nav>
 
-    <Drawer v-model:visible="sheetOpen" position="bottom" class="pp-sheet" :header="$t('pp.nav_more')" style="height: auto">
+    <Drawer v-model:visible="sheetOpen" position="bottom" class="pp-sheet pp-overlay" :header="$t('pp.nav_more')" style="height: auto">
       <div class="pp-sheet__grid">
         <button v-for="item in [{ name: 'parent-schedule', icon: 'pi pi-calendar', label: 'pp.nav_schedule' }, ...MORE]" :key="item.name" type="button" class="pp-sheet__item" @click="go(item.name)">
           <span class="pp-item__icon"><i :class="item.icon" aria-hidden="true" /><span v-if="badgeOf(item)" class="pp-badge">{{ badgeOf(item) }}</span></span>

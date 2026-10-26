@@ -87,7 +87,7 @@ const print = () => window.print();
       </section>
     </template>
 
-    <Dialog :visible="Boolean(open)" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '640px', maxWidth: '94vw' }" @update:visible="open = null">
+    <Dialog class="pp-overlay" :visible="Boolean(open)" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '640px', maxWidth: '94vw' }" @update:visible="open = null">
       <ConsultationResult v-if="open" ref="resultView" :booking="open" />
       <template #footer>
         <Button :label="$t('print')" icon="pi pi-print" variant="text" @click="resultView?.print()" />

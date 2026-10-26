@@ -93,7 +93,7 @@ async function cancel() {
       </article>
     </div>
 
-    <Dialog :visible="Boolean(open)" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '640px', maxWidth: '94vw' }" @update:visible="open = null">
+    <Dialog class="pp-overlay" :visible="Boolean(open)" modal :header="$t('نتيجة الاستشارة')" :style="{ width: '640px', maxWidth: '94vw' }" @update:visible="open = null">
       <ConsultationResult v-if="open" ref="resultView" :booking="open" />
       <template #footer>
         <Button :label="$t('print')" icon="pi pi-print" variant="text" @click="resultView?.print()" />
@@ -102,7 +102,7 @@ async function cancel() {
       </template>
     </Dialog>
 
-    <Dialog :visible="Boolean(cancelling)" modal :header="$t('إلغاء الحجز')" :style="{ width: '420px', maxWidth: '92vw' }" @update:visible="cancelling = null">
+    <Dialog class="pp-overlay" :visible="Boolean(cancelling)" modal :header="$t('إلغاء الحجز')" :style="{ width: '420px', maxWidth: '92vw' }" @update:visible="cancelling = null">
       <p class="m-0 leading-7">{{ $t("confirm_cancel_booking") }}</p>
       <template #footer>
         <Button :label="$t('back')" icon="pi pi-times" variant="text" @click="cancelling = null" />
