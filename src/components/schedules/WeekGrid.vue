@@ -17,11 +17,34 @@ const props = defineProps({
   // Show the employee on each item (the parent's and the overview's grids), and the shift band / load (employees).
   showStaff: { type: Boolean, default: false },
   showShift: { type: Boolean, default: true },
+  // One child's own grid (the parent's): the cards name what happens — the treatment, the kind of appointment, the
+  // evaluation — instead of the child, in bigger type on wider columns; pair it with a taller `hourHeight`.
+  ownChild: { type: Boolean, default: false },
+  hourHeight: { type: Number, default: 56 }, // px per hour
 });
 
 const { t } = useI18n();
-const HOUR = 56; // px per hour
+const HOUR = computed(() => props.hourHeight);
 const evaluationName = (type) => getEvaluationTypeLabel(type, t, t("sch.type_evaluation"));
+
+// The card's words: the child on an employee's grid; on a child's own grid, what the appointment is.
+function title(item) {
+  if (!props.ownChild) return itemTitle(t, item);
+  switch (item.type) {
+    case "session": return item.treatment || t("sch.type_session");
+    case "inclusion": return item.kind === "supervision" ? t("sp_inclusion_supervision") : t("sch.type_inclusion");
+    case "evaluation": return evaluationName(item.evaluation_type);
+    default: return item.title || t(`sch.type_${item.type}`);
+  }
+}
+function sub(item) {
+  if (!props.ownChild) return [itemSubtitle(t, item, evaluationName), item.room].filter(Boolean).join(" · ");
+  const parts = [];
+  if (item.type === "session") parts.push(item.treatment ? t("sch.type_session") : null, item.kind ? t(`sp_session_${item.kind}`) : null);
+  else if (item.type === "evaluation") parts.push(item.title);
+  else if (item.type !== "inclusion" && item.title) parts.push(t(`sch.type_${item.type}`));
+  return [...parts, item.room].filter(Boolean).join(" · ");
+}
 
 const today = computed(() => (props.now ?? moment().format("YYYY-MM-DD HH:mm")).slice(0, 10));
 const nowMinutes = computed(() => minutesOf((props.now ?? moment().format("YYYY-MM-DD HH:mm")).slice(11, 16)));
@@ -36,8 +59,8 @@ const hours = computed(() => {
   const last = Math.min(24, Math.ceil(Math.max(...ends) / 60));
   return Array.from({ length: Math.max(1, last - first) }, (_, index) => first + index);
 });
-const top = (minutes) => ((minutes - hours.value[0] * 60) / 60) * HOUR;
-const height = computed(() => hours.value.length * HOUR);
+const top = (minutes) => ((minutes - hours.value[0] * 60) / 60) * HOUR.value;
+const height = computed(() => hours.value.length * HOUR.value);
 
 const columns = computed(() => props.days.map((day) => {
   const dayItems = props.items.filter((item) => item.date === day.date);
@@ -56,7 +79,7 @@ function style(item) {
   const width = 100 / item.lanes;
   return {
     top: `${top(item.from)}px`,
-    height: `${Math.max(22, ((item.to - item.from) / 60) * HOUR - 2)}px`,
+    height: `${Math.max(22, ((item.to - item.from) / 60) * HOUR.value - 2)}px`,
     insetInlineStart: `calc(${item.lane * width}% + 2px)`,
     width: `calc(${width}% - 4px)`,
     "--item-bg": color.bg,
@@ -71,7 +94,7 @@ const selected = ref(null);
 
 <template>
   <div class="week-grid-wrap">
-    <div class="week-grid" :style="{ '--days': days.length }">
+    <div class="week-grid" :class="{ 'is-roomy': ownChild }" :style="{ '--days': days.length }">
       <!-- Day heads -->
       <div class="wg-corner" />
       <div v-for="day in columns" :key="`h${day.date}`" class="wg-head"
@@ -97,7 +120,7 @@ const selected = ref(null);
           <button v-for="item in day.allDay" :key="item.key" type="button" class="wg-chip"
             :style="{ '--item-bg': ITEM_TYPES[item.type]?.bg, '--item-border': ITEM_TYPES[item.type]?.border, '--item-text': ITEM_TYPES[item.type]?.text }"
             @click="selected = item">
-            <i :class="ITEM_TYPES[item.type]?.icon" aria-hidden="true" /> {{ itemTitle(t, item) }}
+            <i :class="ITEM_TYPES[item.type]?.icon" aria-hidden="true" /> {{ title(item) }}
           </button>
         </div>
       </template>
@@ -112,17 +135,17 @@ const selected = ref(null);
         :style="{ height: `${height}px` }">
         <div v-for="hour in hours" :key="hour" class="wg-line" :style="{ top: `${top(hour * 60)}px` }" />
         <div v-if="showShift && day.shift" class="wg-shift"
-          :style="{ top: `${top(minutesOf(day.shift[0]))}px`, height: `${((minutesOf(day.shift[1]) - minutesOf(day.shift[0])) / 60) * HOUR}px` }" />
+          :style="{ top: `${top(minutesOf(day.shift[0]))}px`, height: `${((minutesOf(day.shift[1]) - minutesOf(day.shift[0])) / 60) * hourHeight}px` }" />
         <div v-if="day.date === today && nowMinutes >= hours[0] * 60 && nowMinutes <= (hours[hours.length - 1] + 1) * 60" class="wg-now"
           :style="{ top: `${top(nowMinutes)}px` }" />
         <button v-for="item in day.timed" :key="item.key" type="button" class="wg-item"
           :class="[`is-${item.type}`, `st-${item.status}`, { 'has-conflict': item.flags?.includes('conflict'), 'is-outside': item.flags?.includes('outside_shift'),
-            'is-tentative': item.flags?.includes('tentative') }]"
+            'is-tentative': item.flags?.includes('tentative'), 'has-sub': sub(item) }]"
           :style="style(item)" @click="selected = item">
           <span class="wg-item-time" dir="ltr">{{ item.start }}–{{ item.end }}</span>
-          <span class="wg-item-title"><i :class="ITEM_TYPES[item.type]?.icon" aria-hidden="true" /> {{ itemTitle(t, item) }}</span>
-          <span class="wg-item-sub">{{ itemSubtitle(t, item, evaluationName) }}<template v-if="item.room"> · {{ item.room }}</template></span>
-          <span v-if="showStaff && item.staff" class="wg-item-sub">{{ item.staff }}</span>
+          <span class="wg-item-title"><i :class="ITEM_TYPES[item.type]?.icon" aria-hidden="true" /> {{ title(item) }}</span>
+          <span v-if="sub(item)" class="wg-item-sub">{{ sub(item) }}</span>
+          <span v-if="showStaff && item.staff" class="wg-item-sub wg-item-staff"><i v-if="ownChild" class="pi pi-user" aria-hidden="true" />{{ item.staff }}</span>
           <span class="wg-item-flags">
             <i v-if="['late', 'missed'].includes(item.status)" class="pi pi-exclamation-triangle" :class="item.status === 'missed' ? 'text-red-600' : 'text-orange-500'" aria-hidden="true" />
             <i v-for="flag in flagsOf(item)" :key="flag" :class="FLAG_META[flag].icon" aria-hidden="true" />
@@ -131,7 +154,7 @@ const selected = ref(null);
       </div>
     </div>
 
-    <Dialog :visible="!!selected" modal :header="selected ? itemTitle(t, selected) : ''" :style="{ width: '26rem' }" :breakpoints="{ '640px': '94vw' }"
+    <Dialog :visible="!!selected" modal :header="selected ? title(selected) : ''" :style="{ width: '26rem' }" :breakpoints="{ '640px': '94vw' }"
       @update:visible="selected = null">
       <div v-if="selected" class="flex flex-col gap-2 text-sm">
         <div class="flex items-center gap-2">
@@ -168,7 +191,7 @@ const selected = ref(null);
   min-width: calc(3.5rem + var(--days) * 7.5rem);
   border: 1px solid #dfe7e8;
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow: clip; /* not `hidden`: that would stop the hours column sticking while the wrap scrolls */
   background: #fff;
 }
 .wg-corner,
@@ -250,8 +273,23 @@ const selected = ref(null);
   border-inline-start: 3px solid var(--item-border);
   cursor: pointer;
 }
+/* The hours stay in view while a phone scrolls through the days. */
+.wg-corner,
+.wg-allday-label,
 .wg-hours {
-  position: relative;
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 5;
+  background: #fff;
+  border-inline-end: 1px solid #e6eded;
+}
+.wg-corner {
+  background: #f3f8f8;
+}
+.wg-corner + .wg-head,
+.wg-allday-label + .wg-allday,
+.wg-hours + .wg-day {
+  border-inline-start: 0;
 }
 .wg-hour-label {
   position: absolute;
@@ -383,6 +421,46 @@ const selected = ref(null);
   display: flex;
   gap: 0.15rem;
   font-size: 0.65rem;
+}
+/* One child's own grid: wider columns, each card's lines big enough to read — time, what, where, with whom. */
+.week-grid.is-roomy {
+  grid-template-columns: 3.75rem repeat(var(--days), minmax(9.5rem, 1fr));
+  min-width: calc(3.75rem + var(--days) * 9.5rem);
+}
+.is-roomy .wg-hour-label {
+  font-size: 0.72rem;
+}
+.is-roomy .wg-chip {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.5rem;
+}
+.is-roomy .wg-item {
+  gap: 2px;
+  padding: 0.3rem 0.45rem;
+  line-height: 1.25;
+}
+.is-roomy .wg-item-time {
+  font-size: 0.74rem;
+  opacity: 1;
+}
+.is-roomy .wg-item-title {
+  font-size: 0.86rem;
+}
+/* A long name (an evaluation's) may take two lines when the card has no detail line to make room for. */
+.is-roomy .wg-item:not(.has-sub) .wg-item-title {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.is-roomy .wg-item-sub {
+  font-size: 0.76rem;
+  opacity: 0.95;
+}
+.is-roomy .wg-item-staff .pi {
+  font-size: 0.7rem;
+  margin-inline-end: 0.25rem;
+  opacity: 0.75;
 }
 .wg-dot {
   width: 0.7rem;
