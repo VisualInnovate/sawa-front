@@ -16,6 +16,7 @@ import "./main.css";
 import "./style.css";
 import "./views/frontend/assets/main.css";
 import "./styles/app.css";
+import "./styles/parent-portal.css";
 
 import resetStore from "@/plugins/reset-store";
 import "./axios";

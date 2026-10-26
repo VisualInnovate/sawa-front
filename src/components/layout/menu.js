@@ -16,6 +16,7 @@ export const buildMenu = () => [
     label: "Adminstration",
     children: [
       { label: "Employees", to: { name: "Employees" }, perm: "employees list" },
+      { label: "sch.title", to: { name: "staff-schedules" }, perm: "staff schedules list" },
       { label: "doctors", to: { name: "doctors" }, perm: "doctor list" },
       { label: "permissions", to: { name: "permissions" }, perm: "permissions list" },
       { label: "roles", to: { name: "Roles" }, perm: "roles list" },
@@ -30,6 +31,12 @@ export const buildMenu = () => [
       { label: "meetings", to: { name: "parent-meeting" }, perm: "parent meetings list" },
       { label: "children", to: { name: "Children" }, perm: "child list" },
     ],
+  },
+  {
+    key: "my-schedule",
+    icon: "mdi-calendar-account-outline",
+    label: "sch.my_title",
+    to: { name: "my-schedule" },
   },
   {
     key: "my-evaluations",
@@ -103,6 +110,7 @@ export const buildMenu = () => [
       { label: "acc.payments", to: { name: "accounting-payments" }, perm: "accounting list" },
       { label: "acc.charges", to: { name: "accounting-charges" }, perm: "accounting list" },
       { label: "acc.credits", to: { name: "accounting-credits" }, perm: "accounting list" },
+      { label: "acc.reports.title", to: { name: "accounting-reports" }, perm: "accounting reports list" },
       { label: "acc.settings", to: { name: "accounting-settings" }, perm: "accounting settings edit" },
     ],
   },

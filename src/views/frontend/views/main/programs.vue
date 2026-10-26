@@ -53,7 +53,7 @@
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
-              src="./images/programs-hero.png"
+              src="./images/class-kids.jpg"
               alt="برامج أكاديمية سوا"
               class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
@@ -117,7 +117,7 @@
                 قياس التقدم
               </h3>
               <p class="text-[#594045] text-xs leading-relaxed">
-                تقارير بيانية دقيقة توضح مدى استجابة الطفل للأهداف الموضوعة.
+                رسوم بيانية توضح مستوى تقدّم الطفل في كل مهارة يتدرّب عليها.
               </p>
             </div>
           </div>
@@ -143,13 +143,13 @@
           >
             <div class="overflow-hidden rounded-[20px] bg-[#ffd9df]/55">
               <img
-                src="./images/programs-early-intervention.png"
+                src="./images/early-intervention.jpg"
                 alt="برنامج التدخل المبكر"
-                class="w-full h-[230px] sm:h-[310px] object-cover"
+                class="w-full h-[230px] sm:h-[310px] lg:h-full lg:max-h-[560px] object-cover"
               />
             </div>
             <div class="text-start flex flex-col gap-8">
-              <span class="text-[#b21553] font-bold text-sm flex gap-2">
+              <span class="text-[#b21553] font-bold text-sm flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -162,7 +162,7 @@
                     fill="#B21553"
                   />
                 </svg>
-                الأعمار من 2-6 سنوات
+                من الولادة حتى عمر 6 سنوات
               </span>
               <h3
                 class="text-[#1c6772] text-2xl sm:text-3xl font-extrabold leading-tight"
@@ -170,42 +170,69 @@
                 برنامج التدخل المبكر
               </h3>
               <p class="text-[#594045] text-sm sm:text-base leading-[1.9]">
-                نركز في هذا البرنامج على استغلال مرونة الدماغ في السنوات الأولى
-                لتطوير المهارات اللغوية، الحركية، والاجتماعية عبر جلسات مكثفة
-                ومدروسة.
+                يهدف إلى دعم الأطفال ذوي التأخر النمائي في سن مبكرة لتنمية قدراتهم الأساسية، وتكمن أهميته في تقليل آثار التأخر وتعزيز فرص النمو والتعلم والدمج مستقبلاً. السنوات الأولى من عمر طفلك هي الأهم في حياته.
               </p>
+              <h4 class="text-[#1c6772] font-bold text-base -mb-5">لمن هذا البرنامج؟</h4>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm">تحفيز لغوي مكثف</span>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">ضعف التواصل البصري أو الاستجابة للاسم</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm"
-                    >تنمية المهارات الحركية الدقيقة</span
-                  >
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تأخر في الجلوس، الحبو، الوقوف أو المشي</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm"
-                    >تدريب على الاستقلالية</span
-                  >
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تأخر لغوي أو قلة الأصوات والكلمات</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm">دمج الحواس</span>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">حساسية عالية أو ضعف استجابة للمؤثرات الحسية</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">الولادة المبكرة أو وجود عوامل خطورة تؤثر على النمو</span>
+                </div>
+              </div>
+              <h4 class="text-[#1c6772] font-bold text-base -mb-5">أهداف البرنامج</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تعزيز البناء العصبي السليم للدماغ</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تطوير المهارات الحركية والحسية واللغوية والاجتماعية والاستقلالية</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">الحد من تأثير التأخر النمائي مبكراً</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">رفع مستوى التواصل والانتباه المشترك</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تطوير التكامل الحسي للطفل</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تمكين الوالدين بتدريبهم على استراتيجيات عملية في البيت</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">زيادة فرص الدمج الفعّال في الروضات والمدارس</span>
                 </div>
               </div>
             </div>
           </article>
-
           <article
             class="bg-[#F6F3F2] rounded-[24px] p-4 sm:p-6 lg:p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center"
           >
             <div class="text-start flex flex-col gap-8 order-1 lg:order-2">
-              <span
-                class="text-[#1c6772] font-bold text-sm flex items-center gap-2"
-              >
+              <span class="text-[#1c6772] font-bold text-sm flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="22"
@@ -218,46 +245,154 @@
                     fill="#1C6772"
                   />
                 </svg>
-                الصفوف النهارية
+                بناء المهارات خطوة بخطوة نحو الاستقلالية
               </span>
               <h3
                 class="text-[#b21553] text-2xl sm:text-3xl font-extrabold leading-tight"
               >
-                برنامج الصفوف التعليمية
+                برنامج الصفوف النهارية
               </h3>
               <p class="text-[#594045] text-sm sm:text-base leading-[1.9]">
-                بيئة مدرسية متخصصة توفر مناهج تعليمية معدلة تتناسب مع احتياجات
-                كل طالب، مع التركيز على المهارات الأكاديمية والاجتماعية في بيئة
-                داعمة.
+                برنامج تربوي تأهيلي متكامل يُنفَّذ في بيئة صفية منظمة ضمن الحد الأدنى من عدد الطلبة وفق المعايير العالمية، ويستهدف الأطفال من ذوي التأخر والاضطرابات النمائية المختلفة، بهدف تطوير مهاراتهم اللازمة للنجاح بدمجهم مع أقرانهم في الروضات والمدارس.
               </p>
+              <h4 class="text-[#1c6772] font-bold text-base -mb-5">مكونات البرنامج</h4>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm">فصول صغيرة العدد</span>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">مهارات الاستقلالية اليومية: تحضير وتناول السناك، غسل اليدين وتنظيف الأسنان، ارتداء وخلع الملابس</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm"
-                    >مناهج معتمدة ومطورة</span
-                  >
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">جلسات سلوكية فردية (ABA) ينفذها أخصائيو تحليل السلوك التطبيقي</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm">أنشطة دمج اجتماعي</span>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">جلسات جماعية ببرنامج (Learning Language) لتطوير اللغة التواصلية والتفاعل مع الأقران</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4" />
-                  <span class="text-[#594045] text-sm">تقييم أكاديمي دوري</span>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">جلسات جماعية بالألواح التفاعلية الذكية والوسائل التعليمية لتبادل الأدوار والتعاون</span>
+                </div>
+              </div>
+              <h4 class="text-[#1c6772] font-bold text-base -mb-5">مميزات البرنامج</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">روتين يومي منظم يعزز التعلّم بالتكرار والاستمرارية</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">دمج المهارات الحياتية في الأنشطة اليومية</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">دعم فردي وجماعي في بيئة صفية آمنة</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">مجموعات صغيرة تمهّد لدمجهم في الروضات والمدارس</span>
                 </div>
               </div>
             </div>
-            <div
-              class="overflow-hidden rounded-[20px] bg-[#a7ebf6]/50 order-2 lg:order-1"
-            >
+            <div class="overflow-hidden rounded-[20px] bg-[#a7ebf6]/50 order-2 lg:order-1">
               <img
-                src="./images/programs-day-classes.png"
+                src="./images/classroom-1.jpg"
                 alt="برنامج الصفوف النهارية"
-                class="w-full h-[230px] sm:h-[310px] object-cover"
+                class="w-full h-[230px] sm:h-[310px] lg:h-full lg:max-h-[560px] object-cover"
+              />
+            </div>
+          </article>
+          <article
+            class="bg-[#F6F3F2] rounded-[24px] p-4 sm:p-6 lg:p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center"
+          >
+            <div class="overflow-hidden rounded-[20px] bg-[#ffd9df]/55">
+              <img
+                src="./images/integration-illustration.jpg"
+                alt="برنامج الدمج في الروضات والمدارس"
+                class="w-full h-[230px] sm:h-[310px] lg:h-full lg:max-h-[560px] object-cover"
+              />
+            </div>
+            <div class="text-start flex flex-col gap-8">
+              <span class="text-[#b21553] font-bold text-sm">أكاديمياً واجتماعياً</span>
+              <h3
+                class="text-[#1c6772] text-2xl sm:text-3xl font-extrabold leading-tight"
+              >
+                برنامج الدمج في الروضات والمدارس
+              </h3>
+              <p class="text-[#594045] text-sm sm:text-base leading-[1.9]">
+                يقدَّم للأطفال من ذوي الاضطرابات النمائية والمشكلات الإدراكية والأكاديمية من طلبة الأكاديمية الذين تم تدريبهم داخلها، وحان وقت تعميم المهارات التي اكتسبوها بين أقرانهم في الروضات والمدارس، بعد تحقيقهم لمتطلبات الدمج والانتقال لها.
+              </p>
+              <h4 class="text-[#1c6772] font-bold text-base -mb-5">مميزات البرنامج</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تقييم فردي شامل لكل طالب بكافة المجالات</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">خطة تربوية فردية شاملة بما فيها الدعم الإدراكي والأكاديمي</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">معلم دمج مخصص لكل طالب</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">إشراف ميداني في الروضات والمدارس</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تقارير أسبوعية بناءً على الخطة التربوية الفردية (IEP)</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">معلم بديل مدرب في حال غياب المعلم الأساسي</span>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article
+            class="bg-[#F6F3F2] rounded-[24px] p-4 sm:p-6 lg:p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center"
+          >
+            <div class="text-start flex flex-col gap-8 order-1 lg:order-2">
+              <span class="text-[#1c6772] font-bold text-sm">العيادات</span>
+              <h3
+                class="text-[#b21553] text-2xl sm:text-3xl font-extrabold leading-tight"
+              >
+                برنامج الجلسات الفردية
+              </h3>
+              <p class="text-[#594045] text-sm sm:text-base leading-[1.9]">
+                برنامج متخصص يُقدَّم بشكل فردي لكل طفل حسب احتياجاته التأهيلية، من قبل فريق متكامل التخصصات. خطة مخصصة لكل طفل تبدأ بالتقييم وتنتهي بالتقدم.
+              </p>
+              <h4 class="text-[#1c6772] font-bold text-base -mb-5">التخصصات</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">تحليل السلوك التطبيقي (ABA)</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">العلاج الوظيفي</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">علاج النطق واللغة</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">العلاج الطبيعي</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <img src="./images/icon-check.svg" alt="" class="w-4 h-4 mt-1 shrink-0" />
+                  <span class="text-[#594045] text-sm">البرنامج الأكاديمي (التعليم الإدراكي)</span>
+                </div>
+              </div>
+            </div>
+            <div class="overflow-hidden rounded-[20px] bg-[#a7ebf6]/50 order-2 lg:order-1">
+              <img
+                src="./images/individual-session.jpg"
+                alt="برنامج الجلسات الفردية"
+                class="w-full h-[230px] sm:h-[310px] lg:h-full lg:max-h-[560px] object-cover"
               />
             </div>
           </article>
@@ -277,11 +412,12 @@
               تخصصات طبية وتعليمية تحت سقف واحد
             </p>
           </div>
-          <span
+          <a
+            href="/therapeutic"
             class="text-[#B21553] font-bold border-b-2 border-[#B21553] text-sm cursor-pointer"
           >
             عرض كافة الأقسام
-          </span>
+          </a>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -367,7 +503,7 @@
             </div>
             <h3 class="text-black font-bold text-base">التعليم الإدراكي</h3>
             <p class="text-[#594045] text-xs leading-relaxed">
-              برامج لرفع كفاءة العمليات العقلية والتركيز والانتباه.
+              تطوير المهارات الأكاديمية والإدراكية بما يتناسب مع قدرات كل طفل.
             </p>
           </div>
         </div>
@@ -382,7 +518,7 @@
             رحلة العمل معنا
           </h2>
           <p class="text-[#594045] text-sm sm:text-base mt-3">
-            رحلة العمل معنا
+            خطة مخصصة لكل طفل تبدأ بالتقييم وتنتهي بالتقدم
           </p>
         </div>
 
@@ -532,27 +668,35 @@
             قياس التقدم <span class="text-[#B21553]">بالبيانات</span>
           </h2>
           <p class="text-[#594045] text-sm sm:text-base leading-[1.9]">
-            نحن لا نعتمد فقط على الملاحظة، بل نستخدم أحدث أنظمة تتبع البيانات
-            الرقمية لرصد كل مهارة يكتسبها طفلك. تحصل العائلة على تقارير بيانية
-            دقيقة توضح منحنى التطور في مختلف الجوانب.
+            نستخدم بعملنا في سوا الرسوم البيانية لعرض تطوّر الطفل بشكل واضح
+            وموضوعي، ونرصد أداءه ونسجّل استجاباته بشكل يومي.
           </p>
           <div class="flex flex-col gap-3 pt-2">
             <div class="bg-white rounded-2xl p-4 flex items-center gap-3">
               <span
                 class="w-8 h-8 rounded-full bg-[#DCFCE7] shrink-0 text-[#16A34A] text-xs flex items-center justify-center font-bold"
-                >25%+</span
+                >1</span
               >
               <p class="text-[#594045] text-sm font-bold">
-                تحسن في مهارات التواصل اللفظي خلال 3 أشهر
+                توضيح مستوى التقدّم في كل مهارة تم تدريب الطفل عليها
               </p>
             </div>
             <div class="bg-white rounded-2xl p-4 flex items-center gap-3">
               <span
                 class="w-8 h-8 rounded-full bg-[#DBEAFE] shrink-0 text-[#2563EB] text-xs flex items-center justify-center font-bold"
-                >40%+</span
+                >2</span
               >
               <p class="text-[#594045] text-sm font-bold">
-                زيادة في التركيز والانتباه في المهام التعليمية
+                مساعدة الأهل على فهم تطوّر طفلهم بفترة زمنية محددة وبسهولة
+              </p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 flex items-center gap-3">
+              <span
+                class="w-8 h-8 rounded-full bg-[#FCE7F3] shrink-0 text-[#B21553] text-xs flex items-center justify-center font-bold"
+                >3</span
+              >
+              <p class="text-[#594045] text-sm font-bold">
+                دعم اتخاذ قرارات تعليمية مبنية على بيانات فعلية لتطوّر الطفل
               </p>
             </div>
           </div>

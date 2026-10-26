@@ -10,6 +10,7 @@ const accounting = [
   { path: "/accounting/payments", name: "accounting-payments", meta: { permission: view }, component: () => import("../views/accounting/Payments.vue") },
   { path: "/accounting/charges", name: "accounting-charges", meta: { permission: view }, component: () => import("../views/accounting/Charges.vue") },
   { path: "/accounting/credits", name: "accounting-credits", meta: { permission: view }, component: () => import("../views/accounting/Credits.vue") },
+  { path: "/accounting/reports", name: "accounting-reports", meta: { permission: ["accounting reports list"] }, component: () => import("../views/accounting/Reports.vue") },
   { path: "/accounting/settings", name: "accounting-settings", meta: { permission: ["accounting settings edit"] }, component: () => import("../views/accounting/Settings.vue") },
 ];
 

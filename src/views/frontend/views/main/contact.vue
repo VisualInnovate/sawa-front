@@ -53,7 +53,7 @@
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
-              src="./images/contact-hero.jpg"
+              src="./images/reception.jpg"
               alt="نحن هنا لدعمك"
               class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />

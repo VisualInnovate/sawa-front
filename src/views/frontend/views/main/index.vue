@@ -50,7 +50,7 @@
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
-              src="./images/hero-main.jpg"
+              src="./images/hero-teacher-child.jpg"
               alt="طفل مع معلمة"
               class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
@@ -69,14 +69,14 @@
           <div class="flex flex-col gap-4 pt-8">
             <div class="bg-[#f6f3f2] p-2 rounded-2xl">
               <img
-                src="./images/about-1.jpg"
+                src="./images/classroom-1.jpg"
                 alt=""
                 class="w-full h-48 object-cover rounded-xl shadow-sm"
               />
             </div>
             <div class="bg-[#ffd9df] p-2 rounded-2xl">
               <img
-                src="./images/about-2.jpg"
+                src="./images/class-kids.jpg"
                 alt=""
                 class="w-full h-64 object-cover rounded-xl shadow-sm"
               />
@@ -85,14 +85,14 @@
           <div class="flex flex-col gap-4 pb-8">
             <div class="bg-[#a7ebf6] p-2 rounded-2xl">
               <img
-                src="./images/about-3.jpg"
+                src="./images/individual-session.jpg"
                 alt=""
                 class="w-full h-64 object-cover rounded-xl shadow-sm"
               />
             </div>
             <div class="bg-[#f6f3f2] p-2 rounded-2xl">
               <img
-                src="./images/about-4.jpg"
+                src="./images/classroom-2.jpg"
                 alt=""
                 class="w-full h-48 object-cover rounded-xl shadow-sm"
               />
@@ -102,7 +102,7 @@
         <!-- Single image for mobile -->
         <div class="lg:hidden rounded-2xl overflow-hidden shadow-md">
           <img
-            src="./images/about-1.jpg"
+            src="./images/class-kids.jpg"
             alt=""
             class="w-full h-56 sm:h-72 object-cover"
           />
@@ -121,9 +121,10 @@
             تأسيس مبني على احتياج حقيقي
           </h2>
           <p class="text-body text-base lg:text-lg text-start leading-[1.7]">
-            نشأت أكاديمية سوا من إيمان عميق بأن كل طفل يستحق فرصة عادلة للتعلم
-            والاندماج. نحن لا نقدم فقط جلسات علاجية، بل نبني مستقبلاً مستقلاً
-            لكل طفل من خلال منهجية علمية حديثة وبيئة تحتضن الاختلاف.
+            جاء تأسيس أكاديمية سوا للتربية الخاصة استجابةً لحاجة مجتمعية
+            حقيقية بوجود مؤسسة تجمع بين العلم والخبرة والمهنية، وتطبق المعايير
+            العالمية في التعامل مع الأطفال الذين يحتاجون للبرامج التأهيلية
+            الشاملة.
           </p>
           <div class="grid grid-cols-2 gap-4 sm:gap-6 w-full pt-2 sm:pt-4">
             <div class="flex items-start gap-3">
@@ -226,8 +227,8 @@
               التدخل المبكر
             </h3>
             <p class="text-body text-sm leading-relaxed">
-              برامج مخصصة للأطفال في المراحل العمرية الأولى لضمان أفضل نتائج
-              نمائية.
+              للأطفال من الولادة حتى عمر 6 سنوات ممن تظهر عليهم علامات التأخر
+              النمائي.
             </p>
           </div>
           <!-- Card 2 -->
@@ -250,8 +251,8 @@
               الصفوف النهارية
             </h3>
             <p class="text-body text-sm leading-relaxed">
-              بيئة مدرسية متكاملة تدمج بين المناهج الأكاديمية والمهارات
-              الحياتية.
+              برنامج تربوي تأهيلي في بيئة صفية منظمة بالحد الأدنى من عدد
+              الطلبة، تحضيراً للدمج في الروضات والمدارس.
             </p>
           </div>
           <!-- Card 3 -->
@@ -274,7 +275,8 @@
               الدمج المدرسي
             </h3>
             <p class="text-body text-sm leading-relaxed">
-              دعم ومرافقة الأطفال في المدارس العادية لضمان اندماج اجتماعي ناجح.
+              دمج طلبة الأكاديمية في الروضات والمدارس أكاديمياً واجتماعياً،
+              بمعلم دمج مخصص لكل طالب.
             </p>
           </div>
           <!-- Card 4 -->
@@ -297,7 +299,8 @@
               الجلسات الفردية
             </h3>
             <p class="text-body text-sm leading-relaxed">
-              علاج نطق، وظيفي، وسلوكي مكثف يركز على أهداف الطفل المحددة.
+              تحليل السلوك التطبيقي (ABA)، العلاج الوظيفي، النطق واللغة، العلاج
+              الطبيعي، والبرنامج الأكاديمي.
             </p>
           </div>
         </div>
@@ -355,8 +358,8 @@
                   فريق معتمد ومحترف
                 </h4>
                 <p class="text-white/70 text-sm sm:text-base leading-relaxed">
-                  كوادرنا حاصلة على أعلى الشهادات والتدريبات في مجالات التربية
-                  الخاصة.
+                  أخصائيون مؤهلون علمياً يحملون مزاولة مهنية رسمية معتمدة
+                  بتخصصاتهم.
                 </p>
               </div>
             </div>
@@ -394,7 +397,7 @@
                   نتائج مبنية على البيانات
                 </h4>
                 <p class="text-white/70 text-sm sm:text-base leading-relaxed">
-                  نحن نؤمن بالأرقام والتقدم الملموس الذي يتم رصده أسبوعياً.
+                  نرصد أداء الطفل يومياً ونعرض تقدّمه برسوم بيانية واضحة.
                 </p>
               </div>
             </div>
@@ -407,7 +410,7 @@
             class="backdrop-blur-[6px] bg-white/10 border border-white/20 p-3 sm:p-4 rounded-[32px] lg:rounded-[40px]"
           >
             <img
-              src="./images/why-sawa.jpg"
+              src="./images/team-photo.jpg"
               alt="لماذا سوا"
               class="w-full h-64 sm:h-96 lg:h-[600px] object-cover rounded-[24px] lg:rounded-[30px] shadow-2xl"
             />
@@ -416,14 +419,14 @@
             class="absolute -bottom-4 sm:-bottom-8 left-0 sm:-left-8 bg-[#B21553] p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl"
           >
             <p
-              class="text-white font-bold text-2xl sm:text-[36px] leading-tight text-center"
+              class="text-white font-bold text-xl sm:text-[28px] leading-tight text-center"
             >
-              100%
+              معكم وبكم
             </p>
             <p
               class="text-white font-medium text-xs tracking-[0.6px] uppercase text-center"
             >
-              التزام بالنمو
+              سنبقى سوا
             </p>
           </div>
         </div>
@@ -552,9 +555,9 @@
             <p
               class="text-body text-sm sm:text-base text-start leading-relaxed"
             >
-              نحن ندرك أهمية الشراكة مع الأهل. لذا، نوفر تقارير أسبوعية مفصلة
-              ورسوم بيانية توضح تقدم طفلك في مختلف المجالات (لغوية، حركية،
-              اجتماعية). شفافيتنا هي سر ثقتكم.
+              نرصد أداء الطفل ونسجّل استجاباته بشكل يومي، ونراجع أهداف خطته
+              الفردية بشكل دوري ونعدّلها عند الحاجة، ونستخدم الرسوم البيانية
+              لعرض تطوّره بشكل واضح وموضوعي.
             </p>
             <div class="flex flex-col gap-3 sm:gap-4 pt-2 sm:pt-4 w-full">
               <div class="flex items-center gap-3">
@@ -564,7 +567,7 @@
                   class="w-5 h-5 shrink-0"
                 />
                 <span class="text-dark font-medium text-sm sm:text-base"
-                  >تقارير رقمية أسبوعية تصلك لهاتفك</span
+                  >تقرير أسبوعي وشهري ودوري لكل طفل</span
                 >
               </div>
               <div class="flex items-center gap-3">
@@ -574,7 +577,7 @@
                   class="w-5 h-5 shrink-0"
                 />
                 <span class="text-dark font-medium text-sm sm:text-base"
-                  >اجتماعات دورية لمناقشة التطور</span
+                  >مراجعة الأهداف دورياً وتعديل الخطة عند الحاجة</span
                 >
               </div>
               <div class="flex items-center gap-3">
@@ -584,7 +587,7 @@
                   class="w-5 h-5 shrink-0"
                 />
                 <span class="text-dark font-medium text-sm sm:text-base"
-                  >فيديوهات توضيحية لبعض المهارات المكتسبة</span
+                  >رسوم بيانية توضح التقدّم في كل مهارة</span
                 >
               </div>
             </div>
@@ -597,9 +600,6 @@
             <div class="flex flex-col gap-4 sm:gap-6">
               <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-[#B21553] font-bold text-sm sm:text-base"
-                    >85%</span
-                  >
                   <span class="text-dark font-bold text-sm sm:text-base"
                     >التواصل اللفظي</span
                   >
@@ -613,9 +613,6 @@
               </div>
               <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-[#1C6772] font-bold text-sm sm:text-base"
-                    >70%</span
-                  >
                   <span class="text-dark font-bold text-sm sm:text-base"
                     >التفاعل الاجتماعي</span
                   >
@@ -629,9 +626,6 @@
               </div>
               <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-[#006b24] font-bold text-sm sm:text-base"
-                    >92%</span
-                  >
                   <span class="text-dark font-bold text-sm sm:text-base"
                     >الرعاية الذاتية</span
                   >
@@ -653,102 +647,56 @@
     <section class="bg-white py-12 lg:py-24">
       <div class="max-w-[1280px] mx-auto px-4 sm:px-6">
         <h2
-          class="text-2xl sm:text-3xl lg:text-[36px] font-bold text-dark text-center mb-10 lg:mb-16"
+          class="text-2xl sm:text-3xl lg:text-[36px] font-bold text-dark text-center mb-4"
         >
-          نخبة من الأخصائيين في خدمتكم
+          فريقنا
         </h2>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          <div class="flex flex-col items-center">
-            <div class="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-48 lg:h-48">
-              <div
-                class="absolute inset-[-8px] lg:inset-[-10px] bg-[#B21553]/10 rounded-full"
-              ></div>
-              <img
-                src="./images/team-sara.jpg"
-                alt="د. سارة الأحمد"
-                class="w-full h-full object-cover rounded-full shadow-lg relative z-10"
-              />
+        <p
+          class="text-body text-base lg:text-lg text-center leading-relaxed max-w-[760px] mx-auto mb-10 lg:mb-16"
+        >
+          نعمل كفريق متكامل التخصصات، وتحت إشراف إدارة ذات خبرة طويلة في مجال
+          التأهيل والتعليم، للوصول بكل طفل إلى أقصى درجات الاستقلالية والاعتماد
+          على الذات.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          <div
+            class="bg-[#F6F3F2] rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
+          >
+            <div
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-[#B21553]/10"
+            >
+              <img src="./images/icon-certified.svg" alt="" class="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h4
-              class="text-base sm:text-lg lg:text-xl font-bold text-dark mt-4 sm:mt-6 text-center"
-            >
-              د. سارة الأحمد
-            </h4>
-            <p
-              class="text-[#B21553] font-bold text-xs sm:text-sm mt-1 text-center"
-            >
-              أخصائية نطق وتخاطب
+            <h3 class="text-lg sm:text-xl font-bold text-[#B21553]">مؤهلون ومعتمدون</h3>
+            <p class="text-body text-sm leading-relaxed">
+              نخبة من الأخصائيين المؤهلين علمياً، يحملون مزاولة مهنية رسمية معتمدة بتخصصاتهم.
             </p>
-            <p class="text-body text-xs mt-1 text-center">12 سنة من الخبرة</p>
           </div>
-          <div class="flex flex-col items-center">
-            <div class="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-48 lg:h-48">
-              <div
-                class="absolute inset-[-8px] lg:inset-[-10px] bg-[#1C67721A] rounded-full"
-              ></div>
-              <img
-                src="./images/team-khaled.jpg"
-                alt="أ. خالد منصور"
-                class="w-full h-full object-cover rounded-full shadow-lg relative z-10"
-              />
+          <div
+            class="bg-[#F6F3F2] rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
+          >
+            <div
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-[#1C6772]/10"
+            >
+              <img src="./images/icon-professionalism.svg" alt="" class="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h4
-              class="text-base sm:text-lg lg:text-xl font-bold text-dark mt-4 sm:mt-6 text-center"
-            >
-              أ. خالد منصور
-            </h4>
-            <p
-              class="text-[#1C6772] font-bold text-xs sm:text-sm mt-1 text-center"
-            >
-              محلل سلوك معتمد
+            <h3 class="text-lg sm:text-xl font-bold text-[#1C6772]">اختيار وفق معايير دقيقة</h3>
+            <p class="text-body text-sm leading-relaxed">
+              يتم اختيارهم وفق معايير دقيقة تضمن الكفاءة العالية والدقة والالتزام المهني.
             </p>
-            <p class="text-body text-xs mt-1 text-center">8 سنوات من الخبرة</p>
           </div>
-          <div class="flex flex-col items-center">
-            <div class="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-48 lg:h-48">
-              <div
-                class="absolute inset-[-8px] lg:inset-[-10px] bg-[#B21553]/10 rounded-full"
-              ></div>
-              <img
-                src="./images/team-layla.jpg"
-                alt="د. ليلى حسن"
-                class="w-full h-full object-cover rounded-full shadow-lg relative z-10"
-              />
+          <div
+            class="bg-[#F6F3F2] rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
+          >
+            <div
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-[#B21553]/10"
+            >
+              <img src="./images/icon-growth.svg" alt="" class="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h4
-              class="text-base sm:text-lg lg:text-xl font-bold text-dark mt-4 sm:mt-6 text-center"
-            >
-              د. ليلى حسن
-            </h4>
-            <p
-              class="text-[#B21553] font-bold text-xs sm:text-sm mt-1 text-center"
-            >
-              أخصائية علاج وظيفي
+            <h3 class="text-lg sm:text-xl font-bold text-[#B21553]">تدريب مستمر</h3>
+            <p class="text-body text-sm leading-relaxed">
+              يخضع جميع أعضاء فريقنا لبرامج تدريب مستمرة داخل سوا وخارجها، لتطوير مهاراتهم وتحديث معارفهم.
             </p>
-            <p class="text-body text-xs mt-1 text-center">15 سنة من الخبرة</p>
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-48 lg:h-48">
-              <div
-                class="absolute inset-[-8px] lg:inset-[-10px] bg-[#1C67721A] rounded-full"
-              ></div>
-              <img
-                src="./images/team-youssef.jpg"
-                alt="أ. يوسف عمر"
-                class="w-full h-full object-cover rounded-full shadow-lg relative z-10"
-              />
-            </div>
-            <h4
-              class="text-base sm:text-lg lg:text-xl font-bold text-dark mt-4 sm:mt-6 text-center"
-            >
-              أ. يوسف عمر
-            </h4>
-            <p
-              class="text-[#1C6772] font-bold text-xs sm:text-sm mt-1 text-center"
-            >
-              أخصائي تربية خاصة
-            </p>
-            <p class="text-body text-xs mt-1 text-center">10 سنوات من الخبرة</p>
           </div>
         </div>
       </div>
@@ -770,7 +718,7 @@
             class="sm:col-span-2 lg:col-span-2 lg:row-span-2 rounded-3xl overflow-hidden relative h-64 sm:h-80 lg:h-full"
           >
             <img
-              src="./images/gallery-classroom.jpg"
+              src="./images/classroom-2.jpg"
               alt="صفوف دراسية"
               class="w-full h-full object-cover"
             />
@@ -787,56 +735,56 @@
             class="rounded-3xl overflow-hidden relative h-44 sm:h-52 lg:h-full"
           >
             <img
-              src="./images/gallery-play.jpg"
+              src="./images/indoor-play-slide.jpg"
               alt="مناطق اللعب"
               class="w-full h-full object-cover"
             />
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4"
             >
-              <p class="text-white font-bold text-sm">مناطق اللعب</p>
+              <p class="text-white font-bold text-sm">ساحات اللعب الداخلية</p>
             </div>
           </div>
           <div
             class="rounded-3xl overflow-hidden relative h-44 sm:h-52 lg:h-full"
           >
             <img
-              src="./images/gallery-safety.jpg"
-              alt="أمان تام"
+              src="./images/reception.jpg"
+              alt="مرافق الأكاديمية"
               class="w-full h-full object-cover"
             />
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4"
             >
-              <p class="text-white font-bold text-sm">أمان تام (كاميرات)</p>
+              <p class="text-white font-bold text-sm">مرافق مراقبة بالكاميرات</p>
             </div>
           </div>
           <div
             class="rounded-3xl overflow-hidden relative h-44 sm:h-52 lg:h-full"
           >
             <img
-              src="./images/gallery-therapy.jpg"
+              src="./images/pt-room.jpg"
               alt="غرف علاجية"
               class="w-full h-full object-cover"
             />
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4"
             >
-              <p class="text-white font-bold text-sm">غرف علاجية متخصصة</p>
+              <p class="text-white font-bold text-sm">قسم العلاج الطبيعي</p>
             </div>
           </div>
           <div
             class="rounded-3xl overflow-hidden relative h-44 sm:h-52 lg:h-full"
           >
             <img
-              src="./images/gallery-outdoor.jpg"
+              src="./images/garden-umbrella.jpg"
               alt="مرافق خارجية"
               class="w-full h-full object-cover"
             />
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4"
             >
-              <p class="text-white font-bold text-sm">مرافق خارجية</p>
+              <p class="text-white font-bold text-sm">ساحات واسعة</p>
             </div>
           </div>
         </div>
@@ -851,7 +799,7 @@
         <!-- Image -->
         <div class="flex-1 relative w-full">
           <img
-            src="./images/transport.jpg"
+            src="./images/bus.jpg"
             alt="نقل آمن"
             class="w-full h-56 sm:h-80 lg:h-[400px] object-cover rounded-[32px] lg:rounded-[40px] shadow-xl"
           />
@@ -871,8 +819,9 @@
             نقل آمن.. براحة بال تامة
           </h2>
           <p class="text-body text-sm sm:text-base text-start leading-relaxed">
-            نوفر أسطولاً من الحافلات الحديثة المجهزة خصيصاً لتناسب احتياجات
-            أطفالنا، مع التزام صارم بأعلى معايير الأمان والخصوصية.
+            نوفر خدمة المواصلات لطلبتنا بمركبات صغيرة لا تتجاوز سعتها 8 أطفال،
+            حتى لا تطول الجولة على الأطفال ويصل كل طفل لبيته وللأكاديمية بأقرب
+            وقت ممكن.
           </p>
           <div class="flex flex-col gap-3 pt-2 w-full">
             <div class="flex gap-3 items-center">
@@ -887,10 +836,10 @@
               </div>
               <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
-                  كاميرات مراقبة داخلية
+                  كاميرات صوت وصورة وتتبع GPS
                 </p>
                 <p class="text-body text-xs sm:text-sm">
-                  لمتابعة رحلة الطفل لحظة بلحظة
+                  مراقبة كاملة للمركبة طوال الرحلة
                 </p>
               </div>
             </div>
@@ -906,10 +855,10 @@
               </div>
               <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
-                  مرافقة متخصصة
+                  معالج سلوكي مرافق
                 </p>
                 <p class="text-body text-xs sm:text-sm">
-                  أخصائية مرافقة في كل رحلة لضمان سلامة الأطفال
+                  مؤهل ومرخّص، يتعامل مع أي سلوك غير مرغوب داخل المركبة
                 </p>
               </div>
             </div>
@@ -918,17 +867,17 @@
                 class="shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14"
               >
                 <img
-                  src="./images/icon-seat.svg"
+                  src="./images/icon-quick.svg"
                   alt=""
                   class="w-10 h-10 sm:w-12 sm:h-12"
                 />
               </div>
               <div class="text-start">
                 <p class="font-bold text-dark text-sm sm:text-base">
-                  مقاعد طبية مريحة
+                  دون تأخير
                 </p>
                 <p class="text-body text-xs sm:text-sm">
-                  مصممة لتوفير أقصى درجات الراحة
+                  جولات قصيرة ليصل كل طفل بأقرب وقت ممكن
                 </p>
               </div>
             </div>
