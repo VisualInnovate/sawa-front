@@ -17,6 +17,7 @@ import treatment_type from "./treatment-type.routes";
 import inputs from "./inputs.routes";
 import sideProfileRoutes from "./side-profile.routes";
 import calender from "./calender.routes";
+import accounting from "./accounting.routes";
 import page_403 from "../views/pages/page_403.vue";
 import HomeView from "../views/frontend/views/HomeView.vue";
 import Login from "../views/frontend/views/Login.vue";
@@ -302,6 +303,7 @@ const routes = [
       ...Object.values(sideProfileRoutes),
       ...Object.values(calender),
       ...Object.values(parentsRoutes),
+      ...Object.values(accounting),
     ],
   },
   {
@@ -333,6 +335,14 @@ const routes = [
     beforeEnter: auth,
     meta: { permission: ["sessions list"] },
     component: () => import("@/views/sessions/SessionRun.vue"),
+  },
+  {
+    // A receipt («سند قبض») as a printable sheet, outside the dashboard layout.
+    path: "/accounting-receipt/:id",
+    name: "accounting-receipt",
+    beforeEnter: auth,
+    meta: { permission: ["accounting list", "accounting payments create"] },
+    component: () => import("@/views/accounting/ReceiptPrint.vue"),
   },
   {
     // A room's weekly activities as a printable sheet, outside the dashboard layout.

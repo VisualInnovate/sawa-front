@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getEvaluationTypeLabel } from "../utils/evaluationTypes";
-import { REQUEST_STATUS, isRequestOpen, requestStatus } from "../utils/evaluationRequestStatus";
+import { REQUEST_STATUS, isRequestLocked, isRequestOpen, requestStatus } from "../utils/evaluationRequestStatus";
 const props = defineProps({
   requests: { type: Array, default: () => [] },
   loading: Boolean,
@@ -59,8 +59,9 @@ const name = row => getEvaluationTypeLabel(row.evaluation_type, t, row.title || 
             <span v-else class="request-date"><i class="pi pi-clock" />{{ t("evaluation_without_appointment") }}</span>
           </div>
           <Tag :severity="requestStatus(row.status).severity" :value="t(requestStatus(row.status).key)" />
+          <Tag v-if="row.billing_status === 'locked'" severity="warn" icon="pi pi-lock" :value="t('acc.billing.locked')" v-tooltip.top="t('acc.locked_hint')" />
           <div class="request-actions">
-            <Button v-if="isRequestOpen(row)" v-can="['evaluation results create', 'able answer create', 'skills answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create', 'transition answer create', 'mchat answer create']" :icon="inProgress(row) ? 'pi pi-forward' : 'pi pi-play'" :label="t(inProgress(row) ? 'continue_evaluation' : 'start_evaluation')" :loading="starting === row.id" :disabled="starting !== null" @click="$emit('start', row)" />
+            <Button v-if="isRequestOpen(row)" v-can="['evaluation results create', 'able answer create', 'skills answer create', 'carolina answer create', 'milestone answer create', 'barrier answer create', 'transition answer create', 'mchat answer create']" :icon="inProgress(row) ? 'pi pi-forward' : 'pi pi-play'" :label="t(inProgress(row) ? 'continue_evaluation' : 'start_evaluation')" :loading="starting === row.id" :disabled="starting !== null || isRequestLocked(row)" @click="$emit('start', row)" />
             <Button v-if="allowDelete" v-can="'evaluation request delete'" icon="pi pi-trash" severity="danger" variant="text" :aria-label="t('delete')" @click="$emit('delete', row.id)" />
           </div>
         </div>

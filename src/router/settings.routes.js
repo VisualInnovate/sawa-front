@@ -14,6 +14,13 @@ const rolesRoutes = [
     meta: { permission: ["pages list"] },
     component: SitePages,
   },
+  // «المساعد الذكي»: what the parent portal assistant may reach, its questions, rules, usage and conversations.
+  {
+    path: "ai-assistant",
+    name: "ai-assistant",
+    meta: { permission: ["ai assistant list", "ai assistant edit"] },
+    component: () => import("@/views/assistant/Settings.vue"),
+  },
 ];
 
 export default {

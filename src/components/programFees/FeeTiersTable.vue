@@ -1,6 +1,7 @@
 <script setup>
 // One program's session tiers (day classes in weekly sessions, the clinics programs in monthly sessions);
 // every tier can be edited, added and deleted.
+import { currency } from "@/utils/accounting";
 import axios from "axios";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -83,7 +84,7 @@ async function remove() {
       <Column :header="$t('fees_discount')">
         <template #body="{ data }">{{ money(data.discount) }}</template>
       </Column>
-      <Column :header="$t('fees_installment_jd')">
+      <Column :header="$t('fees_installment_jd', { currency: currency.currency_name })">
         <template #body="{ data }"><span class="font-semibold">{{ money(data.installment) }}</span></template>
       </Column>
       <Column :header="$t('fees_installment_usd')">
@@ -116,7 +117,7 @@ async function remove() {
       <div v-if="hasDiscount" class="flex flex-column gap-1">
         <label for="tier-discount">{{ $t("fees_discount") }}</label>
         <InputNumber v-model="form.discount" inputId="tier-discount" :min="0" :maxFractionDigits="2" :invalid="!!errors.discount" />
-        <small class="text-color-secondary" v-if="form.price != null">{{ $t("fees_installment_jd") }}: {{ money(form.price - (form.discount ?? 0)) }}</small>
+        <small class="text-color-secondary" v-if="form.price != null">{{ $t("fees_installment_jd", { currency: currency.currency_name }) }}: {{ money(form.price - (form.discount ?? 0)) }}</small>
         <small class="text-red-500" v-if="errors.discount">{{ errors.discount[0] }}</small>
       </div>
       <Button type="submit" :loading="saving" icon="pi pi-check" :label="$t('submit')" />

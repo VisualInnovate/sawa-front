@@ -1,5 +1,6 @@
 <script setup>
 // The student programs (inclusion / day / clinics); old programs from the removed «البرامج العلاجية» are hidden.
+import { currency, programStatusSeverity } from "@/utils/accounting";
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -65,7 +66,13 @@ onMounted(load);
         <template #body="{ data }"><span class="whitespace-nowrap">{{ data.start_date }} → {{ data.end_date }}</span></template>
       </Column>
       <Column field="weekly_sessions" :header="$t('sp_weekly_sessions')" />
-      <Column :header="$t('fees_price')">
+      <Column :header="$t('acc.status')">
+        <template #body="{ data }">
+          <Tag :severity="programStatusSeverity[data.accounting_status]" :value="$t(`acc.program_status.${data.accounting_status}`)" />
+          <i v-if="data.sessions_suspended_at" class="pi pi-pause text-red-600 ms-1" v-tooltip.top="$t('acc.suspended')" :aria-label="$t('acc.suspended')" />
+        </template>
+      </Column>
+      <Column :header="$t('fees_price', { currency: currency.currency_name })">
         <template #body="{ data }">{{ money(data.price) }}</template>
       </Column>
       <Column header-style="width:10rem">

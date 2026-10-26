@@ -153,6 +153,11 @@
     <h2 class="text-lg font-semibold text-gray-800 mb-3">
       {{ $t("نتيجة الاستشارة") }}
     </h2>
+    <!-- «المحاسبة»: a paid consultation takes no result until it is paid or the accountant confirms it. -->
+    <Message v-if="consultationLocked" :severity="booking.billing_status === 'cancelled' ? 'error' : 'warn'" class="mb-3">
+      <i class="pi pi-lock" aria-hidden="true"></i>
+      {{ $t(`acc.billing.${booking.billing_status}`) }} — {{ booking.billing_status === "cancelled" ? $t("acc.cancelled_hint") : $t("acc.locked_hint") }}
+    </Message>
 
     <form
       class="bg-white shadow-lg rounded-xl p-6 space-y-4 mx-auto border border-gray-200"
@@ -245,6 +250,7 @@
 
       <Button
         @click="studentMassage"
+        :disabled="consultationLocked"
         :label="$t('submit')"
         class="w-full py-1.5 mt-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-200"
         icon="pi pi-check">
@@ -537,6 +543,9 @@ export default {
     },
   },
   computed: {
+    consultationLocked() {
+      return ["locked", "cancelled"].includes(this.booking?.billing_status);
+    },
     // The booking was confirmed before (saved with a decision or a note to the parents), so the form edits it.
     // Read from the saved booking, not the form, so the label changes only after saving.
     bookingAnswered() {

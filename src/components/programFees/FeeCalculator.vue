@@ -1,6 +1,7 @@
 <script setup>
 // Prices several lines at once with the fee tables. The backend does the calculation (nothing is stored);
 // it runs again whenever a line changes.
+import { amount as formatAmount } from "@/utils/accounting";
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -133,7 +134,7 @@ function detail(row) {
         <span class="text-color-secondary">{{ detail(lineResult(line)) }}</span>
         <span v-if="lineResult(line).discount > 0" class="line-through text-color-secondary">{{ money(lineResult(line).before_discount) }}</span>
         <Tag v-if="lineResult(line).discount > 0" severity="success" :value="`${$t('fees_discount')} ${money(lineResult(line).discount)}`" />
-        <span class="font-bold">{{ money(lineResult(line).price) }} JD</span>
+        <span class="font-bold">{{ formatAmount(lineResult(line).price) }}</span>
         <span v-if="lineResult(line).type === 'clinics' && lineResult(line).usd != null" class="text-color-secondary">{{ money(lineResult(line).usd) }} $</span>
       </div>
       <Message v-for="warning in lineResult(line)?.warnings ?? []" :key="warning" severity="warn" size="small">
@@ -156,7 +157,7 @@ function detail(row) {
           {{ $t("fees_before_discount") }}: <span class="line-through">{{ money(result.before_discount) }}</span>
         </span>
         <Tag v-if="result.discount > 0" severity="success" :value="`${$t('fees_discount')} ${money(result.discount)}`" />
-        <span class="text-xl font-bold text-[#135C65]">{{ money(result.total) }} JD</span>
+        <span class="text-xl font-bold text-[#135C65]">{{ formatAmount(result.total) }}</span>
         <span v-if="result.total_usd != null" class="text-color-secondary">{{ money(result.total_usd) }} $</span>
         <i v-if="loading" class="pi pi-spin pi-spinner" />
       </div>

@@ -5,6 +5,7 @@
 // - compensate: a missed session is closed with an amount (the system suggests the session's share of the price).
 // Each asks why (family / therapist / transport delay, or another reason written out); on an official holiday the
 // reason is the holiday and cannot be changed. The free hours come from the server, grouped here by day.
+import { amount as formatAmount, currency } from "@/utils/accounting";
 import axios from "axios";
 import moment from "moment";
 import { computed, ref, watch } from "vue";
@@ -113,8 +114,8 @@ async function save() {
         <!-- The amount: the system's suggestion, editable. -->
         <div v-if="mode === 'compensate'" class="rs-amount">
           <label for="rs-amount">{{ $t("session_compensation_amount") }}</label>
-          <InputNumber v-model="amount" inputId="rs-amount" :min="0" :maxFractionDigits="2" suffix=" JD" class="w-full" :invalid="submitted && amount === null" />
-          <small>{{ $t("session_compensation_estimate", { amount: form.estimate }) }}</small>
+          <InputNumber v-model="amount" inputId="rs-amount" :min="0" :maxFractionDigits="2" :suffix="` ${currency.currency_symbol}`" class="w-full" :invalid="submitted && amount === null" />
+          <small>{{ $t("session_compensation_estimate", { amount: formatAmount(form.estimate) }) }}</small>
         </div>
 
         <!-- The free hours of the next days. -->

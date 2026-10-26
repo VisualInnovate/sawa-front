@@ -29,6 +29,15 @@
             <h3 class="my-auto font-bold">{{ $t(" حالة التقييم") }} :</h3>
             <Tag class="my-auto mx-2" :severity="requestStatus(evalu.status).severity" :value="$t(requestStatus(evalu.status).key)" />
           </div>
+          <!-- «المحاسبة»: closed until paid; a cancelled one gets a new time and evaluator. -->
+          <div v-if="evalu.billing_status && evalu.billing_status !== 'cancelled'" class="flex flex-wrap items-center gap-2 py-2">
+            <Tag :severity="billingSeverity[evalu.billing_status]" :value="$t(`acc.billing.${evalu.billing_status}`)" />
+            <span v-if="evalu.billing_price != null" class="text-sm" :class="{ 'line-through text-color-secondary': evalu.billing_status === 'free' }">{{ amount(evalu.billing_price) }}</span>
+          </div>
+          <div v-if="Number(evalu.status) === 3" class="flex flex-wrap items-center justify-between gap-2 py-2">
+            <small class="text-red-600">{{ $t("acc.cancelled_hint") }}</small>
+            <Button v-can="'evaluation request create'" icon="pi pi-refresh" size="small" :label="$t('acc.reassign_evaluation')" @click="reassigning = evalu" />
+          </div>
           </div>
           <!-- <div class="text-center" >
           
@@ -57,6 +66,7 @@
       
     </div>
     <div>
+      <ReassignEvaluationDialog :visible="!!reassigning" :request="reassigning" @update:visible="(open) => { if (!open) reassigning = null; }" @saved="getusers" />
       <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
@@ -81,10 +91,12 @@
   import ChildTaps from '../../components/ChildTaps.vue'
   import { requestStatus } from "../../utils/evaluationRequestStatus";
   import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+  import { amount, billingSeverity } from "../../utils/accounting";
+  import ReassignEvaluationDialog from "../../components/accounting/ReassignEvaluationDialog.vue";
   
     import {useToast} from 'primevue/usetoast'
   export default {
-     components:{ChildTaps},
+     components:{ChildTaps, ReassignEvaluationDialog},
   
     data() {
       return {
@@ -92,6 +104,8 @@
            maxDate: new Date(),
            details:{},
            deleteDialog:false,
+           reassigning: null,
+           billingSeverity,
         // Add other validation rules for the title field
       };
   
@@ -99,6 +113,7 @@
   
     methods: {
       requestStatus,
+      amount,
       typeLabel(request) {
         return getEvaluationTypeLabel(request.evaluation_type, this.$t, request.title || "-");
       },

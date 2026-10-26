@@ -11,6 +11,7 @@ import AdminSidebar from "./layout/AdminSidebar.vue";
 import NotificationBell from "./layout/NotificationBell.vue";
 import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
+import { loadCurrency } from "../utils/accounting";
 
 const router = useRouter();
 const route = useRoute();
@@ -44,6 +45,8 @@ let stopCounts = null;
 onMounted(async () => {
   desktopQuery.addEventListener("change", onMediaChange);
   stopCounts = watchPendingCounts("staff");
+  // Every amount shows the accounting's currency.
+  loadCurrency();
   await authStore.getUser();
   // The role may have changed since sign-in; leave a page it no longer allows.
   const current = router.currentRoute.value;

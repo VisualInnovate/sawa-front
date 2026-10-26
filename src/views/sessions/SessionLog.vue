@@ -1,6 +1,7 @@
 <script setup>
 // «سجل الجلسات»: the program sessions of a period that ran (started → ended), are running, or were missed (why, and
 // what was done: a new appointment or a compensation), and the postponed ones — each with its history.
+import { amount as formatAmount } from "@/utils/accounting";
 import axios from "axios";
 import moment from "moment";
 import { computed, onMounted, ref, watch } from "vue";
@@ -41,7 +42,7 @@ function actionDetail(log) {
     case "ended": return `${hm(log.from_at)} → ${hm(log.to_at)}`;
     case "postponed":
     case "rescheduled": return `${dateTime(log.from_at)} → ${dateTime(log.to_at)}${log.data?.room ? ` · ${log.data.room}` : ""}`;
-    case "compensated": return `${log.amount} JD`;
+    case "compensated": return formatAmount(log.amount);
     case "therapist_changed": return `${log.data?.from ?? "—"} → ${log.data?.to ?? "—"}`;
     default: return "";
   }
@@ -131,7 +132,7 @@ onMounted(load);
             {{ $t("session_resolution_rescheduled", { time: data.makeup ? dateTime(data.makeup.starts_at) : "—" }) }}
           </div>
           <div v-else-if="data.resolution === 'compensated'" class="text-xs font-semibold text-[#135C65]">
-            {{ $t("session_resolution_compensated", { amount: data.compensation_amount }) }}
+            {{ $t("session_resolution_compensated", { amount: formatAmount(data.compensation_amount) }) }}
           </div>
           <div v-else-if="data.status === 'missed'" class="text-xs text-orange-600">{{ $t("session_log_no_action") }}</div>
           <div v-if="data.original_starts_at" class="text-xs text-color-secondary">{{ $t("session_postponed_from", { time: dateTime(data.original_starts_at) }) }}</div>
