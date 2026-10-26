@@ -1,6 +1,7 @@
 <script setup>
 // One category's priced items (inclusion packages, transport, evaluations, individual services);
 // every item can be edited, added and deleted.
+import { currency } from "@/utils/accounting";
 import axios from "axios";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -63,7 +64,7 @@ async function remove() {
   </div>
   <DataTable :value="items" dataKey="id" size="small" stripedRows>
     <Column field="name" :header="$t('fees_item')" />
-    <Column :header="$t('fees_price')">
+    <Column :header="$t('fees_price', { currency: currency.currency_name })">
       <template #body="{ data }"><span class="font-semibold">{{ money(data.price) }}</span></template>
     </Column>
     <Column :header="$t('fees_unit')">
@@ -99,7 +100,7 @@ async function remove() {
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-column gap-1">
-          <label for="item-price">{{ $t("fees_price") }}</label>
+          <label for="item-price">{{ $t("fees_price", { currency: currency.currency_name }) }}</label>
           <InputNumber v-model="form.price" inputId="item-price" :min="0" :maxFractionDigits="2" :invalid="!!errors.price" />
           <small class="text-red-500" v-if="errors.price">{{ errors.price[0] }}</small>
         </div>

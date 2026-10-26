@@ -5,6 +5,7 @@
 // closed · waiting · late (5 minutes, not started) · ongoing · finished · missed (not started 45 minutes after its
 // start, or on an official holiday). Whoever reschedules sessions sees all, postpones one before it starts, and gives
 // a missed one a new appointment or a compensation, each with its reason.
+import { amount as formatAmount } from "@/utils/accounting";
 import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -86,7 +87,8 @@ async function start(session, mode) {
     document.documentElement.requestFullscreen?.().catch(() => {});
     router.push({ name: "session-run", params: { id: session.id } });
   } catch (e) {
-    toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message ?? t("session_not_started"), life: 3500 });
+    const detail = e.response?.data?.suspended ? t("acc.suspended") : e.response?.data?.message ?? t("session_not_started");
+    toast.add({ severity: "error", summary: t("error"), detail, life: 3500 });
     await load();
   } finally {
     busy.value = null;
@@ -183,6 +185,7 @@ onBeforeUnmount(() => clearInterval(timer));
       <Column :header="$t('sp_status')">
         <template #body="{ data }">
           <Tag :severity="SESSION_STATUS_SEVERITY[data.status]" :value="$t(`session_status_${data.status}`)" class="whitespace-nowrap" />
+          <Tag v-if="data.program?.sessions_suspended_at" severity="danger" icon="pi pi-pause" :value="$t('acc.suspended')" class="whitespace-nowrap ms-1" />
           <div v-if="data.started_at" class="text-xs text-color-secondary mt-1">{{ $t("session_started_at", { time: moment(data.started_at).format("HH:mm") }) }}</div>
           <div v-if="data.holiday && !data.reason_type" class="text-xs text-red-600 mt-1">{{ $t("session_reason_holiday") }}: {{ data.holiday.title }}</div>
           <div v-if="data.original_starts_at" class="text-xs text-color-secondary mt-1">
@@ -194,7 +197,7 @@ onBeforeUnmount(() => clearInterval(timer));
           <template v-if="data.resolution">
             <div class="text-xs mt-1 font-semibold text-[#135C65]">
               <template v-if="data.resolution === 'rescheduled'">{{ $t("session_resolution_rescheduled", { time: data.makeup ? dateTime(data.makeup.starts_at) : "—" }) }}</template>
-              <template v-else>{{ $t("session_resolution_compensated", { amount: data.compensation_amount }) }}</template>
+              <template v-else>{{ $t("session_resolution_compensated", { amount: formatAmount(data.compensation_amount) }) }}</template>
             </div>
             <div class="text-xs text-color-secondary">{{ reasonText($t, data.reason_type, data.reason_note) }}</div>
           </template>

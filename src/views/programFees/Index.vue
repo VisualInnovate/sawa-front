@@ -7,6 +7,8 @@ import { useToast } from "primevue/usetoast";
 import FeeCalculator from "@/components/programFees/FeeCalculator.vue";
 import FeeTiersTable from "@/components/programFees/FeeTiersTable.vue";
 import FeeItemsTable from "@/components/programFees/FeeItemsTable.vue";
+import EvaluationTypePrices from "@/components/programFees/EvaluationTypePrices.vue";
+import { currency } from "@/utils/accounting";
 import { money } from "@/utils/programFees";
 
 const { t } = useI18n();
@@ -16,6 +18,7 @@ const tiers = ref([]);
 const items = ref([]);
 const settings = ref({});
 const draft = ref({});
+const evaluationPrices = ref({});
 const loading = ref(true);
 const tab = ref("calculator");
 
@@ -24,6 +27,9 @@ async function load() {
   tiers.value = data.data.tiers;
   items.value = data.data.items;
   settings.value = data.data.settings;
+  evaluationPrices.value = data.data.evaluation_prices ?? {};
+  // The accounting's currency is the page's too.
+  if (data.data.currency) currency.value = { ...currency.value, ...data.data.currency };
   draft.value = { ...data.data.settings };
   loading.value = false;
 }
@@ -104,6 +110,8 @@ onMounted(load);
         <TabPanel value="evaluation">
           <Message severity="info" size="small" class="mb-3">{{ $t("fees_evaluation_rule") }}</Message>
           <FeeItemsTable category="evaluation" :items="itemsOf('evaluation')" @saved="load" />
+          <Divider />
+          <EvaluationTypePrices :items="itemsOf('evaluation')" :prices="evaluationPrices" @saved="load" />
         </TabPanel>
 
         <TabPanel value="individual">

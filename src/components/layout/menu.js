@@ -92,6 +92,21 @@ export const buildMenu = () => [
     ],
   },
   {
+    key: "accounting",
+    icon: "mdi-cash-multiple",
+    label: "acc.menu",
+    children: [
+      { label: "acc.dashboard", to: { name: "accounting" }, perm: "accounting list" },
+      { label: "acc.programs", to: { name: "accounting-programs" }, perm: "accounting list" },
+      { label: "acc.evaluations", to: { name: "accounting-evaluations" }, perm: "accounting list" },
+      { label: "acc.accounts", to: { name: "accounting-accounts" }, perm: "accounting list" },
+      { label: "acc.payments", to: { name: "accounting-payments" }, perm: "accounting list" },
+      { label: "acc.charges", to: { name: "accounting-charges" }, perm: "accounting list" },
+      { label: "acc.credits", to: { name: "accounting-credits" }, perm: "accounting list" },
+      { label: "acc.settings", to: { name: "accounting-settings" }, perm: "accounting settings edit" },
+    ],
+  },
+  {
     key: "rooms",
     icon: "mdi-door-open",
     label: "room",
@@ -119,6 +134,7 @@ export const buildMenu = () => [
     children: [
       { label: "Pages", to: { name: "pages" }, perm: "pages list" },
       { label: "Settings", to: { name: "settings" }, perm: "settings list" },
+      { label: "ai.menu", to: { name: "ai-assistant" }, perm: ["ai assistant list", "ai assistant edit"] },
     ],
   },
   {

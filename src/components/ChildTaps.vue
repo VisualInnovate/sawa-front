@@ -15,6 +15,7 @@ const items = [
   { to: { name: 'children-recommendations' }, label: 'child_recommendations', perm: ['child recommendations list', 'child recommendations create'] },
   { to: { name: 'children-programe' }, label: 'evaluations_details' },
   { to: { name: 'children-request' }, label: 'child_requests' },
+  { to: { name: 'children-finance' }, label: 'acc.finance_tab', perm: 'accounting list' },
 ];
 
 const childName = ref("");

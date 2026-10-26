@@ -55,6 +55,12 @@
           <Tag :value="labelOf(filter, data.status)" :severity="severityOf(data.status)" />
         </template>
       </Column>
+      <!-- «المحاسبة»: paid consultations wait for their payment (or the accountant's confirmation). -->
+      <Column :header="$t('acc.payment')">
+        <template #body="{ data }">
+          <Tag v-if="data.billing_status && data.billing_status !== 'free'" :value="$t(`acc.billing.${data.billing_status}`)" :severity="billingSeverity[data.billing_status]" />
+        </template>
+      </Column>
       <Column :header="$t('actions')" style="width: 6rem">
         <template #body="{ data }">
           <Button icon="pi pi-eye" rounded variant="outlined" severity="secondary"
@@ -67,6 +73,7 @@
 <script>
 import axios from "axios";
 import { formatChildAge } from "@/utils/childAge";
+import { billingSeverity } from "@/utils/accounting";
 
 export default {
   data() {
@@ -75,6 +82,7 @@ export default {
       loading: true,
       selectedStatus: -1,
       selectedFilter: -1,
+      billingSeverity,
     };
   },
   computed: {

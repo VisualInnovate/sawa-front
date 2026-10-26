@@ -1,6 +1,7 @@
 <script setup>
 // The child profile's «البرامج» tab: the child's student programs (inclusion / day / clinics), newest first,
 // each with its details, its week as a timetable and the milestone plan goals attached to it.
+import { amount } from "@/utils/accounting";
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -43,7 +44,7 @@ onMounted(async () => {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
           <div><span class="text-color-secondary">{{ $t("sp_therapist") }}:</span> {{ program.therapist?.name }}</div>
           <div><span class="text-color-secondary">{{ $t("sp_period") }}:</span> <span class="whitespace-nowrap">{{ program.start_date }} → {{ program.end_date }}</span></div>
-          <div><span class="text-color-secondary">{{ $t("fees_price") }}:</span> <span class="font-semibold">{{ money(program.price) }} JD</span></div>
+          <div><span class="text-color-secondary">{{ $t("acc.price") }}:</span> <span class="font-semibold">{{ amount(program.price) }}</span></div>
           <div v-if="program.weekly_sessions"><span class="text-color-secondary">{{ $t("sp_weekly_sessions") }}:</span> {{ program.weekly_sessions }}</div>
           <div v-if="program.next_session"><span class="text-color-secondary">{{ $t("sp_next_session") }}:</span> <span class="whitespace-nowrap">{{ program.next_session.starts_at.slice(0, 16) }}</span></div>
         </div>

@@ -11,7 +11,14 @@
             option-value="id"
             :options="evaluate_types"
             optionLabel="name"
-          />
+            :optionDisabled="(option) => typeState(option.id).disabled"
+          >
+            <!-- «المحاسبة»: free for a registered child; otherwise its price, or closed without one. -->
+            <template #option="{ option }">
+              <span>{{ option.name }}</span>
+              <small v-if="typeState(option.id).note" class="text-color-secondary ms-2">{{ typeState(option.id).note }}</small>
+            </template>
+          </Select>
           <Select
             @update:model-value="getTimes($event)"
             :placeholder="$t('employee_name')"
@@ -150,6 +157,7 @@ import listPlugin from "@fullcalendar/list";
 import DatePicker from 'primevue/datepicker';
 import InputText from "primevue/inputtext";
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+import { evaluationPricing, evaluationTypeState } from "../../utils/accounting";
 import { childMonths, fitsAge, formatAgeRange } from "../../utils/ageRange";
 import { formatChildAge } from "../../utils/childAge";
 import { useAppLangStore } from "../../stores/AppLangStore";
@@ -171,6 +179,7 @@ export default {
       mobileQuery: null,
       required: null,
       typeAges: [],
+      pricing: null,
       not_find: false,
       childreen: [],
       modal_text: false,
@@ -276,6 +285,9 @@ export default {
     },
   },
   methods: {
+    typeState(type) {
+      return evaluationTypeState(this.$t, this.pricing, type);
+    },
     employeeFits(employee) {
       return fitsAge(employee?.age_from_months, employee?.age_to_months, this.childMonths);
     },
@@ -446,10 +458,11 @@ export default {
           if (this.bookingId) await this.loadRequired({ selectNext: false });
       } catch (el) {
           const pastSlot = Boolean(el.response?.data?.errors?.start_time);
+          const closed = Boolean(el.response?.data?.errors?.evaluation_type);
           this.$toast.add({
             severity: "error",
             summary: this.$t("error"),
-            detail: pastSlot ? this.$t('calendar_past_slot') : (el.response?.data?.message || this.$t("mission_error")),
+            detail: pastSlot ? this.$t('calendar_past_slot') : closed ? this.$t('acc.no_price_closed') : (el.response?.data?.message || this.$t("mission_error")),
             life: 3000,
           });
       } finally {
@@ -618,6 +631,7 @@ export default {
     this.doctorshow = localStorage.getItem("type");
     this.opts.locale = localStorage.appLang === "en" ? null : arLocale;
     this.event.child_id = parseInt(this.$route.params.id);
+    evaluationPricing(this.event.child_id).then((pricing) => { this.pricing = pricing; });
   },
   beforeUnmount() {
     this.mobileQuery?.removeEventListener?.('change', this.applyLayout);

@@ -40,6 +40,11 @@ const form = ref({
   inclusion_type: "inclusion", inclusion_english: false, hours: {},
 });
 const endTouched = ref(!!props.programId);
+// A new program (or an unconfirmed one assigned again) starts at least 3 days from today: it waits two days for the accountant.
+const FIRST_SESSION_AFTER_DAYS = 3;
+const accountingStatus = ref(null);
+const needsLeadTime = computed(() => !props.programId || accountingStatus.value === "unconfirmed");
+const earliestStart = (() => { const date = new Date(); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + FIRST_SESSION_AFTER_DAYS); return date; })();
 watch(() => form.value.start_date, (start) => {
   if (start && !endTouched.value) form.value.end_date = endOfYear(start);
 });
@@ -236,6 +241,8 @@ async function loadProgram() {
     days: program.days ?? [],
     inclusion_type: program.inclusion_type ?? "inclusion", inclusion_english: !!program.inclusion_english,
   });
+  accountingStatus.value = program.accounting_status ?? null;
+  if (accountingStatus.value === "unconfirmed" && form.value.start_date < earliestStart) form.value.start_date = new Date(earliestStart);
   if (program.kind === "inclusion") {
     form.value.hours = Object.fromEntries((program.inclusion_hours ?? []).map((row) => [row.day, { on: true, start: row.start, end: row.end }]));
     hoursOf("inclusion").forEach((row) => { form.value.hours[row.day] ??= { on: false, start: row.start, end: row.end }; });
@@ -300,6 +307,7 @@ function slotStatus(slot) {
   <div>
     <p class="text-xl p-4 text-[#135C65] font-bold">{{ programId ? $t("sp_edit_title") : $t("sp_add_title") }}</p>
   </div>
+  <Message v-if="accountingStatus === 'unconfirmed'" severity="warn" class="mb-3">{{ $t("acc.unconfirmed_hint") }}</Message>
   <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
   <div v-else class="flex flex-column gap-3">
     <!-- 1. Kind, student, therapist, dates -->
@@ -328,7 +336,12 @@ function slotStatus(slot) {
       </div>
       <div class="flex flex-column gap-2">
         <label for="sp-start">{{ $t("sp_start_date") }}</label>
-        <DatePicker v-model="form.start_date" inputId="sp-start" dateFormat="yy-mm-dd" showIcon :invalid="!!errors.start_date" />
+        <DatePicker v-model="form.start_date" inputId="sp-start" dateFormat="yy-mm-dd" showIcon :invalid="!!errors.start_date"
+          :minDate="needsLeadTime ? earliestStart : undefined" />
+        <small v-if="needsLeadTime" class="text-color-secondary">
+          {{ $t("acc.first_session_rule", { days: FIRST_SESSION_AFTER_DAYS, date: isoDate(earliestStart) }) }}
+        </small>
+        <small v-if="errors.start_date" class="text-red-600">{{ [errors.start_date].flat()[0] }}</small>
       </div>
       <div class="flex flex-column gap-2">
         <label for="sp-end">{{ $t("sp_end_date") }}</label>

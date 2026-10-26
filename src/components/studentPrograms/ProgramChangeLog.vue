@@ -1,6 +1,7 @@
 <script setup>
 // A student program's log entries: who created or changed it and when, and for each changed field what it was and
 // what it became (therapist, dates, weekly sessions, days, inclusion settings, price, quota rows, the week's slots).
+import { amount } from "@/utils/accounting";
 import moment from "moment";
 import { useI18n } from "vue-i18n";
 import { money } from "@/utils/programFees";
@@ -22,7 +23,7 @@ function lines(field, value) {
     case "rows": return value.map((row) => [row.treatment, sessionKindLabel(t, row.session_kind), `× ${row.sessions}`].filter(Boolean).join(" · "));
     case "week": return value.map((slot) => `${dayLabel(t, slot.day)} ${timeRange(slot.start, slot.end)} · ${[slot.treatment, sessionKindLabel(t, slot.session_kind), slot.room, slot.therapist].filter(Boolean).join(" · ")}`);
     case "inclusion_hours": return value.map((row) => `${dayLabel(t, row.day)} ${timeRange(row.start, row.end)}`);
-    case "price": return [`${money(value)} JD`];
+    case "price": return [amount(value)];
     case "inclusion_english": return [value ? t("yes") : t("no")];
     case "inclusion_type": return [value === "supervision" ? t("sp_inclusion_supervision") : t("sp_inclusion_program")];
     default: return [String(value)];

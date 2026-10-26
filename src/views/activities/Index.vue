@@ -153,18 +153,21 @@ onMounted(load);
           <div v-if="loading" class="ac-grid"><Skeleton v-for="n in 6" :key="n" height="13rem" /></div>
           <p v-else-if="!shown.length" class="ac-empty"><i class="pi pi-images" aria-hidden="true" /> {{ $t("activities.no_activities") }}</p>
           <div v-else class="ac-grid">
-            <article v-for="activity in shown" :key="activity.id" class="ac-card">
+            <article v-for="(activity, i) in shown" :key="activity.id" class="ac-card" :style="{ '--d': `${Math.min(i, 12) * 40}ms` }">
+              <!-- The whole image, never cropped (an image may carry its own title). -->
               <div class="ac-image">
                 <img v-if="activity.image_url" :src="activity.image_url" :alt="activity.name" loading="lazy" />
                 <i v-else class="pi pi-image" aria-hidden="true" />
               </div>
               <div class="ac-body">
-                <h3>{{ activity.name }}</h3>
-                <small>{{ $t("activities.places", { n: activity.room_activities_count ?? 0 }) }}</small>
-              </div>
-              <div class="ac-actions">
-                <Button v-can="'activities edit'" icon="pi pi-pencil" rounded variant="text" severity="info" :aria-label="$t('edit')" v-tooltip.top="$t('edit')" @click="edit(activity)" />
-                <Button v-can="'activities delete'" icon="pi pi-trash" rounded variant="text" severity="danger" :aria-label="$t('delete')" v-tooltip.top="$t('delete')" @click="deleting = activity" />
+                <h3 :title="activity.name">{{ activity.name }}</h3>
+                <div class="ac-footer">
+                  <span class="ac-count"><i class="pi pi-building" aria-hidden="true" /> {{ $t("activities.places", { n: activity.room_activities_count ?? 0 }) }}</span>
+                  <span class="ac-actions">
+                    <Button v-can="'activities edit'" icon="pi pi-pencil" rounded variant="text" severity="info" size="small" :aria-label="$t('edit')" v-tooltip.top="$t('edit')" @click="edit(activity)" />
+                    <Button v-can="'activities delete'" icon="pi pi-trash" rounded variant="text" severity="danger" size="small" :aria-label="$t('delete')" v-tooltip.top="$t('delete')" @click="deleting = activity" />
+                  </span>
+                </div>
               </div>
             </article>
           </div>
@@ -219,16 +222,21 @@ onMounted(load);
 .ac-hero h1 { margin: 0; font-size: 1.35rem; font-weight: 800; }
 .ac-hero p { margin: .2rem 0 0; opacity: .85; }
 .ac-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
-.ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12.5rem), 1fr)); gap: 1rem; }
+.ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr)); gap: 1rem; align-items: start; }
 .ac-empty { margin: 0; padding: 2.5rem 1rem; color: var(--sawa-muted, #64748b); text-align: center; }
-.ac-card { position: relative; display: grid; overflow: hidden; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; transition: box-shadow .2s, transform .2s; }
-.ac-card:hover { box-shadow: 0 10px 24px -16px rgba(15, 23, 42, .45); transform: translateY(-2px); }
-.ac-image { display: grid; place-items: center; aspect-ratio: 1 / 1; background: #f1f5f9; color: #94a3b8; font-size: 2rem; }
-.ac-image img { width: 100%; height: 100%; object-fit: cover; }
-.ac-body { padding: .7rem .9rem .8rem; }
-.ac-body h3 { margin: 0; font-size: 1rem; font-weight: 800; color: #0f172a; }
-.ac-body small { color: var(--sawa-muted, #64748b); }
-.ac-actions { position: absolute; top: .4rem; inset-inline-end: .4rem; display: flex; gap: .15rem; padding: .15rem; border-radius: 999px; background: rgba(255, 255, 255, .92); }
+.ac-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff;
+  transition: box-shadow .2s, transform .2s; animation: ac-in .35s var(--d) ease both; }
+.ac-card:hover { box-shadow: 0 12px 26px -18px rgba(15, 23, 42, .5); transform: translateY(-3px); }
+.ac-image { display: grid; place-items: center; aspect-ratio: 1 / 1; padding: .6rem; background: #f8fafc; color: #94a3b8; font-size: 2rem; border-bottom: 1px solid #f1f5f9; }
+.ac-image img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; transition: transform .25s ease; }
+.ac-card:hover .ac-image img { transform: scale(1.03); }
+.ac-body { display: grid; gap: .35rem; padding: .65rem .8rem .55rem; }
+.ac-body h3 { margin: 0; overflow: hidden; font-size: 1rem; font-weight: 800; color: #0f172a; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.ac-footer { display: flex; align-items: center; justify-content: space-between; gap: .4rem; min-height: 2rem; }
+.ac-count { display: inline-flex; align-items: center; gap: .3rem; color: var(--sawa-muted, #64748b); font-size: .8rem; }
+.ac-actions { display: inline-flex; gap: .1rem; }
+@keyframes ac-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .ac-card { animation: none; } .ac-card:hover, .ac-card:hover .ac-image img { transform: none; } }
 .ac-form { display: grid; gap: 1rem; }
 .ac-field { display: grid; gap: .4rem; }
 .ac-field > label:first-child { font-weight: 700; }

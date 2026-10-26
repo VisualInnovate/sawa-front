@@ -1,5 +1,6 @@
 <script setup>
 // A student program's price month by month (from «رسوم البرامج»): prorated by days, or by the clinics sessions.
+import { amount, currency } from "@/utils/accounting";
 import { money } from "@/utils/programFees";
 
 defineProps({
@@ -21,7 +22,7 @@ defineProps({
       <Column :header="$t('fees_discount')">
         <template #body="{ data }">{{ data.discount > 0 ? money(data.discount) : "" }}</template>
       </Column>
-      <Column :header="$t('fees_price')">
+      <Column :header="$t('fees_price', { currency: currency.currency_name })">
         <template #body="{ data }"><span class="font-semibold">{{ money(data.price) }}</span></template>
       </Column>
     </DataTable>
@@ -30,7 +31,7 @@ defineProps({
         {{ $t("fees_before_discount") }}: <span class="line-through">{{ money(price.before_discount) }}</span>
       </span>
       <Tag v-if="price.discount > 0" severity="success" :value="`${$t('fees_discount')} ${money(price.discount)}`" />
-      <span class="text-lg font-bold text-[#135C65]">{{ $t("fees_total") }}: {{ money(price.total) }} JD</span>
+      <span class="text-lg font-bold text-[#135C65]">{{ $t("fees_total") }}: {{ amount(price.total) }}</span>
     </div>
   </div>
 </template>

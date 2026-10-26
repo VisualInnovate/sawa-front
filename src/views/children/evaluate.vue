@@ -138,7 +138,14 @@
         <div class="flex flex-column gap-2">
           <label for="unscheduled-type">{{ $t("evalute_type") }}</label>
           <Select v-model="unscheduled.evaluation_type" inputId="unscheduled-type" :options="evaluate_types" optionLabel="name" optionValue="id"
-            filter :invalid="unscheduled.submitted && !unscheduled.evaluation_type" @update:modelValue="loadSpecialists" />
+            filter :invalid="unscheduled.submitted && !unscheduled.evaluation_type" @update:modelValue="loadSpecialists"
+            :optionDisabled="(option) => typeState(option.id).disabled">
+            <!-- «المحاسبة»: free for a registered child; otherwise its price, or closed without one. -->
+            <template #option="{ option }">
+              <span>{{ option.name }}</span>
+              <small v-if="typeState(option.id).note" class="text-color-secondary ms-2">{{ typeState(option.id).note }}</small>
+            </template>
+          </Select>
         </div>
         <div class="flex flex-column gap-2">
           <label for="unscheduled-specialist">{{ $t("Name_evaluator") }}</label>
@@ -173,6 +180,7 @@ import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from "../../components/ChildTaps.vue";
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+import { evaluationPricing, evaluationTypeState } from "../../utils/accounting";
 import { childMonths, fitsAge, formatAgeRange } from "../../utils/ageRange";
 import { formatChildAge } from "../../utils/childAge";
 
@@ -182,6 +190,7 @@ export default {
   data() {
     return {
       child_id: useStorage("child_id", Number),
+      pricing: null,
       maxDate: new Date(),
       details: {},
       evaluations: [],
@@ -199,10 +208,14 @@ export default {
 
   methods: {
     fitsAge,
+    typeState(type) {
+      return evaluationTypeState(this.$t, this.pricing, type);
+    },
     openUnscheduled() {
       if (!this.typeAges.length) axios.get("api/evaluation-type-ages").then(({ data }) => { this.typeAges = data.data ?? []; }).catch(() => {});
       this.specialists = [];
       this.unscheduled = { visible: true, evaluation_type: null, employee_id: null, notes: "", submitted: false, loading: false, saving: false };
+      evaluationPricing(this.child_id).then((pricing) => { this.pricing = pricing; });
     },
 
     // The specialists who do this evaluation (as the booking calendar lists them).
@@ -239,7 +252,8 @@ export default {
         this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: this.$t("element_add_success"), life: 3000 });
         this.$router.push({ name: "children-request" });
       } catch (e) {
-        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: e.response?.data?.message || this.$t("mission_error"), life: 3000 });
+        const closed = Boolean(e.response?.data?.errors?.evaluation_type);
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: closed ? this.$t("acc.no_price_closed") : e.response?.data?.message || this.$t("mission_error"), life: 3000 });
       } finally {
         this.unscheduled.saving = false;
       }
