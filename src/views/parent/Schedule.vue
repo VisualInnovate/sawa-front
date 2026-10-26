@@ -29,10 +29,10 @@
       <div v-if="next" class="ps-next mb-4">
         <i class="pi pi-bell" aria-hidden="true" />
         <span>{{ $t("sch.parent_next") }}: <b>{{ dayLabel($t, moment(next.date).day()) }} {{ moment(next.date).format("DD/MM") }}<template v-if="next.start"> · <span dir="ltr">{{ next.start }}</span></template></b>
-          — {{ $t(`sch.type_${next.type}`) }}<template v-if="next.staff"> {{ $t("sch.with") }} {{ next.staff }}</template><template v-if="next.room"> · {{ next.room }}</template></span>
+          — {{ nextWords }}</span>
       </div>
       <ScheduleLegend :types="['session', 'inclusion', 'evaluation', 'consultation']" :staffMarks="false" class="mb-3" />
-      <WeekGrid :days="days" :items="child.items" :holidays="holidays" :now="now" showStaff :showShift="false" />
+      <WeekGrid :days="days" :items="child.items" :holidays="holidays" :now="now" showStaff :showShift="false" ownChild :hourHeight="88" />
       <div class="mt-5">
         <h2 class="text-xl font-bold text-[#135C65] mb-3">{{ $t("sch.tab_list") }}</h2>
         <ScheduleList :items="child.items" showStaff :showFlags="false" :loading="loading" />
@@ -48,6 +48,7 @@
 import axios from "axios";
 import moment from "moment";
 import { computed, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 import PageHead from "@/components/parent/PageHead.vue";
 import ScheduleLegend from "@/components/schedules/ScheduleLegend.vue";
@@ -57,6 +58,7 @@ import WeekNav from "@/components/schedules/WeekNav.vue";
 import { daysOf, weekRange, weekStart } from "@/utils/schedules";
 import { dayLabel } from "@/utils/studentPrograms";
 
+const { t } = useI18n();
 const week = ref(weekStart());
 const children = ref([]);
 const childId = ref(null);
@@ -80,6 +82,15 @@ const cards = computed(() => {
 const next = computed(() => {
   const current = now.value ?? moment().format("YYYY-MM-DD HH:mm");
   return (child.value?.items ?? []).find((item) => `${item.date} ${item.start ?? "23:59"}` >= current && item.status !== "missed") ?? null;
+});
+// "جلسة برنامج (تعديل سلوك) مع أ. سارة · غرفة 2" — built in script so the words keep their spaces.
+const nextWords = computed(() => {
+  if (!next.value) return "";
+  const parts = [t(`sch.type_${next.value.type}`)];
+  if (next.value.treatment) parts.push(`(${next.value.treatment})`);
+  if (next.value.staff) parts.push(`${t("sch.with")} ${next.value.staff}`);
+  const words = parts.join(" ");
+  return next.value.room ? `${words} · ${next.value.room}` : words;
 });
 
 async function load() {
