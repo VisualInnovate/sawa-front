@@ -16,12 +16,12 @@ const sections = computed(() =>
     {
       key: "team",
       label: "sidebar_team",
-      keys: ["admin", "parents", "therapeutic", "consulting"],
+      keys: ["admin", "parents", "therapeutic", "accounting", "consulting"],
     },
     {
       key: "care",
       label: "sidebar_care",
-      keys: ["my-evaluations", "my-evaluation-results", "evaluations", "evaluation-reports", "custom-files", "inputs", "rooms"],
+      keys: ["my-schedule", "my-evaluations", "my-evaluation-results", "evaluations", "evaluation-reports", "custom-files", "inputs", "rooms"],
     },
     {
       key: "system",

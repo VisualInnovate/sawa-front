@@ -19,12 +19,6 @@ import sideProfileRoutes from "./side-profile.routes";
 import calender from "./calender.routes";
 import accounting from "./accounting.routes";
 import page_403 from "../views/pages/page_403.vue";
-import HomeView from "../views/frontend/views/HomeView.vue";
-import Login from "../views/frontend/views/Login.vue";
-import AboutView from "../views/frontend/views/AboutView.vue";
-import BookingTime from "../views/frontend/components/BookingTime.vue";
-import Cursale from "../views/frontend/components/Cursale.vue";
-import contactus from "../views/frontend/views/contactus.vue";
 import { useParentStore } from "../stores/ParentStore";
 import { useAuthStore } from "../stores/Auth";
 import { canVisit, homeRoute } from "../utils/permissions";
@@ -111,160 +105,63 @@ const routes = [
       },
     ],
   },
+  // ---- The parents' portal: the sign-in pages, then everything under /web inside the portal frame. ----
   {
     path: "/web/parent/register",
     name: "SingUp",
-    component: () => import("../views/frontend/views/SingUp.vue"),
+    component: () => import("../views/parent/auth/Register.vue"),
     beforeEnter: guestForNormalUser,
   },
   {
     path: "/web/parent/login",
     name: "parentLogin",
-    component: Login,
+    component: () => import("../views/parent/auth/Login.vue"),
     beforeEnter: guestForNormalUser,
   },
-
   {
     path: "/web/parent/forgetpassword",
     name: "forgetpassword",
-    component: () => import("../views/frontend/views/forgetpassword.vue"),
+    component: () => import("../views/parent/auth/Forgot.vue"),
     beforeEnter: guestForNormalUser,
   },
   {
     path: "/web/parent/restepassword",
     name: "restepassword",
-    component: () => import("../views/frontend/views/resetpassword.vue"),
+    component: () => import("../views/parent/auth/Reset.vue"),
     beforeEnter: guestForNormalUser,
   },
-  {
-    path: "/web/code",
-    name: "code",
-    redirect: { name: "parentLogin" },
-  },
+  { path: "/web/code", name: "code", redirect: { name: "parentLogin" } },
+  { path: "/web/register-code", name: "register-code", redirect: { name: "parentLogin" } },
+  // Open to visitors too (the public pages link here); a signed-in parent sees it inside the portal.
   {
     path: "/web/contactus",
     name: "contactus",
-    component: contactus,
+    component: () => import("../views/parent/Contact.vue"),
   },
   {
     path: "/web",
-    name: "webHome",
-    component: HomeView,
+    component: () => import("../views/parent/ParentShell.vue"),
     beforeEnter: authForNormalUser,
-  },
-  {
-    path: "/request-meeting/:child_id",
-    name: "request-meeting",
-    component: () => import("../views/frontend/views/metting.vue"),
-    beforeEnter: authForNormalUser,
-  },
-  {
-    path: "/web/Cursale",
-    name: "Cursale",
-    component: Cursale,
-  },
-  {
-    path: "/web/AboutView",
-    name: "about",
-    component: AboutView,
-  },
-  {
-    path: "/web/Number",
-    name: "Number",
-    component: () => import("../views/frontend/views/Number.vue"),
-  },
-  {
-    path: "/web/clidreen_parents",
-    name: "clidreen_parents",
-    component: () => import("../views/frontend/views/childreens.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-  {
-    path: "/web/register-code",
-    name: "register-code",
-    redirect: { name: "parentLogin" },
-  },
-  {
-    path: "/web/booking-time/:child_id",
-    name: "BookingTime",
-    component: BookingTime,
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-
-  {
-    path: "/web/notifications",
-    name: "New",
-    component: () => import("../views/frontend/views/New.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-  {
-    path: "/web/generalizations",
-    name: "parent-generalizations",
-    component: () => import("../views/frontend/views/Generalizations.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-  {
-    path: "/web/more/:event_id/:child_id",
-    name: "more",
-    props: true,
-    component: () => import("../views/frontend/views/more.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-
-  {
-    path: "/web/add-child",
-    name: "ReAction",
-    component: () => import("../views/frontend/views/ReAction.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-  {
-    path: "/web/evaluation",
-    name: "Edit",
-    component: () => import("../views/frontend/views/Edit.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-  {
-    path: "/web/profile",
-    name: "Profile",
-    component: () => import("../views/frontend/views/Profile.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-
-  //start Treatment
-
-  //
-
-  {
-    path: "/web/following",
-    name: "Following",
-    component: () => import("../views/frontend/views/Following.vue"),
-    beforeEnter: [
-      authForNormalUser,
-    ],
-  },
-
-  {
-    path: "/web/appointment",
-    name: "Booking",
-    component: () => import("../views/frontend/views/Booking.vue"),
-    beforeEnter: [
-      authForNormalUser,
+    children: [
+      { path: "", name: "webHome", component: () => import("../views/parent/Home.vue") },
+      { path: "clidreen_parents", name: "clidreen_parents", component: () => import("../views/parent/Children.vue") },
+      { path: "children/:child_id(\\d+)", name: "parent-child", component: () => import("../views/parent/ChildDetails.vue"), props: true },
+      { path: "programs", name: "parent-programs", component: () => import("../views/parent/Programs.vue") },
+      { path: "appointment", name: "Booking", component: () => import("../views/parent/Consultations.vue") },
+      // «احجز تقييماً»: the public pages' button; the parent picks the child, then the day and the time.
+      { path: "evaluation", name: "Edit", component: () => import("../views/parent/BookEvaluation.vue") },
+      { path: "booking-time/:child_id", name: "BookingTime", component: () => import("../views/parent/BookSlot.vue"), props: true },
+      { path: "more/:event_id/:child_id", name: "more", component: () => import("../views/parent/BookingDetails.vue"), props: true },
+      { path: "/request-meeting/:child_id", name: "request-meeting", component: () => import("../views/parent/Meeting.vue"), props: true },
+      { path: "add-child", name: "ReAction", component: () => import("../views/parent/AddChild.vue") },
+      { path: "following", name: "Following", redirect: { name: "clidreen_parents" } },
+      { path: "notifications", name: "New", component: () => import("../views/parent/Notifications.vue") },
+      // The free M-CHAT-R at home (kept for the parent only); opened on a child or with the child picker.
+      { path: "mchat/:child_id?", name: "parent-mchat", component: () => import("../views/parent/Mchat.vue") },
+      { path: "generalizations", name: "parent-generalizations", component: () => import("../views/parent/Generalizations.vue") },
+      { path: "profile", name: "Profile", component: () => import("../views/parent/Profile.vue") },
+      // The weekly schedule of the parent's children (sessions, inclusion, evaluations, consultations).
+      { path: "schedule", name: "parent-schedule", component: () => import("../views/parent/Schedule.vue") },
     ],
   },
   ///////////////End Front End Users Routes //////////////////

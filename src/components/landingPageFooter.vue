@@ -32,10 +32,10 @@ const socialIcons = ref([
 ]);
 
 const departments = ref([
-  { label: "التدخل المبكر", href: "#" },
-  { label: "العلاج الوظيفي", href: "#" },
-  { label: "علاج النطق", href: "#" },
-  { label: "تعديل السلوك", href: "#" },
+  { label: "التدخل المبكر", href: "/programs" },
+  { label: "العلاج الوظيفي", href: "/therapeutic" },
+  { label: "علاج النطق", href: "/therapeutic" },
+  { label: "تعديل السلوك", href: "/therapeutic" },
 ]);
 
 const quickLinks = ref([
@@ -73,7 +73,10 @@ const contacts = ref([
   },
 ]);
 
-const bottomLinks = ref(["الشروط والأحكام", "الأسئلة الشائعة"]);
+const bottomLinks = ref([
+  { label: "الشروط والأحكام", href: "/contact" },
+  { label: "الأسئلة الشائعة", href: "/contact" },
+]);
 
 const navigate = (href) => {
   router.push(href);
@@ -169,10 +172,11 @@ const navigate = (href) => {
           <a
             v-for="(link, index) in bottomLinks"
             :key="index"
-            href="#"
+            :href="link.href"
             class="text-[#a1a1aa] text-xs hover:text-[#B21553] transition-colors duration-200"
+            @click.prevent="navigate(link.href)"
           >
-            {{ link }}
+            {{ link.label }}
           </a>
         </div>
       </div>

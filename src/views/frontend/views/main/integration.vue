@@ -46,7 +46,7 @@
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
-              src="./images/integration-hero.png"
+              src="./images/integration-room.jpg"
               alt="Integration hero"
               class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
@@ -75,9 +75,10 @@
                 </div>
 
                 <p class="text-[17px] font-bold leading-[1.75] text-[#6C5C60] sm:text-[20px] sm:leading-[1.65] lg:text-[22px] lg:leading-[1.55]">
-                    يقدم برنامج الدمج للأطفال ذوي صعوبات التعلم والتحديات الإدراكية
-                    والأكاديمية، بهدف تحسين المهارات التي تساعدهم داخل الأكاديمية في
-                    بيئات حقيقية مثل الروضات والمدارس.
+                    يقدَّم برنامج الدمج للأطفال من ذوي الاضطرابات النمائية والمشكلات
+                    الإدراكية والأكاديمية لطلبة الأكاديمية الذين تم تدريبهم داخلها،
+                    وحان وقت تعميم المهارات التي اكتسبوها بين أقرانهم في الروضات
+                    والمدارس؛ بعد تحقيقهم لمتطلبات الدمج والانتقال لها.
                 </p>
             </div>
         </section>
@@ -147,8 +148,8 @@
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </span>
-                                تطوير التفاعل الاجتماعي والمهارات
-                                الأكاديمية
+                                تطوير جوانب التفاعل الاجتماعي والمهارات
+                                الإدراكية والأكاديمية
                             </li>
 
                             <li class="flex items-start gap-[12px]">
@@ -159,8 +160,20 @@
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </span>
-                                تقليل الدعم تدريجياً للوصول
-                                للاستقلالية
+                                تحقيق أهداف المنهاج وفقاً لمستواه الأكاديمي
+                                والإدراكي (النجاح بالصف الحالي والانتقال للصف اللاحق)
+                            </li>
+
+                            <li class="flex items-start gap-[12px]">
+                                <span
+                                    class="mt-[4px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-[#1D7780] text-[#1D7780]">
+                                    <svg class="h-[10px] w-[10px]" viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12.5l3.8 3.8L18 8" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                                تقليل الدعم المقدم تدريجياً من معلم الدمج المرافق
+                                واتباعه لقواعد المدرسة لإيصاله للدمج الكامل باستقلالية
                             </li>
                         </ul>
                     </article>
@@ -180,8 +193,8 @@
                                 تقييم فردي شامل
                             </h3>
                             <p class="text-[13px] font-medium leading-[1.8] text-[#75686B] sm:leading-[1.7]">
-                                تحليل دقيق لقدرات كل طالب واحتياجاته الخاصة
-                                قبل البدء.
+                                تقييم فردي شامل لكل طالب بكافة المجالات قبل
+                                البدء.
                             </p>
                         </article>
 
@@ -198,8 +211,8 @@
                                 خطة تربوية فردية (IEP)
                             </h3>
                             <p class="text-[13px] font-medium leading-[1.8] text-[#75686B] sm:leading-[1.7]">
-                                تصميم مسار تعليمي خاص يتناسب مع وتيرة تطور
-                                الطفل.
+                                خطة شاملة لكافة المجالات بما فيها الدعم الإدراكي
+                                والأكاديمي.
                             </p>
                         </article>
 
@@ -216,8 +229,7 @@
                                 إشراف ميداني
                             </h3>
                             <p class="text-[13px] font-medium leading-[1.8] text-[#75686B] sm:leading-[1.7]">
-                                متابعة مباشرة داخل المدارس لضمان تنفيذ خطط
-                                الدمج بكفاءة.
+                                إشراف ميداني مستمر في الروضات والمدارس.
                             </p>
                         </article>
 
@@ -231,11 +243,35 @@
                                 </svg>
                             </div>
                             <h3 class="mb-3 text-[17px] font-black text-[#2D2D2D] sm:mb-[16px] sm:text-[18px]">
-                                تقارير دورية
+                                تقارير أسبوعية
                             </h3>
                             <p class="text-[13px] font-medium leading-[1.8] text-[#75686B] sm:leading-[1.7]">
-                                تحديثات أسبوعية مفصلة للأهل حول التقدم
-                                الملحوظ.
+                                تقارير أسبوعية بناءً على الخطة التربوية الفردية
+                                للطالب (IEP).
+                            </p>
+                        </article>
+
+                        <article class="rounded-[18px] bg-[#F7F4F3] px-5 py-7 sm:rounded-[20px] sm:px-[32px] sm:py-10 lg:py-12">
+                            <div class="mb-5 text-[#C91F5F] sm:mb-[28px]">
+                                <img src="./images/icon-team.svg" alt="" class="h-[30px] w-[30px]" />
+                            </div>
+                            <h3 class="mb-3 text-[17px] font-black text-[#2D2D2D] sm:mb-[16px] sm:text-[18px]">
+                                معلم دمج مخصص
+                            </h3>
+                            <p class="text-[13px] font-medium leading-[1.8] text-[#75686B] sm:leading-[1.7]">
+                                معلم دمج مخصص لكل طالب يرافقه في الروضة أو المدرسة.
+                            </p>
+                        </article>
+
+                        <article class="rounded-[18px] bg-[#F7F4F3] px-5 py-7 sm:rounded-[20px] sm:px-[32px] sm:py-10 lg:py-12">
+                            <div class="mb-5 text-[#C91F5F] sm:mb-[28px]">
+                                <img src="./images/icon-companion.svg" alt="" class="h-[30px] w-[30px]" />
+                            </div>
+                            <h3 class="mb-3 text-[17px] font-black text-[#2D2D2D] sm:mb-[16px] sm:text-[18px]">
+                                معلم بديل مدرب
+                            </h3>
+                            <p class="text-[13px] font-medium leading-[1.8] text-[#75686B] sm:leading-[1.7]">
+                                معلم بديل مدرب في حال غياب المعلم الأساسي للطالب.
                             </p>
                         </article>
 
@@ -251,7 +287,7 @@
                     كيف نحقق الدمج؟
                 </h2>
                 <p class="mb-10 text-[14px] font-medium leading-relaxed text-[#8A787B] lg:mb-[78px]">
-                    إشراف دائم لضمان الاستقرار
+                    رحلة مدروسة لكل خطوة
                 </p>
 
                 <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-[42px]" dir="ltr">
@@ -261,10 +297,10 @@
                             5
                         </div>
                         <h3 class="mb-[10px] text-[16px] font-black leading-tight text-[#282828]">
-                            دعم مستمر
+                            تقليل الدعم تدريجياً
                         </h3>
                         <p class="text-[12px] font-medium leading-[1.7] text-[#76686B]">
-                            إشراف دائم للأهل والمدرسة
+                            حتى الدمج الكامل باستقلالية وفق قدرته
                         </p>
                     </div>
 
@@ -274,10 +310,10 @@
                             4
                         </div>
                         <h3 class="mb-[10px] text-[16px] font-black leading-tight text-[#282828]">
-                            انتقال تدريجي
+                            الانتقال للروضة أو المدرسة
                         </h3>
                         <p class="text-[12px] font-medium leading-[1.7] text-[#76686B]">
-                            البدء الجزئي في المدرسة
+                            بمرافقة معلم دمج مخصص لكل طالب
                         </p>
                     </div>
 
@@ -300,10 +336,10 @@
                             2
                         </div>
                         <h3 class="mb-[10px] text-[16px] font-black leading-tight text-[#282828]">
-                            إتقان المهارات
+                            إتقان أهداف الخطة
                         </h3>
                         <p class="text-[12px] font-medium leading-[1.7] text-[#76686B]">
-                            الوصول لمستوى التميز الأساسي
+                            وتحقيق متطلبات الدمج والانتقال
                         </p>
                     </div>
 
@@ -330,7 +366,7 @@
                     <div class="pointer-events-none absolute left-[-44px] top-[-54px] hidden h-[150px] w-[150px] rounded-full bg-[#F4DDE7] sm:block"></div>
 
                     <div class="relative h-full w-full overflow-hidden rounded-[16px] bg-white sm:rounded-[20px]">
-                        <img src="./images/integration-progress.png" alt="Integration progress"
+                        <img src="./images/progress-chart.png" alt="Integration progress"
                             class="h-full w-full object-cover" />
                     </div>
                 </div>
@@ -341,34 +377,43 @@
                     </h2>
 
                     <p class="mb-8 text-[15px] font-medium leading-[1.9] text-[#746064] sm:text-[16px] lg:mb-[50px] lg:text-[17px]">
-                        نستخدم أدوات تقييم معيارية ومبتكرة لقياس مدى استجابة الطفل
-                        وتطوره الأكاديمي والاجتماعي. يتم رصد النتائج بدقة لضمان أننا نسير
-                        على الطريق الصحيح نحو الاستقلالية الكاملة.
+                        نرصد أداء الطالب ونوثّق تقدمه برسوم بيانية واضحة، ونصدر تقارير
+                        أسبوعية بناءً على خطته التربوية الفردية (IEP)، مع إشراف ميداني
+                        في الروضات والمدارس حتى يصل للدمج الكامل باستقلالية وفق قدرته.
                     </p>
 
-                    <div class="space-y-5 sm:space-y-[24px]">
-                        <div>
-                            <div
-                                class="mb-[9px] flex items-center justify-between gap-4 text-[12px] font-bold text-[#41383A] sm:text-[13px]">
-                                <span>التفاعل الاجتماعي</span>
-                                <span>85%</span>
-                            </div>
-                            <div class="h-[8px] w-full rounded-full bg-[#E6E2E1]">
-                                <div class="h-full w-[85%] rounded-full bg-[#C91F5F]"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div
-                                class="mb-[9px] flex items-center justify-between gap-4 text-[12px] font-bold text-[#41383A] sm:text-[13px]">
-                                <span>الاستقلالية الأكاديمية</span>
-                                <span>70%</span>
-                            </div>
-                            <div class="h-[8px] w-full rounded-full bg-[#E6E2E1]">
-                                <div class="h-full w-[70%] rounded-full bg-[#1D7780]"></div>
-                            </div>
-                        </div>
-                    </div>
+                    <ul class="space-y-4 text-[13px] font-bold text-[#41383A] sm:text-[14px]">
+                        <li class="flex items-start gap-[12px]">
+                                <span
+                                    class="mt-[4px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-[#1D7780] text-[#1D7780]">
+                                    <svg class="h-[10px] w-[10px]" viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12.5l3.8 3.8L18 8" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            تقييم فردي شامل لكل طالب بكافة المجالات
+                        </li>
+                        <li class="flex items-start gap-[12px]">
+                                <span
+                                    class="mt-[4px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-[#1D7780] text-[#1D7780]">
+                                    <svg class="h-[10px] w-[10px]" viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12.5l3.8 3.8L18 8" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            رسوم بيانية توضح مستوى التقدّم في كل مهارة
+                        </li>
+                        <li class="flex items-start gap-[12px]">
+                                <span
+                                    class="mt-[4px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-[#1D7780] text-[#1D7780]">
+                                    <svg class="h-[10px] w-[10px]" viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12.5l3.8 3.8L18 8" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            تقارير أسبوعية بناءً على الخطة التربوية الفردية (IEP)
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>

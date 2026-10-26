@@ -46,7 +46,7 @@
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
-              src="./images/child-journey-hero.png"
+              src="./images/child-painting.jpg"
               alt="رحلة الطفل"
               class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
@@ -149,22 +149,23 @@
                 </div>
 
                 <p class="mb-5 text-[12px] font-bold leading-[1.85] text-[#6F6669] sm:text-[13px]">
-                  بناءً على نتائج التقييم، يتم إعداد خطة تربوية فردية مخصصة لكل
-                  طفل تلبي احتياجاته الفريدة.
+                  بناءً على نتائج التقييم، نقوم في سوا بإعداد خطة تربوية فردية
+                  مخصصة لكل طفل تُصمَّم بما يتناسب مع احتياجاته الفعلية بكافة
+                  الجوانب النمائية، بحيث تتضمن كل خطة على:
                 </p>
 
                 <ul class="space-y-3 text-[12px] font-bold text-[#6F6669] sm:text-[13px]">
                   <li class="flex items-center gap-2">
                     <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
-                    أهداف قابلة للقياس
+                    أهداف واضحة وقابلة للقياس (قصيرة وطويلة المدى)
                   </li>
                   <li class="flex items-center gap-2">
                     <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
-                    استراتيجيات مناسبة
+                    استراتيجيات وأساليب وأنشطة تعليمية مناسبة لقدرات الطفل
                   </li>
                   <li class="flex items-center gap-2">
                     <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
-                    إشراك الأسرة بشكل كامل
+                    إشراك الأسرة وأولوياتهم بالخطة وأخذ موافقتهم عليها قبل تنفيذها
                   </li>
                 </ul>
               </article>
@@ -190,11 +191,13 @@
                   مكثفة.
                 </p>
 
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">ABA</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج نطق</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج نطق ولغة</span>
                   <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج وظيفي</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">أكاديمي</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج طبيعي</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">تعليم إدراكي أكاديمي</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">جلسات جماعية</span>
                 </div>
               </article>
             </div>
@@ -261,9 +264,45 @@
                 </div>
 
                 <p class="text-[12px] font-bold leading-[1.85] text-[#6F6669] sm:text-[13px]">
-                  تقارير أسبوعية وشهرية ودورية مفصلة تطلعكم على كافة تفاصيل
-                  تقدم الطفل في جميع المجالات.
+                  إصدار تقرير أسبوعي وشهري ودوري لكل طفل بناءً على تحقيقه أهداف
+                  خطته الفردية.
                 </p>
+              </article>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+                7
+              </div>
+              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+                <div class="mb-4 flex items-center gap-[10px]">
+                  <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 4h14v16H5V4Z" stroke="currentColor" stroke-width="2.2" />
+                    <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                  </svg>
+                  <h3 class="text-[17px] font-black text-[#252525]">نماذج العمل والتطبيق العملي</h3>
+                </div>
+
+                <p class="mb-5 text-[12px] font-bold leading-[1.85] text-[#6F6669] sm:text-[13px]">
+                  نقدّم في سوا نماذج عمل حقيقية خلال جلسات التدريب الفردية
+                  والجماعية، تشمل:
+                </p>
+
+                <ul class="space-y-3 text-[12px] font-bold text-[#6F6669] sm:text-[13px]">
+                  <li class="flex items-center gap-2">
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    نماذج التوثيق والمتابعة (DTT / Tracking) ونماذج رصد المشاكل السلوكية
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    نماذج أوراق العمل للأهداف المستهدفة بالتدريب
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    نماذج من الأنشطة التطبيقية مع الطفل
+                  </li>
+                </ul>
               </article>
             </div>
           </div>
@@ -279,7 +318,7 @@
         <div class="relative">
           <div class="h-[260px] overflow-hidden rounded-[16px] bg-[#4CBDBB] shadow-[0_15px_35px_rgba(0,0,0,0.16)] sm:h-[360px] lg:h-[383px]">
             <img
-              src="./images/family-safe-work.png"
+              src="./images/iep-meeting.jpg"
               alt="شراكة حقيقية مع الأسرة"
               class="h-full w-full object-cover"
             />

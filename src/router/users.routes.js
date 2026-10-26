@@ -19,6 +19,19 @@ const usersRoutes = [
     name: "my-evaluation-results",
     component: () => import("../views/users/EvaluationResults.vue"),
   },
+  // «جدولي»: every employee's own week, no permission needed.
+  {
+    path: "/my-schedule",
+    name: "my-schedule",
+    component: () => import("../views/schedules/MySchedule.vue"),
+  },
+  // «جداول الموظفين»: every employee's week.
+  {
+    path: "/staff-schedules",
+    name: "staff-schedules",
+    meta: { permission: ["staff schedules list"] },
+    component: () => import("../views/schedules/StaffSchedules.vue"),
+  },
 ];
 
 export default {

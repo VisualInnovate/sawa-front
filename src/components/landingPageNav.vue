@@ -60,12 +60,12 @@ const navigate = (href) => {
       <!-- Desktop action buttons -->
       <div class="hidden xl:flex items-center gap-2 shrink-0">
         <a
-          @click="navigate('web/parent/register')"
+          @click="navigate('/web/parent/register')"
           class="cursor-pointer text-[#B21553] font-bold text-sm px-4 py-2 rounded-lg border border-[#B21553] hover:bg-pink-50 transition-colors duration-200 whitespace-nowrap"
           >انشاء حساب</a
         >
         <a
-          @click="navigate('web/parent/login')"
+          @click="navigate('/web/parent/login')"
           class="cursor-pointer bg-[#deb413] text-white font-bold text-sm px-4 py-2 rounded-lg hover:opacity-90 transition-opacity duration-200 whitespace-nowrap"
           >تسجيل الدخول</a
         >
@@ -136,18 +136,18 @@ const navigate = (href) => {
 
         <div class="flex flex-col gap-2 mt-3 pt-4 border-t border-gray-100">
           <a
-            href="#"
-            class="text-center text-[#B21553] font-bold text-base py-3 rounded-lg border border-[#B21553] hover:bg-pink-50 transition-colors duration-200"
+            @click="navigate('/web/parent/register')"
+            class="cursor-pointer text-center text-[#B21553] font-bold text-base py-3 rounded-lg border border-[#B21553] hover:bg-pink-50 transition-colors duration-200"
             >انشاء حساب</a
           >
           <a
-            href="#"
-            class="text-center bg-[#deb413] text-white font-bold text-base py-3 rounded-lg hover:opacity-90 transition-opacity duration-200"
+            @click="navigate('/web/parent/login')"
+            class="cursor-pointer text-center bg-[#deb413] text-white font-bold text-base py-3 rounded-lg hover:opacity-90 transition-opacity duration-200"
             >تسجيل الدخول</a
           >
           <a
-            href="#"
-            class="text-center bg-[#B21553] text-white font-bold text-base py-3 rounded-lg hover:opacity-90 transition-opacity duration-200"
+            @click="navigate('/web/evaluation')"
+            class="cursor-pointer text-center bg-[#B21553] text-white font-bold text-base py-3 rounded-lg hover:opacity-90 transition-opacity duration-200"
             >احجز الآن</a
           >
         </div>

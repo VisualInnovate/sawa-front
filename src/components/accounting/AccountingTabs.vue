@@ -10,6 +10,7 @@ const items = [
   { to: { name: "accounting-payments" }, label: "acc.payments", perm: "accounting list" },
   { to: { name: "accounting-charges" }, label: "acc.charges", perm: "accounting list" },
   { to: { name: "accounting-credits" }, label: "acc.credits", perm: "accounting list" },
+  { to: { name: "accounting-reports" }, label: "acc.reports.menu", perm: "accounting reports list" },
   { to: { name: "accounting-settings" }, label: "acc.settings", perm: "accounting settings edit" },
 ];
 </script>

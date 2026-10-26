@@ -65,7 +65,7 @@
               class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
             >
               <img
-                src="./images/support-hero-room.png"
+                src="./images/indoor-play-slide.jpg"
                 alt="الخدمات المساندة"
                 class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
               />
@@ -106,8 +106,10 @@
             <p
               class="mb-[33px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
             >
-              نقدم خدمة نقل ذكية ومريحة تضمن وصول طفلك في الموعد بكل أمان. أسطولنا
-              مجهز خصيصاً لتقليل التوتر وضمان أعلى مستويات الرعاية.
+              توفر أكاديمية سوا للتربية الخاصة خدمة المواصلات لطلبتها بمركبات
+              صغيرة مراقبة بالكاميرات صوتاً وصورة ونظام تتبع GPS، حتى لا تزيد مدة
+              الجولة على الأطفال ويصل كل طفل لبيته وللأكاديمية بأقرب وقت ممكن
+              دون تأخير عليه.
             </p>
 
             <div class="space-y-[20px]">
@@ -146,7 +148,7 @@
             class="relative order-[-1] h-[240px] w-full sm:h-[340px] lg:order-[1] lg:h-auto lg:min-h-[410px] lg:w-[52%]"
           >
             <img
-              src="./images/support-bus.png"
+              src="./images/bus.jpg"
               alt="حافلة أكاديمية سوا"
               class="absolute inset-0 h-full w-full object-cover"
             />
@@ -155,7 +157,7 @@
               class="absolute left-[18px] top-[18px] flex h-[36px] items-center gap-[8px] rounded-full bg-[#E9FBFE] px-[16px] text-[11px] font-black text-[#1B7A83]"
             >
               <span class="h-[9px] w-[9px] rounded-full bg-[#C91F5F]"></span>
-              مراقبة بالكاميرات 24/7
+              كاميرات صوت وصورة + تتبع GPS
             </div>
           </div>
         </div>
@@ -217,7 +219,7 @@
             class="h-[220px] w-full overflow-hidden rounded-[28px] bg-white/10 sm:h-[300px] lg:h-[346px] lg:w-[520px] lg:shrink-0"
           >
             <img
-              src="./images/support-animal-garden.png"
+              src="./images/garden-birds.jpg"
               alt="حديقة العصافير والحيوانات الأليفة"
               class="h-full w-full object-cover"
             />
@@ -233,8 +235,10 @@
             <p
               class="mb-[33px] text-[15px] font-bold leading-[1.9] text-white/82"
             >
-              مرفق فريد من نوعه يهدف إلى دمج العلاج باللعب والمسؤولية. الحديقة
-              ليست مجرد مكان للمرح، بل هي أداة علاجية قوية.
+              توفّر سوا بيئة تفاعلية من خلال الحيوانات الأليفة، مما يساعد
+              الأطفال على تنمية التواصل، وتعزيز المهارات الحسية، ووقت استراحة
+              للطلبة. كما يساهم في تحفيز الانتباه وتعليم المسؤولية بطريقة ممتعة
+              وآمنة تحت إشراف مختصين.
             </p>
 
             <div class="grid grid-cols-2 gap-[16px]">
@@ -388,8 +392,9 @@
             <p
               class="mb-[36px] text-[14px] font-bold leading-[1.9] text-[#6F6669]"
             >
-              ندرك أن رحلة الأهل تتطلب الدعم أيضاً. وفرنا مرافق مريحة تجعل وقت
-              انتظاركم وقتاً للاسترخاء والمتابعة.
+              يوجد في أكاديمية سوا غرفة خاصة للأهل وجلسات خارجية مجهزة بكافة
+              وسائل الراحة، كما وتوفّر أجهزة لوحية تمكّن الأهل من مشاهدة الجلسات
+              الخاصة بأطفالهم.
             </p>
 
             <ul class="space-y-[18px]">
@@ -418,14 +423,25 @@
             </ul>
           </div>
 
-          <div
-            class="order-[-1] aspect-square w-full max-w-[512px] overflow-hidden rounded-[24px] shadow-[0_14px_32px_rgba(0,0,0,0.08)] lg:order-[1]"
-          >
-            <img
-              src="./images/comfort-room.png"
-              alt="راحة الأهل"
-              class="h-full w-full object-cover"
-            />
+          <div class="order-[-1] flex w-full max-w-[512px] flex-col gap-4 lg:order-[1]">
+            <div
+              class="h-[240px] overflow-hidden rounded-[24px] shadow-[0_14px_32px_rgba(0,0,0,0.08)] sm:h-[300px]"
+            >
+              <img
+                src="./images/waiting-room.jpg"
+                alt="غرفة انتظار الأهل الداخلية"
+                class="h-full w-full object-cover"
+              />
+            </div>
+            <div
+              class="h-[200px] overflow-hidden rounded-[24px] shadow-[0_14px_32px_rgba(0,0,0,0.08)] sm:h-[220px]"
+            >
+              <img
+                :src="comfortAreaImage"
+                alt="الجلسات الخارجية للأهل"
+                class="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -495,12 +511,12 @@
 </template>
 
 <script>
-import greenMazeImage from "./images/green-maze.png";
-import comfortAreaImage from "./images/family-safe-work.png";
-import indoorPlayroomImage from "./images/indoor-playroom.png";
-import musicRoomImage from "./images/music-room.png";
-import outdoorPlaygroundImage from "./images/outdoor-playground.png";
-import theaterRoomImage from "./images/theater-room.png";
+import greenMazeImage from "./images/trampoline.jpg";
+import comfortAreaImage from "./images/outdoor-seating.jpg";
+import indoorPlayroomImage from "./images/indoor-play-red.jpg";
+import musicRoomImage from "./images/music.jpg";
+import outdoorPlaygroundImage from "./images/water-slide.jpg";
+import theaterRoomImage from "./images/puppet-theatre.jpg";
 
 export default {
   name: "SupportServicesPage",
@@ -512,15 +528,16 @@ export default {
       transportFeatures: [
         {
           title: "مركبات صغيرة",
-          description: "بحد أقصى 8 أطفال لضمان الراحة والهدوء.",
+          description: "سعتها القصوى لا تتجاوز 8 أطفال، حتى لا تطول الجولة على الأطفال.",
           icon: "users",
           iconBox:
             "flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-[#E7FBFE] text-[#1B7A83]",
           titleClass: "text-[15px] font-black text-[#1B7A83]",
         },
         {
-          title: "مرافق متخصص",
-          description: "يتواجد أخصائي تعديل سلوك في كل رحلة للدعم.",
+          title: "معالج سلوكي مرافق",
+          description:
+            "معالج سلوكي مؤهل ومرخّص يرافق كل رحلة، ولديه القدرة على التعامل مع السلوكيات غير المرغوبة حال حدوثها داخل المركبة بكل مهنية وفاعلية.",
           icon: "location-heart",
           iconBox:
             "flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-[#F8E4EC] text-[#C91F5F]",
@@ -530,43 +547,44 @@ export default {
 
       techCards: [
         {
-          title: "بنية آمنة تماماً",
+          title: "بيئة آمنة مراقبة بالكاميرات",
           description:
-            "جميع القاعات والممرات مراقبة بالكاميرات لضمان سلامة الأطفال المستمرة.",
+            "جميع مرافق الأكاديمية ضمن بيئة فيزيائية آمنة مراقبة بالكاميرات.",
           icon: "shield",
           iconClass: "h-[26px] w-[26px] text-[#C91F5F]",
         },
         {
-          title: "مسارات ومداخل آمنة",
+          title: "ممرات ومداخل آمنة",
           description:
-            "تصميم انسيابي للمداخل والمخارج مع منحدرات مدروسة لتسهيل الحركة.",
+            "ممرات ومداخل آمنة مناسبة للأطفال في كل أرجاء الأكاديمية.",
           icon: "wheelchair",
           iconClass: "h-[26px] w-[26px] text-[#1B7A83]",
         },
         {
-          title: "مصعد كهربائي",
+          title: "ساحات واسعة",
           description:
-            "تجهيزات متكاملة لخدمة ذوي الهمم وتسهيل التنقل بين الطوابق.",
+            "ساحات مجهزة بالألعاب الترفيهية وبكل وأحدث المستلزمات التي يحتاجونها بوقت استراحتهم اليومية المجدولة.",
           icon: "building",
           iconClass: "h-[26px] w-[26px] text-[#C91F5F]",
         },
         {
-          title: "فصول مجهزة",
+          title: "صفوف مجهزة",
           description:
-            "فصول دراسية واسعة مزودة بأحدث الوسائل التعليمية والتفاعلية.",
+            "صفوف منظمة مزودة بالألواح التفاعلية الذكية والوسائل التعليمية والأدوات.",
           icon: "school",
           iconClass: "h-[26px] w-[26px] text-[#1B7A83]",
         },
         {
-          title: "غرف علاج هادئة",
+          title: "عيادات الجلسات الفردية",
           description:
-            "بيئة محفزة للتركيز بعيداً عن المشتتات لجلسات علاجية فعالة.",
+            "غرف جلسات فردية لأقسام ABA والنطق واللغة والعلاج الوظيفي والعلاج الطبيعي والتعليم الأكاديمي.",
           icon: "therapy",
           iconClass: "h-[26px] w-[26px] text-[#C91F5F]",
         },
         {
-          title: "ملاعب فسيحة",
-          description: "مساحات خارجية للعب الحر مجهزة بأرضيات ممتصة للصدمات.",
+          title: "ساحات ألعاب خارجية",
+          description:
+            "بيئة غنية وممتعة تساعد الأطفال على تعميم المهارات المكتسبة وأخذ استراحة مؤقتة من الجلسة الصفية.",
           icon: "playground",
           iconClass: "h-[26px] w-[26px] text-[#1B7A83]",
         },
@@ -581,18 +599,21 @@ export default {
 
       indoorActivities: [
         {
-          title: "العلاج بالموسيقى",
-          description: "استخدام الإيقاعات لتحسين التواصل والتعبير.",
+          title: "حصص الموسيقى العلاجية",
+          description:
+            "تعمل على تحسين التواصل والتعبير لدى الأطفال وتهدئة الانفعالات لديهم وتعزيز التركيز والانتباه.",
           image: musicRoomImage,
         },
         {
-          title: "مسرح العرائس",
-          description: "تنمية الخيال الاجتماعي والمهارات اللغوية.",
+          title: "مسرح الدمى",
+          description:
+            "يحفّز التخيل ولعب الأدوار، ويعزز مهارات التواصل والتعبير عن الانفعالات والمشاعر، وفهم السلوكيات الاجتماعية الصحيحة والمقبولة.",
           image: theaterRoomImage,
         },
         {
-          title: "قاعة الانتظار واللعب",
-          description: "مساحات آمنة للتفريغ الحركي خلال فترات الاستراحة",
+          title: "غرفة الانتظار والألعاب",
+          description:
+            "بيئة هادئة للطفل بأنشطة ممتعة لحين بدء الجلسة التالية أو انتظار وصول الأهل لأخذه إلى المنزل.",
           image: indoorPlayroomImage,
         },
       ],
@@ -600,20 +621,22 @@ export default {
       outdoorActivities: [
         {
           title: "الألعاب المائية",
-          description: "تحفيز حسي ممتع في بيئة مائية آمنة.",
+          description:
+            "تعزز المهارات الحركية والتوازن، وتزيد التفاعل والتواصل بين الأطفال وتحفّز الحواس وتخفف التوتر.",
           image: outdoorPlaygroundImage,
         },
         {
-          title: "الترامبولين",
-          description: "تقوية التوازن والقدرات الحركية الكبرى.",
+          title: "ساحات الألعاب الخارجية",
+          description:
+            "توفر للأطفال بيئة غنية وممتعة تساعدهم على تعميم المهارات المكتسبة وأخذ استراحة مؤقتة من الجلسة الصفية.",
           image: greenMazeImage,
         },
       ],
 
       comfortItems: [
-        { text: "قاعات انتظار فندقية مريحة", icon: "sofa" },
-        { text: "أجهزة تابلت لمتابعة الجلسات مباشرة", icon: "screen" },
-        { text: "منطقة ضيافة مجانية", icon: "cup" },
+        { text: "غرفة خاصة للأهل داخل الأكاديمية", icon: "sofa" },
+        { text: "جلسات خارجية مجهزة بكافة وسائل الراحة", icon: "cup" },
+        { text: "أجهزة لوحية تمكّن الأهل من مشاهدة جلسات أطفالهم", icon: "screen" },
       ],
     };
   },

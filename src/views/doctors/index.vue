@@ -329,7 +329,7 @@ const initFilters = () => {
           <div class="">
             <div>
               <img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px; height: 150px;" v-if="usersdata.image" :src="'https://sawa.sawa.academy/'+usersdata.image">
-              <img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px; height: 150px;" v-else src="../frontend/image/Ellipse2.png">
+              <img onclick="document.getElementById('filr').click()" class="m-auto rounded-full" style="width: 150px; height: 150px;" v-else src="/src/assets/img/Ellipse2.png">
               <div class="mt-1 mb-5 text-red-500" v-if="error?.image">{{ error.image[0] }}</div>
             </div>
           </div>

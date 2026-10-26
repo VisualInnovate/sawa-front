@@ -47,7 +47,7 @@
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
           >
             <img
-              src="./images/about-hero.jpg"
+              src="./images/hero-gate.jpg"
               alt="أكاديمية سوا"
               class="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
             />
@@ -78,15 +78,19 @@
             <p
               class="text-[#594045] text-base lg:text-lg text-start leading-[2]"
             >
-              تأسست أكاديمية سوا من رؤية واضحة لسد الفجوة في خدمات التربية
-              الخاصة المتميزة. لم تكن مجرد مشروع، بل استجابة حقيقية لاحتياجات
-              الأسر الباحثة عن التميز العلمي والاحتواء الإنساني.
+              جاء تأسيس أكاديمية سوا للتربية الخاصة استجابةً لحاجة مجتمعية
+              حقيقية بوجود مؤسسة تجمع بين العلم والخبرة والمهنية، وتطبق
+              المعايير العالمية في التعامل مع الأطفال الذين يحتاجون للبرامج
+              التأهيلية الشاملة.
             </p>
             <p
               class="text-[#594045] text-base lg:text-lg text-start leading-[2]"
             >
-              نحن نؤمن أن كل طفل هو قصة نجاح تنتظر من يقرأها، ولذلك اعتمدنا أعلى
-              المعايير المهنية العالمية لضمان رحلة تعلم مثمرة وآمنة.
+              نحن متخصصون في تقديم الخدمات التأهيلية والتعليمية للأطفال، نعمل
+              كفريق متكامل التخصصات من خلال برامجنا المتخصصة وكادرنا المؤهل،
+              وتحت إشراف إدارة ذات خبرة طويلة في مجال التأهيل والتعليم، للوصول
+              بكل طفل إلى أقصى درجات الاستقلالية والاعتماد على الذات، لنمكّنه من
+              النجاح في دمجه بين أقرانه وأسرته ومجتمعه بثقة وفاعلية.
             </p>
           </div>
         </div>
@@ -333,90 +337,46 @@
       <div class="max-w-[1280px] mx-auto px-4 lg:px-8">
         <div class="text-center mb-4">
           <h2 class="text-2xl lg:text-[36px] font-bold text-[#1c6772]">
-            فريق سوا المتخصص
+            فريقنا
           </h2>
         </div>
         <p class="text-[#594045] text-base text-center mb-10 lg:mb-16">
-          نخبة من الكفاءات المعتمدة عالمياً في مجالات التربية الخاصة وتعديل
-          السلوك والنطق.
+          يضم فريق سوا نخبة من الأخصائيين في تحليل السلوك التطبيقي، والنطق
+          واللغة، والعلاج الوظيفي، والعلاج الطبيعي، والتعليم الإدراكي الأكاديمي.
         </p>
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12"
-        >
-          <div class="flex flex-col items-center">
-            <div class="relative w-48 h-48">
-              <div
-                class="absolute inset-[-10px] bg-[#b21553]/20 blur-[6px] rounded-full"
-              ></div>
-              <img
-                src="./images/team-sara.jpg"
-                alt="د. سارة الأحمد"
-                class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg relative z-10"
-              />
-            </div>
-            <h3 class="text-[#1c6772] font-bold text-xl mt-6">
-              د. سارة الأحمد
+        <div class="mx-auto mb-10 max-w-[640px] overflow-hidden rounded-[32px] bg-[#f6f3f2] lg:mb-14">
+          <img
+            src="./images/team-illustration.png"
+            alt="فريق سوا"
+            class="w-full h-auto"
+          />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          <div class="bg-[#f6f3f2] rounded-[32px] p-8 lg:p-10 flex flex-col gap-4">
+            <img src="./images/icon-certified.svg" alt="" class="w-9 h-9" />
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
+              مؤهلون ومعتمدون
             </h3>
-            <p class="text-[#b21553] font-semibold text-base mt-1">
-              أخصائية تحليل سلوك (BCBA)
-            </p>
-            <p class="text-[#594045] text-sm mt-1">خبرة ١٢ عاماً في التوحد</p>
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="relative w-48 h-48">
-              <div
-                class="absolute inset-[-10px] bg-[#1c6772]/20 blur-[6px] rounded-full"
-              ></div>
-              <img
-                src="./images/team-omar.jpg"
-                alt="أ. عمر محمود"
-                class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg relative z-10"
-              />
-            </div>
-            <h3 class="text-[#1c6772] font-bold text-xl mt-6">أ. عمر محمود</h3>
-            <p class="text-[#b21553] font-semibold text-base mt-1">
-              أخصائي تخاطب ونطق
-            </p>
-            <p class="text-[#594045] text-sm mt-1">
-              خبرة ٨ سنوات في اضطرابات اللغة
+            <p class="text-[#594045] text-base text-start leading-relaxed">
+              نخبة من الأخصائيين المؤهلين علمياً، يحملون مزاولة مهنية رسمية معتمدة بتخصصاتهم.
             </p>
           </div>
-          <div class="flex flex-col items-center">
-            <div class="relative w-48 h-48">
-              <div
-                class="absolute inset-[-10px] bg-[#b21553]/20 blur-[6px] rounded-full"
-              ></div>
-              <img
-                src="./images/team-layla.jpg"
-                alt="أ. ليلى حسن"
-                class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg relative z-10"
-              />
-            </div>
-            <h3 class="text-[#1c6772] font-bold text-xl mt-6">أ. ليلى حسن</h3>
-            <p class="text-[#b21553] font-semibold text-base mt-1">
-              أخصائية علاج وظيفي
-            </p>
-            <p class="text-[#594045] text-sm mt-1">
-              خبرة ١٠ سنوات في تنمية المهارات
+          <div class="bg-[#f6f3f2] rounded-[32px] p-8 lg:p-10 flex flex-col gap-4">
+            <img src="./images/icon-professionalism.svg" alt="" class="w-9 h-9" />
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
+              اختيار وفق معايير دقيقة
+            </h3>
+            <p class="text-[#594045] text-base text-start leading-relaxed">
+              يتم اختيارهم وفق معايير دقيقة تضمن الكفاءة العالية والدقة والالتزام المهني.
             </p>
           </div>
-          <div class="flex flex-col items-center">
-            <div class="relative w-48 h-48">
-              <div
-                class="absolute inset-[-10px] bg-[#1c6772]/20 blur-[6px] rounded-full"
-              ></div>
-              <img
-                src="./images/team-khaled.jpg"
-                alt="د. خالد منصور"
-                class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg relative z-10"
-              />
-            </div>
-            <h3 class="text-[#1c6772] font-bold text-xl mt-6">د. خالد منصور</h3>
-            <p class="text-[#b21553] font-semibold text-base mt-1">
-              مستشار تربية خاصة
-            </p>
-            <p class="text-[#594045] text-sm mt-1">
-              خبرة ١٥ عاماً في تصميم المناهج
+          <div class="bg-[#f6f3f2] rounded-[32px] p-8 lg:p-10 flex flex-col gap-4">
+            <img src="./images/icon-development.svg" alt="" class="w-9 h-9" />
+            <h3 class="text-[#1c6772] font-bold text-xl text-start">
+              تدريب مستمر
+            </h3>
+            <p class="text-[#594045] text-base text-start leading-relaxed">
+              يخضع جميع أعضاء فريقنا لبرامج تدريب مستمرة داخل سوا وخارجها، بهدف تطوير دائم لمهاراتهم وتحديث لمعارفهم.
             </p>
           </div>
         </div>
@@ -431,7 +391,7 @@
         <!-- Image -->
         <div class="relative">
           <img
-            src="./images/why-about.jpg"
+            src="./images/team-photo.jpg"
             alt="لماذا سوا"
             class="w-full h-[300px] sm:h-[400px] lg:h-[512px] object-cover rounded-[48px] shadow-2xl"
           />
@@ -441,10 +401,10 @@
             <p
               class="text-[#b21553] font-bold text-2xl lg:text-[30px] text-start leading-[36px]"
             >
-              +٥٠٠
+              معكم وبكم
             </p>
             <p class="text-[#1c6772] font-bold text-sm lg:text-base text-start">
-              طفل تم دمجهم بنجاح
+              سنبقى سوا
             </p>
           </div>
         </div>
@@ -509,7 +469,7 @@
               <p
                 class="text-[#594045] font-semibold text-base lg:text-lg text-start"
               >
-                برامج مثبتة النتائج مبنية على الـ ABA
+                برامج قائمة على مبادئ تحليل السلوك التطبيقي ABA
               </p>
             </div>
           </div>
