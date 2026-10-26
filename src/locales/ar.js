@@ -2837,6 +2837,10 @@ export default {
   },
   // The parents' portal (views/parent, components/parent).
   pp: {
+    slots_title: "المواعيد المتاحة",
+    slots_count: "{n} مواعيد متاحة · اختر الوقت المناسب لك",
+    slot_book: "احجز",
+    slot_minutes: "{n} دقيقة",
     brand: "أكاديمية سوا",
     public_site: "موقع الأكاديمية",
     footer_line: "أكاديمية سوا للتربية الخاصة — عمّان، الرابية، شارع ميسلون",

@@ -1,12 +1,14 @@
 /* ==========================================================================
    Sawa — the parents' portal look (the booklet's colours: deep teal, magenta,
    soft cyan on a warm cream page). Everything is prefixed `pp-` and scoped to
-   the portal's roots (.pp-shell, .pp-auth) so the dashboard and the public
+   the portal's roots (.pp-shell, .pp-auth, and .pp-overlay on the dialogs and
+   sheets that PrimeVue renders outside them) so the dashboard and the public
    pages keep their own look.
    ========================================================================== */
 
 .pp-shell,
-.pp-auth {
+.pp-auth,
+.pp-overlay {
   --pp-teal: #1c6772;
   --pp-teal-700: #135c65;
   --pp-teal-900: #035b65;
@@ -873,4 +875,38 @@
     box-shadow: none;
     break-inside: avoid;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Dialogs of the portal (rendered at the end of <body>, so they carry
+   .pp-overlay for the tokens above)
+   -------------------------------------------------------------------------- */
+.p-dialog.pp-overlay {
+  border: 0;
+  border-radius: var(--pp-radius);
+  box-shadow: var(--pp-shadow-lg);
+  overflow: hidden;
+  background: #fff;
+}
+.p-dialog.pp-overlay .p-dialog-header {
+  padding: 1.1rem 1.25rem 0.6rem;
+}
+.p-dialog.pp-overlay .p-dialog-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--pp-teal-900);
+}
+.p-dialog.pp-overlay .p-dialog-content {
+  padding: 0.25rem 1.25rem 1.25rem;
+}
+.p-dialog.pp-overlay .p-dialog-close-button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--pp-teal-900);
+  background: var(--pp-teal-50);
+}
+.p-dialog.pp-overlay .p-dialog-close-button:hover {
+  background: var(--pp-teal-100);
 }

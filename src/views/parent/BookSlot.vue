@@ -7,7 +7,7 @@ import axios from "axios";
 import PageHead from "@/components/parent/PageHead.vue";
 import EmptyState from "@/components/parent/EmptyState.vue";
 import { useParentPortalStore } from "@/stores/ParentPortal";
-import { fmtDay, fmtTime, locale } from "@/utils/parentPortal";
+import { fmtTime, locale } from "@/utils/parentPortal";
 
 const props = defineProps({ child_id: { type: [String, Number], required: true } });
 const { t } = useI18n();
@@ -62,6 +62,12 @@ async function openDay(day) {
   }
 }
 
+// The slot's length in minutes ("2026-11-03T13:00:00" … "14:00:00").
+const minutes = (slot) => {
+  const at = (value) => new Date(String(value).includes("T") || String(value).includes(" ") ? String(value).replace(" ", "T") : `2000-01-01T${value}`);
+  return Math.max(0, Math.round((at(slot.end) - at(slot.start)) / 60000));
+};
+
 const choose = (slot) => router.push({ name: "more", params: { event_id: slot.id, child_id: props.child_id } });
 </script>
 
@@ -82,19 +88,33 @@ const choose = (slot) => router.push({ name: "more", params: { event_id: slot.id
       </button>
     </div>
 
-    <Dialog :visible="Boolean(selected)" modal :header="selected ? `${$t('المواعيد المتاحة')} — ${fmtDay(selected.date)}` : ''" :style="{ width: '32rem', maxWidth: '94vw' }" @update:visible="selected = null">
-      <div v-if="slotsLoading" class="pp-stack"><div v-for="i in 3" :key="i" class="pp-skeleton" style="height: 56px" /></div>
-      <Message v-else-if="!slots.length" severity="warn" :closable="false">{{ $t("booking_no_slots_day") }}</Message>
-      <div v-else class="pp-stack">
-        <div v-for="slot in slots" :key="slot.id" class="pp-item">
-          <span class="pp-item__icon"><i class="pi pi-clock" /></span>
-          <div class="pp-item__body">
-            <p class="pp-item__title" dir="ltr">{{ fmtTime(slot.start) }} – {{ fmtTime(slot.end) }}</p>
-            <p v-if="slot.title" class="pp-item__meta">{{ slot.title }}</p>
+    <Dialog class="pp-overlay" :visible="Boolean(selected)" modal :style="{ width: '34rem', maxWidth: '94vw' }" @update:visible="selected = null">
+      <template #header>
+        <div v-if="selected" class="pp-slot-head">
+          <span class="pp-slot-head__date"><b>{{ selected.number }}</b>{{ selected.month }}</span>
+          <div>
+            <p class="pp-slot-head__title">{{ $t("pp.slots_title") }}</p>
+            <p class="pp-slot-head__sub">{{ selected.weekday }}<template v-if="!slotsLoading && slots.length"> · {{ $t("pp.slots_count", { n: slots.length }) }}</template></p>
           </div>
-          <button type="button" class="pp-btn pp-btn--magenta pp-btn--sm" @click="choose(slot)">{{ $t("Book_now") }}</button>
         </div>
-      </div>
+      </template>
+      <div v-if="slotsLoading" class="pp-slots"><div v-for="i in 4" :key="i" class="pp-skeleton" style="height: 76px" /></div>
+      <Message v-else-if="!slots.length" severity="warn" :closable="false">{{ $t("booking_no_slots_day") }}</Message>
+      <ul v-else class="pp-slots">
+        <li v-for="(slot, i) in slots" :key="slot.id">
+          <button type="button" class="pp-slot pp-in" :style="{ '--i': i }" @click="choose(slot)">
+            <span class="pp-slot__icon"><i class="pi pi-clock" aria-hidden="true" /></span>
+            <span class="pp-slot__body">
+              <span class="pp-slot__time">{{ fmtTime(slot.start) }} <span class="pp-slot__to">–</span> {{ fmtTime(slot.end) }}</span>
+              <span class="pp-slot__meta">
+                <span>{{ $t("pp.slot_minutes", { n: minutes(slot) }) }}</span>
+                <span v-if="slot.title" class="pp-slot__chip">{{ slot.title }}</span>
+              </span>
+            </span>
+            <span class="pp-slot__go">{{ $t("pp.slot_book") }} <i class="pi pi-arrow-left pp-flip" aria-hidden="true" /></span>
+          </button>
+        </li>
+      </ul>
     </Dialog>
   </div>
 </template>
@@ -138,5 +158,149 @@ const choose = (slot) => router.push({ name: "more", params: { event_id: slot.id
 .pp-day__month {
   color: var(--pp-muted);
   font-size: 0.9rem;
+}
+</style>
+
+<!-- The dialog is rendered at the end of <body>, outside this component's scope. -->
+<style>
+.pp-slot-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.pp-slot-head__date {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 58px;
+  padding: 0.35rem 0.6rem;
+  white-space: nowrap;
+  border-radius: 16px;
+  background: var(--pp-magenta-50);
+  color: var(--pp-magenta);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.pp-slot-head__date b {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.pp-slot-head__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--pp-teal-900);
+}
+.pp-slot-head__sub {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--pp-muted);
+}
+.pp-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.pp-slot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 0.9rem;
+  border: 1.5px solid var(--pp-teal-100);
+  border-radius: var(--pp-radius-sm);
+  background: #fff;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s var(--pp-ease), box-shadow 0.18s;
+}
+.pp-slot:hover {
+  border-color: var(--pp-magenta);
+  background: var(--pp-magenta-50);
+  transform: translateY(-1px);
+  box-shadow: var(--pp-shadow);
+}
+.pp-slot:focus-visible {
+  outline: 3px solid rgba(178, 21, 83, 0.45);
+  outline-offset: 2px;
+}
+.pp-slot__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--pp-teal-50);
+  color: var(--pp-teal-900);
+  font-size: 1.1rem;
+  transition: background 0.18s, color 0.18s;
+}
+.pp-slot:hover .pp-slot__icon {
+  background: #fff;
+  color: var(--pp-magenta);
+}
+.pp-slot__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.pp-slot__time {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--pp-ink);
+  font-variant-numeric: tabular-nums;
+}
+.pp-slot__to {
+  color: var(--pp-muted);
+  font-weight: 600;
+}
+.pp-slot__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--pp-muted);
+}
+.pp-slot__chip {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--pp-teal-50);
+  color: var(--pp-teal-900);
+  font-weight: 700;
+}
+.pp-slot__go {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background: var(--pp-magenta);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.88rem;
+  box-shadow: 0 8px 18px -10px rgba(178, 21, 83, 0.8);
+}
+[dir="ltr"] .pp-slot__go .pp-flip {
+  transform: scaleX(-1);
+}
+@media (max-width: 420px) {
+  .pp-slot__go {
+    padding: 0 0.75rem;
+  }
+  .pp-slot__icon {
+    display: none;
+  }
 }
 </style>

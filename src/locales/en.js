@@ -2792,6 +2792,10 @@ export default {
   },
   // The parents' portal (views/parent, components/parent).
   pp: {
+    slots_title: "Available times",
+    slots_count: "{n} times available · pick the one that suits you",
+    slot_book: "Book",
+    slot_minutes: "{n} min",
     brand: "Sawa Academy",
     public_site: "Academy website",
     footer_line: "Sawa Academy for Special Education — Amman, Al-Rabieh, Maysaloun St.",
