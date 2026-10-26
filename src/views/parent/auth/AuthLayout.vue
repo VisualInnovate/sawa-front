@@ -34,8 +34,8 @@ defineProps({
         <LocaleSelect />
       </div>
       <div class="pp-auth__card pp-in" :class="{ 'is-wide': wide }" :style="{ '--i': 1 }">
-        <h1 class="pp-h1">{{ title }}</h1>
-        <p v-if="subtitle" class="pp-lead mt-1 mb-5">{{ subtitle }}</p>
+        <h1 class="pp-h1 pp-auth__title">{{ title }}</h1>
+        <p v-if="subtitle" class="pp-lead pp-auth__subtitle">{{ subtitle }}</p>
         <slot />
       </div>
       <p class="pp-auth__foot">
@@ -135,13 +135,20 @@ defineProps({
   background: #fff;
   border-radius: var(--pp-radius);
   box-shadow: var(--pp-shadow-lg);
-  padding: 1.5rem 1.25rem;
+  padding: 1.35rem 1.25rem;
 }
 .pp-auth__card.is-wide {
   max-width: 640px;
 }
+.pp-auth__title {
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.7rem);
+}
+.pp-auth__subtitle {
+  margin: 0.2rem 0 1rem;
+  font-size: 0.92rem;
+}
 .pp-auth__foot {
-  margin: 1.25rem auto 0;
+  margin: 0.9rem auto 0;
   text-align: center;
 }
 @media (min-width: 1024px) {
@@ -166,10 +173,25 @@ defineProps({
   }
   .pp-auth__form {
     justify-content: center;
-    padding: 2rem;
+    padding: 1.25rem 2rem;
   }
   .pp-auth__card {
-    padding: 2.25rem 2rem;
+    padding: 1.75rem 2rem;
+  }
+}
+/* Short laptop screens: the words on the side stay, the form loses its slack. */
+@media (min-width: 1024px) and (max-height: 760px) {
+  .pp-auth__top {
+    margin-bottom: 0.75rem;
+  }
+  .pp-auth__logo {
+    height: 38px;
+  }
+  .pp-auth__card {
+    padding: 1.25rem 1.75rem;
+  }
+  .pp-auth__subtitle {
+    display: none;
   }
 }
 </style>
