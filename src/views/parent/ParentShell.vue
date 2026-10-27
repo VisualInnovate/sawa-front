@@ -19,6 +19,7 @@ const NAV = [
   { name: "webHome", icon: "pi pi-home", label: "pp.nav_home" },
   { name: "clidreen_parents", icon: "pi pi-users", label: "pp.nav_children", also: ["parent-child", "ReAction", "Following"] },
   { name: "parent-programs", icon: "pi pi-book", label: "pp.nav_programs" },
+  { name: "parent-finances", icon: "pi pi-wallet", label: "pp.nav_finances", also: ["parent-receipt"] },
   { name: "Booking", icon: "pi pi-comments", label: "pp.nav_consultations", also: ["BookingTime", "more", "request-meeting", "Edit"] },
   { name: "parent-schedule", icon: "pi pi-calendar", label: "pp.nav_schedule" },
 ];
@@ -36,7 +37,11 @@ const profileMenu = ref(null);
 onClickOutside(profileMenu, () => (profileOpen.value = false));
 
 const isActive = (item) => route.name === item.name || (item.also ?? []).includes(route.name);
-const moreActive = computed(() => MORE.some((item) => item.name === route.name));
+// Phones: four tabs; the rest of the menu is in the "more" sheet.
+const TABS = ["webHome", "clidreen_parents", "parent-finances", "Booking"];
+const tabItems = computed(() => TABS.map((name) => NAV.find((item) => item.name === name)));
+const sheetItems = computed(() => [...NAV.filter((item) => !TABS.includes(item.name)), ...MORE]);
+const moreActive = computed(() => sheetItems.value.some(isActive));
 
 const counts = computed(() => ({
   generalizations: Number(pendingCounts.parent.generalizations ?? portal.pending.generalizations ?? 0),
@@ -156,7 +161,7 @@ watch(() => route.fullPath, () => {
 
     <!-- ===== Phone tab bar ===== -->
     <nav class="pp-tabbar" :aria-label="$t('main_menu')">
-      <router-link v-for="item in NAV.slice(0, 4)" :key="item.name" :to="{ name: item.name }" :class="{ 'is-active': isActive(item) }">
+      <router-link v-for="item in tabItems" :key="item.name" :to="{ name: item.name }" :class="{ 'is-active': isActive(item) }">
         <i :class="item.icon" aria-hidden="true" />
         <span>{{ $t(item.label) }}</span>
       </router-link>
@@ -169,7 +174,7 @@ watch(() => route.fullPath, () => {
 
     <Drawer v-model:visible="sheetOpen" position="bottom" class="pp-sheet pp-overlay" :header="$t('pp.nav_more')" style="height: auto">
       <div class="pp-sheet__grid">
-        <button v-for="item in [{ name: 'parent-schedule', icon: 'pi pi-calendar', label: 'pp.nav_schedule' }, ...MORE]" :key="item.name" type="button" class="pp-sheet__item" @click="go(item.name)">
+        <button v-for="item in sheetItems" :key="item.name" type="button" class="pp-sheet__item" @click="go(item.name)">
           <span class="pp-item__icon"><i :class="item.icon" aria-hidden="true" /><span v-if="badgeOf(item)" class="pp-badge">{{ badgeOf(item) }}</span></span>
           <span>{{ $t(item.label) }}</span>
         </button>
@@ -456,6 +461,18 @@ watch(() => route.fullPath, () => {
   .pp-main {
     padding-bottom: 0;
     min-height: calc(100dvh - var(--pp-nav-h) - 80px);
+  }
+}
+@media (max-width: 1399px) and (min-width: 1024px) {
+  .pp-topbar__nav {
+    gap: 0.1rem;
+  }
+  .pp-nav-link {
+    padding: 0.5rem 0.6rem;
+    white-space: nowrap;
+  }
+  .pp-nav-link > .pi {
+    display: none;
   }
 }
 @media (max-width: 1279px) and (min-width: 1024px) {

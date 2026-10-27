@@ -13,6 +13,21 @@
       "url": "http://localhost:5180"
     },
     {
+      "name": "enable360-demo-dist",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--config",
+        "demo/vite.config.js",
+        "--port",
+        "5181",
+        "--strictPort"
+      ],
+      "port": 5181,
+      "url": "http://localhost:5181"
+    },
+    {
       "name": "sawa-local-front-mchat",
       "runtimeExecutable": "npx",
       "runtimeArgs": [

@@ -28,7 +28,7 @@ export const manager: Chapter = {
       charge.lines.push({ key: "evaluation", type: "evaluation", evaluation_type: type, name: TYPE_NAMES[type], amount: price[type] });
       charge.gross += price[type]; charge.amount += price[type]; charge.installments[0].amount += price[type];
       db.evaluationRequests.push(r);
-      db.notifyStaff(therapist.id, { title: "موعد تقييم جديد", message: `${TYPE_NAMES[type]} — ${child.name} · ${day} ${hh(h).slice(0, 5)}`, url: "/sawa-admin/my-evaluations", type: "specialist_assigned", request_id: r.id });
+      db.notifyStaff(therapist.id, { title: "موعد تقييم جديد", message: `${TYPE_NAMES[type]} — ${child.name} · ${day} ${hh(h).slice(0, 5)}`, url: "/my-evaluations", type: "specialist_assigned", request_id: r.id });
       db.notifyParent({ title: "تم تحديد موعد تقييم", message: `${TYPE_NAMES[type]} لـ${child.name} يوم ${day} الساعة ${hh(h).slice(0, 5)} مع ${therapist.name}`, type: "evaluation_booked", request_id: r.id });
     }
   },

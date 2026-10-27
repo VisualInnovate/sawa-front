@@ -44,8 +44,17 @@ export async function navigate(d: Device, path: string) {
   const end = performance.now() + 4000;
   while (!(w.document.getElementById("app")?.children.length) && performance.now() < end) await new Promise((r) => setTimeout(r, 60));
   if (!w.document.getElementById("app")?.children.length) return load(d, path);
+  const app = w.document.getElementById("app")!;
+  const changed = new Promise<void>((resolve) => {
+    // ننتظر أول تغيير في الشجرة بعد التنقّل حتى لا يلتقط waitFor عناصر الصفحة السابقة.
+    const mo = new MutationObserver(() => { mo.disconnect(); resolve(); });
+    mo.observe(app, { childList: true, subtree: true, attributes: true });
+    setTimeout(() => { mo.disconnect(); resolve(); }, 2500);
+  });
   w.history.pushState({}, "", path);
   w.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
+  await changed;
+  await new Promise((r) => setTimeout(r, 80));
 }
 
 /** إعادة تحميل الإطار على مسار، والانتظار حتى يجهز. */

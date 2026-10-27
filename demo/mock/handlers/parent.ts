@@ -143,6 +143,26 @@ export const parentRoutes = [
       requests: db.evaluationRequests.filter((r) => r.child_id === id).map((r) => ({ id: r.id, type: r.evaluation_type, name: TYPE_NAMES[r.evaluation_type], title: null, date: r.date, start: r.start_time, end: r.end_time, status: String(r.status), cancelled: false, billing_status: r.billing_status, price: r.billing_price, specialist: db.staffById(r.employee_id)?.name })),
     };
   }),
+  // الخطة والأهداف كما يبنيها ParentPortalController::plan: أهداف التراكنج المعتمد، وخطط التقييمات المعتمدة فقط.
+  route("GET", "api/parent/child/:id/portal/plan", ({ db, params }) => {
+    const id = Number(params.id);
+    const mine = db.trackings.filter((t) => t.child_id === id);
+    const tracking = [...mine].reverse().find((t) => t.status === "approved");
+    const pending = [...mine].reverse().find((t) => t.status === "pending");
+    const allGoals = db.reportPlans.filter((p) => p.child_id === id).flatMap((p) => p.goals);
+    const current = tracking ? portalGoals(db, allGoals.filter((g: any) => (tracking.goal_ids as number[]).includes(g.id))) : [];
+    const plans = [...db.reportPlans].filter((p) => p.child_id === id).reverse().flatMap((p) => {
+      const e = db.evaluations.find((x) => x.id === p.evaluation_id);
+      if (!e || e.approval_status !== "approved") return [];
+      return [{ id: p.id, evaluation_id: p.evaluation_id, evaluation: { title: e.title, date: e.date, name: TYPE_NAMES[e.type] }, updated_at: String(p.updated_at).slice(0, 10),
+        goals: portalGoals(db, p.goals.filter((g: any) => !(p.hidden ?? []).includes(g.id))) }];
+    });
+    return {
+      tracking: tracking ? { id: tracking.id, status: tracking.status, approver: tracking.approved_by ? db.staffById(tracking.approved_by)?.name : null, decided_at: tracking.decided_at ? String(tracking.decided_at).slice(0, 10) : null, goals_count: tracking.goal_ids.length } : null,
+      pending_tracking: pending ? { id: pending.id, requested_at: String(pending.requested_at).slice(0, 10) } : null,
+      current, plans,
+    };
+  }),
   route("GET", "api/parent/child/:id/portal/finance", ({ db, params }) => {
     const s = statementOf(db, Number(params.id));
     return { charges: s.charges, payments: s.payments, credits: [], totals: s.totals, currency: db.settings.currency };
@@ -172,6 +192,22 @@ export const parentRoutes = [
 /** برنامج الطفل كما يعرضه StudentProgramPlanController::forChild (ما تقرأه بوابة الأهل). */
 export function programPlan(db: DB, p: any) {
   return { ...details(db, p), plan_goals: [] };
+}
+
+/** الهدف كما تقرؤه بوابة الأهل (ParentPortalController::goals): الرمز المرقّم، المحاولات، التعميمات. */
+function portalGoals(db: DB, goals: any[]) {
+  const counts: Record<string, number> = {};
+  return goals.map((g) => {
+    const k = String(g.general_goal_id ?? g.symbol ?? ""); counts[k] = (counts[k] ?? 0) + 1;
+    const attempts = [...(g.attempts ?? [])].sort((a: any, b: any) => String(a.date).localeCompare(String(b.date))).map((a: any) => ({ date: String(a.date).slice(0, 10), achieved: !!a.achieved }));
+    const done = attempts.filter((a) => a.achieved).length;
+    return {
+      id: g.id, code: `${g.symbol ?? ""}-${counts[k]}`.replace(/^-|-$/g, ""), domain: g.domain, domain_symbol: g.domain_symbol, general_goal: g.general_goal, goal: g.goal, weakness: g.weakness,
+      achieved_at: g.achieved_at ?? null, prop_start: g.prop_start ?? null, attempts,
+      progress: { done, total: attempts.length, percent: attempts.length ? Math.round((done * 100) / attempts.length) : 0 },
+      generalizations: db.generalizations.filter((x) => x.goal_id === g.id).map((x) => ({ id: x.id, type: x.type, status: x.status, note: x.note ?? null, recipient: x.recipient_id ? db.staffById(x.recipient_id)?.name : null, created_at: String(x.created_at).slice(0, 10), decided_at: x.decided_at ? String(x.decided_at).slice(0, 10) : null })),
+    };
+  });
 }
 
 export function generalizationRow(db: DB, g: any) {

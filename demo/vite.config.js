@@ -24,7 +24,11 @@ export default {
       },
     },
   ],
-  server: { port: 5180, strictPort: true },
+  server: {
+    port: 5180, strictPort: true,
+    // تسخين التحويل عند الإقلاع: صفحات الديمو تُفتح لأول مرة أثناء العرض، وبلا تسخين قد ينتظر الإطار ثوانيَ طويلة في وضع التطوير.
+    warmup: { clientFiles: ["./src/main.js", "./src/views/parent/**/*.vue", "./src/views/parent/child/*.vue", "./src/components/parent/*.vue", "./src/views/**/*.vue", "./src/components/**/*.vue"] },
+  },
   build: {
     outDir: resolve(root, "demo-dist"),
     emptyOutDir: true,

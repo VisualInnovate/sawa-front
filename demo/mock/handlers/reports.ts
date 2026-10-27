@@ -123,7 +123,7 @@ export const reportsRoutes = [
     const values = { evaluation_ids: body.evaluations.map(Number), goal_ids: body.goals.map(Number), status: "pending", note: null, requested_by: db.currentStaffId, approved_by: null, decided_at: null, requested_at: db.now() };
     if (t?.status === "pending") Object.assign(t, values); else { t = { id: db.id(), child_id: childId, ...values }; db.trackings.push(t); }
     const child = db.child(childId)!;
-    db.staff.filter((s) => s.perms.includes("tracking approval edit")).forEach((s) => db.notifyStaff(s.id, { kind: "tracking_approval", title: "تراكنج بانتظار الاعتماد", message: `تراكنج ${child.name} (${t!.goal_ids.length} هدفاً) بانتظار اعتماد الإدارة.`, url: "/sawa-admin/tracking-approvals" }));
+    db.staff.filter((s) => s.perms.includes("tracking approval edit")).forEach((s) => db.notifyStaff(s.id, { kind: "tracking_approval", title: "تراكنج بانتظار الاعتماد", message: `تراكنج ${child.name} (${t!.goal_ids.length} هدفاً) بانتظار اعتماد الإدارة.`, url: "/tracking-approvals" }));
     return { tracking: trackingData(db, t) };
   }),
   route("GET", "api/reports/children/:id/tracking/approved", ({ db, params }) => { const t = [...db.trackings].reverse().find((x) => x.child_id === Number(params.id) && x.status === "approved"); return { tracking: t ? trackingData(db, t) : null }; }),

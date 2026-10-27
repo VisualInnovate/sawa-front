@@ -13,7 +13,7 @@ export const approval: Chapter = {
   apply(db) {
     const e = db.evaluations.find((x) => x.type === 2)!;
     e.approval_status = "approved"; e.approved_at = db.now();
-    db.notifyStaff(e.specialist_id, { kind: "evaluation_approval", title: "اعتُمد التقييم", message: `اعتُمدت نتيجة تقييم VB-MAPP للطفل ${scenario.child.name}.`, url: "/sawa-admin/my-evaluation-results", evaluation: `e${e.id}` });
+    db.notifyStaff(e.specialist_id, { kind: "evaluation_approval", title: "اعتُمد التقييم", message: `اعتُمدت نتيجة تقييم VB-MAPP للطفل ${scenario.child.name}.`, url: "/my-evaluation-results", evaluation: `e${e.id}` });
   },
   timeline: (db) => {
     const childId = db.children[0].id;

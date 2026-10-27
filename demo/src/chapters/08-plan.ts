@@ -29,7 +29,8 @@ export const plan: Chapter = {
     { type: "scroll", target: desk(".rx-plan", "", 0) },
     { type: "fly", from: desk(".rx-plan tbody tr", "", 1), to: "counter", label: "أهداف الخطة من نقاط الضعف", counts: 20 },
     { type: "wait", ms: 1500 },
-    { type: "scroll", target: desk(".rx-plan", "", 1) },
+    // قسم الخطة واحد (40 هدفاً)؛ نمرّر إلى منتصفه لا إلى قسم ثانٍ.
+    { type: "scroll", target: desk(".rx-plan tbody tr", "", 20) },
     { type: "wait", ms: 1200 },
     { type: "caption", text: "أي هدف يُعدَّل أو يُحذف في مكانه؛ ثم تُحفظ الخطة على الخادم" },
     { type: "scroll", target: desk(".rx-toolbar") },

@@ -471,8 +471,13 @@
   color: var(--pp-info);
 }
 .pp-item__body {
-  flex: 1;
+  /* basis auto (not 0): with two tags beside it the body kept 0px and wrapped letter by letter on phones. */
+  flex: 1 1 auto;
   min-width: 0;
+}
+.pp-item > .pp-row {
+  flex: 0 1 auto;
+  justify-content: flex-end;
 }
 .pp-item__title {
   margin: 0;
