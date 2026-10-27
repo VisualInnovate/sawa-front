@@ -1,14 +1,14 @@
 <script setup>
-// A Carolina evaluation's result drawn like the paper form: left to right, the domain (written upwards), its general
-// goals («المهارات»), then the age ranges (split into balanced tables when there are more than `perTable`). Each age
-// cell is divided between that goal's skills there, one part per skill with its symbol: + plain, - filled red,
-// +- crossed from the top-left to the bottom-right corner, not answered in grey; the small square in a part's
-// top-right corner is the color of the round that gave the answer.
+// A Carolina evaluation's result drawn like the paper form: left to right, the type (written upwards, over its
+// domains), the domain (a row each, «المهارات»), then the age ranges (split into balanced tables when there are more
+// than `perTable`). Each age cell is divided between that domain's skills there, one part per skill with its symbol:
+// + filled red, - plain, +- crossed from the top-left to the bottom-right corner, not answered in grey; the small
+// square in a part's top-right corner is the color of the round that gave the answer.
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps({
-  // { rounds: [{ round, color, date }], age_ranges: [{ id, name }], domains: [{ id, title, goals: [{ id, title, skills: [...] }] }] }
+  // { rounds: [{ round, color, date }], age_ranges: [{ id, name }], domains: [{ id, title, type, type_title, goals: [{ id, title, skills: [...] }] }] }
   result: { type: Object, default: null },
   perTable: { type: Number, default: 6 },
   // Smaller type for the printed report.
@@ -19,6 +19,16 @@ const { t } = useI18n();
 
 const ranges = computed(() => props.result?.age_ranges ?? []);
 const domains = computed(() => (props.result?.domains ?? []).filter((domain) => domain.goals?.length));
+// The domains under their type, in the order given (by type, then display order); those without a type last.
+const types = computed(() => {
+  const list = [];
+  for (const domain of domains.value) {
+    const key = domain.type ?? 0;
+    if (list.at(-1)?.key !== key) list.push({ key, title: domain.type_title, domains: [] });
+    list.at(-1).domains.push(domain);
+  }
+  return list;
+});
 // Tables of equal width: 8 ranges at 6 a table make two tables of 4, not 6 and 2.
 const chunks = computed(() => {
   const count = Math.ceil(ranges.value.length / Math.max(1, props.perTable));
@@ -27,7 +37,8 @@ const chunks = computed(() => {
   for (let i = 0; i < ranges.value.length; i += size) list.push(ranges.value.slice(i, i + size));
   return list;
 });
-const skillsIn = (goal, range) => (goal.skills ?? []).filter((skill) => skill.age_range_id === range.id);
+// A domain's skills in an age range, goal after goal.
+const skillsIn = (domain, range) => domain.goals.flatMap((goal) => (goal.skills ?? []).filter((skill) => skill.age_range_id === range.id));
 const partClass = (skill) => ({ "+": "is-plus", "-": "is-minus", "+-": "is-partial" })[skill.response] ?? "is-empty";
 const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${skill.response})` : t("carolina_ui.not_answered")].filter(Boolean).join(" — ");
 </script>
@@ -38,8 +49,8 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
     <template v-else>
       <table v-for="(chunk, c) in chunks" :key="c" class="cg-table" dir="ltr">
         <colgroup>
-          <col class="cg-domain-col" />
-          <col class="cg-goal-col" />
+          <col class="cg-type-col" />
+          <col class="cg-domain-name-col" />
           <col v-for="range in chunk" :key="range.id" />
         </colgroup>
         <thead>
@@ -50,15 +61,15 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
             </th>
           </tr>
         </thead>
-        <tbody v-for="domain in domains" :key="domain.id ?? 'none'" class="cg-domain-group">
-          <tr v-for="(goal, g) in domain.goals" :key="goal.id">
-            <th v-if="g === 0" :rowspan="domain.goals.length" class="cg-domain" :style="{ '--rows': domain.goals.length }" dir="rtl">
-              <span>{{ domain.title || $t("carolina_ui.no_domain") }}</span>
+        <tbody v-for="type in types" :key="type.key" class="cg-type-group">
+          <tr v-for="(domain, d) in type.domains" :key="domain.id ?? 'none'">
+            <th v-if="d === 0" :rowspan="type.domains.length" class="cg-type" :style="{ '--rows': type.domains.length }" dir="rtl">
+              <span>{{ type.title || $t("carolina_ui.no_type") }}</span>
             </th>
-            <th class="cg-goal" dir="rtl">{{ goal.title }}</th>
+            <th class="cg-domain-name" dir="rtl">{{ domain.title || $t("carolina_ui.no_domain") }}</th>
             <td v-for="range in chunk" :key="range.id" class="cg-cell">
               <div class="cg-parts">
-                <span v-for="skill in skillsIn(goal, range)" :key="skill.id" class="cg-part" :class="partClass(skill)" :title="partTitle(skill)">
+                <span v-for="skill in skillsIn(domain, range)" :key="skill.id" class="cg-part" :class="partClass(skill)" :title="partTitle(skill)">
                   <i v-if="skill.color" class="cg-color" :style="{ background: '#' + skill.color }" />
                   {{ skill.symbol }}
                 </span>
@@ -98,26 +109,26 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
 /* the paper form: white, thin dark lines, no ornament */
 .cg-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #fff; font-size: .9rem; break-inside: avoid; }
 .cg-table th, .cg-table td { border: 1px solid var(--cg-line); vertical-align: middle; }
-.cg-domain-col { width: 3.4rem; }
-.cg-goal-col { width: 15rem; }
+.cg-type-col { width: 3.4rem; }
+.cg-domain-name-col { width: 15rem; }
 .cg-table thead th { height: 2.6rem; padding: .3rem .4rem; background: #fff; font-weight: 700; text-align: center; }
 .cg-head-skills { font-size: 1rem; }
 .cg-range { font-size: .95rem; }
 .cg-range b { font-size: 1.05rem; font-weight: 800; }
-/* a heavier line under the header and between domains, as on the form */
+/* a heavier line under the header and between types, as on the form */
 .cg-table thead th { border-bottom-width: 2px; }
-.cg-domain-group + .cg-domain-group tr:first-child > * { border-top: 2px solid #111827; }
-.cg-domain { padding: .4rem .2rem; background: #fff; font-size: .92rem; font-weight: 800; text-align: center; }
+.cg-type-group + .cg-type-group tr:first-child > * { border-top: 2px solid #111827; }
+.cg-type { padding: .4rem .2rem; background: #fff; font-size: .92rem; font-weight: 800; text-align: center; }
 /* Written upwards and kept within its rows' height: a long name wraps onto more lines rather than stretching them. */
-.cg-domain span { display: inline-block; max-height: max(4.5rem, calc(var(--rows, 1) * 2.2rem - .5rem)); writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1.25; }
-.cg-goal { padding: .3rem .6rem; background: #fff; font-size: .92rem; font-weight: 600; line-height: 1.45; text-align: start; }
+.cg-type span { display: inline-block; max-height: max(4.5rem, calc(var(--rows, 1) * 2.2rem - .5rem)); writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1.25; }
+.cg-domain-name { padding: .3rem .6rem; background: #fff; font-size: .92rem; font-weight: 600; line-height: 1.45; text-align: start; }
 
 /* each age cell is split between its skills, edge to edge */
 .cg-cell { height: 2.2rem; padding: 0; }
 .cg-parts { display: flex; height: 100%; min-height: 2.2rem; }
 .cg-part { position: relative; display: flex; flex: 1 1 0; align-items: center; justify-content: center; min-width: 0; padding: 0 .3rem; font-size: .88rem; font-weight: 600; direction: ltr; white-space: nowrap; }
 .cg-part + .cg-part { border-left: 1px solid var(--cg-line); }
-.cg-part.is-minus { background: var(--cg-red); color: #111827; }
+.cg-part.is-plus { background: var(--cg-red); color: #111827; }
 /* +-: a line from the top-left corner to the bottom-right one */
 .cg-part.is-partial { background: linear-gradient(to top right, transparent calc(50% - .6px), #374151 calc(50% - .6px), #374151 calc(50% + .6px), transparent calc(50% + .6px)); }
 .cg-part.is-empty { color: #9ca3af; }
@@ -131,12 +142,12 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
 /* the printed report */
 .is-compact { gap: 3mm; }
 .is-compact .cg-table { font-size: 8pt; }
-.is-compact .cg-domain-col { width: 10mm; }
-.is-compact .cg-domain span { max-height: max(16mm, calc(var(--rows, 1) * 6.5mm - 1mm)); }
-.is-compact .cg-goal-col { width: 36mm; }
+.is-compact .cg-type-col { width: 10mm; }
+.is-compact .cg-type span { max-height: max(16mm, calc(var(--rows, 1) * 6.5mm - 1mm)); }
+.is-compact .cg-domain-name-col { width: 36mm; }
 .is-compact .cg-table thead th { height: 7mm; padding: 1mm; }
 .is-compact .cg-range b, .is-compact .cg-head-skills { font-size: 9pt; }
-.is-compact .cg-domain, .is-compact .cg-goal { font-size: 8pt; }
+.is-compact .cg-type, .is-compact .cg-domain-name { font-size: 8pt; }
 .is-compact .cg-cell, .is-compact .cg-parts { height: 6.5mm; min-height: 6.5mm; }
 .is-compact .cg-part { padding: 0 .5mm; font-size: 7.5pt; }
 .is-compact .cg-color { width: 5px; height: 5px; top: 1px; right: 1px; }

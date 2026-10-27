@@ -125,6 +125,12 @@ const evaluationRoutes = [
     component: () => import("../views/carolina/agerange-index.vue")
   },
   {
+    path: '/carolina-types',
+    name: 'carolina-types',
+    meta: { permission: ["carolina domain list"] },
+    component: () => import("../views/carolina/types.vue")
+  },
+  {
     path: '/carolina-domains',
     name: 'carolina-domains',
     meta: { permission: ["carolina domain list"] },

@@ -30,6 +30,9 @@ export const employeeTypeName = (t, type) =>
 /** Skills, evaluation types and treatments belong to therapists (and the old type 0). */
 export const hasTherapistFields = (type) => Number(type) === 0 || Number(type) === 2;
 
+/** «الجلسات» in the employee's evaluation types (saved in users.evaluations with them). */
+export const SESSIONS_WORK_ID = 200;
+
 /** The evaluations an employee may perform (ids saved in users.evaluations). */
 export const evaluationTypeGroups = (t) => [
   {
@@ -53,6 +56,11 @@ export const evaluationTypeGroups = (t) => [
       { name: "Ablls OT", id: 7 },
       { name: "M-CHAT-R", id: 8 },
     ],
+  },
+  {
+    // Not an evaluation: the employee takes sessions. 200 so it never meets an evaluation type's id.
+    label: t("employee_other_work"),
+    items: [{ name: t("sessions_work"), id: SESSIONS_WORK_ID }],
   },
 ];
 

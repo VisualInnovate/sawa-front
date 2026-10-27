@@ -53,15 +53,18 @@ const fill = (column, barrier, level) => {
 </template>
 
 <style scoped>
+/* Six a row, small enough for the whole chart to print on one page, and never split between two. */
 .bc {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4mm 4mm;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2.5mm 3mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 .bc-item {
   display: grid;
   align-content: start;
-  gap: 4px;
+  gap: 2px;
   break-inside: avoid;
   page-break-inside: avoid;
 }
@@ -69,9 +72,9 @@ const fill = (column, barrier, level) => {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 3.6em;
+  min-height: 2.8em;
   margin: 0;
-  font-size: 8pt;
+  font-size: 7pt;
   font-weight: 800;
   line-height: 1.35;
   text-align: center;
@@ -79,11 +82,11 @@ const fill = (column, barrier, level) => {
 }
 .bc-grid {
   display: grid;
-  grid-template-columns: 16px repeat(4, 1fr);
+  grid-template-columns: 12px repeat(4, 1fr);
   gap: 0;
   margin-inline: auto;
   width: 100%;
-  max-width: 36mm;
+  max-width: 30mm;
   direction: ltr;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -92,12 +95,12 @@ const fill = (column, barrier, level) => {
 .bc-test {
   display: grid;
   place-items: center;
-  font-size: 7.5pt;
+  font-size: 6.5pt;
   font-weight: 700;
   color: #64748b;
 }
 .bc-cell {
-  height: 6mm;
+  height: 4mm;
   border: 1px solid #1e293b;
   margin: 0 -1px -1px 0;
 }
@@ -113,5 +116,9 @@ const fill = (column, barrier, level) => {
   position: absolute;
   inset: 2px 1px 0;
   opacity: 0.4;
+}
+/* a phone screen (result pages, parents' portal) */
+@media screen and (max-width: 640px) {
+  .bc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 </style>
