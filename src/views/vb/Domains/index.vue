@@ -24,6 +24,9 @@ const filters = ref({})
 const createdialog=ref(false)
 const levels=ref({})
 const updatedialog=ref(false)
+// The MT steps a session works on for the domain's goals (none chosen: all three).
+const MT_STEPS = [1, 2, 3]
+const mtLabel = (steps) => (steps?.length ? [...steps].sort().map((step) => `MT${step}`).join(' · ') : 'MT1 · MT2 · MT3')
 
 onBeforeMount(() => {
   initFilters()
@@ -52,7 +55,7 @@ fetchData()
 const edit=(id)=>{
     axios.get(`/api/milestone-domains/${id}`).then((res)=>{
     loading.value= false
-    levels.value= res.data.data
+    levels.value= { ...res.data.data, mt_steps: res.data.data?.mt_steps?.length ? res.data.data.mt_steps : [...MT_STEPS] }
     console.log(users.value)
 
   });
@@ -79,7 +82,7 @@ const editescrud=()=>{
 }
 
 const openNew = () => {
-    levels.value = {}
+    levels.value = { mt_steps: [...MT_STEPS] }
     error.value = ''
     createdialog.value=!(createdialog.value)
 }
@@ -189,7 +192,12 @@ const initFilters = () => {
             <template #body="slotProps">
               {{ slotProps.data.sympol }}
             </template>
-           </Column> 
+           </Column>
+           <Column :header='$t("mt_steps_title")' header-style="min-width:12rem;">
+            <template #body="slotProps">
+              <Tag severity="info" class="ltr" :value="mtLabel(slotProps.data.mt_steps)" />
+            </template>
+           </Column>
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div class="table-actions">
@@ -234,8 +242,18 @@ const initFilters = () => {
                 <InputText required class="text-center" v-model="levels.sympol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.sympol[0] }}</div>
             </div>
+            <div class="flex flex-column gap-2 mt-3">
+                <label class="w-full text-start">{{ $t('mt_steps_title') }}</label>
+                <div class="flex gap-4 justify-center ltr">
+                  <label v-for="step in MT_STEPS" :key="step" class="flex items-center gap-2 font-bold">
+                    <Checkbox v-model="levels.mt_steps" :value="step" />MT{{ step }}
+                  </label>
+                </div>
+                <small class="text-color-secondary text-start">{{ $t('mt_steps_hint') }}</small>
+                <div class="text-red-500" v-if="!levels.mt_steps?.length">{{ $t('mt_steps_required') }}</div>
+            </div>
            <div class="w-full text-center">
-            <Button @click="createcrude" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="createcrude" :disabled="!levels.mt_steps?.length" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
         <Dialog v-model:visible="updatedialog" :style="{ width: '550px' }" :header='$t("submit")' :modal="true">
@@ -249,8 +267,18 @@ const initFilters = () => {
                 <InputText required class="text-center" v-model="levels.sympol" :placeholder='$t("sympol")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.sympol">{{ error.sympol[0] }}</div>
             </div>
+            <div class="flex flex-column gap-2 mt-3">
+                <label class="w-full text-start">{{ $t('mt_steps_title') }}</label>
+                <div class="flex gap-4 justify-center ltr">
+                  <label v-for="step in MT_STEPS" :key="step" class="flex items-center gap-2 font-bold">
+                    <Checkbox v-model="levels.mt_steps" :value="step" />MT{{ step }}
+                  </label>
+                </div>
+                <small class="text-color-secondary text-start">{{ $t('mt_steps_hint') }}</small>
+                <div class="text-red-500" v-if="!levels.mt_steps?.length">{{ $t('mt_steps_required') }}</div>
+            </div>
            <div class="w-full text-center">
-            <Button @click="editescrud" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
+            <Button @click="editescrud" :disabled="!levels.mt_steps?.length" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
            </div>
         </Dialog>
       </div>

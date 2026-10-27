@@ -1,7 +1,8 @@
 <script setup>
 // Adds or edits a room. The period(s) and the treatments come first: each period then suggests only the therapists
-// of that work type who give every one of the room's treatments. Day (classes) has one admin, clinics (evening)
-// one or more. Rooms no longer get appointments here; saved ones stay untouched.
+// of that work type who give every one of the room's treatments, one admin or more per period. Each period may have
+// the room's own from–to, which replaces «أوقات البرامج» for this room (empty = those hours); a room used by day and
+// clinics together may have them overlap. Rooms no longer get appointments here; saved ones stay untouched.
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -9,6 +10,7 @@ import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { ROOM_PERIODS, workTypeLabel } from "@/utils/employeeWorkTypes";
 import AgeRangeField from "@/components/common/AgeRangeField.vue";
+import { ROOM_CATEGORIES, SESSIONS_CATEGORY, roomCategoryLabel, savedCategories } from "@/utils/roomCategories";
 
 const props = defineProps({
   roomId: { type: [Number, String], default: null },
@@ -18,7 +20,9 @@ const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
 
-const room = ref({ periods: [], treatments: [], day_admin_id: null, clinics_admin_ids: [], age_from_months: null, age_to_months: null });
+const emptyHours = () => Object.fromEntries(ROOM_PERIODS.map((period) => [period, { start: "", end: "" }]));
+const room = ref({ categories: [], periods: [], treatments: [], day_admin_ids: [], clinics_admin_ids: [], period_hours: emptyHours(), age_from_months: null, age_to_months: null });
+const programHours = ref([]);
 const treatments = ref([]);
 const admins = ref({ day: [], clinics: [] });
 const loadingAdmins = ref({ day: false, clinics: false });
@@ -28,11 +32,12 @@ const saving = ref(false);
 const error = ref({});
 
 const periodOptions = computed(() => ROOM_PERIODS.map((value) => ({ value, label: workTypeLabel(t, value) })));
-const categories = computed(() => [
-  { name: t("Administrative"), value: 0 },
-  { name: t("social"), value: 1 },
-  { name: t("Consultation_evaluation"), value: 2 },
-]);
+// «جلسات» goes alone: with it chosen the others are disabled, and with any other chosen it is.
+const isSessions = computed(() => room.value.categories.includes(SESSIONS_CATEGORY));
+const categoryOptions = computed(() => ROOM_CATEGORIES.map((value) => ({
+  value, label: roomCategoryLabel(t, value),
+  disabled: room.value.categories.length > 0 && (value === SESSIONS_CATEGORY) !== isSessions.value,
+})));
 // «فردية وجماعية» is no longer offered; a room saved with it keeps it.
 const roomTypes = computed(() => [
   { name: t("typeroom2"), value: 0 },
@@ -41,10 +46,19 @@ const roomTypes = computed(() => [
 ]);
 const hasPeriod = (period) => (room.value.periods ?? []).includes(period);
 const ready = computed(() => (room.value.periods ?? []).length > 0 && (room.value.treatments ?? []).length > 0);
-// As before: an administrative or individual room has no capacity.
-const showCapacity = computed(() => room.value.type_tow != null && room.value.type_tow != 0 && room.value.type != 0);
-const adminsValid = computed(() => (!hasPeriod("day") || !!room.value.day_admin_id)
-  && (!hasPeriod("clinics") || room.value.clinics_admin_ids.length > 0));
+// As before: an administrative (only) or individual room has no capacity.
+const showCapacity = computed(() => room.value.categories.length > 0 && !(room.value.categories.length === 1 && room.value.categories[0] === "admin")
+  && (!isSessions.value || room.value.type != 0));
+const adminsKey = (period) => `${period}_admin_ids`;
+const adminsValid = computed(() => ROOM_PERIODS.every((period) => !hasPeriod(period) || room.value[adminsKey(period)].length > 0));
+// A period's own hours: both ends or neither, the end after the start.
+const hoursInvalid = (period) => {
+  const { start, end } = room.value.period_hours[period];
+  return !!(start || end) && (!start || !end || end <= start);
+};
+const hoursValid = computed(() => ROOM_PERIODS.every((period) => !hasPeriod(period) || !hoursInvalid(period)));
+// The «أوقات البرامج» of a period, as its distinct from–to ranges.
+const programHoursText = (period) => [...new Set(programHours.value.filter((row) => row.program === period).map((row) => `${row.start}–${row.end}`))].join("، ");
 
 function adminPlaceholder(period) {
   if (!ready.value) return t("room_admin_pick_period_first");
@@ -57,8 +71,7 @@ async function loadAdmins(period) {
   if (!hasPeriod(period) || !ready.value) {
     admins.value[period] = [];
     // Without treatments yet (rooms saved before them) the chosen admins wait for the list.
-    if (!hasPeriod(period) && period === "day") room.value.day_admin_id = null;
-    if (!hasPeriod(period) && period === "clinics") room.value.clinics_admin_ids = [];
+    if (!hasPeriod(period)) room.value[adminsKey(period)] = [];
     return;
   }
   loadingAdmins.value[period] = true;
@@ -68,8 +81,7 @@ async function loadAdmins(period) {
     admins.value[period] = data?.data ?? [];
     // An admin who no longer fits the period or the treatments is dropped.
     const ids = admins.value[period].map((admin) => Number(admin.id));
-    if (period === "day" && !ids.includes(Number(room.value.day_admin_id))) room.value.day_admin_id = null;
-    if (period === "clinics") room.value.clinics_admin_ids = room.value.clinics_admin_ids.filter((id) => ids.includes(Number(id)));
+    room.value[adminsKey(period)] = room.value[adminsKey(period)].filter((id) => ids.includes(Number(id)));
   } finally {
     if (current === requests[period]) loadingAdmins.value[period] = false;
   }
@@ -80,34 +92,36 @@ watch(() => [[...(room.value.periods ?? [])].sort().join(","), [...(room.value.t
 });
 
 onMounted(async () => {
-  const { data: treatmentData } = await axios.get("api/treatment/all");
+  const [{ data: treatmentData }, { data: hoursData }] = await Promise.all([axios.get("api/treatment/all"), axios.get("api/room/program-hours")]);
   treatments.value = treatmentData.data ?? [];
+  programHours.value = hoursData.data ?? [];
   if (!props.roomId) return;
   const { data } = await axios.get(`/api/room/${props.roomId}`);
-  const { id, name, admin_id, type, type_tow, capacity, periods, admins: roomAdmins = [], treatments: roomTreatments = [],
-    age_from_months = null, age_to_months = null } = data.data;
+  const { id, name, admin_id, type, capacity, periods, admins: roomAdmins = [], treatments: roomTreatments = [],
+    period_hours: savedHours = null, age_from_months = null, age_to_months = null } = data.data;
   const of = (period) => roomAdmins.filter((admin) => admin.pivot?.period === period).map((admin) => admin.id);
   savedType.value = type;
   room.value = {
-    id, name, type, type_tow, capacity, periods: periods ?? [], age_from_months, age_to_months,
+    id, name, type, capacity, periods: periods ?? [], age_from_months, age_to_months, categories: savedCategories(data.data),
     treatments: roomTreatments.map((row) => row.id),
     // Rooms saved before admins per period: their one admin.
-    day_admin_id: of("day")[0] ?? (periods?.includes("day") ? admin_id : null),
-    clinics_admin_ids: of("clinics").length ? of("clinics") : (periods?.includes("clinics") ? [admin_id] : []),
+    ...Object.fromEntries(ROOM_PERIODS.map((period) => [adminsKey(period), of(period).length ? of(period) : (periods?.includes(period) ? [admin_id] : [])])),
+    period_hours: Object.fromEntries(ROOM_PERIODS.map((period) => [period, { start: savedHours?.[period]?.start ?? "", end: savedHours?.[period]?.end ?? "" }])),
   };
 });
 
 async function save() {
   submitted.value = true;
-  if (!ready.value || !adminsValid.value) return;
+  if (!ready.value || !adminsValid.value || !hoursValid.value || !room.value.categories.length) return;
   saving.value = true;
   error.value = {};
   try {
     const body = {
       ...room.value,
       capacity: showCapacity.value ? room.value.capacity : undefined,
-      day_admin_id: hasPeriod("day") ? room.value.day_admin_id : null,
-      clinics_admin_ids: hasPeriod("clinics") ? room.value.clinics_admin_ids : [],
+      ...Object.fromEntries(ROOM_PERIODS.map((period) => [adminsKey(period), hasPeriod(period) ? room.value[adminsKey(period)] : []])),
+      period_hours: Object.fromEntries(ROOM_PERIODS.filter((period) => hasPeriod(period) && room.value.period_hours[period].start)
+        .map((period) => [period, { ...room.value.period_hours[period] }])),
     };
     if (props.roomId) await axios.put(`/api/room/${props.roomId}`, body);
     else await axios.post("/api/room", body);
@@ -143,20 +157,34 @@ async function save() {
         <small class="text-color-secondary">{{ $t("room_treatments_hint") }}</small>
         <small class="text-red-500" v-if="error?.treatments">{{ error.treatments[0] }}</small>
       </div>
-      <div v-if="hasPeriod('day')" class="flex flex-column gap-2">
-        <label for="room-admin-day">{{ $t("room_admin_day") }}</label>
-        <Select v-model="room.day_admin_id" inputId="room-admin-day" :options="admins.day" optionLabel="name" optionValue="id"
-          filter :disabled="!ready" :loading="loadingAdmins.day" :placeholder="adminPlaceholder('day')"
-          :invalid="submitted && ready && !room.day_admin_id" class="w-full" />
-        <small class="text-red-500" v-if="error?.day_admin_id">{{ error.day_admin_id[0] }}</small>
-      </div>
-      <div v-if="hasPeriod('clinics')" class="flex flex-column gap-2">
-        <label for="room-admin-clinics">{{ $t("room_admin_clinics") }}</label>
-        <MultiSelect v-model="room.clinics_admin_ids" inputId="room-admin-clinics" :options="admins.clinics" optionLabel="name"
-          optionValue="id" display="chip" filter :disabled="!ready" :loading="loadingAdmins.clinics"
-          :placeholder="adminPlaceholder('clinics')" :invalid="submitted && ready && !room.clinics_admin_ids.length" class="w-full" />
-        <small class="text-red-500" v-if="error?.clinics_admin_ids">{{ error.clinics_admin_ids[0] }}</small>
-      </div>
+      <template v-for="period in ROOM_PERIODS" :key="period">
+        <div v-if="hasPeriod(period)" class="flex flex-column gap-2">
+          <label :for="`room-admin-${period}`">{{ $t(`room_admin_${period}`) }}</label>
+          <MultiSelect v-model="room[adminsKey(period)]" :inputId="`room-admin-${period}`" :options="admins[period]" optionLabel="name"
+            optionValue="id" display="chip" filter :disabled="!ready" :loading="loadingAdmins[period]"
+            :placeholder="adminPlaceholder(period)" :invalid="submitted && ready && !room[adminsKey(period)].length" class="w-full" />
+          <small class="text-red-500" v-if="error?.[adminsKey(period)]">{{ error[adminsKey(period)][0] }}</small>
+        </div>
+        <!-- The room's own hours in this period; empty = «أوقات البرامج». -->
+        <div v-if="hasPeriod(period)" class="flex flex-column gap-2">
+          <label :for="`room-hours-${period}-from`">{{ $t("room_hours_label", { period: workTypeLabel(t, period) }) }}</label>
+          <div class="flex items-center gap-2">
+            <InputText v-model="room.period_hours[period].start" :id="`room-hours-${period}-from`" type="time" class="flex-1 min-w-0 max-w-[9rem]"
+              :aria-label="$t('room_hours_from')" :invalid="submitted && hoursInvalid(period)" />
+            <span>–</span>
+            <InputText v-model="room.period_hours[period].end" :id="`room-hours-${period}-to`" type="time" class="flex-1 min-w-0 max-w-[9rem]"
+              :aria-label="$t('room_hours_to')" :invalid="submitted && hoursInvalid(period)" />
+            <Button v-if="room.period_hours[period].start || room.period_hours[period].end" type="button" icon="pi pi-times" text rounded
+              severity="secondary" size="small" :aria-label="$t('room_hours_clear')" :title="$t('room_hours_clear')"
+              @click="room.period_hours[period] = { start: '', end: '' }" />
+          </div>
+          <small class="text-color-secondary">{{ programHoursText(period)
+            ? $t("room_hours_hint", { hours: programHoursText(period) }) : $t("room_hours_hint_none") }}</small>
+          <small class="text-red-500" v-if="submitted && hoursInvalid(period)">{{ $t("room_hours_invalid") }}</small>
+          <small class="text-red-500" v-else-if="error?.[`period_hours.${period}.end`] || error?.[`period_hours.${period}.start`]">
+            {{ (error[`period_hours.${period}.end`] ?? error[`period_hours.${period}.start`])[0] }}</small>
+        </div>
+      </template>
       <div class="flex flex-column gap-2">
         <label for="room-name">{{ $t("roomnumber") }}</label>
         <InputText id="room-name" required v-model="room.name" :invalid="submitted && !room.name" />
@@ -164,10 +192,13 @@ async function save() {
       </div>
       <div class="flex flex-column gap-2">
         <label for="room-category">{{ $t("typeroom") }}</label>
-        <Select v-model="room.type_tow" inputId="room-category" :options="categories" optionLabel="name"
-          optionValue="value" :invalid="submitted && room.type_tow == null" class="w-full" />
+        <MultiSelect v-model="room.categories" inputId="room-category" :options="categoryOptions" optionLabel="label"
+          optionValue="value" optionDisabled="disabled" display="chip" :showToggleAll="false" :placeholder="$t('room_cat_pick')"
+          :invalid="submitted && !room.categories.length" class="w-full" />
+        <small class="text-color-secondary">{{ $t("room_cat_hint") }}</small>
+        <small class="text-red-500" v-if="error?.categories">{{ error.categories[0] }}</small>
       </div>
-      <div v-if="room.type_tow == 2" class="flex flex-column gap-2">
+      <div v-if="isSessions" class="flex flex-column gap-2">
         <label for="room-type">{{ $t("typeroom") }}</label>
         <Select v-model="room.type" inputId="room-type" :options="roomTypes" optionLabel="name" optionValue="value"
           :invalid="submitted && room.type == null" class="w-full" />
