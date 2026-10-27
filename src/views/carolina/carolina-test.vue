@@ -1,5 +1,7 @@
 <template>
   <div class="sawa-card">
+    <!-- Opened from the result (?edit=): the same screen with the answers given, until the evaluation is approved. -->
+    <EditModeBanner v-if="editing" class="mb-3" :status="editing.approval_status" :note="editing.approval_note" />
     <Message v-if="alertText" severity="error" class="mb-3">{{ alertText }}</Message>
 
     <form class="p-[2%] bg-[#FDFDFD] shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-4" data-no-request-spinner @submit.prevent="save">
@@ -102,7 +104,7 @@
                       <div class="carolina-responses" role="radiogroup" :aria-label="row.symbol">
                         <button v-for="response in RESPONSES" :key="response" type="button" role="radio" dir="ltr"
                           :aria-checked="selected[row.id] === response" :class="{ 'is-picked': selected[row.id] === response }"
-                          @click="selected = { ...selected, [row.id]: response }">{{ response }}</button>
+                          :disabled="locked[row.id]" @click="selected = { ...selected, [row.id]: response }">{{ response }}</button>
                       </div>
                     </td>
                   </tr>
@@ -114,7 +116,7 @@
 
         <div class="flex flex-column gap-2 lg:col-span-2 carolina-submit">
           <span class="carolina-count">{{ $t("carolina_ui.answered_of", { n: answeredCount, total: items.length }) }}</span>
-          <Button type="submit" :loading="saving" :disabled="saving" class="m-auto w-full" :label="$t('submit')" />
+          <Button type="submit" :loading="saving" :disabled="saving" class="m-auto w-full" :label="editing ? $t('mae_save') : $t('submit')" />
         </div>
       </template>
     </form>
@@ -151,6 +153,7 @@ import axios from "axios";
 import { getEvaluationTypeLabel } from "@/utils/evaluationTypes";
 import { toDateOnly } from "@/utils/childAge";
 import { carolinaText } from "@/utils/carolina";
+import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 
 const CAROLINA = 5;
 // The colors every evaluation screen offers.
@@ -161,7 +164,13 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-const childId = computed(() => Number(route.params.id) || Number(localStorage.getItem("child_id")) || null);
+// Editing a saved evaluation (?edit=id) before its approval: { id, approval_status, approval_note, ... }; its child
+// comes with it (the route then holds the evaluation).
+const editing = ref(null);
+const editChildId = ref(null);
+// skill id -> true: answered in an approved part (a new round waits), shown but not changed.
+const locked = ref({});
+const childId = computed(() => editChildId.value || Number(route.params.id) || Number(localStorage.getItem("child_id")) || null);
 const children = ref([]);
 const child = computed(() => children.value.find((entry) => Number(entry.id) === childId.value) ?? { name: "", gender: "0" });
 const loading = ref(true);
@@ -204,7 +213,11 @@ const domains = computed(() => {
   return [...list.values()];
 });
 // Whether a skill is asked: a new evaluation asks the chosen goals' skills, continuing asks the weaknesses.
-const isAsked = (goal, item) => (mode.value === "continue" ? Boolean(previous.value[item.id]) : selectedIds.value.includes(goal.id));
+// Editing asks what the evaluation answered.
+const isAsked = (goal, item) => (mode.value === "edit" ? item.id in editAnswers.value
+  : mode.value === "continue" ? Boolean(previous.value[item.id]) : selectedIds.value.includes(goal.id));
+// skill id -> the response saved in the evaluation being edited.
+const editAnswers = ref({});
 // The shown domains → goals → table rows (the age range cell spans its skills).
 const shownDomains = computed(() => domains.value.map((domain) => ({
   ...domain,
@@ -314,6 +327,13 @@ async function save() {
   // The request being closed: the one opened from the requests list (same id either way).
   const requestId = route.query.requestId || localStorage.getItem("eavl_id");
   try {
+    if (editing.value) {
+      await axios.put(`api/carolina-answer/evaluation/${evaluationId.value}/edit`, {
+        answers: items.value.filter((item) => !locked.value[item.id]).map((item) => ({ skill_id: item.id, response: selected.value[item.id] })),
+      });
+      router.push({ name: "carolina-resulte", params: { id: evaluationId.value } });
+      return;
+    }
     await axios.post("api/carolina-answer", {
       evaluation_id: evaluationId.value,
       child_id: childId.value,
@@ -342,14 +362,49 @@ function reset() {
   showMissing.value = false;
 }
 
+// The saved evaluation on this screen: the skills it answered (by domain and goal) with their responses.
+async function loadEdit() {
+  loading.value = true;
+  loadError.value = "";
+  try {
+    const [tests, { data: edit }] = await Promise.all([
+      axios.get("api/carolina-skills/evaluation-tree"),
+      axios.get(`api/carolina-answer/evaluation/${route.query.edit}/edit`),
+    ]);
+    const { evaluation, child, domains: saved } = edit.data;
+    const skills = saved.flatMap((domain) => domain.goals.flatMap((goal) => goal.skills));
+    goals.value = tests.data.data ?? [];
+    children.value = child ? [child] : [];
+    editChildId.value = child?.id ?? null;
+    editing.value = evaluation;
+    evaluationId.value = evaluation.id;
+    date.value = evaluation.date ? new Date(evaluation.date) : new Date();
+    childAge.value = evaluation.child_age;
+    color.value = evaluation.color || COLOR_OPTIONS[0];
+    editAnswers.value = Object.fromEntries(skills.map((skill) => [skill.id, skill.response]));
+    locked.value = Object.fromEntries(skills.filter((skill) => !skill.editable).map((skill) => [skill.id, true]));
+    selected.value = { ...editAnswers.value };
+    mode.value = "edit";
+    started.value = true;
+  } catch (error) {
+    loadError.value = errorText(error);
+  } finally {
+    loading.value = false;
+  }
+}
+
 onMounted(() => {
+  if (route.query.edit) {
+    loadEdit();
+    return;
+  }
   load();
   loadAge();
 });
 watch(date, () => { if (!started.value) loadAge(); });
 // Another child on the same screen: start over.
 watch(childId, (value, before) => {
-  if (value && value !== before && route.name === "carolina-test") {
+  if (value && value !== before && route.name === "carolina-test" && !route.query.edit) {
     reset();
     load();
     loadAge();

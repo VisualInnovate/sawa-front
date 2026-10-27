@@ -1,8 +1,8 @@
 <script setup>
-// The M-CHAT-R evaluation of one child (/mchat-evaluation/:id): a parent answers 20 yes/no questions about the
+// The M-CHAT-R evaluation of one child (/mchat-evaluation/:id): a parent answers yes/no questions about the
 // child's usual behaviour, with the evaluator. The risk points add up as they answer (every «لا» is one, except
-// questions 2, 5 and 12 where «نعم» is) and saving gives the risk level. Meant for 16-30 months: outside that
-// age it only warns.
+// the questions marked yes_is_risk where «نعم» is) and saving gives the risk level. The questions, levels,
+// instructions and ages (16-30 months on the form; outside them only warns) come from the M-CHAT settings page.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -10,6 +10,7 @@ import axios from "axios";
 import { toDateOnly } from "@/utils/childAge";
 import { childMonths, fitsAge, formatAgeRange } from "@/utils/ageRange";
 import { RISK_SEVERITY, mchatPoint, mchatRisk } from "./mchat";
+import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -25,15 +26,17 @@ const alertText = ref("");
 const date = ref(new Date());
 const respondent = ref("");
 const notes = ref("");
-// question number -> true («نعم») | false («لا»)
+// question id -> true («نعم») | false («لا»)
 const answers = ref({});
+// Editing a saved evaluation (?edit=id) before its approval: { id, approval_status, approval_note, ... }.
+const editing = ref(null);
 
 const questions = computed(() => context.value?.questions ?? []);
 const child = computed(() => context.value?.child ?? null);
-const isAnswered = (question) => typeof answers.value[question.number] === "boolean";
+const isAnswered = (question) => typeof answers.value[question.id] === "boolean";
 const answeredCount = computed(() => questions.value.filter(isAnswered).length);
-const total = computed(() => questions.value.filter(isAnswered).reduce((sum, question) => sum + mchatPoint(question, answers.value[question.number]), 0));
-const risk = computed(() => mchatRisk(total.value));
+const total = computed(() => questions.value.filter(isAnswered).reduce((sum, question) => sum + mchatPoint(question, answers.value[question.id]), 0));
+const risk = computed(() => mchatRisk(total.value, context.value?.levels));
 const done = computed(() => questions.value.length > 0 && answeredCount.value === questions.value.length);
 
 // The child's age on the evaluation day, and a warning outside the form's ages.
@@ -42,7 +45,7 @@ const range = computed(() => context.value?.age_range ?? {});
 const ageWarning = computed(() => ageMonths.value !== null && !fitsAge(range.value.from_months, range.value.to_months, ageMonths.value));
 
 function answer(question, yes) {
-  answers.value = { ...answers.value, [question.number]: yes };
+  answers.value = { ...answers.value, [question.id]: yes };
 }
 
 async function load() {
@@ -54,7 +57,19 @@ async function load() {
   respondent.value = "";
   notes.value = "";
   date.value = new Date();
+  editing.value = null;
   try {
+    // The saved evaluation (?edit=id): the same screen with its answers, respondent and notes.
+    if (route.query.edit) {
+      const { data } = (await axios.get(`api/mchat-answers/evaluation/${route.query.edit}/edit`)).data;
+      context.value = { ...data.context, questions: data.questions, levels: data.levels };
+      editing.value = data.evaluation;
+      date.value = data.evaluation.date ? new Date(data.evaluation.date) : new Date();
+      answers.value = Object.fromEntries(data.questions.map((question) => [question.id, Boolean(question.yes)]));
+      respondent.value = data.respondent ?? "";
+      notes.value = data.notes ?? "";
+      return;
+    }
     context.value = (await axios.get(`api/mchat-answers/context/${childId.value}`)).data;
   } catch (error) {
     loadError.value = error.response?.data?.message || t("request_failed_retry");
@@ -68,19 +83,28 @@ async function save() {
   if (missing) {
     showMissing.value = true;
     alertText.value = t("mchat.answer_all");
-    document.getElementById("mq-" + missing.number)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("mq-" + missing.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
   saving.value = true;
   alertText.value = "";
   try {
+    if (editing.value) {
+      await axios.put(`api/mchat-answers/evaluation/${editing.value.id}/edit`, {
+        respondent: respondent.value.trim() || null,
+        notes: notes.value.trim() || null,
+        answers: questions.value.map((question) => ({ question: question.id, yes: answers.value[question.id] })),
+      });
+      router.push({ name: "mchat-result", params: { id: child.value?.id ?? childId.value, evaluation: editing.value.id } });
+      return;
+    }
     const { data } = await axios.post("api/mchat-answers", {
       child_id: childId.value,
       date: toDateOnly(date.value),
       request_id: route.query.requestId || null,
       respondent: respondent.value.trim() || null,
       notes: notes.value.trim() || null,
-      answers: questions.value.map((question) => ({ question: question.number, yes: answers.value[question.number] })),
+      answers: questions.value.map((question) => ({ question: question.id, yes: answers.value[question.id] })),
     });
     router.push({ name: "mchat-result", params: { id: childId.value, evaluation: data.evaluation_id } });
   } catch (error) {
@@ -118,13 +142,15 @@ watch(childId, (value, before) => {
     <Message v-else-if="loadError" severity="error" :closable="false">{{ loadError }}</Message>
 
     <template v-else>
+      <!-- Opened from the result (?edit=): the same screen with the answers given, until the evaluation is approved. -->
+      <EditModeBanner v-if="editing" :status="editing.approval_status" :note="editing.approval_note" />
       <Message v-if="alertText" severity="error" :closable="false">{{ alertText }}</Message>
 
       <section class="mc-card">
         <div class="mc-grid">
           <div class="mc-field">
             <label for="mc-date">{{ $t("date") }}</label>
-            <DatePicker v-model="date" inputId="mc-date" showIcon fluid />
+            <DatePicker v-model="date" inputId="mc-date" showIcon fluid :disabled="Boolean(editing)" />
           </div>
           <div class="mc-field">
             <label for="mc-respondent">{{ $t("mchat.respondent") }}</label>
@@ -138,10 +164,10 @@ watch(childId, (value, before) => {
         <Message v-if="ageWarning" severity="warn" :closable="false" class="mt-3">
           {{ $t("mchat.age_warning", { age: $t("mchat.months", { n: ageMonths }), range: formatAgeRange($t, range.from_months, range.to_months) }) }}
         </Message>
-        <p class="mc-instructions"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("mchat.instructions") }}</p>
+        <p class="mc-instructions"><i class="pi pi-info-circle" aria-hidden="true" /> {{ context.instructions || $t("mchat.instructions") }}</p>
       </section>
 
-      <section v-for="question in questions" :id="'mq-' + question.number" :key="question.number" class="mc-card mc-question"
+      <section v-for="question in questions" :id="'mq-' + question.id" :key="question.id" class="mc-card mc-question"
         :class="{ 'is-missing': showMissing && !isAnswered(question) }">
         <span class="mc-num" :class="{ 'is-done': isAnswered(question) }">{{ question.number }}</span>
         <div class="mc-question-text">
@@ -150,7 +176,7 @@ watch(childId, (value, before) => {
         </div>
         <div class="mc-choices" role="radiogroup" :aria-label="question.text">
           <button v-for="option in [true, false]" :key="String(option)" type="button" role="radio" class="mc-choice"
-            :class="{ 'is-picked': answers[question.number] === option, 'is-yes': option }" :aria-checked="answers[question.number] === option"
+            :class="{ 'is-picked': answers[question.id] === option, 'is-yes': option }" :aria-checked="answers[question.id] === option"
             @click="answer(question, option)">
             <i :class="option ? 'pi pi-check' : 'pi pi-times'" aria-hidden="true" />
             {{ option ? $t("mchat.yes") : $t("mchat.no") }}
@@ -170,7 +196,7 @@ watch(childId, (value, before) => {
           {{ $t("mchat.total") }}: <b>{{ total }}</b>
           <Tag v-if="done" :value="$t('mchat.risk_' + risk)" :severity="RISK_SEVERITY[risk]" />
         </span>
-        <Button :label="$t('mchat.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="save" />
+        <Button :label="editing ? $t('mae_save') : $t('mchat.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="save" />
       </footer>
     </template>
   </div>

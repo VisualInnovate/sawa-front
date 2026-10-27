@@ -6,9 +6,10 @@ import { format, formatDistance, formatRelative, subDays, differenceInMonths } f
 import moment from "moment";
 import InputText from 'primevue/inputtext';
 import DatePicker from 'primevue/datepicker';
+import EditModeBanner from "../../components/evaluations/EditModeBanner.vue";
 
 export default {
-  components: { InputText, DatePicker },
+  components: { InputText, DatePicker, EditModeBanner },
   data: () => ({
     valu: "",
 
@@ -42,6 +43,8 @@ export default {
     examDate: '',
     submitted: false,
     alert_text: '',
+    // Editing a saved result (?edit=result id) before its approval: { id, approval_status, approval_note, ... }.
+    editing: null,
     answerOptions: [
       { value: '1', label: 'yes' },
       { value: '0', label: 'no' },
@@ -54,7 +57,7 @@ export default {
     unansweredCount() {
       if (!this.child || this.child.childInMonths === undefined) return 0
       return Object.values(this.headerAndQuestions)
-        .filter((questions) => questions[0].min_age <= this.child.childInMonths)
+        .filter((questions) => this.isShownGroup(questions))
         .flat()
         .filter((question) => this.selected[question.questions.id] === undefined).length
     },
@@ -85,8 +88,46 @@ export default {
     /*
     
     */
+    // A group of questions is shown from the child's age; editing shows the groups the result answered.
+    isShownGroup(questions) {
+      if (this.editing) return questions.some((question) => this.selected[question.questions.id] !== undefined)
+      return questions[0].min_age <= this.child.childInMonths
+    },
+    // The saved result on this screen: the child, its date and every answer given.
+    async loadEdit() {
+      try {
+        const { data } = (await axios.get(`/api/side-profile-results/${this.$route.query.edit}/edit`)).data
+        this.selectBox = [{ title: data.child.name, value: data.child.id }]
+        this.child_id = data.child.id
+        this.child = { ...data.child, canDoExam: true }
+        this.examDate = data.result.date ? new Date(data.result.date.replace(" ", "T")) : new Date()
+        this.selected = []
+        Object.entries(data.answers).forEach(([questionId, yes]) => { this.selected[Number(questionId)] = yes ? '1' : '0' })
+        this.editing = data.result
+      } catch (error) {
+        this.alert_text = error.response?.data?.message || this.$t("request_failed_retry")
+        this.type = "error"
+      }
+    },
+    async saveEdit() {
+      this.load = true
+      try {
+        const answers = this.selected.flatMap((value, question_id) => value === undefined ? [] : [{ question_id, value: value === '1' }])
+        await axios.put(`/api/side-profile-results/${this.editing.id}/edit`, { answers })
+        this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: this.$t("mae_saved"), life: 2500 })
+        this.showResult()
+      } catch (error) {
+        this.$toast.add({ severity: "error", summary: this.$t("error"), detail: error.response?.data?.message || this.$t("request_failed_retry"), life: 5000 })
+      } finally {
+        this.load = false
+      }
+    },
     async submit() {
       this.submitted = true
+      if (this.editing) {
+        if (!this.unansweredCount) await this.saveEdit()
+        return
+      }
       if (!this.child_id || this.unansweredCount || !this.child?.canDoExam) return
       await this.saveResult()
     },
@@ -131,7 +172,8 @@ export default {
       })
     },
     radioChange() {
-      if (this.load || this.saved) return
+      // The basal age is worked out when it is first answered; editing only changes answers.
+      if (this.load || this.saved || this.editing) return
       const groups = Object.values(this.headerAndQuestions)
         .filter(group => group.length && group[0].min_age <= this.child.childInMonths)
         .sort((a, b) => Number(b[0].min_age) - Number(a[0].min_age))
@@ -178,9 +220,13 @@ export default {
 
   , mounted() {
     this.getQuestions()
+    this.examDate = new Date()
+    if (this.$route.query.edit) {
+      this.loadEdit()
+      return
+    }
     this.getChildren()
     this.getallskills()
-    this.examDate = new Date()
   },
 
 
@@ -198,19 +244,21 @@ export default {
       <BackButton />
     </div>
 
+    <!-- Opened from the result (?edit=): the same screen with the answers given, until the result is approved. -->
+    <EditModeBanner v-if="editing" :status="editing.approval_status" :note="editing.approval_note" />
     <form class="surface-card form-stack" novalidate @submit.prevent="submit">
       <div class="form-grid">
         <div class="field">
           <label for="evaluation-child">{{ $t("child") }}</label>
           <Select inputId="evaluation-child" v-model="child_id" :options="selectBox" optionLabel="title" optionValue="value"
-:disabled="Boolean($route.query.requestId) || load || saved"
+:disabled="Boolean($route.query.requestId) || load || saved || Boolean(editing)"
             filter fluid :placeholder="$t('select_child')" :invalid="submitted && !child_id"
             @update:modelValue="getSpecificChildren" />
           <small v-if="submitted && !child_id" class="field-error">{{ $t("field_required") }}</small>
         </div>
         <div class="field">
           <label for="evaluation-date">{{ $t("created_at") }}</label>
-          <DatePicker inputId="evaluation-date" v-model="examDate" dateFormat="yy-mm-dd" showIcon showTime hourFormat="24" fluid />
+          <DatePicker inputId="evaluation-date" v-model="examDate" dateFormat="yy-mm-dd" showIcon showTime hourFormat="24" fluid :disabled="Boolean(editing)" />
         </div>
       </div>
 
@@ -220,7 +268,7 @@ export default {
       </Message>
 
       <template v-for="questions in Object.values(headerAndQuestions).reverse()" :key="questions[0].id">
-        <section v-if="questions[0].min_age <= child.childInMonths" class="question-group">
+        <section v-if="isShownGroup(questions)" class="question-group">
           <h2 class="question-group-title">{{ questions[0].title }}</h2>
           <div v-for="question in questions" :key="question.questions.id" class="question-row"
             :class="{ unanswered: submitted && selected[question.questions.id] === undefined }">
@@ -243,7 +291,7 @@ export default {
 
       <div class="form-actions">
         <Button v-if="saved" v-can="'evaluation results list'" @click="showResult" :label="$t('evaluation_results')" icon="pi pi-chart-bar" />
-        <Button v-if="!saved" :disabled="!child?.canDoExam || !Object.keys(headerAndQuestions).length" :loading="load" type="submit" icon="pi pi-check" :label="$t('submit')" />
+        <Button v-if="!saved" :disabled="!child?.canDoExam || !Object.keys(headerAndQuestions).length" :loading="load" type="submit" icon="pi pi-check" :label="editing ? $t('mae_save') : $t('submit')" />
       </div>
     </form>
   </div>

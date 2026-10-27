@@ -1,6 +1,7 @@
 <script setup>
 import Nav from "../components/landingPageNav.vue";
 import Footer from "../components/landingPageFooter.vue";
+import AssistantChat from "../components/assistant/AssistantChat.vue";
 </script>
 
 <template>
@@ -10,5 +11,7 @@ import Footer from "../components/landingPageFooter.vue";
       <router-view />
     </main>
     <Footer />
+    <!-- «مساعد سوا» for visitors: the academy's public information only, no sign-in. -->
+    <AssistantChat kind="public" />
   </div>
 </template>

@@ -65,7 +65,7 @@ const vb = [
     {
       path: '/milestone-evaluation/:id',
       name: 'milestone-evaluation',
-      meta: { permission: ["milestone answer create"] },
+      meta: { permission: ["milestone answer create", "milestone answer edit", "evaluation approval edit"] },
       component: () => import("../views/evaluation/milestone-evalution/index.vue")
     },
     {
@@ -83,7 +83,7 @@ const vb = [
     {
       path: '/barrier-evaluation/:id', 
       name: 'barrier-evaluation',
-      meta: { permission: ["barrier answer create"] },
+      meta: { permission: ["barrier answer create", "barrier answer edit", "evaluation approval edit"] },
       component: () => import("../views/evaluation/barrier-evalution/index.vue")
     },
     // VB-MAPP Transition: its questions, the evaluation and its results
@@ -96,7 +96,7 @@ const vb = [
     {
       path: '/transition-evaluation/:id',
       name: 'transition-evaluation',
-      meta: { permission: ["transition answer create"] },
+      meta: { permission: ["transition answer create", "transition answer edit", "evaluation approval edit"] },
       component: () => import("../views/evaluation/transition-evaluation/index.vue")
     },
     {
@@ -105,11 +105,17 @@ const vb = [
       meta: { permission: ["transition answer list", "transition answer create"] },
       component: () => import("../views/evaluation/transition-evaluation/result.vue")
     },
-    // M-CHAT-R: the parent's 20 yes/no answers and the risk they give
+    // M-CHAT-R: its settings (questions, levels, instructions, ages), the parent's yes/no answers and the risk they give
+    {
+      path: '/mchat-settings',
+      name: 'mchat-settings',
+      meta: { permission: ["mchat question list", "mchat question edit"] },
+      component: () => import("../views/evaluation/mchat/Settings.vue")
+    },
     {
       path: '/mchat-evaluation/:id',
       name: 'mchat-evaluation',
-      meta: { permission: ["mchat answer create"] },
+      meta: { permission: ["mchat answer create", "mchat answer edit", "evaluation approval edit"] },
       component: () => import("../views/evaluation/mchat/index.vue")
     },
     {

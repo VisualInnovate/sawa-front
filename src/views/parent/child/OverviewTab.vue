@@ -59,7 +59,7 @@ const RISK = { low: ["success", "منخفض"], medium: ["warn", "متوسط"], h
         <h2 class="pp-h2"><i class="pi pi-heart text-[var(--pp-magenta)]" /> {{ $t("pmchat.title") }}</h2>
         <template v-if="mchat">
           <p class="m-0 pp-muted">{{ $t("pp.mchat_last", { date: fmtDate(mchat.date) }) }}</p>
-          <span class="pp-tag" :class="`pp-tag--${RISK[mchat.risk]?.[0] ?? 'neutral'}`">{{ mchat.total }}/20 · {{ RISK[mchat.risk]?.[1] ?? mchat.risk }}</span>
+          <span class="pp-tag" :class="`pp-tag--${RISK[mchat.risk]?.[0] ?? 'neutral'}`">{{ mchat.total }}/{{ mchat.out_of || 20 }} · {{ RISK[mchat.risk]?.[1] ?? mchat.risk }}</span>
         </template>
         <p v-else class="m-0 pp-muted">{{ $t("pp.mchat_none") }}</p>
         <router-link :to="{ name: 'parent-mchat', params: { child_id: childId } }" class="pp-btn pp-btn--soft pp-btn--sm justify-self-start"><i class="pi pi-heart" /> {{ $t("pmchat.button") }}</router-link>

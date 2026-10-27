@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { useParentStore } from "@/stores/ParentStore";
-import ParentAssistantChat from "@/components/assistant/ParentAssistantChat.vue";
+import AssistantChat from "@/components/assistant/AssistantChat.vue";
 
 const route = useRoute();
 const parentStore = useParentStore();
@@ -16,5 +16,5 @@ const showAssistant = computed(
 
 <template>
   <RouterView />
-  <ParentAssistantChat v-if="showAssistant" />
+  <AssistantChat v-if="showAssistant" kind="parent" />
 </template>

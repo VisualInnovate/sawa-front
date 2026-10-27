@@ -20,7 +20,7 @@ const evaluationRoutes = [
   {
     path: "evaluations/:id",
     name: "ShowEvaluations",
-    meta: { permission: ["evaluation results create"] },
+    meta: { permission: ["evaluation results create", "evaluation results edit", "evaluation approval edit"] },
     component: Show,
   },
   // edit
@@ -72,7 +72,7 @@ const evaluationRoutes = [
   {
     path: '/mission-test/:id', // Define the path for your addRoom route
     name: 'mission-test',
-    meta: { permission: ["able answer create"] },
+    meta: { permission: ["able answer create", "able answer edit", "evaluation approval edit"] },
     component: () => import("../views/ablls/mission-test.vue")
   },
   {
@@ -109,7 +109,7 @@ const evaluationRoutes = [
   {
     path: '/ablls-skills/test/:id',
     name: 'skills-test',
-    meta: { permission: ["skills answer create"], assessment: 'skills' },
+    meta: { permission: ["skills answer create", "skills answer edit", "evaluation approval edit"], assessment: 'skills' },
     component: skillsPage(() => import("../views/ablls/mission-test.vue"))
   },
   {
@@ -151,7 +151,7 @@ const evaluationRoutes = [
   {
     path: '/carolina-test/:id', // Define the path for your addRoom route
     name: 'carolina-test',
-    meta: { permission: ["carolina answer create"] },
+    meta: { permission: ["carolina answer create", "carolina answer edit", "evaluation approval edit"] },
     component: () => import("../views/carolina/carolina-test.vue")
   },
   {

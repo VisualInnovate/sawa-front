@@ -1,11 +1,13 @@
 <script setup>
 // «أوقات البرامج»: each program's from–to hours per weekday. Day (classes) and clinics (evening) may not
 // overlap on the same day (touching is fine); inclusion may overlap either. The whole week is saved at once.
+// Below: the default priority order of the automatic scheduling criteria (a program may have its own).
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import { WORK_TYPES, workTypeLabel } from "@/utils/employeeWorkTypes";
+import SchedulingCriteria from "@/components/studentPrograms/SchedulingCriteria.vue";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -32,9 +34,25 @@ function fill(hours) {
 }
 
 async function load() {
-  const { data } = await axios.get("api/program-hours");
-  fill(data.data);
+  const [hours, defaults] = await Promise.all([axios.get("api/program-hours"), axios.get("api/program-hours/criteria")]);
+  fill(hours.data.data);
+  criteria.value = defaults.data.data;
   loading.value = false;
+}
+
+const criteria = ref([]);
+const savingCriteria = ref(false);
+async function saveCriteria() {
+  savingCriteria.value = true;
+  try {
+    const { data } = await axios.put("api/program-hours/criteria", { criteria: criteria.value });
+    criteria.value = data.data;
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("sched.saved"), life: 2500 });
+  } catch (e) {
+    toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message ?? t("sched.not_saved"), life: 3500 });
+  } finally {
+    savingCriteria.value = false;
+  }
 }
 
 function toggle(cell) {
@@ -141,5 +159,15 @@ onMounted(load);
       </div>
     </template>
     <Toast />
+  </div>
+  <div v-if="!loading" class="sawa-card p-3 mt-3 flex flex-column gap-3">
+    <div class="flex flex-column gap-1">
+      <span class="font-semibold text-[#135C65]">{{ $t("sched.default_title") }}</span>
+      <small class="text-color-secondary">{{ $t("sched.hint") }} {{ $t("sched.default_hint") }}</small>
+    </div>
+    <SchedulingCriteria v-model="criteria" />
+    <div class="text-center">
+      <Button icon="pi pi-check" :label="$t('submit')" :loading="savingCriteria" class="w-full lg:w-[40%]" @click="saveCriteria" />
+    </div>
   </div>
 </template>

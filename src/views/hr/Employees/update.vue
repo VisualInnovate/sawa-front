@@ -1,762 +1,489 @@
-<template v-can="'employees edit'">
-  <div class="sawa-card p-[1%]">
-    <form class="form-container" ref="myForm" @submit.prevent="update">
-      <!-- Step 1 -->
+<script setup>
+// Edit an employee: profile header + tabs (personal / job / therapist). The record and every dropdown load
+// together in two requests; leaving with unsaved changes asks first.
+import axios from "axios";
+import moment from "moment";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { onBeforeRouteLeave, useRoute } from "vue-router";
+import { useToast } from "primevue/usetoast";
+import SubstituteSelect from "@/components/SubstituteSelect.vue";
+import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
+import AgeRangeField from "@/components/common/AgeRangeField.vue";
+import EmployeeField from "@/components/employees/EmployeeField.vue";
+import EmployeeHero from "@/components/employees/EmployeeHero.vue";
+import { workTypesValue } from "@/utils/employeeWorkTypes";
+import { can, isAdmin } from "@/utils/permissions";
+import {
+  employeeTypeName,
+  employeeTypes,
+  evaluationTypeGroups,
+  fetchEmployeeFormOptions,
+  hasTherapistFields,
+} from "@/utils/employeeForm";
 
-      <div v-if="currentStep === 0">
-        <h3 class="text-center text-xl font-bold text-blue-950">
-          {{ $t("student_details") }}
-        </h3>
-        <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="col-span-2">
-            <div>
-              <img onclick="document.getElementById('filr').click()" class="m-auto rounded-full"
-                style="width: 150px; height: 150px" :class="{ 'p-invalid': submitted && !employee.image }"
-                v-if="employee.image" :src="employee.image" />
-              <img onclick="document.getElementById('filr').click()" class="m-auto rounded-full"
-                style="width: 150px; height: 150px" :class="{ 'p-invalid': submitted && !employee.image }" v-else
-                src="https://sys.sawa.sawa.academy/public/default.jpg" />
-            </div>
-          </div>
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("employee_name") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputText class="text-center" v-model="employee.name"
-              :class="{ 'p-invalid': submitted && !employee.name }" />
-          </div>
+const { t } = useI18n();
+const toast = useToast();
+const route = useRoute();
 
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("email") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputText type="email" class="text-center" v-model="employee.email"
-              :class="{ 'p-invalid': submitted && !employee.email }" />
-          </div>
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("password") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputText type="password" class="text-center" v-model="employee.password"
-              :class="{ 'p-invalid': submitted && !employee.password }" />
-          </div>
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("title") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputText class="text-center" v-model="employee.title"
-              :class="{ 'p-invalid': submitted && !employee.title }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("national_id") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid required
-              v-model="employee.national_id" :class="{ 'p-invalid': submitted && !employee.national_id }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("date_of_birth") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <DatePicker showButtonBar v-model.number="employee.date_of_birth" showIcon
-              :class="{ 'p-invalid': submitted && !employee.date_of_birth }" />
-          </div>
-          <div class="flex-column gap-2 py-1 hidden">
-            <label class="w-full" for="username">{{
-              $t("personal_image")
-            }}</label>
+const loading = ref(true);
+const loadError = ref(false);
+const saving = ref(false);
+const tab = ref("personal");
+const employee = ref({});
+const original = ref("");
+const errors = ref({});
+const options = ref({ shifts: [], positions: [], treatments: [], skills: [], departments: [], roles: [] });
 
-            <InputText name="file" ref="file" @change="uploadFile" accept="image/*" id="filr" type="file"
-              class="w-full" />
-            <div class="mt-1 mb-5 text-red-500" v-if="error?.image">
-              {{ error.image[0] }}
-            </div>
-          </div>
-        </div>
-        <div class="w-full text-center">
-          <Button class="w-[50%]" :label="$t('next')" @click="nextStep"></Button>
+// Role, salary and type change only with «employees edit» («doctor edit» keeps them).
+const canEditJob = computed(() => can("employees edit"));
+const types = computed(() => employeeTypes(t));
+const evaluationGroups = computed(() => evaluationTypeGroups(t));
+const roles = computed(() => options.value.roles.filter((role) => !role.is_locked || isAdmin()));
+const therapist = computed(() => hasTherapistFields(employee.value.type));
+
+const snapshot = () => JSON.stringify(employee.value);
+const dirty = computed(() => Boolean(original.value) && snapshot() !== original.value);
+
+const nameOf = (list, id, key = "title") => list.find((item) => Number(item.id) === Number(id))?.[key] ?? "";
+const facts = computed(() => [
+  { icon: "pi pi-envelope", label: t("email"), value: employee.value.email },
+  { icon: "pi pi-briefcase", label: t("position_name"), value: nameOf(options.value.positions, employee.value.position_id) },
+  { icon: "pi pi-clock", label: t("shift_name"), value: nameOf(options.value.shifts, employee.value.shift_id) },
+  { icon: "pi pi-calendar", label: t("date_of_enrollment"), value: formatDate(employee.value.date_of_enrollment) },
+]);
+
+const toDate = (value) => (value ? moment(value).toDate() : null);
+const formatDate = (value) => (value ? moment(value).format("YYYY-MM-DD") : "");
+const ids = (list) => (list ?? []).map((item) => Number(typeof item === "object" ? item.id : item)).filter(Number.isInteger);
+
+function fill(data) {
+  const user = data.user ?? {};
+  employee.value = {
+    name: data.name,
+    email: data.email,
+    password: "",
+    title: user.title,
+    user_id: data.user_id,
+    national_id: data.national_id ?? "",
+    date_of_birth: toDate(data.date_of_birth),
+    image: user.image,
+    file: null,
+    position_id: data.position_id,
+    shift_id: data.shift_id,
+    basic_salary: data.basic_salary,
+    spotter: user.spotter,
+    contract_period: data.contract_period,
+    date_of_enrollment: toDate(data.date_of_enrollment),
+    type: user.type,
+    role: user.roles?.[0]?.id ?? null,
+    department: ids(user.departments),
+    skills: ids(user.skills),
+    treatments: ids(user.treatments),
+    evaluation: ids(user.evaluations),
+    substitute_ids: ids(user.substitutes),
+    work_types: data.work_types ?? [],
+    age_from_months: user.age_from_months ?? null,
+    age_to_months: user.age_to_months ?? null,
+  };
+  original.value = snapshot();
+}
+
+async function load() {
+  loading.value = true;
+  loadError.value = false;
+  try {
+    // The record and the dropdowns are fetched at the same time.
+    const [record, lookups] = await Promise.all([
+      axios.get(`api/employees/${route.params.id}`, { params: { form: 1 } }),
+      fetchEmployeeFormOptions(),
+    ]);
+    options.value = { ...options.value, ...lookups };
+    fill(record.data.data);
+  } catch {
+    loadError.value = true;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function setImage({ file, preview }) {
+  employee.value.image = preview;
+  employee.value.file = file;
+}
+
+function body() {
+  const e = employee.value;
+  const form = new FormData();
+  if (e.name) form.append("name", e.name);
+  if (e.title) form.append("title", e.title);
+  if (e.email) form.append("email", e.email);
+  if (e.password) form.append("password", e.password);
+  if (e.shift_id) form.append("shift_id", e.shift_id);
+  if (e.spotter) form.append("spotter", e.spotter);
+  if (e.position_id) form.append("position_id", e.position_id);
+  if (e.date_of_birth) form.append("date_of_birth", formatDate(e.date_of_birth));
+  if (e.date_of_enrollment) form.append("date_of_enrollment", formatDate(e.date_of_enrollment));
+  if (e.contract_period) form.append("contract_period", e.contract_period);
+  if (e.national_id) form.append("national_id", e.national_id);
+  if (e.basic_salary) form.append("basic_salary", e.basic_salary);
+  if (e.type) form.append("type", e.type);
+  if (e.role) form.append("role", e.role);
+  // Always sent: an empty value clears the substitutes.
+  form.append("substitute_ids", e.substitute_ids ?? []);
+  // Always sent too: an empty value clears the work types.
+  form.append("work_types", workTypesValue(e.work_types));
+  if (Number(e.type) === 2) {
+    form.append("age_from_months", e.age_from_months ?? "");
+    form.append("age_to_months", e.age_to_months ?? "");
+  }
+  if (e.evaluation) form.append("evaluations", e.evaluation);
+  if (e.treatments) form.append("treatments", e.treatments);
+  if (e.skills) form.append("skills", e.skills);
+  if (e.department) form.append("department_id", e.department);
+  if (e.file) form.append("image", e.file);
+  return form;
+}
+
+// Which tab holds each field, to open the first one with an error.
+const FIELD_TABS = {
+  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "department_id", "substitute_ids", "work_types"],
+  therapist: ["skills", "evaluations", "treatments", "age_from_months", "age_to_months"],
+};
+const err = (key) => errors.value?.[key];
+const tabOf = (field) => Object.keys(FIELD_TABS).find((name) => FIELD_TABS[name].includes(field.split(".")[0])) ?? "personal";
+const tabsWithErrors = computed(() => new Set(Object.keys(errors.value ?? {}).map(tabOf)));
+
+async function save() {
+  if (saving.value) return;
+  saving.value = true;
+  errors.value = {};
+  try {
+    await axios.post(`/api/employees/${route.params.id}`, body());
+    employee.value.password = "";
+    employee.value.file = null;
+    original.value = snapshot();
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("emp.saved"), life: 3000 });
+  } catch (error) {
+    errors.value = error.response?.data?.errors ?? {};
+    const first = ["personal", "job", "therapist"].find((name) => tabsWithErrors.value.has(name));
+    if (first) tab.value = first;
+    toast.add({ severity: "error", summary: t("error"), detail: error.response?.data?.message ?? t("request_failed_retry"), life: 4000 });
+  } finally {
+    saving.value = false;
+  }
+}
+
+function discard() {
+  employee.value = JSON.parse(original.value);
+  employee.value.date_of_birth = toDate(employee.value.date_of_birth);
+  employee.value.date_of_enrollment = toDate(employee.value.date_of_enrollment);
+  original.value = snapshot();
+  errors.value = {};
+}
+
+// A therapist-only tab is left when the kind changes away from therapist.
+watch(therapist, (value) => {
+  if (!value && tab.value === "therapist") tab.value = "job";
+});
+
+const onBeforeUnload = (event) => {
+  if (!dirty.value) return;
+  event.preventDefault();
+  event.returnValue = "";
+};
+
+onMounted(() => {
+  load();
+  window.addEventListener("beforeunload", onBeforeUnload);
+});
+onBeforeUnmount(() => window.removeEventListener("beforeunload", onBeforeUnload));
+onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاكد من الخروج ؟")));
+</script>
+
+<template>
+  <div class="employee-page">
+    <div class="employee-page__top">
+      <div>
+        <h1 class="employee-page__title">{{ $t("update_employee") }}</h1>
+        <p class="employee-page__subtitle">{{ $t("emp.edit_hint") }}</p>
+      </div>
+      <!-- Opened from the employees or the doctors list: back returns there. -->
+      <BackButton />
+    </div>
+
+    <!-- Loading: the shape of the page, not a blank spinner. -->
+    <template v-if="loading">
+      <div class="employee-hero-skeleton sawa-card">
+        <Skeleton shape="circle" size="112px" />
+        <div class="flex-1 flex flex-column gap-2">
+          <Skeleton width="40%" height="1.6rem" />
+          <Skeleton width="25%" />
+          <Skeleton width="60%" />
         </div>
       </div>
-      <!-- Step 2 -->
-      <div v-if="currentStep === 1">
-        <h3 class="text-center text-xl font-bold text-blue-950">
-          {{ $t("job_details") }}
-        </h3>
-        <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("position_name") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <Select required v-model="employee.position_id"
-              option-value="id" :options="positions" optionLabel="title" :placeholder="$t('position_name')"
-              class="w-full" :class="{ 'p-invalid': submitted && !employee.position_id }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("shift_name") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <Select required v-model="employee.shift_id"
-              option-value="id" :options="shifts" optionLabel="title" :placeholder="$t('shift_name')" class="w-full"
-              :class="{ 'p-invalid': submitted && !employee.shift_id }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("basic_salary") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputNumber inputId="withoutgrouping" :useGrouping="false" fluid required :disabled="!$can('employees edit')"
-              v-model="employee.basic_salary" :placeholder="$t('basic_salary')"
-              :class="{ 'p-invalid': submitted && !employee.basic_salary }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("Spotter") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputNumber required v-model="employee.spotter" :placeholder="$t('Spotter')"
-              :class="{ 'p-invalid': submitted && !employee.Spotter }" />
-          </div>
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{
-                $t("contract_period") + " " + $t("In_months")
-              }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <InputText class="text-center" v-model="employee.contract_period"
-              :class="{ 'p-invalid': submitted && !employee.contract_period }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("date_of_enrollment") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <DatePicker showButtonBar v-model.number="employee.date_of_enrollment" showIcon :class="{ 'p-invalid': submitted && !employee.date_of_enrollment, }" />
-          </div>
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("type") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <Select
-              v-model="employee.type" option-value="id" filter :options="tpes()" optionLabel="name" :disabled="!$can('employees edit')"
-              :class="{ 'p-invalid': submitted && !employee.type }" />
-          </div>
-          <div v-if="employee.type == 0 || employee.type == 2" class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("skill_name") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <MultiSelect v-model="employee.skills" filter option-value="id" :options="skills" optionLabel="name"
-              :class="{ 'p-invalid': submitted && !employee.skills }" />
-          </div>
-          <div v-if="employee.type == 0 || employee.type == 2" class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("Evaluate Types") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <MultiSelect
-              v-model="employee.evaluation"
-              filter
-              option-value="id"
-              :options="evaluate_types"
-              optionLabel="name"
-              optionGroupLabel="label"
-              optionGroupChildren="items"
-              :placeholder="$t('evalute_type')"
-              :class="{ 'p-invalid': submitted && !employee.evaluation?.length }"
-            />
-            <div class="mt-1 text-red-500" v-if="error?.evaluations">{{ error.evaluations[0] }}</div>
-          </div>
-          <div v-if="employee.type == 0 || employee.type == 2" class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("Typetreatment") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <MultiSelect v-model="employee.treatments" filter option-value="id" :options="treatments" optionLabel="name"
-              :class="{ 'p-invalid': submitted && !employee.treatments }" />
-          </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("department") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <MultiSelect v-model="employee.department" filter option-value="id" :options="departments"
-              optionLabel="title" :class="{ 'p-invalid': submitted && !employee.department }" />
-          </div>
-
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("roles") }}</label>
-              <svg class="my-auto mx-1" width="7" height="5" viewBox="0 0 6 5" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414" />
-              </svg>
-            </div>
-            <!-- Role, salary and type change only with «employees edit» («doctor edit» keeps them). -->
-            <Select :disabled="!$can('employees edit')"
-              v-model="employee.role" option-value="id" filter :options="roles" optionLabel="name"
-              :class="{ 'p-invalid': submitted && !employee.role }" />
-          </div>
-          <!-- The employees who stand in for this one (information only); every employee, searchable. -->
-          <div class="flex flex-column gap-2 py-1">
-            <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
-            <SubstituteSelect v-model="employee.substitute_ids" :exclude="employee.user_id" />
-          </div>
-          <!-- Optional: inclusion, day and/or clinics (evening); inclusion and day exclude each other. -->
-          <div class="flex flex-column gap-2 py-1">
-            <label class="text-start" for="work-types">{{ $t("work_types") }}</label>
-            <WorkTypeSelect v-model="employee.work_types" />
-          </div>
-          <!-- Therapists: the ages they specialise in (choosing them for a child outside it only warns). -->
-          <div v-if="employee.type == 2" class="flex flex-column gap-2 py-1">
-            <AgeRangeField v-model:from="employee.age_from_months" v-model:to="employee.age_to_months" :label="$t('age_ranges.therapist_label')" />
-          </div>
-        </div>
-        <div class="text-center">
-          <Button @click="previousStep" :label="$t('Back')"></Button>
-          <Button type="submit" @click="submitted = true" :label="$t('submit')"></Button>
+      <div class="sawa-card p-4 mt-3 employee-grid">
+        <div v-for="n in 6" :key="n" class="flex flex-column gap-2">
+          <Skeleton width="35%" />
+          <Skeleton height="2.5rem" />
         </div>
       </div>
+    </template>
 
-      <Toast />
+    <Message v-else-if="loadError" severity="error" :closable="false">
+      <div class="flex align-items-center gap-3 flex-wrap">
+        <span>{{ $t("request_failed_retry") }}</span>
+        <Button :label="$t('refresh')" icon="pi pi-refresh" size="small" @click="load" />
+      </div>
+    </Message>
+
+    <form v-else @submit.prevent="save">
+      <EmployeeHero :name="employee.name" :title="employee.title" :image="employee.image"
+        :type-name="employeeTypeName(t, employee.type)" :role-name="nameOf(options.roles, employee.role, 'name')"
+        :facts="facts" :image-error="err('image')" editable @image="setImage" />
+
+      <div class="sawa-card employee-card">
+        <Tabs v-model:value="tab" scrollable>
+          <TabList>
+            <Tab value="personal">
+              <i class="pi pi-user mx-1" />{{ $t("student_details") }}
+              <i v-if="tabsWithErrors.has('personal')" class="pi pi-exclamation-circle tab-error" />
+            </Tab>
+            <Tab value="job">
+              <i class="pi pi-briefcase mx-1" />{{ $t("job_details") }}
+              <i v-if="tabsWithErrors.has('job')" class="pi pi-exclamation-circle tab-error" />
+            </Tab>
+            <Tab v-if="therapist" value="therapist">
+              <i class="pi pi-heart mx-1" />{{ $t("emp.therapist_tab") }}
+              <i v-if="tabsWithErrors.has('therapist')" class="pi pi-exclamation-circle tab-error" />
+            </Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel value="personal">
+              <div class="employee-grid">
+                <EmployeeField :label="$t('employee_name')" for="emp-name" required :error="err('name')">
+                  <InputText id="emp-name" v-model="employee.name" :invalid="Boolean(err('name'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('title')" for="emp-title" required :error="err('title')">
+                  <InputText id="emp-title" v-model="employee.title" :invalid="Boolean(err('title'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('email')" for="emp-email" required :error="err('email')">
+                  <IconField>
+                    <InputIcon class="pi pi-envelope" />
+                    <InputText id="emp-email" v-model="employee.email" type="email" dir="ltr" :invalid="Boolean(err('email'))" />
+                  </IconField>
+                </EmployeeField>
+                <EmployeeField :label="$t('password')" for="emp-password" :hint="$t('emp.password_keep')" :error="err('password')">
+                  <Password v-model="employee.password" inputId="emp-password" toggleMask :feedback="false"
+                    autocomplete="new-password" fluid :invalid="Boolean(err('password'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('national_id')" for="emp-national-id" required :error="err('national_id')">
+                  <!-- Text, not a number: keeps leading zeros (the API stores it as a string). -->
+                  <InputText id="emp-national-id" v-model="employee.national_id" inputmode="numeric" dir="ltr"
+                    :invalid="Boolean(err('national_id'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('date_of_birth')" for="emp-birth" required :error="err('date_of_birth')">
+                  <DatePicker v-model="employee.date_of_birth" inputId="emp-birth" dateFormat="yy-mm-dd" showIcon
+                    showButtonBar fluid :maxDate="new Date()" :invalid="Boolean(err('date_of_birth'))" />
+                </EmployeeField>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="job">
+              <div class="employee-grid">
+                <EmployeeField :label="$t('position_name')" for="emp-position" required :error="err('position_id')">
+                  <Select v-model="employee.position_id" inputId="emp-position" :options="options.positions" optionLabel="title"
+                    optionValue="id" filter :placeholder="$t('position_name')" :invalid="Boolean(err('position_id'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('shift_name')" for="emp-shift" required :error="err('shift_id')">
+                  <Select v-model="employee.shift_id" inputId="emp-shift" :options="options.shifts" optionLabel="title"
+                    optionValue="id" filter :placeholder="$t('shift_name')" :invalid="Boolean(err('shift_id'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('basic_salary')" for="emp-salary" required :error="err('basic_salary')">
+                  <InputNumber v-model="employee.basic_salary" inputId="emp-salary" :useGrouping="false" fluid
+                    :disabled="!canEditJob" :invalid="Boolean(err('basic_salary'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('Spotter')" for="emp-spotter" required :error="err('spotter')">
+                  <InputNumber v-model="employee.spotter" inputId="emp-spotter" :useGrouping="false" fluid :invalid="Boolean(err('spotter'))" />
+                </EmployeeField>
+                <EmployeeField :label="`${$t('contract_period')} ${$t('In_months')}`" for="emp-contract" required :error="err('contract_period')">
+                  <InputText id="emp-contract" v-model="employee.contract_period" :invalid="Boolean(err('contract_period'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('date_of_enrollment')" for="emp-enrollment" required :error="err('date_of_enrollment')">
+                  <DatePicker v-model="employee.date_of_enrollment" inputId="emp-enrollment" dateFormat="yy-mm-dd" showIcon
+                    showButtonBar fluid :invalid="Boolean(err('date_of_enrollment'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('type')" for="emp-type" required :error="err('type')">
+                  <Select v-model="employee.type" inputId="emp-type" :options="types" optionLabel="name" optionValue="id"
+                    :disabled="!canEditJob" :invalid="Boolean(err('type'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('roles')" for="emp-role" required :error="err('role')">
+                  <Select v-model="employee.role" inputId="emp-role" :options="roles" optionLabel="name" optionValue="id"
+                    filter :disabled="!canEditJob" :invalid="Boolean(err('role'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('department')" for="emp-department" required :error="err('department_id')">
+                  <MultiSelect v-model="employee.department" inputId="emp-department" :options="options.departments"
+                    optionLabel="title" optionValue="id" filter display="chip" :invalid="Boolean(err('department_id'))" />
+                </EmployeeField>
+                <!-- Optional: inclusion, day and/or clinics (evening); inclusion and day exclude each other. -->
+                <EmployeeField :label="$t('work_types')" for="work-types" :error="err('work_types')">
+                  <WorkTypeSelect v-model="employee.work_types" />
+                </EmployeeField>
+                <!-- The employees who stand in for this one (information only); every employee, searchable. -->
+                <EmployeeField :label="$t('substitute_employee')" for="substitute-employee" :error="err('substitute_ids')" wide>
+                  <SubstituteSelect v-model="employee.substitute_ids" :exclude="employee.user_id" />
+                </EmployeeField>
+              </div>
+            </TabPanel>
+
+            <TabPanel v-if="therapist" value="therapist">
+              <div class="employee-grid">
+                <EmployeeField :label="$t('skill_name')" for="emp-skills" :error="err('skills')">
+                  <MultiSelect v-model="employee.skills" inputId="emp-skills" :options="options.skills" optionLabel="name"
+                    optionValue="id" filter display="chip" :invalid="Boolean(err('skills'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('Typetreatment')" for="emp-treatments" :error="err('treatments')">
+                  <MultiSelect v-model="employee.treatments" inputId="emp-treatments" :options="options.treatments"
+                    optionLabel="name" optionValue="id" filter display="chip" :invalid="Boolean(err('treatments'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('Evaluate Types')" for="emp-evaluations" :error="err('evaluations')" wide>
+                  <MultiSelect v-model="employee.evaluation" inputId="emp-evaluations" :options="evaluationGroups"
+                    optionLabel="name" optionValue="id" optionGroupLabel="label" optionGroupChildren="items" filter
+                    display="chip" :placeholder="$t('evalute_type')" :invalid="Boolean(err('evaluations'))" />
+                </EmployeeField>
+                <!-- Therapists: the ages they specialise in (choosing them for a child outside it only warns). -->
+                <div v-if="Number(employee.type) === 2" class="employee-grid__wide">
+                  <AgeRangeField v-model:from="employee.age_from_months" v-model:to="employee.age_to_months"
+                    :label="$t('age_ranges.therapist_label')" />
+                  <small v-if="err('age_from_months') || err('age_to_months')" class="text-red-600">
+                    {{ (err('age_from_months') || err('age_to_months'))[0] }}
+                  </small>
+                </div>
+              </div>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+
+        <!-- Buttons at the start: the floating assistant button sits at the end corner. -->
+        <div class="employee-actions">
+          <div class="flex gap-2">
+            <Button type="submit" :label="$t('save')" icon="pi pi-check" :loading="saving" :disabled="saving" />
+            <Button type="button" :label="$t('emp.discard')" icon="pi pi-undo" severity="secondary" variant="outlined"
+              :disabled="!dirty || saving" @click="discard" />
+          </div>
+          <span v-if="dirty" class="employee-actions__state"><i class="pi pi-circle-fill" />{{ $t("emp.unsaved") }}</span>
+          <span v-else class="employee-actions__state is-saved"><i class="pi pi-check-circle" />{{ $t("emp.no_changes") }}</span>
+        </div>
+      </div>
     </form>
   </div>
 </template>
 
-<script>
-import axios from "axios";
-import SubstituteSelect from "@/components/SubstituteSelect.vue";
-import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
-import AgeRangeField from "@/components/common/AgeRangeField.vue";
-import { workTypesValue } from "@/utils/employeeWorkTypes";
-import InputNumber from "primevue/inputnumber";
-import moment from "moment";
-
-import { useToast } from "primevue/usetoast";
-export default {
-  components: { SubstituteSelect, WorkTypeSelect, AgeRangeField },
-  data() {
-    return {
-      evaluate_types: [
-        {
-          label: "Side Profile",
-          items: [
-            { name: "البعد المعرفي", id: 101 },
-            { name: "البعد العنايه الذاتيه", id: 102 },
-            { name: "البعد الحركي", id: 103 },
-            { name: "البعد الاجتماعي", id: 104 },
-            { name: "البعد الاتصالي", id: 105 },
-          ],
-        },
-        {
-          label: this.$t('other_evaluation_types'),
-          items: [
-            { name: "milestone", id: 2 },
-            { name: "barrier", id: 3 },
-            { name: "ABLLS Academy", id: 4 },
-            { name: "carolina", id: 5 },
-            { name: "Transition", id: 6 },
-            { name: "Ablls OT", id: 7 },
-            { name: "M-CHAT-R", id: 8 },
-          ],
-        },
-      ],
-      currentStep: 0,
-      steps: [
-        { label: "Personal Details" },
-        { label: "Job Details" },
-        { label: "Additional Details" },
-      ],
-      employee: {},
-      users: {},
-      submitted: false,
-      childs: {},
-      cities: {},
-      positions: [],
-      shifts: [],
-      skills: [],
-      roles: [],
-      departments: [],
-      qustions: {},
-      error: {},
-      maxDate: new Date(),
-      treatments: [],
-      // Add other validation rules for the title field
-      originalEmployee: null,
-      hasUnsaved: false,
-      _unwatchEmployee: null,
-    };
-  },
-
-  methods: {
-    // ... existing methods ...
-
-    tpes() {
-      return [
-        { name: this.$t("driver"), id: 1 },
-        { name: this.$t("doctor"), id: 2 },
-        { name: this.$t("Evaluator"), id: 5 },
-        { name: this.$t("أداري"), id: 6 },
-      ];
-    },
-
-    nextStep() {
-      if (this.currentStep < this.steps.length - 1) {
-        this.currentStep++;
-      }
-    },
-    previousStep() {
-      if (this.currentStep > 0) {
-        this.currentStep--;
-      }
-    },
-    navigateToStep(step) {
-      this.currentStep = step;
-    },
-
-    uploadFile(e) {
-      const image = e.target.files[0];
-      if (!image) return; // Handle case where no file is selected
-
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onload = (event) => {
-        this.employee.image = event.target.result; // Set base64 string
-        this.employee.file = image; // Set file object
-        console.log(this.employee.image); // Log the base64 string
-      };
-    },
-    getoneanswer() {
-      axios.get(`api/employees/${this.$route.params.id}`).then((response) => {
-        console.log(response.data.data);
-        this.employee.name = response.data.data.name;
-        this.employee.email = response.data.data.email;
-        this.employee.user_id = response.data.data.user_id;
-        this.employee.position_id = response.data.data.position_id;
-        this.employee.basic_salary = response.data.data.basic_salary;
-        this.employee.shift_id = response.data.data.shift_id;
-        this.employee.department_id = response.data.data.department_id;
-        this.employee.type = response.data.data.user.type;
-        this.employee.spotter = response.data.data.user.spotter;
-        this.employee.date_of_enrollment =
-          response.data.data.date_of_enrollment;
-        this.employee.date_of_birth = response.data.data.date_of_birth;
-        this.employee.contract_period = response.data.data.contract_period;
-        this.employee.image = response.data.data.user.image;
-        this.employee.title = response.data.data.user.title;
-        this.employee.role = response.data.data.user.roles[0].id;
-        this.employee.substitute_ids = (response.data.data.user.substitutes ?? []).map((user) => Number(user.id));
-        this.employee.work_types = response.data.data.work_types ?? [];
-        this.employee.age_from_months = response.data.data.user?.age_from_months ?? null;
-        this.employee.age_to_months = response.data.data.user?.age_to_months ?? null;
-        this.employee.national_id = parseInt(response.data.data.national_id);
-        this.employee.skills = [];
-        for (let i = 0; i < response.data.data.user.skills.length; i++) {
-          this.employee.skills.push(response.data.data.user.skills[i].id);
-        }
-        this.employee.treatments = [];
-        for (let i = 0; i < response.data.data.user.treatments.length; i++) {
-          this.employee.treatments.push(
-            response.data.data.user.treatments[i].id
-          );
-        }
-        this.employee.evaluation = (response.data.data.user?.evaluations || [])
-          .map((evaluation) => Number(typeof evaluation === "object" ? evaluation.id : evaluation))
-          .filter((evaluation) => Number.isInteger(evaluation));
-
-        this.employee.department = [];
-        for (let i = 0; i < response.data.data.user.departments.length; i++) {
-          this.employee.department.push(
-            response.data.data.user.departments[i].id
-          );
-        }
-        this.originalEmployee = JSON.parse(JSON.stringify(this.employee));
-
-        // إلغاء أي وشر سابق قبل عمل وشر جديد
-        if (this._unwatchEmployee) {
-          this._unwatchEmployee(); // إلغاء
-        }
-
-        // راقب التغيّر العميق على employee
-        this._unwatchEmployee = this.$watch(
-          "employee",
-          () => {
-            this.hasUnsaved = this.isEmployeeDirty();
-          },
-          { deep: true }
-        );
-      });
-
-      console.log("EM", this.employee);
-    },
-
-    getusers() {
-      axios.post("api/users").then((response) => {
-        this.users = response.data.users.data;
-        this.getoneanswer();
-      });
-      axios.get("api/shifts").then((response) => {
-        this.shifts = response.data.data;
-      });
-      axios.get("api/position").then((response) => {
-        this.positions = response.data.data;
-      });
-      axios.get("api/treatment/all").then((response) => {
-        this.treatments = response.data.data;
-      });
-      axios.post("/api/roles").then((res) => {
-        this.roles = res.data.roles.data.filter((role) => !role.is_locked || this.$isAdmin());
-      });
-      axios.get("/api/skills").then((res) => {
-        this.skills = res.data.data;
-      });
-      axios.get("api/department").then((response) => {
-        this.departments = response.data.data;
-      });
-      axios
-        .get(`/api/countries/${localStorage.getItem("appLang")}`)
-        .then((res) => {
-          this.cities = res.data.countries;
-          this.getoneanswer();
-        });
-    },
-
-    update() {
-      const body = new FormData();
-      if (this.employee.name) body.append("name", this.employee.name);
-      if (this.employee.title) body.append("title", this.employee.title);
-      if (this.employee.email) body.append("email", this.employee.email);
-      if (this.employee.password)
-        body.append("password", this.employee.password);
-      if (this.employee.shift_id)
-        body.append("shift_id", this.employee.shift_id);
-      if (this.employee.spotter) body.append("spotter", this.employee.spotter);
-      if (this.employee.position_id)
-        body.append("position_id", this.employee.position_id);
-      if (this.employee.date_of_birth)
-        body.append(
-          "date_of_birth",
-          moment(this.employee.date_of_birth).format("YYYY-MM-DD")
-        );
-      if (this.employee.date_of_enrollment)
-        body.append(
-          "date_of_enrollment",
-          moment(this.employee.date_of_enrollment).format("YYYY-MM-DD")
-        );
-      if (this.employee.contract_period)
-        body.append("contract_period", this.employee.contract_period);
-      if (this.employee.national_id)
-        body.append("national_id", this.employee.national_id);
-      if (this.employee.basic_salary)
-        body.append("basic_salary", this.employee.basic_salary);
-      if (this.employee.type) body.append("type", this.employee.type);
-      if (this.employee.role) body.append("role", this.employee.role);
-      // Always sent: an empty value clears the substitutes.
-      body.append("substitute_ids", this.employee.substitute_ids ?? []);
-      // Always sent too: an empty value clears the work types.
-      body.append("work_types", workTypesValue(this.employee.work_types));
-      if (this.employee.type == 2) {
-        body.append("age_from_months", this.employee.age_from_months ?? "");
-        body.append("age_to_months", this.employee.age_to_months ?? "");
-      }
-      if (this.employee.evaluation)
-        body.append("evaluations", this.employee.evaluation);
-      if (this.employee.treatments)
-        body.append("treatments", this.employee.treatments);
-      if (this.employee.skills) body.append("skills", this.employee.skills);
-      if (this.employee.department)
-        body.append("department_id", this.employee.department);
-      if (this.employee.file) body.append("image", this.employee.file);
-      axios
-        .post(`/api/employees/${this.$route.params.id}`, body)
-        .then((res) => {
-          this.$toast.add({
-            severity: "success",
-            summary: this.$t("success_message"),
-            detail: this.$t("element_add_success"),
-            life: 3000,
-          });
-          this.originalEmployee = JSON.parse(JSON.stringify(this.employee));
-          this.hasUnsaved = false;
-        })
-        .catch((el) => {
-          this.$toast.add({
-            severity: "error",
-            summary: this.$t("error"),
-            detail: `${el.response.data.message}`,
-            life: 3000,
-          });
-        });
-    },
-    discardChangesAndNavigate(next) {
-      // إلغاء حالة الــ unsaved ثم استكمل التنقّل
-      this.hasUnsaved = false;
-      // لو تريد الحذف الكامل للنسخة الأصلية اترك هذا السطر
-      // this.originalEmployee = JSON.parse(JSON.stringify(this.employee));
-      next(); // استدعي next() لتمكين التنقّل
-    },
-    isEmployeeDirty() {
-      if (!this.originalEmployee) return false;
-      try {
-        return JSON.stringify(this.originalEmployee) !== JSON.stringify(this.employee);
-      } catch (e) {
-        return true;
-      }
-    }
-  },
-mounted() {
-  this.getusers();
-
-  // beforeunload — عند تحديث/إغلاق التبويب
-  this._onBeforeUnload = (e) => {
-    if (!this.hasUnsaved) return;
-    e.preventDefault();
-    e.returnValue = ''; // مطلوب لبعض المتصفحات لاظهار التحذير
-    return '';
-  };
-  window.addEventListener('beforeunload', this._onBeforeUnload);
-},
-
-beforeUnmount() {
-  // نظّف المستمعات والواشرات
-  if (this._unwatchEmployee) this._unwatchEmployee();
-  if (this._onBeforeUnload) window.removeEventListener('beforeunload', this._onBeforeUnload);
-},
-
-// خيار Options API — حارس مكوّن قبل تغيير الراوتر
-beforeRouteLeave(to, from, next) {
-  if (!this.hasUnsaved) {
-    next();
-    return;
-  }
-
-  // استخدم confirm افتراضي (أو استبدله بمودال PrimeVue إذا تريد)
-  const leave = window.confirm(this.$t('هل أنت متاكد من الخروج ؟'));
-  if (leave) {
-    // المستخدم وافق على المغادرة بدون حفظ
-    this.hasUnsaved = false;
-    next();
-  } else {
-    // إلغاء التنقّل
-    next(false);
-  }
-},
-};
-</script>
-
 <style scoped>
-/* Add custom styles for the name input field */
-.name-input {
-  height: 70vh;
-  margin: auto !important;
-  overflow-y: scroll;
-  width: 100%;
-  position: relative;
-  background-color: #e7e7e7;
-  padding: 10px;
-  margin-bottom: 15px !important;
-  border-radius: 10px;
+.employee-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.name-input::-webkit-scrollbar {
-  display: none;
-}
-
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.name-input {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.name-input {
-  width: 606px;
-}
-
-.seed {
-  width: 600px;
-
-  margin: auto !important;
-  background-color: #135c65;
-  display: block;
-  color: white;
-
-  /* Set the width to 606px */
-}
-
-.custom-select {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #f8f8f8;
-  color: #333;
-  appearance: none;
-  /* Remove default arrow in some browsers */
-  -webkit-appearance: none;
-  /* Remove default arrow in Chrome and Safari */
-  cursor: pointer;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.loader {
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
-  margin: 20px auto;
-  /* Adjust margin as needed */
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.error-message {
+.employee-page__top {
   display: flex;
   align-items: center;
-  color: #ff0000;
-  /* Red color for errors */
-  margin-top: 5px;
-  font-size: 0.9em;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.error-icon {
-  margin-right: 5px;
-  /* Add styles for your error icon */
+.employee-page__title {
+  margin: 0;
+  color: var(--sawa-primary);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.employee-page__subtitle {
+  margin: 0.2rem 0 0;
+  color: var(--sawa-muted);
+}
+
+.employee-hero-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.employee-card {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem 0;
+}
+
+.tab-error {
+  margin-inline-start: 0.35rem;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.employee-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem 1.5rem;
+  padding: 0.75rem 0.25rem 0.5rem;
+}
+
+.employee-grid__wide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.employee-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0.75rem -1rem 0;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--sawa-border);
+  border-radius: 0 0 var(--sawa-radius) var(--sawa-radius);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(4px);
+}
+
+.employee-actions__state {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #b45309;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.employee-actions__state .pi-circle-fill {
+  font-size: 0.55rem;
+}
+
+.employee-actions__state.is-saved {
+  color: var(--sawa-muted);
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {
-
-  .name-input,
-  .custom-select,
-  .error-message {
-    width: 100%;
-    /* Full width on smaller screens */
-    margin-bottom: 15px;
+  .employee-grid {
+    grid-template-columns: 1fr;
   }
 
-  .v-btn {
+  .employee-actions > div {
     width: 100%;
-    /* Full width button */
-    padding: 12px;
-    /* Larger touch target */
   }
 
-  .error-message {
-    font-size: 0.8em;
-    /* Adjust font size */
+  .employee-actions :deep(.p-button) {
+    flex: 1;
   }
 }
-
-/* Add additional CSS for animation or other styling as needed */
-
-/* Add any other custom styles here */
 </style>

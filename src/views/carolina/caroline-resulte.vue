@@ -18,25 +18,24 @@
       </div>
     </div>
 
-    <div class="hidden print:block py-4 border-b border-gray-200 mb-4">
-      <h1 class="text-3xl font-bold text-gray-800 text-center">{{ $t("carolina_ui.result_title") }}</h1>
-      <div class="text-center text-gray-600 mt-2">{{ $t("generated_on") }}: {{ new Date().toLocaleDateString() }}</div>
-    </div>
-
-    <div v-if="loading || failed" class="bg-white rounded-xl shadow-md px-6 py-10 text-center text-gray-500">
-      {{ loading ? $t("loading") : $t("request_failed_retry") }}
-    </div>
-    <div v-else class="bg-white rounded-xl shadow-md p-4 print:shadow-none print:p-0">
-      <CarolinaGrid :result="result" />
+    <!-- As in the printed report: the paper form, its rounds' colors in each box. -->
+    <div class="rxs-pages">
+      <ResultSheet :label="label" :date="approval?.date" :child-name="approval?.child?.name">
+        <p v-if="loading || failed" class="rx-empty">{{ loading ? $t("loading") : $t("request_failed_retry") }}</p>
+        <CarolinaGrid v-else :result="result" :per-table="4" compact />
+      </ResultSheet>
     </div>
   </div>
 </template>
 
 <script setup>
 // One Carolina evaluation's result (/carolina-resulte/:id) as the paper form: domains and general goals against the
-// age ranges, each skill's symbol showing its response and the color of the round that gave it.
+// age ranges, each skill's symbol showing its response and the color of the round that gave it, on the report's sheet.
 import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import ResultSheet from "@/components/reports/ResultSheet.vue";
+import { CAROLINA, typeLabel } from "@/components/reports/reportUtils";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
@@ -44,6 +43,8 @@ import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import CarolinaAnswerEditor from "@/components/carolina/CarolinaAnswerEditor.vue";
 
 const route = useRoute();
+const { t } = useI18n();
+const label = computed(() => typeLabel(CAROLINA, t));
 const loading = ref(true);
 const failed = ref(false);
 const result = ref(null);

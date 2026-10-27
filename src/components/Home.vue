@@ -9,6 +9,7 @@ import LocaleSelect from "./LocaleSelect.vue";
 import UserProfileMenu from "./UserProfileMenu.vue";
 import AdminSidebar from "./layout/AdminSidebar.vue";
 import NotificationBell from "./layout/NotificationBell.vue";
+import AssistantChat from "./assistant/AssistantChat.vue";
 import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
 import { loadCurrency } from "../utils/accounting";
@@ -96,6 +97,8 @@ onBeforeUnmount(() => {
       </div>
       <footer class="admin-footer">{{ $t("footer_text") }}</footer>
     </main>
+    <!-- «مساعد سوا» for employees: within their own permissions, opens the pages of their menu. -->
+    <AssistantChat v-if="authStore.authenticated" kind="dashboard" />
   </div>
 </template>
 

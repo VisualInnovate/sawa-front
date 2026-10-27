@@ -7,7 +7,7 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { can } from "@/utils/permissions";
-import { amount, chargeSeverity, chargeTitle, creditSeverity, errorText, installmentSeverity, loadCurrency } from "@/utils/accounting";
+import { amount, chargeSeverity, chargeTitle, creditSeverity, errorText, installmentSeverity, installmentText, loadCurrency } from "@/utils/accounting";
 import PaymentDialog from "@/components/accounting/PaymentDialog.vue";
 import ManualFeeDialog from "@/components/accounting/ManualFeeDialog.vue";
 import ProgramAccountDialog from "@/components/accounting/ProgramAccountDialog.vue";
@@ -101,7 +101,7 @@ onMounted(load);
           <template #body="{ data }">
             <div class="flex flex-wrap gap-1">
               <Tag v-for="row in data.installments" :key="row.id" :severity="installmentSeverity[row.state]" class="text-xs"
-                :value="`${row.due_date} · ${amount(row.amount)}`" v-tooltip.top="$t(`acc.installment_state.${row.state}`)" />
+                :value="installmentText(row)" v-tooltip.top="$t(`acc.installment_state.${row.state}`)" />
             </div>
           </template>
         </Column>

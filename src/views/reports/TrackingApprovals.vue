@@ -1,6 +1,6 @@
 <script setup>
 // «طلبات اعتماد التراكنج»: the trackings sent to the management, pending first. Each opens view-only (its goals as
-// the tracking prints them, with prop, MT, EXP, RR and GEN) and is approved — the child's sessions then work on it and
+// the tracking prints them, with prop, MT, EXP, RR, GEN, EF and MF) and is approved — the child's sessions then work on it and
 // it is view-only in the report — or rejected with the reason (the report can edit and send it again).
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
@@ -8,6 +8,8 @@ import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import DecisionDialog from "@/components/sessions/DecisionDialog.vue";
 import { refreshPendingCounts } from "@/utils/pendingCounts";
+import TrackingDates from "@/components/reports/TrackingDates.vue";
+import { TRACKING_COLUMNS, columnDate } from "@/utils/trackingColumns";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -21,10 +23,6 @@ const answering = ref(false);
 const deciding = ref(false);
 const SEVERITY = { pending: "warn", approved: "success", rejected: "danger" };
 const statuses = computed(() => [null, "pending", "approved", "rejected"].map((value) => ({ value, label: value ? t(`ereport.tracking_status_${value}`) : t("sp_all") })));
-const COLUMNS = ["mt", "exp", "rr"];
-
-const propStart = (goal) => goal.prop_start || goal.cells?.prop_start || "";
-const propEnd = (goal) => goal.achieved_at || goal.cells?.prop_end || "";
 function genText(goal) {
   const people = goal.gen?.people ?? [];
   const parts = [
@@ -108,30 +106,22 @@ onMounted(load);
         <p v-if="viewing.status === 'rejected'" class="ta-state is-rejected"><i class="pi pi-times-circle" /> {{ $t("ereport.tracking_rejected_note", { note: viewing.note || "—" }) }}</p>
         <table v-for="group in viewing.groups" :key="group.key" class="ta-table">
           <thead>
-            <tr class="ta-domain"><th colspan="11">{{ group.domain }} <span class="ltr">{{ group.domain_symbol }}</span></th></tr>
-            <tr class="ta-goal"><th colspan="11">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}</th></tr>
-            <tr>
-              <th rowspan="2">{{ $t("ereport.number") }}</th>
-              <th rowspan="2">{{ $t("ereport.tracking_short_goals") }}</th>
-              <th colspan="2">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
-              <th v-for="column in COLUMNS" :key="column" colspan="2">{{ $t("ereport.trial_" + column) }}<br /><span class="ltr">{{ column.toUpperCase() }}</span></th>
-              <th rowspan="2">{{ $t("gen_title") }}<br /><span class="ltr">GEN</span></th>
-            </tr>
-            <tr>
-              <template v-for="n in 4" :key="n"><th>{{ $t("ereport.trial_start") }}</th><th>{{ $t("ereport.trial_end") }}</th></template>
+            <tr class="ta-domain"><th :colspan="TRACKING_COLUMNS.length + 2">{{ group.domain }} <span class="ltr">{{ group.domain_symbol }}</span></th></tr>
+            <tr class="ta-goal"><th :colspan="TRACKING_COLUMNS.length + 2">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}</th></tr>
+            <tr class="ta-cols">
+              <th class="ta-num">{{ $t("ereport.number") }}</th>
+              <th>{{ $t("ereport.tracking_short_goals") }}</th>
+              <th v-for="column in TRACKING_COLUMNS" :key="column.key">{{ $t(column.title) }}<span class="ta-code ltr">{{ column.code }}</span></th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="goal in group.goals" :key="goal.id">
               <td class="ltr"><b>{{ goal.code }}</b></td>
               <td class="ta-text">{{ goal.goal }}</td>
-              <td class="ltr">{{ propStart(goal) }}</td>
-              <td class="ltr">{{ propEnd(goal) }}</td>
-              <template v-for="column in COLUMNS" :key="column">
-                <td class="ltr">{{ goal.cells?.[`${column}_start`] }}</td>
-                <td class="ltr">{{ goal.cells?.[`${column}_end`] }}</td>
-              </template>
-              <td class="ta-gen">{{ genText(goal) }}</td>
+              <td v-for="column in TRACKING_COLUMNS" :key="column.key" :class="{ 'ta-gen': column.key === 'gen' }">
+                <template v-if="column.key === 'gen'">{{ genText(goal) }}</template>
+                <TrackingDates v-else :start="columnDate(goal, column.key, 'start')" :end="columnDate(goal, column.key, 'end')" />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -151,9 +141,11 @@ onMounted(load);
 <style scoped>
 .ta-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: .85rem; table-layout: fixed; }
 .ta-table th, .ta-table td { border: 1px solid #cbd5e1; padding: .35rem; text-align: center; }
-.ta-table th { background: #f1f5f9; color: #0f3d43; font-size: .75rem; }
-.ta-table th:nth-child(2) { width: 30%; }
-.ta-domain th { background: #135c65; color: #fff; font-size: .9rem; }
+.ta-cols th { background: #135c65; color: #fff; font-size: .75rem; line-height: 1.25; }
+.ta-code { display: block; margin-top: 2px; color: #a7f3d0; font-size: .68rem; font-weight: 600; }
+.ta-cols th.ta-num { width: 3.4rem; }
+.ta-cols th:nth-child(2) { width: 22%; }
+.ta-domain th { background: #c4b5fd; color: #1e293b; font-size: .9rem; text-align: start; }
 .ta-goal th { background: #e0f2f1; text-align: start; }
 .ta-text { text-align: start !important; line-height: 1.5; }
 .ta-gen { font-size: .72rem; }

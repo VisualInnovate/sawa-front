@@ -16,6 +16,8 @@
       </div>
     </header>
 
+    <!-- Opened from the result (?edit=): the same screen with the answers given, until the evaluation is approved. -->
+    <EditModeBanner v-if="editing" :status="editing.approval_status" :note="editing.approval_note" />
     <Message v-if="alert_text" severity="error" :closable="false">{{ alert_text }}</Message>
 
     <!-- 1. Evaluation details -->
@@ -75,6 +77,7 @@
               :aria-label="'#' + color"
               :class="{ selected: answer.color === color }"
               :style="{ backgroundColor: '#' + color }"
+              :disabled="Boolean(editing)"
               @click="answer.color = color"
             >
               <i v-if="answer.color === color" class="pi pi-check" aria-hidden="true" />
@@ -165,7 +168,7 @@
           <i class="pi pi-list-check" aria-hidden="true" />
           {{ $t("barrier_ui.answered_of", { n: answeredCount, total: barriers.length }) }}
         </span>
-        <Button :label="$t('barrier_ui.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="getanswer" />
+        <Button :label="editing ? $t('mae_save') : $t('barrier_ui.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="getanswer" />
       </footer>
     </template>
   </div>
@@ -175,6 +178,7 @@
 import axios from "axios";
 import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
 import { formatChildAge, toDateOnly } from "../../../utils/childAge";
+import EditModeBanner from "../../../components/evaluations/EditModeBanner.vue";
 
 // As the backend's BarrierAnswers: a barrier whose answers carry the {{example}} token takes the evaluator's example.
 const EXAMPLE_TOKEN = "{{example}}";
@@ -190,8 +194,11 @@ function withExample(text, example) {
 const COLOR_OPTIONS = ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"];
 
 export default {
+  components: { EditModeBanner },
   data() {
     return {
+      // Editing a saved evaluation (?edit=id) before its approval: { approval_status, approval_note, ... }.
+      editing: null,
       alert_text: "",
       change: { status: "1" },
       started: false,
@@ -288,6 +295,55 @@ export default {
         })
         .catch(() => {});
     },
+    // The saved evaluation on this screen: its details, and every barrier with the answer and example given.
+    async loadEdit() {
+      try {
+        const [{ data: subtests }, { data: edit }] = await Promise.all([
+          axios.get("api/barrier-subtest"),
+          axios.get(`api/barrier-answer/evaluation/${this.$route.query.edit}/edit`),
+        ]);
+        const { evaluation, child, barriers } = edit.data;
+        this.editing = evaluation;
+        this.childName = child?.name ?? "";
+        this.childGender = child?.gender ?? "0";
+        this.answer = {
+          ...this.answer, child_id: child?.id ?? this.answer.child_id, evaluation_id: evaluation.id,
+          date: evaluation.date ? new Date(evaluation.date) : new Date(), child_age: evaluation.child_age,
+          color: evaluation.color || this.answer.color,
+        };
+        this.minDate = null;
+        const saved = Object.fromEntries(barriers.map((barrier) => [barrier.subtest_id, barrier]));
+        // The barriers the evaluation answered, in the screen's order.
+        this.allquestion = (subtests.data ?? []).filter((subtest) => saved[subtest.id]);
+        this.allquestion.forEach((subtest, ind) => {
+          const option = (subtest.barriers_questiont ?? []).find((item) => Number(item.index) === saved[subtest.id].score);
+          this.score[ind] = { subtest_id: subtest.id, question_id: option?.id, question_index: saved[subtest.id].score };
+          this.selected[ind] = saved[subtest.id].score;
+          if (saved[subtest.id].example) this.examples[ind] = saved[subtest.id].example;
+        });
+        this.started = true;
+      } catch (error) {
+        this.alert_text = error.response?.data?.message || this.$t("request_failed_retry");
+      }
+    },
+    saveEdit() {
+      this.saving = true;
+      const answers = this.barriers.map((barrier, ind) => ({
+        subtest_id: barrier.id, score: Number(this.selected[ind]), example: this.takesExample(ind) ? this.examples[ind] || null : null,
+      }));
+      axios
+        .put(`api/barrier-answer/evaluation/${this.answer.evaluation_id}/edit`, { answers })
+        .then(() => {
+          this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: this.$t("mae_saved"), life: 2500 });
+          this.$router.push({ name: "barrier-resulte", params: { id: this.answer.child_id } });
+        })
+        .catch((error) => {
+          this.alert_text = Object.values(error.response?.data?.errors ?? {}).flat().join(" ") || error.response?.data?.message || this.$t("request_failed_retry");
+        })
+        .finally(() => {
+          this.saving = false;
+        });
+    },
     scrollTo(ind) {
       document.getElementById("barrier-" + ind)?.scrollIntoView({ behavior: "smooth", block: "center" });
     },
@@ -300,6 +356,7 @@ export default {
         setTimeout(() => (this.alert_text = ""), 3000);
         return;
       }
+      if (this.editing) return this.saveEdit();
       this.saving = true;
       this.answer.scores = this.score.map((score, ind) => (score && this.takesExample(ind) ? { ...score, example: this.examples[ind] || null } : score));
       const payload = { ...this.answer, date: toDateOnly(this.answer.date) };
@@ -321,6 +378,10 @@ export default {
     },
   },
   mounted() {
+    if (this.$route.query.edit) {
+      this.loadEdit();
+      return;
+    }
     this.getchild();
     this.getallquestion();
   },

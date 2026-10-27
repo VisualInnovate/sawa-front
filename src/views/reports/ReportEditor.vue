@@ -32,9 +32,11 @@ import AbllsChart from "@/components/reports/AbllsChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
+import TrackingDates from "@/components/reports/TrackingDates.vue";
+import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
   ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
-  isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel, ymd,
+  isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
 const { t } = useI18n();
@@ -96,8 +98,8 @@ const sideProfileTests = computed(() => sections.value
   .flatMap((section) => section.tests.map((test) => ({ ...test, title: section.label }))));
 const firstSideProfile = computed(() => sections.value.find((section) => section.type === SIDE_PROFILE)?.group ?? null);
 
-// M-CHAT-R: one test's answer to a question ({ yes, point }), for the answers page's column of that test.
-const mchatAnswer = (test, number) => (test.result?.questions ?? []).find((question) => question.number === number) ?? null;
+// M-CHAT-R: one test's answer to a question ({ yes, point }, by the question's id), for the answers page's column of that test.
+const mchatAnswer = (test, id) => (test.result?.questions ?? []).find((question) => question.id === id) ?? null;
 
 // Barriers: the newest chosen test's answers (barrier, chosen answer, its number) under the chart.
 const barrierAnswers = (section) => [...(section.newest?.result ?? [])].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
@@ -609,11 +611,11 @@ async function savePlan() {
 // { plans: [{ evaluation_id, evaluation_date, goals: [...] }], achieved: { [id]: "YYYY-MM-DD" | "" }, cells: { [id]: {...} },
 //   request: the tracking sent for these tests ({ status: pending | approved | rejected, note, goal_ids, … }) or null,
 //   saving, approving, error, savedAt }
-// Columns prop, MT, EXP, RR and GEN, all free text; what a session filled is shown and cannot change, and once the
-// management approved the tracking it is view-only.
+// Columns prop, MT, EXP, RR, GEN, EF and MF (utils/trackingColumns.js): the date columns take a start and an end date
+// (the sessions show and change them too), MT and GEN are free text until a session fills them, then they are shown
+// and cannot change. Once the management approved the tracking it is view-only.
 const tracking = ref(null);
-const TRIAL_COLUMNS = ["mt", "exp", "rr"];
-const CELL_KEYS = ["prop_start", "prop_end", ...TRIAL_COLUMNS.flatMap((column) => [`${column}_start`, `${column}_end`]), "gen"];
+const CELL_KEYS = TRACKING_COLUMNS.flatMap((column) => (column.key === "gen" ? ["gen"] : [`${column.key}_start`, `${column.key}_end`]));
 const trackingApproved = computed(() => tracking.value?.request?.status === "approved");
 const sessionFilled = (goal, key) => (goal.session_cells ?? []).includes(key);
 const cellLocked = (goal, key) => trackingApproved.value || goal.locked || sessionFilled(goal, key);
@@ -629,8 +631,6 @@ function genSummary(goal) {
 }
 function cellText(goal, key) {
   if (!sessionFilled(goal, key)) return tracking.value.cells[goal.id]?.[key] ?? "";
-  if (key === "prop_start") return goal.prop_start ? ymd(goal.prop_start) : "";
-  if (key === "prop_end") return goal.achieved_at ? ymd(goal.achieved_at) : "";
   if (key === "gen") return genSummary(goal);
   return goal.cells?.[key] ?? "";
 }
@@ -655,6 +655,8 @@ function setTrackingPlans(plans) {
   for (const goal of plans.flatMap((item) => item.goals)) {
     tracking.value.achieved[goal.id] = goal.achieved_at ?? "";
     tracking.value.cells[goal.id] = Object.fromEntries(CELL_KEYS.map((key) => [key, goal.cells?.[key] ?? ""]));
+    // prop's dates are the goal's start and the day it was achieved.
+    Object.assign(tracking.value.cells[goal.id], { prop_start: columnDate(goal, "prop", "start"), prop_end: columnDate(goal, "prop", "end") });
   }
 }
 
@@ -689,7 +691,10 @@ async function saveTracking() {
   tracking.value.error = false;
   try {
     await axios.post(`api/reports/children/${childId.value}/tracking`, {
-      goals: goals.map((goal) => ({ id: goal.id, cells: tracking.value.cells[goal.id] })),
+      goals: goals.map((goal) => {
+        const { prop_start: start, prop_end: end, ...cells } = tracking.value.cells[goal.id];
+        return { id: goal.id, prop_start: isDate(start) ? start : null, achieved_at: isDate(end) ? end : null, cells };
+      }),
     });
     const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: (milestoneSection.value?.tests ?? []).map((test) => test.id) } });
     setTrackingPlans(data.plans ?? []);
@@ -1245,22 +1250,14 @@ function back() {
               <table v-for="group in trackingGroups(item)" :key="group.key" class="rx-table rx-track"
                 :class="{ 'rx-print-hidden': !group.goals.some(isTracked) }">
                 <thead>
-                  <tr class="rx-track-domain"><th colspan="11">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
-                  <tr class="rx-track-goal"><th colspan="11">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
-                  <tr>
-                    <th rowspan="2" class="rx-track-num">{{ $t("ereport.number") }}</th>
-                    <th rowspan="2">{{ $t("ereport.tracking_short_goals") }}</th>
-                    <th colspan="2" class="rx-track-prop">{{ $t("ereport.tracking_prop") }}<br /><span class="ltr">prop</span></th>
-                    <th v-for="column in TRIAL_COLUMNS" :key="column" colspan="2">{{ $t("ereport.trial_" + column) }}<br /><span class="ltr">{{ column.toUpperCase() }}</span></th>
-                    <th rowspan="2" class="rx-track-gen">{{ $t("gen_title") }}<br /><span class="ltr">GEN</span></th>
-                  </tr>
-                  <tr>
-                    <th class="rx-track-prop">{{ $t("ereport.trial_start") }}</th>
-                    <th class="rx-track-prop">{{ $t("ereport.trial_end") }}</th>
-                    <template v-for="column in TRIAL_COLUMNS" :key="column">
-                      <th class="rx-track-cell">{{ $t("ereport.trial_start") }}</th>
-                      <th class="rx-track-cell">{{ $t("ereport.trial_end") }}</th>
-                    </template>
+                  <tr class="rx-track-domain"><th :colspan="TRACKING_COLUMNS.length + 2">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
+                  <tr class="rx-track-goal"><th :colspan="TRACKING_COLUMNS.length + 2">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
+                  <tr class="rx-track-cols">
+                    <th class="rx-track-num">{{ $t("ereport.number") }}</th>
+                    <th>{{ $t("ereport.tracking_short_goals") }}</th>
+                    <th v-for="column in TRACKING_COLUMNS" :key="column.key" :class="`rx-track-col is-${column.key}`">
+                      {{ $t(column.title) }}<span class="rx-track-code ltr">{{ column.code }}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1272,11 +1269,22 @@ function back() {
                         <label><input type="checkbox" :checked="isTracked(goal)" :disabled="trackingApproved" @change="toggleTracked(goal, $event.target.checked)" /> {{ $t("ereport.tracking_print") }}</label>
                       </span>
                     </td>
-                    <!-- prop, MT, EXP, RR, GEN: free text; a session's value is shown (locked), as is all of an approved tracking. -->
-                    <td v-for="key in CELL_KEYS" :key="key" :class="[key.startsWith('prop') ? 'rx-track-prop' : key === 'gen' ? 'rx-track-gen' : 'rx-track-cell',
-                      { 'is-session': sessionFilled(goal, key) }]">
-                      <span v-if="cellLocked(goal, key)" class="rx-track-locked" :title="sessionFilled(goal, key) ? $t('ereport.tracking_from_session') : undefined">{{ cellText(goal, key) }}</span>
-                      <EditableText v-else v-model="tracking.cells[goal.id][key]" block />
+                    <!-- the date columns: pickers; MT and GEN: free text, a session's value shown (locked); an approved tracking: all locked. -->
+                    <td v-for="column in TRACKING_COLUMNS" :key="column.key" :class="['rx-track-col', `is-${column.key}`,
+                      { 'is-session': column.key === 'gen' ? sessionFilled(goal, 'gen') : sessionFilled(goal, `${column.key}_start`) }]">
+                      <TrackingDates v-if="column.dates" :start="tracking.cells[goal.id][`${column.key}_start`]" :end="tracking.cells[goal.id][`${column.key}_end`]"
+                        :editable="!trackingApproved && !goal.locked" @change="(end, value) => (tracking.cells[goal.id][`${column.key}_${end}`] = value)" />
+                      <template v-else-if="column.key === 'gen'">
+                        <span v-if="cellLocked(goal, 'gen')" class="rx-track-locked" :title="sessionFilled(goal, 'gen') ? $t('ereport.tracking_from_session') : undefined">{{ cellText(goal, "gen") }}</span>
+                        <EditableText v-else v-model="tracking.cells[goal.id].gen" block />
+                      </template>
+                      <div v-else class="rx-track-mt">
+                        <div v-for="end in ['start', 'end']" :key="end" :class="`is-${end}`">
+                          <small>{{ $t(`ereport.trial_${end}`) }}</small>
+                          <span v-if="cellLocked(goal, `mt_${end}`)" class="rx-track-locked ltr" :title="sessionFilled(goal, `mt_${end}`) ? $t('ereport.tracking_from_session') : undefined">{{ showDate(cellText(goal, `mt_${end}`)) || "—" }}</span>
+                          <EditableText v-else v-model="tracking.cells[goal.id][`mt_${end}`]" block />
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -1346,7 +1354,7 @@ function back() {
               </tbody>
             </table>
             <div v-if="section.newest.result?.risk" class="rx-mchat-meaning" :class="'is-' + section.newest.result.risk">
-              <h3>{{ $t("mchat.risk_" + section.newest.result.risk) }} — <span class="ltr">{{ section.newest.result.total }} / 20</span></h3>
+              <h3>{{ $t("mchat.risk_" + section.newest.result.risk) }} — <span class="ltr">{{ section.newest.result.total }} / {{ section.newest.result.questions?.length || 20 }}</span></h3>
               <p>{{ section.newest.result.recommendation }}</p>
             </div>
           </template>
@@ -1410,12 +1418,12 @@ function back() {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="question in section.newest.result?.questions ?? []" :key="question.number">
+              <tr v-for="question in section.newest.result?.questions ?? []" :key="question.id">
                 <td class="rx-sum-num">{{ question.number }}</td>
                 <td>{{ question.text }}</td>
                 <td v-for="test in section.tests" :key="test.key" class="rx-mchat-col"
-                  :class="{ 'is-point': mchatAnswer(test, question.number)?.point === 1 }">
-                  {{ mchatAnswer(test, question.number)?.yes == null ? "" : mchatAnswer(test, question.number).yes ? $t("mchat.yes") : $t("mchat.no") }}
+                  :class="{ 'is-point': mchatAnswer(test, question.id)?.point === 1 }">
+                  {{ mchatAnswer(test, question.id)?.yes == null ? "" : mchatAnswer(test, question.id).yes ? $t("mchat.yes") : $t("mchat.no") }}
                 </td>
               </tr>
             </tbody>
@@ -1521,17 +1529,28 @@ function back() {
 .rx-table.rx-track .rx-track-domain th { background: #c4b5fd; color: #1e293b; text-align: start; font-size: 10pt; }
 .rx-table.rx-track .rx-track-goal th { background: #e2e8f0; color: #1e293b; text-align: start; font-weight: 700; }
 .rx-track-symbol { float: inline-end; font-weight: 800; }
-.rx-track-num { width: 11mm; }
-.rx-track-prop { width: 18mm; }
-.rx-track-gen { width: 22mm; font-size: .8em; }
+.rx-track-num { width: 10mm; }
+/* Column titles: dark band, white text; the code (EXP, Mixing fluency…) under the title in a lighter tint. */
+.rx-table.rx-track .rx-track-cols th { padding: 4px 3px; background: #135c65; color: #fff; font-size: 7.5pt; line-height: 1.25; }
+.rx-track-code { display: block; margin-top: 1px; color: #a7f3d0; font-size: .85em; font-weight: 600; }
+.rx-track-col { width: 19mm; }
+.rx-track-col.is-gen { width: 17mm; font-size: .8em; }
+.rx-track td.rx-track-col { padding: 3px 2px; }
 .rx-track-locked { display: block; white-space: pre-wrap; }
 .rx-track td.is-session { background: #f0fdfa; }
 .rx-track-state { display: flex; align-items: center; gap: .4rem; margin: .4rem 0; padding: .45rem .7rem; border-radius: 10px; font-weight: 700; }
 .rx-track-state.is-rejected { background: #fef2f2; color: #b91c1c; }
 .rx-track-state.is-pending { background: #fffbeb; color: #b45309; }
 .rx-track-state.is-approved { background: #ecfdf5; color: #047857; }
-.rx-track-cell { width: 10mm; background: #f8fafc; }
-.rx-track thead .rx-track-cell { background: #f1f5f9; }
+/* MT: start and end as free text, laid out like the date columns. */
+.rx-track-mt { display: grid; gap: 3px; }
+.rx-track-mt > div { display: grid; gap: 1px; padding: 2px 4px; border-radius: 6px; }
+.rx-track-mt > .is-start { background: #ecfdf5; }
+.rx-track-mt > .is-end { background: #eef2ff; }
+.rx-track-mt small { font-size: .72em; font-weight: 800; }
+.rx-track-mt > .is-start small { color: #047857; }
+.rx-track-mt > .is-end small { color: #4338ca; }
+@media print { .rx-track-mt > div { background: none !important; padding: 0; } }
 .rx-attempt { display: block; white-space: nowrap; }
 .rx-prop-input { width: 100%; border: 0; background: transparent; font: inherit; font-size: .75em; direction: ltr; }
 .rx-attempt.is-achieved { color: #166534; font-weight: 800; }

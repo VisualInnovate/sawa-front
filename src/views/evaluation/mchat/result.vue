@@ -1,15 +1,21 @@
 <script setup>
-// One M-CHAT-R evaluation's result (/mchat-result/:id/:evaluation): the risk points out of 20, the risk level with
-// what to do next, the scale, every answer (risk points marked), and the child's other M-CHAT evaluations.
+// One M-CHAT-R evaluation's result (/mchat-result/:id/:evaluation), drawn as the printed report draws it: the risk points out
+// of its questions with the risk level and what to do next, every answer (risk points marked), then the scale, the notes
+// and the child's other M-CHAT evaluations.
 import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
 import MchatAnswerEditor from "@/components/mchat/MchatAnswerEditor.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
-import { RISK_SEVERITY } from "./mchat";
+import ResultSheet from "@/components/reports/ResultSheet.vue";
+import { MCHAT, dmy, typeLabel } from "@/components/reports/reportUtils";
+import { useI18n } from "vue-i18n";
+import { RISK_SEVERITY, levelRange } from "./mchat";
 
 const route = useRoute();
+const { t } = useI18n();
+const label = computed(() => typeLabel(MCHAT, t));
 const loading = ref(true);
 const failed = ref(false);
 const data = ref(null);
@@ -73,65 +79,89 @@ watch(() => route.params.evaluation, (value, before) => {
         </div>
       </header>
 
-      <section class="mr-card mr-risk" :class="'is-' + data.risk">
-        <div class="mr-score">
-          <b>{{ data.total }}</b>
-          <span>/ {{ questions.length }}</span>
-        </div>
-        <div class="mr-risk-text">
-          <Tag :value="$t('mchat.risk_' + data.risk)" :severity="RISK_SEVERITY[data.risk]" />
-          <p>{{ data.recommendation }}</p>
-        </div>
-      </section>
+      <div class="rxs-pages">
+        <ResultSheet :label="label" :date="data.evaluation.date" :child-name="data.child?.name">
+          <table class="rx-table rx-mchat">
+            <thead>
+              <tr>
+                <th class="rx-sum-num">{{ $t("ereport.number") }}</th>
+                <th>{{ $t("mchat.test_date") }}</th>
+                <th>{{ $t("mchat.child_age") }}</th>
+                <th>{{ $t("mchat.tester") }}</th>
+                <th>{{ $t("mchat.total") }}</th>
+                <th>{{ $t("mchat.risk") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="rx-sum-num">1</td>
+                <td><span class="ltr">{{ dmy(data.evaluation.date) }}</span></td>
+                <td>{{ data.child_age == null ? "" : $t("mchat.months", { n: data.child_age }) }}</td>
+                <td>{{ data.evaluation.specialist ?? "" }}</td>
+                <td><b class="ltr">{{ data.total }} / {{ questions.length }}</b></td>
+                <td><span v-if="data.risk" class="rx-mchat-risk" :class="'is-' + data.risk">{{ $t("mchat.risk_" + data.risk) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-if="data.risk" class="rx-mchat-meaning" :class="'is-' + data.risk">
+            <h3>{{ $t("mchat.risk_" + data.risk) }} — <span class="ltr">{{ data.total }} / {{ questions.length }}</span></h3>
+            <p>{{ data.recommendation }}</p>
+          </div>
+        </ResultSheet>
 
-      <section class="mr-card">
-        <h2>{{ $t("mchat.scale") }}</h2>
-        <table class="mr-table">
-          <thead>
-            <tr>
-              <th>{{ $t("mchat.total") }}</th>
-              <th>{{ $t("mchat.meaning") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="level in data.levels" :key="level.key" :class="{ 'is-current': level.key === data.risk }">
-              <td class="mr-range"><span class="ltr">{{ level.from }}–{{ level.to }}</span><br />{{ $t("mchat.risk_" + level.key) }}</td>
-              <td>{{ level.recommendation }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+        <ResultSheet :label="label" :date="data.evaluation.date" :band="$t('mchat.answers')" :intro="false">
+          <table class="rx-table rx-mchat rx-mchat-answers">
+            <thead>
+              <tr>
+                <th class="rx-sum-num">#</th>
+                <th>{{ $t("mchat.question") }}</th>
+                <th class="rx-mchat-col"><span class="ltr">{{ dmy(data.evaluation.date) }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="question in questions" :key="question.id">
+                <td class="rx-sum-num">{{ question.number }}<span v-if="question.yes_is_risk" class="mr-star" v-tooltip.top="$t('mchat.yes_is_risk')">★</span></td>
+                <td>
+                  {{ question.text }}
+                  <small v-if="question.example" class="mr-example">{{ question.example }}</small>
+                </td>
+                <td class="rx-mchat-col" :class="{ 'is-point': question.point === 1 }">
+                  {{ question.yes == null ? "" : question.yes ? $t("mchat.yes") : $t("mchat.no") }}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="2">{{ $t("mchat.total") }}</th>
+                <th class="rx-mchat-col">{{ data.total }}</th>
+              </tr>
+            </tfoot>
+          </table>
+          <p class="rx-mchat-hint">{{ $t("mchat.points_hint") }}</p>
+        </ResultSheet>
 
-      <section class="mr-card">
-        <h2>{{ $t("mchat.answers") }}</h2>
-        <p class="mr-hint">{{ $t("mchat.points_hint") }}</p>
-        <table class="mr-table">
-          <thead>
-            <tr>
-              <th class="mr-num">#</th>
-              <th>{{ $t("mchat.question") }}</th>
-              <th class="mr-answer">{{ $t("mchat.answer") }}</th>
-              <th class="mr-answer">{{ $t("mchat.point") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="question in questions" :key="question.number" :class="{ 'is-risk': question.point === 1 }">
-              <td class="mr-num">{{ question.number }}</td>
-              <td>
-                {{ question.text }}
-                <small v-if="question.example">{{ question.example }}</small>
-              </td>
-              <td class="mr-answer">{{ question.yes === null ? "—" : question.yes ? $t("mchat.yes") : $t("mchat.no") }}</td>
-              <td class="mr-answer">{{ question.point ?? "" }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section v-if="data.notes" class="mr-card">
-        <h2>{{ $t("mchat.notes") }}</h2>
-        <p class="mr-notes">{{ data.notes }}</p>
-      </section>
+        <!-- Not in the report: the scale and the evaluator's notes. -->
+        <ResultSheet :label="label" :date="data.evaluation.date" :band="$t('mchat.scale')" :intro="false">
+          <table class="rx-table rx-summary">
+            <thead>
+              <tr>
+                <th>{{ $t("mchat.total") }}</th>
+                <th>{{ $t("mchat.meaning") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="level in data.levels" :key="level.key" :class="{ 'is-current': level.key === data.risk }">
+                <td class="mr-range"><span class="ltr">{{ levelRange(level) }}</span><br />{{ $t("mchat.risk_" + level.key) }}</td>
+                <td>{{ level.recommendation }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <template v-if="data.notes">
+            <h2 class="rx-band rx-band-soft rx-space">{{ $t("mchat.notes") }}</h2>
+            <p class="mr-notes">{{ data.notes }}</p>
+          </template>
+        </ResultSheet>
+      </div>
 
       <section v-if="history.length > 1" class="mr-card print:hidden">
         <h2>{{ $t("mchat.history") }}</h2>
@@ -157,30 +187,12 @@ watch(() => route.params.evaluation, (value, before) => {
 .mr-head p { margin: .25rem 0 0; color: var(--sawa-muted, #64748b); }
 .mr-card { padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
 .mr-card h2 { margin: 0 0 .75rem; font-size: 1.1rem; font-weight: 800; }
-.mr-risk { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; border-inline-start: 6px solid var(--tone); }
-.mr-risk.is-low { --tone: #16a34a; }
-.mr-risk.is-medium { --tone: #d97706; }
-.mr-risk.is-high { --tone: #dc2626; }
-.mr-score { display: flex; align-items: baseline; gap: .25rem; color: var(--tone); direction: ltr; }
-.mr-score b { font-size: 3rem; font-weight: 800; line-height: 1; }
-.mr-score span { font-size: 1.1rem; font-weight: 700; }
-.mr-risk-text { flex: 1 1 18rem; }
-.mr-risk-text p { margin: .5rem 0 0; line-height: 1.8; }
-.mr-hint { margin: -.25rem 0 .75rem; color: var(--sawa-muted, #64748b); font-size: .88rem; }
-.mr-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-.mr-table th, .mr-table td { border: 1px solid #cbd5e1; padding: .5rem .6rem; vertical-align: top; }
-.mr-table th { background: #f1f5f9; font-weight: 800; text-align: center; }
-.mr-table td small { display: block; margin-top: .2rem; color: #64748b; }
-.mr-table tr.is-current td { background: #fefce8; font-weight: 600; }
-.mr-table tr.is-risk td { background: #fef2f2; }
-.mr-num, .mr-answer { width: 4.5rem; text-align: center; font-weight: 800; }
-.mr-range { width: 7rem; text-align: center; font-weight: 800; }
+.mr-example { display: block; margin-top: .2rem; color: #64748b; }
+.mr-star { margin-inline-start: .15rem; color: #d97706; }
+.mr-range { width: 7rem; text-align: center !important; font-weight: 800; }
+tr.is-current td { background: #fefce8; font-weight: 600; }
 .mr-notes { margin: 0; white-space: pre-line; }
 .mr-history { display: grid; gap: .4rem; margin: 0; padding: 0; list-style: none; }
 .mr-history a { display: flex; align-items: center; gap: .75rem; padding: .45rem .75rem; border: 1px solid #e2e8f0; border-radius: 10px; color: inherit; text-decoration: none; }
 .mr-history li.is-current a { border-color: var(--sawa-primary, #135c65); font-weight: 700; }
-@media print {
-  .mr-card { border: 0; padding: 0; break-inside: avoid; }
-  .mr-table tr { break-inside: avoid; }
-}
 </style>

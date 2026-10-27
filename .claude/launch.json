@@ -2,84 +2,67 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "sawa-front",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
-      "port": 3000
-    },
-    {
-      "name": "sawa-front-alt-port",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "vite",
-        "--port",
-        "3005",
-        "--strictPort"
-      ],
-      "port": 3005
-    },
-    {
-      "name": "sawa-front-preview",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "vite",
-        "preview",
-        "--port",
-        "3000",
-        "--strictPort"
-      ],
-      "port": 3000
-    },
-    {
-      "name": "sawa-local-api",
-      "runtimeExecutable": "C:/xampp/php/php.exe",
-      "runtimeArgs": [
-        "-S",
-        "127.0.0.1:8000",
-        "-t",
-        "C:/Users/User/Documents/GitHub/sys-sawa/public",
-        "C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Documents-GitHub-sawa-front/b64d1a08-1895-4149-bf1e-7204844e1119/scratchpad/laravel_router.php"
-      ],
-      "port": 8000
-    },
-    {
-      "name": "sawa-local-front",
+      "name": "enable360-demo",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
         "vite",
         "--config",
-        "node_modules/.sawa-verify/vite.config.mjs"
+        "demo/vite.config.js"
       ],
-      "port": 3000
+      "port": 5180,
+      "url": "http://localhost:5180"
     },
     {
-      "name": "sawa-local-front-schedules",
+      "name": "sawa-local-front-mchat",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
         "vite",
         "--config",
         "node_modules/.sawa-verify/vite.config.mjs",
         "--port",
-        "3007",
+        "3008",
         "--strictPort"
       ],
-      "port": 3007
+      "port": 3008
     },
     {
-      "name": "sawa-local-front-portal",
+      "name": "sawa-local-front-accounting",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
         "vite",
         "--config",
         "node_modules/.sawa-verify/vite.config.mjs",
         "--port",
-        "3006",
+        "3011",
         "--strictPort"
       ],
-      "port": 3006
+      "port": 3011
+    },
+    {
+      "name": "sawa-local-front-approval-edit",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3015",
+        "--strictPort"
+      ],
+      "port": 3015
+    },
+    {
+      "name": "sawa-local-front-tracking-dates",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3017",
+        "--strictPort"
+      ],
+      "port": 3017
     }
   ]
 }
