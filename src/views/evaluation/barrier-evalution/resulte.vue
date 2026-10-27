@@ -1,213 +1,102 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3  lg:grid-cols-3 gap-y-4">
+  <div class="ba-page">
     <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
-    <Toast class="col-span-full" />
-    <ApprovalBanner ref="approvalBanner" class="col-span-full" :child-id="$route.params.id" :type="3" @loaded="approval = $event" />
-    <!-- Before approval the answers can still be edited (pending or rejected). -->
-    <div v-if="approval && approval.status !== 'approved'" class="col-span-full flex justify-end print:hidden">
-      <BarrierAnswerEditor :evaluation-id="approval.key.slice(1)" @saved="answersEdited" />
-    </div>
-      <div class="" v-for="x,top in mainSquares">
-          <p class="font-bold w-full h-20 text-center py-1">{{ x.subtest }}</p>
-          <div v-if="mainSquares" class=" flex "  style="border: 1px 1px 0px 0px solid black;">
-         
-         <div  class="grid grid-cols-1">
-          
-         <div class="w-20 h-16  m-auto text-center " v-for="(mainSquare, index) in  mainSquares[0]?.questions.slice().reverse()" :key="index">
-           
-           <p class=" h-full text-center ">{{ mainSquares[0]?.questions.length - index }}</p>
-         </div>
-       </div>
-     
-      
-       <div  class="grid grid-cols-1" v-for="mil,index in  5">
-          
-          <div   class="grid grid-cols-1   m-auto text-center "  v-for="m,ind in  5" >
-              <p   class=" text-center pt-7 w-16 h-16 " style="border: 1px solid black;" :style="{backgroundColor: mainSquares[top]?.questions[index].score >= mainSquares[top]?.questions.length - ind ? `#${mainSquares[top]?.questions[index].color}` : ''  }" ></p>
-          </div>
-          <!-- A test that scored this barrier 0: its number on a faded background in the test's color. -->
-          <p class="text-center ba-test" :class="{ 'is-zero': isZero(mainSquares[top]?.questions[index]) }"
-            :style="isZero(mainSquares[top]?.questions[index]) ? { '--zero': '#' + mainSquares[top].questions[index].color } : null">
-            <b>{{ index+1 }}</b>
-          </p>
-       </div>
-      
-      
-       <!-- table -->
-       
-      
-      
-      
-      
-      
-       
-      
-       
-       
-      
-      </div>
-      </div>
-  
-  </div>
-  
-  <!-- <div class="relative py-[4%] overflow-x-auto">
-   <table class="w-full  text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-           <tr>
-             <th scope="col" class="px-6 py-3">
-               الرقم
-               </th>
-               <th scope="col" class="px-6 py-3">
-                   نقاط القوة
-               </th>
-               <th scope="col" class="px-6 py-3">
-                   نقاط الضعف
-               </th>
-               <th scope="col" class="px-6 py-3">
-                   حاله الهدف
-               </th>
-               <th scope="col" class="px-6 py-3">
-                    الرمز المستهدف
-               </th>
-           </tr>
-       </thead>
-       <tbody>
-           <tr v-for="res,index in table_resulte" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              
-               <td class="px-6 py-4">
-                 {{ res.index }}
-               </td>
-               <td  class="px-6 py-4">
-                 <span v-for="str in res.strength">{{str}} - </span>
-               </td>
-               <td  class="px-6 py-4">
-                 <span v-for="str in res.weak">{{str}} - </span>
-               </td>
-               <td class="px-6 py-4">
-                 {{ res.status }}
-               </td>
-               <td class="px-6 py-4">
-                 {{ res.symbol }}
-               </td>
-           </tr>
-          
-       </tbody>
-   </table>
-  </div> -->
-
-  <!-- The child's latest barriers evaluation: each barrier with the chosen answer and its number. -->
-  <section v-if="answersTable.rows.length" class="ba-card">
-    <div class="ba-card-head">
-      <h2>{{ $t("barrier_ui.answers_table") }} <small v-if="answersTable.evaluation">· <span dir="ltr">{{ String(answersTable.evaluation.date).slice(0, 10) }}</span></small></h2>
-      <!-- Deletes the evaluation this table shows (the child's latest); the chart then shows the others. -->
+    <Toast />
+    <ApprovalBanner ref="approvalBanner" :child-id="$route.params.id" :type="3" @loaded="approval = $event" />
+    <div class="flex flex-wrap justify-end gap-2 print:hidden">
+      <!-- Before approval the answers can still be edited (pending or rejected). -->
+      <BarrierAnswerEditor v-if="approval && approval.status !== 'approved'" :evaluation-id="approval.key.slice(1)" @saved="answersEdited" />
+      <!-- Deletes the child's latest barriers evaluation (the table's); the chart then shows the others. -->
       <DeleteEvaluationButton v-if="answersTable.evaluation?.id" :evaluation-id="answersTable.evaluation.id" @deleted="reload" />
     </div>
-    <div class="ba-wrap">
-      <table class="ba-table">
-        <thead>
-          <tr>
-            <th>{{ $t("barrier_ui.number") }}</th>
-            <th>{{ $t("barrier_ui.question") }}</th>
-            <th>{{ $t("barrier_ui.answer") }}</th>
-            <th>{{ $t("barrier_ui.answer_number") }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in answersTable.rows" :key="row.subtest_id">
-            <td class="ba-num">{{ row.number }}</td>
-            <td>{{ row.subtest }}</td>
-            <td>{{ row.answer }}</td>
-            <td class="ba-num">{{ row.score }}</td>
-          </tr>
-        </tbody>
-      </table>
+
+    <!-- As in the printed report: the barriers chart (a column per test, the last four, oldest first) and the latest
+         test's answers. -->
+    <div class="rxs-pages">
+      <ResultSheet :label="label" :date="answersTable.evaluation?.date ?? approval?.date" :child-name="approval?.child?.name">
+        <BarrierChart v-if="tests.length" :tests="tests" />
+        <p v-else class="rx-empty">{{ loading ? $t("loading") : $t("ereport.no_result_data") }}</p>
+
+        <table v-if="answersTable.rows.length" class="rx-table rx-barrier-answers">
+          <thead>
+            <tr>
+              <th>{{ $t("ereport.barrier_domain") }}</th>
+              <th>{{ $t("ereport.barrier_answer") }}</th>
+              <th class="rx-sum-num">{{ $t("ereport.barrier_answer_number") }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in answersTable.rows" :key="row.subtest_id ?? row.number">
+              <td><b>{{ row.subtest }}</b></td>
+              <td>{{ row.answer }}</td>
+              <td class="rx-sum-num">{{ row.score }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </ResultSheet>
     </div>
-  </section>
-  </template>
-  
-  <script>
+  </div>
+</template>
+
+<script>
 import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
 import BarrierAnswerEditor from "@/components/barrier/BarrierAnswerEditor.vue";
-  import axios from "axios";
-  import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
-  export default {
-  name: 'SquareGrid',
-  components: { ApprovalBanner, BarrierAnswerEditor, DeleteEvaluationButton },
+import axios from "axios";
+import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
+import BarrierChart from "@/components/reports/BarrierChart.vue";
+import ResultSheet from "@/components/reports/ResultSheet.vue";
+import { BARRIER, MAX_PER_GROUP, typeLabel } from "@/components/reports/reportUtils";
+
+export default {
+  name: "BarrierResult",
+  components: { ApprovalBanner, BarrierAnswerEditor, BarrierChart, DeleteEvaluationButton, ResultSheet },
   data() {
-   return {
-     color:'bg-[red]',
-     mainSquares: [],
-     table_resulte:[],
-     answersTable: { evaluation: null, rows: [] },
-     approval: null,
-   };
+    return {
+      // [{ subtest, questions: [{ score, color }] }]: each barrier's answers, one per test (oldest first).
+      mainSquares: [],
+      answersTable: { evaluation: null, rows: [] },
+      approval: null,
+      loading: true,
+    };
   },
-  methods:{
-   isZero(test){
-     return Boolean(test && !test.empty && test.color && Number(test.score) === 0)
-   },
-   // Edited answers: the result and the approval state are read again.
-   answersEdited(){
-     this.$refs.approvalBanner?.reload();
-     this.reload();
-   },
-   reload(){
-     this.getresulte()
-     // Without the endpoint (older server) the page shows the chart only.
-     this.answersTable = { evaluation: null, rows: [] }
-     axios.get(`api/barrier-subtest/latest-answers/${this.$route.params.id}`)
-       .then(({ data }) => { this.answersTable = { evaluation: data?.evaluation ?? null, rows: data?.rows ?? [] }; })
-       .catch(() => {});
-   },
-   getresulte(){
-     axios
-         .get(`api/barrier-subtest/result/${this.$route.params.id}`)
-         .then((response) => {
-            
-           this.mainSquares = response.data
-                  for (let i = 0; i < this.mainSquares.length; i++) {
-                    
-                    for (let x = 0; x < 5; x++) {
-                      if(this.mainSquares[i].questions[x]){
-                        
-                      }else{
-                        this.mainSquares[i].questions[x]={score:0,color:"FFFFFF",empty:true}
-                      }
-                    
-                              
-                  }         
-                  }
-                  console.log(this.mainSquares)
-           this.mainSquares[0].questions.slice().reverse();
-       
-          
-         })
-        
-         
-   }
+  computed: {
+    label() {
+      return typeLabel(BARRIER, this.$t);
+    },
+    // The chart's tests as the report gives them: [{ result: [{ subtest, score, color }] }], the last four.
+    tests() {
+      const count = Math.max(0, ...this.mainSquares.map((barrier) => barrier.questions?.length ?? 0));
+      return Array.from({ length: count }, (_, n) => ({
+        result: this.mainSquares.filter((barrier) => barrier.questions?.[n])
+          .map((barrier) => ({ subtest: barrier.subtest, score: barrier.questions[n].score, color: barrier.questions[n].color })),
+      })).slice(-MAX_PER_GROUP);
+    },
+  },
+  methods: {
+    // Edited answers: the result and the approval state are read again.
+    answersEdited() {
+      this.$refs.approvalBanner?.reload();
+      this.reload();
+    },
+    reload() {
+      this.loading = true;
+      axios.get(`api/barrier-subtest/result/${this.$route.params.id}`)
+        .then(({ data }) => { this.mainSquares = Array.isArray(data) ? data : []; })
+        .catch(() => { this.mainSquares = []; })
+        .finally(() => { this.loading = false; });
+      // Without the endpoint (older server) the page shows the chart only.
+      this.answersTable = { evaluation: null, rows: [] };
+      axios.get(`api/barrier-subtest/latest-answers/${this.$route.params.id}`)
+        .then(({ data }) => { this.answersTable = { evaluation: data?.evaluation ?? null, rows: data?.rows ?? [] }; })
+        .catch(() => {});
+    },
   },
   mounted() {
-    this.reload()
-   },
-  };
-  </script>
-  
-  <style>
-  .ba-test { position: relative; margin: 2px 2px 0; }
-  .ba-test b { position: relative; font-weight: inherit; }
-  .ba-test.is-zero::before { content: ""; position: absolute; inset: 0; border-radius: 3px; background: var(--zero); opacity: .4; }
-  .ba-card { margin-top: 2rem; padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
-  .ba-card-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
-  .ba-card-head h2 { margin: 0 !important; }
-  .ba-card h2 { margin: 0 0 1rem; font-size: 1.1rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
-  .ba-card h2 small { color: #64748b; font-weight: 600; }
-  .ba-wrap { overflow-x: auto; }
-  .ba-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-  .ba-table th, .ba-table td { padding: .55rem .7rem; border: 1px solid #cbd5e1; vertical-align: top; }
-  .ba-table th { background: #f1f5f9; font-weight: 800; }
-  .ba-table td { text-align: start !important; }
-  .ba-table td.ba-num { text-align: center !important; font-weight: 800; width: 5rem; }
-  th,td{
-  text-align: center !important;
-  }
-  </style>
+    this.reload();
+  },
+};
+</script>
+
+<style scoped>
+.ba-page { display: grid; gap: 1rem; }
+</style>

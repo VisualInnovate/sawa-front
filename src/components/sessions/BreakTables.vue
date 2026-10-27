@@ -1,12 +1,15 @@
 <script setup>
 // The two break tables of the paper «BREAK SCHEDUAL», 9 rows each:
-// trials: Date · Session/therapist · Place out side · T.1 … T.10 · T.(1*2) … T.(1*5) · breaks in one session
+// trials: Date · Session/therapist · Place outside / inside · T.1 … T.10 · T.(1*2) … T.(1*5) · breaks in one session
 // minutes: the same first three, then 5min … 50min and the breaks.
-// The first three cells are typed; a mark cell is "/" or empty (a click toggles it); the breaks cell holds several
-// "/" (a click adds one, the small minus removes one). Each table prints on its own landscape page.
+// Date is picked on a calendar (kept as YYYY-MM-DD, shown dd/mm/yyyy), Session/therapist is typed, Place is one of
+// two buttons, inside or outside (pressed again it is cleared); an older typed date or place is shown as it is.
+// A mark cell is "/" or empty (a click toggles it); the breaks cell holds several "/" (a click adds one, the small
+// minus removes one). Each table prints on its own landscape page.
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
+import { isDate, showDate } from "@/utils/trackingColumns";
 
 const props = defineProps({
   modelValue: { type: Object, required: true }, // { trials: rows, minutes: rows }
@@ -35,6 +38,21 @@ const setText = (key, row, field, value) => commit((next) => { next[key][row][fi
 const toggle = (key, row, col) => props.editable && commit((next) => { next[key][row].marks[col] = !next[key][row].marks[col]; });
 const addBreak = (key, row) => props.editable && commit((next) => { next[key][row].breaks = Math.min(30, next[key][row].breaks + 1); });
 const removeBreak = (key, row) => props.editable && commit((next) => { next[key][row].breaks = Math.max(0, next[key][row].breaks - 1); });
+
+// Date: the cell opens the browser's calendar of a hidden date input.
+const dateInputs = {};
+function pickDate(key, row) {
+  const input = dateInputs[`${key}-${row}`];
+  try {
+    input.showPicker();
+  } catch {
+    input.focus();
+    input.click();
+  }
+}
+// Place: inside or outside, the same button again clears it.
+const PLACES = ["inside", "outside"];
+const setPlace = (key, row, place) => setText(key, row, "place", props.modelValue[key][row].place === place ? "" : place);
 
 // Printing one table: only it shows on the page.
 const printing = ref(null);
@@ -69,17 +87,36 @@ defineExpose({ print });
             <tr>
               <th class="bt-col-text">Date</th>
               <th class="bt-col-text">Session/<br />therapist</th>
-              <th class="bt-col-place">Place Out<br />side</th>
+              <th class="bt-col-place">Place Outside<br />/ inside</th>
               <th v-for="head in table.heads" :key="head" class="bt-col-mark ltr">{{ head }}</th>
               <th class="bt-col-breaks">{{ $t("break_count_head") }}<br /><span class="ltr">////</span></th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, r) in modelValue[table.key]" :key="r">
-              <td v-for="field in ['date', 'session', 'place']" :key="field" class="bt-text-cell">
-                <input v-if="editable" :value="row[field]" class="bt-input" :aria-label="`${field} ${r + 1}`"
-                  @change="setText(table.key, r, field, $event.target.value)" />
-                <span v-else>{{ row[field] }}</span>
+              <td class="bt-text-cell">
+                <span v-if="editable" class="bt-date-wrap">
+                  <button type="button" class="bt-date" :class="{ 'is-empty': !row.date }" :aria-label="`Date ${r + 1}`" @click="pickDate(table.key, r)">
+                    <template v-if="row.date">{{ showDate(row.date) }}</template><i v-else class="pi pi-calendar" />
+                  </button>
+                  <input :ref="(el) => (dateInputs[`${table.key}-${r}`] = el)" type="date" class="bt-date-input" tabindex="-1" aria-hidden="true"
+                    :value="isDate(row.date) ? row.date : ''" @change="setText(table.key, r, 'date', $event.target.value)" />
+                </span>
+                <span v-else>{{ showDate(row.date) }}</span>
+              </td>
+              <td class="bt-text-cell">
+                <input v-if="editable" :value="row.session" class="bt-input" :aria-label="`session ${r + 1}`"
+                  @change="setText(table.key, r, 'session', $event.target.value)" />
+                <span v-else>{{ row.session }}</span>
+              </td>
+              <td class="bt-text-cell">
+                <span v-if="editable" class="bt-places" role="radiogroup" :aria-label="`Place ${r + 1}`">
+                  <button v-for="place in PLACES" :key="place" type="button" role="radio" :aria-checked="row.place === place"
+                    class="bt-place" :class="[`is-${place}`, { 'is-on': row.place === place, 'bt-no-print': row.place !== place }]"
+                    @click="setPlace(table.key, r, place)">{{ place }}</button>
+                  <small v-if="row.place && !PLACES.includes(row.place)" class="bt-old">{{ row.place }}</small>
+                </span>
+                <span v-else :class="PLACES.includes(row.place) ? `bt-place-text is-${row.place}` : undefined">{{ row.place }}</span>
               </td>
               <td v-for="(mark, c) in row.marks" :key="c" class="bt-mark-cell" :class="{ 'is-on': mark }"
                 :role="editable ? 'button' : undefined" :tabindex="editable ? 0 : undefined"
@@ -118,11 +155,26 @@ defineExpose({ print });
 .bt-grid th, .bt-grid td { border: 1px solid #cbd5e1; padding: 0; height: 1.85rem; text-align: center; }
 .bt-grid th { background: #eef6f6; color: #0f3d43; font-weight: 700; font-size: .7rem; line-height: 1.15; padding: .15rem; }
 .bt-col-text { width: 9%; }
-.bt-col-place { width: 7%; }
+.bt-col-place { width: 10%; }
 .bt-col-breaks { width: 11%; direction: rtl; }
 .bt-text-cell span { padding: 0 .25rem; }
 .bt-input { width: 100%; height: 100%; min-height: 0; padding: 0; line-height: 1.2; border: 0; background: transparent; text-align: center; font: inherit; color: #0f172a; outline: none; }
 .bt-input:focus { background: #f0fdfa; box-shadow: inset 0 0 0 2px #14b8a6; }
+.bt-date-wrap { position: relative; display: block; height: 100%; }
+.bt-date { width: 100%; height: 100%; border: 0; background: transparent; font: inherit; color: #0f172a; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.bt-date.is-empty { color: #94a3b8; }
+.bt-date:hover, .bt-date:focus-visible { background: #f0fdfa; box-shadow: inset 0 0 0 2px #14b8a6; outline: none; }
+.bt-date-input { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
+.bt-places { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px; padding: 2px; }
+.bt-place { padding: .1rem .3rem; border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #475569; font: inherit; font-size: .66rem; font-weight: 700;
+  cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.bt-place:hover { border-color: #0f8a7e; }
+.bt-place.is-on.is-inside { background: #0f766e; border-color: #0f766e; color: #fff; }
+.bt-place.is-on.is-outside { background: #b45309; border-color: #b45309; color: #fff; }
+.bt-place-text { font-weight: 700; }
+.bt-place-text.is-inside { color: #0f766e; }
+.bt-place-text.is-outside { color: #b45309; }
+.bt-old { width: 100%; color: #92400e; font-size: .62rem; }
 .bt-mark-cell, .bt-breaks-cell { position: relative; cursor: pointer; transition: background .15s; user-select: none; }
 .is-readonly .bt-mark-cell, .is-readonly .bt-breaks-cell { cursor: default; }
 .bt-root:not(.is-readonly) .bt-mark-cell:hover, .bt-root:not(.is-readonly) .bt-breaks-cell:hover { background: #f0fdfa; }

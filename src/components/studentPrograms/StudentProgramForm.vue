@@ -2,9 +2,11 @@
 // Adds or edits a student program:
 // 1. the kind (دمج / نهاري (الصفوف) / عيادات), the student, a therapist of that kind and the dates;
 // 2. day / clinics: the weekly quota split into individual rows (one treatment each) and group sessions (no
-//    treatment), the days; «توزيع» spreads it, places every session in a room and prices it; counts per day and
+//    treatment): clinics are individual only; day takes the individual rows first and the rest is group by itself; the days; «توزيع» spreads it, places every session in a room and prices it; counts per day and
 //    rooms can change;
 // 3. inclusion: supervision or inclusion (+ English), the student's from–to each day, a therapist free all that time.
+// The scheduling criteria (their priority order, the skills needed, a from–to window for the program or for one
+// individual treatment) choose the suggested therapist and where each session goes; a window too small is refused.
 // Nothing is saved until «حفظ»; the backend checks everything again.
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
@@ -12,9 +14,10 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { WORK_TYPES, workTypeLabel } from "@/utils/employeeWorkTypes";
-import { GROUP_KINDS, dayLabel, isoDate, sessionKindLabel, timeRange } from "@/utils/studentPrograms";
+import { GROUP_KINDS, SCHEDULING_CRITERIA, dayLabel, isoDate, sessionKindLabel, timeRange, windowHours } from "@/utils/studentPrograms";
 import WeekTimetable from "./WeekTimetable.vue";
 import ProgramPrice from "./ProgramPrice.vue";
+import SchedulingCriteria from "./SchedulingCriteria.vue";
 
 function endOfYear(date) {
   return new Date(new Date(date).getFullYear(), 11, 31);
@@ -31,6 +34,8 @@ const children = ref([]);
 const treatments = ref([]);
 const programHours = ref([]);
 const therapists = ref([]);
+const skills = ref([]);
+const defaultCriteria = ref(SCHEDULING_CRITERIA.map((key) => ({ key, enabled: true })));
 const loading = ref(true);
 
 const form = ref({
@@ -38,6 +43,8 @@ const form = ref({
   child_id: null, kind: null, therapist_id: null, start_date: null, end_date: endOfYear(new Date()),
   weekly_sessions: null, individual_rows: [], group_sessions: 0, days: [],
   inclusion_type: "inclusion", inclusion_english: false, hours: {},
+  // Scheduling: the skills needed, the program's from–to window, and its own criteria order (else the default).
+  skills: [], window_on: false, window: { start: "", end: "" }, custom_criteria: false, criteria: [],
 });
 const endTouched = ref(!!props.programId);
 // A new program (or an unconfirmed one assigned again) starts at least 3 days from today: it waits two days for the accountant.
@@ -64,8 +71,20 @@ const inclusionTypes = computed(() => [
   { value: "inclusion", label: t("sp_inclusion_program") },
 ]);
 
-const remaining = computed(() => (form.value.weekly_sessions ?? 0) - (form.value.group_sessions ?? 0)
-  - form.value.individual_rows.reduce((sum, row) => sum + (row.sessions ?? 0), 0));
+const isClinics = computed(() => form.value.kind === "clinics");
+// A clinics program saved with group sessions (before they were stopped) keeps them on edit.
+const legacyClinicsGroup = ref(false);
+const groupEditable = computed(() => isClinics.value && legacyClinicsGroup.value);
+const individualTotal = computed(() => form.value.individual_rows.reduce((sum, row) => sum + (row.sessions ?? 0), 0));
+const individualLeft = computed(() => (form.value.weekly_sessions ?? 0) - individualTotal.value);
+const remaining = computed(() => individualLeft.value - (form.value.group_sessions ?? 0));
+// The most one row may take: the quota less the other rows.
+const rowMax = (row) => (form.value.weekly_sessions ? (row.sessions ?? 0) + Math.max(individualLeft.value, 0) : undefined);
+// Day: group = the quota less the individual sessions; clinics: none.
+watch(() => [form.value.kind, form.value.weekly_sessions, individualTotal.value], () => {
+  if (form.value.kind === "day") form.value.group_sessions = Math.max(individualLeft.value, 0);
+  else if (isClinics.value && !legacyClinicsGroup.value) form.value.group_sessions = 0;
+});
 // One row per treatment: a treatment already in another row is not offered again.
 const treatmentOptions = (row) => treatments.value.filter((treatment) => treatment.id === row.treatment_id
   || !form.value.individual_rows.some((other) => other.treatment_id === treatment.id));
@@ -77,25 +96,54 @@ const inclusionHours = computed(() => Object.entries(form.value.hours).filter(([
   .map(([day, row]) => ({ day: Number(day), start: row.start, end: row.end })));
 const inclusionReady = computed(() => inclusionHours.value.length > 0 && inclusionHours.value.every((row) => row.start && row.end && row.end > row.start));
 
+const programWindow = computed(() => (!isInclusion.value && form.value.window_on ? { start: form.value.window.start, end: form.value.window.end } : null));
+const rowWindow = (row) => (row.window_on ? { start: row.window_start, end: row.window_end } : null);
+const scheduling = computed(() => ({
+  criteria: form.value.custom_criteria ? form.value.criteria : null,
+  skills: form.value.skills,
+  window: programWindow.value,
+  treatment_windows: isInclusion.value ? [] : form.value.individual_rows.filter((row) => row.treatment_id && row.window_on)
+    .map((row) => ({ treatment_id: row.treatment_id, ...rowWindow(row) })),
+}));
+
+// A window must hold its sessions on the chosen days (the backend refuses it too).
+const windowProblem = computed(() => {
+  if (isInclusion.value) return null;
+  const days = form.value.days.length;
+  const windows = form.value.individual_rows.filter((row) => row.window_on).map((row) => ({ window: rowWindow(row), count: row.sessions ?? 0 }));
+  if (programWindow.value) {
+    const rest = form.value.individual_rows.filter((row) => !row.window_on).reduce((sum, row) => sum + (row.sessions ?? 0), 0);
+    windows.push({ window: programWindow.value, count: rest + (form.value.group_sessions ?? 0) });
+  }
+  for (const { window, count } of windows) {
+    if (!windowHours(window)) return t("sched.window_invalid");
+    const fits = windowHours(window) * days;
+    if (count > fits) return t("sched.window_too_small", { range: timeRange(window.start, window.end), count, fits });
+  }
+  return null;
+});
+
 function body(extra = {}) {
   const base = {
     child_id: form.value.child_id, kind: form.value.kind, therapist_id: form.value.therapist_id,
     start_date: isoDate(form.value.start_date), end_date: isoDate(form.value.end_date),
-    program_id: props.programId ?? undefined,
+    program_id: props.programId ?? undefined, scheduling: scheduling.value,
   };
   if (isInclusion.value) {
     return { ...base, inclusion_type: form.value.inclusion_type, inclusion_english: form.value.inclusion_type === "inclusion" && form.value.inclusion_english, hours: inclusionHours.value };
   }
   return {
     ...base, weekly_sessions: form.value.weekly_sessions, days: [...form.value.days].sort(),
-    individual_rows: form.value.individual_rows, group_sessions: form.value.group_sessions ?? 0, ...extra,
+    individual_rows: form.value.individual_rows.map((row) => ({ treatment_id: row.treatment_id, sessions: row.sessions })),
+    group_sessions: form.value.group_sessions ?? 0, ...extra,
   };
 }
 
 function fail(e) {
   errors.value = e.response?.data?.errors ?? {};
-  const first = Object.values(errors.value)[0]?.[0];
-  toast.add({ severity: "error", summary: t("error"), detail: first ?? e.response?.data?.message ?? t("sp_not_saved"), life: 4000 });
+  // A window too small for the sessions is refused: say so in the user's language.
+  const first = errors.value.window ? t("sched.rejected") : Object.values(errors.value)[0]?.[0];
+  toast.add({ severity: "error", summary: t("error"), detail: first ?? e.response?.data?.message ?? t("sp_not_saved"), life: 5000 });
 }
 
 async function runPreview(extra = {}) {
@@ -121,13 +169,17 @@ const keepSlots = (slots) => runPreview({ plan: preview.value.plan, slots });
 async function loadTherapists() {
   if (!form.value.kind) return;
   // The child and start date let the server warn about therapists outside the child's age.
+  // The skills and the criteria order rank the therapists; the first is suggested.
   const payload = { kind: form.value.kind, program_id: props.programId ?? undefined, child_id: form.value.child_id ?? undefined,
-    start_date: isoDate(form.value.start_date) ?? undefined };
+    start_date: isoDate(form.value.start_date) ?? undefined, scheduling: { skills: form.value.skills, criteria: scheduling.value.criteria } };
   if (isInclusion.value && inclusionReady.value && form.value.start_date && form.value.end_date) {
     Object.assign(payload, { child_id: form.value.child_id, start_date: isoDate(form.value.start_date), end_date: isoDate(form.value.end_date), hours: inclusionHours.value });
   }
   const { data } = await axios.post("api/student-program/therapists", payload);
   therapists.value = data.data;
+  if (!form.value.therapist_id && !props.programId) {
+    form.value.therapist_id = therapists.value.find((row) => row.recommended)?.id ?? null;
+  }
 }
 
 const therapistOptions = computed(() => therapists.value.map((row) => ({
@@ -137,6 +189,7 @@ const therapistOptions = computed(() => therapists.value.map((row) => ({
     : row.name,
   disabled: row.available === false,
 })));
+const chosenTherapist = computed(() => therapists.value.find((row) => row.id === form.value.therapist_id));
 // Age ranges only warn (the room or therapist is still used).
 const chosenTherapistAgeWarning = computed(() => therapists.value.find((row) => row.id === form.value.therapist_id)?.age_warning);
 
@@ -153,8 +206,19 @@ watch(() => form.value.kind, (kind, old) => {
   loadTherapists();
 });
 
+// A new program needs the child's skills by default.
+watch(() => form.value.child_id, async (child) => {
+  if (loading.value || props.programId || !child) return;
+  const { data } = await axios.get(`api/student-program/child/${child}/skills`);
+  form.value.skills = data.data;
+});
+watch(() => form.value.custom_criteria, (custom) => {
+  if (custom && !form.value.criteria.length) form.value.criteria = JSON.parse(JSON.stringify(defaultCriteria.value));
+});
+
 let timer = null;
-watch(() => [JSON.stringify(inclusionHours.value), isoDate(form.value.start_date), isoDate(form.value.end_date), form.value.child_id], () => {
+watch(() => [JSON.stringify(inclusionHours.value), isoDate(form.value.start_date), isoDate(form.value.end_date), form.value.child_id,
+  JSON.stringify(form.value.skills), JSON.stringify(scheduling.value.criteria)], () => {
   if (loading.value || !form.value.kind) return;
   clearTimeout(timer);
   timer = setTimeout(loadTherapists, 400);
@@ -167,11 +231,14 @@ watch(() => [JSON.stringify(body()), basicsReady.value], () => {
   timer = setTimeout(() => runPreview(), 500);
 });
 // Changing the quota or the days makes the shown distribution stale.
-watch(() => JSON.stringify([form.value.weekly_sessions, form.value.individual_rows, form.value.group_sessions, form.value.days, form.value.therapist_id, isoDate(form.value.start_date), isoDate(form.value.end_date)]), () => {
+watch(() => JSON.stringify([form.value.weekly_sessions, form.value.individual_rows, form.value.group_sessions, form.value.days, form.value.therapist_id,
+  isoDate(form.value.start_date), isoDate(form.value.end_date), scheduling.value]), () => {
   if (!loading.value && !isInclusion.value) preview.value = null;
 });
 
-const addIndividualRow = () => form.value.individual_rows.push({ treatment_id: null, sessions: Math.max(remaining.value, 1) });
+// Clinics: a new row takes what is left; day: one session (the rest stays group).
+const addIndividualRow = () => form.value.individual_rows.push({ treatment_id: null, sessions: isClinics.value ? Math.max(individualLeft.value, 1) : 1,
+  window_on: false, window_start: "", window_end: "" });
 const restAsGroup = () => { form.value.group_sessions = (form.value.group_sessions ?? 0) + remaining.value; };
 // A row or a session's treatment, or «جماعي» for group sessions (they have none).
 const rowLabel = (row) => (row.session_kind === "individual" ? treatmentNames.value[row.treatment_id] ?? row.treatment_name : sessionKindLabel(t, "group"));
@@ -229,18 +296,24 @@ async function loadProgram() {
   const { data } = await axios.get(`api/student-program/${props.programId}`);
   const program = data.data;
   const details = program.student_program_details ?? [];
+  const saved = program.scheduling ?? {};
+  const windows = Object.fromEntries((saved.treatment_windows ?? []).map((row) => [row.treatment_id, row]));
 
   Object.assign(form.value, {
     child_id: program.student_id, kind: program.kind, therapist_id: program.therapist_id,
     start_date: new Date(program.start_date), end_date: new Date(program.end_date),
     weekly_sessions: program.weekly_sessions,
     individual_rows: details.filter((row) => row.session_kind === "individual")
-      .map((row) => ({ treatment_id: row.treatment_id, sessions: row.sessions })),
+      .map((row) => ({ treatment_id: row.treatment_id, sessions: row.sessions, window_on: !!windows[row.treatment_id],
+        window_start: windows[row.treatment_id]?.start ?? "", window_end: windows[row.treatment_id]?.end ?? "" })),
     // Saved «جماعي وفردي» rows count as group (that kind is gone).
     group_sessions: details.filter((row) => GROUP_KINDS.includes(row.session_kind)).reduce((sum, row) => sum + row.sessions, 0),
     days: program.days ?? [],
     inclusion_type: program.inclusion_type ?? "inclusion", inclusion_english: !!program.inclusion_english,
+    skills: saved.skills ?? [], window_on: !!saved.window, window: { start: saved.window?.start ?? "", end: saved.window?.end ?? "" },
+    custom_criteria: !!saved.criteria, criteria: saved.criteria ?? [],
   });
+  legacyClinicsGroup.value = program.kind === "clinics" && form.value.group_sessions > 0;
   accountingStatus.value = program.accounting_status ?? null;
   if (accountingStatus.value === "unconfirmed" && form.value.start_date < earliestStart) form.value.start_date = new Date(earliestStart);
   if (program.kind === "inclusion") {
@@ -273,6 +346,8 @@ onMounted(async () => {
   children.value = childRes.data.children ?? [];
   treatments.value = treatmentRes.data.data ?? [];
   programHours.value = hoursRes.data.data ?? [];
+  skills.value = hoursRes.data.skills ?? [];
+  if (hoursRes.data.criteria) defaultCriteria.value = hoursRes.data.criteria;
   if (props.programId) {
     const program = await loadProgram();
     loading.value = false;
@@ -299,6 +374,7 @@ function slotStatus(slot) {
   if (slot.reason === "room_not_suitable") return t("sp_room_not_suitable");
   if (slot.reason === "outside_shift") return t("sp_outside_shift");
   if (slot.reason === "room_activity") return t("sp_room_activity");
+  if (["window_full", "outside_window", "outside_hours"].includes(slot.reason)) return t(`sched.${slot.reason}`);
   return slot.available_from ? t("sp_no_vacancy_from", { date: slot.available_from }) : t("sp_no_vacancy");
 }
 </script>
@@ -327,10 +403,21 @@ function slotStatus(slot) {
           optionDisabled="disabled" filter :disabled="!form.kind" :placeholder="form.kind ? $t('sp_pick_therapist') : $t('sp_pick_kind_first')"
           :invalid="!!errors.therapist_id">
           <template #option="{ option }">
-            <span>{{ option.label }}</span>
-            <i v-if="option.age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-2" v-tooltip.top="$t('age_ranges.therapist_short')" />
+            <div class="flex flex-column">
+              <span>{{ option.label }}
+                <Tag v-if="option.recommended" severity="success" :value="$t('sched.recommended')" class="ms-1 text-xs" />
+                <i v-if="option.age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-2" v-tooltip.top="$t('age_ranges.therapist_short')" />
+              </span>
+              <small class="text-color-secondary">
+                {{ $t("sched.vacancy", { count: option.vacancy }) }}<template v-if="option.skills_needed"> · {{ $t("sched.skills_matched", { matched: option.skills_matched, needed: option.skills_needed }) }}</template>
+              </small>
+            </div>
           </template>
         </Select>
+        <small v-if="chosenTherapist" class="text-color-secondary">
+          <Tag v-if="chosenTherapist.recommended" severity="success" :value="$t('sched.recommended')" class="text-xs" />
+          {{ $t("sched.vacancy", { count: chosenTherapist.vacancy }) }}<template v-if="chosenTherapist.skills_needed"> · {{ $t("sched.skills_matched", { matched: chosenTherapist.skills_matched, needed: chosenTherapist.skills_needed }) }}</template>
+        </small>
         <small v-if="chosenTherapistAgeWarning" class="text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}</small>
         <small v-if="isInclusion" class="text-color-secondary">{{ $t("sp_inclusion_therapist_hint") }}</small>
       </div>
@@ -350,6 +437,44 @@ function slotStatus(slot) {
       </div>
     </div>
 
+    <!-- Scheduling: the skills needed, the program's window, the criteria order -->
+    <div v-if="form.kind" class="sawa-card p-4 flex flex-column gap-4">
+      <span class="font-semibold text-[#135C65]">{{ $t("sched.title") }}</span>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="flex flex-column gap-2">
+          <label for="sp-skills">{{ $t("sched.skills_needed") }}</label>
+          <MultiSelect v-model="form.skills" inputId="sp-skills" :options="skills" optionLabel="name" optionValue="id" filter display="chip" class="w-full" />
+          <small class="text-color-secondary">{{ $t("sched.skills_needed_hint") }}</small>
+        </div>
+        <div v-if="!isInclusion" class="flex flex-column gap-2">
+          <div class="flex items-center gap-2">
+            <Checkbox v-model="form.window_on" inputId="sp-window" binary />
+            <label for="sp-window">{{ $t("sched.window") }}</label>
+          </div>
+          <div v-if="form.window_on" class="flex flex-wrap items-center gap-2">
+            <label for="sp-window-from" class="text-sm text-color-secondary">{{ $t("hours_from") }}</label>
+            <InputText v-model="form.window.start" id="sp-window-from" type="time" class="w-[8.5rem]" :invalid="!!errors.window" />
+            <label for="sp-window-to" class="text-sm text-color-secondary">{{ $t("hours_to") }}</label>
+            <InputText v-model="form.window.end" id="sp-window-to" type="time" class="w-[8.5rem]" :invalid="!!errors.window" />
+          </div>
+          <small class="text-color-secondary">{{ $t("sched.window_hint") }}</small>
+        </div>
+      </div>
+      <div class="flex flex-column gap-2">
+        <div class="flex items-center gap-2">
+          <ToggleSwitch v-model="form.custom_criteria" inputId="sp-custom-criteria" />
+          <label for="sp-custom-criteria">{{ $t("sched.custom_order") }}</label>
+        </div>
+        <small class="text-color-secondary">{{ form.custom_criteria ? $t("sched.hint") : $t("sched.using_default") }}</small>
+        <SchedulingCriteria v-if="form.custom_criteria" v-model="form.criteria" />
+        <ol v-else class="flex flex-wrap gap-2 list-none p-0 m-0">
+          <li v-for="(row, index) in defaultCriteria.filter((item) => item.enabled)" :key="row.key">
+            <Tag severity="secondary" :value="`${index + 1}. ${$t(`sched.${row.key}`)}`" />
+          </li>
+        </ol>
+      </div>
+    </div>
+
     <!-- 2a. Day / clinics: the weekly quota -->
     <div v-if="form.kind && !isInclusion" class="sawa-card p-4 flex flex-column gap-4">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -358,21 +483,24 @@ function slotStatus(slot) {
           <InputNumber v-model="form.weekly_sessions" inputId="sp-weekly" :min="1" :max="100" :invalid="!!errors.weekly_sessions" />
           <small class="text-color-secondary">{{ $t("sp_session_hour") }}</small>
         </div>
-        <div class="flex flex-column gap-2">
+        <div v-if="isClinics && !groupEditable" class="flex flex-column gap-2 justify-center">
+          <Message severity="info" size="small">{{ $t("sp_clinics_individual_only") }}</Message>
+        </div>
+        <div v-else class="flex flex-column gap-2">
           <label for="sp-group-sessions">{{ $t("sp_group_sessions") }}</label>
-          <InputNumber v-model="form.group_sessions" inputId="sp-group-sessions" :min="0" />
-          <small class="text-color-secondary">{{ $t("sp_group_hint") }}</small>
+          <InputNumber v-model="form.group_sessions" inputId="sp-group-sessions" :min="0" :readonly="!groupEditable" :inputClass="groupEditable ? '' : 'bg-[#F4F7F8]'" />
+          <small class="text-color-secondary">{{ groupEditable ? $t("sp_group_hint") : $t("sp_group_auto_hint") }}</small>
         </div>
         <div class="flex flex-column gap-2 justify-center">
           <Tag :severity="remaining === 0 ? 'success' : remaining > 0 ? 'warn' : 'danger'"
             :value="remaining === 0 ? $t('sp_all_assigned') : remaining > 0 ? $t('sp_waiting_treatment', { count: remaining }) : $t('sp_over_quota', { count: -remaining })" />
-          <Button v-if="remaining > 0" icon="pi pi-users" :label="$t('sp_rest_as_group')" variant="text" size="small" class="w-fit" @click="restAsGroup" />
+          <Button v-if="groupEditable && remaining > 0" icon="pi pi-users" :label="$t('sp_rest_as_group')" variant="text" size="small" class="w-fit" @click="restAsGroup" />
         </div>
       </div>
 
       <div class="flex flex-column gap-2">
         <span class="font-semibold">{{ $t("sp_individual_sessions") }}</span>
-        <small class="text-color-secondary">{{ $t("sp_individual_hint") }}</small>
+        <small class="text-color-secondary">{{ $t("sp_individual_hint") }} {{ form.kind === "day" ? $t("sp_individual_day_hint") : "" }}</small>
         <div v-for="(row, index) in form.individual_rows" :key="index" class="grid grid-cols-1 md:grid-cols-[2fr_1fr_auto] gap-2 items-end">
           <div class="flex flex-column gap-1">
             <label :for="`sp-individual-treatment-${index}`" class="text-sm">{{ $t("sp_treatment") }}</label>
@@ -381,11 +509,21 @@ function slotStatus(slot) {
           </div>
           <div class="flex flex-column gap-1">
             <label :for="`sp-individual-sessions-${index}`" class="text-sm">{{ $t("fees_sessions") }}</label>
-            <InputNumber v-model="row.sessions" :inputId="`sp-individual-sessions-${index}`" :min="1" />
+            <InputNumber v-model="row.sessions" :inputId="`sp-individual-sessions-${index}`" :min="1" :max="rowMax(row)" />
           </div>
           <Button icon="pi pi-trash" severity="danger" variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" @click="form.individual_rows.splice(index, 1)" />
+          <div class="flex flex-wrap items-center gap-2 md:col-span-3">
+            <Checkbox v-model="row.window_on" :inputId="`sp-row-window-${index}`" binary />
+            <label :for="`sp-row-window-${index}`" class="text-sm">{{ $t("sched.row_window") }}</label>
+            <template v-if="row.window_on">
+              <label :for="`sp-row-window-${index}-from`" class="text-sm text-color-secondary">{{ $t("hours_from") }}</label>
+              <InputText v-model="row.window_start" :id="`sp-row-window-${index}-from`" type="time" class="w-[8.5rem]" />
+              <label :for="`sp-row-window-${index}-to`" class="text-sm text-color-secondary">{{ $t("hours_to") }}</label>
+              <InputText v-model="row.window_end" :id="`sp-row-window-${index}-to`" type="time" class="w-[8.5rem]" />
+            </template>
+          </div>
         </div>
-        <Button icon="pi pi-plus" :label="$t('sp_add_individual_row')" variant="outlined" class="w-fit" :disabled="remaining <= 0" @click="addIndividualRow" />
+        <Button icon="pi pi-plus" :label="$t('sp_add_individual_row')" variant="outlined" class="w-fit" :disabled="individualLeft <= 0" @click="addIndividualRow" />
       </div>
 
       <div class="flex flex-column gap-2">
@@ -401,7 +539,8 @@ function slotStatus(slot) {
         <small v-if="!openDays.length" class="text-red-500">{{ $t("sp_no_hours") }}</small>
       </div>
 
-      <Button icon="pi pi-th-large" :label="$t('sp_distribute')" :loading="busy" :disabled="!basicsReady || !quotaReady" class="w-full lg:w-[40%] m-auto" @click="distribute" />
+      <Message v-if="windowProblem" severity="error" size="small">{{ windowProblem }}</Message>
+      <Button icon="pi pi-th-large" :label="$t('sp_distribute')" :loading="busy" :disabled="!basicsReady || !quotaReady || !!windowProblem" class="w-full lg:w-[40%] m-auto" @click="distribute" />
     </div>
 
     <!-- 2b. Inclusion -->

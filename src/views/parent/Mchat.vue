@@ -8,7 +8,8 @@
     <template v-else-if="step === 'pick'">
       <div class="pm-card bg-white rounded-2xl border p-5 mb-5">
         <p class="text-[#135C65] font-bold text-xl mb-2"><i class="pi pi-heart mx-1" />{{ $t("pmchat.intro_title") }}</p>
-        <p class="text-slate-600 leading-8 m-0">{{ $t("pmchat.intro", { from: data.age_from, to: data.age_to }) }}</p>
+        <p class="text-slate-600 leading-8 m-0">{{ $t("pmchat.intro", { count: data.questions?.length || 20, from: data.age_from, to: data.age_to }) }}</p>
+        <p v-if="data.instructions" class="text-slate-600 leading-8 mt-2 mb-0">{{ data.instructions }}</p>
         <p class="pm-note mt-3 mb-0"><i class="pi pi-info-circle mx-1" />{{ $t("pmchat.not_diagnosis") }}</p>
       </div>
 
@@ -43,16 +44,16 @@
         <b class="text-[#135C65]">{{ child.name }}</b>
         <small class="text-slate-500">{{ $t("pmchat.progress", { n: index + 1, total: data.questions.length }) }}</small>
       </div>
-      <ProgressBar :value="((index + (answers[question.number] !== undefined ? 1 : 0)) / data.questions.length) * 100" :showValue="false" style="height: 8px" />
+      <ProgressBar :value="((index + (answers[question.id] !== undefined ? 1 : 0)) / data.questions.length) * 100" :showValue="false" style="height: 8px" />
       <transition name="pm-slide" mode="out-in">
-        <div :key="question.number" class="pm-card bg-white rounded-2xl border p-6 mt-4">
+        <div :key="question.id" class="pm-card bg-white rounded-2xl border p-6 mt-4">
           <p class="text-xl leading-9 text-[#303843] font-semibold m-0">{{ question.text }}</p>
           <p v-if="question.example" class="text-slate-500 leading-7 mt-3 mb-0">{{ question.example }}</p>
           <div class="grid grid-cols-2 gap-3 mt-6">
-            <button type="button" class="pm-answer" :class="{ 'pm-answer--on': answers[question.number] === true }" @click="answer(true)">
+            <button type="button" class="pm-answer" :class="{ 'pm-answer--on': answers[question.id] === true }" @click="answer(true)">
               <i class="pi pi-check" /> {{ $t("pmchat.yes") }}
             </button>
-            <button type="button" class="pm-answer" :class="{ 'pm-answer--on': answers[question.number] === false }" @click="answer(false)">
+            <button type="button" class="pm-answer" :class="{ 'pm-answer--on': answers[question.id] === false }" @click="answer(false)">
               <i class="pi pi-times" /> {{ $t("pmchat.no") }}
             </button>
           </div>
@@ -123,7 +124,7 @@ const showAnswers = ref(false);
 const booking = ref(false);
 
 const question = computed(() => data.value.questions[index.value]);
-const complete = computed(() => data.value.questions.every((q) => answers.value[q.number] !== undefined));
+const complete = computed(() => data.value.questions.every((q) => answers.value[q.id] !== undefined));
 
 // quiet: refresh the list (after a new result) without hiding the page.
 async function load(quiet = false) {
@@ -142,7 +143,7 @@ function start(picked) {
 }
 
 function answer(yes) {
-  answers.value = { ...answers.value, [question.value.number]: yes };
+  answers.value = { ...answers.value, [question.value.id]: yes };
   // On to the next unanswered question; the last one waits for «show the result».
   if (index.value < data.value.questions.length - 1) setTimeout(() => (index.value += 1), 180);
 }

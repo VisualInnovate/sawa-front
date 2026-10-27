@@ -4,6 +4,16 @@ import moment from "moment";
 export const WEEK_DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 export const GROUP_KINDS = ["group", "both"];
 
+// The automatic scheduling criteria (backend SchedulingCriteria::KEYS), in the default order.
+export const SCHEDULING_CRITERIA = ["least_vacancy", "consecutive", "early_start", "age_group", "skills", "program_therapist"];
+
+// Whole hours from start to end ("H:i"); 0 when the window is not valid.
+export function windowHours(window) {
+  if (!window?.start || !window?.end || window.end <= window.start) return 0;
+  const minutes = (time) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
+  return Math.floor((minutes(window.end) - minutes(window.start)) / 60);
+}
+
 export function dayLabel(t, day) {
   return t(`weekday.${WEEK_DAYS[day]}`);
 }

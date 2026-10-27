@@ -2,6 +2,8 @@
   <div></div>
   <div class="sawa-card">
     <div>
+      <!-- Opened from the result (?edit=): the same screen with the answers given, until the evaluation is approved. -->
+      <EditModeBanner v-if="editing" class="mb-3" :status="editing.approval_status" :note="editing.approval_note" />
       <Message v-if="alert_text" severity="error" class="mb-3">{{
         alert_text
       }}</Message>
@@ -23,7 +25,7 @@
           </p>
         </Message>
         <!-- The kind of evaluation chosen in the dialog: new (every question) or continuing the last one. -->
-        <Message v-else-if="mode && lastEvaluation" :severity="mode === 'continue' ? 'info' : 'secondary'" :closable="false" class="lg:col-span-2">
+        <Message v-else-if="mode && lastEvaluation && !editing" :severity="mode === 'continue' ? 'info' : 'secondary'" :closable="false" class="lg:col-span-2">
           <div class="mode-banner">
             <span>{{ mode === 'continue' ? $t('milestone_mode_continue_on', { date: day(lastEvaluation.date) }) : $t('milestone_mode_new_on') }}</span>
             <Button v-if="!strart_evaluate" size="small" variant="text" icon="pi pi-sync" :label="$t('milestone_mode_change')" @click="modeDialog = true" />
@@ -130,7 +132,7 @@
           <small v-if="colorLocked" class="text-gray-500">{{ $t("milestone_color_kept") }}</small>
         </div>
         <div
-          v-if="answer.child_id && answer.child_age != null"
+          v-if="answer.child_id && answer.child_age != null && !editing"
           class="flex flex-column gap-2"
         >
           <label style="visibility: hidden">{{ $t("strart_evaluate") }}</label>
@@ -144,13 +146,13 @@
         </div>
 
         <!-- Only what the last evaluation scored 0 or ½ (or never asked) is asked again; its 1s are carried over. -->
-        <Message v-if="!questionsLoading && carriedCount" severity="info" :closable="false" class="lg:col-span-2">
+        <Message v-if="!questionsLoading && carriedCount && !editing" severity="info" :closable="false" class="lg:col-span-2">
           {{ $t("milestone_carried_hint", { count: carriedCount }) }}
         </Message>
         <Message v-if="questionsLoading" class="lg:col-span-2">{{ $t('loading') }}</Message>
         <Message v-else-if="continuing && !continuing.missing_level_ids.length" severity="success" class="lg:col-span-2">{{ $t('milestone_nothing_missing') }}</Message>
         <Message v-else-if="answer.child_age != null && !allquestion.length" severity="warn" class="lg:col-span-2">{{ $t('no_records_found') }}</Message>
-        <fieldset v-if="!questionsLoading && levelGroups.length" class="level-picker lg:col-span-2" :disabled="strart_evaluate || starting">
+        <fieldset v-if="!questionsLoading && levelGroups.length && !editing" class="level-picker lg:col-span-2" :disabled="strart_evaluate || starting">
           <legend>{{ $t('milestone_choose_levels') }}</legend>
           <p>{{ $t('milestone_choose_levels_hint') }}</p>
           <div class="level-picker-options">
@@ -183,7 +185,7 @@
                 <div class="eesa-wrap">
                   <Message v-if="eesaInvalidLevels.includes(level.id)" severity="error" :closable="false">{{ $t('eesa_invalid_boxes') }}</Message>
                   <EesaForm :modelValue="eesaBoxes[level.id] || {}" @update:modelValue="setEesaBoxes(level.id, $event)"
-                    :previous="block.eesa.previous" :disabled="saving" />
+                    :previous="block.eesa.previous" :disabled="saving || block.eesa.locked" />
                 </div>
               </section>
               <section v-else class="milestone-domain">
@@ -203,8 +205,8 @@
                            (lower half in the old color) only 0 (it stays) or 0.5 (the upper half in this color). -->
                       <label v-for="score in question.options || [0, 0.5, 1]" :key="score"
                         :title="isHalfBefore(question) ? $t('milestone_half_box_' + String(score).replace('.', '_')) : $t('milestone_score_box_' + String(score).replace('.', '_'))">
-                        <input type="radio" required :name="'question-' + question.id" :value="score"
-                          @change="collectanswer($event, question.id)" />
+                        <input type="radio" :required="!question.locked" :disabled="question.locked" :name="'question-' + question.id" :value="score"
+                          :checked="isPicked(question, score)" @change="collectanswer($event, question.id)" />
                         <span>{{ score }}</span>
                         <span v-if="isHalfBefore(question)" class="score-box score-box-after-half" :class="{ completes: score === 0.5 }"
                           :style="{ '--prev': '#' + (question.previous.color || '94a3b8') }" aria-hidden="true">
@@ -221,7 +223,7 @@
             </template>
           </section>
         </template>
-        <div v-if="strart_evaluate" class="flex flex-column gap-2">
+        <div v-if="strart_evaluate && !editing" class="flex flex-column gap-2">
           <label for="milestone-program">{{
             $t("milestone_target_program")
           }}</label>
@@ -251,7 +253,7 @@
             :loading="saving"
             :disabled="saving"
             class="m-auto w-full"
-            :label="$t('submit')"
+            :label="editing ? $t('mae_save') : $t('submit')"
           />
           <small id="username-help"></small>
         </div>
@@ -270,10 +272,11 @@ import { resetUserProfile } from "../../../components/profile/userProfile";
 import InputNumber from "primevue/inputnumber";
 import EvaluationType from "../../../components/EvaluationType.vue";
 import EesaForm from "../../../components/milestone/EesaForm.vue";
+import EditModeBanner from "../../../components/evaluations/EditModeBanner.vue";
 import { eesaInvalidKeys, eesaScores } from "../../../utils/eesa";
 import { useToast } from "primevue/usetoast";
 export default {
-  components: { EvaluationType, EesaForm },
+  components: { EvaluationType, EesaForm, EditModeBanner },
 
   data() {
     return {
@@ -320,6 +323,8 @@ export default {
       error: {},
       maxDate: new Date(),
       notanswer: [],
+      // Editing a saved evaluation (?edit=id) before its approval: { approval_status, approval_note }.
+      editing: null,
 
       // Add other validation rules for the title field
     };
@@ -502,12 +507,67 @@ export default {
       console.log(this.answers.answers);
     },
 
+    isPicked(question, score) {
+      const picked = this.answers.answers[question.id]?.score;
+      return picked !== undefined && picked !== null && Number(picked) === Number(score);
+    },
+    // The saved evaluation on this screen: the sub-goals it asked with their answers, and its EESA forms.
+    async loadEdit() {
+      this.questionsLoading = true;
+      this.alert_text = "";
+      try {
+        const { data } = (await axios.get(`api/milestone-answers/evaluation/${this.$route.query.edit}/edit`)).data;
+        const evaluation = data.evaluation;
+        this.editing = evaluation;
+        this.childs = [data.child];
+        this.mode = evaluation.mode;
+        this.color = String(evaluation.color || this.colorOptions[0]).replace("#", "").toUpperCase();
+        this.answer = { child_id: data.child.id, date: evaluation.date ? new Date(evaluation.date) : new Date(), child_age: Number(evaluation.child_age ?? 0), evaluation_id: evaluation.id };
+        this.levels = data.levels;
+        this.allquestion = data.questions;
+        this.eesa = { show: data.eesa.levels.length > 0, domain: data.eesa.domain, levels: data.eesa.levels };
+        this.eesaBoxes = Object.fromEntries(data.eesa.levels.map((level) =>
+          [level.level_id, Object.fromEntries(Object.entries(level.scores ?? {}).map(([key, value]) => [key, String(value)]))]));
+        this.answers.answers = [];
+        data.questions.filter((question) => !question.carried).forEach((question) => {
+          this.answers.answers[question.id] = { question_id: question.id, score: question.score };
+        });
+        this.selectedLevelIds = data.levels.map((level) => level.id);
+        this.strart_evaluate = true;
+      } catch (error) {
+        this.alert_text = error.response?.data?.message || this.$t("request_failed_retry");
+      } finally {
+        this.questionsLoading = false;
+      }
+    },
+    async saveEdit() {
+      this.saving = true;
+      this.error = {};
+      try {
+        const answers = this.allquestion.filter((question) => !question.carried && !question.locked)
+          .map((question) => ({ question_id: question.id, score: Number(this.answers.answers[question.id]?.score) }));
+        const eesaLevels = this.selectedEesaLevels.filter((level) => !level.locked);
+        await axios.put(`api/milestone-answers/evaluation/${this.answer.evaluation_id}/edit`, {
+          answers,
+          ...(eesaLevels.length ? { eesa: { levels: Object.fromEntries(eesaLevels.map((level) => [level.level_id, eesaScores(this.eesaBoxes[level.level_id] || {})])) } } : {}),
+        });
+        this.$toast.add({ severity: "success", summary: this.$t("success_message"), detail: this.$t("mae_saved"), life: 2500 });
+        await this.$router.push({ name: "milestone-resulte", params: { id: this.answer.child_id, evla_id: this.answer.evaluation_id } });
+      } catch (error) {
+        this.error = error.response?.data?.errors || {};
+        this.alert_text = Object.values(this.error).flat().join(" ") || error.response?.data?.message || this.$t("request_failed_retry");
+      } finally {
+        this.saving = false;
+      }
+    },
+
     async getanswer() {
       if (this.saving || !this.selectedLevelGroups.length) return;
       if (this.eesaInvalidLevels.length) {
         this.alert_text = this.$t('eesa_invalid_boxes');
         return;
       }
+      if (this.editing) return this.saveEdit();
       this.saving = true;
       this.error = {};
       try {
@@ -635,7 +695,8 @@ export default {
     },
   },
   mounted() {
-    this.getusers();
+    if (this.$route.query.edit) this.loadEdit();
+    else this.getusers();
   },
   watch: {
     // "Continue" opens the same screen with ?evaluation=id: start over with that evaluation.

@@ -81,7 +81,12 @@ onMounted(load);
           </template>
         </Column>
         <Column :header="$t('acc.owed')">
-          <template #body="{ data }">{{ amount(data.charge?.amount) }}</template>
+          <template #body="{ data }">
+            {{ amount(data.charge?.amount) }}
+            <small v-if="(data.charge?.installments?.filter((row) => row.status !== 'cancelled').length ?? 0) > 1" class="block text-color-secondary">
+              {{ $t("acc.installments_count", { n: data.charge.installments.filter((row) => row.status !== "cancelled").length }) }}
+            </small>
+          </template>
         </Column>
         <Column :header="$t('acc.paid')">
           <template #body="{ data }"><span class="text-green-700">{{ amount(data.charge?.paid) }}</span></template>

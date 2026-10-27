@@ -1,9 +1,9 @@
 <script setup>
-// The parent assistant's conversations: who asked what, the answers, the tools it used and what each cost.
+// An assistant's conversations (parent or dashboard): who asked what, the answers, the tools it used and what each cost.
 import axios from "axios";
 import { onMounted, ref } from "vue";
 
-const props = defineProps({ tools: { type: Array, default: () => [] }, pages: { type: Array, default: () => [] } });
+const props = defineProps({ assistant: { type: String, default: "parent" }, pages: { type: Array, default: () => [] } });
 
 const rows = ref([]);
 const total = ref(0);
@@ -17,14 +17,14 @@ const pageLabel = (name) => props.pages.find((p) => p.name === name)?.label ?? n
 
 async function load(page = 1) {
   loading.value = true;
-  const { data } = await axios.get("api/assistant-settings/parent/conversations", { params: { page, per_page: perPage } });
+  const { data } = await axios.get(`api/assistant-settings/${props.assistant}/conversations`, { params: { page, per_page: perPage } });
   rows.value = data.data;
   total.value = data.total;
   loading.value = false;
 }
 
 async function show(row) {
-  const { data } = await axios.get(`api/assistant-settings/parent/conversations/${row.id}`);
+  const { data } = await axios.get(`api/assistant-settings/${props.assistant}/conversations/${row.id}`);
   open.value = data.data;
 }
 
@@ -35,8 +35,8 @@ onMounted(load);
   <DataTable :value="rows" :loading="loading" lazy paginator :rows="perPage" :totalRecords="total" size="small" stripedRows rowHover
     class="cursor-pointer" @page="(e) => load(e.page + 1)" @row-click="(e) => show(e.data)">
     <template #empty>{{ $t("ai.empty") }}</template>
-    <Column :header="$t('ai.parent')">
-      <template #body="{ data }">{{ data.parent ? `${data.parent.fname} ${data.parent.lname}` : "-" }}<br /><small dir="ltr">{{ data.parent?.phone }}</small></template>
+    <Column :header="assistant === 'parent' ? $t('ai.parent') : assistant === 'public' ? $t('ai.visitor') : $t('ai.owner')">
+      <template #body="{ data }">{{ data.owner?.name ?? "-" }}<br /><small dir="ltr">{{ data.owner?.contact }}</small></template>
     </Column>
     <Column field="title" :header="$t('ai.messages')" />
     <Column field="turns" :header="$t('ai.turns')" style="width: 90px" />
@@ -46,7 +46,7 @@ onMounted(load);
 
   <Dialog :visible="!!open" modal :header="open?.conversation.title" :style="{ width: 'min(720px, 95vw)' }" @update:visible="open = null">
     <p v-if="open" class="text-sm text-gray-500 mb-3">
-      {{ open.parent ? `${open.parent.fname} ${open.parent.lname}` : "" }} · {{ $t("ai.turns") }}: {{ open.conversation.turns }} · {{ usd(open.conversation.cost_usd) }}
+      {{ open.owner?.name ?? "" }} · {{ $t("ai.turns") }}: {{ open.conversation.turns }} · {{ usd(open.conversation.cost_usd) }}
     </p>
     <div v-if="open" class="flex flex-col gap-2">
       <div v-for="m in open.messages" :key="m.id" class="ai-log" :class="m.role === 'user' ? 'ai-log--user' : 'ai-log--bot'">

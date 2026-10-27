@@ -8,6 +8,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { toDateOnly } from "@/utils/childAge";
+import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -29,6 +30,8 @@ const date = ref(new Date());
 const color = ref(null);
 // question id -> 1-5
 const selected = ref({});
+// Editing a saved evaluation (?edit=id) before its approval: { id, approval_status, approval_note, ... }.
+const editing = ref(null);
 
 const questions = computed(() => context.value?.questions ?? []);
 const manualQuestions = computed(() => questions.value.filter((question) => !question.is_auto));
@@ -62,7 +65,20 @@ async function load() {
   alertText.value = "";
   selected.value = {};
   date.value = new Date();
+  editing.value = null;
   try {
+    // The saved evaluation: its own questions, automatic answers and the evaluations before it, with its answers.
+    if (route.query.edit) {
+      const { data } = (await axios.get(`api/transition-answers/evaluation/${route.query.edit}/edit`)).data;
+      context.value = data.context;
+      childName.value = data.context.child?.name ?? "";
+      editing.value = data.evaluation;
+      date.value = data.evaluation.date ? new Date(data.evaluation.date) : new Date();
+      color.value = data.evaluation.color || COLOR_OPTIONS[0];
+      selected.value = Object.fromEntries(data.questions.filter((question) => !question.automatic).map((question) => [question.question_id, question.score]));
+      started.value = true;
+      return;
+    }
     const [{ data }, children] = await Promise.all([
       axios.get(`api/transition-answers/context/${childId.value}`),
       axios.get("api/child").catch(() => ({ data: {} })),
@@ -92,6 +108,13 @@ async function save() {
   saving.value = true;
   alertText.value = "";
   try {
+    if (editing.value) {
+      await axios.put(`api/transition-answers/evaluation/${editing.value.id}/edit`, {
+        answers: manualQuestions.value.map((question) => ({ question_id: question.id, score: selected.value[question.id] })),
+      });
+      router.push({ name: "transition-result", params: { id: childId.value, evaluation: editing.value.id } });
+      return;
+    }
     const { data } = await axios.post("api/transition-answers", {
       child_id: childId.value,
       date: toDateOnly(date.value),
@@ -135,6 +158,8 @@ watch(childId, (value, before) => {
     <Message v-else-if="loadError" severity="error" :closable="false">{{ loadError }}</Message>
 
     <template v-else>
+      <!-- Opened from the result (?edit=): the same screen with the answers given, until the evaluation is approved. -->
+      <EditModeBanner v-if="editing" :status="editing.approval_status" :note="editing.approval_note" />
       <Message v-if="alertText" severity="error" :closable="false">{{ alertText }}</Message>
 
       <!-- Transition needs the child's finished Milestones and Barriers first. -->
@@ -229,7 +254,7 @@ watch(childId, (value, before) => {
 
         <footer class="te-footer">
           <span><i class="pi pi-list-check" aria-hidden="true" /> {{ $t("transition.answered_of", { n: answeredCount, total: manualQuestions.length }) }}</span>
-          <Button :label="$t('transition.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="save" />
+          <Button :label="editing ? $t('mae_save') : $t('transition.save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="save" />
         </footer>
       </template>
     </template>

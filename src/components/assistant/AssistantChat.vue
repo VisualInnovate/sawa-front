@@ -1,33 +1,70 @@
 <script setup>
-// «مساعد سوا» in the parent portal: a floating chat that stays open across pages, sends the current page with
-// every question and opens the pages the assistant suggests (the parent keeps talking to it on the new page).
+// «مساعد سوا»: a floating chat that stays open across pages, sends the current page with every question and opens
+// the pages the assistant suggests (the user keeps talking to it on the new page). One component for every assistant:
+//   kind="parent"     the parent portal (the parent's own children)
+//   kind="dashboard"  the dashboard (the employee's own permissions; sends the pages of their menu)
+//   kind="public"     the public site (no sign-in: a random visitor id kept by the browser)
 import axios from "axios";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useStorage } from "@vueuse/core";
 import { useParentStore } from "@/stores/ParentStore";
+import { useAuthStore } from "@/stores/Auth";
+import { myMenuPages } from "@/utils/assistantPages";
+
+const props = defineProps({ kind: { type: String, default: "parent" } });
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const parentStore = useParentStore();
+const authStore = useAuthStore();
+const dashboard = props.kind === "dashboard";
+const visitorSite = props.kind === "public";
+
+// Per assistant: its API, its texts' prefix and where the browser keeps its state.
+// The parent's keys stay as they were (open chats keep their conversation after an update).
+const KINDS = {
+  parent: { base: "api/parent/assistant", texts: "chat", storage: "assistant" },
+  dashboard: { base: "api/assistant/dashboard", texts: "dash", storage: "dashAssistant" },
+  public: { base: "api/assistant/public", texts: "pub", storage: "pubAssistant" },
+};
+const kind = KINDS[props.kind] ?? KINDS.parent;
+const base = kind.base;
+// Both stores keep the token as plain text ("1234|…"); read it from the store, not by parsing storage.
+const token = () => (dashboard ? authStore.token : visitorSite ? null : parentStore.parentToken);
+// A visitor of the public site is a random id this browser keeps (nothing else is known about them).
+const visitorId = useStorage("sawaVisitorId", null, localStorage);
+if (visitorSite && !visitorId.value) {
+  visitorId.value = globalThis.crypto?.randomUUID?.() ?? `v-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+const copy = computed(() => ({
+  subtitle: t(`ai.${kind.texts}_subtitle`),
+  note: t(`ai.${kind.texts}_note`),
+  suggestions: [1, 2, 3].map((n) => t(props.kind === "parent" ? `ai.suggestion_${n}` : `ai.${kind.texts}_suggestion_${n}`)),
+}));
 
 const enabled = ref(false);
 const welcome = ref("");
-const open = useStorage("assistantOpen", false, sessionStorage);
-const conversationId = useStorage("assistantConversation", null, sessionStorage);
+const open = useStorage(`${kind.storage}Open`, false, sessionStorage);
+const conversationId = useStorage(`${kind.storage}Conversation`, null, sessionStorage);
 const messages = ref([]);
 const draft = ref("");
 const sending = ref(false);
 const list = ref(null);
 const input = ref(null);
 
-const suggestions = computed(() => [t("ai.suggestion_1"), t("ai.suggestion_2"), t("ai.suggestion_3")]);
+const suggestions = computed(() => copy.value.suggestions);
 
-// The answers are plain text; only **bold** is kept, everything else is escaped.
+// The answers are plain text; only **bold** is kept, everything else is escaped. Phone numbers read left to right
+// (in Arabic text "+962…" would otherwise show its plus at the end).
 const escape = (text) => text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const format = (text) => escape(text ?? "").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+const format = (text) =>
+  escape(text ?? "")
+    .replace(/[‎‏]/g, "")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/\+?\d[\d -]{6,}\d/g, (number) => `<span dir="ltr">${number}</span>`);
 
 async function scrollDown() {
   await nextTick();
@@ -36,7 +73,7 @@ async function scrollDown() {
 
 async function load() {
   try {
-    const { data } = await axios.get("/api/parent/assistant");
+    const { data } = await axios.get(`/${base}`);
     enabled.value = data.data.enabled;
     welcome.value = data.data.welcome_message ?? "";
   } catch {
@@ -44,7 +81,7 @@ async function load() {
   }
   if (enabled.value && conversationId.value) {
     try {
-      const { data } = await axios.get(`/api/parent/assistant/conversations/${conversationId.value}`);
+      const { data } = await axios.get(`/${base}/conversations/${conversationId.value}`, { params: visitorSite ? { visitor: visitorId.value } : {} });
       messages.value = data.data.messages;
     } catch {
       conversationId.value = null;
@@ -56,28 +93,32 @@ async function load() {
 function go(action) {
   if (action?.type !== "navigate") return;
   router.push({ name: action.route, params: action.params ?? {} }).catch(() => {});
-  // On a phone the chat covers the page: fold it so the parent sees where they are (the conversation stays).
+  // On a phone the chat covers the page: fold it so the user sees where they are (the conversation stays).
   if (window.innerWidth < 640) open.value = false;
 }
 
 // The answer arrives as server-sent events (start, delta…, action, done | error) and fills its bubble as it is
 // written. fetch, not axios: axios only hands the body over once it is complete.
 async function stream(body, onEvent) {
-  // The parent store keeps the token as plain text ("1234|…"); read it from the store, not by parsing storage.
-  const token = parentStore.parentToken;
-  const response = await fetch(new URL("api/parent/assistant/chat/stream", axios.defaults.baseURL), {
+  const bearer = token();
+  const response = await fetch(new URL(`${base}/chat/stream`, axios.defaults.baseURL), {
     method: "POST",
     headers: {
       Accept: "text/event-stream",
       "Content-Type": "application/json",
       lang: localStorage.getItem("appLang") ?? "",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
     },
     body: JSON.stringify(body),
   });
-  if (response.status === 401) {
-    parentStore.resetAuthStore();
-    router.replace({ name: "parentLogin" }).catch(() => {});
+  if (response.status === 401 && !visitorSite) {
+    if (dashboard) {
+      authStore.resetAuthStore();
+      router.replace({ name: "Login" }).catch(() => {});
+    } else {
+      parentStore.resetAuthStore();
+      router.replace({ name: "parentLogin" }).catch(() => {});
+    }
   }
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -114,31 +155,32 @@ async function send(text = draft.value) {
   scrollDown();
   let finished = false;
   let navigated = false;
+  const body = { message: text, conversation_id: conversationId.value, page: { name: route.name ?? null, path: route.fullPath, title: document.title } };
+  // The dashboard assistant opens only the pages of the employee's own menu.
+  if (dashboard) body.pages = myMenuPages(t);
+  if (visitorSite) body.visitor = visitorId.value;
   try {
-    await stream(
-      { message: text, conversation_id: conversationId.value, page: { name: route.name ?? null, path: route.fullPath, title: document.title } },
-      (event, data) => {
-        if (event === "start") conversationId.value = data.conversation_id;
-        if (event === "delta") reply.text += data.text;
-        // Take the parent to the page as soon as the assistant opens it; the chat stays open there.
-        if (event === "action") {
-          reply.actions.push(data);
-          if (!navigated) go(data);
-          navigated = true;
-        }
-        if (event === "done") {
-          conversationId.value = data.conversation_id;
-          Object.assign(reply, data.message);
-          if (!navigated) go(data.message.actions?.find((a) => a.type === "navigate"));
-          finished = true;
-        }
-        if (event === "error") {
-          Object.assign(reply, { text: data.message, error: true });
-          finished = true;
-        }
-        scrollDown();
+    await stream(body, (event, data) => {
+      if (event === "start") conversationId.value = data.conversation_id;
+      if (event === "delta") reply.text += data.text;
+      // Take the user to the page as soon as the assistant opens it; the chat stays open there.
+      if (event === "action") {
+        reply.actions.push(data);
+        if (!navigated) go(data);
+        navigated = true;
       }
-    );
+      if (event === "done") {
+        conversationId.value = data.conversation_id;
+        Object.assign(reply, data.message);
+        if (!navigated) go(data.message.actions?.find((a) => a.type === "navigate"));
+        finished = true;
+      }
+      if (event === "error") {
+        Object.assign(reply, { text: data.message, error: true });
+        finished = true;
+      }
+      scrollDown();
+    });
     if (!finished) throw new Error(t("ai.chat_error"));
   } catch (error) {
     Object.assign(reply, { text: error.message || t("ai.chat_error"), error: true });
@@ -173,7 +215,7 @@ onMounted(load);
           <div class="sawa-assistant__avatar"><i class="pi pi-sparkles" /></div>
           <div class="grow">
             <p class="sawa-assistant__title">{{ $t("ai.chat_title") }}</p>
-            <p class="sawa-assistant__subtitle">{{ $t("ai.chat_subtitle") }}</p>
+            <p class="sawa-assistant__subtitle">{{ copy.subtitle }}</p>
           </div>
           <button type="button" class="sawa-assistant__icon" :title="$t('ai.chat_new')" :aria-label="$t('ai.chat_new')" @click="restart">
             <i class="pi pi-refresh" />
@@ -208,7 +250,7 @@ onMounted(load);
             <i class="pi pi-send" />
           </button>
         </form>
-        <p class="sawa-assistant__note">{{ $t("ai.chat_note") }}</p>
+        <p class="sawa-assistant__note">{{ copy.note }}</p>
       </section>
     </transition>
 

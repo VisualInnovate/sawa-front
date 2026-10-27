@@ -7,7 +7,7 @@ import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import { FilterMatchMode } from "@primevue/core/api";
 import { can } from "@/utils/permissions";
-import { amount, chargeSeverity, chargeTitle, errorText, installmentSeverity, loadCurrency } from "@/utils/accounting";
+import { amount, chargeSeverity, chargeTitle, errorText, installmentSeverity, installmentText, loadCurrency, spreadDiscount } from "@/utils/accounting";
 import AccountingTabs from "@/components/accounting/AccountingTabs.vue";
 import ManualFeeDialog from "@/components/accounting/ManualFeeDialog.vue";
 import InstallmentsEditor from "@/components/accounting/InstallmentsEditor.vue";
@@ -29,6 +29,12 @@ const sources = computed(() => [{ value: "all", label: t("acc.all") }, ...["prog
 const statuses = ["open", "late", "paid", "cancelled", "all"];
 const rows = computed(() => charges.value.map((row) => ({ ...row, child_name: row.child?.name, title: chargeTitle(t, row) })));
 const planOwed = computed(() => planning.value ? Math.round((planning.value.amount - planning.value.paid) * 100) / 100 : 0);
+// What the paid installments did not take of the discount, spread over the open ones (as the backend).
+const planDiscounts = computed(() => {
+  if (!planning.value) return [];
+  const paidDiscount = planning.value.installments.filter((row) => row.status === "paid").reduce((sum, row) => sum + Number(row.discount || 0), 0);
+  return spreadDiscount(planRows.value, Math.max(0, Math.round((planning.value.discount - paidDiscount) * 100) / 100), "amount");
+});
 const planOk = computed(() => Math.abs(planRows.value.reduce((sum, row) => sum + Number(row.amount || 0), 0) - planOwed.value) < 0.01);
 
 async function load() {
@@ -43,7 +49,9 @@ watch([source, status], load);
 
 function openPlan(row) {
   planning.value = row;
-  planRows.value = row.installments.filter((installment) => installment.status === "open").map((installment) => ({ due_date: installment.due_date, amount: installment.amount }));
+  // An installment chosen for the discount stays chosen (what is left of it stays on the chosen ones).
+  planRows.value = row.installments.filter((installment) => installment.status === "open")
+    .map((installment) => ({ due_date: installment.due_date, amount: installment.amount, discounted: row.discount_target === "installments" && installment.discount > 0 }));
 }
 
 async function request(call) {
@@ -107,7 +115,7 @@ onMounted(load);
         <Column :header="$t('acc.installments')">
           <template #body="{ data }">
             <div class="flex flex-wrap gap-1">
-              <Tag v-for="row in data.installments" :key="row.id" :severity="installmentSeverity[row.state]" class="text-xs" :value="`${row.due_date} · ${amount(row.amount)}`" />
+              <Tag v-for="row in data.installments" :key="row.id" :severity="installmentSeverity[row.state]" class="text-xs" :value="installmentText(row)" />
             </div>
           </template>
         </Column>
@@ -128,7 +136,8 @@ onMounted(load);
     </div>
     <ManualFeeDialog v-model:visible="adding" @saved="load" />
     <Dialog :visible="!!planning" modal :header="$t('acc.edit_installments')" :style="{ width: '40rem' }" @update:visible="planning = null">
-      <InstallmentsEditor v-if="planning" v-model="planRows" :owed="planOwed" :paidRows="planning.installments.filter((row) => row.status === 'paid')" />
+      <InstallmentsEditor v-if="planning" v-model="planRows" :owed="planOwed" :paidRows="planning.installments.filter((row) => row.status === 'paid')"
+        :discounts="planDiscounts" />
       <template #footer>
         <Button :label="$t('acc.close')" severity="secondary" variant="outlined" @click="planning = null" />
         <Button :label="$t('acc.save_plan')" :disabled="!planOk" @click="savePlan" />

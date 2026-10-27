@@ -14,7 +14,10 @@ const print = () => window.print();
 
 const lines = computed(() => (payment.value?.installments ?? []).map((row) => ({
   id: row.id, title: chargeTitle(t, row.charge ?? {}), due: row.due_date, amount: row.pivot?.amount ?? row.amount,
+  discount: Number(row.discount || 0), base: row.base ?? row.amount,
 })));
+// The before / discount columns only when an installment it paid had a discount.
+const discounted = computed(() => lines.value.some((line) => line.discount > 0));
 
 onMounted(async () => {
   await loadCurrency();
@@ -52,10 +55,18 @@ onMounted(async () => {
 
       <table class="receipt-table">
         <thead>
-          <tr><th>{{ $t("acc.for") }}</th><th>{{ $t("acc.due_date") }}</th><th>{{ $t("acc.amount") }}</th></tr>
+          <tr>
+            <th>{{ $t("acc.for") }}</th><th>{{ $t("acc.due_date") }}</th>
+            <template v-if="discounted"><th>{{ $t("acc.before_discount") }}</th><th>{{ $t("acc.discount") }}</th></template>
+            <th>{{ $t("acc.amount") }}</th>
+          </tr>
         </thead>
         <tbody>
-          <tr v-for="line in lines" :key="line.id"><td>{{ line.title }}</td><td dir="ltr" class="text-end">{{ line.due }}</td><td>{{ amount(line.amount) }}</td></tr>
+          <tr v-for="line in lines" :key="line.id">
+            <td>{{ line.title }}</td><td dir="ltr" class="text-end">{{ line.due }}</td>
+            <template v-if="discounted"><td>{{ amount(line.base) }}</td><td>{{ line.discount > 0 ? `− ${amount(line.discount)}` : "" }}</td></template>
+            <td>{{ amount(line.amount) }}</td>
+          </tr>
         </tbody>
       </table>
 

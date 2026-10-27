@@ -1,0 +1,44 @@
+/* نظام تصميم Enable 360 (من الموجز) للإطار الخارجي. الشاشات داخل الإطارات هي واجهة النظام الحقيقية. */
+:root {
+  --brand-navy: #0a2540;
+  --brand-blue: #0080c0;
+  --brand-orange: #fdb01a;
+  --surface: #f5f7fa;
+  --surface-raised: #ffffff;
+  --ink: #0a2540;
+  --ink-muted: #4a5568;
+  --ink-accent: #006a9e;
+  --border: #c9dceb;
+  --navy-raised: #123a5e;
+  --ink-on-dark: #f5f7fa;
+  --radius: 20px;
+  --font: "Cairo", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --t-fast: 250ms;
+  --t-slow: 400ms;
+}
+
+* { box-sizing: border-box; }
+html, body, #demo { height: 100%; margin: 0; }
+body {
+  font-family: var(--font);
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--ink);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+h1, h2, h3, h4 { margin: 0; line-height: 1.4; font-weight: 700; }
+button { font: inherit; cursor: pointer; }
+.ltr { direction: ltr; unicode-bidi: isolate; }
+.num { font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+.btn { border: 0; border-radius: 12px; padding: .55rem 1.1rem; font-weight: 700; transition: transform var(--t-fast), background var(--t-fast); }
+.btn-primary { background: var(--brand-orange); color: var(--brand-navy); }
+.btn-navy { background: var(--brand-navy); color: var(--ink-on-dark); }
+.btn-soft { background: #e8f1f8; color: var(--ink-accent); }
+.btn:active { transform: scale(.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

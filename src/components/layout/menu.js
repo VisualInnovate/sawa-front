@@ -63,6 +63,7 @@ export const buildMenu = () => [
       { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
       { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
       { text: "carolina", to: { name: "carolina-general-goals" }, perm: "carolina general goal list" },
+      { label: "mchat.menu", to: { name: "mchat-settings" }, perm: ["mchat question list", "mchat question edit"] },
       {
         key: "vb-mapp",
         text: "VB Mapp",

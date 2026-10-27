@@ -46,46 +46,10 @@
       {{ alertText }}
     </Message>
 
-    <!-- Controls Container (Chart Controls + Date Filtering) -->
+    <!-- Date filtering -->
     <div
       class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 rounded-xl bg-white p-5 shadow-sm"
     >
-      <div class="flex flex-col gap-1.5">
-        <label class="text-sm font-semibold text-gray-600">{{ $t('chart_type') }}</label>
-        <Select
-          v-model="selectedChartType"
-          :options="chartTypes"
-          optionLabel="label"
-          optionValue="value"
-          :placeholder="$t('select_chart_type')"
-          class="w-full"
-        />
-      </div>
-
-      <div v-if="!isNonCartesianChart" class="flex flex-col gap-1.5">
-        <label class="text-sm font-semibold text-gray-600">{{ $t('xAxis') }}</label>
-        <Select
-          v-model="selectX"
-          :options="firstSelectBoxComputed"
-          optionLabel="title"
-          optionValue="value"
-          :placeholder="$t('xAxis')"
-          class="w-full"
-        />
-      </div>
-
-      <div v-if="!isNonCartesianChart" class="flex flex-col gap-1.5">
-        <label class="text-sm font-semibold text-gray-600">{{ $t('yAxis') }}</label>
-        <Select
-          v-model="selectY"
-          :options="secondSelectBoxComputed"
-          optionLabel="title"
-          optionValue="value"
-          :placeholder="$t('yAxis')"
-          class="w-full"
-        />
-      </div>
-
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-semibold text-gray-600">{{ $t('from') }}</label>
         <DatePicker
@@ -111,53 +75,15 @@
       </div>
     </div>
 
-    <!-- Main Chart -->
-    <Card class="mb-6 overflow-hidden h-auto rounded-xl border-none shadow-md">
-      <template #title>
-        <div class="flex items-center gap-2 text-lg font-semibold">
-          <i class="pi pi-chart-bar text-blue-500"></i>
-          <span>{{ $t('evaluation_results_visualization') }}</span>
-        </div>
-      </template>
-      <template #content>
-        <!-- Custom scrollable legend for pie/doughnut/polarArea charts, which -->
-        <!-- otherwise render one legend swatch per data point and can overflow -->
-        <!-- the card when there are many entries. -->
-        <div
-          v-if="isNonCartesianChart && legendItems.length"
-          class="mb-3 flex max-h-24 flex-wrap gap-x-4 gap-y-2 overflow-y-auto rounded-lg bg-gray-50 p-2.5"
-        >
-          <div
-            v-for="(item, i) in legendItems"
-            :key="i"
-            class="flex items-center gap-1.5 text-xs text-gray-600"
-          >
-            <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
-            <span>{{ item.label }}</span>
-          </div>
-        </div>
-
-        <div
-          class="relative w-full"
-          :class="isNonCartesianChart && legendItems.length
-            ? 'h-72 md:h-[clamp(220px,38vh,420px)]'
-            : 'h-96 md:h-[clamp(300px,50vh,500px)]'"
-        >
-          <Chart
-            v-if="result.length > 0"
-            :type="selectedChartType"
-            :data="chartData"
-            :options="chartOptions"
-            class="h-full w-full"
-            :aria-label="$t('evaluation_results_chart')"
-          />
-          <div v-else class="flex h-full flex-col items-center justify-center gap-2 text-gray-500">
-            <i class="pi pi-info-circle text-4xl"></i>
-            <span>{{ $t('no_data_available') }}</span>
-          </div>
-        </div>
-      </template>
-    </Card>
+    <!-- As in the printed report: the Side Profile sheet (a row per result, then the delay percentages chart). -->
+    <div class="rxs-pages mb-6">
+      <ResultSheet label="Side Profile" :band="false" :intro="false">
+        <h2 class="rx-sp-title ltr">Side Profile</h2>
+        <p class="rx-sp-child"><b>{{ childName }}</b></p>
+        <SideProfileTable v-if="sheetTests.length" :tests="sheetTests" />
+        <p v-else class="rx-empty">{{ loading ? $t('loading') : $t('no_data_available') }}</p>
+      </ResultSheet>
+    </div>
 
     <!-- Results Table Section -->
     <Card class="rounded-xl border-none shadow-md">
@@ -328,8 +254,10 @@
 
 <script setup>
 import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
+import ResultSheet from "@/components/reports/ResultSheet.vue";
+import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import SideProfileAnswerEditor from "@/components/evaluations/SideProfileAnswerEditor.vue";
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
@@ -338,11 +266,9 @@ import moment from 'moment';
 // PrimeVue Components
 import Button from 'primevue/button';
 import Card from 'primevue/card';
-import Chart from 'primevue/chart';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
 import Dialog from 'primevue/dialog';
 import Message from 'primevue/message';
@@ -359,17 +285,8 @@ const { t, locale } = useI18n();
 const result = ref([]);
 const alertText = ref(null);
 const alertType = ref('success');
-const createdAt = ref([]);
-const latePercentages = ref([]);
-const growAge = ref([]);
-const diffAge = ref([]);
 const from = ref(null);
 const to = ref(null);
-const selectedChartType = ref('bar');
-const selectX = ref('createdAt');
-const selectY = ref('latePercentage');
-const chartData = ref({});
-const chartOptions = ref({});
 const search = ref('');
 const visible = ref(false);
 const examDate = ref(null);
@@ -378,47 +295,16 @@ const loading = ref(true);
 const sideProfileName = ref('');
 const formSubmitted = ref(false);
 const childName = ref('');
-// Dynamic Chart Select Options
-const chartTypes = computed(() => [
-  { label: t('bar_chart'), value: 'bar' },
-  { label: t('line_chart'), value: 'line' },
-  { label: t('pie_chart'), value: 'pie' },
-  { label: t('doughnut_chart'), value: 'doughnut' },
-  { label: t('polar_area_chart'), value: 'polarArea' },
-  { label: t('radar_chart'), value: 'radar' },
-]);
-
-const axisOptions = computed(() => [
-  { title: t('created_at'), value: 'createdAt' },
-  { title: t('grow_age'), value: 'growAge' },
-  { title: t('diff_age'), value: 'diffAge' },
-  { title: t('late_percentage'), value: 'latePercentage' },
-]);
-
-const isNonCartesianChart = computed(() =>
-  ['pie', 'doughnut', 'polarArea'].includes(selectedChartType.value)
-);
-
-const legendColors = ['#66BB6A', '#EF5350', '#42A5F5', '#FFCA28', '#AB47BC', '#26A69A'];
-
-// Drives the custom scrollable legend rendered above the chart for
-// pie/doughnut/polarArea types, replacing Chart.js's built-in legend
-// (which renders one swatch per data point and can't be constrained).
-const legendItems = computed(() => {
-  if (!isNonCartesianChart.value) return [];
-  return createdAt.value.map((label, i) => ({
-    label,
-    color: legendColors[i % legendColors.length]
-  }));
-});
-
-const firstSelectBoxComputed = computed(() =>
-  axisOptions.value.filter(item => item.value !== selectY.value)
-);
-
-const secondSelectBoxComputed = computed(() =>
-  axisOptions.value.filter(item => item.value !== selectX.value)
-);
+// The report's Side Profile rows, oldest first.
+const sheetTests = computed(() => [...result.value]
+  .sort((a, b) => String(a.result_created_at).localeCompare(String(b.result_created_at)))
+  .map((row) => ({
+    key: row.id,
+    id: row.id,
+    title: row.evaluation_title || sideProfileName.value,
+    date: row.result_created_at,
+    result: { child_age: row.child_age, grow_age: row.grow_age, diff_age: row.diff_age, late_percentage: row.late_percentage, created_at: row.result_created_at },
+  })));
 
 // Filtering Table Records
 const filteredResults = computed(() => {
@@ -440,112 +326,6 @@ const getchildreen = async () => {
   }
 };
 
-// Build Chart Datasets
-const setChartData = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-
-  if (isNonCartesianChart.value) {
-    return {
-      labels: createdAt.value,
-      datasets: [{
-        data: latePercentages.value.map(val => val ?? 0),
-        backgroundColor: legendColors,
-        borderColor: documentStyle.getPropertyValue('--surface-border') || '#e5e7eb',
-        borderWidth: 1
-      }]
-    };
-  }
-
-  if (selectX.value && selectY.value) {
-    const xDataMap = { growAge: growAge.value, diffAge: diffAge.value, [t('late_percentage')]: latePercentages.value, createdAt: createdAt.value };
-    const yDataMap = { growAge: growAge.value, diffAge: diffAge.value, [t('late_percentage')]: latePercentages.value };
-
-    const xData = xDataMap[selectX.value] || createdAt.value;
-    const yData = yDataMap[selectY.value] || latePercentages.value;
-
-    return {
-      labels: xData,
-      datasets: [{
-        label: t(selectY.value),
-        data: yData.map(v => v ?? 0),
-        backgroundColor: '#42A5F5',
-        borderColor: '#1565C0',
-        pointRadius: 4,
-        tension: 0.3,
-        fill: selectedChartType.value === 'line' || selectedChartType.value === 'radar'
-      }]
-    };
-  }
-
-  return {
-    labels: createdAt.value,
-    datasets: [
-      {
-        label: t('late_percentage'),
-        backgroundColor: '#66BB6A',
-        borderColor: '#388E3C',
-        data: latePercentages.value.map(val => val ?? 0),
-        tension: 0.3
-      },
-      {
-        label: t('diff_age'),
-        backgroundColor: '#EF5350',
-        borderColor: '#D32F2F',
-        data: diffAge.value.map(val => val ?? 0),
-        tension: 0.3
-      },
-      {
-        label: t('grow_age'),
-        backgroundColor: '#42A5F5',
-        borderColor: '#1565C0',
-        data: growAge.value.map(val => val ?? 0),
-        tension: 0.3
-      }
-    ]
-  };
-};
-
-// Build Chart Display Config Options
-const setChartOptions = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const textColor = documentStyle.getPropertyValue('--text-color') || '#495057';
-  const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary') || '#6c757d';
-  const surfaceBorder = documentStyle.getPropertyValue('--surface-border') || '#dfe7ef';
-
-  const baseOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: !isNonCartesianChart.value,
-        position: 'top',
-        labels: { color: textColor, font: { weight: '600' } }
-      },
-      tooltip: {
-        padding: 10,
-        usePointStyle: true
-      }
-    }
-  };
-
-  if (!isNonCartesianChart.value && selectedChartType.value !== 'radar') {
-    baseOptions.scales = {
-      x: {
-        ticks: { color: textColorSecondary },
-        grid: { color: surfaceBorder, drawBorder: false },
-        title: { display: true, text: t(selectX.value), color: textColor, font: { weight: 'bold' } }
-      },
-      y: {
-        ticks: { color: textColorSecondary },
-        grid: { color: surfaceBorder, drawBorder: false },
-        title: { display: true, text: t(selectY.value), color: textColor, font: { weight: 'bold' } }
-      }
-    };
-  }
-
-  return baseOptions;
-};
-
 // API Actions
 const getResults = async () => {
   try {
@@ -558,21 +338,6 @@ const getResults = async () => {
       }
     );
     result.value = response.data.resultEvaluation || [];
-
-    createdAt.value = [];
-    latePercentages.value = [];
-    growAge.value = [];
-    diffAge.value = [];
-
-    result.value.forEach((elem) => {
-      createdAt.value.push(moment(elem.result_created_at).format('MM-DD-YYYY'));
-      latePercentages.value.push(parseFloat(elem.late_percentage) || 0);
-      growAge.value.push(parseInt(elem.grow_age) || 0);
-      diffAge.value.push(parseInt(elem.diff_age) || 0);
-    });
-
-    chartData.value = setChartData();
-    chartOptions.value = setChartOptions();
   } catch (error) {
     console.error('Error fetching results:', error);
     showAlert(t('failed_to_fetch_results'), 'error');
@@ -661,11 +426,6 @@ const answersEdited = () => {
 
 onMounted(async () => {
   await Promise.all([getResults(), getSideProfile(), getchildreen()]);
-});
-
-watch([selectedChartType, selectX, selectY, locale], () => {
-  chartData.value = setChartData();
-  chartOptions.value = setChartOptions();
 });
 </script>
 

@@ -1,58 +1,20 @@
 <template>
-  <div class="sawa-card p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg">
+  <div class="ab-page">
     <!-- The result's approval by the management (pending / approved / rejected with the reason). -->
     <Toast />
     <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.id" @loaded="approval = $event" />
-    <div class="flex justify-end gap-2 mb-4">
+    <div class="flex justify-end gap-2 print:hidden">
       <!-- Before approval the answers can still be edited (pending or rejected). -->
       <AbleAnswerEditor v-if="approval && approval.status !== 'approved'" :evaluation-id="$route.params.id"
         :api="assessmentOf($route).api" @saved="answersEdited" />
       <DeleteEvaluationButton :evaluation-id="$route.params.id" />
     </div>
-    <div class="grid md:grid-cols-3 grid-cols-2 lg:grid-cols-5 gap-6">
-      <transition-group name="fade" tag="div" class="contents">
-        <div 
-          v-show="mainSquares" 
-          v-for="(abll, index) in mainSquares" 
-          :key="index"
-          class="shadow-lg rounded-lg overflow-hidden bg-white hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
-            <p class="m-auto text-center w-full py-1 text-white font-semibold text-sm uppercase tracking-wider">
-              {{ abll?.category }}
-            </p>
-          </div> 
-          
-          <div class="p-3 space-y-3">
-            <div v-for="(count, idx) in abll.missions" :key="idx" class="mb-2 last:mb-0">
-              <div class="flex items-center">
-                <p class="px-2 w-16 text-sm font-medium text-gray-700 truncate">{{ count.mission_key }}</p>
-                <div 
-                  class="bg-white rounded-md grid overflow-hidden"
-                  :class="[`grid-cols-${count.mission_max || count.mission_degree.length-1}`]"
-                >
-                  <div 
-                    v-for="(x, index) in (count.mission_max || count.mission_degree.length-1)" 
-                    :key="index"
-                    class="h-8 w-9 flex items-center justify-center transition-all duration-500"
-                    :style="{ 
-                      border: '1px solid #e2e8f0',
-                      backgroundColor: index < count.answer_score ? `#${count.answer_color}` : '#f8fafc',
-                      'box-shadow': index < count.answer_score ? 'inset 0 2px 4px rgba(0,0,0,0.1)' : 'none'
-                    }"
-                  >
-                    <span 
-                      v-if="index < count.answer_score"
-                      class="text-white text-xs font-bold"
-                    >             
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition-group>
+    <!-- As in the printed report: a card per category, a row of boxes per mission. -->
+    <div class="rxs-pages">
+      <ResultSheet :label="label" :date="approval?.date" :child-name="approval?.child?.name">
+        <AbllsChart v-if="mainSquares.length" :tests="[{ result: mainSquares }]" />
+        <p v-else class="rx-empty">{{ loading ? $t("loading") : $t("ereport.no_result_data") }}</p>
+      </ResultSheet>
     </div>
   </div>
 </template>
@@ -63,15 +25,23 @@ import axios from "axios";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 import AbleAnswerEditor from "@/components/ablls/AbleAnswerEditor.vue";
+import AbllsChart from "@/components/reports/AbllsChart.vue";
+import ResultSheet from "@/components/reports/ResultSheet.vue";
+import { ABLLS, ABLLS_SKILLS, typeLabel } from "@/components/reports/reportUtils";
 export default {
   name: 'SquareGrid',
-  components: { ApprovalBanner, AbleAnswerEditor, DeleteEvaluationButton },
+  components: { ApprovalBanner, AbleAnswerEditor, AbllsChart, DeleteEvaluationButton, ResultSheet },
   data() {
     return {
       mainSquares: [],
-      table_resulte: [],
       approval: null,
+      loading: true,
     };
+  },
+  computed: {
+    label() {
+      return typeLabel(assessmentOf(this.$route).evaluationType === 7 ? ABLLS_SKILLS : ABLLS, this.$t);
+    },
   },
   methods: {
     assessmentOf,
@@ -94,6 +64,8 @@ export default {
           [];
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        this.loading = false;
       }
     }
   },
@@ -111,30 +83,5 @@ export default {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: all 0.5s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-/* Gradient animation for cards */
-.shadow-lg:hover {
-  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
-}
-
-/* Pulse animation for loading */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.loading-square {
-  animation: pulse 1.5s infinite;
-}
+.ab-page { display: grid; gap: 1rem; }
 </style>

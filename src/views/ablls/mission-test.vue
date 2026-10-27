@@ -6,6 +6,8 @@
   <div class="sawa-card">
     <div>
 
+      <!-- Opened from the result (?edit=): the same screen with the answers given, until the evaluation is approved. -->
+      <EditModeBanner v-if="editing" class="mb-3" :status="editing.approval_status" :note="editing.approval_note" />
       <Message v-if="alert_text" severity="error" class="mb-3">{{ alert_text }}</Message>
       
     
@@ -22,7 +24,7 @@
              
               <div  v-if="answer.child_id" class="flex flex-column gap-2">
                 <label for="username">{{ $t('date') }}</label>
-                <DatePicker  @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'   />   
+                <DatePicker :disabled="Boolean(editing)" @update:model-value="getage" style="width: 100%" showButtonBar v-model.number="answer.date" showIcon  :placeholder='$t("date")'   />   
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.child_age">{{ error.child_age[0] }}</div>
 
             </div> 
@@ -40,7 +42,7 @@
                     <div class="ablls-colors">
                       <button v-for="color in colorOptions" :key="color" type="button"
                         :class="{ selected: answer.color === color }" :style="{ backgroundColor: '#' + color }"
-                        :aria-label="'#' + color" @click="answer.color = color"></button>
+                        :aria-label="'#' + color" :disabled="Boolean(editing)" @click="answer.color = color"></button>
                     </div>
                     <Button v-if="!strart_evaluate" @click="createevalutae" class="m-auto w-full h-[50px]" :label='$t("strart_evaluate")'></Button>
                   </div>
@@ -129,7 +131,7 @@
               </template>
               <div v-if="strart_evaluate" class="flex flex-column gap-2 w-full">
                 <label style="visibility: hidden;" for="username">{{ $t('gruop_sessaion') }}</label>
-                <Button @click="getanswer"  class="m-auto w-full" :label='$t("submit")'></Button>
+                <Button @click="getanswer" :loading="saving" class="m-auto w-full" :label='editing ? $t("mae_save") : $t("submit")'></Button>
                 <small id="username-help"></small>
               </div>
             
@@ -152,11 +154,12 @@ import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
 import { childListOf, childTextOf, isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import "@/components/ablls/ablls.css";
+import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
 
 export default {
-  components:{},
+  components:{ EditModeBanner },
 
 
   data() {
@@ -182,7 +185,10 @@ export default {
       error: {},
       maxDate: new Date(),
       notanswer:[],
-     
+      // Editing a saved evaluation (?edit=id) before its approval: { approval_status, approval_note, ... }.
+      editing: null,
+      saving: false,
+
       // Add other validation rules for the title field
     };
 
@@ -303,7 +309,47 @@ export default {
          
         })
     },
+    // The saved evaluation on this screen: its details, and the skills it answered (by domain) with their scores.
+    async loadEdit() {
+      try {
+        const editUrl = `/api/${this.assessment.api}-answer/evaluation/${this.$route.query.edit}/edit`
+        const [{ data: grouped }, { data: edit }] = await Promise.all([
+          axios.get(`${apiOf(this.assessment, "category")}/grouped/category`),
+          axios.get(editUrl),
+        ])
+        const { evaluation, child, domains } = edit.data
+        const saved = Object.fromEntries(domains.flatMap((domain) => domain.skills).map((skill) => [skill.mission_id, skill.score]))
+        this.editing = evaluation
+        this.childs = child ? [child] : []
+        this.answer = {
+          child_id: child?.id, evaluation_id: evaluation.id, date: evaluation.date ? new Date(evaluation.date) : new Date(),
+          child_age: evaluation.child_age, color: evaluation.color || this.answer.color,
+        }
+        // The domains and skills the evaluation answered, in the screen's order.
+        this.qustions = (grouped.data ?? []).map((que) => ({ ...que, missions: (que.missions ?? []).filter((mission) => mission.id in saved) }))
+        this.score = { ...saved }
+        Object.entries(saved).forEach(([id, value]) => this.getanswerscore({ value }, Number(id)))
+        this.strart_evaluate = true
+      } catch (error) {
+        this.alert_text = error.response?.data?.message || this.$t('request_failed_retry')
+      }
+    },
+    async saveEdit() {
+      this.saving = true
+      try {
+        await axios.put(`/api/${this.assessment.api}-answer/evaluation/${this.answer.evaluation_id}/edit`, {
+          answers: Object.entries(this.score).map(([id, score]) => ({ mission_id: Number(id), score })),
+        })
+        this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('mae_saved'), life: 2500 })
+        this.$router.push({ name: this.assessment.routes.result, params: { id: this.answer.evaluation_id } })
+      } catch (error) {
+        this.alert_text = Object.values(error.response?.data?.errors ?? {}).flat().join(' ') || error.response?.data?.message || this.$t('request_failed_retry')
+      } finally {
+        this.saving = false
+      }
+    },
     getanswer(){
+      if (this.editing) return this.saveEdit()
       // The color can still change after answering; every answer takes the final one.
       this.answers.answers.forEach((answer) => {
         if (answer) answer.color = this.answer.color;
@@ -370,6 +416,10 @@ export default {
    
   },
   mounted() {
+   if (this.$route.query.edit) {
+     this.loadEdit()
+     return
+   }
    this.getusers()
    this.getquation()
   },
