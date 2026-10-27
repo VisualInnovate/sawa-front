@@ -82,7 +82,8 @@ const chapter = computed(() => chapters[store.chapter]);
 .phone-body iframe { border-radius: 36px; }
 .notch { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px; height: 26px; background: #0b1726; border-radius: 16px; z-index: 2; }
 
-.phone-active .desktop, .desktop-active .phone { opacity: .92; filter: saturate(.9); }
+/* بلا filter على الجهاز الجانبي: الفلاتر فوق iframe مُصغَّر تترك الإطار أبيض أحياناً في Chrome. */
+.phone-active .desktop, .desktop-active .phone { opacity: .92; }
 
 .badge { position: absolute; top: 1.2rem; inset-inline-start: 1.4rem; background: var(--brand-orange); color: var(--brand-navy); font-weight: 800; font-size: .75rem; border-radius: 999px; padding: .1rem .7rem; z-index: 5; }
 .caption { position: absolute; bottom: 1rem; inset-inline: 0; margin: auto; width: fit-content; max-width: 70%; background: rgb(10 37 64 / .94); color: var(--ink-on-dark); border-radius: 14px; padding: .4rem 1.2rem; font-weight: 600; z-index: 5; }

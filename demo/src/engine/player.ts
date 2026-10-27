@@ -37,12 +37,16 @@ export class Player {
   }
 
   /** ينتظر عنصراً حتى يظهر (الواجهة الحقيقية تطلب بياناتها من الخادم الوهمي). */
-  private async waitFor(target: Target, timeout = 15000): Promise<HTMLElement> {
+  // 25 ثانية: في التطوير قد يتأخر Vite في تحويل صفحة تُفتح أول مرة؛ في البناء النهائي الصفحات محلية وفورية.
+  private async waitFor(target: Target, timeout = 25000): Promise<HTMLElement> {
     const end = performance.now() + timeout;
     while (performance.now() < end) {
       if (this.cancelled) throw new Cancelled();
       const el = find(target);
-      if (el && el.offsetParent !== null) return el;
+      if (el && el.offsetParent !== null) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) return el;
+      }
       await new Promise((r) => setTimeout(r, 60));
     }
     throw new Error(`[demo] لم يظهر العنصر: ${target.frame} ${target.sel} ${target.text ?? ""}`);

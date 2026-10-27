@@ -158,7 +158,7 @@ export const evaluationRoutes = [
     if (!e || e.approval_status !== "pending") throw new HttpError(422, { message: "This evaluation is not waiting for approval." });
     e.approval_status = body.approved ? "approved" : "rejected"; e.approval_note = body.approved ? null : body.note; e.approved_at = body.approved ? db.now() : e.approved_at;
     const child = db.child(e.child_id)!;
-    db.notifyStaff(e.specialist_id, { kind: "evaluation_approval", title: body.approved ? "اعتُمد التقييم" : "رُفض التقييم", message: body.approved ? `اعتُمدت نتيجة تقييم VB-MAPP للطفل ${child.name}.` : `رُفضت نتيجة تقييم VB-MAPP للطفل ${child.name}: ${body.note}`, url: "/sawa-admin/my-evaluation-results", evaluation: `e${e.id}` });
+    db.notifyStaff(e.specialist_id, { kind: "evaluation_approval", title: body.approved ? "اعتُمد التقييم" : "رُفض التقييم", message: body.approved ? `اعتُمدت نتيجة تقييم VB-MAPP للطفل ${child.name}.` : `رُفضت نتيجة تقييم VB-MAPP للطفل ${child.name}: ${body.note}`, url: "/my-evaluation-results", evaluation: `e${e.id}` });
     return { data: approvalState(db, e) };
   }),
 ];

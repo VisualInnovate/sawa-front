@@ -141,7 +141,7 @@ export const consultingRoutes = [
     db.evaluationRequests.push(r);
     const specialist = db.staffById(r.employee_id);
     // SpecialistAssigned → الأخصائية (قاعدة البيانات)، EvaluationBookedForChild → الأهل (قاعدة البيانات + بريد).
-    db.notifyStaff(specialist.id, { title: "موعد تقييم جديد", message: `${TYPE_NAMES[type]} — ${child.name} · ${body.date} ${String(body.start_time).slice(0, 5)}`, url: "/sawa-admin/my-evaluations", type: "specialist_assigned", request_id: r.id });
+    db.notifyStaff(specialist.id, { title: "موعد تقييم جديد", message: `${TYPE_NAMES[type]} — ${child.name} · ${body.date} ${String(body.start_time).slice(0, 5)}`, url: "/my-evaluations", type: "specialist_assigned", request_id: r.id });
     db.notifyParent({ title: "تم تحديد موعد تقييم", message: `${TYPE_NAMES[type]} لـ${child.name} يوم ${body.date} الساعة ${String(body.start_time).slice(0, 5)} مع ${specialist.name}`, type: "evaluation_booked", request_id: r.id });
     return { data: { id: r.id, date: r.date, specialist: specialist.name, consultant: db.staffById(consultantId)?.name, child: child.name }, status: 201, message: "Evaluation Request created successfully" };
   }),

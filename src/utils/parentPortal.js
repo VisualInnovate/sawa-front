@@ -39,6 +39,7 @@ export function fmtDate(value) {
 /** "09:30 ص" from "09:30" or a datetime. */
 export function fmtTime(value) {
   if (!value) return "";
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? "" : new Intl.DateTimeFormat(locale(), { hour: "numeric", minute: "2-digit" }).format(value);
   const text = String(value);
   const match = /^(\d{1,2}):(\d{2})/.exec(text.includes(" ") || text.includes("T") ? text.split(/[ T]/)[1] ?? "" : text);
   const day = match ? new Date(2000, 0, 1, Number(match[1]), Number(match[2])) : toDate(text);

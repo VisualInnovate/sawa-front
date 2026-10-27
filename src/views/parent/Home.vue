@@ -30,7 +30,7 @@ const attention = computed(() => {
   const pending = home.value?.pending ?? {};
   const finance = home.value?.finance ?? {};
   if (pending.generalizations) rows.push({ key: "gen", icon: "pi pi-home", cls: "pp-item__icon--magenta", title: t("pp.att_generalizations", { n: pending.generalizations }), meta: t("pp.att_generalizations_hint"), to: { name: "parent-generalizations" } });
-  if (finance.late > 0) rows.push({ key: "late", icon: "pi pi-exclamation-triangle", cls: "pp-item__icon--warn", title: t("pp.att_late", { amount: money(finance.late, finance.currency) }), meta: t("pp.att_late_hint"), to: { name: "parent-programs" } });
+  if (finance.late > 0) rows.push({ key: "late", icon: "pi pi-exclamation-triangle", cls: "pp-item__icon--warn", title: t("pp.att_late", { amount: money(finance.late, finance.currency) }), meta: t("pp.att_late_hint"), to: { name: "parent-finances" } });
   if (pending.consultations_waiting) rows.push({ key: "cons", icon: "pi pi-comments", cls: "pp-item__icon--info", title: t("pp.att_consultations", { n: pending.consultations_waiting }), meta: t("pp.att_consultations_hint"), to: { name: "Booking" } });
   if (pending.evaluations_waiting) rows.push({ key: "eval", icon: "pi pi-clipboard", cls: "pp-item__icon--warn", title: t("pp.att_evaluations", { n: pending.evaluations_waiting }), meta: t("pp.att_evaluations_hint"), to: { name: "Edit" } });
   return rows;
@@ -118,7 +118,7 @@ const news = computed(() => home.value?.notifications?.latest ?? []);
           <section v-if="finance && finance.owed > 0" class="pp-card pp-card--pad pp-stack pp-in" :style="{ '--i': 5 }">
             <div class="pp-row pp-between">
               <h2 class="pp-h2"><i class="pi pi-wallet text-[var(--pp-teal)]" /> {{ $t("pp.fees_summary") }}</h2>
-              <router-link :to="{ name: 'parent-programs' }" class="pp-link text-sm">{{ $t("pp.details") }}</router-link>
+              <router-link :to="{ name: 'parent-finances' }" class="pp-link text-sm">{{ $t("pp.details") }}</router-link>
             </div>
             <div class="pp-bar"><span :style="{ width: `${finance.owed ? Math.min(100, Math.round((finance.paid / finance.owed) * 100)) : 0}%` }" /></div>
             <div class="pp-money">

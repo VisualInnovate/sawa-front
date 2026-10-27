@@ -22,6 +22,11 @@ export function useDirector() {
     return chapters[index].timeline(backend.db).reduce((n, a) => (a.type === "fly" && a.counts !== false ? n + (typeof a.counts === "number" ? a.counts : 1) : n), 0);
   }
 
+  // إن أُعيد تحميل الشِّل (تحديث عرضي أو Vite) نستأنف من الفصل نفسه بالسرعة والوضع نفسيهما.
+  const RESUME_KEY = "demo:resume";
+  const saveResume = (index: number) => { try { sessionStorage.setItem(RESUME_KEY, JSON.stringify({ chapter: index, mode: store.mode, speed: store.speed })); } catch {} };
+  const readResume = (): { chapter: number; mode: typeof store.mode; speed: typeof store.speed } | null => { try { return JSON.parse(sessionStorage.getItem(RESUME_KEY) ?? "null"); } catch { return null; } };
+
   async function play(index: number) {
     player?.cancel();
     finished.value = false;
@@ -29,6 +34,7 @@ export function useDirector() {
     store.loading = true;
     store.caption = "";
     store.chapter = index;
+    saveResume(index);
     const chapter = chapters[index];
 
     backend.db.reset();
@@ -54,20 +60,25 @@ export function useDirector() {
     store.running = true;
     try {
       await p.run(chapter.timeline(backend.db));
-      if (player === p) { store.markDone(index); finished.value = true; store.running = false; }
+      if (player === p) { store.markDone(index); finished.value = true; store.running = false; retried = -1; }
       if (store.mode === "auto" && player === p && index < chapters.length - 1) {
         await new Promise((r) => setTimeout(r, 2200 / store.speed));
         if (player === p && store.mode === "auto") play(index + 1);
       }
     } catch (e) {
-      if (!(e instanceof Cancelled)) { console.error(e); store.caption = `تعذّر إكمال الحركة: ${(e as Error).message}`; store.running = false; }
+      if (e instanceof Cancelled) return;
+      console.error(e);
+      // في التشغيل التلقائي: محاولة ثانية للفصل نفسه (الحالة تُبنى من جديد في play) قبل إظهار الخطأ.
+      if (store.mode === "auto" && player === p && retried !== index) { retried = index; store.caption = "إعادة محاولة الفصل…"; await new Promise((r) => setTimeout(r, 800)); if (player === p) play(index); return; }
+      store.caption = `تعذّر إكمال الحركة: ${(e as Error).message}`; store.running = false;
     }
   }
+  let retried = -1;
 
   const next = () => { if (store.chapter < chapters.length - 1) play(store.chapter + 1); };
   const prev = () => { if (store.chapter > 0) play(store.chapter - 1); };
   const skip = () => player?.skip();
-  const restart = () => play(0);
+  const restart = () => { try { sessionStorage.removeItem(RESUME_KEY); } catch {} retried = -1; play(0); };
   const togglePause = () => { store.paused = !store.paused; };
 
   function onKey(e: KeyboardEvent) {
@@ -86,7 +97,10 @@ export function useDirector() {
   onMounted(() => {
     window.addEventListener("keydown", onKey);
     // الإطاران يُركَّبان في المسرح؛ نبدأ حين يكونان موجودَين.
-    const start = () => (frames.phone.el && frames.desktop.el ? play(0) : setTimeout(start, 50));
+    const resume = readResume();
+    if (resume && resume.chapter > 0 && resume.chapter < chapters.length) { store.mode = resume.mode; store.speed = resume.speed; }
+    const first = resume && resume.chapter > 0 && resume.chapter < chapters.length ? resume.chapter : 0;
+    const start = () => (frames.phone.el && frames.desktop.el ? play(first) : setTimeout(start, 50));
     start();
   });
   onBeforeUnmount(() => { window.removeEventListener("keydown", onKey); player?.cancel(); });

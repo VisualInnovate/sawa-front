@@ -147,6 +147,9 @@ const routes = [
       { path: "clidreen_parents", name: "clidreen_parents", component: () => import("../views/parent/Children.vue") },
       { path: "children/:child_id(\\d+)", name: "parent-child", component: () => import("../views/parent/ChildDetails.vue"), props: true },
       { path: "programs", name: "parent-programs", component: () => import("../views/parent/Programs.vue") },
+      // «المالية»: the family's and each child's dues, discounts, receipts and compensations (reading only).
+      { path: "finances", name: "parent-finances", component: () => import("../views/parent/Finances.vue") },
+      { path: "receipts/:child_id(\\d+)/:payment_id(\\d+)", name: "parent-receipt", component: () => import("../views/parent/Receipt.vue"), props: true },
       { path: "appointment", name: "Booking", component: () => import("../views/parent/Consultations.vue") },
       // «احجز تقييماً»: the public pages' button; the parent picks the child, then the day and the time.
       { path: "evaluation", name: "Edit", component: () => import("../views/parent/BookEvaluation.vue") },

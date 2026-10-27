@@ -34,7 +34,7 @@ export const tracking: Chapter = {
     { type: "click", target: desk(".rx-save-groups > .rx-save-group:nth-child(4) button", "إرسال") },
     { type: "waitFor", target: desk(".rx-save-group.is-pending") },
     { type: "highlight", target: desk(".rx-save-group.is-pending") },
-    { type: "role", staff: "management", path: "/sawa-admin/tracking-approvals" },
+    { type: "role", staff: "management", path: "/tracking-approvals" },
     { type: "caption", text: "الإدارة: «طلبات اعتماد التراكنج» — تعرض الأهداف كما ستُطبع وتعتمد" },
     { type: "waitFor", target: desk("td", scenario.child.firstName) },
     { type: "click", target: desk("button", "عرض") },

@@ -129,9 +129,9 @@ export const sessionRoutes = [
     if (body.type !== "people" && db.generalizations.some((x) => x.goal_id === g.id && x.type === body.type && ["pending", "approved"].includes(x.status))) throw new HttpError(422, { message: "This generalization was already sent.", errors: { type: ["sent"] } });
     const child = db.child(s.child_id)!;
     const make = (recipient_id: number | null) => db.generalizations.push({ id: db.id(), goal_id: g.id, child_id: s.child_id, session_id: s.id, type: body.type, status: "pending", note: null, requested_by: db.currentStaffId, therapist_id: db.currentStaffId, recipient_id, created_at: db.now(), decided_at: null });
-    if (body.type === "people") { db.staff.filter((x) => x.type === 2 && x.id !== s.therapist_id).forEach((x) => { make(x.id); db.notifyStaff(x.id, { title: "طلب تعميم هدف", message: `${db.staffById(db.currentStaffId).name} تطلب تعميم هدف ${child.name}: ${g.goal}`, url: "/sawa-admin/my-generalizations" }); }); }
+    if (body.type === "people") { db.staff.filter((x) => x.type === 2 && x.id !== s.therapist_id).forEach((x) => { make(x.id); db.notifyStaff(x.id, { title: "طلب تعميم هدف", message: `${db.staffById(db.currentStaffId).name} تطلب تعميم هدف ${child.name}: ${g.goal}`, url: "/my-generalizations" }); }); }
     else { make(null); if (body.type === "home") db.notifyParent({ title: "طلب تعميم هدف في البيت", message: `${db.staffById(db.currentStaffId).name} تطلب تدريب ${child.name} في البيت على: ${g.goal}`, type: "goal_generalization" });
-      else db.staff.filter((x) => x.perms.includes("goal generalization edit")).forEach((x) => db.notifyStaff(x.id, { title: "طلب تعميم في الصفوف", message: `${child.name}: ${g.goal}`, url: "/sawa-admin/goal-generalizations" })); }
+      else db.staff.filter((x) => x.perms.includes("goal generalization edit")).forEach((x) => db.notifyStaff(x.id, { title: "طلب تعميم في الصفوف", message: `${child.name}: ${g.goal}`, url: "/goal-generalizations" })); }
     return { data: sessionGoal(db, g, s.child_id) };
   }),
 
