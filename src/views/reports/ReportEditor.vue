@@ -415,14 +415,24 @@ const caseParagraphs = (level) => caseDescription(level, { female: female.value,
 // { evaluationId, tables: [{ key, title, rows: [{ symbol, strengths: [point], weaknesses: [point] }] }], saved, dirty, saving, error, loading }
 const summary = ref(null);
 
-const summaryFromServer = (tables) => tables.map((table) => ({
-  key: String(table.key ?? ""), title: table.title ?? "", hidden: [...(table.hidden ?? [])],
-  rows: (table.rows ?? []).map((row) => ({
-    symbol: row.symbol ?? "", hidden: [...(row.hidden ?? [])],
-    strengths: (row.strengths ?? []).map((text) => newSummaryPoint(text)),
-    weaknesses: (row.weaknesses ?? []).map((text) => newSummaryPoint(text)),
-  })),
-}));
+// Each point with its question's number in the domain: saved with it, or (a summary saved before numbers were kept)
+// the number of the same text in the newest test.
+const summaryFromServer = (tables, test = milestoneSection.value?.newest) => {
+  const known = new Map((test?.result?.summary ?? []).flatMap((group) => [...(group.strength ?? []), ...(group.weak ?? [])]
+    .filter((point) => point.number).map((point) => [`${group.level_id}|${group.symbol ?? ""}|${point.question}`, point.number])));
+  const points = (table, row, kind) => (row[kind] ?? []).map((text, i) => newSummaryPoint(text,
+    row[`${kind}_numbers`]?.[i] ?? known.get(`${table.key}|${row.symbol ?? ""}|${text}`) ?? null));
+  return tables.map((table) => ({
+    key: String(table.key ?? ""), title: table.title ?? "", hidden: [...(table.hidden ?? [])],
+    rows: (table.rows ?? []).map((row) => ({
+      symbol: row.symbol ?? "", hidden: [...(row.hidden ?? [])],
+      strengths: points(table, row, "strengths"),
+      weaknesses: points(table, row, "weaknesses"),
+    })),
+  }));
+};
+// A point's code: the row's symbol and its question's number in the domain (M-3).
+const pointCode = (row, point) => (point.number ? [row.symbol, point.number].filter(Boolean).join("-") : "");
 
 async function loadSummary() {
   const test = milestoneSection.value?.newest;
@@ -483,8 +493,10 @@ async function saveSummary() {
       key: table.key, title: table.title, hidden: table.hidden ?? [],
       rows: table.rows.map((row) => ({
         symbol: row.symbol, hidden: row.hidden ?? [],
-        strengths: row.strengths.map((point) => point.text).filter((text) => text.trim()),
-        weaknesses: row.weaknesses.map((point) => point.text).filter((text) => text.trim()),
+        ...Object.fromEntries(["strengths", "weaknesses"].flatMap((kind) => {
+          const kept = row[kind].filter((point) => point.text.trim());
+          return [[kind, kept.map((point) => point.text)], [`${kind}_numbers`, kept.map((point) => point.number ?? null)]];
+        })),
       })),
     }));
     const { data } = await axios.put(`api/reports/summaries/${summary.value.evaluationId}`, { tables });
@@ -511,8 +523,14 @@ function planFromSummary(test) {
   return (test?.result?.summary ?? []).flatMap((group) => (group.weak ?? []).filter((point) => point.question).map((point) => planGoal({
     level_id: group.level_id ?? null, general_goal_id: group.general_goal_id ?? null, general_goal: group.general_goal ?? "",
     domain: group.domain ?? "", domain_symbol: group.domain_symbol ?? "", symbol: group.symbol ?? "",
-    weakness: point.question, goal: point.goal ?? "",
+    number: point.number ?? null, weakness: point.question, goal: point.goal ?? "",
   })));
+}
+// A plan saved before goals kept their question's number gets it from the same weakness in the newest test.
+function withSummaryNumbers(goals, test) {
+  const numbers = new Map((test?.result?.summary ?? []).flatMap((group) => (group.weak ?? [])
+    .filter((point) => point.number).map((point) => [`${group.general_goal_id}|${point.question}`, point.number])));
+  return goals.map((goal) => (goal.number ? goal : { ...goal, number: numbers.get(`${goal.general_goal_id}|${goal.weakness}`) ?? null }));
 }
 
 async function loadPlan() {
@@ -521,7 +539,7 @@ async function loadPlan() {
   plan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
   try {
     const { data } = await axios.get(`api/reports/plans/${test.id}`);
-    plan.value.goals = data.plan ? data.plan.goals.map(planGoal) : planFromSummary(test);
+    plan.value.goals = data.plan ? withSummaryNumbers(data.plan.goals, test).map(planGoal) : planFromSummary(test);
     plan.value.hidden = [...(data.plan?.hidden ?? [])];
     plan.value.saved = Boolean(data.plan);
     plan.value.savedAt = data.plan?.updated_at ?? null;
@@ -532,7 +550,7 @@ async function loadPlan() {
   }
 }
 
-// The plan by level (lowest first), then by general goal, numbered inside it (M-1, M-2...).
+// The plan by level (lowest first), then by general goal; each goal coded by its question's number in the domain (M-3).
 const planLevels = computed(() => {
   if (!plan.value) return [];
   const names = new Map((milestoneSection.value?.newest?.result?.levels ?? []).map((level) => [String(level.level_id), level]));
@@ -567,7 +585,8 @@ function setPlanHidden(key, hidden) {
   plan.value.hidden = [...list];
   touchPlan();
 }
-const goalCode = (group, index) => [group.symbol, index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-");
+// The symbol and the question's number in its domain (M-3); a goal written by hand takes its place in the group.
+const goalCode = (group, index, goal) => [group.symbol, goal?.number || index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-");
 
 function touchPlan() {
   if (plan.value) plan.value.dirty = true;
@@ -575,7 +594,7 @@ function touchPlan() {
 function addPlanGoal(group) {
   const last = group.goals[group.goals.length - 1];
   const at = plan.value.goals.indexOf(last) + 1;
-  plan.value.goals.splice(at, 0, planGoal({ ...last, id: undefined, weakness: "", goal: "" }));
+  plan.value.goals.splice(at, 0, planGoal({ ...last, id: undefined, number: null, weakness: "", goal: "" }));
   touchPlan();
 }
 function removePlanGoal(goal) {
@@ -1138,6 +1157,7 @@ function back() {
                       <td>
                         <ul class="rx-plan-points">
                           <li v-for="point in row[kind]" :key="point.id">
+                            <b v-if="pointCode(row, point)" class="rx-point-code ltr">{{ pointCode(row, point) }}</b>
                             <EditableText v-model="point.text" block multiline @update:modelValue="touchSummary" />
                             <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
                               @click="removeSummaryPoint(row, kind, point)"><i class="pi pi-trash" aria-hidden="true" /></button>
@@ -1207,7 +1227,7 @@ function back() {
                     </th>
                   </tr>
                   <tr v-for="(goal, g) in group.goals" :key="goal.key">
-                    <td class="rx-sum-num ltr">{{ goalCode(group, g) }}</td>
+                    <td class="rx-sum-num ltr">{{ goalCode(group, g, goal) }}</td>
                     <td><EditableText v-model="goal.goal" block multiline :placeholder="$t('ereport.plan_goal')" @update:modelValue="touchPlan" /></td>
                     <td class="rx-plan-control-col rx-screen-only">
                       <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')" @click="removePlanGoal(goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
@@ -1262,7 +1282,7 @@ function back() {
                 </thead>
                 <tbody>
                   <tr v-for="(goal, g) in group.goals" :key="goal.id" :class="{ 'rx-print-hidden': !isTracked(goal), 'is-off': !isTracked(goal) }">
-                    <td class="rx-track-num ltr"><b>{{ goal.code || goalCode(group, g) }}</b></td>
+                    <td class="rx-track-num ltr"><b>{{ goal.code || goalCode(group, g, goal) }}</b></td>
                     <td>
                       {{ goal.goal || goal.weakness }}
                       <span class="rx-track-controls rx-screen-only">
@@ -1470,6 +1490,9 @@ function back() {
 <style scoped>
 .rx-plan-points { margin: 0; padding: 0; list-style: none; }
 .rx-plan-points li { display: flex; align-items: start; gap: .5rem; margin-bottom: .4rem; }
+/* a point's code (M-3) before its text */
+.rx-point-code { flex: none; min-width: 2.6em; color: #135c65; font-weight: 800; white-space: nowrap; }
+@media print { .rx-point-code { margin-inline-end: .35em; } }
 .rx-plan-points :deep(.rx-edit) { flex: 1; }
 .rx-plan-control { border: 0; border-radius: 5px; padding: .3rem .5rem; cursor: pointer; font: inherit; font-size: 9pt; }
 .rx-remove-point { color: #b91c1c; background: #fef2f2; flex: none; }

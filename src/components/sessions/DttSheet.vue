@@ -1,7 +1,8 @@
 <script setup>
 // The DTT sheet of one MT step of a goal, as the paper form: Date and Trainer filled in (editable), Phase and SD/SΔ
 // empty, 10 trials with a Response (C, I, P or NR), prompt and notes, then % correct and Next. A VB-MAPP (milestone)
-// goal also has the paper's Approx table beside it: 10 rows of Approx, C, P and date, all free text. Saving goes back
+// goal also has the paper's «Novel» table beside it: 10 rows of Approx, Item and Date, all free text (C and P of rows
+// written before are kept as they were). Saving goes back
 // to the goals table; leaving the session time saves it too. With `preset` it only shows a sheet already loaded (a
 // generalization request sent to another therapist), read-only.
 import axios from "axios";
@@ -31,7 +32,7 @@ const dirty = ref(false);
 const url = () => `api/program-sessions/${props.sessionId}/goals/${props.goal.id}/dtt/${props.step}`;
 
 const milestone = ref(props.forceMilestone || Boolean(props.goal.milestone));
-const blankApprox = () => Array.from({ length: 10 }, () => ({ approx: "", c: "", p: "", date: "" }));
+const blankApprox = () => Array.from({ length: 10 }, () => ({ date: "", item: "", approx: "" }));
 const blank = () => ({
   date: moment().format("YYYY-MM-DD"), trainer: props.therapist, phase: "", sd: "", percent_correct: "", next: "",
   trials: Array.from({ length: 10 }, () => ({ response: null, prompt: "", notes: "" })),
@@ -40,7 +41,8 @@ const blank = () => ({
 
 const fromSaved = (saved) => saved
   ? { date: saved.date, trainer: saved.trainer ?? "", phase: saved.phase ?? "", sd: saved.sd ?? "", percent_correct: saved.percent_correct ?? "",
-    next: saved.next ?? "", trials: saved.trials, approx: saved.approx?.length ? saved.approx : blankApprox() }
+    next: saved.next ?? "", trials: saved.trials,
+    approx: saved.approx?.length ? saved.approx.map((row) => ({ date: "", item: "", approx: "", ...row })) : blankApprox() }
   : blank();
 
 onMounted(async () => {
@@ -138,17 +140,17 @@ defineExpose({ saveIfDirty });
             </tr>
           </tbody>
         </table>
-        <!-- VB-MAPP goals: the paper's Approx table, every cell free text. -->
+        <!-- VB-MAPP goals: the paper's «Novel» table, every cell free text. -->
         <table v-if="milestone" class="dtt-table dtt-approx">
           <thead>
-            <tr><th>Approx</th><th class="dtt-cp">C</th><th class="dtt-cp">P</th><th class="dtt-date">date</th><th class="dtt-num" /></tr>
+            <tr><th colspan="4" class="dtt-novel">Novel</th></tr>
+            <tr><th>Approx</th><th>Item</th><th class="dtt-date">Date</th><th class="dtt-num" /></tr>
           </thead>
           <tbody>
             <tr v-for="(row, i) in sheet.approx" :key="i" :style="{ '--d': `${i * 30}ms` }">
               <td><input v-model="row.approx" :disabled="!canEdit" :aria-label="`Approx ${i + 1}`" /></td>
-              <td class="dtt-cp"><input v-model="row.c" :disabled="!canEdit" :aria-label="`C ${i + 1}`" /></td>
-              <td class="dtt-cp"><input v-model="row.p" :disabled="!canEdit" :aria-label="`P ${i + 1}`" /></td>
-              <td class="dtt-date"><input v-model="row.date" :disabled="!canEdit" :aria-label="`date ${i + 1}`" /></td>
+              <td><input v-model="row.item" :disabled="!canEdit" :aria-label="`Item ${i + 1}`" /></td>
+              <td class="dtt-date"><input v-model="row.date" :disabled="!canEdit" :aria-label="`Date ${i + 1}`" /></td>
               <td class="dtt-num"><b>{{ i + 1 }}</b></td>
             </tr>
           </tbody>
@@ -174,9 +176,8 @@ defineExpose({ saveIfDirty });
 .dtt-paper.has-approx { grid-template-columns: minmax(0, 1fr) minmax(15rem, 22rem); max-width: 86rem; column-gap: .8rem; }
 .dtt-paper.has-approx .dtt-fields { grid-column: 1 / -1; }
 .dtt-approx { animation: dtt-pop .35s .1s cubic-bezier(.34, 1.56, .64, 1) both; }
-.dtt-approx .dtt-cp { width: 2.6rem; text-align: center; }
-.dtt-approx .dtt-cp input { text-align: center; font-weight: 800; }
-.dtt-approx .dtt-date { width: 5.5rem; }
+.dtt-approx .dtt-novel { background: #475569; color: #fff; letter-spacing: .04em; text-align: center; }
+.dtt-approx .dtt-date { width: 6rem; }
 .dtt-approx .dtt-num { width: 2.2rem; text-align: center; background: #f8fafc; }
 .dtt-fields label { display: flex; align-items: center; gap: .4rem; font-weight: 700; color: #0f3d43; font-size: .85rem; white-space: nowrap; }
 .dtt-fields input { flex: 1; min-width: 0; border: 0; border-bottom: 1.5px solid #94a3b8; padding: .2rem .1rem; font: inherit; font-weight: 500; background: transparent; outline: none; }

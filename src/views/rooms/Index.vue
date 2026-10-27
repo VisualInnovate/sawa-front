@@ -8,6 +8,7 @@ import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
 import { workTypeLabel } from "@/utils/employeeWorkTypes";
+import { roomCategoryLabel, savedCategories } from "@/utils/roomCategories";
 import RoomActivities from "@/components/activities/RoomActivities.vue";
 const toast = useToast()
 const router = useRouter()
@@ -170,10 +171,20 @@ const initFilters = () => {
             </template>
            </Column>
 
+           <Column :header='$t("typeroom")' header-style="min-width:9rem;">
+            <template #body="slotProps">
+              <div class="flex flex-wrap gap-1">
+                <Tag v-for="category in savedCategories(slotProps.data)" :key="category" :value="roomCategoryLabel(t, category)" class="whitespace-nowrap" />
+              </div>
+            </template>
+           </Column>
+
            <Column field="periods" :header='$t("room_periods")' header-style="min-width:10rem;">
             <template #body="slotProps">
               <div class="flex flex-wrap gap-1">
-                <Tag v-for="period in slotProps.data.periods ?? []" :key="period" :value="workTypeLabel(t, period)" severity="secondary" class="whitespace-nowrap" />
+                <!-- With the room's own hours of the period when it has them (else «أوقات البرامج»). -->
+                <Tag v-for="period in slotProps.data.periods ?? []" :key="period" severity="secondary" class="whitespace-nowrap"
+                  :value="slotProps.data.period_hours?.[period] ? `${workTypeLabel(t, period)} ${slotProps.data.period_hours[period].start}–${slotProps.data.period_hours[period].end}` : workTypeLabel(t, period)" />
               </div>
             </template>
            </Column>

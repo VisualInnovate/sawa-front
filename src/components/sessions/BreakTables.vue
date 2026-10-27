@@ -4,8 +4,8 @@
 // minutes: the same first three, then 5min … 50min and the breaks.
 // Date is picked on a calendar (kept as YYYY-MM-DD, shown dd/mm/yyyy), Session/therapist is typed, Place is one of
 // two buttons, inside or outside (pressed again it is cleared); an older typed date or place is shown as it is.
-// A mark cell is "/" or empty (a click toggles it); the breaks cell holds several "/" (a click adds one, the small
-// minus removes one). Each table prints on its own landscape page.
+// A mark cell is "/" or empty (a click toggles it); the breaks cell is the row's total of them, a "/" each with the
+// number in its corner. Each table prints on its own landscape page.
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
@@ -35,9 +35,12 @@ function commit(mutate) {
   emit("change", next);
 }
 const setText = (key, row, field, value) => commit((next) => { next[key][row][field] = value; });
-const toggle = (key, row, col) => props.editable && commit((next) => { next[key][row].marks[col] = !next[key][row].marks[col]; });
-const addBreak = (key, row) => props.editable && commit((next) => { next[key][row].breaks = Math.min(30, next[key][row].breaks + 1); });
-const removeBreak = (key, row) => props.editable && commit((next) => { next[key][row].breaks = Math.max(0, next[key][row].breaks - 1); });
+// The breaks of a row = its "/" marks; saved with the row too, so what is stored matches what is shown.
+const breaksOf = (row) => (row.marks ?? []).filter(Boolean).length;
+const toggle = (key, row, col) => props.editable && commit((next) => {
+  next[key][row].marks[col] = !next[key][row].marks[col];
+  next[key][row].breaks = breaksOf(next[key][row]);
+});
 
 // Date: the cell opens the browser's calendar of a hidden date input.
 const dateInputs = {};
@@ -123,13 +126,12 @@ defineExpose({ print });
                 :aria-label="`${table.heads[c]} ${r + 1}`" @click="toggle(table.key, r, c)" @keydown.enter.space.prevent="toggle(table.key, r, c)">
                 <Transition name="bt-pop"><span v-if="mark" class="bt-slash">/</span></Transition>
               </td>
-              <td class="bt-breaks-cell" :role="editable ? 'button' : undefined" :tabindex="editable ? 0 : undefined"
-                @click="addBreak(table.key, r)" @keydown.enter.space.prevent="addBreak(table.key, r)">
+              <!-- The row's total: a "/" per mark, and the number in the corner. -->
+              <td class="bt-breaks-cell" :aria-label="`${$t('break_count_head')} ${r + 1}: ${breaksOf(row)}`">
                 <TransitionGroup name="bt-pop" tag="span" class="bt-slashes ltr">
-                  <span v-for="n in row.breaks" :key="n">/</span>
+                  <span v-for="n in breaksOf(row)" :key="n">/</span>
                 </TransitionGroup>
-                <button v-if="editable && row.breaks" type="button" class="bt-minus bt-no-print" :aria-label="$t('remove')"
-                  @click.stop="removeBreak(table.key, r)"><i class="pi pi-minus" /></button>
+                <b v-if="breaksOf(row)" class="bt-total ltr">{{ breaksOf(row) }}</b>
               </td>
             </tr>
           </tbody>
@@ -175,15 +177,16 @@ defineExpose({ print });
 .bt-place-text.is-inside { color: #0f766e; }
 .bt-place-text.is-outside { color: #b45309; }
 .bt-old { width: 100%; color: #92400e; font-size: .62rem; }
-.bt-mark-cell, .bt-breaks-cell { position: relative; cursor: pointer; transition: background .15s; user-select: none; }
-.is-readonly .bt-mark-cell, .is-readonly .bt-breaks-cell { cursor: default; }
-.bt-root:not(.is-readonly) .bt-mark-cell:hover, .bt-root:not(.is-readonly) .bt-breaks-cell:hover { background: #f0fdfa; }
+.bt-mark-cell { position: relative; cursor: pointer; transition: background .15s; user-select: none; }
+.bt-breaks-cell { position: relative; padding: 0 1rem !important; }
+.is-readonly .bt-mark-cell { cursor: default; }
+.bt-root:not(.is-readonly) .bt-mark-cell:hover { background: #f0fdfa; }
 .bt-mark-cell.is-on { background: #ecfdf5; }
 .bt-slash, .bt-slashes { font-weight: 800; color: #0f766e; font-size: 1.05rem; line-height: 1; }
-.bt-slashes { display: inline-flex; letter-spacing: .05em; }
-.bt-minus { position: absolute; inset-inline-end: 2px; top: 50%; transform: translateY(-50%); width: 1.1rem; height: 1.1rem; border: 0; border-radius: 50%;
-  background: #fee2e2; color: #b91c1c; font-size: .55rem; display: grid; place-items: center; opacity: 0; transition: opacity .15s; cursor: pointer; }
-.bt-breaks-cell:hover .bt-minus, .bt-minus:focus { opacity: 1; }
+.bt-slashes { display: inline-flex; flex-wrap: wrap; justify-content: center; letter-spacing: .05em; }
+/* the number in the cell's corner */
+.bt-total { position: absolute; top: 1px; right: 2px; min-width: 1rem; padding: 0 .2rem; border-radius: 999px; background: #135c65; color: #fff;
+  font-size: .62rem; font-weight: 800; line-height: 1rem; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .bt-pop-enter-active { animation: bt-pop .25s cubic-bezier(.34, 1.56, .64, 1); }
 .bt-pop-leave-active { animation: bt-pop .15s reverse ease-in; }
 @keyframes bt-pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }

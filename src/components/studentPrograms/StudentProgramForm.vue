@@ -292,7 +292,7 @@ function chooseSubstitute(option) {
   keepSlots(slots);
 }
 const substituteStatus = (option) => ({
-  not_suitable: t("sp_substitute_not_suitable"), outside_shift: t("sp_outside_shift"),
+  not_suitable: t("sp_substitute_not_suitable"), outside_shift: t("sp_outside_shift"), room_hours: t("sp_room_hours"), room_activity: t("sp_room_activity"),
 }[option.reason] ?? (option.available_from ? t("sp_no_vacancy_from", { date: option.available_from }) : t("sp_no_vacancy")));
 
 async function save() {
@@ -394,6 +394,7 @@ function slotStatus(slot) {
   if (slot.reason === "room_not_suitable") return t("sp_room_not_suitable");
   if (slot.reason === "outside_shift") return t("sp_outside_shift");
   if (slot.reason === "room_activity") return t("sp_room_activity");
+  if (slot.reason === "room_hours") return t("sp_room_hours");
   if (["window_full", "outside_window", "outside_hours"].includes(slot.reason)) return t(`sched.${slot.reason}`);
   return slot.available_from ? t("sp_no_vacancy_from", { date: slot.available_from }) : t("sp_no_vacancy");
 }
@@ -705,7 +706,7 @@ function slotStatus(slot) {
         <div class="flex items-center gap-2">
           <Tag v-if="option.available" severity="success" :value="$t('sp_available')" />
           <Tag v-else severity="danger" :value="option.reason === 'outside_shift' ? $t('sp_outside_shift') : option.reason === 'room_activity' ? $t('sp_room_activity')
-            : option.available_from ? $t('sp_no_vacancy_from', { date: option.available_from }) : $t('sp_no_vacancy')" />
+            : option.reason === 'room_hours' ? $t('sp_room_hours') : option.available_from ? $t('sp_no_vacancy_from', { date: option.available_from }) : $t('sp_no_vacancy')" />
           <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || (option.room_id === roomDialog?.slot.room_id && option.therapist_id === roomDialog?.slot.therapist_id)" @click="chooseRoom(option)" />
         </div>
       </div>
