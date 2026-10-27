@@ -1,6 +1,7 @@
 <script setup>
-// Carolina domains (المجال): a title and the general goals under it. A general goal has one domain at most, so
-// picking a goal here moves it from any other domain. Deleting a domain keeps its goals, without a domain.
+// Carolina domains (المجال): a title, its type (one of the two «الأنواع»), a display order within the type and the
+// general goals under it. A general goal has one domain at most, so picking a goal here moves it from any other
+// domain. Deleting a domain keeps its goals, without a domain. Listed by type, then display order.
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FilterMatchMode } from '@primevue/core/api';
@@ -10,10 +11,11 @@ import CarolianaTab from '@/components/CarolianaTab.vue';
 
 const { t } = useI18n();
 const toast = useToast();
-const rows = ref([]), goals = ref([]);
+const rows = ref([]), goals = ref([]), types = ref([]);
 const loading = ref(false), saving = ref(false), dialog = ref(false), deleting = ref(null);
 const errors = ref({});
-const form = ref({ title: '', general_goal_ids: [] });
+const blank = () => ({ title: '', type: null, display_order: null, general_goal_ids: [] });
+const form = ref(blank());
 const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
 const notifyError = () => toast.add({ severity: 'error', summary: t('error'), detail: t('request_failed_retry'), life: 5000 });
 const firstError = (key) => Array.isArray(errors.value[key]) ? errors.value[key][0] : errors.value[key];
@@ -27,19 +29,22 @@ const goalOptions = computed(() => goals.value.map(goal => ({
 async function fetchRows() {
   loading.value = true;
   try {
-    const [domains, list] = await Promise.all([axios.get('/api/carolina-domains'), axios.get('/api/carolina-general-goals')]);
+    const [domains, list, typeList] = await Promise.all([axios.get('/api/carolina-domains'), axios.get('/api/carolina-general-goals'),
+      axios.get('/api/carolina-domains/types')]);
     rows.value = domains.data.data ?? [];
     goals.value = list.data.data ?? [];
+    types.value = (typeList.data.data?.types ?? []).map(({ id, title }) => ({ id, title }));
   } catch { notifyError(); }
   finally { loading.value = false; }
 }
 function openNew() {
-  form.value = { title: '', general_goal_ids: [] };
+  form.value = blank();
   errors.value = {};
   dialog.value = true;
 }
 function edit(row) {
-  form.value = { id: row.id, title: row.title ?? '', general_goal_ids: (row.general_goals ?? []).map(goal => goal.id) };
+  form.value = { id: row.id, title: row.title ?? '', type: row.type ?? null, display_order: row.display_order ?? null,
+    general_goal_ids: (row.general_goals ?? []).map(goal => goal.id) };
   errors.value = {};
   dialog.value = true;
 }
@@ -92,6 +97,13 @@ onMounted(fetchRows);
       </template>
       <template #empty>{{ $t('carolina_ui.no_domains') }}</template>
       <Column field="title" :header="$t('carolina_ui.domain')" sortable />
+      <Column :header="$t('carolina_ui.type')" style="width: 15rem">
+        <template #body="{ data }">
+          <Tag v-if="data.type_title" severity="info" :value="data.type_title" />
+          <Tag v-else severity="warn" :value="$t('carolina_ui.no_type')" />
+        </template>
+      </Column>
+      <Column field="display_order" :header="$t('carolina_ui.display_order')" style="width: 8rem" />
       <Column :header="$t('carolina_ui.general_goals')">
         <template #body="{ data }">
           <div class="range-chips">
@@ -117,6 +129,19 @@ onMounted(fetchRows);
           <label for="domain-title">{{ $t('carolina_ui.domain') }}</label>
           <InputText id="domain-title" v-model="form.title" fluid :disabled="saving" :invalid="Boolean(errors.title)" />
           <small v-if="errors.title" class="field-error">{{ firstError('title') }}</small>
+        </div>
+        <div class="form-field">
+          <label for="domain-type">{{ $t('carolina_ui.type') }} <span class="field-error">*</span></label>
+          <Select inputId="domain-type" v-model="form.type" :options="types" optionLabel="title" optionValue="id" fluid :disabled="saving"
+            :invalid="Boolean(errors.type)" :placeholder="$t('carolina_ui.choose_type')" />
+          <small v-if="errors.type" class="field-error">{{ firstError('type') }}</small>
+        </div>
+        <div class="form-field">
+          <label for="domain-order">{{ $t('carolina_ui.display_order') }}</label>
+          <InputNumber inputId="domain-order" v-model="form.display_order" :min="0" :max="100000" :useGrouping="false" fluid :disabled="saving"
+            :invalid="Boolean(errors.display_order)" />
+          <small class="muted">{{ $t('carolina_ui.display_order_hint') }}</small>
+          <small v-if="errors.display_order" class="field-error">{{ firstError('display_order') }}</small>
         </div>
         <div class="form-field">
           <label for="domain-goals">{{ $t('carolina_ui.general_goals') }}</label>

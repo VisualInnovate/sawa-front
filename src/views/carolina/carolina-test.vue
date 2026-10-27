@@ -46,12 +46,19 @@
       <Message v-else-if="loadError" severity="error" :closable="false" class="lg:col-span-2">{{ loadError }}</Message>
       <Message v-else-if="!tree.length" severity="warn" :closable="false" class="lg:col-span-2">{{ $t("carolina_ui.no_items") }}</Message>
 
-      <!-- A new evaluation: the domains it covers, then their general goals (a goal can be left out). -->
+      <!-- A new evaluation: the domains it covers under their type (a whole type at once), then their general goals
+           (a goal can be left out). -->
       <fieldset v-if="!loading && tree.length && mode === 'new'" class="level-picker lg:col-span-2" :disabled="started || starting">
         <legend>{{ $t("carolina_ui.choose_domains") }}</legend>
         <p>{{ $t("carolina_ui.choose_domains_hint") }}</p>
+        <section v-for="type in typeGroups" :key="type.key" class="type-group">
+        <label class="type-group-head">
+          <Checkbox :modelValue="domainState(type) === 'all'" :indeterminate="domainState(type) === 'some'" binary
+            @update:modelValue="toggleDomain(type, $event)" />
+          <b>{{ type.title }}</b>
+        </label>
         <div class="domain-picker">
-          <div v-for="domain in domains" :key="domain.key" class="domain-option">
+          <div v-for="domain in type.domains" :key="domain.key" class="domain-option">
             <label class="domain-option-head">
               <Checkbox :modelValue="domainState(domain) === 'all'" :indeterminate="domainState(domain) === 'some'" binary
                 @update:modelValue="toggleDomain(domain, $event)" />
@@ -65,6 +72,7 @@
             </div>
           </div>
         </div>
+        </section>
       </fieldset>
 
       <div v-if="date && mode" class="flex flex-column gap-2 lg:col-span-2 carolina-start">
@@ -207,15 +215,27 @@ const domains = computed(() => {
   const list = new Map();
   for (const goal of tree.value) {
     const key = goal.domain?.id ?? 0;
-    if (!list.has(key)) list.set(key, { key, title: goal.domain?.title ?? t("carolina_ui.no_domain"), goals: [] });
+    if (!list.has(key)) list.set(key, { key, title: goal.domain?.title ?? t("carolina_ui.no_domain"), type: goal.domain?.type ?? 0,
+      typeTitle: goal.domain?.type_title ?? t("carolina_ui.no_type"), goals: [] });
     list.get(key).goals.push(goal);
   }
   return [...list.values()];
 });
-// Whether a skill is asked: a new evaluation asks the chosen goals' skills, continuing asks the weaknesses.
-// Editing asks what the evaluation answered.
-const isAsked = (goal, item) => (mode.value === "edit" ? item.id in editAnswers.value
-  : mode.value === "continue" ? Boolean(previous.value[item.id]) : selectedIds.value.includes(goal.id));
+// The domains under their type (the server gives them by type, then display order); a type's goals are all its domains'.
+const typeGroups = computed(() => {
+  const list = [];
+  for (const domain of domains.value) {
+    if (list.at(-1)?.key !== domain.type) list.push({ key: domain.type, title: domain.typeTitle, domains: [], goals: [] });
+    list.at(-1).domains.push(domain);
+    list.at(-1).goals.push(...domain.goals);
+  }
+  return list;
+});
+// Whether a skill is asked: a new evaluation asks the chosen goals' skills of the child's age range and the younger
+// ones (an older range is not shown), continuing asks the weaknesses. Editing asks what the evaluation answered.
+const forChildAge = (age) => childAge.value == null || age.from_month == null || Number(age.from_month) <= Number(childAge.value);
+const isAsked = (goal, item, age) => (mode.value === "edit" ? item.id in editAnswers.value
+  : mode.value === "continue" ? Boolean(previous.value[item.id]) : selectedIds.value.includes(goal.id) && forChildAge(age));
 // skill id -> the response saved in the evaluation being edited.
 const editAnswers = ref({});
 // The shown domains → goals → table rows (the age range cell spans its skills).
@@ -224,7 +244,7 @@ const shownDomains = computed(() => domains.value.map((domain) => ({
   goals: domain.goals.map((goal) => ({
     ...goal,
     rows: goal.ages.flatMap((age) => {
-      const asked = age.items.filter((item) => isAsked(goal, item));
+      const asked = age.items.filter((item) => isAsked(goal, item, age));
       return asked.map((item, i) => ({ ...item, age: age.name, first: i === 0, span: asked.length }));
     }),
   })).filter((goal) => goal.rows.length),
@@ -416,6 +436,9 @@ watch(childId, (value, before) => {
 .level-picker { border: 1px solid var(--sawa-border); border-radius: 12px; padding: 1rem; }
 .level-picker legend { font-weight: 700; color: var(--sawa-primary); }
 .level-picker p { margin: 0 0 .75rem; color: var(--sawa-muted); }
+.type-group { display: flex; flex-direction: column; gap: .6rem; }
+.type-group + .type-group { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--sawa-border); }
+.type-group-head { display: flex; align-items: center; gap: .5rem; color: #135c65; font-size: 1.05rem; cursor: pointer; }
 .domain-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: .75rem; }
 .domain-option { padding: .75rem .9rem; border: 1px solid var(--sawa-border); border-radius: 10px; background: #fff; }
 .domain-option-head { display: flex; align-items: center; gap: .5rem; cursor: pointer; }

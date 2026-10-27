@@ -579,35 +579,13 @@ import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
 import AgeRangeField from "@/components/common/AgeRangeField.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
+import { evaluationTypeGroups } from "@/utils/employeeForm";
 import moment from "moment";
 export default {
   components: { SubstituteSelect, WorkTypeSelect, AgeRangeField },
   data() {
     return {
-      evaluate_types: [
-        {
-          label: "Side Profile",
-          items: [
-            { name: "البعد المعرفي", id: 101 },
-            { name: "البعد العنايه الذاتيه", id: 102 },
-            { name: "البعد الحركي", id: 103 },
-            { name: "البعد الاجتماعي", id: 104 },
-            { name: "البعد الاتصالي", id: 105 },
-          ],
-        },
-        {
-          label: this.$t('other_evaluation_types'),
-          items: [
-            { name: "milestone", id: 2 },
-            { name: "barrier", id: 3 },
-            { name: "ABLLS Academy", id: 4 },
-            { name: "carolina", id: 5 },
-            { name: "Transition", id: 6 },
-            { name: "Ablls OT", id: 7 },
-            { name: "M-CHAT-R", id: 8 },
-          ],
-        },
-      ],
+      evaluate_types: evaluationTypeGroups(this.$t),
       currentStep: 0,
       steps: [
         { label: "Personal Details" },

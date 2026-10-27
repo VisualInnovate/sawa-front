@@ -275,6 +275,26 @@ function chooseRoom(option) {
   keepSlots(slots);
 }
 
+// Giving one session to a substitute of its therapist, in the same room.
+const therapistDialog = ref(null); // { index, slot, options: null while loading }
+async function openSubstitutes(index) {
+  const slot = preview.value.slots[index];
+  therapistDialog.value = { index, slot, options: null };
+  const { data } = await axios.post("api/student-program/substitute-options", {
+    ...body(), day: slot.day, start: slot.start, session_kind: slot.session_kind, treatment_id: slot.treatment_id ?? undefined,
+    room_id: slot.room_id, slot_therapist_id: slot.therapist_id ?? form.value.therapist_id,
+  });
+  if (therapistDialog.value?.index === index) therapistDialog.value.options = data.data;
+}
+function chooseSubstitute(option) {
+  const slots = preview.value.slots.map((slot, i) => (i === therapistDialog.value.index ? { ...slot, therapist_id: option.therapist_id } : slot));
+  therapistDialog.value = null;
+  keepSlots(slots);
+}
+const substituteStatus = (option) => ({
+  not_suitable: t("sp_substitute_not_suitable"), outside_shift: t("sp_outside_shift"),
+}[option.reason] ?? (option.available_from ? t("sp_no_vacancy_from", { date: option.available_from }) : t("sp_no_vacancy")));
+
 async function save() {
   saving.value = true;
   const payload = isInclusion.value ? body() : body({ plan: preview.value.plan, slots: preview.value.slots });
@@ -483,21 +503,9 @@ function slotStatus(slot) {
           <InputNumber v-model="form.weekly_sessions" inputId="sp-weekly" :min="1" :max="100" :invalid="!!errors.weekly_sessions" />
           <small class="text-color-secondary">{{ $t("sp_session_hour") }}</small>
         </div>
-        <div v-if="isClinics && !groupEditable" class="flex flex-column gap-2 justify-center">
-          <Message severity="info" size="small">{{ $t("sp_clinics_individual_only") }}</Message>
-        </div>
-        <div v-else class="flex flex-column gap-2">
-          <label for="sp-group-sessions">{{ $t("sp_group_sessions") }}</label>
-          <InputNumber v-model="form.group_sessions" inputId="sp-group-sessions" :min="0" :readonly="!groupEditable" :inputClass="groupEditable ? '' : 'bg-[#F4F7F8]'" />
-          <small class="text-color-secondary">{{ groupEditable ? $t("sp_group_hint") : $t("sp_group_auto_hint") }}</small>
-        </div>
-        <div class="flex flex-column gap-2 justify-center">
-          <Tag :severity="remaining === 0 ? 'success' : remaining > 0 ? 'warn' : 'danger'"
-            :value="remaining === 0 ? $t('sp_all_assigned') : remaining > 0 ? $t('sp_waiting_treatment', { count: remaining }) : $t('sp_over_quota', { count: -remaining })" />
-          <Button v-if="groupEditable && remaining > 0" icon="pi pi-users" :label="$t('sp_rest_as_group')" variant="text" size="small" class="w-fit" @click="restAsGroup" />
-        </div>
       </div>
 
+      <!-- The individual sessions first, then the group ones (what is left of the quota). -->
       <div class="flex flex-column gap-2">
         <span class="font-semibold">{{ $t("sp_individual_sessions") }}</span>
         <small class="text-color-secondary">{{ $t("sp_individual_hint") }} {{ form.kind === "day" ? $t("sp_individual_day_hint") : "" }}</small>
@@ -524,6 +532,22 @@ function slotStatus(slot) {
           </div>
         </div>
         <Button icon="pi pi-plus" :label="$t('sp_add_individual_row')" variant="outlined" class="w-fit" :disabled="individualLeft <= 0" @click="addIndividualRow" />
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div v-if="isClinics && !groupEditable" class="flex flex-column gap-2 justify-center">
+          <Message severity="info" size="small">{{ $t("sp_clinics_individual_only") }}</Message>
+        </div>
+        <div v-else class="flex flex-column gap-2">
+          <label for="sp-group-sessions">{{ $t("sp_group_sessions") }}</label>
+          <InputNumber v-model="form.group_sessions" inputId="sp-group-sessions" :min="0" :readonly="!groupEditable" :inputClass="groupEditable ? '' : 'bg-[#F4F7F8]'" />
+          <small class="text-color-secondary">{{ groupEditable ? $t("sp_group_hint") : $t("sp_group_auto_hint") }}</small>
+        </div>
+        <div class="flex flex-column gap-2 justify-center">
+          <Tag :severity="remaining === 0 ? 'success' : remaining > 0 ? 'warn' : 'danger'"
+            :value="remaining === 0 ? $t('sp_all_assigned') : remaining > 0 ? $t('sp_waiting_treatment', { count: remaining }) : $t('sp_over_quota', { count: -remaining })" />
+          <Button v-if="groupEditable && remaining > 0" icon="pi pi-users" :label="$t('sp_rest_as_group')" variant="text" size="small" class="w-fit" @click="restAsGroup" />
+        </div>
       </div>
 
       <div class="flex flex-column gap-2">
@@ -636,9 +660,13 @@ function slotStatus(slot) {
             <Tag v-else severity="danger" :value="slotStatus(data)" />
           </template>
         </Column>
-        <Column header-style="width:9rem">
+        <Column header-style="width:11rem">
           <template #body="{ data, index }">
-            <Button v-if="data.start" icon="pi pi-arrow-right-arrow-left" size="small" variant="outlined" :label="$t('sp_change_room')" @click="openRooms(index)" />
+            <div v-if="data.start" class="flex flex-column gap-1">
+              <Button icon="pi pi-arrow-right-arrow-left" size="small" variant="outlined" :label="$t('sp_change_room')" @click="openRooms(index)" />
+              <Button v-if="data.room_id" icon="pi pi-user-edit" size="small" variant="outlined" severity="secondary" :label="$t('sp_change_therapist')"
+                @click="openSubstitutes(index)" />
+            </div>
           </template>
         </Column>
       </DataTable>
@@ -681,6 +709,29 @@ function slotStatus(slot) {
           <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || (option.room_id === roomDialog?.slot.room_id && option.therapist_id === roomDialog?.slot.therapist_id)" @click="chooseRoom(option)" />
         </div>
       </div>
+    </Dialog>
+
+    <Dialog :visible="!!therapistDialog" modal :header="$t('sp_change_therapist')" :style="{ width: '34rem' }" :breakpoints="{ '640px': '94vw' }" @update:visible="therapistDialog = null">
+      <template v-if="therapistDialog">
+        <p class="text-sm text-color-secondary mb-3">
+          {{ dayLabel(t, therapistDialog.slot.day) }} {{ timeRange(therapistDialog.slot.start, therapistDialog.slot.end) }} — {{ rowLabel(therapistDialog.slot) }}
+          · {{ $t("sp_room") }} {{ therapistDialog.slot.room_name }} · {{ therapistDialog.slot.therapist_name }}
+        </p>
+        <div v-if="!therapistDialog.options" class="text-center py-3"><i class="pi pi-spin pi-spinner" aria-hidden="true" /></div>
+        <Message v-else-if="!therapistDialog.options.length" severity="info" size="small">{{ $t("sp_no_substitutes") }}</Message>
+        <div v-for="option in therapistDialog.options ?? []" :key="option.therapist_id" class="flex flex-wrap items-center justify-between gap-2 border-b border-[#EEF1F2] py-2">
+          <div class="flex flex-column">
+            <span class="font-semibold">{{ option.therapist_name }}</span>
+            <span class="text-xs text-color-secondary">{{ $t("sp_source_substitute") }}</span>
+            <span v-if="option.therapist_age_warning" class="text-xs text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <Tag v-if="option.available" severity="success" :value="$t('sp_available')" />
+            <Tag v-else severity="danger" :value="substituteStatus(option)" />
+            <Button size="small" :label="$t('sp_choose')" :disabled="!option.available || option.therapist_id === therapistDialog.slot.therapist_id" @click="chooseSubstitute(option)" />
+          </div>
+        </div>
+      </template>
     </Dialog>
     <Toast />
   </div>

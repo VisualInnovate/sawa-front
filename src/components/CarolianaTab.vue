@@ -2,6 +2,7 @@
 import NavTabs from "./common/NavTabs.vue";
 
 const items = [
+  { to: { name: 'carolina-types' }, label: 'carolina_ui.types', perm: 'carolina domain list' },
   { to: { name: 'carolina-domains' }, label: 'carolina_ui.domains', perm: 'carolina domain list' },
   { to: { name: 'carolina-general-goals' }, label: 'carolina_ui.general_goals', perm: 'carolina general goal list' },
   { to: { name: 'agerange' }, label: 'carolina_ui.age_ranges', perm: 'carolina age range list' },

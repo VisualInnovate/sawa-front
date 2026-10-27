@@ -41,6 +41,7 @@ const mission = ref({
   strengths: [],
   goals: [],
   questions: [],
+  strengths_female: [],
   goals_female: [],
   questions_female: [],
   long_term_goal: '',
@@ -51,11 +52,12 @@ const mission = ref({
 const editors = ref([])
 
 // A boy's and a girl's wording (the field and "<field>_female"), item by item; both may hold {{name}}: an academic
-// skill's goals and questions, and a math / reading / spelling (or Ablls OT) skill's long-term goal and sub goals.
+// skill's strengths/weaknesses, goals and questions, and a math / reading / spelling (or Ablls OT) skill's long-term
+// goal and sub goals.
 const gender = ref('male')
 const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male'))
 const gendered = computed(() => academic.value || !!selectedCategory.value)
-const wordingFields = computed(() => (academic.value ? ['goals', 'questions'] : ['long_term_goal', 'sub_goals']))
+const wordingFields = computed(() => (academic.value ? ['strengths', 'goals', 'questions'] : ['long_term_goal', 'sub_goals']))
 const fieldOf = (field, g = gender.value) => (g === 'male' || !gendered.value ? field : `${field}_female`)
 const genderHasError = (g) => wordingFields.value.some((f) => firstError(fieldOf(f, g)))
 const flushWording = () => editors.value.forEach((ed) => ed?.flush?.())
@@ -137,6 +139,7 @@ onMounted(async () => {
         strengths: [...(data.strengths || [])],
         goals: listOf(data, 'goals', 'goal'),
         questions: listOf(data, 'questions', 'question'),
+        strengths_female: [...(data.strengths_female || [])],
         goals_female: [...(data.goals_female || [])],
         questions_female: [...(data.questions_female || [])],
         long_term_goal: data.long_term_goal || (data.goal && !(data.goals || []).length ? data.goal : '') || '',
@@ -166,8 +169,8 @@ const validate = () => {
   const lists = academic.value ? ['strengths', 'goals', 'questions'] : ['sub_goals']
   for (const f of lists) if (!m[f].some((x) => x.trim())) e[f] = [t('ablls_ui.list_required')]
   if (academic.value) {
-    // The girl's wording needs one item for each of the boy's goals / questions.
-    for (const f of ['goals', 'questions']) {
+    // The girl's wording needs one item for each of the boy's strengths / goals / questions.
+    for (const f of ['strengths', 'goals', 'questions']) {
       const count = m[f].filter((x) => x.trim()).length
       const female = m[`${f}_female`].filter((x) => x.trim()).length
       if (!female) e[`${f}_female`] = [t('ablls_ui.list_required')]
@@ -209,6 +212,7 @@ const save = async () => {
           strengths: clean(m.strengths),
           goals: clean(m.goals),
           questions: clean(m.questions),
+          strengths_female: clean(m.strengths_female),
           goals_female: clean(m.goals_female),
           questions_female: clean(m.questions_female),
         }
@@ -339,21 +343,24 @@ const save = async () => {
           </div>
 
           <div v-else-if="academic" class="mf-lists">
-            <ListEditor
-              :ref="(el) => (editors[0] = el)"
-              v-model="mission.strengths"
-              :label="$t('ablls_ui.strengths')"
-              icon="pi pi-chart-bar"
-              :placeholder="$t('ablls_ui.strengths_ph')"
-              :prefix="codePrefix"
-              :error="firstError('strengths')"
-              required
-              @change="clearError('strengths')"
-            />
             <div class="mf-wording">
               <WordingBar :gender="gender" :title="$t('ablls_ui.wording')" :hint="$t('ablls_ui.name_hint_after')"
                 :has-error="genderHasError" :other-has-text="otherHasText" :undone-gender="undo?.gender"
                 @switch="switchGender" @copy="copyFromOther" @undo="undoCopy" />
+
+              <ListEditor
+                :ref="(el) => (editors[0] = el)"
+                v-model="mission[fieldOf('strengths')]"
+                :label="`${$t('ablls_ui.strengths')} (${$t(gender)})`"
+                icon="pi pi-chart-bar"
+                :placeholder="$t('ablls_ui.strengths_ph')"
+                :prefix="codePrefix"
+                :error="firstError(fieldOf('strengths'))"
+                :reference="mission[fieldOf('strengths', otherGender)]"
+                :reference-label="$t(otherGender)"
+                required
+                @change="clearError(fieldOf('strengths'))"
+              />
 
               <ListEditor
                 :ref="(el) => (editors[1] = el)"

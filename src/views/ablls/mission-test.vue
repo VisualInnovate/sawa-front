@@ -94,7 +94,7 @@
                           <div v-if="(q.strengths || []).length">
                             <b>{{ $t('ablls_ui.strengths') }}</b>
                             <ol class="at-list">
-                              <li v-for="(item, i) in q.strengths" :key="i"><span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}</li>
+                              <li v-for="(item, i) in childListOf(q, 'strengths', null, child)" :key="i"><span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}</li>
                             </ol>
                           </div>
                         </details>
