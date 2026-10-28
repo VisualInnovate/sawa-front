@@ -5,6 +5,7 @@ import { chapters } from "@demo/chapters";
 import { useDemo } from "@demo/store/demo";
 import { backend } from "./backend";
 import { staffByKey } from "../../scenario";
+import { toggleFullscreen } from "./fullscreen";
 
 // المخرج: يعيد بناء حالة الفصول السابقة في الخادم الوهمي (فورياً)، يحمّل الإطارَين على مسارَي الفصل، ثم يشغّل حركته.
 export function useDirector() {
@@ -91,6 +92,8 @@ export function useDirector() {
     else if (e.key === "n" || e.key === "N") store.notesOpen = !store.notesOpen;
     else if (e.key === "s" || e.key === "S") skip();
     else if (e.key === "p" || e.key === "P") togglePause();
+    // F11 يصل إلى الصفحة في بعض المتصفحات فقط؛ وإن لم يصل فملء شاشة المتصفح نفسه يؤدي الغرض.
+    else if (e.key === "f" || e.key === "F" || e.key === "F11") { e.preventDefault(); toggleFullscreen(); }
     else if (/^[0-9]$/.test(e.key)) { const i = Number(e.key); if (i < chapters.length) play(i); }
   }
 

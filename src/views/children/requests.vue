@@ -39,6 +39,9 @@
             <Button v-can="'evaluation request create'" icon="pi pi-refresh" size="small" :label="$t('acc.reassign_evaluation')" @click="reassigning = evalu" />
           </div>
           </div>
+          <div v-can="'evaluation request delete'" class="flex justify-end pt-2">
+            <Button icon="pi pi-trash" size="small" severity="danger" variant="outlined" :label="$t('delete')" @click="deleting = evalu; deleteDialog = true" />
+          </div>
           <!-- <div class="text-center" >
           
               <Button @click="go_evaluate(evalu.id,evalu.type,evalu.child_id)" class="m-auto">{{ $t("evaluation_results") }}</Button>     
@@ -77,7 +80,7 @@
           </div>
           <template #footer>
             <Button  :label='$t("no")' icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />
-            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" />
+            <Button  :label='$t("yes")' icon="pi pi-check" @click="deleteAction" severity="danger" :loading="removing" />
           </template>
         </Dialog>
     </div>
@@ -105,6 +108,9 @@
            details:{},
            deleteDialog:false,
            reassigning: null,
+           deleting: null,
+           removing: false,
+           toast: useToast(),
            billingSeverity,
         // Add other validation rules for the title field
       };
@@ -135,7 +141,22 @@
       },
   
   
-     
+      // An unpaid charge is cancelled with the request; a paid one waits for the accountant.
+      deleteAction() {
+        if (!this.deleting) return;
+        this.removing = true;
+        axios.delete(`api/evaluation-request/${this.deleting.id}`)
+          .then(() => {
+            this.toast.add({ severity: "success", summary: this.$t("deleted_successfully"), life: 3000 });
+            this.deleteDialog = false;
+            this.deleting = null;
+            this.getusers();
+          })
+          .catch((error) => {
+            this.toast.add({ severity: "error", summary: error.response?.data?.message || this.$t("request_failed_retry"), life: 4000 });
+          })
+          .finally(() => { this.removing = false; });
+      },
     },
     mounted() {
     this.child_id=localStorage.getItem("child_id") 

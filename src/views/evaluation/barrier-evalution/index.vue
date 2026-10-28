@@ -45,7 +45,6 @@
             inputId="be-date"
             showIcon
             showButtonBar
-            :minDate="minDate"
             :disabled="started"
             :placeholder="$t('date')"
             fluid
@@ -217,7 +216,6 @@ export default {
       childName: "",
       childGender: "0",
       error: {},
-      minDate: new Date(),
     };
   },
   computed: {
@@ -311,7 +309,6 @@ export default {
           date: evaluation.date ? new Date(evaluation.date) : new Date(), child_age: evaluation.child_age,
           color: evaluation.color || this.answer.color,
         };
-        this.minDate = null;
         const saved = Object.fromEntries(barriers.map((barrier) => [barrier.subtest_id, barrier]));
         // The barriers the evaluation answered, in the screen's order.
         this.allquestion = (subtests.data ?? []).filter((subtest) => saved[subtest.id]);

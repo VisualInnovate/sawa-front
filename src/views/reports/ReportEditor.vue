@@ -147,6 +147,8 @@ function defaults(data) {
     // Tracking: the goals left out of the print, by goal id.
     trackingHidden: [],
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
+    // «وصف التقييمات»: each type's description (from its settings page), printed and edited before its charts.
+    descriptions: Object.fromEntries(Object.entries(data.descriptions ?? {}).map(([type, text]) => [type, String(text ?? "")])),
     // Transition: the points of the newest chosen evaluation ("حصل في السؤال: الإجابة"), editable.
     transitionPoints: Object.fromEntries(groupItems(data.items).filter((group) => group.type === TRANSITION)
       .map((group) => [group.group, transitionPoints(newestOf(group.items), data.child)])),
@@ -174,13 +176,21 @@ function readDraft() {
 
 function applyDraft(base, saved) {
   if (!saved) return base;
-  if (Array.isArray(saved.team)) base.team = base.team.map((row, i) => ({ ...row, ...(saved.team[i] ?? {}) }));
+  // Rows may have been added or deleted, so the saved rows replace the defaults.
+  if (Array.isArray(saved.team)) {
+    base.team = saved.team.filter((row) => row && typeof row === "object")
+      .map((row) => ({ name: String(row.name ?? ""), specialty: String(row.specialty ?? "") }));
+  }
   if (CASE_LEVELS.includes(Number(saved.caseLevel))) base.caseLevel = Number(saved.caseLevel);
   if (typeof saved.caseFree === "string") base.caseFree = saved.caseFree;
   if (Array.isArray(saved.hiddenLevels)) base.hiddenLevels = saved.hiddenLevels.map(String);
   if (Array.isArray(saved.trackingHidden)) base.trackingHidden = saved.trackingHidden.map(Number);
   for (const key of Object.keys(base.behaviors)) {
     if (Array.isArray(saved.behaviors?.[key])) base.behaviors[key] = saved.behaviors[key];
+  }
+  // Reports saved before the descriptions existed take the current ones.
+  for (const key of Object.keys(base.descriptions)) {
+    if (typeof saved.descriptions?.[key] === "string") base.descriptions[key] = saved.descriptions[key];
   }
   for (const key of Object.keys(base.transitionPoints)) {
     if (Array.isArray(saved.transitionPoints?.[key])) base.transitionPoints[key] = saved.transitionPoints[key].map(String);
@@ -1045,6 +1055,7 @@ function back() {
               <th>{{ $t("ereport.name") }}</th>
               <th>{{ $t("ereport.specialty") }}</th>
               <th class="rx-col-sign">{{ $t("ereport.signature") }}</th>
+              <th class="rx-plan-control-col rx-screen-only" />
             </tr>
           </thead>
           <tbody>
@@ -1053,6 +1064,14 @@ function back() {
               <td><EditableText v-model="row.name" block :placeholder="$t('ereport.name')" /></td>
               <td><EditableText v-model="row.specialty" block :placeholder="$t('ereport.specialty')" /></td>
               <td class="rx-col-sign" />
+              <td class="rx-plan-control-col rx-screen-only">
+                <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.delete_row')" :title="$t('ereport.delete_row')"
+                  @click="edits.team.splice(i, 1)"><i class="pi pi-trash" aria-hidden="true" /></button>
+              </td>
+            </tr>
+            <tr class="rx-screen-only">
+              <td colspan="5"><button type="button" class="rx-plan-control rx-add-point" @click="edits.team.push({ name: '', specialty: '' })">
+                <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_row") }}</button></td>
             </tr>
           </tbody>
         </table>
@@ -1095,6 +1114,22 @@ function back() {
 
       <!-- 4+. One section per evaluation type -->
       <template v-for="section in sections" :key="section.group">
+        <!-- The evaluation's description (from «وصف التقييمات», edited here), on the page before its charts; once per type. -->
+        <section v-if="showCharts && edits.descriptions?.[section.type] !== undefined && (section.type !== SIDE_PROFILE || section.group === firstSideProfile)"
+          v-page="{ key: 'about-' + section.type, title: $t('eval_desc.report_title') + ' · ' + typeLabel(section.type, $t) }" class="rx-page"
+          :class="{ 'rx-print-hidden': !edits.descriptions[section.type].trim() }" :data-print-note="$t('ereport.page_not_printed')">
+          <header class="rx-head">
+            <img :src="sawaLogo" alt="Sawa" />
+            <span>{{ typeLabel(section.type, $t) }}</span>
+          </header>
+
+          <h2 class="rx-band">{{ $t("eval_desc.report_title") }} · {{ typeLabel(section.type, $t) }}</h2>
+          <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("eval_desc.report_hint") }}</p>
+          <EditableText v-model="edits.descriptions[section.type]" block multiline class="rx-about" :placeholder="$t('eval_desc.placeholder')" />
+
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
         <template v-if="section.type === MILESTONE">
           <!-- One VB-MAPP form page per chosen test, newest first: its tables (a row per level) and its own charts -->
           <section v-for="test in showCharts ? [...section.tests].reverse() : []" :key="'vb-' + test.key"
@@ -1535,6 +1570,7 @@ function back() {
 .rx-case-body p:last-child { margin-bottom: 0; }
 .rx-case-body b { font-weight: 800; }
 .rx-case-free { margin-top: .5rem; }
+.rx-about { font-size: 12pt; line-height: 1.9; text-align: justify; }
 @media screen { .rx-summary .rx-plan-points li::before { content: "•"; flex: none; line-height: 1.6; } }
 .rx-plan-points.is-static { list-style: disc; padding-inline-start: 1.1em; }
 .rx-plan-points.is-static li { display: list-item; }
@@ -2175,6 +2211,9 @@ function back() {
 }
 .rx-team td {
   height: 16mm;
+}
+.rx-team tr.rx-screen-only td {
+  height: auto;
 }
 .rx-col-num {
   width: 12%;

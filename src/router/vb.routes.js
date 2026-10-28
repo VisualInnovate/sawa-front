@@ -138,6 +138,13 @@ const vb = [
       meta: { permission: ["evaluation age ranges edit"] },
       component: () => import("../views/evaluationAges/Index.vue")
     },
+    // «وصف التقييمات»: one description per evaluation type, printed in reports before its chart.
+    {
+      path: '/evaluation-descriptions',
+      name: 'evaluation-descriptions',
+      meta: { permission: ["evaluation descriptions edit"] },
+      component: () => import("../views/evaluationAges/Descriptions.vue")
+    },
     // «طلبات تعميم الأهداف»: the classes' generalization requests, approved or rejected by the management.
     {
       path: '/goal-generalizations',

@@ -2,8 +2,8 @@
 // A Carolina evaluation's result drawn like the paper form: left to right, the type (written upwards, over its
 // domains), the domain (a row each, «المهارات»), then the age ranges (split into balanced tables when there are more
 // than `perTable`). Each age cell is divided between that domain's skills there, one part per skill with its symbol:
-// + filled red, - plain, +- crossed from the top-left to the bottom-right corner, not answered in grey; the small
-// square in a part's top-right corner is the color of the round that gave the answer.
+// every answered part (+, - or +-) is filled with the color of the round that gave the answer, +- also crossed from
+// the top-left to the bottom-right corner; not answered stays white with a grey symbol.
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -39,7 +39,8 @@ const chunks = computed(() => {
 });
 // A domain's skills in an age range, goal after goal.
 const skillsIn = (domain, range) => domain.goals.flatMap((goal) => (goal.skills ?? []).filter((skill) => skill.age_range_id === range.id));
-const partClass = (skill) => ({ "+": "is-plus", "-": "is-minus", "+-": "is-partial" })[skill.response] ?? "is-empty";
+const partClass = (skill) => (skill.response ? ["is-answered", { "is-partial": skill.response === "+-" }] : "is-empty");
+const partStyle = (skill) => (skill.response && skill.color ? { backgroundColor: "#" + skill.color } : null);
 const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${skill.response})` : t("carolina_ui.not_answered")].filter(Boolean).join(" — ");
 </script>
 
@@ -69,8 +70,7 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
             <th class="cg-domain-name" dir="rtl">{{ domain.title || $t("carolina_ui.no_domain") }}</th>
             <td v-for="range in chunk" :key="range.id" class="cg-cell">
               <div class="cg-parts">
-                <span v-for="skill in skillsIn(domain, range)" :key="skill.id" class="cg-part" :class="partClass(skill)" :title="partTitle(skill)">
-                  <i v-if="skill.color" class="cg-color" :style="{ background: '#' + skill.color }" />
+                <span v-for="skill in skillsIn(domain, range)" :key="skill.id" class="cg-part" :class="partClass(skill)" :style="partStyle(skill)" :title="partTitle(skill)">
                   {{ skill.symbol }}
                 </span>
               </div>
@@ -80,9 +80,7 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
       </table>
 
       <p class="cg-legend">
-        <span><span class="cg-part is-sample is-plus">a</span><span dir="ltr">+</span></span>
-        <span><span class="cg-part is-sample is-minus">a</span><span dir="ltr">-</span></span>
-        <span><span class="cg-part is-sample is-partial">a</span><span dir="ltr">+-</span></span>
+        <span><span class="cg-part is-sample is-answered is-partial">a</span><span dir="ltr">+-</span></span>
         <span><span class="cg-part is-sample is-empty">a</span>{{ $t("carolina_ui.not_answered") }}</span>
         <span v-for="round in result?.rounds ?? []" :key="round.round">
           <i class="cg-swatch" :style="{ background: '#' + round.color }" />{{ $t("carolina_ui.round_n", { n: round.round }) }}
@@ -128,28 +126,30 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
 .cg-parts { display: flex; height: 100%; min-height: 2.2rem; }
 .cg-part { position: relative; display: flex; flex: 1 1 0; align-items: center; justify-content: center; min-width: 0; padding: 0 .3rem; font-size: .88rem; font-weight: 600; direction: ltr; white-space: nowrap; }
 .cg-part + .cg-part { border-left: 1px solid var(--cg-line); }
-.cg-part.is-plus { background: var(--cg-red); color: #111827; }
-/* +-: a line from the top-left corner to the bottom-right one */
-.cg-part.is-partial { background: linear-gradient(to top right, transparent calc(50% - .6px), #374151 calc(50% - .6px), #374151 calc(50% + .6px), transparent calc(50% + .6px)); }
+/* answered: the round's color (set inline); red when an old answer has no round */
+.cg-part.is-answered { background-color: var(--cg-red); color: #111827; }
+/* +-: a line from the top-left corner to the bottom-right one, over the color */
+.cg-part.is-partial { background-image: linear-gradient(to top right, transparent calc(50% - .6px), #374151 calc(50% - .6px), #374151 calc(50% + .6px), transparent calc(50% + .6px)); }
 .cg-part.is-empty { color: #9ca3af; }
-.cg-color { position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; border: 1px solid rgba(17, 24, 39, .45); }
 
 .cg-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem; margin: 0; color: #374151; font-size: .82rem; font-variant-ligatures: none; }
 .cg-legend > span { display: inline-flex; align-items: center; gap: .35rem; }
+.cg-part.is-sample.is-answered { background-color: #fff; }
 .cg-part.is-sample { display: inline-flex; flex: none; width: 1.8rem; height: 1.3rem; border: 1px solid var(--cg-line); font-size: .75rem; }
 .cg-swatch { width: 11px; height: 11px; border: 1px solid rgba(17, 24, 39, .45); }
 
-/* the printed report */
-.is-compact { gap: 3mm; }
-.is-compact .cg-table { font-size: 8pt; }
-.is-compact .cg-type-col { width: 10mm; }
-.is-compact .cg-type span { max-height: max(16mm, calc(var(--rows, 1) * 6.5mm - 1mm)); }
-.is-compact .cg-domain-name-col { width: 36mm; }
-.is-compact .cg-table thead th { height: 7mm; padding: 1mm; }
-.is-compact .cg-range b, .is-compact .cg-head-skills { font-size: 9pt; }
-.is-compact .cg-type, .is-compact .cg-domain-name { font-size: 8pt; }
-.is-compact .cg-cell, .is-compact .cg-parts { height: 6.5mm; min-height: 6.5mm; }
-.is-compact .cg-part { padding: 0 .5mm; font-size: 7.5pt; }
-.is-compact .cg-color { width: 5px; height: 5px; top: 1px; right: 1px; }
-.is-compact .cg-legend { font-size: 7.5pt; }
+/* the printed report: small, so a whole age range fits */
+.is-compact { gap: 2mm; }
+.is-compact .cg-table { font-size: 6.5pt; }
+.is-compact .cg-type-col { width: 7mm; }
+.is-compact .cg-type span { max-height: max(12mm, calc(var(--rows, 1) * 4.6mm - 1mm)); }
+.is-compact .cg-domain-name-col { width: 28mm; }
+.is-compact .cg-table thead th { height: 5mm; padding: .5mm; }
+.is-compact .cg-range b, .is-compact .cg-head-skills { font-size: 7pt; }
+.is-compact .cg-range { font-size: 6.5pt; }
+.is-compact .cg-type, .is-compact .cg-domain-name { padding: .3mm .8mm; font-size: 6.5pt; line-height: 1.25; }
+.is-compact .cg-cell, .is-compact .cg-parts { height: 4.6mm; min-height: 4.6mm; }
+.is-compact .cg-part { padding: 0 .3mm; font-size: 5.5pt; }
+.is-compact .cg-legend { font-size: 6.5pt; }
+.is-compact .cg-part.is-sample { width: 6mm; height: 4mm; font-size: 5.5pt; }
 </style>

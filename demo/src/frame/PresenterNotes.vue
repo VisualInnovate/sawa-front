@@ -19,7 +19,7 @@ const emit = defineEmits<{ close: [] }>();
       <b>سؤال متوقع:</b> {{ chapter.notes.question }}
       <br /><b>الجواب:</b> {{ chapter.notes.answer }}
     </div>
-    <small>المفاتيح: ← التالي · → رجوع · 0–9 قفز · R إعادة · S تخطٍّ · P إيقاف · N هذه النافذة</small>
+    <small>المفاتيح: ← التالي · → رجوع · 0–9 قفز · R إعادة · S تخطٍّ · P إيقاف · F ملء الشاشة · N هذه النافذة</small>
   </aside>
 </template>
 

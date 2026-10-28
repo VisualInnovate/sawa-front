@@ -1,8 +1,8 @@
 <script setup>
 // The DTT sheet of one MT step of a goal, as the paper form: Date and Trainer filled in (editable), Phase and SD/SΔ
 // empty, 10 trials with a Response (C, I, P or NR), prompt and notes, then % correct and Next. A VB-MAPP (milestone)
-// goal also has the paper's «Novel» table beside it: 10 rows of Approx, Item and Date, all free text (C and P of rows
-// written before are kept as they were). Saving goes back
+// goal also has the paper's «Novel» table beside it: 10 rows of Approx and Date (free text) and «C  P» (C or P; the
+// Item, C and P of rows written before are kept as they were). Saving goes back
 // to the goals table; leaving the session time saves it too. With `preset` it only shows a sheet already loaded (a
 // generalization request sent to another therapist), read-only.
 import axios from "axios";
@@ -32,7 +32,8 @@ const dirty = ref(false);
 const url = () => `api/program-sessions/${props.sessionId}/goals/${props.goal.id}/dtt/${props.step}`;
 
 const milestone = ref(props.forceMilestone || Boolean(props.goal.milestone));
-const blankApprox = () => Array.from({ length: 10 }, () => ({ date: "", item: "", approx: "" }));
+const CP = ["C", "P"];
+const blankApprox = () => Array.from({ length: 10 }, () => ({ date: "", cp: "", approx: "" }));
 const blank = () => ({
   date: moment().format("YYYY-MM-DD"), trainer: props.therapist, phase: "", sd: "", percent_correct: "", next: "",
   trials: Array.from({ length: 10 }, () => ({ response: null, prompt: "", notes: "" })),
@@ -42,7 +43,7 @@ const blank = () => ({
 const fromSaved = (saved) => saved
   ? { date: saved.date, trainer: saved.trainer ?? "", phase: saved.phase ?? "", sd: saved.sd ?? "", percent_correct: saved.percent_correct ?? "",
     next: saved.next ?? "", trials: saved.trials,
-    approx: saved.approx?.length ? saved.approx.map((row) => ({ date: "", item: "", approx: "", ...row })) : blankApprox() }
+    approx: saved.approx?.length ? saved.approx.map((row) => ({ date: "", cp: "", approx: "", ...row })) : blankApprox() }
   : blank();
 
 onMounted(async () => {
@@ -67,6 +68,11 @@ watch(sheet, () => { dirty.value = true; }, { deep: true });
 const setResponse = (row, value) => {
   if (!props.canEdit) return;
   row.response = row.response === value ? null : value;
+};
+// «C  P»: one of the two; choosing it again clears it.
+const setCp = (row, value) => {
+  if (!props.canEdit) return;
+  row.cp = row.cp === value ? "" : value;
 };
 
 async function save(close = true) {
@@ -144,12 +150,17 @@ defineExpose({ saveIfDirty });
         <table v-if="milestone" class="dtt-table dtt-approx">
           <thead>
             <tr><th colspan="4" class="dtt-novel">Novel</th></tr>
-            <tr><th>Approx</th><th>Item</th><th class="dtt-date">Date</th><th class="dtt-num" /></tr>
+            <tr><th>Approx</th><th class="dtt-cp">C&nbsp;&nbsp;P</th><th class="dtt-date">Date</th><th class="dtt-num" /></tr>
           </thead>
           <tbody>
             <tr v-for="(row, i) in sheet.approx" :key="i" :style="{ '--d': `${i * 30}ms` }">
               <td><input v-model="row.approx" :disabled="!canEdit" :aria-label="`Approx ${i + 1}`" /></td>
-              <td><input v-model="row.item" :disabled="!canEdit" :aria-label="`Item ${i + 1}`" /></td>
+              <td class="dtt-cp">
+                <div class="dtt-choices" role="group" :aria-label="`C P ${i + 1}`">
+                  <button v-for="value in CP" :key="value" type="button" class="dtt-chip dtt-chip-sm" :class="[`is-${value.toLowerCase()}`, { 'is-on': row.cp === value }]"
+                    :disabled="!canEdit" :aria-pressed="row.cp === value" @click="setCp(row, value)">{{ value }}</button>
+                </div>
+              </td>
               <td class="dtt-date"><input v-model="row.date" :disabled="!canEdit" :aria-label="`Date ${i + 1}`" /></td>
               <td class="dtt-num"><b>{{ i + 1 }}</b></td>
             </tr>
@@ -178,6 +189,8 @@ defineExpose({ saveIfDirty });
 .dtt-approx { animation: dtt-pop .35s .1s cubic-bezier(.34, 1.56, .64, 1) both; }
 .dtt-approx .dtt-novel { background: #475569; color: #fff; letter-spacing: .04em; text-align: center; }
 .dtt-approx .dtt-date { width: 6rem; }
+.dtt-approx .dtt-cp { width: 6.2rem; text-align: center; }
+.dtt-chip-sm { min-width: 2rem; }
 .dtt-approx .dtt-num { width: 2.2rem; text-align: center; background: #f8fafc; }
 .dtt-fields label { display: flex; align-items: center; gap: .4rem; font-weight: 700; color: #0f3d43; font-size: .85rem; white-space: nowrap; }
 .dtt-fields input { flex: 1; min-width: 0; border: 0; border-bottom: 1.5px solid #94a3b8; padding: .2rem .1rem; font: inherit; font-weight: 500; background: transparent; outline: none; }
