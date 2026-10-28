@@ -62,7 +62,6 @@ const clientErrors = computed(() => {
   const d = serialize();
   const e = {};
   const need = (key, msg = t("careers.err.required")) => empty(d[key]) && (e[key] = msg);
-  need("vacancy_id", t("careers.err.pick_vacancy"));
   if (empty(d.name_ar)) e.name_ar = t("careers.err.required");
   else if (!/^[؀-ۿ\s]+$/.test(d.name_ar)) e.name_ar = t("careers.err.name_arabic");
   else if (!/\S+\s+\S+/.test(d.name_ar) || d.name_ar.length < 5) e.name_ar = t("careers.err.name_full");
@@ -166,17 +165,43 @@ watch(() => form.has_experience, (v) => {
 
 const locating = ref(false);
 const locationError = ref("");
+// The address found for the location (OpenStreetMap; Google's needs billing on the key). It fills the field when
+// it is empty or still holds the last found address; text the candidate typed is kept and the found one offered.
+const foundAddress = ref("");
+let lastFound = "";
+async function addressOf(lat, long) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&lat=${lat}&lon=${long}&accept-language=${ar.value ? "ar" : "en"}`);
+    if (!res.ok) return "";
+    const a = (await res.json()).address ?? {};
+    const street = [a.road, a.house_number].filter(Boolean).join(" ");
+    const parts = [street, a.neighbourhood || a.quarter || a.suburb, a.city || a.town || a.village || a.county || a.state, a.country];
+    return [...new Set(parts.filter(Boolean))].join(ar.value ? "، " : ", ");
+  } catch {
+    return "";
+  }
+}
+function useFoundAddress() {
+  form.address = lastFound = foundAddress.value;
+  foundAddress.value = "";
+}
 function useLocation() {
   locationError.value = "";
+  foundAddress.value = "";
   if (!navigator.geolocation) {
     locationError.value = t("careers.location_unsupported");
     return;
   }
   locating.value = true;
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
+    async (pos) => {
       form.lat = Number(pos.coords.latitude.toFixed(7));
       form.long = Number(pos.coords.longitude.toFixed(7));
+      const address = await addressOf(form.lat, form.long);
+      if (address) {
+        if (!form.address.trim() || form.address === lastFound) form.address = lastFound = address;
+        else if (address !== form.address.trim()) foundAddress.value = address;
+      }
       locating.value = false;
     },
     () => {
@@ -222,11 +247,12 @@ defineExpose({ save });
     <!-- The job -->
     <section class="pp-card pp-card--pad cr-section">
       <h2 class="pp-h3 cr-section__title"><i class="pi pi-briefcase" /> {{ $t("careers.job") }}</h2>
-      <div class="pp-field is-required" :class="{ 'cr-invalid': error('vacancy_id'), 'cr-flag': flagged.has('vacancy_id') }">
+      <div class="pp-field" :class="{ 'cr-invalid': error('vacancy_id'), 'cr-flag': flagged.has('vacancy_id') }">
         <label for="cr-vacancy">{{ $t("careers.vacancy") }}</label>
         <Select inputId="cr-vacancy" v-model="form.vacancy_id" :options="info.vacancies" optionValue="id" :optionLabel="(v) => (ar ? v.title_ar : v.title_en || v.title_ar)"
-          :placeholder="$t('careers.pick')" filter fluid :invalid="!!error('vacancy_id')" @hide="touch('vacancy_id')" />
+          :placeholder="$t('careers.pick')" filter showClear fluid :invalid="!!error('vacancy_id')" @hide="touch('vacancy_id')" />
         <small v-if="error('vacancy_id')" class="error">{{ error("vacancy_id") }}</small>
+        <small v-else class="help">{{ $t("careers.vacancy_optional") }}</small>
       </div>
     </section>
 
@@ -316,6 +342,10 @@ defineExpose({ save });
           <Button type="button" icon="pi pi-map-marker" :label="$t('careers.use_location')" :loading="locating" size="small" @click="useLocation" />
           <span v-if="form.lat" class="help"><i class="pi pi-check-circle text-green-600" /> {{ $t("careers.location_set") }}</span>
           <small v-if="locationError" class="error">{{ locationError }}</small>
+        </div>
+        <div v-if="foundAddress" class="cr-found">
+          <span>{{ $t("careers.found_address", { address: foundAddress }) }}</span>
+          <Button type="button" :label="$t('careers.use_found_address')" size="small" text @click="useFoundAddress" />
         </div>
       </div>
     </section>
