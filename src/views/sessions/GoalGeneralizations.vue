@@ -50,7 +50,7 @@ onMounted(load);
   <div class="sawa-card p-3">
     <Toast />
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <p class="text-xl text-[#135C65] font-bold"><i class="pi pi-share-alt" aria-hidden="true" /> {{ $t("gen_requests_title") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold"><i class="pi pi-share-alt" aria-hidden="true" /> {{ $t("gen_requests_title") }}</p>
       <div class="flex flex-wrap items-center gap-2">
         <SelectButton v-model="status" :options="statuses" optionLabel="label" optionValue="value" :allowEmpty="false" @change="load" />
         <Button icon="pi pi-refresh" variant="outlined" :loading="loading" :aria-label="$t('refresh')" @click="load" />

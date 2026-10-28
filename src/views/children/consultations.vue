@@ -96,10 +96,10 @@ onMounted(load);
 <style scoped>
 .consultations-page { padding: 1.25rem; }
 .consultation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1rem; }
-.consultation-card { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.1rem 1.25rem; border: 1px solid #e2e8f0; border-top: 4px solid var(--sawa-primary, #135c65); border-radius: 14px; background: #fff; }
+.consultation-card { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.1rem 1.25rem; border: 1px solid #e2e8f0; border-top: 4px solid var(--sawa-primary, rgb(var(--bp-135c65))); border-radius: 14px; background: #fff; }
 .consultation-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .consultation-date { display: inline-flex; align-items: center; gap: 0.4rem; color: #0f172a; font-weight: 700; }
-.consultation-date i { color: var(--sawa-primary, #135c65); }
+.consultation-date i { color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .consultation-time { color: #64748b; font-weight: 500; font-size: 0.85rem; }
 .result-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
 .result-chip.is-written { background: #dcfce7; color: #166534; }

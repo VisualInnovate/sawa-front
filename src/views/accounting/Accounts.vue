@@ -23,7 +23,7 @@ const open = (row) => router.push({ name: "accounting-statement", params: { chil
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold m-0">{{ $t("acc.accounts") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold m-0">{{ $t("acc.accounts") }}</p>
     <AccountingTabs />
     <div class="sawa-card p-3">
       <div class="flex justify-end mb-3">

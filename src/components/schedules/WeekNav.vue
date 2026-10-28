@@ -25,7 +25,7 @@ const pick = (value) => { if (value) model.value = weekStart(value); };
     <Button :icon="rtl ? 'pi pi-angle-left' : 'pi pi-angle-right'" variant="outlined" size="small" v-tooltip.top="$t('sch.next_week')" :aria-label="$t('sch.next_week')" @click="move(1)" />
     <DatePicker :modelValue="model" dateFormat="yy-mm-dd" showIcon iconDisplay="input" :manualInput="false" class="w-40" :aria-label="$t('sch.pick_week')"
       @update:modelValue="pick" />
-    <span class="font-semibold text-[#135C65] whitespace-nowrap">{{ label }}</span>
+    <span class="font-semibold text-bp-135c65 whitespace-nowrap">{{ label }}</span>
     <Button icon="pi pi-refresh" variant="outlined" size="small" :loading="loading" v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" @click="$emit('refresh')" />
     <Button icon="pi pi-print" size="small" :label="$t('sch.print')" @click="$emit('print')" />
   </div>

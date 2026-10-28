@@ -263,7 +263,7 @@ onMounted(load);
 
 <style scoped>
 .sawa-assistant {
-  --sa-main: #135c65;
+  --sa-main: rgb(var(--bp-135c65));
   --sa-accent: #ff2a5b;
   position: fixed;
   bottom: 20px;
@@ -280,7 +280,7 @@ onMounted(load);
   background: var(--sa-main);
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 8px 24px rgba(19, 92, 101, 0.35);
+  box-shadow: 0 8px 24px rgb(var(--bp-135c65) / 0.35);
 }
 .sawa-assistant__fab .pi {
   font-size: 1.3rem;

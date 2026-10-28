@@ -3,6 +3,7 @@ import {FilterMatchMode} from '@primevue/core/api'
 import moment from "moment";
 import {ref, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
+import PayrollItemStatus from '@/components/hr/PayrollItemStatus.vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
@@ -56,10 +57,14 @@ const updateStatus=(id,status)=>{
   
     loading.value=true
    
-    axios.get(`/api/financial-advance/change-status/${id}?status=${status}`).then((res)=>{
-        loading.value=false
-        fetchData()
-        });
+    axios.get(`/api/financial-advance/change-status/${id}?status=${status}`).then(()=>{
+      loading.value=false
+      fetchData()
+    }).catch((e)=>{
+      loading.value=false
+      toast.add({severity: 'error', summary: t('error'), detail: e.response?.data?.message || t('mission_error'), life: 4000})
+      fetchData()
+    });
 
 }
 
@@ -229,6 +234,7 @@ const initFilters = () => {
            <Column field="amount" :header='$t("advance_mount")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.amount }}
+              <small v-if="slotProps.data.installments > 1" class="block text-color-secondary">{{ $t('hrpay.over_months', { n: slotProps.data.installments }) }}</small>
             </template>
            </Column>
            <Column field="date" :header='$t("advance_date")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
@@ -238,7 +244,7 @@ const initFilters = () => {
            </Column>
            <Column field="status" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-                <Select  :disabled="!$can('financial advance edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+                <PayrollItemStatus :item="slotProps.data" :can-edit="$can('financial advance edit')" @change="updateStatus(slotProps.data.id,$event)" />
 
                
             </template>
@@ -253,11 +259,11 @@ const initFilters = () => {
             <template #body="slotProps">
               <div class="table-actions">
                 <Button
-                v-can="'financial advance edit'"
+                v-if="!slotProps.data.payroll_id" v-can="'financial advance edit'"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
-                v-can="'financial advance delete'"
+                v-if="!slotProps.data.payroll_id" v-can="'financial advance delete'"
                 icon="pi pi-trash"
                 @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
               </div>
@@ -291,6 +297,13 @@ const initFilters = () => {
                   <label class="w-full text-start" for="username">{{ $t('advance_mount') }}</label>
                 <InputNumber required class="text-center" v-model="advance.amount"  :class="{ 'p-invalid': submitted && !advance.amount}"/>
             </div>
+            <div class="flex flex-column gap-2 mt-3">
+                <label class="w-full text-start" for="adv-installments">{{ $t('hrpay.installments') }}</label>
+                <InputNumber inputId="adv-installments" v-model="advance.installments" :min="1" :max="24" showButtons :placeholder="'1'" :suffix="` ${$t('hrpay.months')}`" />
+                <small v-if="advance.amount && advance.installments > 1" class="text-color-secondary">
+                  {{ $t('hrpay.installment_each', { amount: Math.floor((advance.amount / advance.installments) * 100) / 100 }) }}
+                </small>
+            </div>
            
            <div class="w-full text-center">
             <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
@@ -307,6 +320,13 @@ const initFilters = () => {
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('advance_mount') }}</label>
                 <InputNumber required class="text-center" v-model="advance.amount"  :class="{ 'p-invalid': submitted && !advance.amount}"/>
+            </div>
+            <div class="flex flex-column gap-2 mt-3">
+                <label class="w-full text-start" for="adv-installments">{{ $t('hrpay.installments') }}</label>
+                <InputNumber inputId="adv-installments" v-model="advance.installments" :min="1" :max="24" showButtons :placeholder="'1'" :suffix="` ${$t('hrpay.months')}`" />
+                <small v-if="advance.amount && advance.installments > 1" class="text-color-secondary">
+                  {{ $t('hrpay.installment_each', { amount: Math.floor((advance.amount / advance.installments) * 100) / 100 }) }}
+                </small>
             </div>
            <div class="w-full text-center">
             <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 

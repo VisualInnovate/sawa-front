@@ -57,7 +57,7 @@ onMounted(load);
   <div class="sawa-card p-3">
     <Toast />
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <p class="text-xl text-[#135C65] font-bold">
+      <p class="text-xl text-bp-135c65 font-bold">
         <i class="pi pi-inbox" aria-hidden="true" /> {{ $t("gen_inbox_title") }}
         <Badge v-if="pending" :value="pending" severity="warn" class="ms-1" />
       </p>

@@ -1,13 +1,14 @@
 <script setup>
 // «تواصل معنا»: a message to the academy and its phone, address and e-mail. Open to visitors too; a signed-in
 // parent sees it inside the portal.
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import PageHead from "@/components/parent/PageHead.vue";
 import LocaleSelect from "@/components/LocaleSelect.vue";
 import { useParentStore } from "@/stores/ParentStore";
 import { sendContactMessage, contactErrorText } from "@/utils/contact";
 import logo from "@/views/frontend/views/main/images/logo.png";
+import { siteContacts } from "@/utils/siteBrand";
 
 const { t } = useI18n();
 const parentStore = useParentStore();
@@ -30,19 +31,23 @@ async function submit() {
   }
 }
 
-const CARDS = [
-  { icon: "pi pi-phone", title: "call_now", text: "happy_to_help", value: "0791017001 - 065522688", href: "tel:+962791017001" },
-  { icon: "pi pi-whatsapp", title: "pp.whatsapp", text: "pp.whatsapp_hint", value: "+962 79 101 7001", href: "https://wa.me/962791017001" },
-  { icon: "pi pi-map-marker", title: "address", text: "academy_address", value: "", href: "https://maps.google.com/?q=Sawa+Academy+Amman" },
-  { icon: "pi pi-envelope", title: "support", text: "support_hint", value: "info@sawa.academy", href: "mailto:info@sawa.academy" },
-];
+// Phones, WhatsApp, address and e-mail from «إعدادات الموقع».
+const CARDS = computed(() => {
+  const c = siteContacts();
+  return [
+    c.phones.length && { icon: "pi pi-phone", title: "call_now", text: "happy_to_help", value: c.phones.join(" - "), href: c.telHref(c.phone1), ltr: true },
+    c.whatsappHref && { icon: "pi pi-whatsapp", title: "pp.whatsapp", text: "pp.whatsapp_hint", value: c.phone1, href: c.whatsappHref, ltr: true },
+    c.address && { icon: "pi pi-map-marker", title: "address", text: null, value: c.address, href: c.mapHref },
+    c.email && { icon: "pi pi-envelope", title: "support", text: "support_hint", value: c.email, href: `mailto:${c.email}`, ltr: true },
+  ].filter(Boolean);
+});
 </script>
 
 <template>
   <div :class="parentStore.isAuthenticated ? '' : 'pp-shell pp-guest'">
     <header v-if="!parentStore.isAuthenticated" class="pp-guest__bar">
       <div class="pp-container pp-row pp-between" style="min-height: 72px">
-        <a href="/"><img :src="logo" alt="Sawa" style="height: 44px" /></a>
+        <a href="/"><img :src="$siteLogo(logo)" alt="Sawa" style="height: 44px" /></a>
         <div class="pp-row">
           <LocaleSelect />
           <router-link :to="{ name: 'parentLogin' }" class="pp-btn pp-btn--soft pp-btn--sm">{{ $t("sign_in") }}</router-link>
@@ -73,8 +78,8 @@ const CARDS = [
               <span class="pp-item__icon pp-item__icon--magenta"><i :class="card.icon" /></span>
               <div class="pp-item__body">
                 <p class="pp-item__title">{{ $t(card.title) }}</p>
-                <p class="pp-item__meta">{{ $t(card.text) }}</p>
-                <p v-if="card.value" class="pp-item__meta font-bold text-[var(--pp-teal-900)]" dir="ltr">{{ card.value }}</p>
+                <p v-if="card.text" class="pp-item__meta">{{ $t(card.text) }}</p>
+                <p v-if="card.value" class="pp-item__meta font-bold text-[var(--pp-teal-900)]" :dir="card.ltr ? 'ltr' : undefined">{{ card.value }}</p>
               </div>
             </a>
           </div>
@@ -90,7 +95,7 @@ const CARDS = [
 }
 .pp-guest__bar {
   background: rgba(252, 249, 248, 0.9);
-  border-bottom: 1px solid rgba(28, 103, 114, 0.08);
+  border-bottom: 1px solid rgb(var(--bp-1c6772) / 0.08);
 }
 .pp-contact {
   grid-template-columns: 1fr;

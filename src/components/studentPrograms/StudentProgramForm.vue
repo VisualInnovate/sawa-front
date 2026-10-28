@@ -41,6 +41,8 @@ const loading = ref(true);
 const form = ref({
   // The end date starts at the end of the year; it follows the start date's year until changed by hand.
   child_id: null, kind: null, therapist_id: null, start_date: null, end_date: endOfYear(new Date()),
+  // Clinics: the substitute therapists, in the user's order.
+  substitute_ids: [],
   weekly_sessions: null, individual_rows: [], group_sessions: 0, days: [],
   inclusion_type: "inclusion", inclusion_english: false, hours: {},
   // Scheduling: the skills needed, the program's from–to window, and its own criteria order (else the default).
@@ -129,6 +131,7 @@ function body(extra = {}) {
     start_date: isoDate(form.value.start_date), end_date: isoDate(form.value.end_date),
     program_id: props.programId ?? undefined, scheduling: scheduling.value,
   };
+  if (isClinics.value) base.substitute_ids = form.value.substitute_ids;
   if (isInclusion.value) {
     return { ...base, inclusion_type: form.value.inclusion_type, inclusion_english: form.value.inclusion_type === "inclusion" && form.value.inclusion_english, hours: inclusionHours.value };
   }
@@ -190,6 +193,23 @@ const therapistOptions = computed(() => therapists.value.map((row) => ({
   disabled: row.available === false,
 })));
 const chosenTherapist = computed(() => therapists.value.find((row) => row.id === form.value.therapist_id));
+// Clinics substitutes: any other therapist of clinics, added one by one and ordered by hand.
+const therapistName = (id) => therapists.value.find((row) => row.id === id)?.name ?? `#${id}`;
+const substituteChoices = computed(() => therapists.value
+  .filter((row) => row.id !== form.value.therapist_id && !form.value.substitute_ids.includes(row.id)));
+const substitutePick = ref(null);
+function addSubstitute(id) {
+  if (id) form.value.substitute_ids.push(id);
+  substitutePick.value = null;
+}
+function moveSubstitute(index, step) {
+  const ids = form.value.substitute_ids;
+  [ids[index], ids[index + step]] = [ids[index + step], ids[index]];
+}
+// The program's therapist is not their own substitute.
+watch(() => form.value.therapist_id, (id) => {
+  form.value.substitute_ids = form.value.substitute_ids.filter((other) => other !== id);
+});
 // Age ranges only warn (the room or therapist is still used).
 const chosenTherapistAgeWarning = computed(() => therapists.value.find((row) => row.id === form.value.therapist_id)?.age_warning);
 
@@ -199,7 +219,10 @@ function defaultHours() {
 
 watch(() => form.value.kind, (kind, old) => {
   if (loading.value || !kind) return;
-  if (old) form.value.therapist_id = null;
+  if (old) {
+    form.value.therapist_id = null;
+    form.value.substitute_ids = [];
+  }
   preview.value = null;
   form.value.days = [...openDays.value];
   if (kind === "inclusion") defaultHours();
@@ -321,6 +344,7 @@ async function loadProgram() {
 
   Object.assign(form.value, {
     child_id: program.student_id, kind: program.kind, therapist_id: program.therapist_id,
+    substitute_ids: (program.substitute_ids ?? []).map(Number),
     start_date: new Date(program.start_date), end_date: new Date(program.end_date),
     weekly_sessions: program.weekly_sessions,
     individual_rows: details.filter((row) => row.session_kind === "individual")
@@ -402,7 +426,7 @@ function slotStatus(slot) {
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold">{{ programId ? $t("sp_edit_title") : $t("sp_add_title") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold">{{ programId ? $t("sp_edit_title") : $t("sp_add_title") }}</p>
   </div>
   <Message v-if="accountingStatus === 'unconfirmed'" severity="warn" class="mb-3">{{ $t("acc.unconfirmed_hint") }}</Message>
   <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
@@ -442,6 +466,27 @@ function slotStatus(slot) {
         <small v-if="chosenTherapistAgeWarning" class="text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}</small>
         <small v-if="isInclusion" class="text-color-secondary">{{ $t("sp_inclusion_therapist_hint") }}</small>
       </div>
+      <div v-if="isClinics" class="flex flex-column gap-2 lg:col-span-2">
+        <label for="sp-substitute-add">{{ $t("sp_substitutes") }}</label>
+        <Select v-model="substitutePick" inputId="sp-substitute-add" :options="substituteChoices" optionLabel="name" optionValue="id" filter
+          :placeholder="$t('sp_substitutes_add')" :invalid="!!errors.substitute_ids" class="w-full lg:w-1/2" @update:modelValue="addSubstitute" />
+        <small class="text-color-secondary">{{ $t("sp_substitutes_hint") }}</small>
+        <small v-if="errors.substitute_ids" class="text-red-600">{{ [errors.substitute_ids].flat()[0] }}</small>
+        <p v-if="!form.substitute_ids.length" class="text-sm text-color-secondary m-0">{{ $t("sp_substitutes_empty") }}</p>
+        <ol v-else class="flex flex-column gap-2 m-0 p-0 list-none">
+          <li v-for="(id, index) in form.substitute_ids" :key="id"
+            class="flex items-center gap-2 border-1 border-[#EEF1F2] border-round px-3 py-2 lg:w-1/2">
+            <span class="font-semibold text-bp-135c65 w-6">{{ index + 1 }}.</span>
+            <span class="flex-1">{{ therapistName(id) }}</span>
+            <Button icon="pi pi-arrow-up" text rounded size="small" :disabled="index === 0" :aria-label="$t('sp_substitute_up')"
+              v-tooltip.top="$t('sp_substitute_up')" @click="moveSubstitute(index, -1)" />
+            <Button icon="pi pi-arrow-down" text rounded size="small" :disabled="index === form.substitute_ids.length - 1"
+              :aria-label="$t('sp_substitute_down')" v-tooltip.top="$t('sp_substitute_down')" @click="moveSubstitute(index, 1)" />
+            <Button icon="pi pi-times" text rounded size="small" severity="danger" :aria-label="$t('sp_substitute_remove')"
+              v-tooltip.top="$t('sp_substitute_remove')" @click="form.substitute_ids.splice(index, 1)" />
+          </li>
+        </ol>
+      </div>
       <div class="flex flex-column gap-2">
         <label for="sp-start">{{ $t("sp_start_date") }}</label>
         <DatePicker v-model="form.start_date" inputId="sp-start" dateFormat="yy-mm-dd" showIcon :invalid="!!errors.start_date"
@@ -460,7 +505,7 @@ function slotStatus(slot) {
 
     <!-- Scheduling: the skills needed, the program's window, the criteria order -->
     <div v-if="form.kind" class="sawa-card p-4 flex flex-column gap-4">
-      <span class="font-semibold text-[#135C65]">{{ $t("sched.title") }}</span>
+      <span class="font-semibold text-bp-135c65">{{ $t("sched.title") }}</span>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="flex flex-column gap-2">
           <label for="sp-skills">{{ $t("sched.skills_needed") }}</label>

@@ -404,7 +404,7 @@ export default {
 .evaluations-toolbar:empty { display: none; }
 .evaluations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1rem; }
 .evaluation-card {
-  --tone: #135c65; --tone-soft: #e6f4f3;
+  --tone: rgb(var(--bp-135c65)); --tone-soft: #e6f4f3;
   display: flex; flex-direction: column; gap: .85rem; padding: 1.1rem 1.25rem;
   border: 1px solid #e2e8f0; border-top: 4px solid var(--tone); border-radius: 14px; background: #fff;
   box-shadow: 0 1px 2px rgb(15 23 42 / .04); transition: box-shadow .2s, transform .2s;
@@ -414,7 +414,7 @@ export default {
 .evaluation-card.type-2 { --tone: #0f8a7e; --tone-soft: #e3f5f2; }
 .evaluation-card.type-3 { --tone: #d9730d; --tone-soft: #fdf0e3; }
 .evaluation-card.type-4 { --tone: #2563eb; --tone-soft: #e8effd; }
-.evaluation-card.type-5 { --tone: #db2777; --tone-soft: #fce8f1; }
+.evaluation-card.type-5 { --tone: rgb(var(--bs-db2777)); --tone-soft: rgb(var(--bs-fce8f1)); }
 .evaluation-card-header { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
 .evaluation-type-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .7rem; border-radius: 999px; background: var(--tone-soft); color: var(--tone); font-size: .8rem; font-weight: 700; }
 .evaluation-status { padding: .25rem .65rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }

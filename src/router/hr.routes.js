@@ -72,8 +72,55 @@ const hr = [
    {
         path: '/setting', 
         name: 'setting',
-        meta: { permission: ["hr settings list"] },
+        // The labour system has its own permission; the lists theirs.
+        meta: { permission: ["hr settings list", "hr settings edit", "hr country edit", "hr lists list"] },
         component: () => import("../views/hr/setting/index.vue")
+      },
+      // Recruitment: the vacancies and the candidates' board.
+      {
+        path: '/vacancies',
+        name: 'vacancies',
+        meta: { permission: ["vacancies list", "vacancies create", "vacancies edit"] },
+        component: () => import("../views/hr/vacancies/index.vue")
+      },
+      {
+        path: '/candidates',
+        name: 'candidates',
+        meta: { permission: ["candidates list"] },
+        component: () => import("../views/hr/candidates/index.vue")
+      },
+      {
+        path: '/contracts',
+        name: 'contracts',
+        meta: { permission: ["contracts list"] },
+        component: () => import("../views/hr/contracts/index.vue")
+      },
+      // The employee's profile (by user id): data, documents, onboarding, attendance, leaves, money, log.
+      {
+        path: '/employee/:id',
+        name: 'employee-profile',
+        meta: { permission: ["employees list", "employees edit"] },
+        component: () => import("../views/hr/employee-profile/index.vue")
+      },
+      // The reports center: each report also needs the permission of its own data.
+      {
+        path: '/hr-reports',
+        name: 'hr-reports',
+        meta: { permission: ["reports list"] },
+        component: () => import("../views/hr/reports-center/index.vue")
+      },
+      // Everyone opens it: without «onboarding list» it shows only the tasks given to you.
+      {
+        path: '/onboarding',
+        name: 'onboarding',
+        component: () => import("../views/hr/onboarding/index.vue")
+      },
+      // Every HR operation, read only.
+      {
+        path: '/hr-log',
+        name: 'hr-log',
+        meta: { permission: ["hr log list"] },
+        component: () => import("../views/hr/log/index.vue")
       },
 
 
@@ -107,6 +154,14 @@ const hr = [
   name: 'payroll',
   meta: { permission: ["payroll list"] },
   component: () => import("../views/hr/PayRoll/index.vue")
+},
+
+// Overtime requests from the employees' app and the overtime amounts the payroll pays.
+{
+  path: '/overtime',
+  name: 'overtime',
+  meta: { permission: ["overtime list"] },
+  component: () => import("../views/hr/overtime/index.vue")
 },
 
 ///////////////////////////////////////////////bonus

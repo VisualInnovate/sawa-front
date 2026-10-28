@@ -272,8 +272,8 @@ onMounted(load);
 .page-head h2 { margin: 0; color: #0f172a; font-size: 1.3rem; font-weight: 700; }
 .page-head p { margin: 0.2rem 0 0; color: #64748b; }
 .recommendation-list { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
-.recommendation-item { display: flex; align-items: flex-start; gap: 0.9rem; padding: 1rem 1.1rem; border: 1px solid #e2e8f0; border-inline-start: 4px solid var(--sawa-primary, #135c65); border-radius: 0.75rem; background: #fff; }
-.recommendation-number { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; background: #e6f4f3; color: var(--sawa-primary, #135c65); font-weight: 700; }
+.recommendation-item { display: flex; align-items: flex-start; gap: 0.9rem; padding: 1rem 1.1rem; border: 1px solid #e2e8f0; border-inline-start: 4px solid var(--sawa-primary, rgb(var(--bp-135c65))); border-radius: 0.75rem; background: #fff; }
+.recommendation-number { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; background: #e6f4f3; color: var(--sawa-primary, rgb(var(--bp-135c65))); font-weight: 700; }
 .recommendation-body { flex: 1; min-width: 0; }
 .recommendation-body p { margin: 0 0 0.35rem; color: #1e293b; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; }
 .recommendation-body small { color: #94a3b8; }

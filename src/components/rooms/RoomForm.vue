@@ -138,7 +138,7 @@ async function save() {
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold">{{ $t("room") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold">{{ $t("room") }}</p>
   </div>
   <div class="sawa-card">
     <form class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4" @submit.prevent="save">

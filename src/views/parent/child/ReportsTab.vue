@@ -102,7 +102,7 @@ const print = () => window.print();
 .pp-report-head {
   display: none;
   justify-content: space-between;
-  border-bottom: 2px solid #1c6772;
+  border-bottom: 2px solid rgb(var(--bp-1c6772));
   padding-bottom: 0.5rem;
 }
 [dir="ltr"] .rtl-arrow {

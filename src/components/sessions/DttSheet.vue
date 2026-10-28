@@ -173,12 +173,12 @@ defineExpose({ saveIfDirty });
 
 <style scoped>
 .dtt-root { height: 100%; min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: .6rem; }
-.dtt-loading { display: grid; place-items: center; font-size: 2rem; color: #135c65; }
+.dtt-loading { display: grid; place-items: center; font-size: 2rem; color: rgb(var(--bp-135c65)); }
 .dtt-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .dtt-title { display: flex; align-items: center; gap: .7rem; min-width: 0; }
-.dtt-badge { padding: .45rem .7rem; border-radius: 12px; background: linear-gradient(135deg, #135c65, #0f8a7e); color: #fff; font-weight: 900; font-size: 1.1rem;
-  box-shadow: 0 10px 20px -12px #135c65; animation: dtt-pop .4s cubic-bezier(.34, 1.56, .64, 1); }
-.dtt-title b { color: #135c65; }
+.dtt-badge { padding: .45rem .7rem; border-radius: 12px; background: linear-gradient(135deg, rgb(var(--bp-135c65)), #0f8a7e); color: #fff; font-weight: 900; font-size: 1.1rem;
+  box-shadow: 0 10px 20px -12px rgb(var(--bp-135c65)); animation: dtt-pop .4s cubic-bezier(.34, 1.56, .64, 1); }
+.dtt-title b { color: rgb(var(--bp-135c65)); }
 .dtt-title p { margin: 0; color: #475569; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50vw; }
 .dtt-paper { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: .5rem; padding: .8rem 1rem; border-radius: 16px; background: #fff;
   border: 1px solid #e2e8f0; box-shadow: 0 14px 40px -28px rgb(15 23 42 / .7); overflow: hidden; max-width: 64rem; width: 100%; margin-inline: auto; }
@@ -192,12 +192,12 @@ defineExpose({ saveIfDirty });
 .dtt-approx .dtt-cp { width: 6.2rem; text-align: center; }
 .dtt-chip-sm { min-width: 2rem; }
 .dtt-approx .dtt-num { width: 2.2rem; text-align: center; background: #f8fafc; }
-.dtt-fields label { display: flex; align-items: center; gap: .4rem; font-weight: 700; color: #0f3d43; font-size: .85rem; white-space: nowrap; }
+.dtt-fields label { display: flex; align-items: center; gap: .4rem; font-weight: 700; color: rgb(var(--bp-0f3d43)); font-size: .85rem; white-space: nowrap; }
 .dtt-fields input { flex: 1; min-width: 0; border: 0; border-bottom: 1.5px solid #94a3b8; padding: .2rem .1rem; font: inherit; font-weight: 500; background: transparent; outline: none; }
 .dtt-fields input:focus { border-color: #0f8a7e; }
 .dtt-table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-size: .85rem; }
 .dtt-table th, .dtt-table td { border: 1px solid #94a3b8; padding: 0 .3rem; }
-.dtt-table th { background: #eef6f6; font-size: .8rem; height: 1.8rem; }
+.dtt-table th { background: rgb(var(--bp-eef6f6)); font-size: .8rem; height: 1.8rem; }
 .dtt-trial { width: 3.5rem; text-align: center; }
 .dtt-resp { width: 14rem; }
 .dtt-table tbody tr { animation: dtt-row .35s var(--d, 0ms) ease both; }

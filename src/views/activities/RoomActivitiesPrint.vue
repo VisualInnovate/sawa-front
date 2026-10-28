@@ -92,7 +92,7 @@ onBeforeUnmount(() => { document.title = previousTitle; });
           <h1>{{ $t("activities.print_title") }}</h1>
           <p>{{ $t("activities.room") }}: <b>{{ room?.name }}</b></p>
         </div>
-        <img :src="sawaLogo" alt="Sawa" class="wp-logo" />
+        <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="wp-logo" />
         <div class="wp-head-side wp-head-date">
           <p>{{ $t("activities.print_date") }}: <b dir="ltr">{{ today }}</b></p>
         </div>
@@ -121,7 +121,7 @@ onBeforeUnmount(() => { document.title = previousTitle; });
 
       <footer class="wp-foot">
         <div v-for="key in ['supervision', 'students', 'accounting']" :key="key" class="wp-stamp">
-          <img :src="sawaLogo" alt="" />
+          <img :src="$siteLogo(sawaLogo)" alt="" />
           <span>{{ $t("activities.stamp_" + key) }}</span>
         </div>
       </footer>
@@ -132,7 +132,7 @@ onBeforeUnmount(() => { document.title = previousTitle; });
 <style scoped>
 .wp-root { min-height: 100vh; background: #e8edef; color: #111827; }
 .wp-toolbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 1.25rem; background: #fff; border-bottom: 1px solid #e2e8f0; }
-.wp-toolbar strong { color: var(--sawa-primary, #135c65); }
+.wp-toolbar strong { color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .wp-state { padding: 3rem 1rem; text-align: center; color: #64748b; }
 /* A4 landscape */
 .wp-sheet { box-sizing: border-box; display: flex; flex-direction: column; gap: 6mm; width: 297mm; min-height: 210mm; margin: 24px auto; padding: 10mm 12mm; background: #fff; box-shadow: 0 10px 30px -12px rgba(15, 23, 42, .35); -webkit-print-color-adjust: exact; print-color-adjust: exact; }

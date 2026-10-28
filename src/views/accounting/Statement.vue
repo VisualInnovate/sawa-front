@@ -12,7 +12,7 @@ const route = useRoute();
   <div>
     <div class="flex items-center gap-2 p-4">
       <BackButton />
-      <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("acc.statement") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("acc.statement") }}</p>
     </div>
     <AccountingTabs />
     <ChildStatement :childId="route.params.child" />

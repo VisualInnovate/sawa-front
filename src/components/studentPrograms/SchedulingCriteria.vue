@@ -23,7 +23,7 @@ function toggle(index, enabled) {
   <ol class="flex flex-column gap-2 list-none p-0 m-0">
     <li v-for="(row, index) in criteria" :key="row.key" class="flex items-center gap-3 border border-[#EEF1F2] rounded-lg p-2"
       :class="row.enabled ? '' : 'opacity-60'">
-      <span class="w-7 h-7 shrink-0 rounded-full bg-[#E8F1F2] text-[#135C65] font-bold flex items-center justify-center">{{ index + 1 }}</span>
+      <span class="w-7 h-7 shrink-0 rounded-full bg-bp-e8f1f2 text-bp-135c65 font-bold flex items-center justify-center">{{ index + 1 }}</span>
       <div class="flex flex-column grow min-w-0">
         <span class="font-semibold">{{ $t(`sched.${row.key}`) }}</span>
         <small class="text-color-secondary">{{ $t(`sched.${row.key}_hint`) }}</small>

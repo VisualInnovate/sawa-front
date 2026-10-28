@@ -36,7 +36,7 @@ onMounted(async () => {
     <div v-else class="flex flex-column gap-3">
       <div v-for="program in programs" :key="program.id" class="sawa-card p-4 flex flex-column gap-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-lg font-bold text-[#135C65]">{{ programName(t, program) }}</span>
+          <span class="text-lg font-bold text-bp-135c65">{{ programName(t, program) }}</span>
           <Button v-can="'student program list'" icon="pi pi-eye" size="small" variant="outlined" :label="$t('sp_details')"
             @click="router.push({ name: 'show-studentprograme', params: { id: program.id } })" />
         </div>

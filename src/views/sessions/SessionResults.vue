@@ -36,7 +36,7 @@ onMounted(async () => {
       <div class="flex items-center gap-3">
         <Button icon="pi pi-arrow-right" variant="text" rounded :aria-label="$t('back')" @click="router.push({ name: 'sessions' })" />
         <div>
-          <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("session_results") }}</p>
+          <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("session_results") }}</p>
           <p v-if="session" class="text-sm text-color-secondary m-0">
             {{ session.child?.name }} · {{ moment(session.starts_at).format("YYYY-MM-DD HH:mm") }} · {{ session.therapist?.name }}
             · {{ session.treatment?.name ?? sessionKindLabel(t, session.session_kind) }}
@@ -116,11 +116,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.sr-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .8rem; color: #135c65; font-size: 1.05rem; font-weight: 800; }
+.sr-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .8rem; color: rgb(var(--bp-135c65)); font-size: 1.05rem; font-weight: 800; }
 .sr-test { padding: .8rem; border-radius: 12px; background: #f8fafc; }
 .sr-test ol { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .3rem; }
 .sr-test li { display: grid; grid-template-columns: 1.6rem minmax(5rem, 9rem) 1fr 3.5rem auto; align-items: center; gap: .5rem; }
-.sr-letter { width: 1.5rem; height: 1.5rem; border-radius: 7px; display: grid; place-items: center; background: #e0f2f1; color: #135c65; font-weight: 800; }
+.sr-letter { width: 1.5rem; height: 1.5rem; border-radius: 7px; display: grid; place-items: center; background: #e0f2f1; color: rgb(var(--bp-135c65)); font-weight: 800; }
 .sr-bar { height: .45rem; border-radius: 9px; background: #e2e8f0; overflow: hidden; }
 .sr-bar span { display: block; height: 100%; background: #0f8a7e; }
 .sr-sheet { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: .5rem; overflow: hidden; }
@@ -129,7 +129,7 @@ onMounted(async () => {
 .sr-sheet-body .sr-approx { flex: 0 1 20rem; }
 .sr-sheet-head { width: 100%; display: flex; align-items: center; gap: .7rem; padding: .6rem .8rem; border: 0; background: #fff; cursor: pointer; font: inherit; }
 .sr-sheet-head:hover { background: #f8fafc; }
-.sr-mt { padding: .2rem .5rem; border-radius: 8px; background: #135c65; color: #fff; font-weight: 800; }
+.sr-mt { padding: .2rem .5rem; border-radius: 8px; background: rgb(var(--bp-135c65)); color: #fff; font-weight: 800; }
 .sr-counts { display: flex; gap: .3rem; font-size: .75rem; }
 .sr-counts span { padding: .1rem .4rem; border-radius: 6px; background: #f1f5f9; }
 .sr-counts .is-c { background: #d1fae5; } .sr-counts .is-i { background: #fee2e2; } .sr-counts .is-p { background: #fef3c7; }

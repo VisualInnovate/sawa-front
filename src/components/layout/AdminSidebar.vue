@@ -142,16 +142,16 @@ function handleKeydown(event) {
 
 <style scoped>
 .admin-sidebar {
-  --sidebar-surface: #f7faf8;
+  --sidebar-surface: rgb(var(--bp-f7faf8));
   --sidebar-panel: #ffffff;
-  --sidebar-panel-strong: #edf9f5;
-  --sidebar-border: #dfece7;
-  --sidebar-text: #1d3b3d;
-  --sidebar-muted: #5d726d;
-  --sidebar-accent: #0f7a73;
-  --sidebar-accent-strong: #0b5f5d;
-  --sidebar-active: #e8f7f2;
-  --sidebar-soft: #f4f8f5;
+  --sidebar-panel-strong: rgb(var(--bp-edf9f5));
+  --sidebar-border: rgb(var(--bp-dfece7));
+  --sidebar-text: rgb(var(--bp-1d3b3d));
+  --sidebar-muted: rgb(var(--bp-5d726d));
+  --sidebar-accent: rgb(var(--bp-0f7a73));
+  --sidebar-accent-strong: rgb(var(--bp-0b5f5d));
+  --sidebar-active: rgb(var(--bp-e8f7f2));
+  --sidebar-soft: rgb(var(--bp-f4f8f5));
   position: fixed;
   inset-block: calc(var(--header-h) + var(--sidebar-gap)) var(--sidebar-gap);
   inset-inline-start: var(--sidebar-gap);
@@ -195,10 +195,10 @@ function handleKeydown(event) {
   color: var(--sidebar-accent);
   background: linear-gradient(
     135deg,
-    rgba(15, 122, 115, 0.12),
-    rgba(15, 122, 115, 0.06)
+    rgb(var(--bp-0f7a73) / 0.12),
+    rgb(var(--bp-0f7a73) / 0.06)
   );
-  border: 1px solid rgba(15, 122, 115, 0.15);
+  border: 1px solid rgb(var(--bp-0f7a73) / 0.15);
   border-radius: 14px;
   font-size: 24px;
 }
@@ -236,7 +236,7 @@ function handleKeydown(event) {
 .sidebar-toggle:hover {
   color: var(--sidebar-accent);
   background: var(--sidebar-active);
-  border-color: rgba(15, 122, 115, 0.2);
+  border-color: rgb(var(--bp-0f7a73) / 0.2);
 }
 .sidebar-toggle:focus-visible {
   outline: 2px solid var(--sidebar-accent);
@@ -249,7 +249,7 @@ function handleKeydown(event) {
   overflow-x: hidden;
   padding: 12px 12px 16px;
   scrollbar-width: thin;
-  scrollbar-color: #c9ddd7 transparent;
+  scrollbar-color: rgb(var(--bp-c9ddd7)) transparent;
 }
 .side-menu {
   list-style: none;
@@ -272,7 +272,7 @@ function handleKeydown(event) {
   font-size: 10px;
   font-weight: 800;
   line-height: 1.6;
-  color: #738783;
+  color: rgb(var(--bp-738783));
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }

@@ -172,7 +172,7 @@ const formatAt = formatDateTime;
     <div v-else class="flex flex-column gap-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-column">
-          <span class="text-lg font-bold text-[#135C65]">{{ program.student?.name }} — {{ programName(t, program) }}</span>
+          <span class="text-lg font-bold text-bp-135c65">{{ program.student?.name }} — {{ programName(t, program) }}</span>
           <span class="text-sm text-color-secondary">{{ program.start_date }} → {{ program.end_date }} · {{ program.therapist?.name }}</span>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -258,7 +258,7 @@ const formatAt = formatDateTime;
         </div>
         <div class="flex flex-wrap justify-end items-center gap-3">
           <span v-if="discountAmount > 0 && editableLines" class="text-color-secondary">{{ $t("acc.before_discount") }}: <span class="line-through">{{ amount(gross) }}</span></span>
-          <span class="text-lg font-bold text-[#135C65]">{{ $t("acc.total") }}: {{ amount(net) }}</span>
+          <span class="text-lg font-bold text-bp-135c65">{{ $t("acc.total") }}: {{ amount(net) }}</span>
         </div>
 
         <div v-if="charge.status !== 'cancelled'" class="flex flex-column gap-2">

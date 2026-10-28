@@ -22,7 +22,7 @@ defineProps({
 <template>
   <section class="rxs-page">
     <header class="rx-head">
-      <img :src="sawaLogo" alt="Sawa" />
+      <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
       <span>{{ label }}<template v-if="date"> · <span class="ltr">{{ dmy(date) }}</span></template></span>
     </header>
 
@@ -74,7 +74,7 @@ defineProps({
   gap: 12px;
   margin-bottom: 8mm;
   padding-bottom: 8px;
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   color: #64748b;
   font-size: 9.5pt;
   font-weight: 600;
@@ -93,14 +93,14 @@ defineProps({
   margin: 0 0 12px;
   padding: 8px 16px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #135c65 0%, #1b7c86 100%);
+  background: linear-gradient(135deg, rgb(var(--bp-135c65)) 0%, rgb(var(--bp-1b7c86)) 100%);
   color: #fff;
   font-size: 14pt;
   font-weight: 800;
 }
-.rxs-page .rx-band-soft { background: #eef8f9; color: #135c65; border-inline-start: 5px solid #135c65; }
+.rxs-page .rx-band-soft { background: rgb(var(--bp-eef8f9)); color: rgb(var(--bp-135c65)); border-inline-start: 5px solid rgb(var(--bp-135c65)); }
 .rxs-page .rx-space { margin-top: 10mm; }
-.rxs-page .rx-kicker { margin: 0; color: #135c65; font-size: 13pt; font-weight: 800; }
+.rxs-page .rx-kicker { margin: 0; color: rgb(var(--bp-135c65)); font-size: 13pt; font-weight: 800; }
 .rxs-page .rx-intro { margin: 2px 0 12px; }
 .rxs-page .rx-empty { color: #64748b; text-align: center; }
 
@@ -108,14 +108,14 @@ defineProps({
 .rxs-page .rx-table { width: 100%; border-collapse: collapse; }
 .rxs-page .rx-table th,
 .rxs-page .rx-table td { padding: 8px 12px; border: 1px solid #b7cdd0; text-align: start; vertical-align: middle; }
-.rxs-page .rx-table thead th { background: #135c65; color: #fff; font-weight: 700; }
+.rxs-page .rx-table thead th { background: rgb(var(--bp-135c65)); color: #fff; font-weight: 700; }
 
 /* strengths / weaknesses */
 .rxs-page .rx-summary-level {
   margin: 14px 0 6px;
   padding-inline-start: 10px;
-  border-inline-start: 4px solid #135c65;
-  color: #135c65;
+  border-inline-start: 4px solid rgb(var(--bp-135c65));
+  color: rgb(var(--bp-135c65));
   font-size: 12pt;
   font-weight: 800;
   break-after: avoid;
@@ -152,7 +152,7 @@ defineProps({
 .rxs-page .rx-mchat-answers td:nth-child(2) { text-align: start; }
 .rxs-page .rx-mchat-col { width: 15mm; }
 .rxs-page .rx-mchat-answers td.is-point { background: #fee2e2; color: #b91c1c; font-weight: 800; }
-.rxs-page .rx-mchat-answers tfoot th { background: #eef8f9; color: #0e464d; }
+.rxs-page .rx-mchat-answers tfoot th { background: rgb(var(--bp-eef8f9)); color: rgb(var(--bp-0e464d)); }
 .rxs-page .rx-mchat-hint { margin: 3mm 0 0; color: #64748b; font-size: 8.5pt; }
 
 /* side profile */

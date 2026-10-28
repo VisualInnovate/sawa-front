@@ -73,7 +73,7 @@ onMounted(load);
   <div class="sawa-card p-3">
     <Toast />
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <p class="text-xl text-[#135C65] font-bold"><i class="pi pi-verified" aria-hidden="true" /> {{ $t("ereport.tracking_approvals") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold"><i class="pi pi-verified" aria-hidden="true" /> {{ $t("ereport.tracking_approvals") }}</p>
       <div class="flex flex-wrap items-center gap-2">
         <SelectButton v-model="status" :options="statuses" optionLabel="label" optionValue="value" :allowEmpty="false" @change="load" />
         <Button icon="pi pi-refresh" variant="outlined" :loading="loading" :aria-label="$t('refresh')" @click="load" />
@@ -141,7 +141,7 @@ onMounted(load);
 <style scoped>
 .ta-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: .85rem; table-layout: fixed; }
 .ta-table th, .ta-table td { border: 1px solid #cbd5e1; padding: .35rem; text-align: center; }
-.ta-cols th { background: #135c65; color: #fff; font-size: .75rem; line-height: 1.25; }
+.ta-cols th { background: rgb(var(--bp-135c65)); color: #fff; font-size: .75rem; line-height: 1.25; }
 .ta-code { display: block; margin-top: 2px; color: #a7f3d0; font-size: .68rem; font-weight: 600; }
 .ta-cols th.ta-num { width: 3.4rem; }
 .ta-cols th:nth-child(2) { width: 22%; }

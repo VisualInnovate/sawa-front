@@ -30,7 +30,7 @@ defineProps({
 
     <section class="pp-auth__form">
       <div class="pp-auth__top">
-        <a href="/" class="pp-auth__logo-link"><img :src="logo" alt="Sawa" class="pp-auth__logo" /></a>
+        <a href="/" class="pp-auth__logo-link"><img :src="$siteLogo(logo)" alt="Sawa" class="pp-auth__logo" /></a>
         <LocaleSelect />
       </div>
       <div class="pp-auth__card pp-in" :class="{ 'is-wide': wide }" :style="{ '--i': 1 }">
@@ -68,7 +68,7 @@ defineProps({
 .pp-auth__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(3, 91, 101, 0.1) 0%, rgba(3, 91, 101, 0.75) 100%);
+  background: linear-gradient(180deg, rgb(var(--bp-035b65) / 0.1) 0%, rgb(var(--bp-035b65) / 0.75) 100%);
 }
 .pp-auth__words {
   position: absolute;

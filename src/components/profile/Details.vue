@@ -464,7 +464,7 @@ onMounted(load);
   padding: 0.75rem 1rem;
   border: 1px solid var(--sawa-border);
   border-radius: 10px;
-  background: #fafcfc;
+  background: rgb(var(--bp-fafcfc));
 }
 
 .profile-info dt {

@@ -157,7 +157,7 @@ function detail(row) {
           {{ $t("fees_before_discount") }}: <span class="line-through">{{ money(result.before_discount) }}</span>
         </span>
         <Tag v-if="result.discount > 0" severity="success" :value="`${$t('fees_discount')} ${money(result.discount)}`" />
-        <span class="text-xl font-bold text-[#135C65]">{{ formatAmount(result.total) }}</span>
+        <span class="text-xl font-bold text-bp-135c65">{{ formatAmount(result.total) }}</span>
         <span v-if="result.total_usd != null" class="text-color-secondary">{{ money(result.total_usd) }} $</span>
         <i v-if="loading" class="pi pi-spin pi-spinner" />
       </div>

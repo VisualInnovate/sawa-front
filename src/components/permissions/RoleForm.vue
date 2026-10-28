@@ -202,9 +202,9 @@ onMounted(load);
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #f0f9fa;
-  border: 1px solid #b6dde0;
-  color: #135c65;
+  background: rgb(var(--bp-f0f9fa));
+  border: 1px solid rgb(var(--bp-b6dde0));
+  color: rgb(var(--bp-135c65));
   border-radius: 10px;
   padding: 0.9rem 1rem;
   margin-bottom: 1.5rem;
@@ -273,7 +273,7 @@ onMounted(load);
   }
 
   &:focus-visible {
-    outline: 2px solid #135c65;
+    outline: 2px solid rgb(var(--bp-135c65));
     outline-offset: 2px;
   }
 }

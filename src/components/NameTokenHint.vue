@@ -42,5 +42,5 @@ onBeforeUnmount(() => clearTimeout(timer));
 }
 .name-hint code { font-weight: 700; background: #fff; border-radius: .3rem; padding: 0 .35rem; }
 .hint-copy { padding: .1rem .4rem; }
-.hint-rest { flex-basis: 100%; color: #3f6f75; }
+.hint-rest { flex-basis: 100%; color: rgb(var(--bp-3f6f75)); }
 </style>

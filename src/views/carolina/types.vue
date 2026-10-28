@@ -96,8 +96,8 @@ onMounted(load);
 .types-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1rem; }
 .type-card { display: flex; flex-direction: column; gap: .8rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 14px; }
 .type-card-head { display: flex; align-items: center; gap: .6rem; }
-.type-card-head h2 { flex: 1; margin: 0; color: #135c65; font-size: 1.1rem; font-weight: 800; }
-.type-number { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: #135c65; color: #fff; font-weight: 800; }
+.type-card-head h2 { flex: 1; margin: 0; color: rgb(var(--bp-135c65)); font-size: 1.1rem; font-weight: 800; }
+.type-number { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: rgb(var(--bp-135c65)); color: #fff; font-weight: 800; }
 .type-domains { display: flex; flex-direction: column; gap: .35rem; margin: 0; padding-inline-start: 1.4rem; }
 .type-domains li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .2rem .8rem; }
 .type-add { display: flex; flex-direction: column; gap: .4rem; padding-top: .8rem; border-top: 1px dashed #e2e8f0; }

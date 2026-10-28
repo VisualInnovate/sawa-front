@@ -41,7 +41,7 @@ function treatment(slot) {
         <tr v-if="isInclusion">
           <td class="p-2 font-semibold">{{ $t("sp_inclusion_time") }}</td>
           <td v-for="day in days" :key="day" class="p-2">
-            <div class="rounded-lg p-2" :class="inclusionOf(day).available === false ? 'bg-[#FDECEC]' : 'bg-[#E8F3F4]'">
+            <div class="rounded-lg p-2" :class="inclusionOf(day).available === false ? 'bg-[#FDECEC]' : 'bg-bp-e8f3f4'">
               <div class="font-semibold">{{ timeRange(inclusionOf(day).start, inclusionOf(day).end) }}</div>
               <div class="text-color-secondary">{{ inclusionOf(day).therapist_name ?? inclusionOf(day).therapist?.name }}</div>
             </div>
@@ -51,7 +51,7 @@ function treatment(slot) {
           <td class="p-2 font-semibold whitespace-nowrap">{{ hour }}</td>
           <td v-for="day in days" :key="day" class="p-1">
             <div v-if="cell(day, hour)" class="rounded-lg p-2 flex flex-column gap-1"
-              :class="cell(day, hour).available === false ? 'bg-[#FDECEC]' : cell(day, hour).session_kind === 'individual' ? 'bg-[#E8F3F4]' : 'bg-[#F3EFE6]'">
+              :class="cell(day, hour).available === false ? 'bg-[#FDECEC]' : cell(day, hour).session_kind === 'individual' ? 'bg-bp-e8f3f4' : 'bg-[#F3EFE6]'">
               <!-- Group sessions have no treatment: their kind is the title. -->
               <span class="font-semibold">{{ treatment(cell(day, hour)) || sessionKindLabel(t, cell(day, hour).session_kind) }}</span>
               <span v-if="treatment(cell(day, hour))" class="text-xs">{{ sessionKindLabel(t, cell(day, hour).session_kind) }}</span>

@@ -399,9 +399,9 @@ export default {
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border-radius: var(--sawa-radius);
-  background: linear-gradient(135deg, var(--sawa-primary) 0%, #1b7c86 100%);
+  background: linear-gradient(135deg, var(--sawa-primary) 0%, rgb(var(--bp-1b7c86)) 100%);
   color: #fff;
-  box-shadow: 0 8px 24px -12px rgba(19, 92, 101, 0.55);
+  box-shadow: 0 8px 24px -12px rgb(var(--bp-135c65) / 0.55);
 }
 .be-hero-main {
   display: flex;
@@ -675,7 +675,7 @@ export default {
   transition: border-color 0.15s, background-color 0.15s;
 }
 .be-option:hover {
-  border-color: #b6d7db;
+  border-color: rgb(var(--bp-b6d7db));
   background: #fff;
 }
 .be-option.is-picked {

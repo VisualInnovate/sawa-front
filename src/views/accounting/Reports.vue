@@ -54,7 +54,7 @@ onMounted(load);
   <div>
     <div class="no-print">
       <div class="flex flex-wrap items-center justify-between gap-2 p-4">
-        <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("acc.reports.title") }}</p>
+        <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("acc.reports.title") }}</p>
         <Button icon="pi pi-print" :label="$t('acc.print')" :disabled="!data" @click="print" />
       </div>
       <AccountingTabs />
@@ -69,7 +69,7 @@ onMounted(load);
     <div v-else-if="data" class="sawa-card p-4 acc-report">
       <!-- Shown on paper only. -->
       <div class="print-only report-head">
-        <img :src="sawaLogo" alt="Sawa" class="report-logo" />
+        <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="report-logo" />
         <div class="text-end">
           <div class="text-lg font-bold">{{ $t(`acc.reports.${report}`) }}</div>
           <div class="text-sm" dir="ltr">{{ periodText }}</div>
@@ -82,7 +82,7 @@ onMounted(load);
         <div class="report-stats">
           <div><span>{{ $t("acc.reports.received") }}</span><strong>{{ amount(data.total) }}</strong><small>{{ $t("acc.reports.receipts_count", { n: data.receipts }) }}</small></div>
           <div><span>{{ $t("acc.reports.refunded") }}</span><strong class="text-red-600">{{ amount(data.refunded) }}</strong></div>
-          <div><span>{{ $t("acc.reports.net") }}</span><strong class="text-[#135C65]">{{ amount(data.net) }}</strong></div>
+          <div><span>{{ $t("acc.reports.net") }}</span><strong class="text-bp-135c65">{{ amount(data.net) }}</strong></div>
           <div><span>{{ $t("acc.reports.from_balance") }}</span><strong>{{ amount(data.from_balance) }}</strong></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,7 +230,7 @@ onMounted(load);
 }
 .report-table thead th,
 .report-table tfoot th {
-  background: #e6f1f3;
+  background: rgb(var(--bp-e6f1f3));
 }
 .report-subtitle {
   font-size: 1rem;
@@ -241,7 +241,7 @@ onMounted(load);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }

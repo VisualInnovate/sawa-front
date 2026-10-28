@@ -3,6 +3,7 @@ import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import Deduction from '../../../components/hr/Deduction.vue'
 import moment from "moment";
+import PayrollItemStatus from '@/components/hr/PayrollItemStatus.vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
@@ -107,7 +108,9 @@ const edite=()=>{
       deduction.value = ref({})
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      error.value = el.response?.data?.errors
+      // A salary not set (or a deduction already paid) comes back as a message, not as field errors.
+      if (!error.value) toast.add({severity: 'error', summary: t('error'), detail: el.response?.data?.message || t('mission_error'), life: 5000})
     })
 }
 
@@ -127,14 +130,18 @@ const updateStatus=(id,status)=>{
   
   loading.value=true
  
-  axios.get(`/api/deductions/change-status/${id}?status=${status}`).then((res)=>{
+  axios.get(`/api/deductions/change-status/${id}?status=${status}`).then(()=>{
       loading.value=false
       fetchData()
-      });
+    }).catch((e)=>{
+      loading.value=false
+      toast.add({severity: 'error', summary: t('error'), detail: e.response?.data?.message || t('mission_error'), life: 4000})
+      fetchData()
+    });
 
 }
 const createskill=()=>{
-  deduction.value.date = moment(deduction.value.dat).format("YYYY-MM-DD" );
+  deduction.value.date = moment(deduction.value.date).format("YYYY-MM-DD" );
     axios
     .post('/api/deductions',deduction.value)
     .then((res) => {
@@ -145,7 +152,9 @@ const createskill=()=>{
       deduction.value = ref({})
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      error.value = el.response?.data?.errors
+      // A salary not set (or a deduction already paid) comes back as a message, not as field errors.
+      if (!error.value) toast.add({severity: 'error', summary: t('error'), detail: el.response?.data?.message || t('mission_error'), life: 5000})
     })
 }
 const deleting = ref(false)
@@ -250,7 +259,7 @@ const initFilters = () => {
           
            <Column field="status" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
-                <Select  :disabled="!$can('deduction edit')" @update:model-value="updateStatus(slotProps.data.id,$event)"  :style="{ backgroundColor: slotProps.data.status == 1 ? '#10B981' : slotProps.data.status == -1 ? '#EF4444' : slotProps.data.status == 0 ? '#F59E0B' : 'transparent' }" v-model="slotProps.data.status"  option-value="code"  :options="status" optionLabel="name"   />
+                <PayrollItemStatus :item="slotProps.data" :can-edit="$can('deduction edit')" @change="updateStatus(slotProps.data.id,$event)" />
 
                
             </template>
@@ -261,11 +270,11 @@ const initFilters = () => {
             <template #body="slotProps">
               <div class="table-actions">
                 <Button
-                v-can="'deduction edit'"
+                v-if="!slotProps.data.payroll_id" v-can="'deduction edit'"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
-                v-can="'deduction delete'"
+                v-if="!slotProps.data.payroll_id" v-can="'deduction delete'"
                 icon="pi pi-trash"
                 @click="confirmDelete(slotProps.data.id)" severity="danger" rounded variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
               </div>

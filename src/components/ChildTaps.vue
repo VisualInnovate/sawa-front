@@ -51,13 +51,13 @@ watchEffect(async () => {
   gap: 0.5rem;
   padding: 0.45rem 1rem;
   border-radius: 999px;
-  background: #fdf2f7;
+  background: rgb(var(--bs-fdf2f7));
   color: #0f172a;
   font-size: 1rem;
   font-weight: 700;
 }
 .child-tabs-name i {
-  color: #EC477C;
+  color: rgb(var(--bs-ec477c));
   font-size: 0.85rem;
 }
 </style>

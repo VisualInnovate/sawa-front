@@ -85,7 +85,7 @@ onMounted(load);
 
 <template>
   <div class="flex flex-wrap items-center justify-between gap-3 p-4">
-    <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("ai.page_title") }}</p>
+    <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("ai.page_title") }}</p>
     <SelectButton v-model="assistant" :options="assistants" optionLabel="label" optionValue="value" :allowEmpty="false" />
   </div>
   <div class="sawa-card p-3">
@@ -239,7 +239,7 @@ onMounted(load);
 }
 .ai-stat b {
   font-size: 1.15rem;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 .ai-option {
   display: flex;
@@ -256,7 +256,7 @@ onMounted(load);
 .ai-perms {
   display: block;
   margin-top: 0.3rem;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 .ai-hidden {
   display: inline-block;

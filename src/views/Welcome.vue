@@ -1,7 +1,7 @@
 <template>
   <section class="welcome">
     <div class="welcome-card">
-      <img :src="sawaLogo" alt="Sawa" class="welcome-logo" />
+      <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="welcome-logo" />
       <h1 class="welcome-title">{{ $t("welcome_title", { name: userName }) }}</h1>
       <p class="welcome-hint">{{ $t("welcome_hint") }}</p>
     </div>
@@ -188,7 +188,7 @@ onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.07);
-  border-top: 4px solid #135c65;
+  border-top: 4px solid rgb(var(--bp-135c65));
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
   padding: 2.5rem 1.5rem;
 }
@@ -196,9 +196,9 @@ onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
 .pending-card {
   width: 100%;
   background: #ffffff;
-  border: 1px solid rgba(19, 92, 101, 0.14);
+  border: 1px solid rgb(var(--bp-135c65) / 0.14);
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(19, 92, 101, 0.07);
+  box-shadow: 0 8px 24px rgb(var(--bp-135c65) / 0.07);
   overflow: hidden;
 }
 
@@ -210,7 +210,7 @@ onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
   margin: 0 0 0.25rem;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 
 .bookings-header p {
@@ -229,7 +229,7 @@ onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
   margin: 0 0 0.5rem;
   font-size: 1.6rem;
   font-weight: 700;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 
 .welcome-hint {

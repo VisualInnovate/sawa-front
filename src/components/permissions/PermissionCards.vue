@@ -119,7 +119,7 @@ const toggleCard = (card) => {
 .group-title {
   font-size: 1.15rem;
   font-weight: 600;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   margin: 0 0 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e2e8f0;

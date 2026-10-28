@@ -61,7 +61,7 @@ const fill = (question, column, row) => {
   color: #1e293b;
 }
 .tg-n {
-  color: var(--sawa-primary, #135c65);
+  color: var(--sawa-primary, rgb(var(--bp-135c65)));
 }
 .tg-grid {
   display: grid;

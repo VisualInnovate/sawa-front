@@ -59,21 +59,22 @@ import Toolbar from "primevue/toolbar";
 
 import { primeLocales } from "./locale";
 
-// Sawa teal (#135c65) as the primary palette; shade 700 is the brand color itself.
+// Sawa teal as the primary palette; shade 700 is the brand color itself. The values are the brand variables
+// (utils/brandPalette.js), so the colours chosen in «إعدادات الموقع» recolour PrimeVue too.
 const SawaPreset = definePreset(Aura, {
   primitive: {
     sawa: {
-      50: "#eef8f9",
-      100: "#d5eef0",
-      200: "#aedde2",
-      300: "#7cc4cc",
-      400: "#4aa3ad",
-      500: "#2e8791",
-      600: "#226f78",
-      700: "#135c65",
-      800: "#134b53",
-      900: "#133f45",
-      950: "#08282d",
+      50: "rgb(var(--bp-eef8f9))",
+      100: "rgb(var(--bp-d5eef0))",
+      200: "rgb(var(--bp-aedde2))",
+      300: "rgb(var(--bp-7cc4cc))",
+      400: "rgb(var(--bp-4aa3ad))",
+      500: "rgb(var(--bp-2e8791))",
+      600: "rgb(var(--bp-226f78))",
+      700: "rgb(var(--bp-135c65))",
+      800: "rgb(var(--bp-134b53))",
+      900: "rgb(var(--bp-133f45))",
+      950: "rgb(var(--bp-08282d))",
     },
   },
   semantic: {

@@ -227,7 +227,7 @@ const choose = (slot) => router.push({ name: "more", params: { event_id: slot.id
   box-shadow: var(--pp-shadow);
 }
 .pp-slot:focus-visible {
-  outline: 3px solid rgba(178, 21, 83, 0.45);
+  outline: 3px solid rgb(var(--bs-b21553) / 0.45);
   outline-offset: 2px;
 }
 .pp-slot__icon {
@@ -290,7 +290,7 @@ const choose = (slot) => router.push({ name: "more", params: { event_id: slot.id
   color: #fff;
   font-weight: 800;
   font-size: 0.88rem;
-  box-shadow: 0 8px 18px -10px rgba(178, 21, 83, 0.8);
+  box-shadow: 0 8px 18px -10px rgb(var(--bs-b21553) / 0.8);
 }
 [dir="ltr"] .pp-slot__go .pp-flip {
   transform: scaleX(-1);

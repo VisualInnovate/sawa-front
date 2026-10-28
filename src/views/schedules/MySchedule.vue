@@ -36,13 +36,13 @@ onMounted(load);
   <div class="sawa-card p-3 my-schedule">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3 no-print">
       <div>
-        <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("sch.my_title") }}</p>
+        <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("sch.my_title") }}</p>
         <p class="text-sm text-color-secondary m-0">{{ $t("sch.my_subtitle") }}</p>
       </div>
       <WeekNav v-model="week" :loading="loading" @refresh="load" @print="print" />
     </div>
     <div class="report-head">
-      <img :src="sawaLogo" alt="" class="report-logo" />
+      <img :src="$siteLogo(sawaLogo)" alt="" class="report-logo" />
       <div class="text-center">
         <div class="text-lg font-bold">{{ $t("sch.my_title") }}<template v-if="schedule"> — {{ schedule.user.name }}</template></div>
         <div class="text-sm">{{ weekRange(week).from }} – {{ weekRange(week).to }}</div>
@@ -59,7 +59,7 @@ onMounted(load);
   display: none;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }

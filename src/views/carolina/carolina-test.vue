@@ -438,7 +438,7 @@ watch(childId, (value, before) => {
 .level-picker p { margin: 0 0 .75rem; color: var(--sawa-muted); }
 .type-group { display: flex; flex-direction: column; gap: .6rem; }
 .type-group + .type-group { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--sawa-border); }
-.type-group-head { display: flex; align-items: center; gap: .5rem; color: #135c65; font-size: 1.05rem; cursor: pointer; }
+.type-group-head { display: flex; align-items: center; gap: .5rem; color: rgb(var(--bp-135c65)); font-size: 1.05rem; cursor: pointer; }
 .domain-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: .75rem; }
 .domain-option { padding: .75rem .9rem; border: 1px solid var(--sawa-border); border-radius: 10px; background: #fff; }
 .domain-option-head { display: flex; align-items: center; gap: .5rem; cursor: pointer; }

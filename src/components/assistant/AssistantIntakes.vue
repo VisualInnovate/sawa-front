@@ -62,7 +62,7 @@ onMounted(load);
 <style scoped>
 .ai-answers dt {
   font-weight: 600;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   margin-top: 0.5rem;
 }
 .ai-answers dd {

@@ -116,7 +116,7 @@ onMounted(load);
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold">{{ $t("program_hours") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold">{{ $t("program_hours") }}</p>
   </div>
   <div class="sawa-card p-3">
     <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
@@ -162,7 +162,7 @@ onMounted(load);
   </div>
   <div v-if="!loading" class="sawa-card p-3 mt-3 flex flex-column gap-3">
     <div class="flex flex-column gap-1">
-      <span class="font-semibold text-[#135C65]">{{ $t("sched.default_title") }}</span>
+      <span class="font-semibold text-bp-135c65">{{ $t("sched.default_title") }}</span>
       <small class="text-color-secondary">{{ $t("sched.hint") }} {{ $t("sched.default_hint") }}</small>
     </div>
     <SchedulingCriteria v-model="criteria" />

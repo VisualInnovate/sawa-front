@@ -34,7 +34,7 @@ onMounted(async () => {
     <div v-else class="receipt">
       <div class="flex justify-between items-start gap-3 receipt-head">
         <div class="flex flex-column">
-          <img :src="sawaLogo" alt="Sawa" class="receipt-logo" />
+          <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="receipt-logo" />
         </div>
         <div class="text-center">
           <h1 class="m-0 text-2xl">{{ $t("acc.receipt_title") }}</h1>
@@ -97,7 +97,7 @@ onMounted(async () => {
   color: #1f2a2e;
 }
 .receipt-head {
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   padding-bottom: 0.75rem;
 }
 .receipt-logo {
@@ -128,7 +128,7 @@ onMounted(async () => {
   text-align: start;
 }
 .receipt-table th {
-  background: #e6f1f3;
+  background: rgb(var(--bp-e6f1f3));
 }
 @media print {
   .no-print {

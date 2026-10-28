@@ -122,7 +122,7 @@ export default {
   <Message v-if="alert_text != null" severity="success" class="no-print">{{ alert_text }}</Message>
   <div class="back-back">
     <div class="back">
-      <div class="text-center"><img src="../../assets/img/sawa_logo.svg" style="width:130px; "></div>
+      <div class="text-center"><img :src="$siteLogo()" style="width:130px; "></div>
       <div><p class="w-[100%] text-h4 text-center ma-4">{{ print_results[0]?.evaluation_title }}</p></div>
       <div>
         <p class="w-[100%] text-start ma-4">{{ print_results[0]?.child_name }}</p>
@@ -222,7 +222,7 @@ td {
   text-align: start;
 }
 .print-table th {
-  background: #eef8f9;
-  color: #135c65;
+  background: rgb(var(--bp-eef8f9));
+  color: rgb(var(--bp-135c65));
 }
 </style>

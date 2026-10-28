@@ -963,7 +963,7 @@ function back() {
       <!-- 1. Cover -->
       <section v-page="{ key: 'cover', title: $t('ereport.page_cover') }" class="rx-page rx-cover">
         <div class="rx-cover-top">
-          <img :src="sawaLogo" alt="Sawa" class="rx-cover-logo" />
+          <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="rx-cover-logo" />
           <p class="rx-cover-academy">{{ $t("ereport.academy") }}</p>
         </div>
 
@@ -1006,7 +1006,7 @@ function back() {
       <!-- 2. Personal information and team -->
       <section v-page="{ key: 'info', title: $t('ereport.page_info') }" class="rx-page">
         <header class="rx-head">
-          <img :src="sawaLogo" alt="Sawa" />
+          <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
           <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
         </header>
 
@@ -1082,7 +1082,7 @@ function back() {
       <!-- Case description belongs to the report output. -->
       <section v-if="showCharts" v-page="{ key: 'case', title: $t('ereport.page_case') }" class="rx-page">
         <header class="rx-head">
-          <img :src="sawaLogo" alt="Sawa" />
+          <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
           <span>{{ $t("ereport.report_title") }} · {{ child.name }}</span>
         </header>
 
@@ -1119,7 +1119,7 @@ function back() {
           v-page="{ key: 'about-' + section.type, title: $t('eval_desc.report_title') + ' · ' + typeLabel(section.type, $t) }" class="rx-page"
           :class="{ 'rx-print-hidden': !edits.descriptions[section.type].trim() }" :data-print-note="$t('ereport.page_not_printed')">
           <header class="rx-head">
-            <img :src="sawaLogo" alt="Sawa" />
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ typeLabel(section.type, $t) }}</span>
           </header>
 
@@ -1135,7 +1135,7 @@ function back() {
           <section v-for="test in showCharts ? [...section.tests].reverse() : []" :key="'vb-' + test.key"
             v-page="{ key: 'vb-' + test.key, title: 'VB-MAPP · ' + dmy(test.date) }" class="rx-page">
             <header class="rx-head">
-              <img :src="sawaLogo" alt="Sawa" />
+              <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(test.date) }}</span></span>
             </header>
 
@@ -1158,7 +1158,7 @@ function back() {
             v-page="{ key: 'summary-' + (table?.key ?? 'none'), title: [$t('ereport.page_summary'), table?.title].filter(Boolean).join(' · ') }" class="rx-page"
             :class="{ 'rx-print-hidden': table && !summaryPrintable(table) }" :data-print-note="$t('ereport.page_not_printed')">
             <header class="rx-head">
-              <img :src="sawaLogo" alt="Sawa" />
+              <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
               <span>VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
             <template v-if="table">
@@ -1227,7 +1227,7 @@ function back() {
             v-page="{ key: 'plan-' + (level?.key ?? 'none'), title: [$t('ereport.plan_title'), level?.title].filter(Boolean).join(' · ') }" class="rx-page"
             :class="{ 'rx-print-hidden': level && (level.hidden || !level.groups.length) }" :data-print-note="$t('ereport.page_not_printed')">
             <header class="rx-head">
-              <img :src="sawaLogo" alt="Sawa" />
+              <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
               <span>{{ $t("ereport.plan_title") }} · VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
             </header>
             <h2 class="rx-band">{{ $t("ereport.plan_title") }}<template v-if="level?.title"> — {{ level.title }}</template></h2>
@@ -1285,7 +1285,7 @@ function back() {
             v-page="{ key: 'track-' + (item?.evaluation_id ?? 'none'), title: [$t('ereport.tracking_title'), item ? dmy(item.evaluation_date) : ''].filter(Boolean).join(' · ') }" class="rx-page"
             :class="{ 'rx-print-hidden': item && !item.goals.some(isTracked) }" :data-print-note="$t('ereport.page_not_printed')">
             <header class="rx-head">
-              <img :src="sawaLogo" alt="Sawa" />
+              <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
               <span>{{ $t("ereport.tracking_title") }}<template v-if="item"> · VB-MAPP · <span class="ltr">{{ dmy(item.evaluation_date) }}</span></template></span>
             </header>
             <h2 class="rx-band">{{ $t("ereport.tracking_title") }}</h2>
@@ -1355,7 +1355,7 @@ function back() {
         <section v-else-if="showCharts && section.type === SIDE_PROFILE && section.group === firstSideProfile"
           v-page="{ key: 'side-profile', title: 'Side Profile' }" class="rx-page">
           <header class="rx-head">
-            <img :src="sawaLogo" alt="Sawa" />
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>Side Profile</span>
           </header>
           <h2 class="rx-sp-title ltr">Side Profile</h2>
@@ -1367,7 +1367,7 @@ function back() {
         <section v-else-if="showCharts && section.type !== SIDE_PROFILE"
           v-page="{ key: 'type-' + section.group, title: section.label + ' · ' + dmy(section.newest.date) }" class="rx-page">
           <header class="rx-head">
-            <img :src="sawaLogo" alt="Sawa" />
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
           </header>
 
@@ -1459,7 +1459,7 @@ function back() {
         <section v-if="showCharts && section.type === MCHAT"
           v-page="{ key: 'mchat-' + section.group, title: $t('mchat.answers') + ' · ' + section.label }" class="rx-page">
           <header class="rx-head">
-            <img :src="sawaLogo" alt="Sawa" />
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
           </header>
 
@@ -1499,7 +1499,7 @@ function back() {
           v-page="{ key: 'points-' + section.group, title: $t('ereport.transition_points') + ' · ' + section.label }" class="rx-page"
           :class="{ 'rx-print-hidden': !edits.transitionPoints[section.group].some((point) => String(point).trim()) }" :data-print-note="$t('ereport.page_not_printed')">
           <header class="rx-head">
-            <img :src="sawaLogo" alt="Sawa" />
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
           </header>
 
@@ -1526,7 +1526,7 @@ function back() {
 .rx-plan-points { margin: 0; padding: 0; list-style: none; }
 .rx-plan-points li { display: flex; align-items: start; gap: .5rem; margin-bottom: .4rem; }
 /* a point's code (M-3) before its text */
-.rx-point-code { flex: none; min-width: 2.6em; color: #135c65; font-weight: 800; white-space: nowrap; }
+.rx-point-code { flex: none; min-width: 2.6em; color: rgb(var(--bp-135c65)); font-weight: 800; white-space: nowrap; }
 @media print { .rx-point-code { margin-inline-end: .35em; } }
 .rx-plan-points :deep(.rx-edit) { flex: 1; }
 .rx-plan-control { border: 0; border-radius: 5px; padding: .3rem .5rem; cursor: pointer; font: inherit; font-size: 9pt; }
@@ -1551,7 +1551,7 @@ function back() {
 .rx-mchat-answers td:nth-child(2) { text-align: start; }
 .rx-mchat-col { width: 15mm; }
 .rx-mchat-answers td.is-point { background: #fee2e2; color: #b91c1c; font-weight: 800; }
-.rx-mchat-answers tfoot th { background: #eef8f9; color: #0e464d; }
+.rx-mchat-answers tfoot th { background: rgb(var(--bp-eef8f9)); color: rgb(var(--bp-0e464d)); }
 .rx-mchat-hint { margin: 3mm 0 0; color: #64748b; font-size: 8.5pt; }
 .rx-barrier-answers td { vertical-align: top; }
 .rx-track-date { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; }
@@ -1590,7 +1590,7 @@ function back() {
 .rx-track-symbol { float: inline-end; font-weight: 800; }
 .rx-track-num { width: 10mm; }
 /* Column titles: dark band, white text; the code (EXP, Mixing fluency…) under the title in a lighter tint. */
-.rx-table.rx-track .rx-track-cols th { padding: 4px 3px; background: #135c65; color: #fff; font-size: 7.5pt; line-height: 1.25; }
+.rx-table.rx-track .rx-track-cols th { padding: 4px 3px; background: rgb(var(--bp-135c65)); color: #fff; font-size: 7.5pt; line-height: 1.25; }
 .rx-track-code { display: block; margin-top: 1px; color: #a7f3d0; font-size: .85em; font-weight: 600; }
 .rx-track-col { width: 19mm; }
 .rx-track-col.is-gen { width: 17mm; font-size: .8em; }
@@ -1718,7 +1718,7 @@ function back() {
   min-width: 6.5rem;
 }
 .rx-save-text b {
-  color: #0f3d43;
+  color: rgb(var(--bp-0f3d43));
   font-size: 0.85rem;
 }
 .rx-save-text small {
@@ -1860,7 +1860,7 @@ function back() {
   border-radius: 6px;
   padding: 0.15rem 0.5rem;
   background: #edf7f5;
-  color: var(--sawa-primary, #135c65);
+  color: var(--sawa-primary, rgb(var(--bp-135c65)));
   cursor: pointer;
   font: inherit;
   font-size: 0.8rem;
@@ -1889,7 +1889,7 @@ function back() {
   gap: 12px;
   margin-bottom: 8mm;
   padding-bottom: 8px;
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   color: #64748b;
   font-size: 9.5pt;
   font-weight: 600;
@@ -1919,7 +1919,7 @@ function back() {
   padding: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at 100% 0, rgba(19, 92, 101, 0.1) 0 150px, transparent 151px),
+    radial-gradient(circle at 100% 0, rgb(var(--bp-135c65) / 0.1) 0 150px, transparent 151px),
     radial-gradient(circle at 0 100%, rgba(169, 171, 127, 0.16) 0 170px, transparent 171px),
     #fff;
 }
@@ -1934,7 +1934,7 @@ function back() {
 }
 .rx-cover-academy {
   margin: 0;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   font-size: 12pt;
   font-weight: 700;
 }
@@ -1945,7 +1945,7 @@ function back() {
   margin: 10mm 20mm 9mm;
   padding: 8mm 10mm 7mm;
   border-radius: 16px;
-  background: linear-gradient(135deg, #135c65 0%, #1b7c86 100%);
+  background: linear-gradient(135deg, rgb(var(--bp-135c65)) 0%, rgb(var(--bp-1b7c86)) 100%);
   color: #fff;
   text-align: center;
 }
@@ -1984,7 +1984,7 @@ function back() {
   align-items: center;
   gap: 8px;
   margin: 0 0 8px;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   font-size: 12pt;
   font-weight: 800;
 }
@@ -1993,7 +1993,7 @@ function back() {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #135c65;
+  background: rgb(var(--bp-135c65));
 }
 .rx-cover-grid {
   display: grid;
@@ -2008,7 +2008,7 @@ function back() {
   align-content: start;
   gap: 5px;
   padding: 8px 11px;
-  border: 1px solid #d5e6e8;
+  border: 1px solid rgb(var(--bp-d5e6e8));
   border-radius: 10px;
   background: #fff;
   font-size: 9.5pt;
@@ -2022,7 +2022,7 @@ function back() {
 }
 .rx-cover-card header strong {
   flex: 1;
-  color: #0e464d;
+  color: rgb(var(--bp-0e464d));
   font-size: 11pt;
 }
 .rx-cover-icon {
@@ -2032,8 +2032,8 @@ function back() {
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: #eef8f9;
-  color: #135c65;
+  background: rgb(var(--bp-eef8f9));
+  color: rgb(var(--bp-135c65));
   font-size: 9pt;
 }
 .rx-cover-count {
@@ -2042,7 +2042,7 @@ function back() {
   min-width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #135c65;
+  background: rgb(var(--bp-135c65));
   color: #fff;
   font-size: 9pt;
   font-weight: 800;
@@ -2087,7 +2087,7 @@ function back() {
   align-items: center;
   gap: 10px;
   margin: 0 0 12px;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   font-size: 14pt;
   font-weight: 800;
 }
@@ -2097,29 +2097,29 @@ function back() {
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: #135c65;
-  box-shadow: 0 0 0 4px #d7ecee;
+  background: rgb(var(--bp-135c65));
+  box-shadow: 0 0 0 4px rgb(var(--bp-d7ecee));
 }
 .rx-band {
   margin: 0 0 12px;
   padding: 8px 16px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #135c65 0%, #1b7c86 100%);
+  background: linear-gradient(135deg, rgb(var(--bp-135c65)) 0%, rgb(var(--bp-1b7c86)) 100%);
   color: #fff;
   font-size: 14pt;
   font-weight: 800;
 }
 .rx-band-soft {
-  background: #eef8f9;
-  color: #135c65;
-  border-inline-start: 5px solid #135c65;
+  background: rgb(var(--bp-eef8f9));
+  color: rgb(var(--bp-135c65));
+  border-inline-start: 5px solid rgb(var(--bp-135c65));
 }
 .rx-space {
   margin-top: 10mm;
 }
 .rx-kicker {
   margin: 0;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   font-size: 13pt;
   font-weight: 800;
 }
@@ -2137,7 +2137,7 @@ function back() {
 .rx-case {
   margin: 0;
   padding: 12px 16px;
-  border: 1px solid #d5e6e8;
+  border: 1px solid rgb(var(--bp-d5e6e8));
   border-radius: 10px;
   background: #fbfdfd;
   font-size: 12.5pt;
@@ -2165,14 +2165,14 @@ function back() {
   vertical-align: middle;
 }
 .rx-table thead th {
-  background: #135c65;
+  background: rgb(var(--bp-135c65));
   color: #fff;
   font-weight: 700;
 }
 .rx-info th {
   width: 34%;
-  background: #eef8f9;
-  color: #0e464d;
+  background: rgb(var(--bp-eef8f9));
+  color: rgb(var(--bp-0e464d));
   font-weight: 700;
 }
 .rx-dob {
@@ -2199,11 +2199,11 @@ function back() {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 1.5px solid #0e464d;
+  border: 1.5px solid rgb(var(--bp-0e464d));
   border-radius: 3px;
 }
 .rx-box.is-on {
-  background: #135c65;
+  background: rgb(var(--bp-135c65));
   box-shadow: inset 0 0 0 2px #fff;
 }
 .ltr-cell {
@@ -2240,8 +2240,8 @@ function back() {
 .rx-summary-level {
   margin: 14px 0 6px;
   padding-inline-start: 10px;
-  border-inline-start: 4px solid #135c65;
-  color: #135c65;
+  border-inline-start: 4px solid rgb(var(--bp-135c65));
+  color: rgb(var(--bp-135c65));
   font-size: 12pt;
   font-weight: 800;
   break-after: avoid;
@@ -2280,11 +2280,11 @@ function back() {
   list-style: disc;
 }
 .rx-points li::marker {
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 .rx-weak-name {
   display: block;
-  color: #0e464d;
+  color: rgb(var(--bp-0e464d));
 }
 .rx-weak {
   margin: 0;

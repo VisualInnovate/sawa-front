@@ -379,8 +379,8 @@ const remove = async () => {
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 .cat-card:hover {
-  border-color: #b6d7db;
-  box-shadow: 0 10px 24px -14px rgba(19, 92, 101, 0.45);
+  border-color: rgb(var(--bp-b6d7db));
+  box-shadow: 0 10px 24px -14px rgb(var(--bp-135c65) / 0.45);
   transform: translateY(-2px);
 }
 .cat-top {
@@ -479,7 +479,7 @@ const remove = async () => {
 .cat-preview {
   position: relative;
   padding: 1.1rem 1rem 1rem;
-  border: 1px dashed #b6d7db;
+  border: 1px dashed rgb(var(--bp-b6d7db));
   border-radius: var(--sawa-radius);
   background: #fafdfd;
 }

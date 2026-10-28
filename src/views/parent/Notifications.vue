@@ -40,7 +40,7 @@ onMounted(async () => {
 
 <style scoped>
 .is-unread {
-  border-color: rgba(178, 21, 83, 0.3);
+  border-color: rgb(var(--bs-b21553) / 0.3);
   background: #fff;
 }
 </style>

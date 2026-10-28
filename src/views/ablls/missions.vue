@@ -433,8 +433,8 @@ const remove = async () => {
 }
 .ms-card:hover {
   background: #fff;
-  border-color: #b6d7db;
-  box-shadow: 0 8px 20px -14px rgba(19, 92, 101, 0.5);
+  border-color: rgb(var(--bp-b6d7db));
+  box-shadow: 0 8px 20px -14px rgb(var(--bp-135c65) / 0.5);
 }
 .ms-card:hover::before {
   opacity: 1;

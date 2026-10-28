@@ -44,7 +44,7 @@ async function save(row) {
 
 <template>
   <div class="sawa-card p-3">
-    <p class="text-xl text-[#135C65] font-bold mb-2"><i class="pi pi-align-right" aria-hidden="true" /> {{ $t("eval_desc.page") }}</p>
+    <p class="text-xl text-bp-135c65 font-bold mb-2"><i class="pi pi-align-right" aria-hidden="true" /> {{ $t("eval_desc.page") }}</p>
     <p class="text-color-secondary mb-4">{{ $t("eval_desc.hint") }}</p>
     <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
     <div v-else class="ed-grid">
@@ -64,7 +64,7 @@ async function save(row) {
 <style scoped>
 .ed-grid { display: grid; gap: 1rem; }
 .ed-card { display: grid; gap: .6rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
-.ed-title { font-weight: 800; color: #135c65; }
+.ed-title { font-weight: 800; color: rgb(var(--bp-135c65)); }
 .ed-actions { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; }
 .ed-unsaved { color: #b45309; font-size: .85rem; }
 </style>

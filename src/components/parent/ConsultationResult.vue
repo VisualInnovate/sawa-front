@@ -7,27 +7,29 @@ import { useToast } from "primevue/usetoast";
 import { useStyleTag } from "@vueuse/core";
 import html2pdf from "html2pdf.js";
 import { fmtDate } from "@/utils/parentPortal";
+import { brandHex } from "@/utils/siteBrand";
 
 const props = defineProps({ booking: { type: Object, required: true } });
 const { t } = useI18n();
 const toast = useToast();
 const content = ref(null);
 
-// Literal colours: the print frame and html2pdf do not see the portal's CSS variables.
+// Literal colours (the brand ones as «إعدادات الموقع» has them): the print frame and html2pdf do not see the
+// portal's CSS variables.
 const styles = `
 .cr{color:#1e293b;line-height:1.8;display:grid;gap:14px;font-family:"Cairo","Segoe UI",Tahoma,sans-serif}
-.cr-header{background:#e9f4f5;border-radius:14px;padding:16px 18px}
-.cr-caption{margin:0;color:#1c6772;font-size:13px;font-weight:700}
-.cr-child{margin:2px 0 10px;font-size:20px;font-weight:800;color:#035b65}
+.cr-header{background:${brandHex("#e9f4f5")};border-radius:14px;padding:16px 18px}
+.cr-caption{margin:0;color:${brandHex("#1c6772")};font-size:13px;font-weight:700}
+.cr-child{margin:2px 0 10px;font-size:20px;font-weight:800;color:${brandHex("#035b65")}}
 .cr-meta{display:flex;flex-wrap:wrap;gap:8px}
-.cr-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d2e8ea;border-radius:999px;padding:3px 12px;font-size:13px}
+.cr-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid ${brandHex("#d2e8ea")};border-radius:999px;padding:3px 12px;font-size:13px}
 .cr-chip-label{color:#6f6669}
-.cr-section{border:1px solid #e5e2e1;border-inline-start:4px solid #b21553;border-radius:12px;padding:12px 16px;break-inside:avoid}
-.cr-label{margin:0 0 6px;font-size:15px;font-weight:800;color:#1c6772}
+.cr-section{border:1px solid #e5e2e1;border-inline-start:4px solid ${brandHex("#b21553")};border-radius:12px;padding:12px 16px;break-inside:avoid}
+.cr-label{margin:0 0 6px;font-size:15px;font-weight:800;color:${brandHex("#1c6772")}}
 .cr-text{margin:0;white-space:pre-line;overflow-wrap:anywhere}
 .cr-list{margin:0;padding-inline-start:22px;display:grid;gap:6px;list-style:disc outside}
 .cr-list li{display:list-item;line-height:1.8;overflow-wrap:anywhere}
-.cr-list li::marker{color:#b21553;font-weight:700}
+.cr-list li::marker{color:${brandHex("#b21553")};font-weight:700}
 .cr-empty{margin:0;text-align:center;color:#6f6669;padding:24px}
 `;
 useStyleTag(styles);

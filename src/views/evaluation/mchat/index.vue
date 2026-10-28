@@ -204,7 +204,7 @@ watch(childId, (value, before) => {
 
 <style scoped>
 .mc-page { display: grid; gap: 1rem; }
-.mc-hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem; border-radius: var(--sawa-radius, 16px); background: linear-gradient(135deg, var(--sawa-primary, #135c65) 0%, #1b7c86 100%); color: #fff; }
+.mc-hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem; border-radius: var(--sawa-radius, 16px); background: linear-gradient(135deg, var(--sawa-primary, rgb(var(--bp-135c65))) 0%, rgb(var(--bp-1b7c86)) 100%); color: #fff; }
 .mc-hero-main { display: flex; align-items: center; gap: 1rem; }
 .mc-hero-icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 14px; background: rgba(255, 255, 255, .15); font-size: 1.4rem; }
 .mc-hero h1 { margin: 0; font-size: 1.35rem; font-weight: 800; }
@@ -220,15 +220,15 @@ watch(childId, (value, before) => {
 .mc-instructions { margin: 1rem 0 0; padding: .6rem .8rem; border-radius: 10px; background: #f1f5f9; color: #475569; font-size: .9rem; line-height: 1.7; }
 .mc-question { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .9rem; }
 .mc-question.is-missing { border-color: #f87171; box-shadow: 0 0 0 2px #fecaca; }
-.mc-num { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 10px; background: #edf7f5; color: var(--sawa-primary, #135c65); font-weight: 800; }
-.mc-num.is-done { background: var(--sawa-primary, #135c65); color: #fff; }
+.mc-num { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 10px; background: #edf7f5; color: var(--sawa-primary, rgb(var(--bp-135c65))); font-weight: 800; }
+.mc-num.is-done { background: var(--sawa-primary, rgb(var(--bp-135c65))); color: #fff; }
 .mc-question-text h3 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.7; }
 .mc-question-text p { margin: .2rem 0 0; color: var(--sawa-muted, #64748b); font-size: .88rem; }
 .mc-choices { display: flex; gap: .5rem; }
 .mc-choice { display: inline-flex; align-items: center; gap: .4rem; min-width: 5.5rem; justify-content: center; padding: .55rem .9rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 10px; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
 .mc-choice:hover { border-color: #94a3b8; }
-.mc-choice:focus-visible { outline: 2px solid var(--sawa-primary, #135c65); outline-offset: 2px; }
-.mc-choice.is-picked { border-color: var(--sawa-primary, #135c65); background: var(--sawa-primary, #135c65); color: #fff; }
+.mc-choice:focus-visible { outline: 2px solid var(--sawa-primary, rgb(var(--bp-135c65))); outline-offset: 2px; }
+.mc-choice.is-picked { border-color: var(--sawa-primary, rgb(var(--bp-135c65))); background: var(--sawa-primary, rgb(var(--bp-135c65))); color: #fff; }
 .mc-choice.is-picked:not(.is-yes) { border-color: #475569; background: #475569; }
 .mc-footer { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 14px; background: #fff; box-shadow: 0 -6px 20px -12px rgba(15, 23, 42, .25); }
 .mc-total { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; }

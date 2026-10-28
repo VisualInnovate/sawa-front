@@ -12,7 +12,7 @@
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
               <span class="block text-[#252525]">رحلة طفلك معنا</span>
-              <span class="block text-[#C91F5F]">خطوة بخطوة</span>
+              <span class="block text-bs-c91f5f">خطوة بخطوة</span>
             </h1>
           </div>
           <p
@@ -24,12 +24,12 @@
           <div class="flex flex-wrap gap-4 items-center">
             <a
               href="/web/evaluation"
-              class="bg-[#C91F5F] text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(201,31,95,0.25)]"
+              class="bg-bs-c91f5f text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(201,31,95,0.25)]"
               >احجز تقييم الآن</a
             >
             <a
               href="/contact"
-              class="border-2 border-[#1B7A83] text-[#1B7A83] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              class="border-2 border-bp-1b7a83 text-bp-1b7a83 font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
               >تواصل معنا</a
             >
           </div>
@@ -37,10 +37,10 @@
         <!-- Image -->
         <div class="relative mt-6 lg:mt-0">
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#51BDBB]/20 blur-[32px] -top-8 -right-10"
+            class="absolute w-64 h-64 rounded-full bg-bp-51bdbb/20 blur-[32px] -top-8 -right-10"
           ></div>
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#C91F5F]/10 blur-[32px] -bottom-8 -left-8"
+            class="absolute w-64 h-64 rounded-full bg-bs-c91f5f/10 blur-[32px] -bottom-8 -left-8"
           ></div>
           <div
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
@@ -55,7 +55,7 @@
           <div
             class="relative z-20 mx-4 mt-[-54px] max-w-[260px] rounded-[12px] bg-white px-5 py-4 text-start shadow-[0_14px_28px_rgba(0,0,0,0.16)] sm:absolute sm:bottom-[-24px] sm:left-[-24px] sm:mx-0 sm:mt-0"
           >
-            <h3 class="mb-1 text-[14px] font-black text-[#C91F5F]">
+            <h3 class="mb-1 text-[14px] font-black text-bs-c91f5f">
               دعم متكامل
             </h3>
             <p class="text-[12px] font-semibold leading-[1.6] text-[#5F5F5F]">
@@ -70,13 +70,13 @@
     <section class="w-full bg-[#F7F5F4] py-12 sm:py-16">
       <div class="mx-auto max-w-[900px] px-4 text-center sm:px-6 lg:px-8">
         <span
-          class="inline-flex rounded-full bg-[#F7E7EF] px-5 py-2 text-[11px] font-black text-[#C91F5F]"
+          class="inline-flex rounded-full bg-bs-f7e7ef px-5 py-2 text-[11px] font-black text-bs-c91f5f"
         >
           فلسفتنا في العمل
         </span>
 
         <p
-          class="mt-8 text-[20px] font-semibold leading-[1.8] text-[#1B7A83] sm:text-[23px] lg:text-[25px] lg:leading-[1.65]"
+          class="mt-8 text-[20px] font-semibold leading-[1.8] text-bp-1b7a83 sm:text-[23px] lg:text-[25px] lg:leading-[1.65]"
         >
           "نؤمن أن التقدم الحقيقي للطفل يحتاج إلى متابعة دقيقة وخطة واضحة تبدأ
           بالتقييم وتنتهي بتحقيق الأهداف"
@@ -91,23 +91,23 @@
           <h2 class="text-[27px] font-black leading-tight text-[#252525] sm:text-[32px]">
             مسار التأهيل والنمو
           </h2>
-          <div class="mx-auto mt-5 h-[5px] w-[74px] rounded-full bg-[#C91F5F]"></div>
+          <div class="mx-auto mt-5 h-[5px] w-[74px] rounded-full bg-bs-c91f5f"></div>
         </div>
 
         <div class="relative">
           <div
-            class="absolute bottom-0 right-[26px] top-0 w-[4px] rounded-full bg-[#DDF6F8] lg:left-1/2 lg:right-auto lg:-translate-x-1/2"
+            class="absolute bottom-0 right-[26px] top-0 w-[4px] rounded-full bg-bp-ddf6f8 lg:left-1/2 lg:right-auto lg:-translate-x-1/2"
           ></div>
 
           <div class="space-y-8 lg:space-y-14">
             <!-- Step 1 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bs-c91f5f text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 1
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-bs-c91f5f bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bs-c91f5f" viewBox="0 0 24 24" fill="none">
                     <path d="M5 4h14v16H5V4Z" stroke="currentColor" stroke-width="2.2" />
                     <path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                     <path d="M15.5 18.5l1.5 1.5 3-3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
@@ -134,12 +134,12 @@
 
             <!-- Step 2 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#1B7A83] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bp-1b7a83 text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 2
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
+              <article class="rounded-[17px] border-r-[4px] border-bp-1b7a83 bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#1B7A83]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bp-1b7a83" viewBox="0 0 24 24" fill="none">
                     <path d="M6 4h12v16H6V4Z" stroke="currentColor" stroke-width="2.2" />
                     <path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                   </svg>
@@ -156,15 +156,15 @@
 
                 <ul class="space-y-3 text-[12px] font-bold text-[#6F6669] sm:text-[13px]">
                   <li class="flex items-center gap-2">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-bs-c91f5f"></span>
                     أهداف واضحة وقابلة للقياس (قصيرة وطويلة المدى)
                   </li>
                   <li class="flex items-center gap-2">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-bs-c91f5f"></span>
                     استراتيجيات وأساليب وأنشطة تعليمية مناسبة لقدرات الطفل
                   </li>
                   <li class="flex items-center gap-2">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-bs-c91f5f"></span>
                     إشراك الأسرة وأولوياتهم بالخطة وأخذ موافقتهم عليها قبل تنفيذها
                   </li>
                 </ul>
@@ -173,12 +173,12 @@
 
             <!-- Step 3 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bs-c91f5f text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 3
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-bs-c91f5f bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bs-c91f5f" viewBox="0 0 24 24" fill="none">
                     <path d="M12 3 4 7l8 4 8-4-8-4Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
                     <path d="M4 12l8 4 8-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M4 17l8 4 8-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
@@ -192,24 +192,24 @@
                 </p>
 
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">ABA</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج نطق ولغة</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج وظيفي</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">علاج طبيعي</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">تعليم إدراكي أكاديمي</span>
-                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-[#EEF8FA] px-3 text-center text-[12px] font-black text-[#1B7A83]">جلسات جماعية</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-bp-eef8fa px-3 text-center text-[12px] font-black text-bp-1b7a83">ABA</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-bp-eef8fa px-3 text-center text-[12px] font-black text-bp-1b7a83">علاج نطق ولغة</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-bp-eef8fa px-3 text-center text-[12px] font-black text-bp-1b7a83">علاج وظيفي</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-bp-eef8fa px-3 text-center text-[12px] font-black text-bp-1b7a83">علاج طبيعي</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-bp-eef8fa px-3 text-center text-[12px] font-black text-bp-1b7a83">تعليم إدراكي أكاديمي</span>
+                  <span class="flex min-h-[38px] items-center justify-center rounded-[8px] bg-bp-eef8fa px-3 text-center text-[12px] font-black text-bp-1b7a83">جلسات جماعية</span>
                 </div>
               </article>
             </div>
 
             <!-- Step 4 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#1B7A83] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bp-1b7a83 text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 4
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
+              <article class="rounded-[17px] border-r-[4px] border-bp-1b7a83 bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#1B7A83]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bp-1b7a83" viewBox="0 0 24 24" fill="none">
                     <path d="M3.5 12s3.2-5 8.5-5 8.5 5 8.5 5-3.2 5-8.5 5-8.5-5-8.5-5Z" stroke="currentColor" stroke-width="2.2" />
                     <path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="2.2" />
                   </svg>
@@ -227,12 +227,12 @@
 
             <!-- Step 5 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bs-c91f5f text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 5
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-bs-c91f5f bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bs-c91f5f" viewBox="0 0 24 24" fill="none">
                     <path d="M5 19V5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                     <path d="M9 19v-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                     <path d="M13 19V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -250,12 +250,12 @@
 
             <!-- Step 6 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#1B7A83] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bp-1b7a83 text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 6
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#1B7A83] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
+              <article class="rounded-[17px] border-r-[4px] border-bp-1b7a83 bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-1 lg:row-start-1 lg:border-l-[4px] lg:border-r-0">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#1B7A83]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bp-1b7a83" viewBox="0 0 24 24" fill="none">
                     <path d="M7 4h8l3 3v13H7V4Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
                     <path d="M15 4v4h4" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
                     <path d="M10 12h5M10 16h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -272,12 +272,12 @@
 
             <!-- Step 7 -->
             <div class="relative grid grid-cols-[56px_1fr] gap-4 lg:grid-cols-[1fr_72px_1fr] lg:gap-8">
-              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#C91F5F] text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
+              <div class="relative z-10 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-bs-c91f5f text-[18px] font-black text-white lg:col-start-2 lg:mx-auto lg:h-[62px] lg:w-[62px]">
                 7
               </div>
-              <article class="rounded-[17px] border-r-[4px] border-[#C91F5F] bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
+              <article class="rounded-[17px] border-r-[4px] border-bs-c91f5f bg-white p-5 text-start shadow-[0_12px_30px_rgba(0,0,0,0.035)] sm:p-7 lg:col-start-3 lg:row-start-1">
                 <div class="mb-4 flex items-center gap-[10px]">
-                  <svg class="h-[22px] w-[22px] text-[#C91F5F]" viewBox="0 0 24 24" fill="none">
+                  <svg class="h-[22px] w-[22px] text-bs-c91f5f" viewBox="0 0 24 24" fill="none">
                     <path d="M5 4h14v16H5V4Z" stroke="currentColor" stroke-width="2.2" />
                     <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                   </svg>
@@ -291,15 +291,15 @@
 
                 <ul class="space-y-3 text-[12px] font-bold text-[#6F6669] sm:text-[13px]">
                   <li class="flex items-center gap-2">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-bs-c91f5f"></span>
                     نماذج التوثيق والمتابعة (DTT / Tracking) ونماذج رصد المشاكل السلوكية
                   </li>
                   <li class="flex items-center gap-2">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-bs-c91f5f"></span>
                     نماذج أوراق العمل للأهداف المستهدفة بالتدريب
                   </li>
                   <li class="flex items-center gap-2">
-                    <span class="h-2 w-2 shrink-0 rounded-full bg-[#C91F5F]"></span>
+                    <span class="h-2 w-2 shrink-0 rounded-full bg-bs-c91f5f"></span>
                     نماذج من الأنشطة التطبيقية مع الطفل
                   </li>
                 </ul>
@@ -311,12 +311,12 @@
     </section>
 
     <!-- Family Partnership -->
-    <section class="w-full bg-[#F0FAFC] py-12 sm:py-16 lg:py-20">
+    <section class="w-full bg-bp-f0fafc py-12 sm:py-16 lg:py-20">
       <div
         class="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:px-8"
       >
         <div class="relative">
-          <div class="h-[260px] overflow-hidden rounded-[16px] bg-[#4CBDBB] shadow-[0_15px_35px_rgba(0,0,0,0.16)] sm:h-[360px] lg:h-[383px]">
+          <div class="h-[260px] overflow-hidden rounded-[16px] bg-bp-4cbdbb shadow-[0_15px_35px_rgba(0,0,0,0.16)] sm:h-[360px] lg:h-[383px]">
             <img
               src="./images/iep-meeting.jpg"
               alt="شراكة حقيقية مع الأسرة"
@@ -325,7 +325,7 @@
           </div>
 
           <div
-            class="absolute right-[-10px] top-[-18px] flex h-[46px] w-[46px] items-center justify-center rounded-[10px] bg-[#C91F5F] text-white shadow-[0_10px_22px_rgba(201,31,95,0.22)] sm:right-[-18px]"
+            class="absolute right-[-10px] top-[-18px] flex h-[46px] w-[46px] items-center justify-center rounded-[10px] bg-bs-c91f5f text-white shadow-[0_10px_22px_rgba(201,31,95,0.22)] sm:right-[-18px]"
           >
             <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none">
               <path d="M8 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="2.1" />
@@ -337,7 +337,7 @@
         </div>
 
         <div class="text-start">
-          <h2 class="mb-5 text-[26px] font-black leading-tight text-[#1B7A83] sm:text-[31px]">
+          <h2 class="mb-5 text-[26px] font-black leading-tight text-bp-1b7a83 sm:text-[31px]">
             شراكة حقيقية مع الأسرة
           </h2>
 
@@ -349,7 +349,7 @@
 
           <div class="space-y-3">
             <div class="flex min-h-[42px] w-full items-center gap-3 rounded-[9px] bg-white px-4 py-2 text-[12px] font-bold text-[#4E4E4E]">
-              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F7E7EF] text-[#C91F5F]">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bs-f7e7ef text-bs-c91f5f">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none">
                   <path d="M12 4v16M5 11h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                 </svg>
@@ -358,7 +358,7 @@
             </div>
 
             <div class="flex min-h-[42px] w-full items-center gap-3 rounded-[9px] bg-white px-4 py-2 text-[12px] font-bold text-[#4E4E4E]">
-              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F7E7EF] text-[#C91F5F]">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bs-f7e7ef text-bs-c91f5f">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none">
                   <path d="M5 7h14v9H8l-3 3V7Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
                 </svg>
@@ -373,8 +373,8 @@
     <!-- Main Goal -->
     <section class="w-full bg-white py-12 sm:py-16 lg:py-20">
       <div class="mx-auto max-w-[960px] px-4 sm:px-6 lg:px-8">
-        <div class="rounded-[24px] border border-[#F0C9D6] bg-[#FAEEF2] px-5 py-10 text-center sm:rounded-[34px] sm:px-10 sm:py-12">
-          <div class="mx-auto mb-6 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-white text-[#C91F5F]">
+        <div class="rounded-[24px] border border-bs-f0c9d6 bg-bs-faeef2 px-5 py-10 text-center sm:rounded-[34px] sm:px-10 sm:py-12">
+          <div class="mx-auto mb-6 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-white text-bs-c91f5f">
             <svg class="h-8 w-8" viewBox="0 0 45 45" fill="none">
               <path
                 d="M10 45V40H20V32.25C17.9583 31.7917 16.1354 30.9271 14.5312 29.6562C12.9271 28.3854 11.75 26.7917 11 24.875C7.875 24.5 5.26042 23.1354 3.15625 20.7812C1.05208 18.4271 0 15.6667 0 12.5V10C0 8.625 0.489583 7.44792 1.46875 6.46875C2.44792 5.48958 3.625 5 5 5H10V0H35V5H40C41.375 5 42.5521 5.48958 43.5312 6.46875C44.5104 7.44792 45 8.625 45 10V12.5C45 15.6667 43.9479 18.4271 41.8438 20.7812C39.7396 23.1354 37.125 24.5 34 24.875C33.25 26.7917 32.0729 28.3854 30.4688 29.6562C28.8646 30.9271 27.0417 31.7917 25 32.25V40H35V45H10ZM10 19.5V10H5V12.5C5 14.0833 5.45833 15.5104 6.375 16.7812C7.29167 18.0521 8.5 18.9583 10 19.5ZM22.5 27.5C24.5833 27.5 26.3542 26.7708 27.8125 25.3125C29.2708 23.8542 30 22.0833 30 20V5H15V20C15 22.0833 15.7292 23.8542 17.1875 25.3125C18.6458 26.7708 20.4167 27.5 22.5 27.5ZM35 19.5C36.5 18.9583 37.7083 18.0521 38.625 16.7812C39.5417 15.5104 40 14.0833 40 12.5V10H35V19.5Z"
@@ -387,7 +387,7 @@
             هدفنا الأسمى
           </h2>
 
-          <p class="mx-auto mt-5 max-w-[640px] text-[16px] font-semibold leading-[1.85] text-[#1B7A83] sm:text-[17px]">
+          <p class="mx-auto mt-5 max-w-[640px] text-[16px] font-semibold leading-[1.85] text-bp-1b7a83 sm:text-[17px]">
             "الوصول بالطفل إلى أقصى درجات الاستقلالية ودمجه بثقة وفاعلية في
             المجتمع"
           </p>
@@ -396,7 +396,7 @@
     </section>
 
     <!-- CTA -->
-    <section class="w-full bg-[#C91F5F] px-4 py-14 text-center text-white sm:px-6 sm:py-16">
+    <section class="w-full bg-bs-c91f5f px-4 py-14 text-center text-white sm:px-6 sm:py-16">
       <h2 class="text-[26px] font-black leading-tight sm:text-[32px]">
         ابدأ رحلة طفلك معنا اليوم
       </h2>
@@ -408,7 +408,7 @@
       <div class="mx-auto mt-8 flex max-w-[340px] flex-col justify-center gap-3 sm:max-w-none sm:flex-row sm:gap-4">
         <a
           href="/web/evaluation"
-          class="inline-flex h-[51px] items-center justify-center rounded-full bg-white px-7 text-[13px] font-black text-[#C91F5F]"
+          class="inline-flex h-[51px] items-center justify-center rounded-full bg-white px-7 text-[13px] font-black text-bs-c91f5f"
         >
           احجز تقييم الآن
         </a>

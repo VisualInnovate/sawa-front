@@ -222,7 +222,7 @@ const news = computed(() => home.value?.notifications?.latest ?? []);
 }
 .pp-hello__bubble--2 {
   inset: 22px;
-  background: rgba(167, 235, 246, 0.25);
+  background: rgb(var(--bp-a7ebf6) / 0.25);
 }
 .pp-home-cols {
   grid-template-columns: 1fr;

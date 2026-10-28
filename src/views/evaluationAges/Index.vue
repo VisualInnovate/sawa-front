@@ -39,7 +39,7 @@ async function save() {
 <template>
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
-      <p class="text-xl text-[#135C65] font-bold"><i class="pi pi-users" aria-hidden="true" /> {{ $t("age_ranges.evaluation_page") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold"><i class="pi pi-users" aria-hidden="true" /> {{ $t("age_ranges.evaluation_page") }}</p>
       <Button icon="pi pi-save" :label="$t('save')" :loading="saving" :disabled="loading" @click="save" />
     </div>
     <p class="text-color-secondary mb-4">{{ $t("age_ranges.evaluation_hint") }}</p>

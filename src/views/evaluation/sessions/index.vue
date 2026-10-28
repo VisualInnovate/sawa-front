@@ -99,8 +99,10 @@ function enter(session) {
   router.push({ name: "session-run", params: { id: session.id } });
 }
 
-// Changing the therapist (before the start): the original therapist or one of their substitutes.
+// Changing the therapist (before the start): the original therapist or one of their substitutes; a clinics
+// program's own substitutes, only those free at the session's time.
 const therapistDialog = ref(null);
+const clinicsDialog = computed(() => therapistDialog.value?.session.program?.kind === "clinics");
 async function openTherapist(session) {
   therapistDialog.value = { session, options: [], therapist_id: session.therapist_id, loading: true, saving: false };
   try {
@@ -140,7 +142,7 @@ onBeforeUnmount(() => clearInterval(timer));
 <template>
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <p class="text-xl text-[#135C65] font-bold">{{ $t("sessions") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold">{{ $t("sessions") }}</p>
       <div class="flex flex-wrap items-center gap-2">
         <DatePicker v-model="range" selectionMode="range" dateFormat="yy-mm-dd" showIcon :manualInput="false" :aria-label="$t('sp_period')" />
         <Button icon="pi pi-refresh" variant="outlined" :loading="loading" v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" @click="load" />
@@ -195,7 +197,7 @@ onBeforeUnmount(() => clearInterval(timer));
             <i class="pi pi-replay" aria-hidden="true" /> {{ $t("session_makeup_of", { time: dateTime(data.makeup_of.starts_at) }) }}
           </div>
           <template v-if="data.resolution">
-            <div class="text-xs mt-1 font-semibold text-[#135C65]">
+            <div class="text-xs mt-1 font-semibold text-bp-135c65">
               <template v-if="data.resolution === 'rescheduled'">{{ $t("session_resolution_rescheduled", { time: data.makeup ? dateTime(data.makeup.starts_at) : "—" }) }}</template>
               <template v-else>{{ $t("session_resolution_compensated", { amount: formatAmount(data.compensation_amount) }) }}</template>
             </div>
@@ -237,13 +239,13 @@ onBeforeUnmount(() => clearInterval(timer));
     <Dialog :visible="!!therapistDialog" modal :header="$t('session_change_therapist')" :style="{ width: '26rem' }" :breakpoints="{ '640px': '94vw' }"
       @update:visible="therapistDialog = null">
       <template v-if="therapistDialog">
-        <p class="text-sm text-color-secondary mb-3">{{ $t("session_therapist_hint") }}</p>
+        <p class="text-sm text-color-secondary mb-3">{{ $t(clinicsDialog ? "session_clinics_substitutes_hint" : "session_therapist_hint") }}</p>
         <Select v-model="therapistDialog.therapist_id" :options="therapistDialog.options" optionLabel="name" optionValue="id" filter
           :loading="therapistDialog.loading" class="w-full mb-3" :aria-label="$t('sp_therapist')">
           <template #option="{ option }">{{ option.name }} <span v-if="!option.original" class="text-xs text-color-secondary">({{ $t("substitute") }})</span>
             <i v-if="option.age_warning" class="pi pi-exclamation-triangle text-orange-500 ms-1" v-tooltip.top="$t('age_ranges.therapist_short')" /></template>
         </Select>
-        <small v-if="!therapistDialog.loading && therapistDialog.options.length < 2" class="block text-orange-600 mb-3">{{ $t("session_no_substitutes") }}</small>
+        <small v-if="!therapistDialog.loading && therapistDialog.options.length < 2" class="block text-orange-600 mb-3">{{ $t(clinicsDialog ? "session_no_free_substitutes" : "session_no_substitutes") }}</small>
         <small v-if="therapistDialog.options.find((row) => row.id === therapistDialog.therapist_id)?.age_warning" class="block text-orange-600 mb-3">
           <i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}
         </small>

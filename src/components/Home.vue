@@ -76,7 +76,7 @@ onBeforeUnmount(() => {
         aria-controls="admin-sidebar"
         @click="sidebarOpen = !sidebarOpen" />
       <router-link :to="homeRoute()" class="admin-brand">
-        <img :src="sawaLogo" alt="Sawa" />
+        <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
       </router-link>
       <div class="admin-header-actions">
         <LocaleSelect />

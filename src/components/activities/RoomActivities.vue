@@ -229,7 +229,7 @@ defineExpose({ reload: loadLists });
 .ra-room { display: grid; gap: .35rem; }
 .ra-room label { font-weight: 700; }
 .ra-room-select { min-width: 16rem; }
-.ra-title { margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
+.ra-title { margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .ra-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .ra-hours { margin: 0; padding: .5rem .75rem; border-radius: 10px; background: #f1f5f9; color: #334155; font-size: .88rem; }
 .ra-empty { margin: 0; padding: 1.5rem; color: var(--sawa-muted, #64748b); text-align: center; }

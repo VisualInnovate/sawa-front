@@ -217,7 +217,7 @@ onMounted(load);
 
 <style scoped>
 .ac-page { display: grid; gap: 1rem; }
-.ac-hero { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border-radius: var(--sawa-radius, 16px); background: linear-gradient(135deg, var(--sawa-primary, #135c65) 0%, #1b7c86 100%); color: #fff; }
+.ac-hero { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border-radius: var(--sawa-radius, 16px); background: linear-gradient(135deg, var(--sawa-primary, rgb(var(--bp-135c65))) 0%, rgb(var(--bp-1b7c86)) 100%); color: #fff; }
 .ac-hero-icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 14px; background: rgba(255, 255, 255, .15); font-size: 1.4rem; }
 .ac-hero h1 { margin: 0; font-size: 1.35rem; font-weight: 800; }
 .ac-hero p { margin: .2rem 0 0; opacity: .85; }
@@ -244,7 +244,7 @@ onMounted(load);
 .ac-upload.is-invalid { border-color: #ef4444; }
 .ac-upload img { width: 100%; height: 100%; object-fit: cover; }
 .ac-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.ac-upload:focus-within { outline: 2px solid var(--sawa-primary, #135c65); outline-offset: 2px; }
+.ac-upload:focus-within { outline: 2px solid var(--sawa-primary, rgb(var(--bp-135c65))); outline-offset: 2px; }
 .ac-hint { color: var(--sawa-muted, #64748b); }
 .ac-error { color: #dc2626; }
 .ac-form-actions { display: flex; justify-content: flex-end; }

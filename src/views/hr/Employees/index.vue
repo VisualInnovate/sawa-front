@@ -10,6 +10,7 @@ import { useRouter } from "vue-router";
 import printPlugin from "vue3-print-nb";
 import { workTypeLabel } from "@/utils/employeeWorkTypes";
 import { formatAgeRange } from "@/utils/ageRange";
+import { can } from "@/utils/permissions";
 const toast = useToast();
 const router = useRouter();
 const allusers = ref([]);
@@ -28,6 +29,19 @@ const employee = ref({});
 const updatedialog = ref(false);
 const clockeddialog = ref(false);
 const restdialog = ref(false);
+// The employees' documents that expired or expire soon (HR settings: alert days), above the list.
+const docAlerts = ref(null);
+const docAlertsOpen = ref(false);
+const openProfile = (row) => router.push({ name: "employee-profile", params: { id: row.user?.id ?? row.user_id } });
+const loadDocAlerts = async () => {
+  if (!can("employee documents list")) return;
+  try {
+    docAlerts.value = (await axios.get("api/employee-documents/alerts")).data;
+  } catch {
+    docAlerts.value = null;
+  }
+};
+onMounted(loadDocAlerts);
 const clocked_s = ref();
 const id = ref("");
 onBeforeMount(() => {
@@ -38,12 +52,21 @@ const getallusers = () => {
     allusers.value = res.data.users.data;
   });
 };
+// Archived employees (deleted ones are archived) are listed apart, to restore one.
+const showArchived = ref(false);
 const fetchData = () => {
   loading.value = true;
-  axios.get("/api/employees").then((res) => {
+  axios.get("/api/employees", { params: { archived: showArchived.value ? 1 : undefined } }).then((res) => {
     loading.value = false;
     users.value = res.data.data;
-    console.log(users.value);
+  });
+};
+const restore = (row) => {
+  axios.post(`/api/employees/${row.id}/restore`).then(() => {
+    toast.add({ severity: "success", summary: t('success_message'), detail: t('hremp.restored', { name: row.name }), life: 3000 });
+    fetchData();
+  }).catch((e) => {
+    toast.add({ severity: "error", summary: t('error'), detail: e.response?.data?.message || t('mission_error'), life: 4000 });
   });
 };
 
@@ -197,11 +220,13 @@ const deleteAction = () => {
       toast.add({
         severity: "success",
         summary: t('success_message'),
-        detail: t('successful'),
+        detail: t('hremp.archived'),
         life: 3000,
       });
     })
-    .catch(() => { });
+    .catch((e) => {
+      toast.add({ severity: "error", summary: t('error'), detail: e.response?.data?.message || t('mission_error'), life: 4000 });
+    });
 };
 
 // The role and age-range columns are searched, sorted and exported by their text.
@@ -240,6 +265,33 @@ const initFilters = () => {
 
         <Toast />
 
+        <Message v-if="docAlerts && (docAlerts.counts.expired || docAlerts.counts.expiring)" severity="warn" :closable="false" class="mb-3 no-print">
+          <div class="flex flex-wrap items-center justify-between gap-2 w-full">
+            <span class="flex flex-wrap items-center gap-2">
+              {{ $t("prof.doc_alerts") }}
+              <Tag v-if="docAlerts.counts.expired" severity="danger" :value="$t('prof.docs_expired', { n: docAlerts.counts.expired })" />
+              <Tag v-if="docAlerts.counts.expiring" severity="warn" :value="$t('prof.docs_expiring', { n: docAlerts.counts.expiring })" />
+            </span>
+            <Button :label="$t('prof.show')" size="small" text @click="docAlertsOpen = true" />
+          </div>
+        </Message>
+        <Dialog v-model:visible="docAlertsOpen" modal :header="$t('prof.doc_alerts_title')" :style="{ width: '620px' }" :breakpoints="{ '660px': '95vw' }">
+          <DataTable :value="docAlerts?.data ?? []" size="small" stripedRows>
+            <Column :header="$t('prof.employee')">
+              <template #body="{ data }">
+                <Button :label="data.employee?.name" link class="p-0" @click="router.push({ name: 'employee-profile', params: { id: data.employee.user_id }, query: { tab: 'documents' } })" />
+              </template>
+            </Column>
+            <Column field="title" :header="$t('edoc.document')" />
+            <Column :header="$t('edoc.expiry_date')">
+              <template #body="{ data }">
+                <bdi dir="ltr">{{ data.expiry_date }}</bdi>
+                <Tag class="ms-2" :severity="data.alert === 'expired' ? 'danger' : 'warn'" :value="$t(data.alert === 'expired' ? 'edoc.expired' : 'edoc.expiring')" />
+              </template>
+            </Column>
+          </DataTable>
+        </Dialog>
+
         <div class="card shadow-1 surface-0">
           <DataTable ref="dt" v-model:selection="selectedProducts" :value="users" :loading="loading" data-key="id"
             :paginator="true" :rows="10" :filters="filters"
@@ -257,6 +309,10 @@ const initFilters = () => {
               </IconField>
                   <Button icon="pi pi-refresh" @click="fetchData"
                     v-tooltip.top="$t('refresh')" :aria-label="$t('refresh')" variant="text" />
+                  <div v-if="$can('employees delete')" class="flex items-center gap-2">
+                    <ToggleSwitch v-model="showArchived" inputId="emp-archived" @update:modelValue="fetchData" />
+                    <label for="emp-archived">{{ $t('hremp.show_archived') }}</label>
+                  </div>
                 </div>
               </div>
             </template>
@@ -309,7 +365,13 @@ const initFilters = () => {
 
             <Column header-style="min-width:10rem;" class="no-print">
               <template #body="slotProps">
-                <div class="table-actions">
+                <div v-if="slotProps.data.deleted_at" class="table-actions">
+                  <Button icon="pi pi-id-card" @click="openProfile(slotProps.data)" v-tooltip.top="$t('prof.title')" :aria-label="$t('prof.title')" rounded severity="secondary" variant="outlined" />
+                  <Button v-can="'employees delete'" icon="pi pi-replay" :label="$t('hremp.restore')" size="small"
+                    @click="restore(slotProps.data)" severity="success" variant="outlined" />
+                </div>
+                <div v-else class="table-actions">
+                  <Button icon="pi pi-id-card" @click="openProfile(slotProps.data)" v-tooltip.top="$t('prof.title')" :aria-label="$t('prof.title')" rounded severity="secondary" variant="outlined" />
                   <Button v-can="'employees edit'" icon="pi pi-pencil"
                     @click="edit(slotProps.data.user.id)" v-tooltip.top="$t('edit')" rounded severity="info" variant="outlined" />
                   <Button v-can="'employees delete'" icon="pi pi-trash"
@@ -354,9 +416,7 @@ const initFilters = () => {
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header="$t('confirm')" :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
-            <span v-if="user">
-              {{ $t("remove_item") }} <b>{{ user.first_name }}</b>?
-            </span>
+            <span>{{ $t("hremp.archive_confirm") }}</span>
           </div>
           <template #footer>
             <Button :label="$t('no')" icon="pi pi-times" @click="deleteDialog = false" variant="text" severity="secondary" />

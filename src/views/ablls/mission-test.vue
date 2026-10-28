@@ -461,7 +461,7 @@ export default {
   width: 600px;
 
   margin: auto !important;
-  background-color: #135c65;
+  background-color: rgb(var(--bp-135c65));
   display: block;
   color: white;
  

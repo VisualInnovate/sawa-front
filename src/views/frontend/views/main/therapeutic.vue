@@ -9,7 +9,7 @@
         <div class="flex flex-col gap-4 lg:gap-8">
           <div class="text-start">
             <span
-              class="mb-5 inline-flex rounded-full bg-[#A7EBF6] text-[#1C6772] text-xs sm:text-sm font-bold px-4 py-2"
+              class="mb-5 inline-flex rounded-full bg-bp-a7ebf6 text-bp-1c6772 text-xs sm:text-sm font-bold px-4 py-2"
             >
               رحلة التمكين تبدأ هنا
             </span>
@@ -30,12 +30,12 @@
           <div class="flex flex-wrap gap-4 items-center">
             <a
               href="/programs"
-              class="bg-[#C91F5F] text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(201,31,95,0.25)]"
+              class="bg-bs-c91f5f text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(201,31,95,0.25)]"
               >اكتشف برامجنا</a
             >
             <a
               href="/services"
-              class="border-2 border-[#1C6772] text-[#1C6772] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              class="border-2 border-bp-1c6772 text-bp-1c6772 font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
               >لماذا نختلف؟</a
             >
           </div>
@@ -43,10 +43,10 @@
         <!-- Image -->
         <div class="relative mt-6 lg:mt-0">
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#A7EBF6]/40 blur-[32px] -top-8 -right-10"
+            class="absolute w-64 h-64 rounded-full bg-bp-a7ebf6/40 blur-[32px] -top-8 -right-10"
           ></div>
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#C91F5F]/10 blur-[32px] -bottom-8 -left-8"
+            class="absolute w-64 h-64 rounded-full bg-bs-c91f5f/10 blur-[32px] -bottom-8 -left-8"
           ></div>
           <div
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
@@ -76,7 +76,7 @@
             بالتنسيق مع باقي البرامج والأقسام.
           </p>
           <div
-            class="mx-auto mt-5 h-[6px] w-[80px] rounded-full bg-[#B21553] sm:mt-[26px] sm:w-[96px]"
+            class="mx-auto mt-5 h-[6px] w-[80px] rounded-full bg-bs-b21553 sm:mt-[26px] sm:w-[96px]"
           ></div>
         </div>
 
@@ -98,7 +98,7 @@
               <div>
                 <div class="mb-4 flex items-center gap-3">
                   <div
-                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-[#B21553]/10"
+                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-bs-b21553/10"
                   >
                     <img src="./images/therapeutic-departments1.svg" alt="" class="h-7 w-7" />
                   </div>
@@ -115,90 +115,90 @@
             </div>
             <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#B21553]">
+              <p class="mb-3 text-[13px] font-extrabold text-bs-b21553">
                 لمن يواجهون تحديات في
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>مهارات التواصل اللفظي وغير اللفظي مثل: (الطلبات، التسمية، استجابة المستمع، التقليد الصوتي).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>المهارات الاجتماعية مثل: (التفاعل، تبادل الأدوار، بدء اللعب).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>السلوكيات غير المرغوبة مثل: (البكاء، الصراخ، الانسحاب، السلوكيات العدوانية أو النمطية).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>مهارات اللعب الوظيفي والرمزي مثل: (دفع السيارة لتحريكها، إطعام دمية).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>المهارات المعرفية والإدراكية مثل: (الانتباه، الاستجابة، تقليل التشتت).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>مهارات الاستقلالية مثل: (الجلوس، الانتظار، اتباع الروتين).</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#B21553]">
+              <p class="mb-3 text-[13px] font-extrabold text-bs-b21553">
                 أهداف القسم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تطوير مهارات التواصل اللفظي والوظيفي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>بناء مهارات اجتماعية مستقرة ومتدرجة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تقليل السلوكيات غير المرغوبة بطريقة آمنة وعلمية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تعزيز السلوكيات البديلة المناسبة مثل: (التواصل، الطلب، المهارات الاجتماعية).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تطوير مهارات اللعب والتفاعل.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تحسين الانتباه، الاستجابة، وتنظيم السلوك.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>دعم استقلالية الطفل داخل الجلسة وفي البيئة المدرسية والمنزلية.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#B21553]">
+              <p class="mb-3 text-[13px] font-extrabold text-bs-b21553">
                 كيف نعمل؟
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تقييم سلوكي شامل باستخدام أدوات تقييم معتمدة عالمياً.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>إعداد خطة تربوية فردية مبنية على احتياجات الطفل وأهداف قابلة للقياس.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>جلسات علاج فردية باستخدام استراتيجيات ABA مثل: DTT التجارب المنفصلة، NET التعليم في البيئة الطبيعية، Prompting & Fading التدريب بتقديم المساعدات وسحبها تدريجياً.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تعزيز السلوكيات البديلة.</span>
                 </li>
               </ul>
@@ -223,7 +223,7 @@
               <div>
                 <div class="mb-4 flex items-center gap-3">
                   <div
-                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-[#1C6772]/10"
+                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-bp-1c6772/10"
                   >
                     <img src="./images/therapeutic-departments2.svg" alt="" class="h-7 w-7" />
                   </div>
@@ -240,78 +240,78 @@
             </div>
             <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 مخصص للأطفال الذين لديهم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تأخر لغوي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>مشاكل في مخارج الأصوات الكلامية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>مشاكل بالطلاقة الكلامية مثل: (التأتأة والسرعة في الكلام).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>الاضطرابات النطقية واللغوية الناتجة عن الضعف السمعي.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 أهداف القسم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تطوير مهارات النطق والتواصل اللفظي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تحسين القدرة النطقية واللغوية عند الطفل.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تعزيز التعبير عن الانفعالات والمشاعر والأفكار والاحتياجات.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تنمية مهارات التواصل الاجتماعي والتفاعل مع الآخرين.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تحسين وتعزيز استخدام اللغة بالمواقف الاجتماعية المختلفة.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 كيف نعمل؟
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>نبدأ بإجراء تقييم شامل للمهارات اللغوية والنطقية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تحديد مستوى الأداء الحالي بالإضافة إلى رسومات بيانية توضيحية تبين التقدم وتتيح مراقبة التطور لدى الطفل.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>إعداد خطة علاجية فردية مخصصة حسب احتياجات الطفل ومستواه اللغوي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>جلسات علاجية منظمة باستخدام استراتيجيات وأدوات علاجية حديثة وشيّقة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>متابعة دورية وتعاون مستمر مع الأسرة والمدرسة لضمان استمرارية التقدم.</span>
                 </li>
               </ul>
@@ -457,7 +457,7 @@
               <div>
                 <div class="mb-4 flex items-center gap-3">
                   <div
-                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-[#1C6772]/10"
+                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-bp-1c6772/10"
                   >
                     <img src="./images/therapeutic-departments5.svg" alt="" class="h-7 w-7" />
                   </div>
@@ -474,116 +474,116 @@
             </div>
             <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 مخصص للأطفال الذين لديهم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>صعوبات تعلم أكاديمية أو إدراكية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>اضطرابات نمائية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>انخفاض بنسبة الذكاء مثل ذوي بطء التعلّم.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 أهداف القسم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تطوير المهارات الأكاديمية بما يتناسب مع القدرات الإدراكية الحقيقية لكل طفل.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>دعم التحصيل الدراسي داخل الصف المدرسي وفق المنهاج المعتمد.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تنمية المهارات الإدراكية اللازمة للتعلّم (الانتباه، الذاكرة، الفهم، التنظيم).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تمكين الطالب من الدمج الشامل والفعلي داخل الصف دون إقصاء أو تهميش.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تقليل الفجوة الأكاديمية بين الطالب وأقرانه.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>دعم انتقال الطالب التدريجي نحو الاستقلالية الأكاديمية.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 المهارات المستهدفة
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>أولاً: المهارات الأكاديمية مثل: (القراءة والكتابة والرياضيات حسب مستوى الطالب، متابعة الدروس الصفية وأداء الواجبات، أهداف المنهاج المدرسي).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>ثانياً: المهارات الإدراكية مثل: (الانتباه والتركيز داخل الصف، الذاكرة، الإدراك السمعي والبصري، الفهم والاستيعاب).</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 مميزات القسم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>دمج حقيقي مبني على التخطيط وليس التجربة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تعليم فردي دقيق مرتبط بالخطة الفردية للطالب ومستند على المنهاج المدرسي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>تنسيق فعّال بين الأكاديمية والمدرسة والأسرة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>متابعة مستمرة وتوثيق لتقدّم الطالب.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#1C6772]">
+              <p class="mb-3 text-[13px] font-extrabold text-bp-1c6772">
                 كيف نعمل؟
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>إجراء تقييم إدراكي وأكاديمي شامل لكل طالب مستند على منهاج عالمي مقنن وعلى المناهج المدرسية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>بناء خطة إدراكية أكاديمية لكل طالب اعتماداً على نتائج التقييم، شاملة لنقاط الضعف والقوة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>جلسات فردية لتدريب الطالب على أهداف الخطة من قبل معالجين ذوي خبرة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>توثيق يومي ورسومات بيانية توضح تطور الطفل بإتقانه أهداف الخطة.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#1C6772]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bp-1c6772"></span>
                   <span>اتصالات يومية وأسبوعية وشهرية واجتماعات دورية مع الأهل.</span>
                 </li>
               </ul>
@@ -608,7 +608,7 @@
               <div>
                 <div class="mb-4 flex items-center gap-3">
                   <div
-                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-[#B21553]/10"
+                    class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[16px] bg-bs-b21553/10"
                   >
                     <img src="./images/therapeutic-departments4.svg" alt="" class="h-7 w-7" />
                   </div>
@@ -625,86 +625,86 @@
             </div>
             <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#B21553]">
+              <p class="mb-3 text-[13px] font-extrabold text-bs-b21553">
                 مخصص للأطفال الذين تظهر عليهم العلامات التالية
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تأخر في اكتساب المهارات الحركية مثل التقلب، الجلوس، المشي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>ضعف واضح في قوة العضلات.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>ارتخاء أو شد زائد بالجسم.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>صعوبة في التوازن أو كثرة السقوط.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>المشي على أطراف الأصابع.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>وضعيات غير طبيعية للجسم.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>مشاكل في التناسق الحركي (نوعية المشي والركض).</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#B21553]">
+              <p class="mb-3 text-[13px] font-extrabold text-bs-b21553">
                 أهداف القسم
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تطوير المهارات الحركية الأساسية مثل: (التقلب، الجلوس، الوقوف، المشي والركض، وصعود الدرج).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تحسين التوازن والتناسق الحركي.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>زيادة قوة العضلات والقدرة على التحمل خلال النشاطات اليومية.</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>تصحيح قوام الجسم وتعزيز الاستقلالية في الأنشطة الحركية اليومية.</span>
                 </li>
               </ul>
             </div>
             <div class="rounded-[12px] bg-[#FCF9F8] px-4 py-4">
-              <p class="mb-3 text-[13px] font-extrabold text-[#B21553]">
+              <p class="mb-3 text-[13px] font-extrabold text-bs-b21553">
                 كيف نعمل؟ نعمل على أكثر الطرق المعتمدة عالمياً مثل
               </p>
               <ul class="space-y-2 text-[12.5px] font-bold leading-[1.75] text-[#343434]">
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>طريقة بوباث (Bobath).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>طريقة الثيراسوت (البذلة الفضائية).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>نظام البكرات (Pulley System).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>نظام السبايدر (Spider System).</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#B21553]"></span>
+                  <span class="mt-[8px] h-[6px] w-[6px] shrink-0 rounded-full bg-bs-b21553"></span>
                   <span>نظام عزل الجاذبية (Suspension System).</span>
                 </li>
               </ul>
@@ -734,7 +734,7 @@
           <div class="space-y-7">
             <div class="flex items-start gap-4 sm:gap-[22px]">
               <div
-                class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-[#1C6772] text-[18px] font-black text-white"
+                class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-bp-1c6772 text-[18px] font-black text-white"
               >
                 ١
               </div>
@@ -756,7 +756,7 @@
 
             <div class="flex items-start gap-4 sm:gap-[22px]">
               <div
-                class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-[#1C6772] text-[18px] font-black text-white"
+                class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-bp-1c6772 text-[18px] font-black text-white"
               >
                 ٢
               </div>
@@ -778,7 +778,7 @@
 
             <div class="flex items-start gap-4 sm:gap-[22px]">
               <div
-                class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-[#1C6772] text-[18px] font-black text-white"
+                class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-bp-1c6772 text-[18px] font-black text-white"
               >
                 ٣
               </div>
@@ -803,7 +803,7 @@
           <article
             class="rounded-[22px] bg-white p-6 text-start shadow-[0_8px_20px_rgba(40,40,40,0.018)]"
           >
-            <div class="mb-5 text-[#1C6772]">
+            <div class="mb-5 text-bp-1c6772">
               <img src="./images/icon-planIEP.svg" alt="" class="h-8 w-8" />
             </div>
             <h3 class="mb-2 text-[19px] font-black text-[#252525]">خطة IEP</h3>
@@ -815,7 +815,7 @@
           <article
             class="rounded-[22px] bg-white p-6 text-start shadow-[0_8px_20px_rgba(40,40,40,0.018)]"
           >
-            <div class="mb-5 text-[#B21553]">
+            <div class="mb-5 text-bs-b21553">
               <img src="./images/icon-measure.svg" alt="" class="h-8 w-8" />
             </div>
             <h3 class="mb-2 text-[18px] font-black text-[#252525]">
@@ -827,7 +827,7 @@
           </article>
 
           <article
-            class="relative overflow-hidden rounded-[22px] bg-[#1C6772] p-6 text-start text-white sm:col-span-2"
+            class="relative overflow-hidden rounded-[22px] bg-bp-1c6772 p-6 text-start text-white sm:col-span-2"
           >
             <div class="pointer-events-none absolute left-8 top-8 opacity-20">
               <svg
@@ -861,7 +861,7 @@
     <section class="w-full bg-[#FCF9F8] py-14 sm:py-20">
       <div class="mx-auto max-w-[1024px] px-4 sm:px-6 lg:px-8">
         <div
-          class="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#C51A58] to-[#D73572] px-5 py-14 text-center text-white sm:rounded-[34px] sm:px-10 sm:py-16 lg:rounded-[40px] lg:px-16"
+          class="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-bs-c51a58 to-bs-d73572 px-5 py-14 text-center text-white sm:rounded-[34px] sm:px-10 sm:py-16 lg:rounded-[40px] lg:px-16"
         >
           <div
             class="pointer-events-none absolute left-[-120px] top-[-80px] h-[260px] w-[260px] rounded-full bg-white/5 sm:h-[310px] sm:w-[310px]"
@@ -889,7 +889,7 @@
             >
               <a
                 href="/web/evaluation"
-                class="inline-flex h-[56px] items-center justify-center rounded-[18px] bg-white px-8 text-[16px] font-black text-[#C91F5F] sm:h-[64px] sm:px-10 sm:text-[18px]"
+                class="inline-flex h-[56px] items-center justify-center rounded-[18px] bg-white px-8 text-[16px] font-black text-bs-c91f5f sm:h-[64px] sm:px-10 sm:text-[18px]"
               >
                 احجز تقييم الآن
               </a>

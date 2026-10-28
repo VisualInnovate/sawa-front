@@ -1,6 +1,7 @@
 <script>
 import axios from 'axios'
 import Chart from 'chart.js/auto';
+import { brandHex } from '@/utils/siteBrand';
 import moment from "moment";
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
@@ -102,7 +103,7 @@ export default {
                 label: this.$t('diff_age'),
                 data: this.diffAge,
                 borderWidth: 1,
-                backgroundColor: '#4c9499',
+                backgroundColor: brandHex('#4c9499'),
                 barPercentage: 0.5,
                 categoryPercentage: 0.2
               },
@@ -110,7 +111,7 @@ export default {
                 label: this.$t('grow_age'),
                 data: this.growAge,
                 borderWidth: 1,
-                backgroundColor: '#135C65',
+                backgroundColor: brandHex('#135c65'),
                 barPercentage: 0.5,
                 categoryPercentage: 0.2
               },
@@ -196,7 +197,7 @@ export default {
   <Message v-if="alert_text != null" severity="success" class="no-print">{{ alert_text }}</Message>
   <div class="back-back">
     <div class="back">
-      <div class="text-center"><img src="../../assets/img/sawa_logo.svg" style="width:130px; "></div>
+      <div class="text-center"><img :src="$siteLogo()" style="width:130px; "></div>
       <div><p class="w-[100%] text-h4 text-center ma-4">{{ print_results[0]?.evaluation_title }}</p></div>
       <div>
         <p class="w-[100%] text-start ma-4">{{ print_results[0]?.child_name }}</p>
@@ -296,7 +297,7 @@ td {
   text-align: start;
 }
 .print-table th {
-  background: #eef8f9;
-  color: #135c65;
+  background: rgb(var(--bp-eef8f9));
+  color: rgb(var(--bp-135c65));
 }
 </style>

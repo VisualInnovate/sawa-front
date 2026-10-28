@@ -1,18 +1,29 @@
 <script setup>
 import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
+import moment from "moment";
 
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
 import { useI18n } from 'vue-i18n';
+import PayrollMonths from '@/components/hr/PayrollMonths.vue';
+import { printPayslip } from '@/components/hr/payslip';
 const toast = useToast()
 const router = useRouter()
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const monthsPanel = ref(null)
+// A month card picks that month in the filter.
+const pickMonth = (month) => {
+  fetchFilter.value.month = moment(month, 'YYYY-MM').toDate()
+  fetchData()
+}
+const slip = (id) => printPayslip(t, id, locale.value).catch(() => toast.add({ severity: 'error', summary: t('error'), detail: t('mission_error'), life: 4000 }))
 const allemployee=ref([])
 const loading = ref(true)
 const fetchFilter=ref({
-  base_salary:''
+  base_salary:'',
+  month: null,
 })
 const user = ref({})
 const error = ref('')
@@ -31,15 +42,18 @@ onBeforeMount(() => {
   initFilters()
 })
 
+// "2026-10" from a DatePicker month, "" when empty.
+const monthOf = (d) => (d ? moment(d).format("YYYY-MM") : "")
+
  const fetchData= ()=>{
 
 
-  axios.get(`/api/payroll?base_salary=${fetchFilter.value?.base_salary}`).then((res)=>{
+  const params = { base_salary: fetchFilter.value?.base_salary || undefined, month: monthOf(fetchFilter.value?.month) || undefined }
+  axios.get('/api/payroll', { params }).then((res)=>{
     loading.value= false
     users.value= res.data.data
-    console.log(users.value)
-
   });
+  monthsPanel.value?.load()
   axios.get("/api/employees").then((res)=>{
    
     allemployee.value= res.data.data
@@ -88,7 +102,9 @@ const update=()=>{
 
 const openNew = () => {
     createdialog.value=!(createdialog.value)
-    payroll.value={}
+    error.value = ''
+    // The month that just ended is the usual one to pay.
+    payroll.value={ month: moment().subtract(1, 'month').startOf('month').toDate() }
 }
 
 const confirmDelete = (id) => {
@@ -100,17 +116,28 @@ const confirmDelete = (id) => {
 }
 
 const create=()=>{
+    error.value = ''
     axios
-    .post('/api/payroll',payroll.value)
+    .post('/api/payroll',{ ...payroll.value, month: monthOf(payroll.value.month) })
     .then((res) => {
-      console.log(res.data)
       fetchData()
       createdialog.value=!(createdialog.value)
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
-      payroll.value = ref({})
+      payroll.value = {}
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      const data = el.response?.data
+      error.value = data?.errors ?? ''
+      // A salary not set or a month already paid comes back as a message ({id: name} in data), not as field errors.
+      if (!data?.errors) {
+        const name = Object.values(data?.data ?? {})[0]
+        const message = String(data?.message ?? '')
+        const detail = message === 'hr.month_closed' ? t('pmon.month_closed', { month: monthOf(payroll.value.month) })
+          : name && message.includes('already has a payroll') ? t('hrpay.already_paid_month', { name, month: monthOf(payroll.value.month) })
+          : name && message.includes('Salary not set') ? t('hrpay.salary_not_set', { name })
+          : message || t('mission_error')
+        toast.add({severity: 'error', summary: t('error'), detail, life: 5000})
+      }
     })
 }
 const deleteAction = () => {
@@ -122,7 +149,11 @@ const deleteAction = () => {
       fetchData()
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
     })
-    .catch(() => {})
+    .catch((el) => {
+      deleteDialog.value=false
+      const closed = el.response?.data?.message === 'hr.month_closed'
+      toast.add({severity: 'error', summary: t('error'), detail: closed ? t('pmon.cannot_delete_closed') : t('mission_error'), life: 5000})
+    })
 
 }
 
@@ -158,11 +189,11 @@ const initFilters = () => {
         </Toolbar>
 
         <Toast/>
+        <PayrollMonths ref="monthsPanel" class="mt-3" @pick="pickMonth" />
         <Toolbar class="mb-4 shadow-md overflow-x-scroll">
           <template #start>
-          <DatePicker  v-model="fetchFilter.start_date"   :placeholder='$t("from")'  />   
-          <DatePicker  v-model="fetchFilter.end_date"   :placeholder='$t("to")' class="mx-2"  />   
-          <InputNumber  required v-model="fetchFilter.base_salary" :placeholder='$t("basic_salary")' />
+          <DatePicker v-model="fetchFilter.month" view="month" date-format="yy-mm" show-clear :placeholder='$t("hrpay.month")' />
+          <InputNumber  required v-model="fetchFilter.base_salary" :placeholder='$t("basic_salary")' class="mx-2" />
         </template>
         <template #end>
       
@@ -209,19 +240,47 @@ const initFilters = () => {
             </template>
            </Column>
 
-           <Column field="base_salary" :header='$t("basic_salary")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+           <!-- Payrolls made before months were kept show their creation date. -->
+           <Column field="month" :header='$t("hrpay.month")' :sortable="true" header-style="min-width:7rem;">
+            <template #body="slotProps">
+              {{ slotProps.data.month || slotProps.data.date }}
+            </template>
+           </Column>
+
+           <Column field="base_salary" :header='$t("basic_salary")' :sortable="true" header-style="min-width:8rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.base_salary }}
             </template>
            </Column>
-           <Column field="deduction" :header='$t("deduction_mount")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="overtime" :header='$t("hrpay.overtime")' :sortable="true" header-style="min-width:8rem;">
             <template #body="slotProps">
-              {{ slotProps.data.deduction }}
+              <span class="text-green-600">+{{ slotProps.data.overtime }}</span>
             </template>
            </Column>
-           <Column field="bonus" :header='$t("bonus")' :sortable="true" header-style="width:20%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="bonus" :header='$t("bonus")' :sortable="true" header-style="min-width:8rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.bonus }}
+              <span class="text-green-600">+{{ slotProps.data.bonus }}</span>
+            </template>
+           </Column>
+           <Column field="deduction" :header='$t("deduction_mount")' :sortable="true" header-style="min-width:8rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              <span class="text-red-600">−{{ slotProps.data.deduction }}</span>
+            </template>
+           </Column>
+           <Column field="financial_advance" :header='$t("hrpay.financial_advance")' :sortable="true" header-style="min-width:8rem;">
+            <template #body="slotProps">
+              <span class="text-red-600">−{{ slotProps.data.financial_advance ?? 0 }}</span>
+            </template>
+           </Column>
+           <Column field="insurance" :header='$t("pmon.insurance_col")' :sortable="true" header-style="min-width:8rem;">
+            <template #body="slotProps">
+              <span v-if="Number(slotProps.data.insurance)" class="text-red-600">−{{ slotProps.data.insurance }}</span>
+              <span v-else class="text-color-secondary">—</span>
+            </template>
+           </Column>
+           <Column field="total_salary" :header='$t("total")' :sortable="true" header-style="min-width:8rem;">
+            <template #body="slotProps">
+              <b>{{ slotProps.data.total_salary }}</b>
             </template>
            </Column>
            
@@ -235,6 +294,7 @@ const initFilters = () => {
                 v-if="false"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
+                <Button icon="pi pi-file" @click="slip(slotProps.data.id)" rounded severity="secondary" variant="outlined" v-tooltip.top="$t('slip.print')" :aria-label="$t('slip.print')" />
                 <Button
                 v-can="'payroll delete'"
                 icon="pi pi-trash"
@@ -262,8 +322,12 @@ const initFilters = () => {
         <Dialog v-model:visible="createdialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('employee_payroll') }}</label>
-                  <MultiSelect v-model="payroll.employees_ids"  required  option-value="id" filter :options="allemployee" optionLabel="name" :placeholder='$t("employee_payroll")' class="w-full" />          
+                  <MultiSelect v-model="payroll.employees_ids"  required  option-value="id" filter :options="allemployee" optionLabel="name" :placeholder='$t("employee_payroll")' class="w-full" />
                   <div class="mt-1 mb-5 text-red-500" v-if="error?.employees_ids">{{ error.employees_ids[0] }}</div>
+                  <label class="w-full text-start" for="payroll-month">{{ $t('hrpay.month') }}</label>
+                  <DatePicker input-id="payroll-month" v-model="payroll.month" view="month" date-format="yy-mm" class="w-full" />
+                  <div class="mt-1 text-red-500" v-if="error?.month">{{ error.month[0] }}</div>
+                  <small class="text-muted-color">{{ $t('hrpay.month_hint') }}</small>
             </div>
            <div class="w-full text-center">
             <Button @click="create" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 

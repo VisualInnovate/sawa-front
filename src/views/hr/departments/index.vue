@@ -101,7 +101,15 @@ const deleteAction = () => {
       fetchData()
       toast.add({severity: 'success', summary: t('success_message'), detail: t('department_deleted_successfully'), life: 3000})
     })
-    .catch(() => {})
+    .catch((e) => {
+      // A department with employees or therapists stays until they move to another one.
+      const data = e.response?.data?.data
+      const detail = data?.employees !== undefined
+        ? t('hremp.department_in_use', { employees: data.employees, therapists: data.therapists })
+        : e.response?.data?.message || t('mission_error')
+      deleteDialog.value = false
+      toast.add({severity: 'error', summary: t('error'), detail, life: 6000})
+    })
 }
 
 const exportCSV = () => {

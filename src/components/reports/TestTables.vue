@@ -96,7 +96,7 @@ const score = (row) => (row?.score === null || row?.score === undefined || !row?
 .tt-n {
   width: 26px;
 }
-.tone-a { background: #cfe8ea; }
+.tone-a { background: rgb(var(--bp-cfe8ea)); }
 .tone-b { background: #dcfce7; }
 .tone-c { background: #fef3c7; }
 .tone-d { background: #fce7f3; }

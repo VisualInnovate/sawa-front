@@ -12,10 +12,12 @@ import { amount, loadCurrency } from "@/utils/accounting";
 import { getEvaluationTypeLabel } from "@/utils/evaluationTypes";
 import { canVisit } from "@/utils/permissions";
 import { useAuthStore } from "@/stores/Auth";
+import { brandHex } from "@/utils/siteBrand";
 
 const REFRESH_MS = 60_000;
+// teal / magenta follow «إعدادات الموقع» (read when the module loads; the settings are applied before the app mounts).
 const COLORS = {
-  teal: "#135c65", tealSoft: "#3aa39b", sand: "#a9ab7f", magenta: "#b21553", cyan: "#2fa8c4",
+  teal: brandHex("#135c65"), tealSoft: "#3aa39b", sand: "#a9ab7f", magenta: brandHex("#b21553"), cyan: "#2fa8c4",
   amber: "#d9822b", red: "#dc2626", violet: "#6a3fb5", blue: "#2f6fcf", slate: "#94a3b8",
 };
 
@@ -180,7 +182,7 @@ const axes = (stacked = false, money = false) => ({
 
 const sessionsChart = computed(() => {
   const days = sessions.value?.days ?? [];
-  const series = [["done", COLORS.teal], ["missed", COLORS.red], ["moved", COLORS.violet], ["ahead", "#b7d7d9"]];
+  const series = [["done", COLORS.teal], ["missed", COLORS.red], ["moved", COLORS.violet], ["ahead", brandHex("#b7d7d9")]];
   return {
     data: { labels: days.map((day) => (day.date === data.value?.now?.slice(0, 10) ? `● ${dayShort(day.date)}` : dayShort(day.date))),
       datasets: series.map(([key, color]) => ({ label: t(`dash.st_${key}`), data: days.map((day) => day[key]), backgroundColor: color, borderRadius: 4, maxBarThickness: 22 })) },
@@ -207,8 +209,8 @@ const financeChart = computed(() => {
 const familiesChart = computed(() => {
   const kids = children.value?.months ?? [];
   const parents = data.value?.parents?.months ?? [];
-  const datasets = [{ label: t("dash.new_children"), data: kids.map((row) => row.n), borderColor: COLORS.magenta, backgroundColor: "rgba(178,21,83,0.12)", fill: true, tension: 0.35, pointRadius: 3 }];
-  if (parents.length) datasets.push({ label: t("dash.new_parents"), data: parents.map((row) => row.n), borderColor: COLORS.teal, backgroundColor: "rgba(19,92,101,0.08)", fill: true, tension: 0.35, pointRadius: 3 });
+  const datasets = [{ label: t("dash.new_children"), data: kids.map((row) => row.n), borderColor: COLORS.magenta, backgroundColor: `${COLORS.magenta}1f`, fill: true, tension: 0.35, pointRadius: 3 }];
+  if (parents.length) datasets.push({ label: t("dash.new_parents"), data: parents.map((row) => row.n), borderColor: COLORS.teal, backgroundColor: `${COLORS.teal}14`, fill: true, tension: 0.35, pointRadius: 3 });
   return { data: { labels: kids.map((row) => monthText(row.month)), datasets }, options: baseOptions({ scales: axes() }), empty: !kids.some((row) => row.n) && !parents.some((row) => row.n) };
 });
 
@@ -724,14 +726,14 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
 
 <style scoped>
 .dsh {
-  --teal: #135c65;
-  --teal-900: #0b3f45;
-  --ink: #0f2a2e;
+  --teal: rgb(var(--bp-135c65));
+  --teal-900: rgb(var(--bp-0b3f45));
+  --ink: rgb(var(--bp-0f2a2e));
   --muted: #64748b;
   --line: #e4ecee;
   --soft: #f4f8f8;
   --radius: 16px;
-  --shadow: 0 1px 2px rgba(15, 42, 46, 0.05), 0 4px 16px rgba(15, 42, 46, 0.05);
+  --shadow: 0 1px 2px rgb(var(--bp-0f2a2e) / 0.05), 0 4px 16px rgb(var(--bp-0f2a2e) / 0.05);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -743,18 +745,18 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
 }
 
 /* tones: text / soft background pairs, all ≥ 4.5:1 */
-.tone-teal { --c: #135c65; --bg: #e3f1f1; }
+.tone-teal { --c: rgb(var(--bp-135c65)); --bg: rgb(var(--bp-e3f1f1)); }
 .tone-green { --c: #15803d; --bg: #e7f6ec; }
-.tone-magenta { --c: #b21553; --bg: #fbe7ef; }
+.tone-magenta { --c: rgb(var(--bs-b21553)); --bg: rgb(var(--bs-fbe7ef)); }
 .tone-amber { --c: #b45309; --bg: #fdf1e1; }
 .tone-red { --c: #b91c1c; --bg: #fde8e8; }
 .tone-violet { --c: #5b34a3; --bg: #efe9fb; }
 .tone-blue { --c: #1d4ed8; --bg: #e6efff; }
 .tone-slate { --c: #475569; --bg: #eef2f5; }
 .tone-sand { --c: #6b6d3f; --bg: #f2f2e6; }
-.tone-bg-teal { background: #135c65; }
+.tone-bg-teal { background: rgb(var(--bp-135c65)); }
 .tone-bg-green { background: #22a05a; }
-.tone-bg-magenta { background: #b21553; }
+.tone-bg-magenta { background: rgb(var(--bs-b21553)); }
 .tone-bg-amber { background: #e19a3b; }
 .tone-bg-red { background: #dc2626; }
 .tone-bg-violet { background: #6a3fb5; }
@@ -773,10 +775,10 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
   border-radius: var(--radius);
   color: #fff;
   background:
-    radial-gradient(circle at 12% 120%, rgba(167, 235, 246, 0.35), transparent 45%),
-    radial-gradient(circle at 95% -20%, rgba(212, 52, 107, 0.45), transparent 40%),
-    linear-gradient(120deg, #0b3f45, #135c65 55%, #1c6772);
-  box-shadow: 0 10px 30px rgba(11, 63, 69, 0.25);
+    radial-gradient(circle at 12% 120%, rgb(var(--bp-a7ebf6) / 0.35), transparent 45%),
+    radial-gradient(circle at 95% -20%, rgb(var(--bs-d4346b) / 0.45), transparent 40%),
+    linear-gradient(120deg, rgb(var(--bp-0b3f45)), rgb(var(--bp-135c65)) 55%, rgb(var(--bp-1c6772)));
+  box-shadow: 0 10px 30px rgb(var(--bp-0b3f45) / 0.25);
 }
 .dsh-kicker {
   margin: 0;
@@ -837,7 +839,7 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
 .dsh-btn:disabled { opacity: 0.7; cursor: wait; }
 .dsh-btn--solid { background: var(--teal); border-color: var(--teal); }
 .dsh-btn:focus-visible, .dsh-kpi:focus-visible, .dsh-attn__item:focus-visible, .dsh-more:focus-visible, .dsh-row__title:focus-visible {
-  outline: 3px solid #a7ebf6;
+  outline: 3px solid rgb(var(--bp-a7ebf6));
   outline-offset: 2px;
 }
 .dsh-banner {
@@ -905,7 +907,7 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
   border-radius: 9px;
   font-size: 0.9rem;
   color: var(--teal);
-  background: #e3f1f1;
+  background: rgb(var(--bp-e3f1f1));
 }
 .dsh-more {
   display: inline-flex;
@@ -949,7 +951,7 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
   display: inline-grid;
   place-items: center;
   border-radius: 999px;
-  background: #b21553;
+  background: rgb(var(--bs-b21553));
   color: #fff;
   font-size: 0.8rem;
   font-weight: 800;
@@ -981,7 +983,7 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
   background: var(--c);
 }
 .dsh-kpi.is-link { cursor: pointer; }
-.dsh-kpi.is-link:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15, 42, 46, 0.1); border-color: color-mix(in srgb, var(--c) 35%, #fff); }
+.dsh-kpi.is-link:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgb(var(--bp-0f2a2e) / 0.1); border-color: color-mix(in srgb, var(--c) 35%, #fff); }
 .dsh-kpi.is-alert .dsh-kpi__icon { box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 18%, transparent); }
 .dsh-kpi__top { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
 .dsh-kpi__icon {
@@ -1069,7 +1071,7 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
   font-size: 0.7rem;
   line-height: 1.2;
   color: var(--c, var(--teal));
-  background: var(--bg, #e3f1f1);
+  background: var(--bg, rgb(var(--bp-e3f1f1)));
 }
 .dsh-date b { font-size: 1.05rem; }
 .dsh-row__body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -1142,7 +1144,7 @@ a.dsh-row__title:hover { color: var(--teal); text-decoration: underline; }
   font-size: 0.88rem;
   border: 1px dashed var(--line);
   border-radius: 12px;
-  background: repeating-linear-gradient(135deg, #fafcfc, #fafcfc 10px, #f4f8f8 10px, #f4f8f8 20px);
+  background: repeating-linear-gradient(135deg, rgb(var(--bp-fafcfc)), rgb(var(--bp-fafcfc)) 10px, #f4f8f8 10px, #f4f8f8 20px);
 }
 
 /* bars */
@@ -1161,7 +1163,7 @@ a.dsh-row__title:hover { color: var(--teal); text-decoration: underline; }
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: conic-gradient(var(--teal) calc(var(--p) * 1%), #e3eef0 0);
+  background: conic-gradient(var(--teal) calc(var(--p) * 1%), rgb(var(--bp-e3eef0)) 0);
 }
 .dsh-ring span {
   width: 78px;

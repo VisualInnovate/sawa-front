@@ -46,7 +46,7 @@ onMounted(load);
 <template>
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-      <p class="text-xl text-[#135C65] font-bold">{{ $t("student_programe") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold">{{ $t("student_programe") }}</p>
       <div class="flex flex-wrap gap-2">
         <IconField>
           <InputIcon class="pi pi-search" />

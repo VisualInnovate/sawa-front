@@ -119,9 +119,9 @@ async function send(type) {
   background: #fff; cursor: pointer; font: inherit; text-align: center; animation: gg-pop .35s var(--d) ease both;
   transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), border-color .2s, box-shadow .2s; }
 .gg-option i { font-size: 1.7rem; color: #0f8a7e; }
-.gg-option b { color: #135c65; }
+.gg-option b { color: rgb(var(--bp-135c65)); }
 .gg-option small { color: #64748b; font-size: .75rem; }
-.gg-option:hover:not(:disabled) { transform: translateY(-4px); border-color: #0f8a7e; box-shadow: 0 12px 24px -18px #135c65; }
+.gg-option:hover:not(:disabled) { transform: translateY(-4px); border-color: #0f8a7e; box-shadow: 0 12px 24px -18px rgb(var(--bp-135c65)); }
 .gg-option.is-disabled { opacity: .5; cursor: not-allowed; }
 .gg-option.is-disabled i { color: #94a3b8; }
 .gg-list { display: grid; gap: .55rem; }

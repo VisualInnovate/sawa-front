@@ -1,321 +1,278 @@
-<template>
-  <div class="" style="padding: 1rem 1.5rem">
-    <h2 class="text-2xl font-bold">{{ $t("Settings") }}</h2>
-    <p class="text-lg" style="color: #42a5f5; padding: 0.5rem 0">
-      {{ $t("settings_menu") }}
-    </p>
-  </div>
-  <div class="sawa-card">
-    <div class="sawa-card  bg-slate-50 m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-    <div class="">
-    
-      <div class="flex">
-        <label class="my-auto" for="password">{{ $t('Twitter ') }}</label>
-        <svg class="mx-6" width="24px" height="24px" viewBox="0 -4 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Twitter-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-300.000000, -164.000000)" fill="#00AAEC"> <path d="M348,168.735283 C346.236309,169.538462 344.337383,170.081618 342.345483,170.324305 C344.379644,169.076201 345.940482,167.097147 346.675823,164.739617 C344.771263,165.895269 342.666667,166.736006 340.418384,167.18671 C338.626519,165.224991 336.065504,164 333.231203,164 C327.796443,164 323.387216,168.521488 323.387216,174.097508 C323.387216,174.88913 323.471738,175.657638 323.640782,176.397255 C315.456242,175.975442 308.201444,171.959552 303.341433,165.843265 C302.493397,167.339834 302.008804,169.076201 302.008804,170.925244 C302.008804,174.426869 303.747139,177.518238 306.389857,179.329722 C304.778306,179.280607 303.256911,178.821235 301.9271,178.070061 L301.9271,178.194294 C301.9271,183.08848 305.322064,187.17082 309.8299,188.095341 C309.004402,188.33225 308.133826,188.450704 307.235077,188.450704 C306.601162,188.450704 305.981335,188.390033 305.381229,188.271578 C306.634971,192.28169 310.269414,195.2026 314.580032,195.280607 C311.210424,197.99061 306.961789,199.605634 302.349709,199.605634 C301.555203,199.605634 300.769149,199.559408 300,199.466956 C304.358514,202.327194 309.53689,204 315.095615,204 C333.211481,204 343.114633,188.615385 343.114633,175.270495 C343.114633,174.831347 343.106181,174.392199 343.089276,173.961719 C345.013559,172.537378 346.684275,170.760563 348,168.735283" id="Twitter"> </path> </g> </g> </g></svg>
-      </div>
-      <InputText  v-model="settings.social_links.twitter "  class="mt-3 w-full mb-3"/>
-
-    </div>
-
-    <div class="">
-      <div class="flex">
-        <label class="my-auto" for="password">{{ $t('facebook ') }}</label>
-        <svg class="mx-6" width="24px" height="24px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Facebook-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0"> <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,208 Z" id="Facebook"> </path> </g> </g> </g></svg>
-      </div>
-
-      <InputText type="text" v-model="settings.social_links.facebook"  class="mt-3 w-full mb-3"/>
-      
-
-    </div>
-    <div class="">
-      <div class="flex">
-        <label class="my-auto" for="password">{{ $t('Instagram ') }}</label>
-        <svg class="mx-6" width="24px" height="24px" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint0_radial_87_7153)"></rect> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint1_radial_87_7153)"></rect> <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#paint2_radial_87_7153)"></rect> <path d="M23 10.5C23 11.3284 22.3284 12 21.5 12C20.6716 12 20 11.3284 20 10.5C20 9.67157 20.6716 9 21.5 9C22.3284 9 23 9.67157 23 10.5Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21ZM16 19C17.6569 19 19 17.6569 19 16C19 14.3431 17.6569 13 16 13C14.3431 13 13 14.3431 13 16C13 17.6569 14.3431 19 16 19Z" fill="white"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M6 15.6C6 12.2397 6 10.5595 6.65396 9.27606C7.2292 8.14708 8.14708 7.2292 9.27606 6.65396C10.5595 6 12.2397 6 15.6 6H16.4C19.7603 6 21.4405 6 22.7239 6.65396C23.8529 7.2292 24.7708 8.14708 25.346 9.27606C26 10.5595 26 12.2397 26 15.6V16.4C26 19.7603 26 21.4405 25.346 22.7239C24.7708 23.8529 23.8529 24.7708 22.7239 25.346C21.4405 26 19.7603 26 16.4 26H15.6C12.2397 26 10.5595 26 9.27606 25.346C8.14708 24.7708 7.2292 23.8529 6.65396 22.7239C6 21.4405 6 19.7603 6 16.4V15.6ZM15.6 8H16.4C18.1132 8 19.2777 8.00156 20.1779 8.0751C21.0548 8.14674 21.5032 8.27659 21.816 8.43597C22.5686 8.81947 23.1805 9.43139 23.564 10.184C23.7234 10.4968 23.8533 10.9452 23.9249 11.8221C23.9984 12.7223 24 13.8868 24 15.6V16.4C24 18.1132 23.9984 19.2777 23.9249 20.1779C23.8533 21.0548 23.7234 21.5032 23.564 21.816C23.1805 22.5686 22.5686 23.1805 21.816 23.564C21.5032 23.7234 21.0548 23.8533 20.1779 23.9249C19.2777 23.9984 18.1132 24 16.4 24H15.6C13.8868 24 12.7223 23.9984 11.8221 23.9249C10.9452 23.8533 10.4968 23.7234 10.184 23.564C9.43139 23.1805 8.81947 22.5686 8.43597 21.816C8.27659 21.5032 8.14674 21.0548 8.0751 20.1779C8.00156 19.2777 8 18.1132 8 16.4V15.6C8 13.8868 8.00156 12.7223 8.0751 11.8221C8.14674 10.9452 8.27659 10.4968 8.43597 10.184C8.81947 9.43139 9.43139 8.81947 10.184 8.43597C10.4968 8.27659 10.9452 8.14674 11.8221 8.0751C12.7223 8.00156 13.8868 8 15.6 8Z" fill="white"></path> <defs> <radialGradient id="paint0_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 23) rotate(-55.3758) scale(25.5196)"> <stop stop-color="#B13589"></stop> <stop offset="0.79309" stop-color="#C62F94"></stop> <stop offset="1" stop-color="#8A3AC8"></stop> </radialGradient> <radialGradient id="paint1_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11 31) rotate(-65.1363) scale(22.5942)"> <stop stop-color="#E0E8B7"></stop> <stop offset="0.444662" stop-color="#FB8A2E"></stop> <stop offset="0.71474" stop-color="#E2425C"></stop> <stop offset="1" stop-color="#E2425C" stop-opacity="0"></stop> </radialGradient> <radialGradient id="paint2_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0.500002 3) rotate(-8.1301) scale(38.8909 8.31836)"> <stop offset="0.156701" stop-color="#406ADC"></stop> <stop offset="0.467799" stop-color="#6A45BE"></stop> <stop offset="1" stop-color="#6A45BE" stop-opacity="0"></stop> </radialGradient> </defs> </g></svg>
-      </div>
-
-      <InputText    v-model="settings.social_links.instagram"  class="mt-3 w-full mb-3"/>
-   
-
-    </div>
-    <div class="">
-      <div class="flex">
-        <label class="my-auto" for="password">{{ $t('youtube ') }}</label>
-        <svg class="mx-6" width="24px" height="24px" viewBox="0 -7 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Youtube-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-200.000000, -368.000000)" fill="#CE1312"> <path d="M219.044,391.269916 L219.0425,377.687742 L232.0115,384.502244 L219.044,391.269916 Z M247.52,375.334163 C247.52,375.334163 247.0505,372.003199 245.612,370.536366 C243.7865,368.610299 241.7405,368.601235 240.803,368.489448 C234.086,368 224.0105,368 224.0105,368 L223.9895,368 C223.9895,368 213.914,368 207.197,368.489448 C206.258,368.601235 204.2135,368.610299 202.3865,370.536366 C200.948,372.003199 200.48,375.334163 200.48,375.334163 C200.48,375.334163 200,379.246723 200,383.157773 L200,386.82561 C200,390.73817 200.48,394.64922 200.48,394.64922 C200.48,394.64922 200.948,397.980184 202.3865,399.447016 C204.2135,401.373084 206.612,401.312658 207.68,401.513574 C211.52,401.885191 224,402 224,402 C224,402 234.086,401.984894 240.803,401.495446 C241.7405,401.382148 243.7865,401.373084 245.612,399.447016 C247.0505,397.980184 247.52,394.64922 247.52,394.64922 C247.52,394.64922 248,390.73817 248,386.82561 L248,383.157773 C248,379.246723 247.52,375.334163 247.52,375.334163 L247.52,375.334163 Z" id="Youtube"> </path> </g> </g> </g></svg>
-      </div>
-
-      <InputText   v-model="settings.social_links.youtube"  class="mt-3 w-full mb-3"/>
-
-    </div>
-
-
-    
-
-
-</div>
-<div class="sawa-card  bg-slate-50  m-[2%] p-[2%] ">
-  <div
-          class="text-center font-bold  grid grid-cols-2"
-        
-        >
-          <div>
-            <label for="" style=" font-size: 20px;">{{ $t('Site Logo') }}</label>
-          <div class="relative m-auto">
-            <input
-              type="file"
-              ref="fileInput"
-              name="image"
-              id="image"
-              hidden
-              @change="handleFileUpload"
-            />
-            <img
-              @click="openFile"
-              :src="imageSrc"
-              class="uploaded-image relative m-auto cursor-pointer object-cover"
-            />
-
-            <svg
-              @click="openFile"
-              class="cursor-pointer absolute left-[50%] m-auto bottom-0 bg-white rounded-full p-1 h-8 w-8"
-              viewBox="-2.4 -2.4 28.80 28.80"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="#29CCFF"
-              transform="matrix(-1, 0, 0, 1, 0, 0)"
-            >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g
-                id="SVGRepo_tracerCarrier"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              ></g>
-              <g id="SVGRepo_iconCarrier">
-                <path
-                  fill="#29CCFF"
-                  d="M21 3H3C1.35 3 0 4.35 0 6v12c0 1.55 1.19 2.83 2.7 2.98.1.01.2.02.3.02h18c.1 0 .2 0 .29-.02.03 0 .06-.01.09-.01C22.86 20.78 24 19.52 24 18V6c0-1.65-1.35-3-3-3zm1 13.53l-2.21-4.42c-.25-.5-.69-.87-1.22-1.03-.19-.05-.38-.08-.57-.08-.35 0-.7.09-1.01.27l-6.41 3.74-2.46-1.67C7.78 13.11 7.39 13 7 13c-.52 0-1.03.2-1.41.59L2 17.18V6c0-.55.45-1 1-1h18c.55 0 1 .45 1 1v10.53z"
-                ></path>
-                <circle fill="#29CCFF" cx="11" cy="10" r="2"></circle>
-              </g>
-            </svg>
-          </div>
-          </div>
-
-          <div class="w-full">
-            <label for="" style="padding: 1rem; font-size: 20px;font;"
-            >{{ $t('Site Cover') }}</label
-          >
-          <div class="relative m-auto p-2">
-            <input
-              type="file"
-              ref="fileInputCover"
-              name="image"
-              id="image"
-              hidden
-              @change="handleFileUploadCover"
-            />
-            <img
-              @click="openCoverFile"
-              :src="imageSrcCover"
-              class="uploaded-image relative m-auto w-full cursor-pointer object-cover"
-            />
-
-            <svg
-              @click="openCoverFile"
-              class="cursor-pointer absolute left-[50%] m-auto bottom-0 bg-white rounded-full p-1 h-8 w-8"
-              viewBox="-2.4 -2.4 28.80 28.80"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="#29CCFF"
-              transform="matrix(-1, 0, 0, 1, 0, 0)"
-            >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g
-                id="SVGRepo_tracerCarrier"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              ></g>
-              <g id="SVGRepo_iconCarrier">
-                <path
-                  fill="#29CCFF"
-                  d="M21 3H3C1.35 3 0 4.35 0 6v12c0 1.55 1.19 2.83 2.7 2.98.1.01.2.02.3.02h18c.1 0 .2 0 .29-.02.03 0 .06-.01.09-.01C22.86 20.78 24 19.52 24 18V6c0-1.65-1.35-3-3-3zm1 13.53l-2.21-4.42c-.25-.5-.69-.87-1.22-1.03-.19-.05-.38-.08-.57-.08-.35 0-.7.09-1.01.27l-6.41 3.74-2.46-1.67C7.78 13.11 7.39 13 7 13c-.52 0-1.03.2-1.41.59L2 17.18V6c0-.55.45-1 1-1h18c.55 0 1 .45 1 1v10.53z"
-                ></path>
-                <circle fill="#29CCFF" cx="11" cy="10" r="2"></circle>
-              </g>
-            </svg>
-          </div>
-          </div>
-
-        </div>
-
-
-
-</div>
-    <div  class="sawa-card m-[2%] p-[2%] grid grid-cols-1 gap-4 lg:grid-cols-2 bg-slate-50 ">
-        <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('Site_Name') }}</label>
-                  <InputText required v-model="settings.name" :placeholder="$t('Site_Name')" />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.name">{{ error.name[0] }}</div>
-           </div>
-          
-          <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('Site_Phone') }}</label>
-                  <InputText required v-model="settings.number_1" :placeholder="$t('Site_Phone')" />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.number_1">{{ error.number_1[0] }}</div>
-           </div>
-           <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('Site_Phone') }}</label>
-                  <InputText required v-model="settings.number_2" :placeholder="$t('Site_Phone')" />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.number_2">{{ error.number_2[0] }}</div>
-           </div>
-           <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('address') }}</label>
-                  <InputText required v-model="settings.address" :placeholder="$t('address')" />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.address">{{ error.address[0] }}</div>
-           </div>
-           <div   class="flex flex-column gap-2">
-                  <label for="username">{{ $t('Site_Email') }}</label>
-                  <InputText required v-model="settings.email" :placeholder="$t('Site_Email')" />
-                  <div class="mt-1 mb-5 text-red-500" v-if="error?.email">{{ error.email[0] }}</div>
-           </div>
-     
-       
-          <div class=" ">
-            <label for="username">{{ $t('Site_description') }}</label>
-            <Textarea rows="2" v-model="settings.description" autoResize fluid />
-         
-          </div>
-          <button v-can="'settings edit'" @click="updateSettings"  class="p-4 mt-10 text-center bg-[#148A98] text-white w-full rounded-2xl text-xl" >{{ $t('save_changes') }}</button>
-        </div>
-  </div>
-  <Toast/>
-</template>
-<script>
-import {useToast} from 'primevue/usetoast'
+<script setup>
+// «إعدادات الموقع»: the academy's contacts, logo and two main colours. Every page reads them (utils/siteBrand):
+// public pages, parents' portal, dashboard and printouts; saving applies them at once on this browser too.
 import axios from "axios";
-export default {
-  data() {
-    return {
-      imageSrc: null,
-      imageSrcCover: null,
-      toast:useToast(),
-      error:'',
-      settings: {
-        name: "",
-        
-        number_1: " ",
-        number_2: " ",
-        address: " ",
-        email: " ",
-        logo: " ",
-        cover: " ",
-        description: " ",
-        social_links: [
-          {
-            facebook:""
-          }
-        ],
-      },
-    };
-  },
-  methods: {
-    getSettings() {
-      axios
-        .get("/api/site/settings")
-        .then((res) => {
-          console.log(res);
-          if (res.data.settings == null) {
-            return;
-          }
-          this.settings = res.data.settings;
-        
-          this.imageSrc = this.settings.logo;
-          this.imageSrcCover = this.settings.cover;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    openFile() {
-      this.$refs.fileInput.click();
-    },
-    openCoverFile() {
-      this.$refs.fileInputCover.click();
-    },
-    handleFileUpload(e) {
-      const image = e.target.files[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onload = (e) => {
-        this.imageSrc = e.target.result;
-        this.settings.logo = image;
-      };
-    },
-    handleFileUploadCover(e) {
-      const image = e.target.files[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onload = (e) => {
-        this.imageSrcCover = e.target.result;
-        this.settings.cover = image;
-      };
-    },
-    updateSettings() {
-      const formData = new FormData();
+import { computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { useToast } from "primevue/usetoast";
+import { applySiteBrand } from "@/utils/siteBrand";
+import { brandVariables, DEFAULT_BRAND_COLORS, isHex } from "@/utils/brandPalette";
+import sawaLogo from "@/assets/img/sawa_logo.svg";
 
-      formData.append("name", this.settings.name);
-      formData.append("number_1", this.settings.number_1);
-      formData.append("number_2", this.settings.number_2);
-      formData.append("address", this.settings.address);
-      formData.append("email", this.settings.email);
-      formData.append("description", this.settings.description);
-      formData.append("social_links",this.settings.social_links);
-   
-      if (this.$refs.fileInput.files[0] != null) {
-        formData.append("logo", this.$refs.fileInput.files[0]);
-      }
-      if (this.$refs.fileInput.files[0] != null) {
-        formData.append("cover", this.$refs.fileInputCover.files[0]);
-      }
-      axios
-        .post("/api/site/settings", formData)
-        .then((res) => {
-          this.$toast.add({ severity: 'success', summary: this.$t('success_message'), detail: this.$t('successful'), life: 3000 });
-         
-        }).catch((el)=>{
-           this.error = el.response.data.errors
-        
-    })
-        
-    },
-  },
-  mounted() {
-    this.getSettings();
-  },
+const { t } = useI18n();
+const toast = useToast();
+
+const SOCIAL = [
+  { key: "facebook", icon: "pi pi-facebook", label: "facebook " },
+  { key: "instagram", icon: "pi pi-instagram", label: "Instagram " },
+  { key: "twitter", icon: "pi pi-twitter", label: "Twitter " },
+  { key: "youtube", icon: "pi pi-youtube", label: "youtube " },
+];
+const COLOR_FIELDS = [
+  { key: "primary", hint: "site.primary_hint" },
+  { key: "secondary", hint: "site.secondary_hint" },
+];
+
+const loading = ref(true);
+const saving = ref(false);
+const errors = ref({});
+const form = ref({
+  name: "", number_1: "", number_2: "", email: "", address: "", location: "", description: "",
+  social_links: {}, colors: { ...DEFAULT_BRAND_COLORS },
+});
+// What the Hex boxes show while typing; the colour changes once a full code is written.
+const hexText = ref({ ...DEFAULT_BRAND_COLORS });
+const currentLogo = ref(null);
+const logoFile = ref(null);
+const logoPreview = ref(null);
+const removeLogo = ref(false);
+const fileInput = ref(null);
+
+const shownLogo = computed(() => logoPreview.value || (removeLogo.value ? null : currentLogo.value) || sawaLogo);
+const usingDefaultLogo = computed(() => !logoPreview.value && (removeLogo.value || !currentLogo.value));
+// The chosen colours on the preview box only, until they are saved.
+const previewVars = computed(() => brandVariables(form.value.colors));
+
+const fill = (s) => {
+  form.value = {
+    name: s.name ?? "", number_1: s.number_1 ?? "", number_2: s.number_2 ?? "", email: s.email ?? "",
+    address: s.address ?? "", location: s.location ?? "", description: s.description ?? "",
+    social_links: { ...(s.social_links && !Array.isArray(s.social_links) ? s.social_links : {}) },
+    colors: { ...DEFAULT_BRAND_COLORS, ...(s.colors || {}) },
+  };
+  hexText.value = { ...form.value.colors };
+  currentLogo.value = s.logo || null;
 };
+
+onMounted(async () => {
+  try {
+    const { data } = await axios.get("/api/site/settings");
+    if (data.settings) fill(data.settings);
+  } finally {
+    loading.value = false;
+  }
+});
+
+// ColorPicker (format hex) works without the "#".
+const pickerValue = (key) => form.value.colors[key].replace("#", "");
+const onPick = (key, value) => {
+  const hex = `#${String(value).replace("#", "").toLowerCase()}`;
+  if (!isHex(hex)) return;
+  form.value.colors[key] = hex;
+  hexText.value[key] = hex;
+};
+const onHexInput = (key, value) => {
+  let v = String(value ?? "").trim();
+  if (v && !v.startsWith("#")) v = `#${v}`;
+  hexText.value[key] = v;
+  if (isHex(v)) form.value.colors[key] = v.toLowerCase();
+};
+const hexInvalid = (key) => !isHex(hexText.value[key]);
+const resetColors = () => {
+  form.value.colors = { ...DEFAULT_BRAND_COLORS };
+  hexText.value = { ...DEFAULT_BRAND_COLORS };
+};
+
+const pickLogo = (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  logoFile.value = file;
+  removeLogo.value = false;
+  const reader = new FileReader();
+  reader.onload = (e) => (logoPreview.value = e.target.result);
+  reader.readAsDataURL(file);
+};
+const useDefaultLogo = () => {
+  logoFile.value = null;
+  logoPreview.value = null;
+  removeLogo.value = true;
+  if (fileInput.value) fileInput.value.value = "";
+};
+
+const fieldError = (key) => errors.value?.[key]?.[0];
+
+async function save() {
+  if (COLOR_FIELDS.some(({ key }) => hexInvalid(key))) return;
+  saving.value = true;
+  errors.value = {};
+  const data = new FormData();
+  for (const key of ["name", "number_1", "number_2", "email", "address", "location", "description"]) data.append(key, form.value[key] ?? "");
+  data.append("social_links", JSON.stringify(form.value.social_links));
+  data.append("colors[primary]", form.value.colors.primary);
+  data.append("colors[secondary]", form.value.colors.secondary);
+  if (logoFile.value) data.append("logo", logoFile.value);
+  else if (removeLogo.value) data.append("remove_logo", "1");
+  try {
+    const res = await axios.post("/api/site/settings", data);
+    fill(res.data.settings);
+    logoFile.value = null;
+    logoPreview.value = null;
+    removeLogo.value = false;
+    // The rest of the site (this browser) follows at once; other visitors get it on their next page load.
+    applySiteBrand(res.data.settings);
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("site.saved"), life: 2500 });
+  } catch (e) {
+    errors.value = e.response?.data?.errors ?? {};
+    const first = Object.values(errors.value)[0]?.[0];
+    toast.add({ severity: "error", summary: t("error"), detail: first || e.response?.data?.message || t("mission_error"), life: 4000 });
+  } finally {
+    saving.value = false;
+  }
+}
 </script>
-<style>
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.flex-input {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 2.5px solid gray;
-}
-.flex-center-col {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.m2 {
-  margin: 2rem;
-}
-.uploaded-image {
-  width: 250px;
-  height: 250px;
-}
+
+<template>
+  <div class="sawa-card p-3">
+    <p class="text-xl text-bp-135c65 font-bold mb-2"><i class="pi pi-cog" aria-hidden="true" /> {{ $t("site.title") }}</p>
+    <p class="text-color-secondary mb-4">{{ $t("site.lead") }}</p>
+
+    <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
+    <form v-else class="ss-grid" novalidate @submit.prevent="save">
+      <!-- Contacts -->
+      <section class="ss-card ss-wide">
+        <h2 class="ss-title"><i class="pi pi-phone" /> {{ $t("site.contact") }}</h2>
+        <div class="ss-fields">
+          <div class="ss-field">
+            <label for="ss-name">{{ $t("site.name") }} <span class="text-red-500">*</span></label>
+            <InputText id="ss-name" v-model="form.name" :invalid="!!fieldError('name')" fluid />
+            <small v-if="fieldError('name')" class="text-red-500">{{ fieldError("name") }}</small>
+          </div>
+          <div class="ss-field">
+            <label for="ss-email">{{ $t("site.email") }} <span class="text-red-500">*</span></label>
+            <InputText id="ss-email" v-model="form.email" type="email" dir="ltr" :invalid="!!fieldError('email')" fluid />
+            <small v-if="fieldError('email')" class="text-red-500">{{ fieldError("email") }}</small>
+          </div>
+          <div class="ss-field">
+            <label for="ss-phone1">{{ $t("site.phone1") }} <span class="text-red-500">*</span></label>
+            <InputText id="ss-phone1" v-model="form.number_1" type="tel" dir="ltr" :invalid="!!fieldError('number_1')" fluid />
+            <small v-if="fieldError('number_1')" class="text-red-500">{{ fieldError("number_1") }}</small>
+            <small v-else class="text-color-secondary">{{ $t("site.phone1_hint") }}</small>
+          </div>
+          <div class="ss-field">
+            <label for="ss-phone2">{{ $t("site.phone2") }}</label>
+            <InputText id="ss-phone2" v-model="form.number_2" type="tel" dir="ltr" :invalid="!!fieldError('number_2')" fluid />
+            <small v-if="fieldError('number_2')" class="text-red-500">{{ fieldError("number_2") }}</small>
+          </div>
+          <div class="ss-field">
+            <label for="ss-address">{{ $t("site.address") }} <span class="text-red-500">*</span></label>
+            <InputText id="ss-address" v-model="form.address" :invalid="!!fieldError('address')" fluid />
+            <small v-if="fieldError('address')" class="text-red-500">{{ fieldError("address") }}</small>
+          </div>
+          <div class="ss-field">
+            <label for="ss-location">{{ $t("site.location") }}</label>
+            <InputText id="ss-location" v-model="form.location" dir="ltr" placeholder="https://maps.google.com/..." :invalid="!!fieldError('location')" fluid />
+            <small v-if="fieldError('location')" class="text-red-500">{{ fieldError("location") }}</small>
+            <small v-else class="text-color-secondary">{{ $t("site.location_hint") }}</small>
+          </div>
+          <div class="ss-field ss-span">
+            <label for="ss-desc">{{ $t("site.description") }}</label>
+            <Textarea id="ss-desc" v-model="form.description" rows="2" auto-resize fluid />
+          </div>
+        </div>
+
+        <h3 class="ss-subtitle">{{ $t("site.social") }}</h3>
+        <div class="ss-fields">
+          <div v-for="item in SOCIAL" :key="item.key" class="ss-field">
+            <label :for="'ss-' + item.key"><i :class="item.icon" /> {{ $t(item.label) }}</label>
+            <InputText :id="'ss-' + item.key" v-model="form.social_links[item.key]" dir="ltr" placeholder="https://" fluid />
+          </div>
+        </div>
+      </section>
+
+      <!-- Logo -->
+      <section class="ss-card">
+        <h2 class="ss-title"><i class="pi pi-image" /> {{ $t("site.logo") }}</h2>
+        <p class="text-color-secondary text-sm m-0">{{ $t("site.logo_hint") }}</p>
+        <button type="button" class="ss-logo" @click="fileInput?.click()">
+          <img :src="shownLogo" alt="" />
+        </button>
+        <small v-if="usingDefaultLogo" class="text-color-secondary text-center">{{ $t("site.logo_using_default") }}</small>
+        <small v-if="fieldError('logo')" class="text-red-500">{{ fieldError("logo") }}</small>
+        <input ref="fileInput" type="file" accept="image/*" hidden @change="pickLogo" />
+        <div class="flex flex-wrap gap-2 justify-center">
+          <Button type="button" icon="pi pi-upload" :label="$t('site.logo_pick')" severity="secondary" outlined @click="fileInput?.click()" />
+          <Button v-if="!usingDefaultLogo" type="button" icon="pi pi-replay" :label="$t('site.logo_default')" severity="secondary" text @click="useDefaultLogo" />
+        </div>
+      </section>
+
+      <!-- Colours -->
+      <section class="ss-card">
+        <h2 class="ss-title"><i class="pi pi-palette" /> {{ $t("site.colors") }}</h2>
+        <p class="text-color-secondary text-sm m-0">{{ $t("site.colors_hint") }}</p>
+        <div v-for="field in COLOR_FIELDS" :key="field.key" class="ss-color">
+          <ColorPicker :model-value="pickerValue(field.key)" format="hex" :aria-label="$t('site.' + field.key)" @update:model-value="onPick(field.key, $event)" />
+          <div class="ss-field flex-1">
+            <label :for="'ss-hex-' + field.key">{{ $t("site." + field.key) }}</label>
+            <InputText
+              :id="'ss-hex-' + field.key"
+              :model-value="hexText[field.key]"
+              dir="ltr"
+              maxlength="7"
+              class="ss-hex"
+              :invalid="hexInvalid(field.key)"
+              @update:model-value="onHexInput(field.key, $event)"
+            />
+            <small v-if="hexInvalid(field.key)" class="text-red-500">{{ $t("site.hex_invalid") }}</small>
+            <small v-else class="text-color-secondary">{{ $t(field.hint) }}</small>
+          </div>
+        </div>
+        <Button type="button" icon="pi pi-replay" :label="$t('site.reset_colors')" severity="secondary" text class="self-start" @click="resetColors" />
+
+        <div class="ss-preview" :style="previewVars">
+          <p class="ss-preview__label">{{ $t("site.preview") }}</p>
+          <div class="ss-preview__bar">
+            <img :src="shownLogo" alt="" />
+            <span>{{ form.name || "Sawa" }}</span>
+          </div>
+          <div class="flex flex-wrap gap-2 p-3">
+            <span class="ss-preview__btn ss-preview__btn--primary">{{ $t("site.preview_button") }}</span>
+            <span class="ss-preview__btn ss-preview__btn--accent">{{ $t("site.preview_accent") }}</span>
+            <span class="ss-preview__chip">{{ $t("site.primary") }}</span>
+          </div>
+          <small class="text-color-secondary px-3 pb-2 block">{{ $t("site.unsaved_preview") }}</small>
+        </div>
+      </section>
+
+      <div class="ss-wide flex justify-end">
+        <Button v-can="'settings edit'" type="submit" icon="pi pi-save" :label="$t('save_changes')" :loading="saving" size="large" />
+      </div>
+    </form>
+    <Toast />
+  </div>
+</template>
+
+<style scoped>
+.ss-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 1024px) { .ss-grid { grid-template-columns: 1fr 1fr; } .ss-wide { grid-column: 1 / -1; } }
+.ss-card { display: flex; flex-direction: column; gap: .8rem; padding: 1rem 1.1rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.ss-title { margin: 0; font-size: 1.05rem; font-weight: 800; color: rgb(var(--bp-135c65)); display: flex; align-items: center; gap: .5rem; }
+.ss-subtitle { margin: .4rem 0 0; font-size: .95rem; font-weight: 700; color: #334155; }
+.ss-fields { display: grid; gap: .9rem; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .ss-fields { grid-template-columns: 1fr 1fr; } .ss-span { grid-column: 1 / -1; } }
+.ss-field { display: flex; flex-direction: column; gap: .35rem; }
+.ss-field > label { font-weight: 600; font-size: .9rem; }
+.ss-logo { align-self: center; width: 180px; height: 180px; padding: .75rem; border: 2px dashed #cbd5e1; border-radius: 16px; background: #f8fafc; cursor: pointer; display: grid; place-items: center; }
+.ss-logo:hover { border-color: rgb(var(--bp-135c65)); }
+.ss-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.ss-color { display: flex; align-items: flex-start; gap: .9rem; }
+.ss-color :deep(.p-colorpicker-preview) { width: 3rem; height: 3rem; border-radius: 12px; margin-top: 1.6rem; }
+.ss-hex { font-family: ui-monospace, Consolas, monospace; text-transform: lowercase; max-width: 11rem; }
+.ss-preview { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: rgb(var(--bp-f0f9fa, 240 249 250)); }
+.ss-preview__label { margin: 0; padding: .4rem .75rem; font-size: .75rem; font-weight: 700; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+.ss-preview__bar { display: flex; align-items: center; gap: .6rem; padding: .6rem .9rem; background: rgb(var(--bp-135c65)); color: #fff; font-weight: 700; }
+.ss-preview__bar img { height: 2rem; width: auto; background: #fff; border-radius: 8px; padding: 2px; }
+.ss-preview__btn { padding: .45rem .9rem; border-radius: 999px; color: #fff; font-weight: 700; font-size: .85rem; }
+.ss-preview__btn--primary { background: rgb(var(--bp-135c65)); }
+.ss-preview__btn--accent { background: rgb(var(--bs-b21553)); }
+.ss-preview__chip { padding: .4rem .8rem; border-radius: 999px; font-size: .85rem; font-weight: 700; color: rgb(var(--bp-135c65)); background: rgb(var(--bp-135c65) / .12); }
 </style>

@@ -22,9 +22,9 @@ const tab = ref("grid");
 const cards = computed(() => {
   const summary = props.schedule.summary ?? {};
   return [
-    { key: "children", icon: "pi pi-face-smile", value: summary.children, color: "#135c65" },
+    { key: "children", icon: "pi pi-face-smile", value: summary.children, color: "rgb(var(--bp-135c65))" },
     { key: "programs", icon: "pi pi-briefcase", value: summary.programs, color: "#3aa39b" },
-    { key: "sessions", icon: "pi pi-users", value: summary.sessions + (summary.inclusion ?? 0), color: "#135c65" },
+    { key: "sessions", icon: "pi pi-users", value: summary.sessions + (summary.inclusion ?? 0), color: "rgb(var(--bp-135c65))" },
     { key: "evaluations", icon: "pi pi-clipboard", value: summary.evaluations, color: "#d9822b" },
     { key: "consultations", icon: "pi pi-comments", value: summary.consultations + (summary.meetings ?? 0), color: "#2f6fcf" },
     { key: "busy", icon: "pi pi-clock", text: formatMinutes(t, summary.busy_minutes ?? 0), color: "#6a3fb5" },

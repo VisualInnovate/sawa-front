@@ -72,7 +72,7 @@ onMounted(load);
   max-width: 90%;
 }
 .ai-log--user {
-  background: #e8f3f4;
+  background: rgb(var(--bp-e8f3f4));
   align-self: flex-start;
 }
 .ai-log--bot {

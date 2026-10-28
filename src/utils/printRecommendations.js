@@ -2,7 +2,7 @@
 // texts: the recommendations already in display order.
 // The settings page prints a blank sheet (genderLabel = which wording, name and date left to fill in by hand);
 // a child's page passes childName and date, and its texts already carry the child's name.
-import sawaLogo from "@/assets/img/sawa_logo.svg";
+import { brandHex, siteLogo } from "@/utils/siteBrand";
 
 const escape = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -13,7 +13,7 @@ const withBlank = (text) => escape(text).replace(/\{\{.*?\}\}/g, '<span class="b
 export function printRecommendations({ texts, genderLabel = null, childName = null, date = null, t }) {
   const dir = document.documentElement.dir || "rtl";
   const lang = document.documentElement.lang || "ar";
-  const logo = new URL(sawaLogo, window.location.href).href;
+  const logo = new URL(siteLogo(), window.location.href).href;
 
   const rows = texts
     .map((text, i) => `<li class="item"><span class="num">${i + 1}</span><p>${withBlank(text)}</p></li>`)
@@ -43,12 +43,12 @@ export function printRecommendations({ texts, genderLabel = null, childName = nu
     justify-content: space-between;
     gap: 16px;
     padding-bottom: 12px;
-    border-bottom: 3px solid #135c65;
+    border-bottom: 3px solid ${brandHex("#135c65")};
   }
   .head img { height: 64px; }
-  .academy { font-size: 12pt; font-weight: 700; color: #135c65; }
+  .academy { font-size: 12pt; font-weight: 700; color: ${brandHex("#135c65")}; }
   .academy small { display: block; font-weight: 400; color: #64748b; font-size: 10pt; }
-  h1 { margin: 20px 0 14px; text-align: center; font-size: 20pt; font-weight: 800; color: #135c65; }
+  h1 { margin: 20px 0 14px; text-align: center; font-size: 20pt; font-weight: 800; color: ${brandHex("#135c65")}; }
   .meta {
     display: flex;
     flex-wrap: wrap;
@@ -56,12 +56,12 @@ export function printRecommendations({ texts, genderLabel = null, childName = nu
     gap: 8px 28px;
     margin-bottom: 18px;
     padding: 10px 16px;
-    border: 1px solid #d5e6e8;
+    border: 1px solid ${brandHex("#d5e6e8")};
     border-radius: 10px;
-    background: #f3f9fa;
+    background: ${brandHex("#f3f9fa")};
     font-size: 11.5pt;
   }
-  .meta b { color: #135c65; margin-inline-end: 6px; }
+  .meta b { color: ${brandHex("#135c65")}; margin-inline-end: 6px; }
   .line { display: inline-block; min-width: 150px; border-bottom: 1px dotted #64748b; }
   ol { list-style: none; margin: 0; padding: 0; }
   .item {
@@ -83,7 +83,7 @@ export function printRecommendations({ texts, genderLabel = null, childName = nu
     height: 30px;
     margin-top: 3px;
     border-radius: 50%;
-    background: #135c65;
+    background: ${brandHex("#135c65")};
     color: #fff;
     font-weight: 700;
     font-size: 11pt;
