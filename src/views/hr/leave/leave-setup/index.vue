@@ -2,6 +2,8 @@
 import { FilterMatchMode } from '@primevue/core/api'
 import { ref, onMounted, onBeforeMount } from 'vue'
 import LeavesNave from '../../../../components/LeavesNave.vue'
+import LeaveTypeRules from '@/components/hr/LeaveTypeRules.vue'
+import LeaveSuggestions from '@/components/hr/LeaveSuggestions.vue'
 import { useToast } from 'primevue/usetoast'
 import axios from "axios"
 import { useRouter } from "vue-router"
@@ -25,7 +27,11 @@ const leave = ref({
   type: null,
   title: '',
   days: null,
-  hours: null
+  hours: null,
+  is_annual: false,
+  more_after_years: null,
+  more_days: null,
+  once_per_service: false
 })
 const exportLoading = ref(false)
 const printLoading = ref(false)
@@ -78,7 +84,11 @@ const editescrud = () => {
         type: null,
         title: '',
         days: null,
-        hours: null
+        hours: null,
+        is_annual: false,
+        more_after_years: null,
+        more_days: null,
+        once_per_service: false
       }
     })
     .catch((el) => {
@@ -92,7 +102,11 @@ const openNew = () => {
     type: null,
     title: '',
     days: null,
-    hours: null
+    hours: null,
+    is_annual: false,
+    more_after_years: null,
+    more_days: null,
+    once_per_service: false
   }
 }
 
@@ -112,7 +126,11 @@ const createcrude = () => {
         type: null,
         title: '',
         days: null,
-        hours: null
+        hours: null,
+        is_annual: false,
+        more_after_years: null,
+        more_days: null,
+        once_per_service: false
       }
     })
     .catch((el) => {
@@ -248,6 +266,7 @@ const initFilters = () => {
                 class="no-print" 
                 :loading="exportLoading"
                 @click="exportCSV" severity="info" />
+              <LeaveSuggestions v-if="$can('leave setup create')" @added="fetchData" />
               <Button 
                 v-can="'leave setup create'"
                 :label='$t("Add New")' 
@@ -287,6 +306,16 @@ const initFilters = () => {
               <template #body="slotProps">
                 <span v-if="slotProps.data.hours !== null">{{ slotProps.data.hours }}</span>
                 <span v-else class="text-gray-400">-</span>
+              </template>
+            </Column>
+
+            <Column :header="$t('lvt.rules')">
+              <template #body="{ data }">
+                <div class="flex flex-wrap gap-1">
+                  <Tag v-if="data.is_annual" severity="info" :value="$t('lvt.annual_tag')" />
+                  <Tag v-if="data.more_after_years" severity="secondary" :value="$t('lvt.more_short', { years: data.more_after_years, days: data.more_days })" />
+                  <Tag v-if="data.once_per_service" severity="warn" :value="$t('lvt.once_short')" />
+                </div>
               </template>
             </Column>
             
@@ -369,6 +398,7 @@ const initFilters = () => {
             />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.days">{{ error.days[0] }}</div>
           </div>
+          <LeaveTypeRules v-if="leave.type === 'daily'" v-model="leave" />
           <div v-show="leave.type === 'hourly'" class="flex flex-column gap-2 py-1">
             <label class="w-full text-start">{{ $t('Hours') }}</label>
             <InputNumber  
@@ -422,6 +452,7 @@ const initFilters = () => {
             />
             <div class="mt-1 mb-5 text-red-500" v-if="error?.days">{{ error.days[0] }}</div>
           </div>
+          <LeaveTypeRules v-if="leave.type === 'daily'" v-model="leave" />
           <div v-if="leave.type === 'hourly'" class="flex flex-column gap-2 py-1">
             <label class="w-full text-start">{{ $t('Hours') }}</label>
             <InputNumber  

@@ -419,9 +419,9 @@ onMounted(loadChildren);
   gap: 1rem 1.5rem;
   padding: 1.35rem 1.5rem;
   border-radius: var(--sawa-radius);
-  background: linear-gradient(135deg, var(--sawa-primary) 0%, #1b7c86 100%);
+  background: linear-gradient(135deg, var(--sawa-primary) 0%, rgb(var(--bp-1b7c86)) 100%);
   color: #fff;
-  box-shadow: 0 8px 24px -12px rgba(19, 92, 101, 0.55);
+  box-shadow: 0 8px 24px -12px rgb(var(--bp-135c65) / 0.55);
 }
 .rp-hero::after {
   content: "";
@@ -560,7 +560,7 @@ onMounted(loadChildren);
 }
 .rp-avatar.is-female {
   background: #fce7f3;
-  color: #be185d;
+  color: rgb(var(--bs-be185d));
 }
 .rp-avatar.is-lg {
   width: 3rem;
@@ -597,12 +597,12 @@ onMounted(loadChildren);
 .rp-type .pi {
   font-size: 0.7rem;
 }
-.type-1 { --tone: #db2777; --tone-soft: #fce7f3; }
+.type-1 { --tone: rgb(var(--bs-db2777)); --tone-soft: #fce7f3; }
 .type-2 { --tone: #0f766e; --tone-soft: #ccfbf1; }
 .type-3 { --tone: #b45309; --tone-soft: #fef3c7; }
 .type-4 { --tone: #4f46e5; --tone-soft: #e0e7ff; }
 .type-5 { --tone: #0369a1; --tone-soft: #e0f2fe; }
-.type-6 { --tone: #9d174d; --tone-soft: #fce7f3; }
+.type-6 { --tone: rgb(var(--bs-9d174d)); --tone-soft: #fce7f3; }
 .type-7 { --tone: #4338ca; --tone-soft: #e0e7ff; }
 .type-8 { --tone: #047857; --tone-soft: #d1fae5; }
 .rp-type[class*="type-"] {
@@ -734,7 +734,7 @@ onMounted(loadChildren);
   transition: border-color 0.15s, background-color 0.15s;
 }
 .rp-eval:hover {
-  border-color: #b6d7db;
+  border-color: rgb(var(--bp-b6d7db));
 }
 .rp-eval.is-picked {
   border-color: var(--sawa-primary);

@@ -76,7 +76,7 @@ defineExpose({ print });
     <section v-for="table in tables" :key="table.key" class="bt-table-card" :class="{ 'bt-print-target': printing === table.key }">
       <header class="bt-head">
         <div class="bt-title">
-          <img :src="sawaLogo" alt="Sawa" class="bt-logo" />
+          <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="bt-logo" />
           <div>
             <h3>BREAK SCHEDUAL <span class="bt-sub">· {{ table.title }}</span></h3>
             <p>Student name: <b>{{ childName || "…………" }}</b></p>
@@ -149,13 +149,13 @@ defineExpose({ print });
 .bt-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .5rem; }
 .bt-title { display: flex; align-items: center; gap: .6rem; }
 .bt-logo { height: 2.1rem; }
-.bt-title h3 { margin: 0; font-size: .95rem; font-weight: 800; color: #135c65; letter-spacing: .02em; }
+.bt-title h3 { margin: 0; font-size: .95rem; font-weight: 800; color: rgb(var(--bp-135c65)); letter-spacing: .02em; }
 .bt-sub { font-weight: 600; color: #64748b; }
 .bt-title p { margin: 0; font-size: .8rem; color: #475569; direction: ltr; text-align: start; }
 .bt-grid-wrap { min-height: 0; overflow: hidden; }
 .bt-grid { width: 100%; border-collapse: collapse; table-layout: fixed; direction: ltr; font-size: .78rem; }
 .bt-grid th, .bt-grid td { border: 1px solid #cbd5e1; padding: 0; height: 1.85rem; text-align: center; }
-.bt-grid th { background: #eef6f6; color: #0f3d43; font-weight: 700; font-size: .7rem; line-height: 1.15; padding: .15rem; }
+.bt-grid th { background: rgb(var(--bp-eef6f6)); color: rgb(var(--bp-0f3d43)); font-weight: 700; font-size: .7rem; line-height: 1.15; padding: .15rem; }
 .bt-col-text { width: 9%; }
 .bt-col-place { width: 10%; }
 .bt-col-breaks { width: 11%; direction: rtl; }
@@ -185,7 +185,7 @@ defineExpose({ print });
 .bt-slash, .bt-slashes { font-weight: 800; color: #0f766e; font-size: 1.05rem; line-height: 1; }
 .bt-slashes { display: inline-flex; flex-wrap: wrap; justify-content: center; letter-spacing: .05em; }
 /* the number in the cell's corner */
-.bt-total { position: absolute; top: 1px; right: 2px; min-width: 1rem; padding: 0 .2rem; border-radius: 999px; background: #135c65; color: #fff;
+.bt-total { position: absolute; top: 1px; right: 2px; min-width: 1rem; padding: 0 .2rem; border-radius: 999px; background: rgb(var(--bp-135c65)); color: #fff;
   font-size: .62rem; font-weight: 800; line-height: 1rem; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .bt-pop-enter-active { animation: bt-pop .25s cubic-bezier(.34, 1.56, .64, 1); }
 .bt-pop-leave-active { animation: bt-pop .15s reverse ease-in; }

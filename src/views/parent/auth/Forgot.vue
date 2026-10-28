@@ -91,11 +91,11 @@ async function sendCode() {
   border: 2px solid currentColor;
 }
 .pp-steps .current {
-  color: #1c6772;
+  color: rgb(var(--bp-1c6772));
 }
 .pp-steps .current > span {
-  background: #1c6772;
-  border-color: #1c6772;
+  background: rgb(var(--bp-1c6772));
+  border-color: rgb(var(--bp-1c6772));
   color: #fff;
 }
 .pp-steps .done {

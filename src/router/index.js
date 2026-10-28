@@ -138,6 +138,12 @@ const routes = [
     name: "contactus",
     component: () => import("../views/parent/Contact.vue"),
   },
+  // The public careers page: candidates sign in with their phone and a one-time code (their own session).
+  {
+    path: "/careers",
+    name: "careers",
+    component: () => import("../views/careers/Careers.vue"),
+  },
   {
     path: "/web",
     component: () => import("../views/parent/ParentShell.vue"),

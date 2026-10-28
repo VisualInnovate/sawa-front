@@ -1,7 +1,7 @@
 <template>
     <div>
       <div>
-        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("transportation_schedule") }}</p>
+        <p class="text-xl p-4 text-bp-135c65 cursor-pointer font-bold" >{{ $t("transportation_schedule") }}</p>
       </div>
     
     </div>
@@ -295,7 +295,7 @@
     width: 600px;
   
     margin: auto !important;
-    background-color: #135c65;
+    background-color: rgb(var(--bp-135c65));
     display: block;
     color: white;
    

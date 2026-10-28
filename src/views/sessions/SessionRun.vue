@@ -157,7 +157,7 @@ onBeforeUnmount(() => {
     <!-- top bar -->
     <header class="run-bar">
       <div class="run-brand">
-        <img :src="sawaLogo" alt="Sawa" />
+        <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
         <div v-if="data" class="run-who">
           <strong>{{ data.session.child?.name }}</strong>
           <small>{{ data.session.treatment?.name ?? $t("sp_session_group") }} · {{ data.session.room?.name }} · {{ data.session.therapist?.name }}</small>
@@ -244,8 +244,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.run-root { --run-teal: #135c65; --run-accent: #0f8a7e; position: fixed; inset: 0; z-index: 10; display: grid; grid-template-rows: auto 1fr; overflow: hidden;
-  background: radial-gradient(1200px 500px at 100% -10%, #e0f2f1 0, transparent 60%), linear-gradient(180deg, #f6fafa, #eef3f4); font-family: 'Cairo', sans-serif; }
+.run-root { --run-teal: rgb(var(--bp-135c65)); --run-accent: #0f8a7e; position: fixed; inset: 0; z-index: 10; display: grid; grid-template-rows: auto 1fr; overflow: hidden;
+  background: radial-gradient(1200px 500px at 100% -10%, #e0f2f1 0, transparent 60%), linear-gradient(180deg, rgb(var(--bp-f6fafa)), #eef3f4); font-family: 'Cairo', sans-serif; }
 .run-bar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: .55rem 1.1rem; background: rgb(255 255 255 / .85);
   backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; box-shadow: 0 6px 24px -18px rgb(15 23 42 / .5); animation: run-down .45s ease both; }
 .run-brand { display: flex; align-items: center; gap: .7rem; min-width: 0; }
@@ -254,7 +254,7 @@ onBeforeUnmount(() => {
 .run-who strong { color: var(--run-teal); font-size: 1rem; }
 .run-who small { color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22rem; }
 .run-activities { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .25rem; }
-.run-activity { display: inline-flex; align-items: center; gap: .35rem; padding: .1rem .55rem .1rem .15rem; border-radius: 999px; background: #edf7f5; color: #0e464d; font-size: .75rem; white-space: nowrap; }
+.run-activity { display: inline-flex; align-items: center; gap: .35rem; padding: .1rem .55rem .1rem .15rem; border-radius: 999px; background: #edf7f5; color: rgb(var(--bp-0e464d)); font-size: .75rem; white-space: nowrap; }
 .run-activity img { width: 1.4rem; height: 1.4rem; border-radius: 50%; object-fit: cover; }
 .run-activity-time { color: #64748b; }
 .run-steps { position: relative; display: flex; justify-content: center; gap: 2.5rem; }

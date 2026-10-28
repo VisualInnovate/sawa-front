@@ -103,7 +103,7 @@ const STEPS = ["pp.bk_step_1", "pp.bk_step_2", "pp.bk_step_3", "pp.bk_step_4"];
   align-items: center;
   gap: 0.85rem;
   padding: 1rem;
-  border: 1px solid rgba(28, 103, 114, 0.1);
+  border: 1px solid rgb(var(--bp-1c6772) / 0.1);
   font: inherit;
   color: inherit;
   text-decoration: none;

@@ -49,7 +49,7 @@ onMounted(() => {
 <template>
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <p class="text-xl text-[#135C65] font-bold"><i class="pi pi-history" aria-hidden="true" /> {{ $t("program_logs") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold"><i class="pi pi-history" aria-hidden="true" /> {{ $t("program_logs") }}</p>
       <div class="flex flex-wrap items-center gap-2">
         <Select v-model="child" :options="children" optionLabel="name" optionValue="id" filter showClear :placeholder="$t('sp_student')" class="w-14rem" />
         <Select v-model="action" :options="[{ value: 'created', label: $t('program_log_created') }, { value: 'updated', label: $t('program_log_updated') }]"

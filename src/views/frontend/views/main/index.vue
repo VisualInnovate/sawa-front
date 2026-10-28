@@ -15,7 +15,7 @@
             >
               <span class="block">نمضي في رحلة التعلم</span>
               <span class="block">والنمو معا نحو</span>
-              <span class="block text-[#B21553]">الاستقلالية والدمج</span>
+              <span class="block text-bs-b21553">الاستقلالية والدمج</span>
             </h1>
           </div>
           <p
@@ -28,12 +28,12 @@
           <div class="flex flex-wrap gap-4 items-center">
             <a
               href="/web/evaluation"
-              class="bg-[#B21553] text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
+              class="bg-bs-b21553 text-white font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
               >احجز تقييم الآن</a
             >
             <a
               href="/programs"
-              class="border-2 border-[#1C6772] text-[#1C6772] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              class="border-2 border-bp-1c6772 text-bp-1c6772 font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
               >تعرف على برامجنا</a
             >
           </div>
@@ -41,10 +41,10 @@
         <!-- Image -->
         <div class="relative mt-6 lg:mt-0">
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#1C6772]/10 blur-[32px] -top-8 -right-10"
+            class="absolute w-64 h-64 rounded-full bg-bp-1c6772/10 blur-[32px] -top-8 -right-10"
           ></div>
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#b21553]/10 blur-[32px] -bottom-8 -left-8"
+            class="absolute w-64 h-64 rounded-full bg-bs-b21553/10 blur-[32px] -bottom-8 -left-8"
           ></div>
           <div
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
@@ -83,7 +83,7 @@
             </div>
           </div>
           <div class="flex flex-col gap-4 pb-8">
-            <div class="bg-[#a7ebf6] p-2 rounded-2xl">
+            <div class="bg-bp-a7ebf6 p-2 rounded-2xl">
               <img
                 src="./images/individual-session.jpg"
                 alt=""
@@ -111,7 +111,7 @@
         <!-- Text -->
         <div class="flex flex-col gap-4 sm:gap-5">
           <p
-            class="text-[#B21553] font-bold text-xs sm:text-sm tracking-[1.4px] uppercase"
+            class="text-bs-b21553 font-bold text-xs sm:text-sm tracking-[1.4px] uppercase"
           >
             من نحن
           </p>
@@ -214,7 +214,7 @@
             <div
               class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
               style="
-                background: linear-gradient(135deg, #b21553 0%, #d4346b 100%);
+                background: linear-gradient(135deg, rgb(var(--bs-b21553)) 0%, rgb(var(--bs-d4346b)) 100%);
               "
             >
               <img
@@ -238,7 +238,7 @@
             <div
               class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
               style="
-                background: linear-gradient(135deg, #b21553 0%, #d4346b 100%);
+                background: linear-gradient(135deg, rgb(var(--bs-b21553)) 0%, rgb(var(--bs-d4346b)) 100%);
               "
             >
               <img
@@ -262,7 +262,7 @@
             <div
               class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
               style="
-                background: linear-gradient(135deg, #b21553 0%, #d4346b 100%);
+                background: linear-gradient(135deg, rgb(var(--bs-b21553)) 0%, rgb(var(--bs-d4346b)) 100%);
               "
             >
               <img
@@ -286,7 +286,7 @@
             <div
               class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
               style="
-                background: linear-gradient(135deg, #b21553 0%, #d4346b 100%);
+                background: linear-gradient(135deg, rgb(var(--bs-b21553)) 0%, rgb(var(--bs-d4346b)) 100%);
               "
             >
               <img
@@ -308,9 +308,9 @@
     </section>
 
     <!-- ===== WHY SAWA ===== -->
-    <section class="py-12 lg:py-24 overflow-hidden relative bg-[#035B65]">
+    <section class="py-12 lg:py-24 overflow-hidden relative bg-bp-035b65">
       <div
-        class="absolute w-96 h-96 rounded-full bg-[#1C6772]/20 blur-[60px] -top-0 -left-48"
+        class="absolute w-96 h-96 rounded-full bg-bp-1c6772/20 blur-[60px] -top-0 -left-48"
       ></div>
       <div
         class="max-w-[1228px] mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center relative"
@@ -324,7 +324,7 @@
           </h2>
           <div class="flex flex-col gap-6 sm:gap-8 w-full">
             <div class="flex items-start gap-3">
-              <div class="bg-[#B21553]/20 rounded-full p-2 sm:p-3 shrink-0">
+              <div class="bg-bs-b21553/20 rounded-full p-2 sm:p-3 shrink-0">
                 <img
                   src="./images/icon-iep.svg"
                   alt=""
@@ -344,7 +344,7 @@
               </div>
             </div>
             <div class="flex items-start gap-3">
-              <div class="bg-[#B21553]/20 rounded-full p-2 sm:p-3 shrink-0">
+              <div class="bg-bs-b21553/20 rounded-full p-2 sm:p-3 shrink-0">
                 <img
                   src="./images/icon-certified.svg"
                   alt=""
@@ -364,7 +364,7 @@
               </div>
             </div>
             <div class="flex items-start gap-3">
-              <div class="bg-[#B21553]/20 rounded-full p-2 sm:p-3 shrink-0">
+              <div class="bg-bs-b21553/20 rounded-full p-2 sm:p-3 shrink-0">
                 <img
                   src="./images/icon-assessment.svg"
                   alt=""
@@ -383,7 +383,7 @@
               </div>
             </div>
             <div class="flex items-start gap-3">
-              <div class="bg-[#B21553]/20 rounded-full p-2 sm:p-3 shrink-0">
+              <div class="bg-bs-b21553/20 rounded-full p-2 sm:p-3 shrink-0">
                 <img
                   src="./images/icon-data.svg"
                   alt=""
@@ -416,7 +416,7 @@
             />
           </div>
           <div
-            class="absolute -bottom-4 sm:-bottom-8 left-0 sm:-left-8 bg-[#B21553] p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl"
+            class="absolute -bottom-4 sm:-bottom-8 left-0 sm:-left-8 bg-bs-b21553 p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl"
           >
             <p
               class="text-white font-bold text-xl sm:text-[28px] leading-tight text-center"
@@ -444,14 +444,14 @@
         <div class="relative">
           <!-- Timeline line — desktop only -->
           <div
-            class="absolute top-8 left-0 right-0 h-1 bg-[#1C6772]/20 hidden lg:block"
+            class="absolute top-8 left-0 right-0 h-1 bg-bp-1c6772/20 hidden lg:block"
           ></div>
           <div
             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8 relative"
           >
             <div class="flex flex-col items-center gap-2">
               <div
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-[#035B65] bg-white flex items-center justify-center z-10 shadow-md"
+                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-bp-035b65 bg-white flex items-center justify-center z-10 shadow-md"
               >
                 <img
                   src="./images/icon-step-assess.svg"
@@ -470,7 +470,7 @@
             </div>
             <div class="flex flex-col items-center gap-2">
               <div
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-[#035B65] bg-white flex items-center justify-center z-10 shadow-md"
+                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-bp-035b65 bg-white flex items-center justify-center z-10 shadow-md"
               >
                 <img src="./images/icon-step-plan.svg" alt="" class="w-4 h-5" />
               </div>
@@ -483,7 +483,7 @@
             </div>
             <div class="flex flex-col items-center gap-2">
               <div
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-[#035B65] bg-white flex items-center justify-center z-10 shadow-md"
+                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-bp-035b65 bg-white flex items-center justify-center z-10 shadow-md"
               >
                 <img
                   src="./images/icon-step-start.svg"
@@ -500,7 +500,7 @@
             </div>
             <div class="flex flex-col items-center gap-2">
               <div
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-[#035B65] bg-white flex items-center justify-center z-10 shadow-md"
+                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-bp-035b65 bg-white flex items-center justify-center z-10 shadow-md"
               >
                 <img
                   src="./images/icon-step-follow.svg"
@@ -519,7 +519,7 @@
               class="flex flex-col items-center gap-2 sm:col-span-1 col-span-2 sm:col-start-auto col-start-1 justify-self-center sm:justify-self-auto w-full sm:w-auto"
             >
               <div
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-[#B21553] bg-white flex items-center justify-center z-10 shadow-md"
+                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-bs-b21553 bg-white flex items-center justify-center z-10 shadow-md"
               >
                 <img
                   src="./images/icon-step-goal.svg"
@@ -606,7 +606,7 @@
                 </div>
                 <div class="bg-[#f4f4f5] h-2 rounded-full overflow-hidden">
                   <div
-                    class="bg-[#B21553] h-full rounded-full"
+                    class="bg-bs-b21553 h-full rounded-full"
                     style="width: 85%"
                   ></div>
                 </div>
@@ -619,7 +619,7 @@
                 </div>
                 <div class="bg-[#f4f4f5] h-2 rounded-full overflow-hidden">
                   <div
-                    class="bg-[#1C6772] h-full rounded-full"
+                    class="bg-bp-1c6772 h-full rounded-full"
                     style="width: 70%"
                   ></div>
                 </div>
@@ -663,11 +663,11 @@
             class="bg-[#F6F3F2] rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
           >
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-[#B21553]/10"
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-bs-b21553/10"
             >
               <img src="./images/icon-certified.svg" alt="" class="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-[#B21553]">مؤهلون ومعتمدون</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-bs-b21553">مؤهلون ومعتمدون</h3>
             <p class="text-body text-sm leading-relaxed">
               نخبة من الأخصائيين المؤهلين علمياً، يحملون مزاولة مهنية رسمية معتمدة بتخصصاتهم.
             </p>
@@ -676,11 +676,11 @@
             class="bg-[#F6F3F2] rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
           >
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-[#1C6772]/10"
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-bp-1c6772/10"
             >
               <img src="./images/icon-professionalism.svg" alt="" class="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-[#1C6772]">اختيار وفق معايير دقيقة</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-bp-1c6772">اختيار وفق معايير دقيقة</h3>
             <p class="text-body text-sm leading-relaxed">
               يتم اختيارهم وفق معايير دقيقة تضمن الكفاءة العالية والدقة والالتزام المهني.
             </p>
@@ -689,11 +689,11 @@
             class="bg-[#F6F3F2] rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
           >
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-[#B21553]/10"
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-bs-b21553/10"
             >
               <img src="./images/icon-growth.svg" alt="" class="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-[#B21553]">تدريب مستمر</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-bs-b21553">تدريب مستمر</h3>
             <p class="text-body text-sm leading-relaxed">
               يخضع جميع أعضاء فريقنا لبرامج تدريب مستمرة داخل سوا وخارجها، لتطوير مهاراتهم وتحديث معارفهم.
             </p>
@@ -804,7 +804,7 @@
             class="w-full h-56 sm:h-80 lg:h-[400px] object-cover rounded-[32px] lg:rounded-[40px] shadow-xl"
           />
           <div
-            class="absolute -top-4 sm:-top-6 right-0 sm:-right-6 bg-[#1C6772] text-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg"
+            class="absolute -top-4 sm:-top-6 right-0 sm:-right-6 bg-bp-1c6772 text-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg"
           >
             <p class="font-bold text-xl sm:text-2xl text-start">8 أطفال</p>
             <p class="text-xs text-white text-start">كحد أقصى لكل رحلة</p>
@@ -890,7 +890,7 @@
     <section class="py-12 lg:py-24 relative overflow-hidden">
       <div
         class="absolute inset-0 opacity-10"
-        style="background: linear-gradient(138deg, #b21553 0%, #d4346b 100%)"
+        style="background: linear-gradient(138deg, rgb(var(--bs-b21553)) 0%, rgb(var(--bs-d4346b)) 100%)"
       ></div>
       <div class="max-w-[896px] mx-auto px-4 sm:px-6 text-center relative">
         <h2
@@ -909,12 +909,12 @@
         >
           <a
             href="/web/evaluation"
-            class="w-full sm:w-auto bg-[#B21553] text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-full shadow-xl text-center"
+            class="w-full sm:w-auto bg-bs-b21553 text-white font-bold text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-full shadow-xl text-center"
             >احجز تقييم الآن</a
           >
           <a
             href="/contact"
-            class="w-full sm:w-auto bg-white border-2 border-[#1C6772] text-[#1C6772] font-bold text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-full text-center"
+            class="w-full sm:w-auto bg-white border-2 border-bp-1c6772 text-bp-1c6772 font-bold text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-full text-center"
             >تواصل معنا</a
           >
         </div>

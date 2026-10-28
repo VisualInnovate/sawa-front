@@ -2,7 +2,7 @@
     
     <div class="back-back">
       <div  class="back">
-        <div class="text-center"><img src="../../assets/img/sawa_logo.svg" style="width:130px; "></div>
+        <div class="text-center"><img :src="$siteLogo()" style="width:130px; "></div>
       <div> <p class="w-[100%] text-h4 text-center ma-4" >{{title }}</p></div>
      <div>
       <p class="w-[100%] text-start ma-4">{{child_Name}}</p>
@@ -158,7 +158,7 @@ import axios from 'axios'
   text-align: start;
 }
 .print-table th {
-  background: #eef8f9;
-  color: #135c65;
+  background: rgb(var(--bp-eef8f9));
+  color: rgb(var(--bp-135c65));
 }
 </style>

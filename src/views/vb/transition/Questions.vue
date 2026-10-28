@@ -208,7 +208,7 @@ onMounted(load);
 .tq-answer-text { flex: 1; min-width: 0; }
 .tq-wording { display: inline-grid; gap: .2rem; vertical-align: top; }
 .tq-wording em { font-style: normal; color: var(--sawa-muted); }
-.tq-score { display: grid; place-items: center; flex: none; width: 2rem; height: 2.4rem; border-radius: 8px; background: var(--sawa-primary, #135c65); color: #fff; font-weight: 800; }
+.tq-score { display: grid; place-items: center; flex: none; width: 2rem; height: 2.4rem; border-radius: 8px; background: var(--sawa-primary, rgb(var(--bp-135c65))); color: #fff; font-weight: 800; }
 .tq-error { color: #dc2626; }
 .tq-actions { display: flex; justify-content: flex-end; gap: .5rem; }
 </style>

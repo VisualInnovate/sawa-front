@@ -37,7 +37,7 @@ defineProps({
         {{ $t("fees_before_discount") }}: <span class="line-through">{{ money(price.before_discount) }}</span>
       </span>
       <Tag v-if="price.discount > 0" severity="success" :value="`${$t('fees_discount')} ${money(price.discount)}`" />
-      <span class="text-lg font-bold text-[#135C65]">{{ $t("fees_total") }}: {{ amount(price.total) }}</span>
+      <span class="text-lg font-bold text-bp-135c65">{{ $t("fees_total") }}: {{ amount(price.total) }}</span>
     </div>
     <small v-if="price.free_sessions > 0" class="text-color-secondary"><i class="pi pi-gift" aria-hidden="true" /> {{ $t("acc.month_free_hint") }}</small>
   </div>

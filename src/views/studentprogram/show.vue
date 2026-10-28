@@ -38,7 +38,7 @@ onMounted(async () => {
   <div v-if="!program" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
   <div v-else class="flex flex-column gap-3">
     <div class="flex flex-wrap items-center justify-between gap-2 px-2">
-      <p class="text-xl text-[#135C65] font-bold">{{ program.student?.name }} — {{ programName(t, program) }}</p>
+      <p class="text-xl text-bp-135c65 font-bold">{{ program.student?.name }} — {{ programName(t, program) }}</p>
       <div class="flex flex-wrap gap-2">
         <Button v-if="can('accounting list')" icon="pi pi-wallet" :label="$t('acc.program_account')" severity="secondary" variant="outlined" @click="showingAccount = true" />
         <Button v-if="program.accounting_status !== 'stopped'" v-can="'student program edit'" icon="pi pi-pencil" :label="$t('edit')" variant="outlined"
@@ -68,6 +68,8 @@ onMounted(async () => {
 
     <div class="sawa-card p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
       <div><span class="text-color-secondary">{{ $t("sp_therapist") }}:</span> {{ program.therapist?.name }}</div>
+      <div v-if="program.substitutes?.length"><span class="text-color-secondary">{{ $t("sp_substitutes") }}:</span>
+        {{ program.substitutes.map((row, i) => `${i + 1}. ${row.name}`).join("، ") }}</div>
       <div><span class="text-color-secondary">{{ $t("sp_period") }}:</span> <span class="whitespace-nowrap">{{ program.start_date }} → {{ program.end_date }}</span></div>
       <div v-if="program.weekly_sessions"><span class="text-color-secondary">{{ $t("sp_weekly_sessions") }}:</span> {{ program.weekly_sessions }}</div>
       <div><span class="text-color-secondary">{{ $t("acc.price") }}:</span> <span class="font-semibold">{{ amount(program.price) }}</span></div>

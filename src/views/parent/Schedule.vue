@@ -9,7 +9,7 @@
     </div>
 
     <div class="report-head">
-      <img :src="sawaLogo" alt="" class="report-logo" />
+      <img :src="$siteLogo(sawaLogo)" alt="" class="report-logo" />
       <div class="text-center">
         <div class="text-lg font-bold">{{ $t("sch.parent_title") }}<template v-if="child"> — {{ child.name }}</template></div>
         <div class="text-sm">{{ range.from }} – {{ range.to }}</div>
@@ -34,7 +34,7 @@
       <ScheduleLegend :types="['session', 'inclusion', 'evaluation', 'consultation']" :staffMarks="false" class="mb-3" />
       <WeekGrid :days="days" :items="child.items" :holidays="holidays" :now="now" showStaff :showShift="false" ownChild :hourHeight="88" />
       <div class="mt-5">
-        <h2 class="text-xl font-bold text-[#135C65] mb-3">{{ $t("sch.tab_list") }}</h2>
+        <h2 class="text-xl font-bold text-bp-135c65 mb-3">{{ $t("sch.tab_list") }}</h2>
         <ScheduleList :items="child.items" showStaff :showFlags="false" :loading="loading" />
       </div>
     </template>
@@ -72,7 +72,7 @@ const child = computed(() => children.value.find((row) => row.id === childId.val
 const cards = computed(() => {
   const items = child.value?.items ?? [];
   return [
-    { key: "sessions", icon: "pi pi-users", value: items.filter((item) => ["session", "inclusion"].includes(item.type)).length, color: "#135c65" },
+    { key: "sessions", icon: "pi pi-users", value: items.filter((item) => ["session", "inclusion"].includes(item.type)).length, color: "rgb(var(--bp-135c65))" },
     { key: "evaluations", icon: "pi pi-clipboard", value: items.filter((item) => item.type === "evaluation").length, color: "#d9822b" },
     { key: "consultations", icon: "pi pi-comments", value: items.filter((item) => ["consultation", "meeting"].includes(item.type)).length, color: "#2f6fcf" },
     { key: "therapists", icon: "pi pi-user", value: new Set(items.map((item) => item.staff).filter(Boolean)).size, color: "#6a3fb5" },
@@ -121,8 +121,8 @@ onMounted(load);
   padding: 0.85rem;
   border-radius: 0.9rem;
   background: #fff;
-  border: 1px solid #e5eef0;
-  box-shadow: 0 2px 6px rgba(19, 92, 101, 0.06);
+  border: 1px solid rgb(var(--bp-e5eef0));
+  box-shadow: 0 2px 6px rgb(var(--bp-135c65) / 0.06);
 }
 .ps-card > i {
   font-size: 1.2rem;
@@ -158,7 +158,7 @@ onMounted(load);
   display: none;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }

@@ -66,7 +66,7 @@ async function resetPassword() {
 <template>
   <div class="reset-page">
     <div class="reset-card">
-      <img class="reset-logo" :src="sawaLogo" alt="Sawa" />
+      <img class="reset-logo" :src="$siteLogo(sawaLogo)" alt="Sawa" />
       <h1 class="reset-title">{{ $t("pwreset.title") }}</h1>
       <p class="reset-subtitle">
         {{ step === 1 ? $t("pwreset.staff_step1_hint") : $t("pwreset.step2_hint_sent", { email: form.email }) }}
@@ -136,7 +136,7 @@ async function resetPassword() {
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: linear-gradient(160deg, #eef8f9 0%, #f8fafc 60%, #f6f6ee 100%);
+  background: linear-gradient(160deg, rgb(var(--bp-eef8f9)) 0%, #f8fafc 60%, #f6f6ee 100%);
 }
 .reset-card {
   width: 100%;
@@ -145,7 +145,7 @@ async function resetPassword() {
   border: 1px solid var(--sawa-border);
   border-top: 4px solid var(--sawa-primary);
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(19, 92, 101, 0.1);
+  box-shadow: 0 12px 32px rgb(var(--bp-135c65) / 0.1);
   padding: 2rem 1.75rem;
   text-align: center;
 }

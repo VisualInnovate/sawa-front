@@ -43,7 +43,7 @@ onMounted(load);
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold m-0">{{ $t("acc.settings") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold m-0">{{ $t("acc.settings") }}</p>
     <AccountingTabs />
     <div v-if="!form" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-3">

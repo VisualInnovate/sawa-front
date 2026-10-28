@@ -141,7 +141,7 @@ async function save() {
     </div>
     <template #footer>
       <div class="flex flex-wrap items-center justify-between gap-2 w-full">
-        <span class="text-lg font-bold text-[#135C65]">{{ $t("acc.payment_total") }}: {{ amount(total) }}</span>
+        <span class="text-lg font-bold text-bp-135c65">{{ $t("acc.payment_total") }}: {{ amount(total) }}</span>
         <div class="flex gap-2">
           <Button :label="$t('acc.cancel')" severity="secondary" variant="outlined" @click="visible = false" />
           <Button icon="pi pi-check" :label="$t('acc.save_payment')" :loading="saving"

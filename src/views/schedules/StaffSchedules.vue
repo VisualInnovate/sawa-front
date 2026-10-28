@@ -54,7 +54,7 @@ const totals = computed(() => rows.value.reduce((sum, row) => {
   return sum;
 }, { employees: rows.value.filter((row) => row.items.length).length }));
 const totalCards = computed(() => [
-  { key: "employees", icon: "pi pi-id-card", value: totals.value.employees, color: "#135c65" },
+  { key: "employees", icon: "pi pi-id-card", value: totals.value.employees, color: "rgb(var(--bp-135c65))" },
   { key: "sessions", icon: "pi pi-users", value: (totals.value.sessions ?? 0) + (totals.value.inclusion ?? 0), color: "#3aa39b" },
   { key: "evaluations", icon: "pi pi-clipboard", value: totals.value.evaluations ?? 0, color: "#d9822b" },
   { key: "consultations", icon: "pi pi-comments", value: (totals.value.consultations ?? 0) + (totals.value.meetings ?? 0), color: "#2f6fcf" },
@@ -68,7 +68,7 @@ function heat(day) {
   if (!day.busy_minutes) return { background: "#f7f9f9", color: "#9ca3af" };
   const load = Math.min(1, day.load ?? 0);
   if (day.crowded) return { background: "#fde2e2", color: "#991b1b" };
-  return { background: `rgba(19, 92, 101, ${0.1 + load * 0.5})`, color: load > 0.6 ? "#fff" : "#0b3f45" };
+  return { background: `rgb(var(--bp-135c65) / ${0.1 + load * 0.5})`, color: load > 0.6 ? "#fff" : "rgb(var(--bp-0b3f45))" };
 }
 const dayItems = (row, date) => row.items.filter((item) => item.date === date && item.type !== "availability");
 const dayAttention = (row, date) => dayItems(row, date).some((item) => ["late", "missed"].includes(item.status) || item.flags?.some((flag) => ["conflict", "outside_shift"].includes(flag)));
@@ -90,14 +90,14 @@ onMounted(load);
   <div class="sawa-card p-3 staff-schedules">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3 no-print">
       <div>
-        <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("sch.title") }}</p>
+        <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("sch.title") }}</p>
         <p class="text-sm text-color-secondary m-0">{{ $t("sch.subtitle") }}</p>
       </div>
       <WeekNav v-model="week" :loading="loading" @refresh="load" @print="print" />
     </div>
 
     <div class="report-head print-only">
-      <img :src="sawaLogo" alt="" class="report-logo" />
+      <img :src="$siteLogo(sawaLogo)" alt="" class="report-logo" />
       <div class="text-center">
         <div class="text-lg font-bold">{{ $t("sch.title") }}<template v-if="tab === 'employee' && selected"> — {{ selected.user.name }}</template></div>
         <div class="text-sm">{{ weekRange(week).from }} – {{ weekRange(week).to }}</div>
@@ -151,7 +151,7 @@ onMounted(load);
                 <tr v-if="!filtered.length"><td :colspan="days.length + 8" class="text-center text-color-secondary py-4">{{ loading ? $t("loading") : $t("sch.empty") }}</td></tr>
                 <tr v-for="row in filtered" :key="row.user.id" class="cursor-pointer" @click="openEmployee(row)">
                   <td class="text-start">
-                    <div class="font-bold text-[#135C65]">{{ row.user.name }}</div>
+                    <div class="font-bold text-bp-135c65">{{ row.user.name }}</div>
                     <div v-if="row.user.job_title" class="text-xs text-color-secondary">{{ row.user.job_title }}</div>
                   </td>
                   <td v-for="day in row.days" :key="day.date" class="sch-heat" :style="heat(day)"
@@ -239,7 +239,7 @@ onMounted(load);
   font-size: 0.85rem;
 }
 .sch-overview th {
-  background: #135c65;
+  background: rgb(var(--bp-135c65));
   color: #fff;
   padding: 0.5rem 0.4rem;
   font-weight: 700;
@@ -254,7 +254,7 @@ onMounted(load);
   text-align: center;
 }
 .sch-overview tbody tr:hover td:not(.sch-heat) {
-  background: #f3f8f8;
+  background: rgb(var(--bp-f3f8f8));
 }
 .sch-heat {
   position: relative;
@@ -274,7 +274,7 @@ onMounted(load);
   display: none;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #135c65;
+  border-bottom: 2px solid rgb(var(--bp-135c65));
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }

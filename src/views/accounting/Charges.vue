@@ -83,7 +83,7 @@ onMounted(load);
 <template>
   <div>
     <div class="flex flex-wrap items-center justify-between gap-2 p-4">
-      <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("acc.charges") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("acc.charges") }}</p>
       <Button v-if="can('accounting charges create')" icon="pi pi-plus" :label="$t('acc.add_fee')" @click="adding = true" />
     </div>
     <AccountingTabs />

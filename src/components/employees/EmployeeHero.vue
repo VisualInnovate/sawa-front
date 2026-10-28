@@ -105,7 +105,7 @@ function onFile(event) {
   border: 4px solid #fff;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 4px 14px rgba(19, 92, 101, 0.18);
+  box-shadow: 0 4px 14px rgb(var(--bp-135c65) / 0.18);
   overflow: hidden;
   cursor: default;
 }
@@ -140,7 +140,7 @@ function onFile(event) {
   display: flex;
   justify-content: center;
   padding: 0.3rem 0 0.4rem;
-  background: rgba(14, 70, 77, 0.65);
+  background: rgb(var(--bp-0e464d) / 0.65);
   color: #fff;
   opacity: 0;
   transition: opacity 0.2s;

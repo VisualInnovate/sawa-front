@@ -121,7 +121,7 @@ const chartOptions = {
 }
 .sp-note {
   padding: 8px 12px;
-  border: 1px solid #d5e6e8;
+  border: 1px solid rgb(var(--bp-d5e6e8));
   border-radius: 8px;
   font-size: 10pt;
 }

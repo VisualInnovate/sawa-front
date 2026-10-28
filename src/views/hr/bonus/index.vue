@@ -2,6 +2,7 @@
 import {FilterMatchMode} from '@primevue/core/api'
 import {ref, onMounted, onBeforeMount} from 'vue'
 import moment from "moment";
+import PayrollItemStatus from '@/components/hr/PayrollItemStatus.vue'
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
@@ -48,6 +49,17 @@ onMounted(() => {
   fetchData()
 })
 
+// Approved bonuses go into the next payroll; a refused change (already paid) shows its message.
+const updateStatus = (id, status) => {
+  loading.value = true
+  axios.get(`/api/bonus/change-status/${id}`, { params: { status } }).then(() => {
+    fetchData()
+  }).catch((e) => {
+    toast.add({ severity: 'error', summary: t('error'), detail: e.response?.data?.message || t('mission_error'), life: 4000 })
+    fetchData()
+  })
+}
+
 const edit=(id)=>{
   axios.get(`/api/bonus/${id}`).then((res)=>{
     bouns.value= res.data.data
@@ -83,8 +95,10 @@ const confirmDelete = (id) => {
 
 const create=()=>{
   bouns.value.date = moment(bouns.value.date).format("YYYY-MM-DD");
+  // Adding takes a list of employees (one bonus each); the form picks one.
+  const { employee_id, ...bonus } = bouns.value
   axios
-    .post('/api/bonus',bouns.value)
+    .post('/api/bonus', { ...bonus, employees: employee_id ? [employee_id] : [] })
     .then((res) => {
       fetchData()
       createdialog.value=!(createdialog.value)
@@ -92,7 +106,8 @@ const create=()=>{
       bouns.value = {}
     })
     .catch((el)=>{
-      error.value = el.response.data.errors
+      const errors = el.response?.data?.errors
+      error.value = errors ? { ...errors, employee_id: errors.employee_id ?? errors.employees } : ''
     })
 }
 
@@ -241,14 +256,22 @@ const initFilters = () => {
               </template>
             </Column>
 
+            <Column field="status" :header='$t("status")' :sortable="true" header-style="min-width:10rem;">
+              <template #body="slotProps">
+                <PayrollItemStatus :item="slotProps.data" :can-edit="$can('bonus edit')" @change="updateStatus(slotProps.data.id, $event)" />
+              </template>
+            </Column>
+
             <Column header-style="min-width:10rem;">
               <template #body="slotProps">
                 <div class="table-actions">
                   <Button
+                    v-if="!slotProps.data.payroll_id"
                     v-can="'bonus edit'"
                     icon="pi pi-pencil"
                     @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                   <Button
+                    v-if="!slotProps.data.payroll_id"
                     v-can="'bonus delete'"
                     icon="pi pi-trash"
                     @click="confirmDelete(slotProps.data.id)" rounded severity="danger" variant="outlined" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />

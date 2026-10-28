@@ -5,9 +5,9 @@
    ========================================================================== */
 
 :root {
-  --sawa-primary: #135c65;
-  --sawa-primary-dark: #0e464d;
-  --sawa-primary-soft: #eef8f9;
+  --sawa-primary: rgb(var(--bp-135c65));
+  --sawa-primary-dark: rgb(var(--bp-0e464d));
+  --sawa-primary-soft: rgb(var(--bp-eef8f9));
   --sawa-accent: #a9ab7f;
   --sawa-page-bg: #f4f7f8;
   --sawa-border: #e2e8f0;

@@ -106,7 +106,7 @@ onBeforeUnmount(() => clearInterval(timer));
   margin: 0 0 0.5rem;
   font-size: 1rem;
   font-weight: 700;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 .bell-empty {
   margin: 0;
@@ -136,7 +136,7 @@ onBeforeUnmount(() => clearInterval(timer));
 }
 .bell-item:hover,
 .bell-item:focus-visible {
-  background: #f0f7f7;
+  background: rgb(var(--bp-f0f7f7));
 }
 .bell-item.unread {
   background: #ecfdf5;

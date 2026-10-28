@@ -7,7 +7,7 @@
     <!-- 1. Pick the child -->
     <template v-else-if="step === 'pick'">
       <div class="pm-card bg-white rounded-2xl border p-5 mb-5">
-        <p class="text-[#135C65] font-bold text-xl mb-2"><i class="pi pi-heart mx-1" />{{ $t("pmchat.intro_title") }}</p>
+        <p class="text-bp-135c65 font-bold text-xl mb-2"><i class="pi pi-heart mx-1" />{{ $t("pmchat.intro_title") }}</p>
         <p class="text-slate-600 leading-8 m-0">{{ $t("pmchat.intro", { count: data.questions?.length || 20, from: data.age_from, to: data.age_to }) }}</p>
         <p v-if="data.instructions" class="text-slate-600 leading-8 mt-2 mb-0">{{ data.instructions }}</p>
         <p class="pm-note mt-3 mb-0"><i class="pi pi-info-circle mx-1" />{{ $t("pmchat.not_diagnosis") }}</p>
@@ -20,7 +20,7 @@
       </div>
       <div class="grid gap-3 sm:grid-cols-2">
         <button v-for="child in data.children" :key="child.id" type="button" class="pm-child bg-white rounded-xl border p-4 text-start" @click="start(child)">
-          <b class="text-[#135C65] text-lg block">{{ child.name }}</b>
+          <b class="text-bp-135c65 text-lg block">{{ child.name }}</b>
           <small class="text-slate-500">{{ formatChildAge(null, child.age_months, $t) }}</small>
           <small v-if="!child.in_range" class="block text-amber-700 mt-1"><i class="pi pi-exclamation-triangle" /> {{ $t("pmchat.out_of_range", { from: data.age_from, to: data.age_to }) }}</small>
           <span class="pm-go"><i class="pi pi-arrow-left" /> {{ $t("pmchat.start") }}</span>
@@ -41,7 +41,7 @@
     <!-- 2. The questions, one at a time -->
     <template v-else-if="step === 'questions'">
       <div class="flex items-center justify-between mb-2">
-        <b class="text-[#135C65]">{{ child.name }}</b>
+        <b class="text-bp-135c65">{{ child.name }}</b>
         <small class="text-slate-500">{{ $t("pmchat.progress", { n: index + 1, total: data.questions.length }) }}</small>
       </div>
       <ProgressBar :value="((index + (answers[question.id] !== undefined ? 1 : 0)) / data.questions.length) * 100" :showValue="false" style="height: 8px" />
@@ -86,7 +86,7 @@
         <div v-for="a in result.answers" :key="a.number" class="pm-row">
           <span class="text-slate-400">{{ a.number }}</span>
           <span class="grow">{{ a.text }}</span>
-          <b :class="a.yes ? 'text-[#135C65]' : 'text-slate-500'">{{ a.yes ? $t("pmchat.yes") : $t("pmchat.no") }}</b>
+          <b :class="a.yes ? 'text-bp-135c65' : 'text-slate-500'">{{ a.yes ? $t("pmchat.yes") : $t("pmchat.no") }}</b>
         </div>
       </div>
     </template>
@@ -206,11 +206,11 @@ onMounted(async () => {
 
 <style scoped>
 .pm-card {
-  box-shadow: 0 6px 24px rgba(19, 92, 101, 0.06);
+  box-shadow: 0 6px 24px rgb(var(--bp-135c65) / 0.06);
 }
 .pm-note {
-  background: #f0f7f8;
-  color: #135c65;
+  background: rgb(var(--bp-f0f7f8));
+  color: rgb(var(--bp-135c65));
   border-radius: 10px;
   padding: 0.7rem 0.9rem;
   line-height: 1.8;
@@ -220,7 +220,7 @@ onMounted(async () => {
   transition: border-color 0.15s, transform 0.15s;
 }
 .pm-child:hover {
-  border-color: #135c65;
+  border-color: rgb(var(--bp-135c65));
   transform: translateY(-2px);
 }
 .pm-go {
@@ -243,16 +243,16 @@ onMounted(async () => {
   border: 2px solid #d6e4e6;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   background: #fff;
   transition: background 0.15s, border-color 0.15s;
 }
 .pm-answer:hover {
-  border-color: #135c65;
+  border-color: rgb(var(--bp-135c65));
 }
 .pm-answer--on {
-  background: #135c65;
-  border-color: #135c65;
+  background: rgb(var(--bp-135c65));
+  border-color: rgb(var(--bp-135c65));
   color: #fff;
 }
 .pm-score {

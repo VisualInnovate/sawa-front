@@ -153,11 +153,11 @@ onBeforeUnmount(() => {
 .name-hint {
   display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
   padding: .45rem .75rem; border-radius: .5rem;
-  background: #eef8f9; color: #135c65; font-size: .85rem; line-height: 1.6;
+  background: rgb(var(--bp-eef8f9)); color: rgb(var(--bp-135c65)); font-size: .85rem; line-height: 1.6;
 }
 .name-hint code { font-weight: 700; background: #fff; border-radius: .3rem; padding: 0 .35rem; }
 .hint-copy { padding: .1rem .4rem; }
-.hint-rest { flex-basis: 100%; color: #3f6f75; }
+.hint-rest { flex-basis: 100%; color: rgb(var(--bp-3f6f75)); }
 .wording-box { display: grid; gap: .75rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: .75rem; }
 .gender-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
 .error-marker { color: #fff; background: #dc2626; border-radius: 50%; width: 1.1rem; height: 1.1rem; display: inline-grid; place-items: center; font-size: .75rem; margin-inline-start: .4rem; }

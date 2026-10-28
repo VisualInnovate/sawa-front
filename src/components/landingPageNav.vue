@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import defaultLogo from "@/views/frontend/views/main/images/logo.png";
 
 const route = useRoute();
 const router = useRouter();
@@ -34,7 +35,7 @@ const navigate = (href) => {
     >
       <!-- Logo -->
       <img
-        src="./../views/frontend/views/main/images/logo.png"
+        :src="$siteLogo(defaultLogo)"
         alt="Sawa Academy"
         class="h-[48px] w-auto shrink-0"
       />
@@ -47,10 +48,10 @@ const navigate = (href) => {
           v-for="page in pages"
           :key="page.name"
           @click="navigate(page.href)"
-          class="cursor-pointer text-[#475569] text-sm 2xl:text-base whitespace-nowrap hover:text-[#B21553] transition-colors duration-200 px-1"
+          class="cursor-pointer text-[#475569] text-sm 2xl:text-base whitespace-nowrap hover:text-bs-b21553 transition-colors duration-200 px-1"
           :class="
             route.path === page.href
-              ? 'text-[#B21553] border-b-2 border-[#B21553] pb-0.5'
+              ? 'text-bs-b21553 border-b-2 border-bs-b21553 pb-0.5'
               : ''
           "
           >{{ page.name }}</a
@@ -61,7 +62,7 @@ const navigate = (href) => {
       <div class="hidden xl:flex items-center gap-2 shrink-0">
         <a
           @click="navigate('/web/parent/register')"
-          class="cursor-pointer text-[#B21553] font-bold text-sm px-4 py-2 rounded-lg border border-[#B21553] hover:bg-pink-50 transition-colors duration-200 whitespace-nowrap"
+          class="cursor-pointer text-bs-b21553 font-bold text-sm px-4 py-2 rounded-lg border border-bs-b21553 hover:bg-pink-50 transition-colors duration-200 whitespace-nowrap"
           >انشاء حساب</a
         >
         <a
@@ -71,7 +72,7 @@ const navigate = (href) => {
         >
         <a
           @click="navigate('/web/evaluation')"
-          class="bg-[#B21553] cursor-pointer text-white font-bold text-sm px-4 py-2 rounded-lg hover:opacity-90 transition-opacity duration-200 whitespace-nowrap"
+          class="bg-bs-b21553 cursor-pointer text-white font-bold text-sm px-4 py-2 rounded-lg hover:opacity-90 transition-opacity duration-200 whitespace-nowrap"
           >احجز الآن</a
         >
       </div>
@@ -79,7 +80,7 @@ const navigate = (href) => {
       <!-- Hamburger — shown below xl -->
       <button
         @click="isMenuOpen = !isMenuOpen"
-        class="xl:hidden p-2 rounded-lg text-[#475569] hover:text-[#B21553] hover:bg-gray-100 transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+        class="xl:hidden p-2 rounded-lg text-[#475569] hover:text-bs-b21553 hover:bg-gray-100 transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label="Toggle menu"
       >
         <svg
@@ -125,10 +126,10 @@ const navigate = (href) => {
           v-for="page in pages"
           :key="page.name + '-m'"
           @click="navigate(page.href)"
-          class="cursor-pointer text-[#475569] text-base py-3 px-4 rounded-lg hover:bg-gray-50 hover:text-[#B21553] transition-colors duration-200 flex items-center justify-end min-h-[44px]"
+          class="cursor-pointer text-[#475569] text-base py-3 px-4 rounded-lg hover:bg-gray-50 hover:text-bs-b21553 transition-colors duration-200 flex items-center justify-end min-h-[44px]"
           :class="
             route.path === page.href
-              ? 'text-[#B21553] bg-pink-50 font-medium'
+              ? 'text-bs-b21553 bg-pink-50 font-medium'
               : ''
           "
           >{{ page.name }}</a
@@ -137,7 +138,7 @@ const navigate = (href) => {
         <div class="flex flex-col gap-2 mt-3 pt-4 border-t border-gray-100">
           <a
             @click="navigate('/web/parent/register')"
-            class="cursor-pointer text-center text-[#B21553] font-bold text-base py-3 rounded-lg border border-[#B21553] hover:bg-pink-50 transition-colors duration-200"
+            class="cursor-pointer text-center text-bs-b21553 font-bold text-base py-3 rounded-lg border border-bs-b21553 hover:bg-pink-50 transition-colors duration-200"
             >انشاء حساب</a
           >
           <a
@@ -147,7 +148,7 @@ const navigate = (href) => {
           >
           <a
             @click="navigate('/web/evaluation')"
-            class="cursor-pointer text-center bg-[#B21553] text-white font-bold text-base py-3 rounded-lg hover:opacity-90 transition-opacity duration-200"
+            class="cursor-pointer text-center bg-bs-b21553 text-white font-bold text-base py-3 rounded-lg hover:opacity-90 transition-opacity duration-200"
             >احجز الآن</a
           >
         </div>

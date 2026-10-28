@@ -2,8 +2,8 @@
 // A Carolina evaluation's result drawn like the paper form: left to right, the type (written upwards, over its
 // domains), the domain (a row each, «المهارات»), then the age ranges (split into balanced tables when there are more
 // than `perTable`). Each age cell is divided between that domain's skills there, one part per skill with its symbol:
-// every answered part (+, - or +-) is filled with the color of the round that gave the answer, +- also crossed from
-// the top-left to the bottom-right corner; not answered stays white with a grey symbol.
+// every answered part (+ or -) is filled with the color of the round that gave the answer, +- stays white and is
+// crossed from the top-left to the bottom-right corner; not answered stays white with a grey symbol.
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -40,7 +40,7 @@ const chunks = computed(() => {
 // A domain's skills in an age range, goal after goal.
 const skillsIn = (domain, range) => domain.goals.flatMap((goal) => (goal.skills ?? []).filter((skill) => skill.age_range_id === range.id));
 const partClass = (skill) => (skill.response ? ["is-answered", { "is-partial": skill.response === "+-" }] : "is-empty");
-const partStyle = (skill) => (skill.response && skill.color ? { backgroundColor: "#" + skill.color } : null);
+const partStyle = (skill) => (skill.response && skill.response !== "+-" && skill.color ? { backgroundColor: "#" + skill.color } : null);
 const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${skill.response})` : t("carolina_ui.not_answered")].filter(Boolean).join(" — ");
 </script>
 
@@ -128,8 +128,8 @@ const partTitle = (skill) => [skill.symbol, skill.skill, skill.response ? `(${sk
 .cg-part + .cg-part { border-left: 1px solid var(--cg-line); }
 /* answered: the round's color (set inline); red when an old answer has no round */
 .cg-part.is-answered { background-color: var(--cg-red); color: #111827; }
-/* +-: a line from the top-left corner to the bottom-right one, over the color */
-.cg-part.is-partial { background-image: linear-gradient(to top right, transparent calc(50% - .6px), #374151 calc(50% - .6px), #374151 calc(50% + .6px), transparent calc(50% + .6px)); }
+/* +-: no color, only a line from the top-left corner to the bottom-right one */
+.cg-part.is-partial { background-color: #fff; background-image: linear-gradient(to top right, transparent calc(50% - .6px), #374151 calc(50% - .6px), #374151 calc(50% + .6px), transparent calc(50% + .6px)); }
 .cg-part.is-empty { color: #9ca3af; }
 
 .cg-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem; margin: 0; color: #374151; font-size: .82rem; font-variant-ligatures: none; }

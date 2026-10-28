@@ -41,7 +41,7 @@ onMounted(load);
 <template>
   <div>
     <div class="flex flex-wrap items-center justify-between gap-2 p-4">
-      <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("acc.dashboard") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("acc.dashboard") }}</p>
       <Button v-if="can('accounting payments create')" icon="pi pi-wallet" :label="$t('acc.pay')" @click="paying = true" />
     </div>
     <AccountingTabs />
@@ -94,7 +94,7 @@ onMounted(load);
   box-shadow: 0 2px 10px rgb(19 92 101 / 0.15);
 }
 .tone-green { background: #e7f6ee; color: #1b7a46; }
-.tone-blue { background: #e6f1f3; color: #135c65; }
+.tone-blue { background: rgb(var(--bp-e6f1f3)); color: rgb(var(--bp-135c65)); }
 .tone-red { background: #fdecec; color: #c62828; }
 .tone-orange { background: #fff3e0; color: #b45309; }
 .tone-gray { background: #f1f1f1; color: #555; }

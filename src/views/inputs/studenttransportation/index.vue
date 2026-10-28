@@ -281,7 +281,7 @@ const initFilters = () => {
 }
 
 .dot.active {
-  background-color: #135C65 ;
+  background-color: rgb(var(--bp-135c65)) ;
 }
 
 .line {

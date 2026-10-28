@@ -56,7 +56,7 @@ onMounted(load);
 <template>
   <div>
     <div class="flex flex-wrap items-center justify-between gap-2 p-4">
-      <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("acc.payments") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("acc.payments") }}</p>
       <Button v-if="can('accounting payments create')" icon="pi pi-wallet" :label="$t('acc.pay')" @click="paying = true" />
     </div>
     <AccountingTabs />
@@ -70,7 +70,7 @@ onMounted(load);
             <InputText v-model="filters.global.value" :placeholder="$t('acc.search_child')" />
           </IconField>
         </div>
-        <span class="text-lg font-bold text-[#135C65]">{{ $t("acc.total") }}: {{ amount(total) }}</span>
+        <span class="text-lg font-bold text-bp-135c65">{{ $t("acc.total") }}: {{ amount(total) }}</span>
       </div>
       <DataTable :value="rows" :loading="loading" dataKey="id" v-model:filters="filters" :globalFilterFields="['child_name', 'reference']"
         paginator :rows="20" stripedRows :rowClass="(row) => (row.cancelled_at ? 'opacity-60' : '')">

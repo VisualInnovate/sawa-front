@@ -51,7 +51,7 @@ onMounted(load);
       <div class="flex items-center gap-3">
         <Button icon="pi pi-arrow-right" variant="text" rounded :aria-label="$t('back')" @click="router.push({ name: 'sessions' })" />
         <div>
-          <p class="text-xl text-[#135C65] font-bold m-0">{{ $t("break_schedule") }}</p>
+          <p class="text-xl text-bp-135c65 font-bold m-0">{{ $t("break_schedule") }}</p>
           <p v-if="session" class="text-sm text-color-secondary m-0">
             {{ session.child?.name }} · {{ moment(session.starts_at).format("YYYY-MM-DD HH:mm") }} · {{ session.therapist?.name }}
           </p>

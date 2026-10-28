@@ -49,7 +49,7 @@ onMounted(load);
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold">{{ $t("program_fees") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold">{{ $t("program_fees") }}</p>
   </div>
   <div class="sawa-card p-3">
     <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>

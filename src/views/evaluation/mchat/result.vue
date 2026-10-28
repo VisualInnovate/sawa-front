@@ -183,7 +183,7 @@ watch(() => route.params.evaluation, (value, before) => {
 .mr-page { display: grid; gap: 1rem; }
 .mr-state { display: grid; place-items: center; padding: 3rem; }
 .mr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
-.mr-head h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
+.mr-head h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .mr-head p { margin: .25rem 0 0; color: var(--sawa-muted, #64748b); }
 .mr-card { padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
 .mr-card h2 { margin: 0 0 .75rem; font-size: 1.1rem; font-weight: 800; }
@@ -194,5 +194,5 @@ tr.is-current td { background: #fefce8; font-weight: 600; }
 .mr-notes { margin: 0; white-space: pre-line; }
 .mr-history { display: grid; gap: .4rem; margin: 0; padding: 0; list-style: none; }
 .mr-history a { display: flex; align-items: center; gap: .75rem; padding: .45rem .75rem; border: 1px solid #e2e8f0; border-radius: 10px; color: inherit; text-decoration: none; }
-.mr-history li.is-current a { border-color: var(--sawa-primary, #135c65); font-weight: 700; }
+.mr-history li.is-current a { border-color: var(--sawa-primary, rgb(var(--bp-135c65))); font-weight: 700; }
 </style>

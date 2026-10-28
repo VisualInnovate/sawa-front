@@ -713,15 +713,15 @@ export default {
 .mode-banner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
 .mode-options { display: grid; gap: .75rem; }
 .mode-option { display: flex; align-items: flex-start; gap: .85rem; width: 100%; padding: .9rem 1rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 12px; background: #fff; text-align: start; cursor: pointer; font: inherit; }
-.mode-option:hover, .mode-option:focus-visible { border-color: var(--sawa-primary, #135c65); background: #edf7f5; }
-.mode-option i { font-size: 1.3rem; color: var(--sawa-primary, #135c65); margin-top: .1rem; }
+.mode-option:hover, .mode-option:focus-visible { border-color: var(--sawa-primary, rgb(var(--bp-135c65))); background: #edf7f5; }
+.mode-option i { font-size: 1.3rem; color: var(--sawa-primary, rgb(var(--bp-135c65))); margin-top: .1rem; }
 .mode-option span { display: grid; gap: .2rem; }
 .mode-option small { color: var(--sawa-muted, #64748b); }
 .mode-option .mode-option-id { font-size: .75rem; opacity: .8; }
 .milestone-half-hint { display: block; margin-top: .25rem; color: var(--sawa-muted, #64748b); font-size: .8rem; }
 /* After a ½: the lower half already in the old color; 0.5 adds the upper half in this evaluation's color. */
 .score-box-after-half i:last-child { background: var(--prev); }
-.score-box-after-half.completes i:first-child { background: var(--level-color, #135c65); }
+.score-box-after-half.completes i:first-child { background: var(--level-color, rgb(var(--bp-135c65))); }
 .pending-item { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-top: .6rem; }
 .level-picker { border: 1px solid var(--sawa-border); border-radius: 12px; padding: 1rem; }
 .level-picker legend { font-weight: 700; color: var(--sawa-primary); }
@@ -762,13 +762,13 @@ export default {
 .milestone-scores { display: flex; gap: .6rem; }
 .milestone-scores label { display: flex; align-items: center; gap: .4rem; padding: .5rem .8rem; border: 1px solid var(--sawa-border); border-radius: 8px; cursor: pointer; }
 .score-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.25rem; padding: .75rem 1rem; border: 1px dashed var(--sawa-border); border-radius: 12px; background: #f8fafc; color: #334155; font-size: .9rem; }
-.score-legend-title { font-weight: 700; color: var(--sawa-primary, #135c65); }
+.score-legend-title { font-weight: 700; color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .score-legend-item { display: inline-flex; align-items: center; gap: .45rem; }
 /* The chart box for each answer, in the level's color: upper half for 1, lower half for 0.5 and 1. */
-.score-box { display: grid; grid-template-rows: 1fr 1fr; width: 22px; height: 22px; margin-inline-start: .15rem; border: 1.5px solid var(--level-color, #135c65); background: #fff; }
-.score-box i + i { border-top: 1px dotted var(--level-color, #135c65); }
+.score-box { display: grid; grid-template-rows: 1fr 1fr; width: 22px; height: 22px; margin-inline-start: .15rem; border: 1.5px solid var(--level-color, rgb(var(--bp-135c65))); background: #fff; }
+.score-box i + i { border-top: 1px dotted var(--level-color, rgb(var(--bp-135c65))); }
 .score-box-0_5 i:last-child,
-.score-box-1 i { background: var(--level-color, #135c65); }
+.score-box-1 i { background: var(--level-color, rgb(var(--bp-135c65))); }
 .score-box-1 i + i { border-top-color: rgba(255, 255, 255, .7); }
 
 /* Add custom styles for the name input field */
@@ -799,7 +799,7 @@ export default {
   width: 600px;
 
   margin: auto !important;
-  background-color: #135c65;
+  background-color: rgb(var(--bp-135c65));
   display: block;
   color: white;
 

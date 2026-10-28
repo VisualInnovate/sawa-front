@@ -264,7 +264,7 @@ const initFilters = () => {
                   <i
                     v-if="slotProps.data.is_locked"
                     class="pi pi-lock p-2"
-                    style="color: #135c65"
+                    style="color: rgb(var(--bp-135c65))"
                     v-tooltip.top="$t('admin_role_locked')"
                   ></i>
                   <Button 

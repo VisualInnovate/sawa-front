@@ -65,7 +65,7 @@ onMounted(load);
   <div v-if="!statement" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
   <div v-else class="flex flex-column gap-3">
     <div class="flex flex-wrap items-center justify-between gap-2">
-      <span class="text-lg font-bold text-[#135C65]">{{ statement.child?.name }}</span>
+      <span class="text-lg font-bold text-bp-135c65">{{ statement.child?.name }}</span>
       <div class="flex flex-wrap gap-2">
         <Button v-if="can('accounting charges create')" icon="pi pi-plus" :label="$t('acc.add_fee')" severity="secondary" variant="outlined" @click="addingFee = true" />
         <Button v-if="can('accounting payments create')" icon="pi pi-wallet" :label="$t('acc.pay')" @click="paying = true" />
@@ -84,7 +84,7 @@ onMounted(load);
       <DataTable :value="statement.charges" dataKey="id" size="small" :rowClass="(row) => (row.status === 'cancelled' ? 'opacity-60' : '')">
         <Column :header="$t('acc.description')">
           <template #body="{ data }">
-            <button v-if="data.source === 'program'" type="button" class="text-start text-[#135C65] underline bg-transparent border-none cursor-pointer p-0" @click="openCharge(data)">
+            <button v-if="data.source === 'program'" type="button" class="text-start text-bp-135c65 underline bg-transparent border-none cursor-pointer p-0" @click="openCharge(data)">
               {{ chargeTitle(t, data) }}
             </button>
             <span v-else>{{ chargeTitle(t, data) }}</span>

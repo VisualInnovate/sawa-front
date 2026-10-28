@@ -50,7 +50,7 @@ const back = computed(() => ({ name: "parent-finances", query: { child: props.ch
 
     <article v-else class="pp-card pp-receipt pp-in">
       <header class="pp-receipt__head">
-        <img :src="sawaLogo" alt="Sawa" class="pp-receipt__logo" />
+        <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="pp-receipt__logo" />
         <div class="text-center">
           <h2 class="pp-h2 m-0">{{ $t("acc.receipt_title") }}</h2>
           <span v-if="receipt.cancelled_at" class="pp-receipt__cancelled">{{ $t("pp.fin_receipt_cancelled") }}</span>

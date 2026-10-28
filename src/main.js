@@ -15,6 +15,7 @@ import "animate.css";
 import "./main.css";
 import "./style.css";
 import "./views/frontend/assets/main.css";
+import "./styles/brand-colors.css";
 import "./styles/app.css";
 import "./styles/parent-portal.css";
 
@@ -25,8 +26,12 @@ import { applyDirection } from "@/utils/direction";
 import installButtonLoading from "@/plugins/button-loading";
 import App from "@/App.vue";
 import BackButton from "@/components/common/BackButton.vue";
+import { applySiteBrand, loadSiteBrand, siteBrand, siteLogo } from "@/utils/siteBrand";
 
 installButtonLoading();
+// «إعدادات الموقع»: last visit's colours and logo at once, then the current ones from the server.
+applySiteBrand();
+loadSiteBrand();
 library.add(faUserSecret, faChevronLeft);
 
 const pinia = createPinia();
@@ -55,6 +60,8 @@ const applyCan = (el, binding) => {
 app.directive("can", { mounted: applyCan, updated: applyCan });
 app.config.globalProperties.$can = can;
 app.config.globalProperties.$isAdmin = isAdmin;
+app.config.globalProperties.$siteBrand = siteBrand;
+app.config.globalProperties.$siteLogo = siteLogo;
 
 // One place decides the page direction: <html dir/lang> follow the app language, and so
 // do PrimeVue's built-in texts (overlays are teleported to <body>, so <html> must carry dir).

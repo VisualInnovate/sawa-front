@@ -152,7 +152,7 @@ const clearHeight = (el) => {
   border: 1px solid transparent;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.4);
-  color: #3d565a;
+  color: rgb(var(--bp-3d565a));
   font-family: inherit;
   font-size: 13px;
   font-weight: 700;
@@ -164,24 +164,24 @@ const clearHeight = (el) => {
     box-shadow 0.15s;
 }
 .side-link:hover {
-  color: #0b6462;
-  background: #effaf5;
-  border-color: rgba(15, 122, 115, 0.12);
+  color: rgb(var(--bp-0b6462));
+  background: rgb(var(--bp-effaf5));
+  border-color: rgb(var(--bp-0f7a73) / 0.12);
 }
 .side-link:focus-visible {
-  outline: 2px solid #0f7a73;
+  outline: 2px solid rgb(var(--bp-0f7a73));
   outline-offset: -2px;
 }
 .side-link.has-current,
 .side-link.is-expanded {
-  background: #edf9f5;
-  color: #0f6462;
-  border-color: rgba(15, 122, 115, 0.14);
+  background: rgb(var(--bp-edf9f5));
+  color: rgb(var(--bp-0f6462));
+  border-color: rgb(var(--bp-0f7a73) / 0.14);
 }
 .side-link.is-current {
   color: #fff;
-  background: linear-gradient(135deg, #0f7a73 0%, #0b5f5d 100%);
-  box-shadow: 0 8px 16px -10px rgba(15, 122, 115, 0.7);
+  background: linear-gradient(135deg, rgb(var(--bp-0f7a73)) 0%, rgb(var(--bp-0b5f5d)) 100%);
+  box-shadow: 0 8px 16px -10px rgb(var(--bp-0f7a73) / 0.7);
 }
 .side-link.is-sub {
   min-height: 37px;
@@ -195,7 +195,7 @@ const clearHeight = (el) => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #a9c5b9;
+  background: rgb(var(--bp-a9c5b9));
   flex-shrink: 0;
 }
 .side-link.is-sub.is-current::before {
@@ -208,15 +208,15 @@ const clearHeight = (el) => {
   height: 30px;
   flex-shrink: 0;
   border-radius: 9px;
-  background: #eef7f3;
-  color: #4a7b73;
+  background: rgb(var(--bp-eef7f3));
+  color: rgb(var(--bp-4a7b73));
   font-size: 20px;
   line-height: 1;
 }
 .has-current .side-icon,
 .is-expanded .side-icon {
-  color: #0f7a73;
-  background: #dff5ee;
+  color: rgb(var(--bp-0f7a73));
+  background: rgb(var(--bp-dff5ee));
 }
 .side-link.is-current .side-icon {
   color: #edf9d5;
@@ -271,7 +271,7 @@ const clearHeight = (el) => {
   margin-inline-start: auto;
   font-size: 18px;
   line-height: 1;
-  color: #8b9e96;
+  color: rgb(var(--bp-8b9e96));
 }
 .side-collapse {
   overflow: hidden;
@@ -284,7 +284,7 @@ const clearHeight = (el) => {
   margin-inline-start: 24px;
   padding: 0;
   padding-inline-start: 10px;
-  border-inline-start: 1px solid #dce8e1;
+  border-inline-start: 1px solid rgb(var(--bp-dce8e1));
   display: grid;
   gap: 3px;
 }

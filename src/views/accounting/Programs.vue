@@ -49,7 +49,7 @@ onMounted(load);
 
 <template>
   <div>
-    <p class="text-xl p-4 text-[#135C65] font-bold m-0">{{ $t("acc.programs") }}</p>
+    <p class="text-xl p-4 text-bp-135c65 font-bold m-0">{{ $t("acc.programs") }}</p>
     <AccountingTabs />
     <div class="sawa-card p-3">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">

@@ -200,24 +200,24 @@ onMounted(async () => {
 <style scoped>
 .consultant-page { padding: 1.25rem; }
 .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-.page-head h2 { margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--sawa-primary, #135c65); }
+.page-head h2 { margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .page-head p { margin: 0.3rem 0 0; color: #64748b; font-size: 0.9rem; }
 .page-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .consultant-picker { min-width: 14rem; }
 .page-state { display: grid; justify-items: center; gap: 0.5rem; padding: 3rem 1rem; color: #64748b; }
 .page-state .pi { font-size: 2rem; color: #94a3b8; }
 .child-list { display: grid; gap: 0.75rem; }
-.child-card { border: 1px solid #e2e8f0; border-inline-start: 4px solid var(--sawa-primary, #135c65); border-radius: 0.85rem; background: #fff; overflow: hidden; }
+.child-card { border: 1px solid #e2e8f0; border-inline-start: 4px solid var(--sawa-primary, rgb(var(--bp-135c65))); border-radius: 0.85rem; background: #fff; overflow: hidden; }
 .child-head { display: flex; align-items: center; gap: 0.85rem; width: 100%; padding: 0.85rem 1rem; border: 0; background: none; text-align: start; cursor: pointer; }
 .child-head:hover, .child-head:focus-visible { background: #f8fafc; }
-.child-avatar { display: grid; place-items: center; flex-shrink: 0; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: #e6f4f3; color: var(--sawa-primary, #135c65); }
+.child-avatar { display: grid; place-items: center; flex-shrink: 0; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: #e6f4f3; color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .child-identity { display: grid; flex: 1; min-width: 0; }
 .child-identity strong { color: #0f172a; }
 .child-identity small { color: #64748b; }
 .child-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 .child-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; padding: 0 1rem 1rem; }
 .child-body .wide { grid-column: 1 / -1; }
-.child-body h3 { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.6rem; font-size: 0.98rem; font-weight: 700; color: #135c65; }
+.child-body h3 { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.6rem; font-size: 0.98rem; font-weight: 700; color: rgb(var(--bp-135c65)); }
 .rows { display: grid; gap: 0.45rem; margin: 0; padding: 0; list-style: none; }
 .rows li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; padding: 0.5rem 0.7rem; border: 1px solid #eef2f2; border-radius: 0.6rem; }
 .row-main { display: grid; flex: 1; min-width: 10rem; }

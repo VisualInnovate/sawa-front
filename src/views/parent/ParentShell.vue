@@ -89,7 +89,7 @@ watch(() => route.fullPath, () => {
     <header class="pp-topbar">
       <div class="pp-container pp-topbar__row">
         <router-link :to="{ name: 'webHome' }" class="pp-topbar__brand" :aria-label="$t('pp.brand')">
-          <img :src="logo" alt="" class="pp-topbar__logo" />
+          <img :src="$siteLogo(logo)" alt="" class="pp-topbar__logo" />
         </router-link>
 
         <nav class="pp-topbar__nav" :aria-label="$t('main_menu')">
@@ -195,7 +195,7 @@ watch(() => route.fullPath, () => {
   background: rgba(252, 249, 248, 0.85);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(28, 103, 114, 0.08);
+  border-bottom: 1px solid rgb(var(--bp-1c6772) / 0.08);
 }
 .pp-topbar__row {
   display: flex;
@@ -277,7 +277,7 @@ watch(() => route.fullPath, () => {
   gap: 0.5rem;
   padding: 0.3rem 0.75rem 0.3rem 0.35rem;
   border-radius: 999px;
-  border: 1px solid rgba(28, 103, 114, 0.12);
+  border: 1px solid rgb(var(--bp-1c6772) / 0.12);
   background: #fff;
   font: inherit;
   font-weight: 800;
@@ -309,7 +309,7 @@ watch(() => route.fullPath, () => {
   border-radius: 18px;
   background: #fff;
   box-shadow: var(--pp-shadow-lg);
-  border: 1px solid rgba(28, 103, 114, 0.1);
+  border: 1px solid rgb(var(--bp-1c6772) / 0.1);
   display: grid;
   gap: 0.15rem;
   z-index: 70;
@@ -364,8 +364,8 @@ watch(() => route.fullPath, () => {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(28, 103, 114, 0.1);
-  box-shadow: 0 -8px 24px -20px rgba(28, 103, 114, 0.5);
+  border-top: 1px solid rgb(var(--bp-1c6772) / 0.1);
+  box-shadow: 0 -8px 24px -20px rgb(var(--bp-1c6772) / 0.5);
 }
 .pp-tabbar > a,
 .pp-tabbar > button {

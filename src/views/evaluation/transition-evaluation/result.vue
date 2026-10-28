@@ -146,16 +146,16 @@ watch(() => route.params.evaluation, (value, before) => {
 .tr-page { display: grid; gap: 1rem; }
 .tr-state { display: grid; place-items: center; padding: 3rem; }
 .tr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
-.tr-head h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--sawa-primary, #135c65); }
+.tr-head h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--sawa-primary, rgb(var(--bp-135c65))); }
 .tr-head p { margin: .25rem 0 0; color: var(--sawa-muted, #64748b); }
 /* Which test each chart column is (the report's test table gives it there). */
 .tr-columns { display: flex; flex-wrap: wrap; gap: .4rem .8rem; margin-bottom: 5mm; font-size: 9pt; }
 .tr-column { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .55rem; border: 1px solid #e2e8f0; border-radius: 999px; }
-.tr-column.is-current { border-color: #135c65; font-weight: 700; }
+.tr-column.is-current { border-color: rgb(var(--bp-135c65)); font-weight: 700; }
 .tr-column i { width: 12px; height: 12px; border-radius: 3px; }
 .tr-points li { line-height: 1.8; }
 .tr-score { text-align: center !important; font-weight: 800; }
-.tr-score.is-current { background: #ecfeff; }
+.tr-score.is-current { background: rgb(var(--bp-ecfeff)); }
 .tr-auto { margin-inline-start: .4rem; }
 .tr-source { display: block; margin-top: .25rem; color: #64748b; }
 </style>

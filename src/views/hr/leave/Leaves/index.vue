@@ -90,8 +90,24 @@ const accept = (id) => {
       fetchData()
       toast.add({ severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000 })
     })
-    .catch(() => {})
+    .catch((e) => {
+      loading.value = false
+      // Without enough balance the leave stays pending; the answer says what is left.
+      const data = e.response?.data?.data
+      const row = users.value?.find((l) => l.id === id)
+      const detail = data?.remaining !== undefined
+        ? t('hrleave.no_balance', { name: row?.employee?.name ?? '', remaining: data.remaining, requested: data.requested, unit: t(`hrleave.${data.unit}`) })
+        : e.response?.data?.message || t('mission_error')
+      toast.add({ severity: 'error', summary: t('error'), detail, life: 6000 })
+      fetchData()
+    })
 }
+
+// "2026-11-01 → 2026-11-03" with «أيام العمل: 3», or "2026-11-04 09:00–11:00" with «الساعات: 2».
+const period = (l) => l.start_date
+  ? `${l.start_date}${l.end_date && l.end_date !== l.start_date ? ' → ' + l.end_date : ''}`
+  : `${l.off_date ?? ''} ${l.start_time?.slice(0, 5) ?? ''}–${l.end_time?.slice(0, 5) ?? ''}`
+const length = (l) => l.start_date ? `${t('hrleave.days')}: ${l.total_days ?? 0}` : `${t('hrleave.hours')}: ${l.total_hours ?? 0}`
 
 const exportCSV = () => {
   exportLoading.value = true
@@ -237,6 +253,13 @@ const initFilters = () => {
             <Column field="leave_setup.title" :header="$t('leave_type')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.leave_setup.title }}
+              </template>
+            </Column>
+
+            <Column field="start_date" :header="$t('hrleave.period')" :sortable="true">
+              <template #body="slotProps">
+                <div dir="ltr" class="text-start whitespace-nowrap">{{ period(slotProps.data) }}</div>
+                <small class="text-muted-color">{{ length(slotProps.data) }}</small>
               </template>
             </Column>
             

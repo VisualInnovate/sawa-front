@@ -650,7 +650,7 @@ export default {
 }
 .required-strip-label {
   font-weight: 600;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
 }
 :deep(.fc-day-unavailable) {
   background: repeating-linear-gradient(135deg, #f3f4f6, #f3f4f6 6px, #e5e7eb 6px, #e5e7eb 12px);
@@ -689,7 +689,7 @@ input {
 }
 .calendar-hint {
   text-align: center;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   font-size: 0.9rem;
   margin: 0 0 0.5rem;
 }

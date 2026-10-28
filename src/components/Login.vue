@@ -36,7 +36,7 @@ const submit = () => {
       <LocaleSelect />
     </div>
     <div class="login-card">
-      <img class="login-logo" :src="sawaLogo" alt="Sawa" />
+      <img class="login-logo" :src="$siteLogo(sawaLogo)" alt="Sawa" />
       <h1 class="login-title">{{ $t("admin_login_title") }}</h1>
       <p class="login-subtitle">{{ $t("admin_login_hint") }}</p>
 
@@ -101,7 +101,7 @@ const submit = () => {
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: linear-gradient(160deg, #eef8f9 0%, #f8fafc 60%, #f6f6ee 100%);
+  background: linear-gradient(160deg, rgb(var(--bp-eef8f9)) 0%, #f8fafc 60%, #f6f6ee 100%);
   position: relative;
 }
 .login-locale {
@@ -116,7 +116,7 @@ const submit = () => {
   border: 1px solid var(--sawa-border);
   border-top: 4px solid var(--sawa-primary);
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(19, 92, 101, 0.1);
+  box-shadow: 0 12px 32px rgb(var(--bp-135c65) / 0.1);
   padding: 2rem 1.75rem;
 }
 .login-logo {

@@ -70,7 +70,7 @@ onMounted(load);
 <template>
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <p class="text-xl text-[#135C65] font-bold"><i class="pi pi-history" aria-hidden="true" /> {{ $t("session_log") }}</p>
+      <p class="text-xl text-bp-135c65 font-bold"><i class="pi pi-history" aria-hidden="true" /> {{ $t("session_log") }}</p>
       <div class="flex flex-wrap items-center gap-2">
         <IconField>
           <InputIcon class="pi pi-search" />
@@ -128,10 +128,10 @@ onMounted(load);
           <div v-if="data.reason_type || (data.holiday && data.status === 'missed')" class="text-sm">
             {{ data.reason_type ? reasonText($t, data.reason_type, data.reason_note) : `${$t("session_reason_holiday")}: ${data.holiday.title}` }}
           </div>
-          <div v-if="data.resolution === 'rescheduled'" class="text-xs font-semibold text-[#135C65]">
+          <div v-if="data.resolution === 'rescheduled'" class="text-xs font-semibold text-bp-135c65">
             {{ $t("session_resolution_rescheduled", { time: data.makeup ? dateTime(data.makeup.starts_at) : "—" }) }}
           </div>
-          <div v-else-if="data.resolution === 'compensated'" class="text-xs font-semibold text-[#135C65]">
+          <div v-else-if="data.resolution === 'compensated'" class="text-xs font-semibold text-bp-135c65">
             {{ $t("session_resolution_compensated", { amount: formatAmount(data.compensation_amount) }) }}
           </div>
           <div v-else-if="data.status === 'missed'" class="text-xs text-orange-600">{{ $t("session_log_no_action") }}</div>

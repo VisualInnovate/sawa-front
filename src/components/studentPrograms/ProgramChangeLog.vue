@@ -23,6 +23,7 @@ function lines(field, value) {
     case "rows": return value.map((row) => [row.treatment, sessionKindLabel(t, row.session_kind), `× ${row.sessions}`].filter(Boolean).join(" · "));
     case "week": return value.map((slot) => `${dayLabel(t, slot.day)} ${timeRange(slot.start, slot.end)} · ${[slot.treatment, sessionKindLabel(t, slot.session_kind), slot.room, slot.therapist].filter(Boolean).join(" · ")}`);
     case "inclusion_hours": return value.map((row) => `${dayLabel(t, row.day)} ${timeRange(row.start, row.end)}`);
+    case "substitutes": return value.length ? [value.map((name, i) => `${i + 1}. ${name}`).join("، ")] : [];
     case "price": return [amount(value)];
     case "inclusion_english": return [value ? t("yes") : t("no")];
     case "inclusion_type": return [value === "supervision" ? t("sp_inclusion_supervision") : t("sp_inclusion_program")];
@@ -80,7 +81,7 @@ function diff(change) {
 .pcl-entry { padding: .85rem 1rem; border: 1px solid #e2e8f0; border-inline-start: 4px solid #0ea5e9; border-radius: 12px; background: #fff; }
 .pcl-entry.is-created { border-inline-start-color: #16a34a; }
 .pcl-entry header { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-bottom: .6rem; }
-.pcl-program { font-weight: 700; color: #135c65; }
+.pcl-program { font-weight: 700; color: rgb(var(--bp-135c65)); }
 .pcl-meta { color: #64748b; font-size: .85rem; }
 .pcl-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
 .pcl-table th, .pcl-table td { padding: .4rem .55rem; border-bottom: 1px solid #f1f5f9; text-align: start; vertical-align: top; }

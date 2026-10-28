@@ -196,7 +196,7 @@ const selected = ref(null);
 }
 .wg-corner,
 .wg-head {
-  background: #f3f8f8;
+  background: rgb(var(--bp-f3f8f8));
   border-bottom: 1px solid #dfe7e8;
 }
 .wg-head {
@@ -204,11 +204,11 @@ const selected = ref(null);
   padding: 0.5rem 0.4rem 0.6rem;
   text-align: center;
   border-inline-start: 1px solid #e6eded;
-  color: #135c65;
+  color: rgb(var(--bp-135c65));
   min-height: 5.25rem;
 }
 .wg-head.is-today {
-  background: #135c65;
+  background: rgb(var(--bp-135c65));
   color: #fff;
 }
 .wg-head.is-holiday {
@@ -230,7 +230,7 @@ const selected = ref(null);
   margin: 0.35rem auto 0;
   width: 80%;
   border-radius: 4px;
-  background: rgba(19, 92, 101, 0.15);
+  background: rgb(var(--bp-135c65) / 0.15);
   overflow: hidden;
 }
 .wg-head.is-today .wg-load {
@@ -284,7 +284,7 @@ const selected = ref(null);
   border-inline-end: 1px solid #e6eded;
 }
 .wg-corner {
-  background: #f3f8f8;
+  background: rgb(var(--bp-f3f8f8));
 }
 .wg-corner + .wg-head,
 .wg-allday-label + .wg-allday,
@@ -307,7 +307,7 @@ const selected = ref(null);
   border-inline-start: 1px solid #e6eded;
 }
 .wg-day.is-today {
-  background: rgba(19, 92, 101, 0.035);
+  background: rgb(var(--bp-135c65) / 0.035);
 }
 .wg-day.is-holiday {
   background: repeating-linear-gradient(135deg, #fff6f6, #fff6f6 8px, #fff 8px, #fff 16px);

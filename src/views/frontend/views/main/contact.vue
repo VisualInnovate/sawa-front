@@ -12,7 +12,7 @@
               class="mb-5 text-[36px] font-black leading-[1.15] tracking-normal sm:text-[44px] lg:text-[47px] lg:leading-[1.12]"
             >
               <span class="block">نحن هنا لدعمك</span>
-              <span class="block text-[#b21553]">في كل خطوة</span>
+              <span class="block text-bs-b21553">في كل خطوة</span>
             </h1>
           </div>
           <p
@@ -30,13 +30,13 @@
                 alt=""
                 class="w-5 h-5 mx-1"
               />
-              <a :href="'https://wa.me/962791017001'" target="_blank">
+              <a :href="contactInfo.whatsappHref" target="_blank">
                 <span>واتساب مباشر</span>
               </a>
             </a>
             <a
               href="/web/evaluation"
-              class="border-2 cursor-pointer border-[#1C6772] text-[#1C6772] font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
+              class="border-2 cursor-pointer border-bp-1c6772 text-bp-1c6772 font-bold text-base lg:text-lg px-6 lg:px-8 py-4 lg:py-[18px] rounded-full"
               >احجز تقييم</a
             >
           </div>
@@ -44,10 +44,10 @@
         <!-- Image -->
         <div class="relative mt-6 lg:mt-0">
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#b21553]/10 blur-[32px] -top-8 -right-10"
+            class="absolute w-64 h-64 rounded-full bg-bs-b21553/10 blur-[32px] -top-8 -right-10"
           ></div>
           <div
-            class="absolute w-64 h-64 rounded-full bg-[#1c6772]/10 blur-[32px] -bottom-8 -left-8"
+            class="absolute w-64 h-64 rounded-full bg-bp-1c6772/10 blur-[32px] -bottom-8 -left-8"
           ></div>
           <div
             class="rotate-2 rounded-[40px] overflow-hidden shadow-2xl relative z-10"
@@ -70,17 +70,17 @@
         <!-- Trust 1 -->
         <div class="flex items-center gap-4 bg-white py-2 px-4 rounded-lg">
           <img src="./images/icon-quick.svg" alt="" class="w-6 h-6" />
-          <p class="font-bold text-[#1C6772]">استجابة سريعة</p>
+          <p class="font-bold text-bp-1c6772">استجابة سريعة</p>
         </div>
         <!-- Trust 2 -->
         <div class="flex items-center gap-4 bg-white py-2 px-4 rounded-lg">
           <img src="./images/icon-followup.svg" alt="" class="w-6 h-6" />
-          <p class="font-bold text-[#1C6772]">متابعة مستمرة</p>
+          <p class="font-bold text-bp-1c6772">متابعة مستمرة</p>
         </div>
         <!-- Trust 3 -->
         <div class="flex items-center gap-4 bg-white py-2 px-4 rounded-lg">
           <img src="./images/icon-team2.svg" alt="" class="w-6 h-6" />
-          <p class="font-bold text-[#1C6772]">فريق متخصص</p>
+          <p class="font-bold text-bp-1c6772">فريق متخصص</p>
         </div>
       </div>
     </section>
@@ -94,21 +94,21 @@
             class="bg-[#f6f3f2] rounded-3xl p-8 flex flex-col gap-4 justify-center items-center"
           >
             <div
-              class="w-14 h-14 rounded-2xl bg-[#b21553]/10 flex items-center justify-center"
+              class="w-14 h-14 rounded-2xl bg-bs-b21553/10 flex items-center justify-center"
             >
               <img src="./images/icon-location.svg" alt="" class="w-6 h-7" />
             </div>
             <h3 class="text-xl font-bold text-[#1c1b1b] text-start">موقعنا</h3>
-            <p class="text-[#594045] text-sm text-center leading-relaxed">
-              عمان - الرابية - شارع ميسلون
-            </p>
+            <a :href="contactInfo.mapHref" target="_blank" rel="noopener" class="text-[#594045] text-sm text-center leading-relaxed">
+              {{ contactInfo.address }}
+            </a>
           </div>
           <!-- Card: Phone -->
           <div
             class="bg-[#f6f3f2] rounded-3xl p-8 flex flex-col gap-4 justify-center items-center"
           >
             <div
-              class="w-14 h-14 rounded-2xl bg-[#1c6772]/10 flex items-center justify-center"
+              class="w-14 h-14 rounded-2xl bg-bp-1c6772/10 flex items-center justify-center"
             >
               <img src="./images/icon-phone.svg" alt="" class="w-6 h-6" />
             </div>
@@ -116,8 +116,7 @@
               اتصل بنا
             </h3>
             <div class="flex flex-col gap-1 text-center">
-              <p class="text-[#594045] text-sm" dir="ltr">+962-65522688</p>
-              <p class="text-[#594045] text-sm" dir="ltr">0791017001</p>
+              <a v-for="phone in contactInfo.phones" :key="phone" :href="contactInfo.telHref(phone)" class="text-[#594045] text-sm" dir="ltr">{{ phone }}</a>
             </div>
           </div>
           <!-- Card: Email -->
@@ -125,20 +124,20 @@
             class="bg-[#f6f3f2] rounded-3xl p-8 flex flex-col gap-4 justify-center items-center"
           >
             <div
-              class="w-14 h-14 rounded-2xl bg-[#b21553]/10 flex items-center justify-center"
+              class="w-14 h-14 rounded-2xl bg-bs-b21553/10 flex items-center justify-center"
             >
               <img src="./images/icon-email.svg" alt="" class="w-6 h-5" />
             </div>
             <h3 class="text-xl font-bold text-[#1c1b1b] text-start">
               البريد الإلكتروني
             </h3>
-            <p class="text-[#594045] text-sm text-start" dir="ltr">
-              info@sawa.academy
-            </p>
+            <a :href="`mailto:${contactInfo.email}`" class="text-[#594045] text-sm text-start" dir="ltr">
+              {{ contactInfo.email }}
+            </a>
           </div>
           <!-- Card: Support -->
           <div
-            class="bg-[#b21553] rounded-3xl p-8 flex flex-col gap-4 relative overflow-hidden justify-center items-center"
+            class="bg-bs-b21553 rounded-3xl p-8 flex flex-col gap-4 relative overflow-hidden justify-center items-center"
           >
             <div
               class="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/10"
@@ -168,7 +167,7 @@
       >
         <!-- Form -->
         <div class="bg-white rounded-xl p-6 flex flex-col w-full lg:w-[60%]">
-          <h1 class="text-[#1C6772] text-2xl font-extrabold">
+          <h1 class="text-bp-1c6772 text-2xl font-extrabold">
             أرسل استفسارك الآن
           </h1>
           <form class="w-full mt-6 flex flex-col gap-4" novalidate data-no-request-spinner @submit.prevent="submitForm">
@@ -232,7 +231,7 @@
             </p>
             <button
               type="submit"
-              class="bg-[#B21553] text-white py-2 rounded-xl cursor-pointer disabled:opacity-60"
+              class="bg-bs-b21553 text-white py-2 rounded-xl cursor-pointer disabled:opacity-60"
               :disabled="sending"
             >
               {{ sending ? "..." : "إرسال الرسالة" }}
@@ -243,11 +242,13 @@
         <!-- Map -->
         <div class="w-full lg:w-[40%]">
           <div class="flex justify-center items-center h-full">
-            <img
-              src="./images/map-section.png"
-              alt=""
-              class="w-3/4 lg:w-full rounded-xl"
-            />
+            <a :href="contactInfo.mapHref" target="_blank" rel="noopener" class="contents">
+              <img
+                src="./images/map-section.png"
+                alt=""
+                class="w-3/4 lg:w-full rounded-xl"
+              />
+            </a>
           </div>
         </div>
       </div>
@@ -257,13 +258,13 @@
     <section class="bg-white py-16 lg:py-24">
       <div class="max-w-[1280px] mx-auto px-4 lg:px-8">
         <div
-          class="bg-[#1C6772] rounded-[48px] shadow-2xl p-8 sm:p-12 lg:p-20 text-center relative overflow-hidden"
+          class="bg-bp-1c6772 rounded-[48px] shadow-2xl p-8 sm:p-12 lg:p-20 text-center relative overflow-hidden"
         >
           <div
-            class="absolute -top-32 -right-32 w-64 h-64 rounded-full opacity-5 bg-gradient-to-br from-[#b21553] to-[#d4346b]"
+            class="absolute -top-32 -right-32 w-64 h-64 rounded-full opacity-5 bg-gradient-to-br from-bs-b21553 to-bs-d4346b"
           ></div>
           <div
-            class="absolute -bottom-32 -left-32 w-64 h-64 rounded-full opacity-5 bg-gradient-to-br from-[#1c6772] to-[#004f58]"
+            class="absolute -bottom-32 -left-32 w-64 h-64 rounded-full opacity-5 bg-gradient-to-br from-bp-1c6772 to-bp-004f58"
           ></div>
           <h2
             class="text-2xl sm:text-[36px] lg:text-[48px] font-extrabold text-white mb-6 relative"
@@ -271,7 +272,7 @@
             ابدأ رحلة طفلك نحو التطور اليوم
           </h2>
           <p
-            class="text-[#AAEEF9] text-base lg:text-xl leading-relaxed mb-8 lg:mb-10 max-w-[672px] mx-auto relative"
+            class="text-bp-aaeef9 text-base lg:text-xl leading-relaxed mb-8 lg:mb-10 max-w-[672px] mx-auto relative"
           >
             نحن نؤمن بأن كل طفل لديه قدرات فريدة تنتظر من يكتشفها. دعنا نكون
             شركاءك في هذا المشوار.
@@ -279,7 +280,7 @@
           <div class="flex gap-4 items-center justify-center">
             <a
               href="/web/evaluation"
-              class="bg-[#b21553] text-white font-bold text-base lg:text-xl px-8 lg:px-10 py-4 lg:py-5 rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
+              class="bg-bs-b21553 text-white font-bold text-base lg:text-xl px-8 lg:px-10 py-4 lg:py-5 rounded-full shadow-[0_20px_25px_-5px_rgba(178,21,83,0.25)]"
               >احجز تقييم الآن</a
             >
           </div>
@@ -290,11 +291,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { contactErrorText, sendContactMessage, splitFullName } from "@/utils/contact";
+import { siteContacts } from "@/utils/siteBrand";
 
 const { t } = useI18n();
+// Address, phones and e-mail from «إعدادات الموقع».
+const contactInfo = computed(() => siteContacts());
 const form = ref({ name: "", phone: "", email: "", message: "" });
 const sending = ref(false);
 const feedback = ref(null);

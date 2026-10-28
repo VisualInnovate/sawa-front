@@ -150,12 +150,12 @@ async function save() {
 </template>
 
 <style scoped>
-.rs-session { display: flex; align-items: center; gap: .5rem; padding: .6rem .8rem; margin-bottom: 1rem; border-radius: 10px; background: #f1f7f7; color: #135c65; font-size: .9rem; }
+.rs-session { display: flex; align-items: center; gap: .5rem; padding: .6rem .8rem; margin-bottom: 1rem; border-radius: 10px; background: rgb(var(--bp-f1f7f7)); color: rgb(var(--bp-135c65)); font-size: .9rem; }
 .rs-state { display: grid; place-items: center; padding: 2rem; }
 .rs-reasons { margin: 0 0 1rem; padding: .75rem; border: 1px solid #e2e8f0; border-radius: 12px; }
 .rs-reasons legend { padding: 0 .35rem; font-weight: 700; color: #0f172a; }
 .rs-reason { display: inline-flex; align-items: center; gap: .4rem; margin: .25rem .75rem .25rem 0; cursor: pointer; }
-.rs-reason.is-on span { font-weight: 700; color: #135c65; }
+.rs-reason.is-on span { font-weight: 700; color: rgb(var(--bp-135c65)); }
 .rs-error { display: block; margin-top: .4rem; color: #dc2626; }
 .rs-amount { display: grid; gap: .35rem; }
 .rs-amount label { font-weight: 700; }
@@ -168,7 +168,7 @@ async function save() {
 .rs-hours { display: grid; grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: .4rem; }
 .rs-hour { display: flex; align-items: center; gap: .5rem; padding: .45rem .6rem; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: border-color .15s, background-color .15s; }
 .rs-hour:hover { border-color: #94a3b8; }
-.rs-hour.is-on { border-color: #135c65; background: #e6f4f3; }
+.rs-hour.is-on { border-color: rgb(var(--bp-135c65)); background: #e6f4f3; }
 .rs-hour span { display: grid; line-height: 1.35; }
 .rs-hour small { color: #64748b; font-size: .75rem; }
 .rs-hour small.rs-age { color: #c2410c; }

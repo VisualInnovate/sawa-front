@@ -3,7 +3,7 @@
 
     <div>
       <div>
-        <p class="text-xl p-4 text-[#135C65] cursor-pointer font-bold" >{{ $t("student_tans") }}</p>
+        <p class="text-xl p-4 text-bp-135c65 cursor-pointer font-bold" >{{ $t("student_tans") }}</p>
       </div>
       <div v-if="loading" class="loader"></div>
       <!-- Your existing content goes here -->
