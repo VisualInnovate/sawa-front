@@ -19,6 +19,9 @@ const TIER = { highest: "success", moderate: "warn", lowest: "danger" };
 const schedule = computed(() => session.value?.break_schedule);
 // A Novel table saved before 2026-10-27 has C and P columns.
 const oldApprox = (sheet) => (sheet.approx ?? []).some((row) => row.c || row.p);
+// Rows written before «C  P» replaced Item keep their Item text.
+const oldItem = (sheet) => (sheet.approx ?? []).some((row) => row.item);
+const approxColumns = (sheet) => 4 + (oldItem(sheet) ? 1 : 0) + (oldApprox(sheet) ? 2 : 0);
 const counts = (sheet) => ["C", "I", "P", "NR"].map((value) => ({ value, count: sheet.trials.filter((row) => row.response === value).length }));
 
 onMounted(async () => {
@@ -93,12 +96,12 @@ onMounted(async () => {
             <!-- A VB-MAPP goal's «Novel» table (C and P only for a sheet written before they were dropped). -->
             <table v-if="sheet.approx?.length" class="sr-table sr-approx">
               <thead>
-                <tr><th :colspan="oldApprox(sheet) ? 6 : 4">Novel</th></tr>
-                <tr><th>Approx</th><th>Item</th><template v-if="oldApprox(sheet)"><th>C</th><th>P</th></template><th>Date</th><th /></tr>
+                <tr><th :colspan="approxColumns(sheet)">Novel</th></tr>
+                <tr><th>Approx</th><th>C&nbsp;&nbsp;P</th><th v-if="oldItem(sheet)">Item</th><template v-if="oldApprox(sheet)"><th>C</th><th>P</th></template><th>Date</th><th /></tr>
               </thead>
               <tbody>
                 <tr v-for="(row, i) in sheet.approx" :key="i">
-                  <td>{{ row.approx }}</td><td>{{ row.item }}</td>
+                  <td>{{ row.approx }}</td><td><b>{{ row.cp }}</b></td><td v-if="oldItem(sheet)">{{ row.item }}</td>
                   <template v-if="oldApprox(sheet)"><td><b>{{ row.c }}</b></td><td><b>{{ row.p }}</b></td></template>
                   <td>{{ row.date }}</td><td>{{ i + 1 }}</td>
                 </tr>

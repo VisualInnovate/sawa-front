@@ -179,7 +179,7 @@
           <label for="cat-symbol">{{ $t('ablls_ui.symbol') }}<span class="ab-req">*</span></label>
           <InputText id="cat-symbol" v-model="form.symbol" class="ltr" maxlength="10" :placeholder="$t('ablls_ui.symbol_ph')" :invalid="!!errors.symbol" />
           <small v-if="errors.symbol" class="ab-error">{{ errors.symbol[0] }}</small>
-          <small v-else class="ab-hint">{{ $t('ablls_ui.symbol_hint') }}</small>
+          <small v-else class="ab-hint">{{ $t('ablls_ui.symbol_hint') }}<template v-if="assessment.customTypes"> {{ $t('ablls_ui.symbol_numbered_hint') }}</template></small>
         </div>
 
         <div class="cat-preview">

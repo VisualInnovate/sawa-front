@@ -16,7 +16,11 @@ export function shiftSessionsToToday(db: any) {
 }
 
 export const REINFORCERS = ["فقاعات الصابون", "المكعبات الملوّنة", "الأرجوحة"];
-export const todaySession = (db: any) => db.sessions.filter((s: any) => s.starts_at.slice(0, 10) === ymd(new Date())).sort((a: any, b: any) => a.starts_at.localeCompare(b.starts_at))[0];
+// الجلسة الجارية أولاً (بعد فتحها يُزاح وقتها إلى الآن فقد لا تبقى الأولى في ترتيب اليوم)، وإلا أول جلسات اليوم.
+export const todaySession = (db: any) => {
+  const today = db.sessions.filter((s: any) => s.starts_at.slice(0, 10) === ymd(new Date())).sort((a: any, b: any) => a.starts_at.localeCompare(b.starts_at));
+  return today.find((s: any) => s.status === "ongoing") ?? today[0];
+};
 export const firstGoal = (db: any) => { const t = db.trackings.find((x: any) => x.status === "approved"); return db.reportPlans.flatMap((p: any) => p.goals).find((g: any) => t.goal_ids.includes(g.id)); };
 
 export const session: Chapter = {
@@ -29,6 +33,12 @@ export const session: Chapter = {
   apply(db) {
     shiftSessionsToToday(db);
     const s = todaySession(db); const g = firstGoal(db); const t = staffByKey("therapist");
+    // كما يفعل زر «بدء» في الخادم الوهمي: الجلسة تُفتح الآن بطولها نفسه، وإلا كانت ساعة الجلسة تنتهي فور الفتح
+    // (seconds_left = 0 مساءً) فتخرج الصفحة وحدها إلى قائمة الجلسات ويفشل الفصلان 13 و14 بعد القفز.
+    const len = (new Date(s.ends_at.replace(" ", "T")).getTime() - new Date(s.starts_at.replace(" ", "T")).getTime()) / 1000;
+    const now = new Date(); const end = new Date(now.getTime() + Math.max(60, len) * 1000);
+    const f = (d: Date) => `${ymd(d)} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+    s.starts_at = f(now); s.ends_at = f(end);
     s.started_at = db.now(); s.status = "ongoing"; s.workspace = { step: "goals" };
     const sched = blankSchedule(); sched.trials[0].date = ymd(new Date()); sched.trials[0].session = `1 / ${t.name}`; sched.trials[0].place = "inside"; sched.trials[0].marks[0] = true; sched.trials[0].marks[1] = true; sched.trials[0].breaks = 1;
     s.break_schedule = { ...sched, ready_at: null, updated_at: db.now() };

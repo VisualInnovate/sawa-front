@@ -1,6 +1,6 @@
 <script setup>
 // Adds or edits a room. The period(s) and the treatments come first: each period then suggests only the therapists
-// of that work type who give every one of the room's treatments, one admin or more per period. Each period may have
+// of that work type who give one of the room's treatments at least, one admin or more per period. Each period may have
 // the room's own from–to, which replaces «أوقات البرامج» for this room (empty = those hours); a room used by day and
 // clinics together may have them overlap. Rooms no longer get appointments here; saved ones stay untouched.
 import axios from "axios";

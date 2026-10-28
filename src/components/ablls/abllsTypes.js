@@ -18,13 +18,13 @@ export const typeOrder = (type) => {
   return i < 0 ? ABLLS_TYPES.length : i
 }
 
-// C13 -> C13.1 for academic preparation, R -> R1 for the others; a domain whose missions are numbered
-// "B-1" keeps that form (matches the backend's nextKey).
+// C13 -> C13.1 for academic preparation, R -> R1 for the others, a numbered symbol (an Ablls OT B2) -> B2.1;
+// a domain whose missions are numbered "B-1" keeps that form (matches the backend's nextKey).
 export const nextSkillKey = (category, keys = []) => {
   if (!category?.symbol) return ''
   const symbol = category.symbol.trim()
   const esc = symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  let sep = isAcademic(category) ? '.' : ''
+  let sep = isAcademic(category) || /\d$/.test(symbol) ? '.' : ''
   if (keys.some((k) => new RegExp(`^${esc}-\\d+$`).test(k))) sep = '-'
   const max = Math.max(0, ...keys.map((k) => Number(String(k).trim().match(new RegExp(`^${esc}[.\\-]?(\\d+)$`))?.[1] ?? 0)))
   return `${symbol}${sep}${max + 1}`

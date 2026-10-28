@@ -15,6 +15,10 @@ export const useDemo = defineStore("demo", {
     loading: false,
     caption: "",
     notesOpen: false,
+    /** لوحة التخصيص (الشعار والألوان) مفتوحة. */
+    brandOpen: false,
+    /** الصفحة في وضع ملء الشاشة (Fullscreen API). */
+    fullscreen: false,
     /** الجهاز الذي يحتل مركز المسرح الآن. */
     active: "phone" as Device,
     /** الدور الظاهر على الحاسوب الآن (مفتاح الموظف في السيناريو). */

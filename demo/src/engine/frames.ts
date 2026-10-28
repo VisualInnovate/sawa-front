@@ -51,20 +51,34 @@ export async function navigate(d: Device, path: string) {
     mo.observe(app, { childList: true, subtree: true, attributes: true });
     setTimeout(() => { mo.disconnect(); resolve(); }, 2500);
   });
-  w.history.pushState({}, "", path);
-  w.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
+  // عبر vue-router نفسه حتى تبقى حالة history سليمة. popstate مصطنع بحالة فارغة كان يفسد historyState
+  // (current = undefined)، فأول router.push لاحق يستدعي replaceState بعنوان «https://host + undefined»
+  // فيفشل، وvue-router يعوّض بـ location.replace إلى ذلك المضيف الوهمي فيموت الإطار (ظهر على الاستضافة الحية).
+  const router = (app as any).__vue_app__?.config?.globalProperties?.$router;
+  if (router?.push) {
+    await Promise.resolve(router.push(path)).catch(() => {});
+  } else {
+    const prev = w.history.state ?? {};
+    const state = { ...prev, back: w.location.pathname + w.location.search, current: path, forward: null, position: (prev.position ?? 0) + 1, replaced: false, scroll: null };
+    w.history.pushState(state, "", path);
+    w.dispatchEvent(new PopStateEvent("popstate", { state }));
+  }
   await changed;
   await new Promise((r) => setTimeout(r, 80));
 }
 
 /** إعادة تحميل الإطار على مسار، والانتظار حتى يجهز. */
-export function load(d: Device, path: string) {
+export function load(d: Device, path: string, attempt = 0) {
   return new Promise<void>((resolve) => {
     const el = frames[d].el;
     if (!el) return resolve();
     frames[d].ready = false;
     const onLoad = () => {
       el.removeEventListener("load", onLoad);
+      // صفحة خطأ من المتصفح (انقطاع مؤقت على الاستضافة) تصل كمستند من أصل آخر: نعيد التحميل مرتين قبل الاستسلام.
+      let ok = false;
+      try { ok = !!el.contentDocument?.getElementById("app"); } catch { ok = false; }
+      if (!ok && attempt < 2) { setTimeout(() => load(d, path, attempt + 1).then(resolve), 600); return; }
       frames[d].ready = true;
       hookFrame(d);
       resolve();

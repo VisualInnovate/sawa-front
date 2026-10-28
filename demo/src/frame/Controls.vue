@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useDemo, type Speed } from "@demo/store/demo";
+import { toggleFullscreen } from "@demo/engine/fullscreen";
 const store = useDemo();
 defineProps<{ finished: boolean }>();
 const emit = defineEmits<{ next: []; prev: []; skip: []; restart: []; pause: [] }>();
@@ -24,6 +25,9 @@ const speeds: Array<{ v: Speed; label: string }> = [{ v: 0.6, label: "هادئة
       <span class="sep" />
       <button class="pill" @click="store.notesOpen = !store.notesOpen" title="N">ملاحظات المقدّم</button>
       <button class="pill" @click="emit('restart')" title="R">إعادة</button>
+      <span class="sep" />
+      <button class="pill" :class="{ on: store.brandOpen }" @click="store.brandOpen = !store.brandOpen" title="الشعار والألوان">🎨 تخصيص</button>
+      <button class="pill" :class="{ on: store.fullscreen }" @click="toggleFullscreen" title="F أو F11">{{ store.fullscreen ? "⤡ إنهاء ملء الشاشة" : "⛶ ملء الشاشة" }}</button>
     </div>
   </footer>
 </template>

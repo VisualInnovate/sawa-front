@@ -2,6 +2,7 @@
 // داخل إطار الديمو يُستخدم الخادم الوهمي الذي يملكه الشِّل (window.parent) حتى يرى الهاتف والحاسوب الحالة نفسها؛
 // وعند فتح التطبيق وحده يُنشَأ خادم محلي.
 import { Backend } from "./backend";
+import { installBranding } from "../brand/inFrame.js";
 
 let local = null;
 
@@ -16,6 +17,8 @@ function backend() {
 }
 
 export function installDemo(axios) {
+  // تخصيص الديمو (شعار وألوان من الشِّل) يُطبَّق على هذا الإطار دون تعديل كود التطبيق.
+  installBranding();
   axios.defaults.adapter = async (config) => {
     const url = new URL(config.url ?? "", "http://demo.local/");
     const query = Object.fromEntries(url.searchParams.entries());

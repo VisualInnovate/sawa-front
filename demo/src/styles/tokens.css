@@ -11,6 +11,7 @@
   --border: #c9dceb;
   --navy-raised: #123a5e;
   --ink-on-dark: #f5f7fa;
+  --soft: #e8f1f8;
   --radius: 20px;
   --font: "Cairo", "Segoe UI", Tahoma, system-ui, sans-serif;
   --t-fast: 250ms;
@@ -36,7 +37,7 @@ button { font: inherit; cursor: pointer; }
 .btn { border: 0; border-radius: 12px; padding: .55rem 1.1rem; font-weight: 700; transition: transform var(--t-fast), background var(--t-fast); }
 .btn-primary { background: var(--brand-orange); color: var(--brand-navy); }
 .btn-navy { background: var(--brand-navy); color: var(--ink-on-dark); }
-.btn-soft { background: #e8f1f8; color: var(--ink-accent); }
+.btn-soft { background: var(--soft); color: var(--ink-accent); }
 .btn:active { transform: scale(.97); }
 
 @media (prefers-reduced-motion: reduce) {

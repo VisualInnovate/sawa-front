@@ -59,6 +59,7 @@ export const buildMenu = () => [
     children: [
       { label: "ea_title", to: { name: "evaluation-approvals" }, perm: ["evaluation approval list", "evaluation approval edit"], badge: "evaluation_approvals" },
       { label: "age_ranges.evaluation_page", to: { name: "evaluation-age-ranges" }, perm: "evaluation age ranges edit" },
+      { label: "eval_desc.page", to: { name: "evaluation-descriptions" }, perm: "evaluation descriptions edit" },
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },
       { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
       { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
