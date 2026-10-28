@@ -266,6 +266,7 @@ const vacancyName = computed(() => {
 .cr-two { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .cr-invalid .p-selectbutton { outline: 2px solid var(--pp-danger); outline-offset: 2px; border-radius: 12px; }
 .cr-flag { background: var(--pp-warn-50); border-radius: 12px; padding: 0.5rem; margin: -0.5rem; }
+.cr-found { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; font-size: 0.85rem; color: var(--pp-ink-2, #475569); }
 .cr-addon { display: flex; align-items: stretch; }
 .cr-addon__label { display: grid; place-items: center; padding: 0 0.9rem; background: var(--pp-sand); border: 1px solid var(--pp-sand-200); border-inline-end: 0; border-radius: 14px 0 0 14px; font-weight: 800; color: var(--pp-ink); }
 .cr-addon__input { flex: 1; border-radius: 0 14px 14px 0 !important; letter-spacing: 0.04em; }
