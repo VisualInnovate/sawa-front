@@ -113,6 +113,7 @@ export const buildMenu = () => [
       { label: "acc.charges", to: { name: "accounting-charges" }, perm: "accounting list" },
       { label: "acc.credits", to: { name: "accounting-credits" }, perm: "accounting list" },
       { label: "acc.reports.title", to: { name: "accounting-reports" }, perm: "accounting reports list" },
+      { label: "jr.title", to: { name: "accounting-journal" }, perm: "accounting journal list" },
       { label: "acc.settings", to: { name: "accounting-settings" }, perm: "accounting settings edit" },
     ],
   },

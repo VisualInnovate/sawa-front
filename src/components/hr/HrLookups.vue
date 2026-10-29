@@ -62,7 +62,7 @@ function openNew() {
   form.value = {
     type: type.value, country: type.value === "bank" ? props.country : null, name_ar: "", name_en: "", is_active: true,
     meta: type.value === "document" ? { required: true, for: "all", accept: "any", multiple: false } : type.value === "specialty" ? { specialist: false }
-      : type.value === "onboarding" ? { days: 0 } : null,
+      : type.value === "onboarding" ? { days: 0 } : type.value === "bank" ? { code: "" } : null,
   };
   dialog.value = true;
 }
@@ -72,6 +72,7 @@ function openEdit(row) {
   if (row.type === "document") form.value.meta = { required: false, for: "all", accept: "any", multiple: false, ...(row.meta ?? {}) };
   if (row.type === "specialty") form.value.meta = { specialist: false, ...(row.meta ?? {}) };
   if (row.type === "onboarding") form.value.meta = { days: 0, ...(row.meta ?? {}) };
+  if (row.type === "bank") form.value.meta = { code: "", ...(row.meta ?? {}) };
   dialog.value = true;
 }
 
@@ -142,6 +143,9 @@ onMounted(load);
       <Column v-if="type === 'specialty'" :header="$t('hrset.specialist')">
         <template #body="{ data }"><i :class="data.meta?.specialist ? 'pi pi-check text-green-600' : 'pi pi-minus text-color-secondary'" /></template>
       </Column>
+      <Column v-if="type === 'bank'" :header="$t('hrset.bank_code')">
+        <template #body="{ data }"><bdi dir="ltr">{{ data.meta?.code || "—" }}</bdi></template>
+      </Column>
       <Column v-if="type === 'onboarding'" :header="$t('hrset.onboarding_days')">
         <template #body="{ data }">{{ $t("hrset.after_days", { n: data.meta?.days ?? 0 }) }}</template>
       </Column>
@@ -189,6 +193,11 @@ onMounted(load);
         <div v-if="form.type === 'specialty'" class="flex items-center gap-2">
           <Checkbox v-model="form.meta.specialist" inputId="lk-specialist" binary />
           <label for="lk-specialist">{{ $t("hrset.specialist_hint") }}</label>
+        </div>
+        <div v-if="form.type === 'bank'" class="flex flex-column gap-1">
+          <label for="lk-code">{{ $t("hrset.bank_code") }}</label>
+          <InputText v-model="form.meta.code" id="lk-code" dir="ltr" maxlength="20" class="w-12rem text-start" />
+          <small class="text-color-secondary">{{ $t("hrset.bank_code_hint") }}</small>
         </div>
         <div v-if="form.type === 'onboarding'" class="flex flex-column gap-1">
           <label for="lk-days">{{ $t("hrset.onboarding_days") }}</label>
