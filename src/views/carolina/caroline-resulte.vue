@@ -22,7 +22,7 @@
     <div class="rxs-pages">
       <ResultSheet :label="label" :date="approval?.date" :child-name="approval?.child?.name">
         <p v-if="loading || failed" class="rx-empty">{{ loading ? $t("loading") : $t("request_failed_retry") }}</p>
-        <CarolinaGrid v-else :result="result" :per-table="4" compact />
+        <CarolinaGrid v-else :result="result" :per-table="5" compact />
       </ResultSheet>
     </div>
   </div>

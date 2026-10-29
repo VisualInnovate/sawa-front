@@ -15,7 +15,7 @@ const emit = defineEmits(["saved"]);
 const { t } = useI18n();
 const toast = useToast();
 
-const TYPES = [1, 101, 102, 103, 104, 105, 2, 3, 6, 4, 7, 5, 8];
+const TYPES = [1, 101, 102, 103, 104, 105, 2, 3, 6, 4, 7, 5, 8, 9];
 const draft = ref({});
 // "none" (not null): the Select shows nothing for a null value.
 const options = computed(() => [{ id: "none", label: t("acc.no_price") }, ...props.items.map((item) => ({ id: item.id, label: `${item.name} — ${amount(item.price)}` }))]);

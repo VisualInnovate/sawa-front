@@ -1,6 +1,6 @@
 <script setup>
 // A Carolina evaluation's result drawn like the paper form: left to right, the type (written upwards, over its
-// domains), the domain (a row each, «المهارات»), then the age ranges (split into balanced tables when there are more
+// domains), the domain (a row each, «المهارات»), then the age ranges (split into tables of `perTable` when there are more
 // than `perTable`). Each age cell is divided between that domain's skills there, one part per skill with its symbol:
 // every answered part (+ or -) is filled with the color of the round that gave the answer, +- stays white and is
 // crossed from the top-left to the bottom-right corner; not answered stays white with a grey symbol.
@@ -29,10 +29,9 @@ const types = computed(() => {
   }
   return list;
 });
-// Tables of equal width: 8 ranges at 6 a table make two tables of 4, not 6 and 2.
+// Each table shows `perTable` age ranges; only the last one may have fewer.
 const chunks = computed(() => {
-  const count = Math.ceil(ranges.value.length / Math.max(1, props.perTable));
-  const size = Math.ceil(ranges.value.length / Math.max(1, count));
+  const size = Math.max(1, props.perTable);
   const list = [];
   for (let i = 0; i < ranges.value.length; i += size) list.push(ranges.value.slice(i, i + size));
   return list;

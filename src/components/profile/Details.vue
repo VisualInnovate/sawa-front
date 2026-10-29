@@ -39,7 +39,8 @@ const passwordLoading = ref(false);
 const types = computed(() => employeeTypes(t));
 const roles = computed(() => options.value.roles.filter((role) => !role.is_locked || isAdmin()));
 const therapist = computed(() => Number(profile.value.type) === 2);
-const sameIds = (a, b) => [...a].map(Number).sort((x, y) => x - y).join(",") === [...b].map(Number).sort((x, y) => x - y).join(",");
+// In order: the substitutes' order matters (the first free one takes a leave's sessions).
+const sameIds = (a, b) => [...a].map(Number).join(",") === [...b].map(Number).join(",");
 const substitutesChanged = computed(() => !sameIds(substituteIds.value, savedSubstituteIds.value));
 const passwordMismatch = computed(() => Boolean(passwordForm.value.password_confirmation)
   && passwordForm.value.password !== passwordForm.value.password_confirmation);

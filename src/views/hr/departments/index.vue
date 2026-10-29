@@ -49,7 +49,8 @@ onMounted(() => {
 
 const edit=(id)=>{
   axios.get(`/api/department/${id}`).then((res)=>{
-    department.value= res.data.data
+    const item = res.data.data ?? {}
+    department.value = { title: item.title, description: item.description, head_ids: (item.heads ?? []).map((h) => h.id) }
   });
   confir_id.value=id
   updatedialog.value=!(updatedialog.value)
@@ -236,6 +237,15 @@ const initFilters = () => {
               </template>
             </Column>
 
+            <Column :header="$t('lflow.heads')">
+              <template #body="slotProps">
+                <div class="flex flex-wrap gap-1">
+                  <Tag v-for="h in slotProps.data.heads ?? []" :key="h.id" :value="h.name" severity="info" />
+                  <span v-if="!slotProps.data.heads?.length" class="text-muted-color">--</span>
+                </div>
+              </template>
+            </Column>
+
             <Column header-style="min-width:10rem;">
               <template #body="slotProps">
                 <div class="table-actions">
@@ -293,6 +303,13 @@ const initFilters = () => {
               class="w-full" :placeholder='$t("description")' />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.description">{{ error.description[0] }}</div>
           </div>
+
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-start" for="department-heads-new">{{ $t('lflow.heads') }}</label>
+            <MultiSelect inputId="department-heads-new" v-model="department.head_ids" :options="allemployee" optionLabel="name" optionValue="id" filter display="chip" class="w-full" />
+            <small class="text-muted-color">{{ $t('lflow.heads_hint') }}</small>
+            <div class="mt-1 text-red-500" v-if="error?.head_ids">{{ error.head_ids[0] }}</div>
+          </div>
           
           <div class="w-full text-center mt-4">
             <Button @click="create" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
@@ -312,6 +329,13 @@ const initFilters = () => {
             <Textarea v-model="department.description" :autoResize="true" rows="5" cols="30" 
               class="w-full" :placeholder='$t("description")' />
             <div class="mt-1 mb-3 text-red-500" v-if="error?.description">{{ error.description[0] }}</div>
+          </div>
+
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-start" for="department-heads">{{ $t('lflow.heads') }}</label>
+            <MultiSelect inputId="department-heads" v-model="department.head_ids" :options="allemployee" optionLabel="name" optionValue="id" filter display="chip" class="w-full" />
+            <small class="text-muted-color">{{ $t('lflow.heads_hint') }}</small>
+            <div class="mt-1 text-red-500" v-if="error?.head_ids">{{ error.head_ids[0] }}</div>
           </div>
           
           <div class="w-full text-center mt-4">

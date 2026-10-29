@@ -155,6 +155,11 @@
             />
           </div>
           <div class="flex flex-column gap-2">
+            <label class="text-start" for="emp-number-new">{{ $t("lflow.employee_number") }}</label>
+            <InputText id="emp-number-new" v-model="employee.employee_number" dir="ltr" />
+            <small class="text-muted-color">{{ $t("lflow.employee_number_hint") }}</small>
+          </div>
+          <div class="flex flex-column gap-2">
             <div class="flex">
               <label class="text-start">{{ $t("date_of_birth") }}</label>
               <svg
@@ -688,6 +693,8 @@ export default {
         body.append("contract_period", this.employee.contract_period);
       if (this.employee.national_id)
         body.append("national_id", this.employee.national_id);
+      if (this.employee.employee_number)
+        body.append("employee_number", this.employee.employee_number);
       if (this.employee.basic_salary)
         body.append("basic_salary", this.employee.basic_salary);
       if (this.employee.type) body.append("type", this.employee.type);

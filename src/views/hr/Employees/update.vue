@@ -66,6 +66,7 @@ function fill(data) {
     title: user.title,
     user_id: data.user_id,
     national_id: data.national_id ?? "",
+    employee_number: data.employee_number ?? "",
     date_of_birth: toDate(data.date_of_birth),
     image: user.image,
     file: null,
@@ -126,6 +127,7 @@ function body() {
   if (e.date_of_enrollment) form.append("date_of_enrollment", formatDate(e.date_of_enrollment));
   if (e.contract_period) form.append("contract_period", e.contract_period);
   if (e.national_id) form.append("national_id", e.national_id);
+  form.append("employee_number", e.employee_number ?? "");
   if (e.basic_salary) form.append("basic_salary", e.basic_salary);
   if (e.type) form.append("type", e.type);
   if (e.role) form.append("role", e.role);
@@ -281,6 +283,9 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                   <!-- Text, not a number: keeps leading zeros (the API stores it as a string). -->
                   <InputText id="emp-national-id" v-model="employee.national_id" inputmode="numeric" dir="ltr"
                     :invalid="Boolean(err('national_id'))" />
+                </EmployeeField>
+                <EmployeeField :label="$t('lflow.employee_number')" for="emp-number" :hint="$t('lflow.employee_number_hint')" :error="err('employee_number')">
+                  <InputText id="emp-number" v-model="employee.employee_number" dir="ltr" :invalid="Boolean(err('employee_number'))" />
                 </EmployeeField>
                 <EmployeeField :label="$t('date_of_birth')" for="emp-birth" required :error="err('date_of_birth')">
                   <DatePicker v-model="employee.date_of_birth" inputId="emp-birth" dateFormat="yy-mm-dd" showIcon

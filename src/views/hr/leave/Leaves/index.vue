@@ -103,6 +103,9 @@ const accept = (id) => {
     })
 }
 
+// Rows made before the two steps have no stage: by their status.
+const stageOf = (l) => l.stage ?? ({ 1: 'approved', '-1': 'rejected' }[l.status] ?? 'pending_hr')
+
 // "2026-11-01 → 2026-11-03" with «أيام العمل: 3», or "2026-11-04 09:00–11:00" with «الساعات: 2».
 const period = (l) => l.start_date
   ? `${l.start_date}${l.end_date && l.end_date !== l.start_date ? ' → ' + l.end_date : ''}`
@@ -263,30 +266,27 @@ const initFilters = () => {
               </template>
             </Column>
             
-            <Column field="status" :header='$t("Status")' :sortable="true">
+            <Column field="stage" :header="$t('lflow.stage')" :sortable="true">
               <template #body="slotProps">
-                <Tag 
-                  :value="slotProps.data.status == 0 ? $t('Pending') : slotProps.data.status == 1 ? $t('Accepted') : $t('Rejected')"
-                  :severity="slotProps.data.status == 0 ? 'warning' : slotProps.data.status == 1 ? 'success' : 'danger'"
+                <Tag
+                  :value="$t(`lflow.stage_${stageOf(slotProps.data)}`)"
+                  :severity="{ approved: 'success', rejected: 'danger' }[stageOf(slotProps.data)] ?? 'warn'"
                 />
+                <small v-if="slotProps.data.unpaid_days > 0" class="block text-amber-700">{{ $t('lflow.unpaid') }}: {{ slotProps.data.unpaid_days }}</small>
               </template>
             </Column>
-            
-            <Column :exportable="false" header-style="width: 10rem" body-class="text-center">
+
+            <Column :exportable="false" header-style="width: 8rem" body-class="text-center">
               <template #body="slotProps">
                 <div class="table-actions">
-                  <Button 
-                    v-if="slotProps.data.status == 0"
-                    v-can="'leaves edit'"
-                    icon="pi pi-times" 
-                    @click="reject(slotProps.data.id)"
-                    v-tooltip.top="$t('reject')" rounded variant="outlined" severity="danger" />
-                  <Button 
-                    v-if="slotProps.data.status == 0"
-                    v-can="'leaves edit'"
-                    icon="pi pi-check" 
-                    @click="accept(slotProps.data.id)"
-                    v-tooltip.top="$t('accept')" rounded variant="outlined" severity="success" />
+                  <!-- The head's or HR's step, with the items and substitutes, happens on the review page. -->
+                  <Button
+                    icon="pi pi-eye"
+                    :label="$t('lflow.review')"
+                    size="small"
+                    :severity="slotProps.data.status == 0 ? 'warn' : 'secondary'"
+                    variant="outlined"
+                    @click="router.push({ name: 'leave-review', params: { id: slotProps.data.id } })" />
                 </div>
               </template>
             </Column>

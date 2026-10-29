@@ -2,6 +2,7 @@
 // `label` is an i18n key; `text` is shown as-is (evaluation names stay English).
 // `perm` is one permission or a list (any of them); `to` may depend on the permissions the user has.
 import { can, homeRoute } from "@/utils/permissions";
+import { approver } from "@/utils/approver";
 
 export const buildMenu = () => [
   {
@@ -30,6 +31,8 @@ export const buildMenu = () => [
       { label: "parents", to: { name: "Parents" }, perm: "parents list" },
       { label: "meetings", to: { name: "parent-meeting" }, perm: "parent meetings list" },
       { label: "children", to: { name: "Children" }, perm: "child list" },
+      { label: "con.menu", to: { name: "parent-contracts" }, perm: "parent contracts list" },
+      { label: "ct.menu", to: { name: "contract-templates" }, perm: "contract templates list" },
     ],
   },
   {
@@ -37,6 +40,14 @@ export const buildMenu = () => [
     icon: "mdi-calendar-account-outline",
     label: "sch.my_title",
     to: { name: "my-schedule" },
+  },
+  // The leaves waiting for a department head / HR (shown only to them).
+  {
+    key: "approvals",
+    icon: "mdi-check-decagram-outline",
+    label: "lflow.approvals",
+    to: { name: "approvals" },
+    show: () => approver.is,
   },
   {
     key: "my-evaluations",
@@ -65,6 +76,7 @@ export const buildMenu = () => [
       { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
       { text: "carolina", to: { name: "carolina-general-goals" }, perm: "carolina general goal list" },
       { label: "mchat.menu", to: { name: "mchat-settings" }, perm: ["mchat question list", "mchat question edit"] },
+      { label: "qfba.menu", to: { name: "qfba-settings" }, perm: ["qfba question list", "qfba question edit"] },
       {
         key: "vb-mapp",
         text: "VB Mapp",
@@ -192,6 +204,7 @@ export const buildMenu = () => [
         perm: ["deduction list", "deduction type list"],
         to: () => ({ name: can("deduction list") ? "deduction" : "deduction-types" }),
       },
+      { label: "dobj.title", to: { name: "deduction-objections" }, perm: "deduction edit" },
       { label: "holidays", to: { name: "holidays" }, perm: "holidays list" },
       { label: "official_leaves", to: { name: "official-leaves" }, perm: "official leave list" },
       { label: "payroll", to: { name: "payroll" }, perm: "payroll list" },
@@ -217,6 +230,7 @@ export const visibleMenu = (items) =>
         return children.length ? { ...item, children } : null;
       }
       if (item.perm && !can(item.perm)) return null;
+      if (item.show && !item.show()) return null;
       return { ...item, to: typeof item.to === "function" ? item.to() : item.to };
     })
     .filter(Boolean);
