@@ -16,8 +16,11 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const toast = useToast();
 
-const ICONS = { attendance: "pi pi-clock", leaves: "pi pi-calendar", payroll: "pi pi-wallet", items: "pi pi-list", employees: "pi pi-users", recruitment: "pi pi-briefcase" };
+const ICONS = { attendance: "pi pi-clock", leaves: "pi pi-calendar", payroll: "pi pi-wallet", insurance: "pi pi-shield", advances: "pi pi-money-bill", items: "pi pi-list",
+  employees: "pi pi-users", recruitment: "pi pi-briefcase" };
 const PERIOD = ["attendance", "leaves", "items", "recruitment"];
+// The reports of one payroll month.
+const MONTHLY = ["payroll", "insurance"];
 const KINDS = ["deduction", "bonus", "advance", "overtime"];
 
 const available = ref([]);
@@ -54,7 +57,7 @@ async function load() {
       params: {
         from: PERIOD.includes(report.value) && from ? moment(from).format("YYYY-MM-DD") : undefined,
         to: PERIOD.includes(report.value) && (to || from) ? moment(to || from).format("YYYY-MM-DD") : undefined,
-        month: report.value === "payroll" && filters.value.month ? moment(filters.value.month).format("YYYY-MM") : undefined,
+        month: MONTHLY.includes(report.value) && filters.value.month ? moment(filters.value.month).format("YYYY-MM") : undefined,
         department_id: filters.value.department_id || undefined,
         employee_id: filters.value.employee_id || undefined,
         kinds: report.value === "items" ? filters.value.kinds : undefined,
@@ -100,7 +103,7 @@ const isNum = (col) => ["money", "number", "minutes"].includes(col.type);
 const title = computed(() => {
   if (!report.value) return "";
   const [from, to] = filters.value.range ?? [];
-  const when = report.value === "payroll" ? result.value?.month
+  const when = MONTHLY.includes(report.value) ? result.value?.month
     : PERIOD.includes(report.value) && from ? `${moment(from).format("YYYY-MM-DD")} → ${moment(to || from).format("YYYY-MM-DD")}` : "";
   return `${t(`rep.r_${report.value}`)}${when ? " — " + when : ""}`;
 });
@@ -116,7 +119,7 @@ function documentHtml() {
     ? `<tr class="total">${cols.map((c, i) => `<td${isNum(c) ? ' class="num"' : ""}>${i === 0 ? esc(t("rep.total")) : esc(totalCell(c))}</td>`).join("")}</tr>` : "";
   return `<!doctype html><html lang="${rtl.value ? "ar" : "en"}" dir="${rtl.value ? "rtl" : "ltr"}"><head><meta charset="utf-8"><title>${esc(title.value)}</title>
 <style>${PRINT_STYLE} table{font-size:12px} td,th{padding:6px} @page{size:A4 landscape}</style></head><body>
-<h1>${esc(title.value)}</h1><div class="muted">${esc(scope.value || t("rep.all_staff"))} · ${esc(t("eos.printed_on"))} ${moment().format("YYYY-MM-DD")}${report.value === "payroll" || report.value === "items" ? " · " + esc(cur.value) : ""}</div>
+<h1>${esc(title.value)}</h1><div class="muted">${esc(scope.value || t("rep.all_staff"))} · ${esc(t("eos.printed_on"))} ${moment().format("YYYY-MM-DD")}${[...MONTHLY, "items", "advances"].includes(report.value) ? " · " + esc(cur.value) : ""}</div>
 <table><thead><tr>${head}</tr></thead><tbody>${body}${totals}</tbody></table></body></html>`;
 }
 const print = () => printHtml(documentHtml());
@@ -182,7 +185,7 @@ async function excel() {
         <label for="rep-range" class="text-sm">{{ $t("rep.period") }}</label>
         <DatePicker inputId="rep-range" v-model="filters.range" selectionMode="range" dateFormat="yy-mm-dd" showIcon class="w-16rem" />
       </div>
-      <div v-if="report === 'payroll'" class="flex flex-column gap-1">
+      <div v-if="MONTHLY.includes(report)" class="flex flex-column gap-1">
         <label for="rep-month" class="text-sm">{{ $t("hrpay.month") }}</label>
         <DatePicker inputId="rep-month" v-model="filters.month" view="month" dateFormat="yy-mm" showIcon class="w-12rem" />
       </div>
@@ -219,7 +222,7 @@ async function excel() {
           <template #body="{ data }">
             <Tag v-if="col.type === 'alert' && data[col.key]" :severity="data[col.key] === 'expired' ? 'danger' : data[col.key] === 'expiring' ? 'warn' : 'info'" :value="cell(col, data)" />
             <Tag v-else-if="col.type === 'status'" :severity="data.paid_in ? 'info' : data[col.key] === 1 ? 'success' : data[col.key] === -1 ? 'danger' : 'warn'" :value="cell(col, data)" />
-            <span v-else :dir="col.type === 'date' ? 'ltr' : undefined">{{ cell(col, data) }}</span>
+            <span v-else :dir="col.type === 'date' ? 'ltr' : undefined" :class="{ 'text-red-500 font-bold': Number(data[col.key]) < 0 }">{{ cell(col, data) }}</span>
           </template>
           <template v-if="result.totals && Object.keys(result.totals).length" #footer>
             <b>{{ i === 0 ? $t("rep.total") : totalCell(col) }}</b>

@@ -10,6 +10,7 @@ import { mapPoint } from "@/utils/mapPoint";
 import { errorText, loadCurrency } from "@/utils/accounting";
 import { can } from "@/utils/permissions";
 import HrLookups from "@/components/hr/HrLookups.vue";
+import InsuranceRates from "@/components/hr/InsuranceRates.vue";
 
 const { t, locale } = useI18n();
 const toast = useToast();
@@ -279,12 +280,32 @@ onMounted(load);
                 :suffix="` ${$t('ctr.days')}`" class="w-12rem" />
               <small class="text-color-secondary">{{ $t("hrset.carry_over_days_hint") }}</small>
             </div>
+            <div class="flex flex-column gap-1">
+              <label for="lv-accrual" class="font-semibold">{{ $t("hrset.accrual") }}</label>
+              <SelectButton v-model="form.rules.leaves.accrual" inputId="lv-accrual" :options="['monthly', 'yearly']" :optionLabel="(x) => $t(`hrset.accrual_${x}`)"
+                :allowEmpty="false" :disabled="!canEdit" class="self-start" />
+              <small class="text-color-secondary">{{ $t("hrset.accrual_hint") }}</small>
+            </div>
+            <div v-if="form.rules.leaves.accrual === 'monthly'" class="flex flex-wrap gap-4">
+              <div v-for="key in ['monthly_rate', 'rate_after_years', 'monthly_rate_after']" :key="key" class="flex flex-column gap-1">
+                <label :for="`lv-${key}`" class="font-semibold">{{ $t(`hrset.${key}`) }}</label>
+                <div class="flex items-center gap-2">
+                  <InputNumber v-model="form.rules.leaves[key]" :inputId="`lv-${key}`" :min="0" :max="key === 'rate_after_years' ? 50 : 10" :step="key === 'rate_after_years' ? 1 : 0.01"
+                    :maxFractionDigits="key === 'rate_after_years' ? 0 : 4" showButtons :disabled="!canEdit" class="w-11rem"
+                    :suffix="key === 'rate_after_years' ? ` ${$t('hrset.years')}` : ` ${$t('ctr.days')}`" />
+                  <Button v-if="changed('leaves', key)" icon="pi pi-undo" text rounded :aria-label="$t('hrset.reset')" v-tooltip.top="$t('hrset.reset')"
+                    :disabled="!canEdit" @click="reset('leaves', key)" />
+                </div>
+              </div>
+              <small class="text-color-secondary w-full">{{ $t("hrset.monthly_rate_hint", { a: form.rules.leaves.monthly_rate, b: form.rules.leaves.monthly_rate_after,
+                years: form.rules.leaves.rate_after_years, ya: Math.round(form.rules.leaves.monthly_rate * 12), yb: Math.round(form.rules.leaves.monthly_rate_after * 12) }) }}</small>
+            </div>
           </div>
         </TabPanel>
 
         <!-- Payroll: social insurance -->
         <TabPanel value="payroll">
-          <div v-if="form.rules.payroll" class="sawa-card p-4 flex flex-column gap-4 max-w-2xl">
+          <div v-if="form.rules.payroll" class="sawa-card p-4 flex flex-column gap-4 max-w-4xl">
             <div class="flex flex-column gap-1">
               <div class="flex items-center gap-3">
                 <ToggleSwitch v-model="form.rules.payroll.insurance_enabled" inputId="pay-ins" :disabled="!canEdit" />
@@ -292,16 +313,29 @@ onMounted(load);
               </div>
               <small class="text-color-secondary">{{ $t("hrset.insurance_hint") }}</small>
             </div>
-            <div v-for="key in ['insurance_rate', 'insurance_employer_rate']" :key="key" class="flex flex-column gap-1">
-              <label :for="`pay-${key}`" class="font-semibold">{{ $t(`hrset.${key}`) }}</label>
-              <div class="flex items-center gap-2">
-                <InputNumber v-model="form.rules.payroll[key]" :inputId="`pay-${key}`" :min="0" :max="50" :step="0.25" :maxFractionDigits="2" showButtons
-                  :disabled="!canEdit || !form.rules.payroll.insurance_enabled" suffix=" %" class="w-12rem" />
-                <Button v-if="changed('payroll', key)" icon="pi pi-undo" text rounded :aria-label="$t('hrset.reset')" v-tooltip.top="$t('hrset.reset')"
-                  :disabled="!canEdit" @click="reset('payroll', key)" />
+            <InsuranceRates v-if="form.rules.payroll.insurance_enabled" :key="settings.country" :canEdit="canEdit" />
+            <template v-if="settings.country === 'JO'">
+              <div class="flex flex-column gap-1">
+                <div class="flex items-center gap-3">
+                  <ToggleSwitch v-model="form.rules.payroll.income_tax_enabled" inputId="pay-tax" :disabled="!canEdit" />
+                  <label for="pay-tax" class="font-semibold">{{ $t("hrset.income_tax") }}</label>
+                </div>
+                <small class="text-color-secondary">{{ $t("hrset.income_tax_hint") }}</small>
               </div>
-              <small class="text-color-secondary">{{ $t(`hrset.${key}_hint`, { value: settings.defaults.payroll?.[key] }) }}</small>
-            </div>
+              <div v-if="form.rules.payroll.income_tax_enabled" class="flex flex-wrap gap-4">
+                <div v-for="key in ['tax_exempt_amount', 'tax_rate']" :key="key" class="flex flex-column gap-1">
+                  <label :for="`pay-${key}`" class="font-semibold">{{ $t(`hrset.${key}`) }}</label>
+                  <div class="flex items-center gap-2">
+                    <InputNumber v-model="form.rules.payroll[key]" :inputId="`pay-${key}`" :min="0" :maxFractionDigits="2" showButtons :disabled="!canEdit" class="w-12rem"
+                      :suffix="key === 'tax_rate' ? ' %' : ''" :step="key === 'tax_rate' ? 0.5 : 10" />
+                    <Button v-if="changed('payroll', key)" icon="pi pi-undo" text rounded :aria-label="$t('hrset.reset')" v-tooltip.top="$t('hrset.reset')"
+                      :disabled="!canEdit" @click="reset('payroll', key)" />
+                  </div>
+                </div>
+                <small class="text-color-secondary w-full">{{ $t("hrset.tax_estimate_hint", { exempt: form.rules.payroll.tax_exempt_amount, rate: form.rules.payroll.tax_rate }) }}</small>
+              </div>
+            </template>
+            <small v-else class="text-color-secondary">{{ $t("hrset.no_income_tax_sa") }}</small>
           </div>
         </TabPanel>
 

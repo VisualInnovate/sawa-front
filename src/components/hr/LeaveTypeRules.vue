@@ -1,6 +1,7 @@
 <script setup>
 // A daily leave type's rules: the annual leave (its unused days carry over; more days after some years of
-// service) and a leave given once in the whole service (Hajj).
+// service), a leave given once in the whole service (Hajj), and its pay: paid, unpaid (taken from the salary), or
+// paid only up to some days a year (sick leave: the days beyond are taken from the salary).
 const leave = defineModel({ type: Object, required: true });
 </script>
 
@@ -20,6 +21,17 @@ const leave = defineModel({ type: Object, required: true });
     <div class="flex items-center gap-2">
       <Checkbox v-model="leave.once_per_service" inputId="lt-once" binary @update:modelValue="(v) => v && (leave.is_annual = false)" />
       <label for="lt-once">{{ $t("lvt.once") }}</label>
+    </div>
+    <div v-if="!leave.is_annual" class="flex flex-column gap-2">
+      <div class="flex items-center gap-2">
+        <Checkbox v-model="leave.unpaid" inputId="lt-unpaid" binary @update:modelValue="(v) => v && (leave.paid_days_per_year = null)" />
+        <label for="lt-unpaid">{{ $t("lvt.unpaid") }}</label>
+      </div>
+      <div v-if="!leave.unpaid" class="flex flex-wrap items-center gap-2">
+        <span>{{ $t("lvt.paid_up_to") }}</span>
+        <InputNumber v-model="leave.paid_days_per_year" :min="0" :max="365" showButtons class="w-8rem" :aria-label="$t('lvt.days')" :suffix="` ${$t('lvt.days')}`" />
+        <small class="text-color-secondary w-full">{{ $t("lvt.paid_up_to_hint") }}</small>
+      </div>
     </div>
   </div>
 </template>

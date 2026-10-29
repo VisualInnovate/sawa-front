@@ -15,6 +15,7 @@ import EndOfServiceDialog from "@/components/hr/profile/EndOfServiceDialog.vue";
 import ProfileAttendance from "@/components/hr/profile/ProfileAttendance.vue";
 import ProfileLeaves from "@/components/hr/profile/ProfileLeaves.vue";
 import ProfileMoney from "@/components/hr/profile/ProfileMoney.vue";
+import PayrollFile from "@/components/hr/profile/PayrollFile.vue";
 import HrLog from "@/views/hr/log/index.vue";
 import { eosLineLabel, printSettlement } from "@/components/hr/profile/endOfService";
 
@@ -81,26 +82,6 @@ async function cancelEnd() {
 }
 const print = () => printSettlement(t, { record: eos.value, employee: employee.value, locale: locale.value });
 
-// ---- Salary account and social insurance ----
-const banks = ref([]);
-const payForm = ref(null);
-const payError = ref("");
-async function openPay() {
-  payForm.value = { insured: employee.value.insured ?? true, bank_id: employee.value.bank_id ?? null, iban: employee.value.iban ?? "" };
-  payError.value = "";
-  if (!banks.value.length) banks.value = (await axios.get("api/employee-profile/banks")).data.data;
-}
-async function savePay() {
-  try {
-    await axios.post(`api/employee-profile/${userId.value}/payroll-info`, { ...payForm.value, iban: payForm.value.iban?.trim() || null });
-    payForm.value = null;
-    toast.add({ severity: "success", summary: t("success_message"), detail: t("prof.pay_saved"), life: 2500 });
-    load();
-  } catch (error) {
-    const code = error.response?.data?.errors?.iban?.[0];
-    payError.value = code === "hr.iban" ? t("prof.iban_invalid") : errorText(error);
-  }
-}
 </script>
 
 <template>
@@ -183,21 +164,7 @@ async function savePay() {
                   <p v-else class="m-0 text-color-secondary">{{ $t("prof.no_contract") }}</p>
                 </section>
 
-                <section class="sawa-card p-4">
-                  <div class="flex items-center justify-between gap-2 mb-3">
-                    <p class="font-bold m-0">{{ $t("prof.pay_title") }}</p>
-                    <Button v-if="!archived && can('employees edit')" :label="$t('edit')" icon="pi pi-pencil" text size="small" @click="openPay" />
-                  </div>
-                  <dl class="prof-dl">
-                    <dt>{{ $t("slip.bank") }}</dt><dd>{{ summary.bank || "—" }}</dd>
-                    <dt>IBAN</dt><dd><bdi dir="ltr">{{ employee.iban || "—" }}</bdi></dd>
-                    <dt>{{ $t("prof.insured") }}</dt>
-                    <dd>
-                      {{ employee.insured === false ? $t("prof.insured_no") : $t("prof.insured_yes") }}
-                      <small v-if="!summary.insurance_enabled" class="block text-color-secondary">{{ $t("prof.insurance_off") }}</small>
-                    </dd>
-                  </dl>
-                </section>
+                <PayrollFile :employee="employee" :summary="summary" :userId="userId" :archived="archived" @saved="load" />
 
                 <section v-if="can('onboarding list', 'onboarding edit')" class="sawa-card p-4">
                   <div class="flex items-center justify-between gap-2 mb-2">
@@ -268,29 +235,6 @@ async function savePay() {
         </TabPanels>
       </Tabs>
     </template>
-
-    <Dialog :visible="!!payForm" modal :header="$t('prof.pay_title')" :style="{ width: '480px' }" @update:visible="payForm = null">
-      <div v-if="payForm" class="flex flex-column gap-3">
-        <div class="flex flex-column gap-1">
-          <label for="pay-bank">{{ $t("slip.bank") }}</label>
-          <Select inputId="pay-bank" v-model="payForm.bank_id" :options="banks" optionValue="id" :optionLabel="(b) => (locale === 'ar' ? b.name_ar : b.name_en || b.name_ar)" filter showClear />
-        </div>
-        <div class="flex flex-column gap-1">
-          <label for="pay-iban">IBAN</label>
-          <InputText id="pay-iban" v-model="payForm.iban" dir="ltr" class="text-start" maxlength="40" :invalid="!!payError" />
-          <small v-if="payError" class="text-red-500">{{ payError }}</small>
-          <small v-else class="text-color-secondary">{{ $t("prof.iban_hint", { prefix: summary.profile?.iban_prefix, length: summary.profile?.iban_length }) }}</small>
-        </div>
-        <div class="flex items-center gap-2">
-          <ToggleSwitch v-model="payForm.insured" inputId="pay-insured" />
-          <label for="pay-insured">{{ $t("prof.insured_label") }}</label>
-        </div>
-      </div>
-      <template #footer>
-        <Button :label="$t('cancel')" text severity="secondary" @click="payForm = null" />
-        <Button icon="pi pi-check" :label="$t('save')" @click="savePay" />
-      </template>
-    </Dialog>
 
     <EndOfServiceDialog v-if="ending" :employee="employee" @close="ending = false" @saved="onEnded" />
     <Dialog :visible="cancelling" modal :header="$t('eos.cancel')" :style="{ width: '440px' }" @update:visible="cancelling = false">

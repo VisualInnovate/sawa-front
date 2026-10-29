@@ -31,7 +31,9 @@ const leave = ref({
   is_annual: false,
   more_after_years: null,
   more_days: null,
-  once_per_service: false
+  once_per_service: false,
+  unpaid: false,
+  paid_days_per_year: null
 })
 const exportLoading = ref(false)
 const printLoading = ref(false)
@@ -88,7 +90,9 @@ const editescrud = () => {
         is_annual: false,
         more_after_years: null,
         more_days: null,
-        once_per_service: false
+        once_per_service: false,
+        unpaid: false,
+        paid_days_per_year: null
       }
     })
     .catch((el) => {
@@ -106,7 +110,9 @@ const openNew = () => {
     is_annual: false,
     more_after_years: null,
     more_days: null,
-    once_per_service: false
+    once_per_service: false,
+    unpaid: false,
+    paid_days_per_year: null
   }
 }
 
@@ -130,7 +136,9 @@ const createcrude = () => {
         is_annual: false,
         more_after_years: null,
         more_days: null,
-        once_per_service: false
+        once_per_service: false,
+        unpaid: false,
+        paid_days_per_year: null
       }
     })
     .catch((el) => {

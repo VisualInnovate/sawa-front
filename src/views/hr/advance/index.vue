@@ -9,6 +9,10 @@ import axios from "axios";
 import {useRouter} from "vue-router";
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber';
+import AdvanceStatement from '@/components/hr/AdvanceStatement.vue';
+
+// The advance whose statement (months, paid, left) is open.
+const statementOf = ref(null)
 
 const { t } = useI18n()
 const toast = useToast()
@@ -234,7 +238,8 @@ const initFilters = () => {
            <Column field="amount" :header='$t("advance_mount")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
             <template #body="slotProps">
               {{ slotProps.data.amount }}
-              <small v-if="slotProps.data.installments > 1" class="block text-color-secondary">{{ $t('hrpay.over_months', { n: slotProps.data.installments }) }}</small>
+              <small v-if="slotProps.data.monthly_installment > 0" class="block text-color-secondary">{{ $t('advs.per_month', { amount: slotProps.data.monthly_installment }) }}</small>
+              <small v-else-if="slotProps.data.installments > 1" class="block text-color-secondary">{{ $t('hrpay.over_months', { n: slotProps.data.installments }) }}</small>
             </template>
            </Column>
            <Column field="date" :header='$t("advance_date")' :sortable="true" header-style="width:14%; min-width:12rem;" class="ltr:text-justify">
@@ -258,6 +263,8 @@ const initFilters = () => {
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div class="table-actions">
+                <Button v-if="slotProps.data.status == 1 && !slotProps.data.payroll_id" icon="pi pi-list" rounded severity="secondary" variant="outlined"
+                  v-tooltip.top="$t('advs.open')" :aria-label="$t('advs.open')" @click="statementOf = slotProps.data.id" />
                 <Button
                 v-if="!slotProps.data.payroll_id" v-can="'financial advance edit'"
                 icon="pi pi-pencil"
@@ -304,6 +311,11 @@ const initFilters = () => {
                   {{ $t('hrpay.installment_each', { amount: Math.floor((advance.amount / advance.installments) * 100) / 100 }) }}
                 </small>
             </div>
+            <div class="flex flex-column gap-2 mt-3">
+                <label class="w-full text-start" for="adv-monthly">{{ $t('advs.monthly_field') }}</label>
+                <InputNumber inputId="adv-monthly" v-model="advance.monthly_installment" :min="0" :maxFractionDigits="2" />
+                <small class="text-color-secondary">{{ $t('advs.monthly_field_hint') }}</small>
+            </div>
            
            <div class="w-full text-center">
             <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")'></Button> 
@@ -328,11 +340,17 @@ const initFilters = () => {
                   {{ $t('hrpay.installment_each', { amount: Math.floor((advance.amount / advance.installments) * 100) / 100 }) }}
                 </small>
             </div>
+            <div class="flex flex-column gap-2 mt-3">
+                <label class="w-full text-start" for="adv-monthly">{{ $t('advs.monthly_field') }}</label>
+                <InputNumber inputId="adv-monthly" v-model="advance.monthly_installment" :min="0" :maxFractionDigits="2" />
+                <small class="text-color-secondary">{{ $t('advs.monthly_field_hint') }}</small>
+            </div>
            <div class="w-full text-center">
             <Button type="submit" @click="submitted=true" class="m-auto w-[50%] my-4" :label='$t("submit")' severity="success"></Button> 
            </div>  
           </form>
         </Dialog>
+        <AdvanceStatement :advanceId="statementOf" @close="statementOf = null; fetchData()" />
       </div>
       </div>
     </div>
