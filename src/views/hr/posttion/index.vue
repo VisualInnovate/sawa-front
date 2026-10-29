@@ -1,7 +1,7 @@
 <script setup>
 import {FilterMatchMode} from '@primevue/core/api'
 import moment from "moment";
-import {ref, onMounted, onBeforeMount} from 'vue'
+import {ref, computed, onMounted, onBeforeMount} from 'vue'
 // import ProductService from '@/service/ProductService';
 import {useToast} from 'primevue/usetoast'
 import axios from "axios";
@@ -24,6 +24,9 @@ const filters = ref({})
 const createdialog=ref(false)
 const position=ref({})
 const updatedialog=ref(false)
+// Where the position sits in the approvals: the department head first, then HR (the general manager may do either).
+const levels = ['general_manager', 'hr_manager', 'department_head', 'staff']
+const levelOptions = computed(() => levels.map((value) => ({ value, label: t(`lflow.level_${value}`) })))
 
 onBeforeMount(() => {
   initFilters()
@@ -53,7 +56,7 @@ const edit=(id)=>{
     axios.get(`/api/position/${id}`).then((res)=>{
 
     const item = res.data.data ?? {}
-    position.value = { parent_id: item.parent_id, title: item.title, description: item.description }
+    position.value = { parent_id: item.parent_id, org_level: item.org_level ?? 'staff', title: item.title, description: item.description }
     
 
   });
@@ -81,7 +84,7 @@ const updateitem=()=>{
 
 const openNew = () => {
     createdialog.value=!(createdialog.value)
-    position.value={}
+    position.value={ org_level: 'staff' }
 }
 
 const confirmDelete = (id) => {
@@ -215,6 +218,12 @@ const initFilters = () => {
 
 
         
+           <Column field="org_level" :header="$t('lflow.org_level')" :sortable="true" header-style="min-width:10rem;">
+            <template #body="slotProps">
+              <Tag :value="$t(`lflow.level_${slotProps.data.org_level ?? 'staff'}`)" :severity="(slotProps.data.org_level ?? 'staff') === 'staff' ? 'secondary' : 'info'" />
+            </template>
+           </Column>
+
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <div class="table-actions">
@@ -259,6 +268,11 @@ const initFilters = () => {
             </div>
             
             <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-level-new">{{ $t('lflow.org_level') }}</label>
+                  <Select inputId="position-level-new" v-model="position.org_level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
+                  <small class="text-muted-color mb-3">{{ $t('lflow.org_level_hint') }}</small>
+            </div>
+            <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('posttion_description') }}</label>
                   <Textarea rows="3" v-model="position.description" autoResize fluid /> 
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.description">{{ error.description[0] }}</div>
@@ -278,6 +292,11 @@ const initFilters = () => {
                   <label class="w-full text-start" for="position-title">{{ $t('title') }}</label>
                 <InputText id="position-title" required v-model="position.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-level">{{ $t('lflow.org_level') }}</label>
+                  <Select inputId="position-level" v-model="position.org_level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
+                  <small class="text-muted-color mb-3">{{ $t('lflow.org_level_hint') }}</small>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="position-description">{{ $t('posttion_description') }}</label>

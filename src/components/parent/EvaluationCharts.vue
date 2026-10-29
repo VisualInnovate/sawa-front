@@ -10,7 +10,9 @@ import AbllsChart from "@/components/reports/AbllsChart.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileChart from "@/components/reports/SideProfileChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
-import { ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, SIDE_PROFILE, TRANSITION, groupItems, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
+import QfbaChart from "@/components/reports/QfbaChart.vue";
+import QfbaSummary from "@/components/reports/QfbaSummary.vue";
+import { ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SIDE_PROFILE, TRANSITION, groupItems, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
 import { fmtDate } from "@/utils/parentPortal";
 
 const props = defineProps({ report: { type: Object, required: true } });
@@ -74,7 +76,7 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
       <div v-else-if="section.type === ABLLS || section.type === ABLLS_SKILLS" class="pp-chart-scroll"><AbllsChart :tests="section.tests" /></div>
 
       <!-- Carolina -->
-      <div v-else-if="section.type === CAROLINA" class="pp-chart-scroll"><CarolinaGrid :result="section.newest?.result" :per-table="4" compact /></div>
+      <div v-else-if="section.type === CAROLINA" class="pp-chart-scroll"><CarolinaGrid :result="section.newest?.result" :per-table="5" compact /></div>
 
       <!-- Transition -->
       <div v-else-if="section.type === TRANSITION" class="pp-chart-scroll"><TransitionChart :tests="section.tests" /></div>
@@ -88,6 +90,12 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
           </div>
           <p v-if="test.result?.recommendation" class="m-0 leading-7">{{ test.result.recommendation }}</p>
         </div>
+      </div>
+
+      <!-- QFBA (in the language it was filled in) -->
+      <div v-else-if="section.type === QFBA" class="pp-stack">
+        <div class="pp-chart-scroll"><QfbaChart :tests="section.tests" :lang="section.newest?.result?.language === 'en' ? 'en' : 'ar'" /></div>
+        <QfbaSummary v-if="section.newest?.result" :result="section.newest.result" :lang="section.newest.result.language === 'en' ? 'en' : 'ar'" />
       </div>
 
       <!-- Side profile -->

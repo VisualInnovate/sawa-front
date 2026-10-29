@@ -124,6 +124,26 @@ const vb = [
       meta: { permission: ["mchat answer list", "mchat answer create"] },
       component: () => import("../views/evaluation/mchat/result.vue")
     },
+    // QFBA: its settings (questions, functions, scale, instructions — Arabic and English), the answers about one
+    // target behaviour, and each function's endorsed questions and severity
+    {
+      path: '/qfba-settings',
+      name: 'qfba-settings',
+      meta: { permission: ["qfba question list", "qfba question edit"] },
+      component: () => import("../views/evaluation/qfba/Settings.vue")
+    },
+    {
+      path: '/qfba-evaluation/:id',
+      name: 'qfba-evaluation',
+      meta: { permission: ["qfba answer create", "qfba answer edit", "evaluation approval edit"] },
+      component: () => import("../views/evaluation/qfba/index.vue")
+    },
+    {
+      path: '/qfba-result/:id/:evaluation',
+      name: 'qfba-result',
+      meta: { permission: ["qfba answer list", "qfba answer create"] },
+      component: () => import("../views/evaluation/qfba/result.vue")
+    },
     //  sesions
     {
       path: '/sessions', 

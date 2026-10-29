@@ -13,6 +13,7 @@ import AssistantChat from "./assistant/AssistantChat.vue";
 import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
 import { loadCurrency } from "../utils/accounting";
+import { approver, loadApprover } from "../utils/approver";
 
 const router = useRouter();
 const route = useRoute();
@@ -21,6 +22,7 @@ const authStore = useAuthStore();
 // Rebuilt when the permissions change (they are refreshed from the API on load).
 const menu = computed(() => {
   void authStore.userPermissions;
+  void approver.is;
   return visibleMenu(buildMenu());
 });
 
@@ -44,6 +46,7 @@ watch(() => route.fullPath, closeOnMobile);
 
 let stopCounts = null;
 onMounted(async () => {
+  loadApprover();
   desktopQuery.addEventListener("change", onMediaChange);
   stopCounts = watchPendingCounts("staff");
   // Every amount shows the accounting's currency.

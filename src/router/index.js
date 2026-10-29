@@ -18,6 +18,7 @@ import inputs from "./inputs.routes";
 import sideProfileRoutes from "./side-profile.routes";
 import calender from "./calender.routes";
 import accounting from "./accounting.routes";
+import contracts from "./contracts.routes";
 import page_403 from "../views/pages/page_403.vue";
 import { useParentStore } from "../stores/ParentStore";
 import { useAuthStore } from "../stores/Auth";
@@ -138,6 +139,17 @@ const routes = [
     name: "contactus",
     component: () => import("../views/parent/Contact.vue"),
   },
+  // A contract's private signing link (no account: a code to the recipient's phone) and the public check of its code.
+  {
+    path: "/sign/:token",
+    name: "contract-sign",
+    component: () => import("../views/contracts/SignContract.vue"),
+  },
+  {
+    path: "/contract-check/:code",
+    name: "contract-check",
+    component: () => import("../views/contracts/ContractCheck.vue"),
+  },
   // The public careers page: candidates sign in with their phone and a one-time code (their own session).
   {
     path: "/careers",
@@ -210,6 +222,7 @@ const routes = [
       ...Object.values(calender),
       ...Object.values(parentsRoutes),
       ...Object.values(accounting),
+      ...Object.values(contracts),
     ],
   },
   {

@@ -67,6 +67,17 @@ const hr = [
         meta: { permission: ["leaves list"] },
         component: () => import("../views/hr/leave/Leaves/index.vue")
       },
+      // The two-step leave: the review (the employee, their head, HR — the API checks who) and the approvals inbox.
+      {
+        path: '/leaves/:id/review',
+        name: 'leave-review',
+        component: () => import("../views/hr/leave/LeaveReview.vue")
+      },
+      {
+        path: '/approvals',
+        name: 'approvals',
+        component: () => import("../views/hr/leave/Approvals.vue")
+      },
       /////////////////////////////////////////// setting
 
    {
@@ -136,6 +147,13 @@ const hr = [
         name: 'deduction',
         meta: { permission: ["deduction list"] },
         component: () => import("../views/hr/deductions/deduction.vue")
+      },
+      // What employees object to from the «دوامي» app, and HR's answer.
+      {
+        path: '/deduction-objections',
+        name: 'deduction-objections',
+        meta: { permission: ["deduction edit"] },
+        component: () => import("../views/hr/deductions/DeductionObjections.vue")
       },
 
       /////////////////////////////////////////Holidays

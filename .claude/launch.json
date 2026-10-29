@@ -78,6 +78,32 @@
         "--strictPort"
       ],
       "port": 3017
+    },
+    {
+      "name": "sawa-local-front-staff-leave",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3019",
+        "--strictPort"
+      ],
+      "port": 3019
+    },
+    {
+      "name": "sawa-local-front-qfba",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3021",
+        "--strictPort"
+      ],
+      "port": 3021
     }
   ]
 }

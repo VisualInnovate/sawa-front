@@ -30,12 +30,15 @@ import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
+import QfbaChart from "@/components/reports/QfbaChart.vue";
+import QfbaSummary from "@/components/reports/QfbaSummary.vue";
+import { functionColor, functionName, optionLabel, qt, questionText } from "@/views/evaluation/qfba/qfba";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
 import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
-  ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
   isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
@@ -100,6 +103,11 @@ const firstSideProfile = computed(() => sections.value.find((section) => section
 
 // M-CHAT-R: one test's answer to a question ({ yes, point }, by the question's id), for the answers page's column of that test.
 const mchatAnswer = (test, id) => (test.result?.questions ?? []).find((question) => question.id === id) ?? null;
+
+// QFBA: the language its newest chosen test was filled in (its pages are drawn in it), and one test's answer to a question.
+const qfbaLang = (section) => (section.newest?.result?.language === "en" ? "en" : "ar");
+const qfbaAnswer = (test, id) => (test.result?.questions ?? []).find((question) => question.id === id) ?? null;
+const qfbaFunction = (section, functionId) => (section.newest?.result?.scores ?? []).find((score) => score.function_id === functionId) ?? null;
 
 // Barriers: the newest chosen test's answers (barrier, chosen answer, its number) under the chart.
 const barrierAnswers = (section) => [...(section.newest?.result ?? [])].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
@@ -1381,7 +1389,7 @@ function back() {
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
           <AbllsChart v-else-if="section.type === ABLLS || section.type === ABLLS_SKILLS" :tests="section.tests" />
           <!-- Carolina: the newest chosen evaluation as the paper form (its rounds' colors in each box). -->
-          <CarolinaGrid v-else-if="section.type === CAROLINA" :result="section.newest.result" :per-table="4" compact />
+          <CarolinaGrid v-else-if="section.type === CAROLINA" :result="section.newest.result" :per-table="5" compact />
           <TransitionChart v-else-if="section.type === TRANSITION" :tests="section.tests" />
 
           <!-- M-CHAT-R: each chosen test's risk points and level (oldest first), then what the newest one means. -->
@@ -1413,6 +1421,35 @@ function back() {
               <p>{{ section.newest.result.recommendation }}</p>
             </div>
           </template>
+
+          <!-- QFBA (in the language it was filled in): each chosen test's row, the severity chart (tests side by side),
+               then the newest test's functions with the likely one and what it means. -->
+          <div v-if="section.type === QFBA" class="rx-qfba" :dir="qfbaLang(section) === 'en' ? 'ltr' : 'rtl'">
+            <table class="rx-table rx-mchat">
+              <thead>
+                <tr>
+                  <th class="rx-sum-num">#</th>
+                  <th>{{ qt(qfbaLang(section), "test_date") }}</th>
+                  <th>{{ qt(qfbaLang(section), "child_age") }}</th>
+                  <th>{{ qt(qfbaLang(section), "tester") }}</th>
+                  <th>{{ qt(qfbaLang(section), "interviewee") }}</th>
+                  <th>{{ qt(qfbaLang(section), "target_behavior") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(test, i) in section.tests" :key="test.key">
+                  <td class="rx-sum-num">{{ i + 1 }}</td>
+                  <td><span class="ltr">{{ dmy(test.date) }}</span></td>
+                  <td>{{ (test.result?.child_age ?? test.form?.age_months) == null ? "" : qt(qfbaLang(section), "months", { n: test.result?.child_age ?? test.form.age_months }) }}</td>
+                  <td>{{ test.specialist?.name ?? "" }}</td>
+                  <td>{{ test.result?.interviewee ?? "" }}</td>
+                  <td><b>{{ test.result?.target_behavior ?? "" }}</b></td>
+                </tr>
+              </tbody>
+            </table>
+            <QfbaChart :tests="section.tests" :lang="qfbaLang(section)" />
+            <QfbaSummary v-if="section.newest.result" :result="section.newest.result" :lang="qfbaLang(section)" />
+          </div>
 
           <!-- The newest chosen barriers test as a table: barrier, the chosen answer, its number. -->
           <table v-if="section.type === BARRIER && barrierAnswers(section).length" class="rx-table rx-barrier-answers">
@@ -1494,6 +1531,48 @@ function back() {
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
 
+        <!-- QFBA: every answer of each chosen test side by side (oldest first); an endorsed answer is marked. -->
+        <section v-if="showCharts && section.type === QFBA"
+          v-page="{ key: 'qfba-' + section.group, title: qt(qfbaLang(section), 'answers') + ' · ' + section.label }" class="rx-page">
+          <header class="rx-head">
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+            <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+
+          <h2 class="rx-band">{{ qt(qfbaLang(section), "answers") }}</h2>
+          <table class="rx-table rx-mchat rx-mchat-answers rx-qfba-answers" :dir="qfbaLang(section) === 'en' ? 'ltr' : 'rtl'">
+            <thead>
+              <tr>
+                <th class="rx-sum-num">#</th>
+                <th>{{ qt(qfbaLang(section), "question") }}</th>
+                <th>{{ qt(qfbaLang(section), "function") }}</th>
+                <th v-for="test in section.tests" :key="test.key" class="rx-mchat-col"><span class="ltr">{{ dmy(test.date) }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="question in section.newest.result?.questions ?? []" :key="question.id">
+                <td class="rx-sum-num">{{ question.number }}</td>
+                <td>{{ questionText(question, qfbaLang(section)) }}</td>
+                <td class="rx-qfba-fn" :style="{ color: functionColor(qfbaFunction(section, question.function_id)?.key) }">
+                  {{ functionName(qfbaFunction(section, question.function_id), qfbaLang(section)) }}
+                </td>
+                <td v-for="test in section.tests" :key="test.key" class="rx-mchat-col"
+                  :class="{ 'is-endorsed': qfbaAnswer(test, question.id)?.value > 0 }">
+                  <template v-if="qfbaAnswer(test, question.id)?.value === null">{{ qfbaAnswer(test, question.id)?.answered ? qt(qfbaLang(section), "na") : "" }}</template>
+                  <template v-else-if="qfbaAnswer(test, question.id)">{{ qfbaAnswer(test, question.id).value }}</template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="rx-mchat-hint" :dir="qfbaLang(section) === 'en' ? 'ltr' : 'rtl'">
+            {{ qt(qfbaLang(section), "scale") }}:
+            <span v-for="option in section.newest.result?.options ?? []" :key="option.value"> <span class="ltr">{{ option.value }}</span> = {{ optionLabel(option, qfbaLang(section)) }} ·</span>
+            {{ qt(qfbaLang(section), "na") }}
+          </p>
+
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
         <!-- Transition: what each answer of the newest chosen test means. -->
         <section v-if="showCharts && section.type === TRANSITION && edits.transitionPoints?.[section.group]"
           v-page="{ key: 'points-' + section.group, title: $t('ereport.transition_points') + ' · ' + section.label }" class="rx-page"
@@ -1550,6 +1629,10 @@ function back() {
 .rx-mchat-answers th, .rx-mchat-answers td { padding: 4px 6px; }
 .rx-mchat-answers td:nth-child(2) { text-align: start; }
 .rx-mchat-col { width: 15mm; }
+.rx-qfba { display: grid; gap: 5mm; text-align: start; }
+.rx-qfba-answers td:nth-child(2) { text-align: start; }
+.rx-qfba-fn { font-size: 8pt; font-weight: 700; }
+.rx-qfba-answers td.is-endorsed { background: #fef3c7; font-weight: 800; }
 .rx-mchat-answers td.is-point { background: #fee2e2; color: #b91c1c; font-weight: 800; }
 .rx-mchat-answers tfoot th { background: rgb(var(--bp-eef8f9)); color: rgb(var(--bp-0e464d)); }
 .rx-mchat-hint { margin: 3mm 0 0; color: #64748b; font-size: 8.5pt; }
