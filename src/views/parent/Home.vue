@@ -1,7 +1,8 @@
 <script setup>
 // The portal's home: a hello, what waits for the parent, the children, what is coming this week, the money and
 // the latest news — all from one request (api/parent/home), kept in the portal store.
-import { computed, onMounted } from "vue";
+import axios from "axios";
+import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useParentPortalStore } from "@/stores/ParentPortal";
 import ChildCard from "@/components/parent/ChildCard.vue";
@@ -11,7 +12,14 @@ import { fmtDay, fmtRelative, money, notificationText } from "@/utils/parentPort
 
 const { t } = useI18n();
 const portal = useParentPortalStore();
-onMounted(() => portal.load());
+// The children on today's bus trips, with what the bus supervisor last marked.
+const bus = ref([]);
+const busStatus = (row) => t(`tr.status.${row.direction === "to_home" && row.status === "arrived" ? "arrived_home" : row.status}`);
+const busTime = (row) => (row.updated_at ? new Date(row.updated_at).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "");
+onMounted(() => {
+  portal.load();
+  axios.get("api/parent/bus-today").then(({ data }) => { bus.value = data.data ?? []; }).catch(() => {});
+});
 
 const home = computed(() => portal.home);
 const children = computed(() => portal.children);
@@ -80,6 +88,20 @@ const news = computed(() => home.value?.notifications?.latest ?? []);
             </div>
             <i class="pi pi-angle-left rtl-arrow pp-muted" aria-hidden="true" />
           </router-link>
+        </div>
+      </section>
+
+      <!-- Today's bus -->
+      <section v-if="bus.length" class="pp-stack pp-in" :style="{ '--i': 1 }">
+        <h2 class="pp-h2"><i class="pi pi-car text-[var(--pp-teal)]" /> {{ $t("tr.bus_today") }}</h2>
+        <div class="pp-list">
+          <div v-for="(row, i) in bus" :key="i" class="pp-item">
+            <span class="pp-item__icon" :class="row.status === 'absent' ? 'pp-item__icon--warn' : 'pp-item__icon--info'"><i :class="row.direction === 'to_home' ? 'pi pi-home' : 'pi pi-building'" /></span>
+            <div class="pp-item__body">
+              <p class="pp-item__title">{{ row.child }} — {{ busStatus(row) }}</p>
+              <p class="pp-item__meta">{{ $t(`tr.dir.${row.direction}`) }} · <span dir="ltr">{{ row.from }} – {{ row.to }}</span><template v-if="busTime(row)"> · <span dir="ltr">{{ busTime(row) }}</span></template></p>
+            </div>
+          </div>
         </div>
       </section>
 

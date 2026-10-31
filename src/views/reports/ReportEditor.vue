@@ -10,10 +10,12 @@
 //              otherwise free text), one VB-MAPP form page per chosen test (its tables, a row per level, and its own
 //              level charts) with the newest test's strengths/weaknesses (edited here, saved on the server), and the other types' charts
 //              (barriers with their test tables). The behaviour-problems table belongs to a behavioural evaluation.
-//   plan     = the goals written for the newest chosen VB-MAPP test's weaknesses (only the goals are shown), edited here and saved on the server.
+//   plan     = the goals written for the newest chosen VB-MAPP test's weaknesses (only the goals are shown), edited here and saved on the server;
+//              with a QFBA, also its plan page: goals for each endorsed function of the newest chosen QFBA (from the QFBA settings),
+//              in the form's language, saved on the server the same way.
 //   In the strengths/weaknesses and the plan, a whole row (domain) or table can be deleted; it is saved with them and
 //   listed on its page to be restored.
-//   tracking = the goals of the chosen tests' saved plans, as the centre's tracking form: one table per general goal,
+//   tracking = the goals of the chosen VB-MAPP and QFBA tests' saved plans, as the centre's tracking form: one table per general goal,
 //              the date each goal was achieved (prop, editable; sessions will set it) and the trial columns MT, EXP
 //              and RR; «اعتماد التراكنج» records it as the one the child's sessions work on.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
@@ -32,7 +34,7 @@ import AbllsChart from "@/components/reports/AbllsChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
-import { functionColor, functionName, optionLabel, qt, questionText } from "@/views/evaluation/qfba/qfba";
+import { functionColor, functionName, optionLabel, planGoalsOf, qt, questionText } from "@/views/evaluation/qfba/qfba";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
@@ -302,7 +304,10 @@ async function load() {
     });
     document.title = `${t("ereport.report_title")} - ${data.child?.name ?? ""}`;
     if (showCharts.value) loadSummary();
-    if (showPlan.value) loadPlan();
+    if (showPlan.value) {
+      loadPlan();
+      loadQfbaPlan();
+    }
     if (showTracking.value) loadTracking();
   } catch {
     loadError.value = true;
@@ -318,6 +323,7 @@ function open() {
   edits.value = null;
   summary.value = null;
   plan.value = null;
+  qfbaPlan.value = null;
   tracking.value = null;
   if (!keys.value.length) {
     loading.value = false;
@@ -643,7 +649,101 @@ async function savePlan() {
   }
 }
 
-// ---- tracking (the saved plans' goals of the chosen VB-MAPP tests) ---------------------------------
+// ---- QFBA plan (saved on the server, per QFBA evaluation) -------------------------------------------
+
+// The newest chosen QFBA's plan, in the form's language: goals for each endorsed function, grouped by function and coded by
+// its symbol (ATT-1, ATT-2 …); a new plan starts from the goals set for the functions in the QFBA settings. A group is
+// deleted as "group:|<symbol>" (no level), so the tracking leaves its goals out too.
+// { evaluationId, lang, goals: [planGoal], hidden: [key], saved, dirty, saving, error, loading, savedAt }
+const qfbaSection = computed(() => sections.value.find((section) => section.type === QFBA) ?? null);
+const qfbaPlan = ref(null);
+const qfbaSymbol = (score) => score?.symbol || score?.key || "";
+const qfbaGoal = (score, lang, values = {}) => planGoal({
+  level_id: null, general_goal_id: null, general_goal: functionName(score, lang), domain: functionName(score, lang),
+  domain_symbol: qfbaSymbol(score), symbol: qfbaSymbol(score), number: null, weakness: functionName(score, lang), goal: "", ...values,
+});
+const qfbaPlanFromResult = (test, lang) => planGoalsOf(test?.result, lang, { female: female.value, name: shortName.value })
+  .flatMap(({ score, goals }) => goals.map((goal) => qfbaGoal(score, lang, { goal })));
+
+async function loadQfbaPlan() {
+  const test = qfbaSection.value?.newest;
+  if (!test) return;
+  const lang = qfbaLang(qfbaSection.value);
+  qfbaPlan.value = { evaluationId: test.id, lang, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+  try {
+    const { data } = await axios.get(`api/reports/plans/${test.id}`);
+    qfbaPlan.value.goals = data.plan ? data.plan.goals.map(planGoal) : qfbaPlanFromResult(test, lang);
+    qfbaPlan.value.hidden = [...(data.plan?.hidden ?? [])];
+    qfbaPlan.value.saved = Boolean(data.plan);
+    qfbaPlan.value.savedAt = data.plan?.updated_at ?? null;
+  } catch {
+    qfbaPlan.value.goals = qfbaPlanFromResult(test, lang);
+  } finally {
+    qfbaPlan.value.loading = false;
+  }
+}
+
+// One group per endorsed function (even without goals, to add some), then any other function a saved goal has.
+const qfbaPlanAllGroups = computed(() => {
+  if (!qfbaPlan.value) return [];
+  const groups = new Map();
+  for (const score of (qfbaSection.value?.newest?.result?.scores ?? []).filter((item) => item.endorsed > 0)) {
+    groups.set(qfbaSymbol(score), { key: qfbaSymbol(score), score, title: functionName(score, qfbaPlan.value.lang), goals: [] });
+  }
+  for (const goal of qfbaPlan.value.goals) {
+    const key = goal.symbol || "";
+    if (!groups.has(key)) groups.set(key, { key, score: null, title: goal.domain || goal.general_goal || key, goals: [] });
+    groups.get(key).goals.push(goal);
+  }
+  return [...groups.values()];
+});
+const qfbaGroupHidden = (group) => qfbaPlan.value.hidden.includes(`group:|${group.key}`);
+const qfbaPlanGroups = computed(() => qfbaPlanAllGroups.value.filter((group) => !qfbaGroupHidden(group)));
+const qfbaPlanDeleted = computed(() => qfbaPlanAllGroups.value.filter(qfbaGroupHidden));
+
+function touchQfbaPlan() {
+  if (qfbaPlan.value) qfbaPlan.value.dirty = true;
+}
+function setQfbaGroupHidden(group, hidden) {
+  const list = new Set(qfbaPlan.value.hidden);
+  if (hidden) list.add(`group:|${group.key}`);
+  else list.delete(`group:|${group.key}`);
+  qfbaPlan.value.hidden = [...list];
+  touchQfbaPlan();
+}
+function addQfbaGoal(group) {
+  const last = group.goals[group.goals.length - 1];
+  const goal = last ? planGoal({ ...last, id: undefined, number: null, goal: "" }) : qfbaGoal(group.score, qfbaPlan.value.lang);
+  qfbaPlan.value.goals.splice(last ? qfbaPlan.value.goals.indexOf(last) + 1 : qfbaPlan.value.goals.length, 0, goal);
+  touchQfbaPlan();
+}
+function removeQfbaGoal(goal) {
+  qfbaPlan.value.goals.splice(qfbaPlan.value.goals.indexOf(goal), 1);
+  touchQfbaPlan();
+}
+
+async function saveQfbaPlan() {
+  if (!qfbaPlan.value || qfbaPlan.value.saving) return;
+  qfbaPlan.value.saving = true;
+  qfbaPlan.value.error = false;
+  try {
+    const goals = qfbaPlan.value.goals.filter((goal) => goal.goal.trim())
+      .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness?.trim() ? goal.weakness : goal.goal }));
+    const { data } = await axios.put(`api/reports/plans/${qfbaPlan.value.evaluationId}`, { goals, hidden: qfbaPlan.value.hidden });
+    qfbaPlan.value.goals = data.plan.goals.map(planGoal);
+    qfbaPlan.value.hidden = [...(data.plan.hidden ?? [])];
+    qfbaPlan.value.saved = true;
+    qfbaPlan.value.dirty = false;
+    qfbaPlan.value.savedAt = data.plan.updated_at;
+    if (showTracking.value) loadTracking();
+  } catch {
+    qfbaPlan.value.error = true;
+  } finally {
+    qfbaPlan.value.saving = false;
+  }
+}
+
+// ---- tracking (the saved plans' goals of the chosen VB-MAPP and QFBA tests) -----------------------
 
 // { plans: [{ evaluation_id, evaluation_date, goals: [...] }], achieved: { [id]: "YYYY-MM-DD" | "" }, cells: { [id]: {...} },
 //   request: the tracking sent for these tests ({ status: pending | approved | rejected, note, goal_ids, … }) or null,
@@ -652,6 +752,9 @@ async function savePlan() {
 // (the sessions show and change them too), MT and GEN are free text until a session fills them, then they are shown
 // and cannot change. Once the management approved the tracking it is view-only.
 const tracking = ref(null);
+// The tests whose plans the tracking reads (VB-MAPP, then QFBA), and the evaluation type a tracked plan belongs to.
+const trackingTests = computed(() => [...(milestoneSection.value?.tests ?? []), ...(qfbaSection.value?.tests ?? [])]);
+const planTypeLabel = (item) => (items.value.find((test) => Number(test.id) === Number(item?.evaluation_id))?.type === QFBA ? "QFBA" : "VB-MAPP");
 const CELL_KEYS = TRACKING_COLUMNS.flatMap((column) => (column.key === "gen" ? ["gen"] : [`${column.key}_start`, `${column.key}_end`]));
 const trackingApproved = computed(() => tracking.value?.request?.status === "approved");
 const sessionFilled = (goal, key) => (goal.session_cells ?? []).includes(key);
@@ -673,7 +776,7 @@ function cellText(goal, key) {
 }
 
 async function loadTracking() {
-  const tests = milestoneSection.value?.tests ?? [];
+  const tests = trackingTests.value;
   if (!tests.length) return;
   tracking.value = { plans: [], achieved: {}, cells: {}, request: null, loading: true, saving: false, approving: false, error: false };
   try {
@@ -733,7 +836,7 @@ async function saveTracking() {
         return { id: goal.id, prop_start: isDate(start) ? start : null, achieved_at: isDate(end) ? end : null, cells };
       }),
     });
-    const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: (milestoneSection.value?.tests ?? []).map((test) => test.id) } });
+    const { data } = await axios.get(`api/reports/children/${childId.value}/tracking`, { params: { evaluations: trackingTests.value.map((test) => test.id) } });
     setTrackingPlans(data.plans ?? []);
     tracking.value.request = data.request ?? null;
     tracking.value.savedAt = new Date().toLocaleTimeString();
@@ -839,7 +942,7 @@ async function approveTracking() {
   try {
     if (!(await saveTracking())) return;
     const { data } = await axios.post(`api/reports/children/${childId.value}/tracking/approve`, {
-      evaluations: (milestoneSection.value?.tests ?? []).map((test) => test.id),
+      evaluations: trackingTests.value.map((test) => test.id),
       goals: goals.map((goal) => goal.id),
     });
     tracking.value.request = data.tracking;
@@ -937,6 +1040,15 @@ function back() {
               <small>{{ plan.error ? $t("ereport.save_failed") : plan.dirty || !plan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="plan.saving" data-no-request-spinner @click="savePlan" />
+          </div>
+
+          <div v-if="qfbaPlan && !qfbaPlan.loading" class="rx-save-group" :class="qfbaPlan.error ? 'is-error' : qfbaPlan.dirty || !qfbaPlan.saved ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_plan") }} · QFBA</b>
+              <small>{{ qfbaPlan.error ? $t("ereport.save_failed") : qfbaPlan.dirty || !qfbaPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="qfbaPlan.saving" data-no-request-spinner @click="saveQfbaPlan" />
           </div>
 
           <div v-if="tracking && !tracking.loading && tracking.plans.length" class="rx-save-group"
@@ -1287,75 +1399,6 @@ function back() {
           </section>
           </template>
 
-          <!-- Tracking: the saved plans' goals, one table per general goal as on the centre's form -->
-          <template v-if="showTracking && tracking">
-          <section v-for="item in tracking.plans.length ? tracking.plans : [null]" :key="'track-' + (item?.evaluation_id ?? 'none')"
-            v-page="{ key: 'track-' + (item?.evaluation_id ?? 'none'), title: [$t('ereport.tracking_title'), item ? dmy(item.evaluation_date) : ''].filter(Boolean).join(' · ') }" class="rx-page"
-            :class="{ 'rx-print-hidden': item && !item.goals.some(isTracked) }" :data-print-note="$t('ereport.page_not_printed')">
-            <header class="rx-head">
-              <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
-              <span>{{ $t("ereport.tracking_title") }}<template v-if="item"> · VB-MAPP · <span class="ltr">{{ dmy(item.evaluation_date) }}</span></template></span>
-            </header>
-            <h2 class="rx-band">{{ $t("ereport.tracking_title") }}</h2>
-            <p v-if="tracking.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
-            <p v-else-if="!item" class="rx-empty">{{ $t("ereport.tracking_no_plan") }}</p>
-            <template v-else>
-              <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.tracking_hint") }}</p>
-              <p v-if="tracking.request?.status === 'rejected'" class="rx-track-state is-rejected rx-screen-only">
-                <i class="pi pi-times-circle" aria-hidden="true" /> {{ $t("ereport.tracking_rejected_note", { note: tracking.request.note || "—" }) }}
-              </p>
-              <p v-else-if="tracking.request?.status === 'pending'" class="rx-track-state is-pending rx-screen-only">
-                <i class="pi pi-clock" aria-hidden="true" /> {{ $t("ereport.tracking_pending_note", { date: tracking.request.requested_at }) }}
-              </p>
-              <p v-else-if="trackingApproved" class="rx-track-state is-approved rx-screen-only">
-                <i class="pi pi-lock" aria-hidden="true" /> {{ $t("ereport.tracking_approved_note", { date: tracking.request.decided_at, name: tracking.request.approver || "" }) }}
-              </p>
-              <table v-for="group in trackingGroups(item)" :key="group.key" class="rx-table rx-track"
-                :class="{ 'rx-print-hidden': !group.goals.some(isTracked) }">
-                <thead>
-                  <tr class="rx-track-domain"><th :colspan="TRACKING_COLUMNS.length + 2">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
-                  <tr class="rx-track-goal"><th :colspan="TRACKING_COLUMNS.length + 2">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
-                  <tr class="rx-track-cols">
-                    <th class="rx-track-num">{{ $t("ereport.number") }}</th>
-                    <th>{{ $t("ereport.tracking_short_goals") }}</th>
-                    <th v-for="column in TRACKING_COLUMNS" :key="column.key" :class="`rx-track-col is-${column.key}`">
-                      {{ $t(column.title) }}<span class="rx-track-code ltr">{{ column.code }}</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(goal, g) in group.goals" :key="goal.id" :class="{ 'rx-print-hidden': !isTracked(goal), 'is-off': !isTracked(goal) }">
-                    <td class="rx-track-num ltr"><b>{{ goal.code || goalCode(group, g, goal) }}</b></td>
-                    <td>
-                      {{ goal.goal || goal.weakness }}
-                      <span class="rx-track-controls rx-screen-only">
-                        <label><input type="checkbox" :checked="isTracked(goal)" :disabled="trackingApproved" @change="toggleTracked(goal, $event.target.checked)" /> {{ $t("ereport.tracking_print") }}</label>
-                      </span>
-                    </td>
-                    <!-- the date columns: pickers; MT and GEN: free text, a session's value shown (locked); an approved tracking: all locked. -->
-                    <td v-for="column in TRACKING_COLUMNS" :key="column.key" :class="['rx-track-col', `is-${column.key}`,
-                      { 'is-session': column.key === 'gen' ? sessionFilled(goal, 'gen') : sessionFilled(goal, `${column.key}_start`) }]">
-                      <TrackingDates v-if="column.dates" :start="tracking.cells[goal.id][`${column.key}_start`]" :end="tracking.cells[goal.id][`${column.key}_end`]"
-                        :editable="!trackingApproved && !goal.locked" @change="(end, value) => (tracking.cells[goal.id][`${column.key}_${end}`] = value)" />
-                      <template v-else-if="column.key === 'gen'">
-                        <span v-if="cellLocked(goal, 'gen')" class="rx-track-locked" :title="sessionFilled(goal, 'gen') ? $t('ereport.tracking_from_session') : undefined">{{ cellText(goal, "gen") }}</span>
-                        <EditableText v-else v-model="tracking.cells[goal.id].gen" block />
-                      </template>
-                      <div v-else class="rx-track-mt">
-                        <div v-for="end in ['start', 'end']" :key="end" :class="`is-${end}`">
-                          <small>{{ $t(`ereport.trial_${end}`) }}</small>
-                          <span v-if="cellLocked(goal, `mt_${end}`)" class="rx-track-locked ltr" :title="sessionFilled(goal, `mt_${end}`) ? $t('ereport.tracking_from_session') : undefined">{{ showDate(cellText(goal, `mt_${end}`)) || "—" }}</span>
-                          <EditableText v-else v-model="tracking.cells[goal.id][`mt_${end}`]" block />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </template>
-            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
-          </section>
-          </template>
         </template>
 
         <!-- Any other type (in the report): barriers with their test tables, then each type's chart -->
@@ -1447,7 +1490,7 @@ function back() {
                 </tr>
               </tbody>
             </table>
-            <QfbaChart :tests="section.tests" :lang="qfbaLang(section)" />
+            <QfbaChart :tests="section.tests" :lang="qfbaLang(section)" :child-name="child.name ?? ''" />
             <QfbaSummary v-if="section.newest.result" :result="section.newest.result" :lang="qfbaLang(section)" />
           </div>
 
@@ -1573,6 +1616,63 @@ function back() {
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
 
+        <!-- QFBA plan (in the form's language): goals for each endorsed function, edited here and saved on the server. -->
+        <section v-if="showPlan && qfbaPlan && section.type === QFBA && section.group === qfbaSection?.group"
+          v-page="{ key: 'qfba-plan', title: qt(qfbaPlan.lang, 'plan_title') + ' · QFBA' }" class="rx-page"
+          :class="{ 'rx-print-hidden': !qfbaPlan.loading && !qfbaPlanGroups.some((group) => group.goals.length) }" :data-print-note="$t('ereport.page_not_printed')">
+          <header class="rx-head">
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+            <span>{{ qt(qfbaPlan.lang, "plan_title") }} · QFBA · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+          <h2 class="rx-band">{{ qt(qfbaPlan.lang, "plan_title") }}<template v-if="section.newest.result?.target_behavior"> — {{ section.newest.result.target_behavior }}</template></h2>
+          <div :dir="qfbaPlan.lang === 'en' ? 'ltr' : 'rtl'">
+            <div v-if="qfbaPlanDeleted.length" class="rx-deleted rx-screen-only">
+              <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+              <button v-for="group in qfbaPlanDeleted" :key="group.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="setQfbaGroupHidden(group, false)">
+                <i class="pi pi-undo" aria-hidden="true" /> {{ group.title }} ({{ group.key }})
+              </button>
+            </div>
+            <p v-if="qfbaPlan.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+            <template v-else>
+              <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ qt(qfbaPlan.lang, "plan_hint") }}</p>
+              <table v-if="qfbaPlanGroups.length" class="rx-table rx-summary rx-plan">
+                <thead>
+                  <tr>
+                    <th class="rx-sum-num">#</th>
+                    <th>{{ qt(qfbaPlan.lang, "plan_goal") }}</th>
+                    <th class="rx-plan-control-col rx-screen-only" />
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="group in qfbaPlanGroups" :key="group.key">
+                    <tr class="rx-plan-group">
+                      <th colspan="3">
+                        {{ qt(qfbaPlan.lang, "function") }}: {{ group.title }} <span class="ltr">({{ group.key }})</span>
+                        <template v-if="group.score"> · {{ qt(qfbaPlan.lang, "endorsed") }} <span class="ltr">{{ group.score.endorsed }}/{{ group.score.questions }}</span>
+                          · {{ qt(qfbaPlan.lang, "severity") }} <span class="ltr">{{ group.score.severity }}/{{ group.score.max_severity }}</span></template>
+                        <button type="button" class="rx-plan-control rx-remove-point rx-row-delete rx-screen-only" :aria-label="$t('ereport.delete_row')"
+                          :title="$t('ereport.delete_row')" @click="setQfbaGroupHidden(group, true)"><i class="pi pi-times" aria-hidden="true" /></button>
+                      </th>
+                    </tr>
+                    <tr v-for="(goal, g) in group.goals" :key="goal.key">
+                      <td class="rx-sum-num ltr" style="white-space: nowrap">{{ group.key }}-{{ g + 1 }}</td>
+                      <td><EditableText v-model="goal.goal" block multiline :placeholder="qt(qfbaPlan.lang, 'plan_goal')" @update:modelValue="touchQfbaPlan" /></td>
+                      <td class="rx-plan-control-col rx-screen-only">
+                        <button type="button" class="rx-plan-control rx-remove-point" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')" @click="removeQfbaGoal(goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                      </td>
+                    </tr>
+                    <tr class="rx-screen-only">
+                      <td colspan="3"><button type="button" class="rx-plan-control rx-add-point" @click="addQfbaGoal(group)"><i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}</button></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              <p v-else-if="!qfbaPlanDeleted.length" class="rx-empty">{{ qt(qfbaPlan.lang, "plan_empty") }}</p>
+            </template>
+          </div>
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
         <!-- Transition: what each answer of the newest chosen test means. -->
         <section v-if="showCharts && section.type === TRANSITION && edits.transitionPoints?.[section.group]"
           v-page="{ key: 'points-' + section.group, title: $t('ereport.transition_points') + ' · ' + section.label }" class="rx-page"
@@ -1596,6 +1696,76 @@ function back() {
 
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
+      </template>
+
+      <!-- Tracking: the saved plans' goals (VB-MAPP and QFBA), one table per general goal as on the centre's form -->
+      <template v-if="showTracking && tracking">
+      <section v-for="item in tracking.plans.length ? tracking.plans : [null]" :key="'track-' + (item?.evaluation_id ?? 'none')"
+        v-page="{ key: 'track-' + (item?.evaluation_id ?? 'none'), title: [$t('ereport.tracking_title'), item ? dmy(item.evaluation_date) : ''].filter(Boolean).join(' · ') }" class="rx-page"
+        :class="{ 'rx-print-hidden': item && !item.goals.some(isTracked) }" :data-print-note="$t('ereport.page_not_printed')">
+        <header class="rx-head">
+          <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+          <span>{{ $t("ereport.tracking_title") }}<template v-if="item"> · {{ planTypeLabel(item) }} · <span class="ltr">{{ dmy(item.evaluation_date) }}</span></template></span>
+        </header>
+        <h2 class="rx-band">{{ $t("ereport.tracking_title") }}</h2>
+        <p v-if="tracking.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+        <p v-else-if="!item" class="rx-empty">{{ $t("ereport.tracking_no_plan") }}</p>
+        <template v-else>
+          <p class="rx-case-hint rx-screen-only"><i class="pi pi-info-circle" aria-hidden="true" /> {{ $t("ereport.tracking_hint") }}</p>
+          <p v-if="tracking.request?.status === 'rejected'" class="rx-track-state is-rejected rx-screen-only">
+            <i class="pi pi-times-circle" aria-hidden="true" /> {{ $t("ereport.tracking_rejected_note", { note: tracking.request.note || "—" }) }}
+          </p>
+          <p v-else-if="tracking.request?.status === 'pending'" class="rx-track-state is-pending rx-screen-only">
+            <i class="pi pi-clock" aria-hidden="true" /> {{ $t("ereport.tracking_pending_note", { date: tracking.request.requested_at }) }}
+          </p>
+          <p v-else-if="trackingApproved" class="rx-track-state is-approved rx-screen-only">
+            <i class="pi pi-lock" aria-hidden="true" /> {{ $t("ereport.tracking_approved_note", { date: tracking.request.decided_at, name: tracking.request.approver || "" }) }}
+          </p>
+          <table v-for="group in trackingGroups(item)" :key="group.key" class="rx-table rx-track"
+            :class="{ 'rx-print-hidden': !group.goals.some(isTracked) }">
+            <thead>
+              <tr class="rx-track-domain"><th :colspan="TRACKING_COLUMNS.length + 2">{{ group.domain }} <span v-if="group.domain_symbol" class="ltr">{{ group.domain_symbol }}</span></th></tr>
+              <tr class="rx-track-goal"><th :colspan="TRACKING_COLUMNS.length + 2">{{ $t("ereport.tracking_goal") }}: {{ group.general_goal }}<span v-if="group.symbol" class="rx-track-symbol ltr">{{ group.symbol }}</span></th></tr>
+              <tr class="rx-track-cols">
+                <th class="rx-track-num">{{ $t("ereport.number") }}</th>
+                <th>{{ $t("ereport.tracking_short_goals") }}</th>
+                <th v-for="column in TRACKING_COLUMNS" :key="column.key" :class="`rx-track-col is-${column.key}`">
+                  {{ $t(column.title) }}<span class="rx-track-code ltr">{{ column.code }}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(goal, g) in group.goals" :key="goal.id" :class="{ 'rx-print-hidden': !isTracked(goal), 'is-off': !isTracked(goal) }">
+                <td class="rx-track-num ltr"><b>{{ goal.code || goalCode(group, g, goal) }}</b></td>
+                <td>
+                  {{ goal.goal || goal.weakness }}
+                  <span class="rx-track-controls rx-screen-only">
+                    <label><input type="checkbox" :checked="isTracked(goal)" :disabled="trackingApproved" @change="toggleTracked(goal, $event.target.checked)" /> {{ $t("ereport.tracking_print") }}</label>
+                  </span>
+                </td>
+                <!-- the date columns: pickers; MT and GEN: free text, a session's value shown (locked); an approved tracking: all locked. -->
+                <td v-for="column in TRACKING_COLUMNS" :key="column.key" :class="['rx-track-col', `is-${column.key}`,
+                  { 'is-session': column.key === 'gen' ? sessionFilled(goal, 'gen') : sessionFilled(goal, `${column.key}_start`) }]">
+                  <TrackingDates v-if="column.dates" :start="tracking.cells[goal.id][`${column.key}_start`]" :end="tracking.cells[goal.id][`${column.key}_end`]"
+                    :editable="!trackingApproved && !goal.locked" @change="(end, value) => (tracking.cells[goal.id][`${column.key}_${end}`] = value)" />
+                  <template v-else-if="column.key === 'gen'">
+                    <span v-if="cellLocked(goal, 'gen')" class="rx-track-locked" :title="sessionFilled(goal, 'gen') ? $t('ereport.tracking_from_session') : undefined">{{ cellText(goal, "gen") }}</span>
+                    <EditableText v-else v-model="tracking.cells[goal.id].gen" block />
+                  </template>
+                  <div v-else class="rx-track-mt">
+                    <div v-for="end in ['start', 'end']" :key="end" :class="`is-${end}`">
+                      <small>{{ $t(`ereport.trial_${end}`) }}</small>
+                      <span v-if="cellLocked(goal, `mt_${end}`)" class="rx-track-locked ltr" :title="sessionFilled(goal, `mt_${end}`) ? $t('ereport.tracking_from_session') : undefined">{{ showDate(cellText(goal, `mt_${end}`)) || "—" }}</span>
+                      <EditableText v-else v-model="tracking.cells[goal.id][`mt_${end}`]" block />
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+        <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+      </section>
       </template>
     </main>
   </div>

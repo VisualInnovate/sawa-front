@@ -207,6 +207,18 @@ const formatAt = formatDateTime;
           <span class="text-sm">{{ $t("acc.price_change_hint", { from: amount(charge.gross), to: amount(charge.pending_gross) }) }}</span>
         </div>
 
+        <!-- The route, its price or the program's days changed, and the edited / paid transport lines did not follow. -->
+        <div v-if="charge.transport_changed_at" class="flex flex-column gap-2 p-3 border-round border-1 border-orange-300 bg-orange-50" role="status">
+          <span class="font-semibold"><i class="pi pi-car" aria-hidden="true" /> {{ $t("tr.changed_title") }}</span>
+          <span class="text-sm">{{ $t("tr.changed_text") }}</span>
+          <ul v-if="(charge.transport_suggested ?? []).length" class="m-0 ps-4 text-sm">
+            <li v-for="line in charge.transport_suggested" :key="line.key">{{ line.name ?? $t("pp.fin_line_transport") }}: <strong>{{ amount(line.amount) }}</strong></li>
+          </ul>
+          <span v-else class="text-sm">{{ $t("tr.changed_none") }}</span>
+          <Button v-if="canEdit" class="align-self-start" size="small" icon="pi pi-check" variant="outlined" :label="$t('tr.changed_dismiss')" :loading="busy"
+            @click="run(() => axios.post(`api/accounting/charges/${charge.id}/transport-change/dismiss`))" />
+        </div>
+
         <div class="flex flex-column gap-2">
           <span class="font-semibold">{{ $t("acc.lines") }}</span>
           <div v-for="line in lines" :key="line.key" class="flex flex-wrap items-center justify-between gap-2 py-1 border-bottom-1 surface-border">

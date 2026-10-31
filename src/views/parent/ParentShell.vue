@@ -27,6 +27,7 @@ const MORE = [
   { name: "parent-generalizations", icon: "pi pi-home", label: "pp.nav_generalizations", badge: "generalizations" },
   { name: "New", icon: "pi pi-bell", label: "pp.nav_notifications", badge: "unread" },
   { name: "parent-mchat", icon: "pi pi-heart", label: "pp.nav_mchat" },
+  { name: "parent-feedback", icon: "pi pi-comment", label: "pfb.my_title" },
   { name: "Profile", icon: "pi pi-user", label: "pp.nav_profile" },
   { name: "contactus", icon: "pi pi-phone", label: "pp.nav_contact" },
 ];

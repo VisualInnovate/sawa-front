@@ -30,7 +30,14 @@ export function canVisit(route) {
   return true;
 }
 
-/** Where a dashboard user lands: the statistics dashboard if allowed, otherwise the welcome page. */
+/** «مشرف باص» and nothing else: his bus's trips are all his dashboard (no schedule or evaluation pages). */
+export function onlyBusSupervisor() {
+  const owned = currentPermissions();
+  return owned.length > 0 && owned.every((name) => name.startsWith("bus supervisor")) && !isAdmin();
+}
+
+/** Where a dashboard user lands: the statistics dashboard if allowed, a bus supervisor's trips, otherwise the welcome page. */
 export function homeRoute() {
-  return { name: can(DASHBOARD_PERMISSION) ? "dashbord" : "welcome" };
+  if (can(DASHBOARD_PERMISSION)) return { name: "dashbord" };
+  return { name: onlyBusSupervisor() ? "bus-trips" : "welcome" };
 }

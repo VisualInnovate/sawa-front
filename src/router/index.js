@@ -177,6 +177,8 @@ const routes = [
       { path: "add-child", name: "ReAction", component: () => import("../views/parent/AddChild.vue") },
       { path: "following", name: "Following", redirect: { name: "clidreen_parents" } },
       { path: "notifications", name: "New", component: () => import("../views/parent/Notifications.vue") },
+      // «ملاحظاتي»: notes, complaints, suggestions and questions to the management, with their answers.
+      { path: "feedback", name: "parent-feedback", component: () => import("../views/parent/Feedback.vue") },
       // The free M-CHAT-R at home (kept for the parent only); opened on a child or with the child picker.
       { path: "mchat/:child_id?", name: "parent-mchat", component: () => import("../views/parent/Mchat.vue") },
       { path: "generalizations", name: "parent-generalizations", component: () => import("../views/parent/Generalizations.vue") },

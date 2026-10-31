@@ -1,7 +1,8 @@
 <script setup>
 // «العقود»: a contract for an approved candidate and a vacancy (draft), then «تعيين» turns the candidate into an
 // employee (account with a temporary password shown once) and the contract active. Active contracts warn before
-// they end and before the probation ends, and can be renewed or ended early.
+// they end and before the probation ends, and can be renewed or ended early. «المستندات» holds the contract's signed
+// documents: the offer letter, the work contract (signing it hires) and the amendments.
 import axios from "axios";
 import moment from "moment";
 import { computed, onMounted, ref } from "vue";
@@ -10,6 +11,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { errorText } from "@/utils/accounting";
 import { can } from "@/utils/permissions";
+import EmployeeDocuments from "@/components/hr/EmployeeDocuments.vue";
 
 const { t, te, locale } = useI18n();
 const route = useRoute();
@@ -248,6 +250,7 @@ async function end() {
   }
 }
 
+const documentsOf = ref(null);
 const removing = ref(null);
 async function remove() {
   try {
@@ -326,7 +329,9 @@ const cards = computed(() => [
       <Column header-style="min-width:14rem">
         <template #body="{ data }">
           <div class="table-actions">
-            <Button v-if="data.status === 'draft' && can('contracts edit') && can('employees create')" icon="pi pi-user-plus" :label="$t('ctr.hire')" size="small" severity="success" @click="openHire(data)" />
+            <Button v-if="['draft', 'active'].includes(data.status)" icon="pi pi-file-check" :label="$t('ect.documents')" size="small" severity="secondary" outlined @click="documentsOf = data" />
+            <Button v-if="data.status === 'draft' && can('contracts edit') && can('employees create')" icon="pi pi-user-plus" :label="$t('ctr.hire')" size="small" severity="success" text
+              v-tooltip.top="$t('ect.hire_by_hand')" @click="openHire(data)" />
             <Button v-if="data.employee && can('employees list', 'employees edit')" icon="pi pi-id-card" rounded variant="outlined" severity="secondary" v-tooltip.top="$t('ctr.open_employee')" :aria-label="$t('ctr.open_employee')"
               @click="router.push({ name: 'employee-profile', params: { id: data.employee.user_id } })" />
             <Button v-if="data.file_name" icon="pi pi-paperclip" rounded variant="outlined" severity="secondary" v-tooltip.top="data.file_name" :aria-label="$t('ctr.open_file')" @click="openFile(data)" />
@@ -505,6 +510,8 @@ const cards = computed(() => [
         <Button icon="pi pi-ban" severity="warn" :label="ending?.status === 'draft' ? $t('ctr.cancel') : $t('ctr.end')" :loading="saving" @click="end" />
       </template>
     </Dialog>
+
+    <EmployeeDocuments :contract="documentsOf" :options="options" @close="documentsOf = null; load()" />
 
     <Dialog :visible="!!removing" modal :header="$t('ctr.archive')" :style="{ width: '420px' }" @update:visible="removing = null">
       <p class="m-0">{{ $t("ctr.archive_confirm") }}</p>

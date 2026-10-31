@@ -227,6 +227,12 @@ function fit() {
           <h1>{{ t("sign.approved_title") }}</h1>
           <p>{{ contract ? t("sign.approved_body", { date: dateTime(contract.decided_at) }) : t("sign.already_approved") }}</p>
           <Button v-if="contract" icon="pi pi-print" :label="t('sign.print')" @click="printHtml(html)" />
+          <div v-if="contract?.account" class="sg-account" role="status">
+            <p class="font-bold m-0">{{ t("sign.account_title") }}</p>
+            <p class="m-0">{{ t("sign.account_body") }}</p>
+            <p class="m-0">{{ t("sign.account_email") }}: <b dir="ltr">{{ contract.account.email }}</b></p>
+            <p class="m-0">{{ t("sign.account_password") }}: <b dir="ltr">{{ contract.account.password }}</b></p>
+          </div>
         </div>
         <iframe v-if="contract" ref="frame" class="sg-doc" :srcdoc="html" :title="t('sign.read_title')" @load="fit" />
       </template>
@@ -276,4 +282,5 @@ function fit() {
 .sg-state { text-align: center; justify-items: center; }
 .sg-state > i { font-size: 2.6rem; color: #94a3b8; }
 .sg-state.ok > i { color: #16a34a; }
+.sg-account { display: grid; gap: .35rem; text-align: start; width: 100%; max-width: 420px; margin-top: .5rem; padding: .8rem 1rem; border-radius: 12px; background: #fefce8; border: 1px solid #fde68a; }
 </style>

@@ -100,6 +100,24 @@ const hr = [
         meta: { permission: ["candidates list"] },
         component: () => import("../views/hr/candidates/index.vue")
       },
+      // The candidates' cycle at the department head: their files and interviews (the API shows each head their own),
+      // and the interview criteria per department.
+      {
+        path: '/candidate-reviews',
+        name: 'candidate-reviews',
+        component: () => import("../views/hr/candidate-reviews/index.vue")
+      },
+      {
+        path: '/candidate-reviews/:id',
+        name: 'candidate-review',
+        component: () => import("../views/hr/candidate-reviews/Review.vue")
+      },
+      {
+        path: '/interview-criteria',
+        name: 'interview-criteria',
+        meta: { permission: ["hr lists list", "hr lists edit"] },
+        component: () => import("../views/hr/interview-criteria/index.vue")
+      },
       {
         path: '/contracts',
         name: 'contracts',

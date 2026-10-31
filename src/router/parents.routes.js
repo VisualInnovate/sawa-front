@@ -16,7 +16,14 @@ const parentsRoutes = [
     name: "parent-meeting",
     meta: { permission: ["parent meetings list"] },
     component: mettins,
-   
+
+  },
+  // «ملاحظات أولياء الأمور»: what parents send from the portal; answered and closed here.
+  {
+    path: "parent-feedback",
+    name: "admin-parent-feedback",
+    meta: { permission: ["parent feedback list"] },
+    component: () => import("../views/parents/ParentFeedback.vue"),
   },
 ];
 
