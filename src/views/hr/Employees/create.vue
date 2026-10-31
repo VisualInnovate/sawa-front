@@ -547,6 +547,12 @@
               :class="{ 'p-invalid': submitted && !employee.role }"
             />
           </div>
+          <!-- Extra roles on top of the main one («مشرف باص»). -->
+          <div v-if="extraRoles.length" class="flex flex-column gap-2 py-1">
+            <label class="text-start" for="extra-roles">{{ $t("extra_roles") }}</label>
+            <MultiSelect v-model="employee.extra_roles" inputId="extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" />
+            <small class="text-color-secondary">{{ $t("extra_roles_hint") }}</small>
+          </div>
           <!-- The employees who stand in for this one (information only); every employee, searchable. -->
           <div class="flex flex-column gap-2 py-1">
             <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
@@ -584,7 +590,7 @@ import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
 import AgeRangeField from "@/components/common/AgeRangeField.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
-import { evaluationTypeGroups } from "@/utils/employeeForm";
+import { evaluationTypeGroups, extraRoleOptions, extraRolesValue } from "@/utils/employeeForm";
 import moment from "moment";
 export default {
   components: { SubstituteSelect, WorkTypeSelect, AgeRangeField },
@@ -598,11 +604,17 @@ export default {
         { label: "Additional Details" },
       ],
       submitted: false,
-      employee: {},
+      employee: { extra_roles: [] },
+      roles: [],
       shifts: [],
       positions: [],
       treatments: [],
     };
+  },
+  computed: {
+    extraRoles() {
+      return extraRoleOptions(this.roles, this.employee.role);
+    },
   },
   methods: {
     tpes() {
@@ -701,6 +713,7 @@ export default {
       if (this.employee.evaluation)
         body.append("evaluations", this.employee.evaluation);
       if (this.employee.role) body.append("role", this.employee.role);
+      body.append("extra_roles", extraRolesValue(this.employee));
       if (this.employee.substitute_ids?.length) body.append("substitute_ids", this.employee.substitute_ids);
       if (this.employee.work_types?.length) body.append("work_types", workTypesValue(this.employee.work_types));
       if (this.employee.type == 2) {

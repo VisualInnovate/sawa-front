@@ -18,8 +18,11 @@ import {
   employeeTypeName,
   employeeTypes,
   evaluationTypeGroups,
+  extraRoleOptions,
+  extraRolesValue,
   fetchEmployeeFormOptions,
   hasTherapistFields,
+  splitRoles,
 } from "@/utils/employeeForm";
 
 const { t } = useI18n();
@@ -40,6 +43,7 @@ const canEditJob = computed(() => can("employees edit"));
 const types = computed(() => employeeTypes(t));
 const evaluationGroups = computed(() => evaluationTypeGroups(t));
 const roles = computed(() => options.value.roles.filter((role) => !role.is_locked || isAdmin()));
+const extraRoles = computed(() => extraRoleOptions(roles.value, employee.value.role));
 const therapist = computed(() => hasTherapistFields(employee.value.type));
 
 const snapshot = () => JSON.stringify(employee.value);
@@ -77,7 +81,7 @@ function fill(data) {
     contract_period: data.contract_period,
     date_of_enrollment: toDate(data.date_of_enrollment),
     type: user.type,
-    role: user.roles?.[0]?.id ?? null,
+    ...splitRoles(user.roles, options.value.roles),
     department: ids(user.departments),
     skills: ids(user.skills),
     treatments: ids(user.treatments),
@@ -131,6 +135,7 @@ function body() {
   if (e.basic_salary) form.append("basic_salary", e.basic_salary);
   if (e.type) form.append("type", e.type);
   if (e.role) form.append("role", e.role);
+  if (canEditJob.value) form.append("extra_roles", extraRolesValue(e));
   // Always sent: an empty value clears the substitutes.
   form.append("substitute_ids", e.substitute_ids ?? []);
   // Always sent too: an empty value clears the work types.
@@ -149,7 +154,7 @@ function body() {
 
 // Which tab holds each field, to open the first one with an error.
 const FIELD_TABS = {
-  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "department_id", "substitute_ids", "work_types"],
+  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "extra_roles", "department_id", "substitute_ids", "work_types"],
   therapist: ["skills", "evaluations", "treatments", "age_from_months", "age_to_months"],
 };
 const err = (key) => errors.value?.[key];
@@ -325,6 +330,9 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                 <EmployeeField :label="$t('roles')" for="emp-role" required :error="err('role')">
                   <Select v-model="employee.role" inputId="emp-role" :options="roles" optionLabel="name" optionValue="id"
                     filter :disabled="!canEditJob" :invalid="Boolean(err('role'))" />
+                </EmployeeField>
+                <EmployeeField v-if="extraRoles.length" :label="$t('extra_roles')" for="emp-extra-roles" :hint="$t('extra_roles_hint')">
+                  <MultiSelect v-model="employee.extra_roles" inputId="emp-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" :disabled="!canEditJob" />
                 </EmployeeField>
                 <EmployeeField :label="$t('department')" for="emp-department" required :error="err('department_id')">
                   <MultiSelect v-model="employee.department" inputId="emp-department" :options="options.departments"

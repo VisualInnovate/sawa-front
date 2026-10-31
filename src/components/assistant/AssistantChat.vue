@@ -66,7 +66,7 @@ const readAloud = useStorage("assistantReadAloud", false, localStorage);
 
 function mic() {
   if (voice.listening.value) return voice.stopListening();
-  voice.unlock();
+  // No silent «unlock» sentence here: on some phones speaking takes the audio away from the mic and listening stops at once.
   voice.listen({
     onText: (text) => (draft.value = text),
     onEnd: (text) => text && send(text, { voice: true }),
@@ -302,7 +302,7 @@ onMounted(load);
             <i class="pi pi-send" />
           </button>
         </form>
-        <p v-if="voice.error.value" class="sawa-assistant__note sawa-assistant__note--error">{{ $t(`ai.voice_${voice.error.value}`) }}</p>
+        <p v-if="voice.error.value" class="sawa-assistant__note sawa-assistant__note--error">{{ $t(`ai.voice_${voice.error.value}`) }}<span v-if="voice.errorCode.value" dir="ltr"> ({{ voice.errorCode.value }})</span></p>
         <p v-else-if="voice.listening.value" class="sawa-assistant__note">{{ $t("ai.voice_listening") }}</p>
         <p v-else class="sawa-assistant__note">{{ copy.note }}</p>
       </section>

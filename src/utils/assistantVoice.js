@@ -22,36 +22,55 @@ export function useAssistantVoice(lang) {
   const listening = ref(false);
   const speaking = ref(false);
   const error = ref("");
+  // The browser's own reason when listening fails (shown with the message, so a failing device can be told apart).
+  const errorCode = ref("");
 
   // ── Listening ──
   let recognition = null;
+  // A browser without the country's variant ("ar-JO") gets plain Arabic next time.
+  const tried = new Set();
+  const ERRORS = { "not-allowed": "mic_denied", "service-not-allowed": "mic_denied", network: "mic_network", "audio-capture": "mic_capture" };
   function listen({ onText, onEnd }) {
     if (!canListen || listening.value) return;
-    stopSpeaking();
+    if (synth?.speaking) stopSpeaking();
     error.value = "";
+    errorCode.value = "";
     recognition = new Recognition();
-    recognition.lang = lang();
+    const wanted = lang();
+    recognition.lang = tried.has(wanted) ? wanted.slice(0, 2) : wanted;
     recognition.interimResults = true;
     recognition.continuous = false;
+    recognition.maxAlternatives = 1;
     let text = "";
+    let retry = false;
     recognition.onresult = (event) => {
       text = Array.from(event.results, (r) => r[0].transcript).join(" ");
       onText(text);
     };
     recognition.onerror = (event) => {
       // "no-speech" and "aborted" are not errors for the user: nothing was said, or they stopped it.
-      if (!["no-speech", "aborted"].includes(event.error)) error.value = event.error === "not-allowed" || event.error === "service-not-allowed" ? "mic_denied" : "mic_failed";
+      if (["no-speech", "aborted"].includes(event.error)) return;
+      if (event.error === "language-not-supported" && !tried.has(wanted)) {
+        tried.add(wanted);
+        retry = true;
+        return;
+      }
+      errorCode.value = event.error ?? "";
+      error.value = ERRORS[event.error] ?? "mic_failed";
     };
     recognition.onend = () => {
       listening.value = false;
       recognition = null;
+      if (retry) return listen({ onText, onEnd });
       onEnd(text.trim());
     };
     listening.value = true;
     try {
       recognition.start();
-    } catch {
+    } catch (e) {
       listening.value = false;
+      recognition = null;
+      errorCode.value = e?.name ?? "";
       error.value = "mic_failed";
     }
   }
@@ -124,5 +143,5 @@ export function useAssistantVoice(lang) {
     synth?.removeEventListener?.("voiceschanged", pickVoice);
   });
 
-  return { canListen, canSpeak, listening, speaking, error, listen, stopListening, say, stopSpeaking, unlock, reader };
+  return { canListen, canSpeak, listening, speaking, error, errorCode, listen, stopListening, say, stopSpeaking, unlock, reader };
 }

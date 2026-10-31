@@ -11,7 +11,7 @@ import AgeRangeField from "../common/AgeRangeField.vue";
 import EmployeeField from "../employees/EmployeeField.vue";
 import EmployeeHero from "../employees/EmployeeHero.vue";
 import { can, isAdmin } from "../../utils/permissions";
-import { employeeTypeName, employeeTypes, fetchEmployeeFormOptions, hasTherapistFields } from "../../utils/employeeForm";
+import { employeeTypeName, employeeTypes, extraRoleOptions, extraRolesValue, fetchEmployeeFormOptions, hasTherapistFields, splitRoles } from "../../utils/employeeForm";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -38,6 +38,7 @@ const passwordLoading = ref(false);
 
 const types = computed(() => employeeTypes(t));
 const roles = computed(() => options.value.roles.filter((role) => !role.is_locked || isAdmin()));
+const extraRoles = computed(() => extraRoleOptions(roles.value, employee.value.role));
 const therapist = computed(() => Number(profile.value.type) === 2);
 // In order: the substitutes' order matters (the first free one takes a leave's sessions).
 const sameIds = (a, b) => [...a].map(Number).join(",") === [...b].map(Number).join(",");
@@ -100,7 +101,7 @@ function fill(user) {
     contract_period: user.contract_period,
     date_of_enrollment: toDate(user.date_of_enrollment),
     type: user.type,
-    role: user.roles?.[0]?.id ?? null,
+    ...splitRoles(user.roles, options.value.roles),
     skills: ids(user.skills),
     treatments: ids(user.treatments),
     department: ids(user.departments),
@@ -152,6 +153,7 @@ async function update() {
   if (e.basic_salary) body.append("basic_salary", e.basic_salary);
   if (e.type) body.append("type", e.type);
   if (e.role) body.append("role", e.role);
+  body.append("extra_roles", extraRolesValue(e));
   if (e.treatments) body.append("treatments", e.treatments);
   if (e.skills) body.append("skills", e.skills);
   if (e.department) body.append("department_id", e.department);
@@ -255,7 +257,7 @@ onMounted(load);
 
     <template v-else>
       <EmployeeHero :name="canEditProfile ? employee.name : profile.name" :title="canEditProfile ? employee.title : profile.title"
-        :image="employee.image" :type-name="employeeTypeName(t, profile.type)" :role-name="profile.roles?.[0]?.name"
+        :image="employee.image" :type-name="employeeTypeName(t, profile.type)" :role-name="options.roles.find((role) => Number(role.id) === Number(employee.role))?.name"
         :facts="facts" :editable="canEditProfile" :image-error="err('image')" @image="setImage" />
 
       <div class="sawa-card profile-card">
@@ -325,6 +327,9 @@ onMounted(load);
                 </EmployeeField>
                 <EmployeeField :label="$t('roles')" for="profile-role" required :error="err('role')">
                   <Select v-model="employee.role" inputId="profile-role" :options="roles" optionLabel="name" optionValue="id" filter />
+                </EmployeeField>
+                <EmployeeField v-if="extraRoles.length" :label="$t('extra_roles')" for="profile-extra-roles" :hint="$t('extra_roles_hint')">
+                  <MultiSelect v-model="employee.extra_roles" inputId="profile-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" />
                 </EmployeeField>
                 <EmployeeField :label="$t('department')" for="profile-department" :error="err('department_id')">
                   <MultiSelect v-model="employee.department" inputId="profile-department" :options="options.departments" optionLabel="title" optionValue="id" filter display="chip" />
