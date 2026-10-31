@@ -143,6 +143,19 @@
         "--strictPort"
       ],
       "port": 3031
+    },
+    {
+      "name": "sawa-local-front-voice",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3033",
+        "--strictPort"
+      ],
+      "port": 3033
     }
   ]
 }

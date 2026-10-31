@@ -132,6 +132,7 @@ export const buildMenu = () => [
       { label: "program_logs", to: { name: "student-program-logs" }, perm: "student program log list" },
       { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
       { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },
+      { label: "cl.title", to: { name: "concepts-library" }, perm: "concepts library list" },
     ],
   },
   {

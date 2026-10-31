@@ -14,12 +14,22 @@ import sawaLogo from "@/assets/img/sawa_logo.svg";
 import BreakTables from "@/components/sessions/BreakTables.vue";
 import RunReinforcers from "@/components/sessions/RunReinforcers.vue";
 import RunGoals from "@/components/sessions/RunGoals.vue";
+import ConceptLibrary from "@/components/concepts/ConceptLibrary.vue";
+import { can } from "@/utils/permissions";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const id = route.params.id;
+// «مكتبة المفاهيم» over the session (it keeps its place when closed and opened again).
+const canConcepts = can("concepts library list");
+const conceptsOpen = ref(false);
+const conceptsOpened = ref(false);
+function openConcepts() {
+  conceptsOpened.value = true;
+  conceptsOpen.value = true;
+}
 
 const data = ref(null);
 const step = ref("breaks");
@@ -189,6 +199,7 @@ onBeforeUnmount(() => {
           </svg>
           <div><small>{{ $t("run_time_left") }}</small><b class="ltr">{{ clock }}</b></div>
         </div>
+        <Button v-if="canConcepts" icon="pi pi-images" :label="$t('cl.short')" severity="help" variant="outlined" size="small" @click="openConcepts" />
         <Button :icon="fullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" variant="text" rounded severity="secondary"
           v-tooltip.bottom="$t('run_fullscreen')" :aria-label="$t('run_fullscreen')" @click="toggleFullscreen" />
         <Button v-if="canEdit" icon="pi pi-stop-circle" :label="$t('run_end')" severity="danger" variant="outlined" size="small" @click="endDialog = true" />
@@ -231,6 +242,12 @@ onBeforeUnmount(() => {
       </Transition>
     </main>
     <div v-else class="run-loading"><i class="pi pi-spin pi-spinner" /></div>
+
+    <!-- Kept mounted after the first opening, so closing the dialog does not lose the set and the card. -->
+    <Dialog v-if="conceptsOpened" v-model:visible="conceptsOpen" modal maximizable :header="$t('cl.title')" :style="{ width: 'min(1100px, 96vw)' }"
+      :contentStyle="{ minHeight: '70vh' }" :pt="{ root: { dir: 'rtl' } }">
+      <ConceptLibrary embedded />
+    </Dialog>
 
     <Dialog v-model:visible="endDialog" modal :header="$t('run_end')" :style="{ width: '24rem' }">
       <p>{{ $t("run_end_confirm") }}</p>
