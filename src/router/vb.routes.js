@@ -206,6 +206,13 @@ const vb = [
       meta: { permission: ["program hours edit"] },
       component: () => import("../views/programHours/Index.vue")
     },
+    // «مكتبة المفاهيم من Enable 360» (?set=T1-S03 opens a set).
+    {
+      path: '/concepts',
+      name: 'concepts-library',
+      meta: { permission: ["concepts library list"] },
+      component: () => import("../views/concepts/Library.vue")
+    },
 
     // Before a session starts: its break schedule (two tables).
     {

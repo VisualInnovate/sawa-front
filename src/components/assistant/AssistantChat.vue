@@ -59,26 +59,55 @@ const input = ref(null);
 
 const suggestions = computed(() => copy.value.suggestions);
 
-// Voice (parent only). A question asked by voice is always answered aloud; «قراءة الردود» reads the typed ones too.
-const voice = useAssistantVoice(() => (locale.value === "ar" ? "ar-JO" : "en-US"));
+// Voice (parent only). A question asked by voice is answered aloud, then the mic opens again by itself so the talk
+// goes on hands-free («talking»), until the user stops it, types, or says nothing. A typed question gets a written
+// answer only. The server's voice (natural Arabic) when it is on, the browser's otherwise.
+const voiceServer = ref(false);
+const voice = useAssistantVoice({
+  lang: () => (locale.value === "ar" ? "ar-JO" : "en-US"),
+  server: () => voiceServer.value,
+  request: (path, init) => {
+    const bearer = token();
+    return fetch(new URL(`${base}/${path}`, axios.defaults.baseURL), {
+      ...init,
+      headers: { Accept: "application/json", lang: localStorage.getItem("appLang") ?? "", ...(init.headers ?? {}), ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}) },
+    });
+  },
+});
 const voiceOn = props.kind === "parent";
-const readAloud = useStorage("assistantReadAloud", false, localStorage);
+const talking = ref(false);
+const micLabel = computed(() =>
+  voice.transcribing.value ? "ai.voice_transcribing" : voice.listening.value ? "ai.voice_send_now" : talking.value ? "ai.voice_end" : "ai.voice_mic",
+);
 
-function mic() {
-  if (voice.listening.value) return voice.stopListening();
-  // No silent «unlock» sentence here: on some phones speaking takes the audio away from the mic and listening stops at once.
+function listenNow() {
   voice.listen({
     onText: (text) => (draft.value = text),
-    onEnd: (text) => text && send(text, { voice: true }),
+    onEnd: (text) => {
+      if (text && talking.value) return send(text, { voice: true });
+      // Nothing said (or stopped): the talk ends quietly.
+      draft.value = "";
+      talking.value = false;
+    },
   });
 }
-function toggleReadAloud() {
-  readAloud.value = !readAloud.value;
-  if (readAloud.value) voice.unlock();
-  else voice.stopSpeaking();
+function mic() {
+  // While listening: send now, without waiting for the silence.
+  if (voice.listening.value) return voice.stopListening();
+  if (talking.value) return stopTalking();
+  talking.value = true;
+  // Inside the tap: lets the answer's voice play later.
+  voice.unlock();
+  listenNow();
+}
+function stopTalking() {
+  talking.value = false;
+  voice.cancelListening();
+  voice.stopSpeaking();
 }
 function listenTo(m) {
-  voice.stopSpeaking();
+  stopTalking();
+  voice.unlock();
   voice.say(m.text);
 }
 
@@ -101,6 +130,7 @@ async function load() {
     const { data } = await axios.get(`/${base}`);
     enabled.value = data.data.enabled;
     welcome.value = data.data.welcome_message ?? "";
+    voiceServer.value = !!data.data.voice;
   } catch {
     enabled.value = false;
   }
@@ -173,8 +203,9 @@ async function send(text = draft.value, { voice: byVoice = false } = {}) {
   if (!text || sending.value) return;
   draft.value = "";
   voice.stopSpeaking();
-  if (readAloud.value) voice.unlock();
-  const aloud = voiceOn && (byVoice || readAloud.value) ? voice.reader() : null;
+  // A typed question (or a suggestion) ends the spoken talk: its answer is written only.
+  if (!byVoice) stopTalking();
+  const aloud = voiceOn && byVoice ? voice.reader() : null;
   messages.value.push({ id: `local-${Date.now()}`, role: "user", text });
   messages.value.push({ id: `reply-${Date.now()}`, role: "assistant", text: "", actions: [] });
   // The reactive copy, so the bubble updates as the text arrives.
@@ -184,6 +215,8 @@ async function send(text = draft.value, { voice: byVoice = false } = {}) {
   let finished = false;
   let navigated = false;
   const body = { message: text, conversation_id: conversationId.value, page: { name: route.name ?? null, path: route.fullPath, title: document.title } };
+  // Asked by voice: the answer is written to be heard (spoken dialect, short, no symbols).
+  if (aloud) body.page.spoken = true;
   // The dashboard assistant opens only the pages of the employee's own menu.
   if (dashboard) body.pages = myMenuPages(t);
   if (visitorSite) body.visitor = visitorId.value;
@@ -219,7 +252,13 @@ async function send(text = draft.value, { voice: byVoice = false } = {}) {
   } finally {
     sending.value = false;
     scrollDown();
-    nextTick(() => input.value?.focus?.());
+    if (!aloud) nextTick(() => input.value?.focus?.());
+  }
+  // The talk goes on: once the answer has been read, the mic opens for the next question.
+  if (aloud && talking.value) {
+    if (reply.error) return (talking.value = false);
+    await voice.drained();
+    if (talking.value && open.value && !sending.value) listenNow();
   }
 }
 
@@ -231,12 +270,12 @@ function onKey(event) {
 }
 
 function restart() {
-  voice.stopSpeaking();
+  stopTalking();
   conversationId.value = null;
   messages.value = [];
 }
 
-watch(open, (value) => (value ? scrollDown() : voice.stopSpeaking()));
+watch(open, (value) => (value ? scrollDown() : stopTalking()));
 onMounted(load);
 </script>
 
@@ -250,16 +289,10 @@ onMounted(load);
             <p class="sawa-assistant__title">{{ $t("ai.chat_title") }}</p>
             <p class="sawa-assistant__subtitle">{{ copy.subtitle }}</p>
           </div>
-          <template v-if="voiceOn && voice.canSpeak">
-            <button v-if="voice.speaking.value" type="button" class="sawa-assistant__icon" :title="$t('ai.voice_stop')" :aria-label="$t('ai.voice_stop')"
-              @click="voice.stopSpeaking()">
-              <i class="pi pi-stop-circle" />
-            </button>
-            <button type="button" class="sawa-assistant__icon" :class="{ 'is-on': readAloud }" :title="$t(readAloud ? 'ai.voice_read_off' : 'ai.voice_read_on')"
-              :aria-label="$t(readAloud ? 'ai.voice_read_off' : 'ai.voice_read_on')" :aria-pressed="readAloud" @click="toggleReadAloud">
-              <i :class="readAloud ? 'pi pi-volume-up' : 'pi pi-volume-off'" />
-            </button>
-          </template>
+          <button v-if="voiceOn && (voice.speaking.value || talking)" type="button" class="sawa-assistant__icon" :title="$t('ai.voice_stop')"
+            :aria-label="$t('ai.voice_stop')" @click="stopTalking">
+            <i class="pi pi-stop-circle" />
+          </button>
           <button type="button" class="sawa-assistant__icon" :title="$t('ai.chat_new')" :aria-label="$t('ai.chat_new')" @click="restart">
             <i class="pi pi-refresh" />
           </button>
@@ -293,17 +326,19 @@ onMounted(load);
         <form class="sawa-assistant__form" @submit.prevent="send()">
           <textarea ref="input" v-model="draft" rows="1" maxlength="2000" :placeholder="$t('ai.chat_placeholder')" :aria-label="$t('ai.chat_placeholder')"
             @keydown="onKey" />
-          <button v-if="voiceOn && voice.canListen" type="button" class="sawa-assistant__mic" :class="{ 'is-listening': voice.listening.value }" :disabled="sending"
-            :title="$t(voice.listening.value ? 'ai.voice_listening' : 'ai.voice_mic')" :aria-label="$t(voice.listening.value ? 'ai.voice_listening' : 'ai.voice_mic')"
-            :aria-pressed="voice.listening.value" @click="mic">
-            <i :class="voice.listening.value ? 'pi pi-stop' : 'pi pi-microphone'" />
+          <button v-if="voiceOn && voice.canListen" type="button" class="sawa-assistant__mic" :class="{ 'is-listening': voice.listening.value, 'is-talking': talking }"
+            :style="{ '--sa-level': voice.level.value }" :disabled="voice.transcribing.value || (sending && !talking)" :title="$t(micLabel)" :aria-label="$t(micLabel)"
+            :aria-pressed="talking" @click="mic">
+            <i :class="voice.transcribing.value ? 'pi pi-spin pi-spinner' : voice.listening.value ? 'pi pi-send' : talking ? 'pi pi-stop' : 'pi pi-microphone'" />
           </button>
           <button type="submit" class="sawa-assistant__send" :disabled="!draft.trim() || sending" :aria-label="$t('ai.chat_send')">
             <i class="pi pi-send" />
           </button>
         </form>
         <p v-if="voice.error.value" class="sawa-assistant__note sawa-assistant__note--error">{{ $t(`ai.voice_${voice.error.value}`) }}<span v-if="voice.errorCode.value" dir="ltr"> ({{ voice.errorCode.value }})</span></p>
-        <p v-else-if="voice.listening.value" class="sawa-assistant__note">{{ $t("ai.voice_listening") }}</p>
+        <p v-else-if="voice.listening.value" class="sawa-assistant__note sawa-assistant__note--live">{{ $t("ai.voice_listening") }}</p>
+        <p v-else-if="voice.transcribing.value" class="sawa-assistant__note sawa-assistant__note--live">{{ $t("ai.voice_transcribing") }}</p>
+        <p v-else-if="talking" class="sawa-assistant__note sawa-assistant__note--live">{{ $t(voice.speaking.value ? "ai.voice_talking" : "ai.voice_thinking") }}</p>
         <p v-else class="sawa-assistant__note">{{ copy.note }}</p>
       </section>
     </transition>
@@ -508,18 +543,21 @@ onMounted(load);
 .sawa-assistant__mic:disabled {
   opacity: 0.45;
 }
+.sawa-assistant__mic.is-talking {
+  background: var(--sa-main);
+  color: #fff;
+}
+/* The ring follows the voice's loudness: the user sees they are heard. */
 .sawa-assistant__mic.is-listening {
   background: var(--sa-accent);
   border-color: var(--sa-accent);
   color: #fff;
-  animation: sa-pulse 1.2s infinite;
+  box-shadow: 0 0 0 calc(3px + var(--sa-level, 0) * 12px) rgba(255, 42, 91, 0.28);
+  transition: box-shadow 0.08s linear;
 }
-@keyframes sa-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 42, 91, 0.5); }
-  100% { box-shadow: 0 0 0 10px rgba(255, 42, 91, 0); }
-}
-.sawa-assistant__icon.is-on {
-  background: rgba(255, 255, 255, 0.22);
+.sawa-assistant__note--live {
+  color: var(--sa-main);
+  font-weight: 600;
 }
 .sawa-assistant__listen {
   align-self: flex-start;

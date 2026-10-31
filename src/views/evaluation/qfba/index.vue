@@ -1,8 +1,8 @@
 <script setup>
 // The QFBA evaluation of one child (/qfba-evaluation/:id): the evaluator picks the form's language (Arabic or English),
 // names the target behaviour and who answers, then rates how often the behaviour happens in each situation (the scale
-// from the QFBA settings, or «لا ينطبق»). Each function's endorsed questions and severity add up as they answer, and
-// saving shows the result. ?edit=<evaluation id> opens a saved evaluation (before its approval) with its answers.
+// from the QFBA settings, or «لا ينطبق»). The functions stay hidden while answering (no label per question, no running
+// totals); saving shows the result. ?edit=<evaluation id> opens a saved evaluation (before its approval) with its answers.
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -11,7 +11,7 @@ import { toDateOnly } from "@/utils/childAge";
 import { childMonths, fitsAge, formatAgeRange } from "@/utils/ageRange";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 import {
-  functionColor, functionName, instructionsOf, optionLabel, primaryOf, qt, questionText, scoresOf,
+  instructionsOf, optionLabel, qt, questionText,
 } from "./qfba";
 
 const { t, locale } = useI18n();
@@ -36,16 +36,10 @@ const editing = ref(null);
 
 const LANGUAGE_OPTIONS = [{ value: "ar", label: "العربية" }, { value: "en", label: "English" }];
 const questions = computed(() => context.value?.questions ?? []);
-const functions = computed(() => context.value?.functions ?? []);
 const options = computed(() => context.value?.options ?? []);
 const child = computed(() => context.value?.child ?? null);
-const maxValue = computed(() => Math.max(0, ...options.value.map((option) => option.value)));
-const functionOf = computed(() => Object.fromEntries(functions.value.map((fn) => [fn.id, fn])));
 const isAnswered = (question) => Object.prototype.hasOwnProperty.call(answers.value, question.id);
 const answeredCount = computed(() => questions.value.filter(isAnswered).length);
-const done = computed(() => questions.value.length > 0 && answeredCount.value === questions.value.length);
-const scores = computed(() => scoresOf(functions.value, questions.value, answers.value, maxValue.value));
-const likely = computed(() => primaryOf(scores.value));
 
 const ageMonths = computed(() => (child.value?.birth_date && date.value ? childMonths(child.value.birth_date, date.value) : null));
 const range = computed(() => context.value?.age_range ?? {});
@@ -191,9 +185,6 @@ watch(childId, (value, before) => {
         <span class="qf-num" :class="{ 'is-done': isAnswered(question) }">{{ question.number }}</span>
         <div class="qf-question-text">
           <h3>{{ questionText(question, lang) }}</h3>
-          <small class="qf-fn" :style="{ color: functionColor(functionOf[question.function_id]?.key) }">
-            {{ functionName(functionOf[question.function_id], lang) }}
-          </small>
         </div>
         <div class="qf-choices" role="radiogroup" :aria-label="questionText(question, lang)">
           <button v-for="option in options" :key="option.value" type="button" role="radio" class="qf-choice"
@@ -216,12 +207,6 @@ watch(childId, (value, before) => {
       </section>
 
       <footer class="qf-footer" :dir="lang === 'en' ? 'ltr' : 'rtl'">
-        <div class="qf-tally">
-          <span v-for="score in scores" :key="score.key" class="qf-tally-item" :class="{ 'is-likely': done && likely.includes(score.key) }"
-            :style="{ '--tone': functionColor(score.key) }">
-            {{ functionName(score, lang) }} <b class="ltr">{{ score.endorsed }}/{{ score.questions }} · {{ score.severity }}</b>
-          </span>
-        </div>
         <Button :label="editing ? $t('mae_save') : qt(lang, 'save')" icon="pi pi-check" :loading="saving" data-no-request-spinner @click="save" />
       </footer>
     </template>
@@ -251,17 +236,13 @@ watch(childId, (value, before) => {
 .qf-num { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 10px; background: #edf7f5; color: var(--sawa-primary, rgb(var(--bp-135c65))); font-weight: 800; }
 .qf-num.is-done { background: var(--sawa-primary, rgb(var(--bp-135c65))); color: #fff; }
 .qf-question-text h3 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.7; }
-.qf-fn { font-weight: 700; }
 .qf-choices { grid-column: 2; display: flex; flex-wrap: wrap; gap: .45rem; }
 .qf-choice { display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .8rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 10px; background: #fff; font: inherit; font-weight: 600; cursor: pointer; }
 .qf-choice:hover { border-color: #94a3b8; }
 .qf-choice:focus-visible { outline: 2px solid var(--sawa-primary, rgb(var(--bp-135c65))); outline-offset: 2px; }
 .qf-choice.is-picked { border-color: var(--sawa-primary, rgb(var(--bp-135c65))); background: var(--sawa-primary, rgb(var(--bp-135c65))); color: #fff; }
 .qf-choice.is-na.is-picked { border-color: #475569; background: #475569; }
-.qf-footer { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 14px; background: #fff; box-shadow: 0 -6px 20px -12px rgba(15, 23, 42, .25); }
-.qf-tally { display: flex; flex-wrap: wrap; gap: .4rem; }
-.qf-tally-item { padding: .2rem .6rem; border: 1px solid #e2e8f0; border-inline-start: 4px solid var(--tone); border-radius: 8px; font-size: .85rem; }
-.qf-tally-item.is-likely { background: #fefce8; border-color: var(--tone); font-weight: 700; }
+.qf-footer { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem; padding: .85rem 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 14px; background: #fff; box-shadow: 0 -6px 20px -12px rgba(15, 23, 42, .25); }
 .ltr { direction: ltr; unicode-bidi: isolate; }
 @media (max-width: 640px) {
   .qf-choices { grid-column: 1 / -1; }
