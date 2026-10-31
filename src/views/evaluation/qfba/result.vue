@@ -103,7 +103,7 @@ watch(() => route.params.evaluation, (value, before) => {
                 </tr>
               </tbody>
             </table>
-            <QfbaChart :tests="tests" :lang="lang" />
+            <QfbaChart :tests="tests" :lang="lang" :child-name="data.child?.name ?? ''" />
             <QfbaSummary :result="data" :lang="lang" />
           </div>
         </ResultSheet>

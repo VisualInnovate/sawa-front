@@ -217,9 +217,27 @@ onMounted(load);
               </label>
             </div>
             <small class="text-color-secondary">{{ $t("hrset.application_hint") }}</small>
+            <div v-for="key in ['interview_minutes', 'interview_days_ahead']" :key="key" class="flex flex-column gap-1">
+              <label :for="`rec-${key}`" class="font-semibold">{{ $t(`hrset.${key}`) }}</label>
+              <div class="flex items-center gap-2">
+                <InputNumber v-model="form.rules.recruitment[key]" :inputId="`rec-${key}`" :min="key === 'interview_minutes' ? 10 : 1" :max="key === 'interview_minutes' ? 240 : 120"
+                  :step="key === 'interview_minutes' ? 5 : 1" showButtons :disabled="!canEdit" :suffix="` ${key === 'interview_minutes' ? $t('hrset.minutes') : $t('ctr.days')}`" class="w-12rem" />
+                <Button v-if="changed('recruitment', key)" icon="pi pi-undo" text rounded :aria-label="$t('hrset.reset')" v-tooltip.top="$t('hrset.reset')"
+                  :disabled="!canEdit" @click="reset('recruitment', key)" />
+              </div>
+              <small class="text-color-secondary">{{ $t(`hrset.${key}_hint`, { value: settings.defaults.recruitment?.[key] }) }}</small>
+            </div>
+            <RouterLink :to="{ name: 'interview-criteria' }" class="text-sm"><i class="pi pi-list-check me-1" />{{ $t("icr.title") }}</RouterLink>
           </div>
           <div v-if="form.rules.contracts" class="sawa-card p-4 flex flex-column gap-4 max-w-2xl mt-3">
             <p class="font-bold m-0">{{ $t("hrset.contracts") }}</p>
+            <div v-for="key in ['gm_approval', 'offer_required']" :key="key" class="flex flex-column gap-1">
+              <div class="flex items-center gap-3">
+                <ToggleSwitch v-model="form.rules.contracts[key]" :inputId="`ctr-${key}`" :disabled="!canEdit" />
+                <label :for="`ctr-${key}`" class="font-semibold">{{ $t(`hrset.${key}`) }}</label>
+              </div>
+              <small class="text-color-secondary">{{ $t(`hrset.${key}_hint`) }}</small>
+            </div>
             <div v-for="key in ['probation_days', 'expiry_alert_days', 'probation_alert_days']" :key="key" class="flex flex-column gap-1">
               <label :for="`ctr-${key}`" class="font-semibold">{{ $t(`hrset.${key}`) }}</label>
               <div class="flex items-center gap-2">

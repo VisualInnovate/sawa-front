@@ -159,29 +159,32 @@ const initFilters = () => {
 
         
          
-           <Column field="vehicle.plate_number" :header='$t("vecile_type")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="date" :header='$t("tr.date")' :sortable="true" header-style="min-width:8rem;">
+            <template #body="slotProps">{{ String(slotProps.data.date ?? '').slice(0, 10) }}</template>
+           </Column>
+           <Column field="direction" :header='$t("tr.direction")' :sortable="true" header-style="min-width:9rem;">
+            <template #body="slotProps">{{ $t(`tr.dir.${slotProps.data.direction ?? 'to_academy'}`) }}</template>
+           </Column>
+           <Column field="vehicle.plate_number" :header='$t("tr.bus")' :sortable="true" header-style="min-width:8rem;">
             <template #body="slotProps">
-              {{ slotProps.data.vehicle.plate_number }}
+              <span dir="ltr">{{ slotProps.data.vehicle?.plate_number }}</span>
             </template>
            </Column>
-
-           <Column field="plate_number.location_url" :header='$t("student_tans")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="student_transportation.region.name" :header='$t("student_tans")' :sortable="true" header-style="min-width:9rem;">
             <template #body="slotProps">
-              {{ slotProps.data.student_transportation.location_url }}
+              {{ slotProps.data.student_transportation?.region?.name ?? '—' }}
             </template>
            </Column>
-           <Column field="from" :header='$t("from")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="from" :header='$t("tr.time")' :sortable="true" header-style="min-width:8rem;">
             <template #body="slotProps">
-                {{ slotProps.data.from }}
+                <span dir="ltr">{{ String(slotProps.data.from).slice(0, 5) }} – {{ String(slotProps.data.to).slice(0, 5) }}</span>
             </template>
            </Column>
-           
-          
-          
-           <Column field="to" :header='$t("to")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
-            <template #body="slotProps">
-              {{ slotProps.data.to }}
-            </template>
+           <Column :header='$t("driver_name")' header-style="min-width:8rem;">
+            <template #body="slotProps">{{ slotProps.data.driver?.name ?? '—' }}</template>
+           </Column>
+           <Column :header='$t("tr.supervisor")' header-style="min-width:8rem;">
+            <template #body="slotProps">{{ slotProps.data.supervisor?.name ?? slotProps.data.vehicle?.supervisor?.name ?? '—' }}</template>
            </Column>
            <Column field="is_active" :header='$t("status")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">

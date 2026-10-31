@@ -1,9 +1,10 @@
 <script setup>
 // «قوالب العقود»: the parents' contract templates — open one to write it, copy it, preview or print it as a blank form.
+// With route meta audience «employee»: the employees' offer letters, work contracts and amendments (HR's permissions).
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { can } from "@/utils/permissions";
@@ -14,6 +15,11 @@ const { t, locale } = useI18n();
 const toast = useToast();
 const confirm = useConfirm();
 const router = useRouter();
+const route = useRoute();
+const employee = route.meta.audience === "employee";
+const perm = (action) => can((employee ? "contracts " : "contract templates ") + action);
+const names = employee ? { new: "employee-contract-template-new", edit: "employee-contract-template-edit" } : { new: "contract-template-new", edit: "contract-template-edit" };
+const listUrl = employee ? "api/contract-templates?audience=employee" : "api/contract-templates";
 
 const rows = ref([]);
 const variables = ref([]);
@@ -27,7 +33,7 @@ const dateTime = (iso) => (iso ? new Date(iso).toLocaleString(locale.value === "
 async function load() {
   loading.value = true;
   try {
-    const { data } = await axios.get("api/contract-templates");
+    const { data } = await axios.get(listUrl);
     rows.value = data.data;
     variables.value = data.variables;
   } finally {
@@ -59,7 +65,7 @@ async function duplicate(row) {
   try {
     const { data } = await axios.post(`api/contract-templates/${row.id}/duplicate`);
     toast.add({ severity: "success", summary: t("ct.copied"), life: 2500 });
-    router.push({ name: "contract-template-edit", params: { id: data.data.id } });
+    router.push({ name: names.edit, params: { id: data.data.id } });
   } catch (e) {
     fail(e);
   } finally {
@@ -90,10 +96,10 @@ function remove(row) {
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div>
-        <p class="text-xl text-bp-135c65 font-bold mb-1"><i class="pi pi-file-edit" aria-hidden="true" /> {{ t("ct.menu") }}</p>
-        <p class="text-color-secondary m-0">{{ t("ct.hint") }}</p>
+        <p class="text-xl text-bp-135c65 font-bold mb-1"><i class="pi pi-file-edit" aria-hidden="true" /> {{ employee ? t("ect.templates") : t("ct.menu") }}</p>
+        <p class="text-color-secondary m-0">{{ employee ? t("ect.templates_hint") : t("ct.hint") }}</p>
       </div>
-      <Button v-if="can('contract templates create')" icon="pi pi-plus" :label="t('ct.new')" @click="router.push({ name: 'contract-template-new' })" />
+      <Button v-if="perm('create')" icon="pi pi-plus" :label="t('ct.new')" @click="router.push({ name: names.new })" />
     </div>
 
     <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
@@ -104,7 +110,8 @@ function remove(row) {
           <Tag :severity="row.active ? 'success' : 'secondary'" :value="row.active ? t('ct.active') : t('ct.inactive')" />
         </div>
         <div class="ct-meta">
-          <span v-if="row.kind"><i class="pi pi-tag" aria-hidden="true" /> {{ t("ct.kind_" + row.kind) }}</span>
+          <span v-if="row.kind"><i class="pi pi-tag" aria-hidden="true" /> {{ employee ? t("ect.doc_" + row.kind) : t("ct.kind_" + row.kind) }}</span>
+          <span v-if="employee"><i class="pi pi-globe" aria-hidden="true" /> {{ row.country ? t("ect.country_" + row.country) : t("ect.both_systems") }}</span>
           <span><i class="pi pi-list" aria-hidden="true" /> {{ t("ct.clauses_n", { n: row.clauses }) }}</span>
           <span><i class="pi pi-history" aria-hidden="true" /> {{ t("ct.version_n", { n: row.version }) }}</span>
         </div>
@@ -112,10 +119,10 @@ function remove(row) {
         <p v-if="row.unknown.length" class="ct-bad"><i class="pi pi-exclamation-circle" aria-hidden="true" /> {{ t("ct.unknown_n", { n: row.unknown.length }) }}</p>
         <p class="ct-updated">{{ t("ct.updated", { at: dateTime(row.updated_at) }) }}<template v-if="row.updated_by"> — {{ row.updated_by }}</template></p>
         <div class="ct-actions">
-          <Button v-if="can('contract templates edit')" icon="pi pi-pencil" :label="t('ct.edit')" size="small" @click="router.push({ name: 'contract-template-edit', params: { id: row.id } })" />
+          <Button v-if="perm('edit')" icon="pi pi-pencil" :label="t('ct.edit')" size="small" @click="router.push({ name: names.edit, params: { id: row.id } })" />
           <Button icon="pi pi-eye" :label="t('ct.preview')" size="small" severity="secondary" outlined :loading="busy === row.id" @click="openPreview(row)" />
-          <Button v-if="can('contract templates create')" icon="pi pi-copy" size="small" severity="secondary" text :aria-label="t('ct.copy')" v-tooltip.top="t('ct.copy')" :disabled="busy !== null" @click="duplicate(row)" />
-          <Button v-if="can('contract templates delete')" icon="pi pi-trash" size="small" severity="danger" text :aria-label="t('ct.delete')" v-tooltip.top="t('ct.delete')" @click="remove(row)" />
+          <Button v-if="perm('create')" icon="pi pi-copy" size="small" severity="secondary" text :aria-label="t('ct.copy')" v-tooltip.top="t('ct.copy')" :disabled="busy !== null" @click="duplicate(row)" />
+          <Button v-if="perm('delete')" icon="pi pi-trash" size="small" severity="danger" text :aria-label="t('ct.delete')" v-tooltip.top="t('ct.delete')" @click="remove(row)" />
         </div>
       </article>
       <p v-if="!rows.length" class="text-color-secondary">{{ t("ct.empty") }}</p>

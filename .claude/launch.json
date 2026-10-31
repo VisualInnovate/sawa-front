@@ -104,6 +104,45 @@
         "--strictPort"
       ],
       "port": 3021
+    },
+    {
+      "name": "sawa-local-front-feedback",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3023",
+        "--strictPort"
+      ],
+      "port": 3023
+    },
+    {
+      "name": "sawa-local-front-qfba-cycle",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3027",
+        "--strictPort"
+      ],
+      "port": 3027
+    },
+    {
+      "name": "sawa-local-front-transport",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3031",
+        "--strictPort"
+      ],
+      "port": 3031
     }
   ]
 }

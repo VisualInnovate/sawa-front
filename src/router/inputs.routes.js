@@ -88,22 +88,34 @@ const inputs = [
   meta: { permission: ["transportation schedule edit"] },
   component: () => import("../views/inputs/transportationschedule/update.vue")
   },
-
-
-
-  // custom-files
+  // A route's fixed week days and times, from which each day's trips are made.
   {
-    path: '/custom-files', 
-    name: 'custom-files',
-    meta: { permission: ["modules create"] },
-    component: () => import("../views/custom-files/create.vue")
+    path: "/transport-weekly-trips",
+    name: "transport-weekly-trips",
+    meta: { permission: ["transportation schedule list"] },
+    component: () => import("../views/transport/WeeklyTrips.vue"),
+  },
+  // «رحلاتي»: the bus supervisor's trips and their children.
+  {
+    path: "/bus-trips",
+    name: "bus-trips",
+    meta: { permission: ["bus supervisor list"] },
+    component: () => import("../views/transport/BusTrips.vue"),
   },
   {
-    path: '/module', 
-    name: 'module',
-    meta: { permission: ["modules list"] },
-    component: () => import("../views/custom-files/module.vue")
+    path: "/bus-trips/:id(\\d+)",
+    name: "bus-trip",
+    meta: { permission: ["bus supervisor list"] },
+    component: () => import("../views/transport/BusTrips.vue"),
   },
+  // «سجل الرحلات»: the children's statuses on the trips, for the management.
+  {
+    path: "/transport-trip-log",
+    name: "transport-trip-log",
+    meta: { permission: ["child list", "parents list", "transportation schedule list"] },
+    component: () => import("../views/transport/TripLog.vue"),
+  },
+
 ];
 
 export default {

@@ -160,7 +160,12 @@ const initFilters = () => {
          
            <Column field="users.name" :header='$t("driver_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.users.name }}
+              {{ slotProps.data.users?.name ?? '—' }}
+            </template>
+           </Column>
+           <Column field="supervisor.name" :header='$t("tr.supervisor")' :sortable="true" header-style="width:14%; min-width:10rem;">
+            <template #body="slotProps">
+              {{ slotProps.data.supervisor?.name ?? '—' }}
             </template>
            </Column>
 

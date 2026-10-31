@@ -27,6 +27,18 @@ const dialog = ref(false);
 const form = ref({});
 const saving = ref(false);
 const removing = ref(null);
+// The staff a specialty's candidates may be sent to (its default department head).
+const reviewers = ref([]);
+const reviewerName = (id) => reviewers.value.find((r) => r.user_id === id)?.name ?? "—";
+const reviewerLabel = (r) => `${r.name}${r.department ? ` — ${r.department}` : ""}`;
+async function loadReviewers() {
+  if (reviewers.value.length) return;
+  try {
+    reviewers.value = (await axios.get("api/candidate-reviews/reviewers")).data.data;
+  } catch {
+    reviewers.value = [];
+  }
+}
 
 const ar = computed(() => locale.value === "ar");
 const typeOptions = computed(() => TYPES.map((value) => ({ value, label: t(`hrset.list_${value}`) })));
@@ -61,7 +73,7 @@ async function load() {
 function openNew() {
   form.value = {
     type: type.value, country: type.value === "bank" ? props.country : null, name_ar: "", name_en: "", is_active: true,
-    meta: type.value === "document" ? { required: true, for: "all", accept: "any", multiple: false } : type.value === "specialty" ? { specialist: false }
+    meta: type.value === "document" ? { required: true, for: "all", accept: "any", multiple: false } : type.value === "specialty" ? { specialist: false, reviewer_id: null }
       : type.value === "onboarding" ? { days: 0 } : type.value === "bank" ? { code: "" } : null,
   };
   dialog.value = true;
@@ -70,7 +82,7 @@ function openNew() {
 function openEdit(row) {
   form.value = JSON.parse(JSON.stringify(row));
   if (row.type === "document") form.value.meta = { required: false, for: "all", accept: "any", multiple: false, ...(row.meta ?? {}) };
-  if (row.type === "specialty") form.value.meta = { specialist: false, ...(row.meta ?? {}) };
+  if (row.type === "specialty") form.value.meta = { specialist: false, reviewer_id: null, ...(row.meta ?? {}) };
   if (row.type === "onboarding") form.value.meta = { days: 0, ...(row.meta ?? {}) };
   if (row.type === "bank") form.value.meta = { code: "", ...(row.meta ?? {}) };
   dialog.value = true;
@@ -115,7 +127,10 @@ async function remove() {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  load();
+  loadReviewers();
+});
 </script>
 
 <template>
@@ -142,6 +157,9 @@ onMounted(load);
       </Column>
       <Column v-if="type === 'specialty'" :header="$t('hrset.specialist')">
         <template #body="{ data }"><i :class="data.meta?.specialist ? 'pi pi-check text-green-600' : 'pi pi-minus text-color-secondary'" /></template>
+      </Column>
+      <Column v-if="type === 'specialty'" :header="$t('crv.default_head')">
+        <template #body="{ data }">{{ data.meta?.reviewer_id ? reviewerName(data.meta.reviewer_id) : "—" }}</template>
       </Column>
       <Column v-if="type === 'bank'" :header="$t('hrset.bank_code')">
         <template #body="{ data }"><bdi dir="ltr">{{ data.meta?.code || "—" }}</bdi></template>
@@ -193,6 +211,12 @@ onMounted(load);
         <div v-if="form.type === 'specialty'" class="flex items-center gap-2">
           <Checkbox v-model="form.meta.specialist" inputId="lk-specialist" binary />
           <label for="lk-specialist">{{ $t("hrset.specialist_hint") }}</label>
+        </div>
+        <div v-if="form.type === 'specialty'" class="flex flex-column gap-1">
+          <label for="lk-reviewer">{{ $t("crv.default_head") }}</label>
+          <Select inputId="lk-reviewer" v-model="form.meta.reviewer_id" :options="reviewers" optionValue="user_id" :optionLabel="reviewerLabel" filter showClear
+            :placeholder="$t('crv.pick_reviewer')" />
+          <small class="text-color-secondary">{{ $t("crv.default_head_hint") }}</small>
         </div>
         <div v-if="form.type === 'bank'" class="flex flex-column gap-1">
           <label for="lk-code">{{ $t("hrset.bank_code") }}</label>

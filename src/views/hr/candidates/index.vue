@@ -1,7 +1,10 @@
 <script setup>
 // «المرشحون»: the board of sent applications. Drag a card to another column (or use its menu) to move it; dropping
-// it on «تعديل بيانات» asks for the reason and what to fix, which the candidate sees on the careers page. The
-// drawer shows the whole file, the documents and the history, with notes.
+// it on «تعديل بيانات» asks for the reason and what to fix, which the candidate sees on the careers page. After HR
+// checks the file it goes to a department head («عند رئيس القسم»), who books the interview («مقابلة»), keeps the
+// candidate in the pool or rejects them; after the interview the head passes them back here («تمت الموافقة»).
+// Rejecting needs a reason. «بنك المرشحين» lists the kept candidates, to bring them back into the cycle.
+// The drawer shows the whole file, the documents, the heads' interviews and the history, with notes.
 import axios from "axios";
 import moment from "moment";
 import { computed, onMounted, ref } from "vue";
@@ -11,18 +14,27 @@ import { useToast } from "primevue/usetoast";
 import Menu from "primevue/menu";
 import { errorText } from "@/utils/accounting";
 import { can } from "@/utils/permissions";
+import { formatWhen, hrError } from "@/utils/interviewer";
+import CandidateFile from "@/components/hr/CandidateFile.vue";
+import AssignReviewer from "@/components/hr/AssignReviewer.vue";
 
 const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 
-const COLORS = { new: "#0ea5e9", review: "#6366f1", returned: "#f59e0b", approved: "#10b981", contracting: "#8b5cf6", rejected: "#ef4444" };
+const COLORS = { new: "#0ea5e9", review: "#6366f1", returned: "#f59e0b", head_review: "#0891b2", interview: "#d946ef", pool: "#64748b",
+  approved: "#10b981", contracting: "#8b5cf6", rejected: "#ef4444" };
+// Where HR moves a card by hand; «عند رئيس القسم» goes through the head picker, «مقابلة» only from the head.
+const MANUAL = ["new", "review", "approved", "contracting", "rejected"];
+const ASSIGNABLE = ["new", "review", "head_review", "interview", "pool"];
+const movesFrom = (status) => MANUAL.filter((to) => to !== status
+  && (to !== "approved" || ["pool", "contracting"].includes(status)) && (to !== "contracting" || status === "approved"));
 const rows = ref([]);
-const columns = ref(["new", "review", "returned", "approved", "contracting", "rejected"]);
+const columns = ref(["new", "review", "returned", "head_review", "interview", "approved", "contracting", "rejected"]);
 const vacancies = ref([]);
 const loading = ref(false);
-const filters = ref({ search: "", range: null, vacancy_id: route.query.vacancy ? Number(route.query.vacancy) : null, drafts: false });
+const filters = ref({ search: "", range: null, vacancy_id: route.query.vacancy ? Number(route.query.vacancy) : null, drafts: false, pool: route.query.pool === "1", specialty_id: null });
 const canEdit = computed(() => can("candidates edit"));
 const ar = computed(() => locale.value === "ar");
 
@@ -33,11 +45,14 @@ async function load() {
     const { data } = await axios.get("api/candidates", {
       params: {
         search: filters.value.search.trim() || undefined, vacancy_id: filters.value.vacancy_id || undefined, drafts: filters.value.drafts ? 1 : undefined,
+        pool: filters.value.pool ? 1 : undefined, specialty_id: filters.value.specialty_id || undefined,
         from: from ? moment(from).format("YYYY-MM-DD") : undefined, to: to ? moment(to).format("YYYY-MM-DD") : undefined,
       },
     });
     rows.value = data.data;
     columns.value = data.columns;
+    // The specialties to filter by: the ones the shown candidates have (kept while a filter is on).
+    for (const r of data.data) if (r.specialty && !specialties.value.some((s) => s.id === r.specialty.id)) specialties.value.push(r.specialty);
   } finally {
     loading.value = false;
   }
@@ -51,7 +66,10 @@ onMounted(async () => {
   }
 });
 
+const specialties = ref([]);
+const specialtyName = (s) => (s ? (ar.value ? s.name_ar : s.name_en || s.name_ar) : "");
 const inColumn = (status) => rows.value.filter((r) => r.status === status);
+const when = (at) => formatWhen(at, locale.value, "short");
 const drafts = computed(() => rows.value.filter((r) => r.status === "draft"));
 const vacancyTitle = (v) => (v ? (ar.value ? v.title_ar : v.title_en || v.title_ar) : t("cand.no_vacancy"));
 const ago = (date) => {
@@ -73,21 +91,60 @@ function onDrop(status) {
   dragged.value = null;
   if (card && card.status !== status) moveTo(card, status);
 }
-async function moveTo(card, status) {
+async function moveTo(card, status, note = null) {
   if (status === "returned") {
     openReturn(card.id);
+    return;
+  }
+  if (status === "head_review") {
+    if (ASSIGNABLE.includes(card.status)) assigning.value = card;
+    else toast.add({ severity: "warn", summary: hrError(t, "hr.status_locked"), life: 4000 });
+    return;
+  }
+  if (status === "interview") {
+    toast.add({ severity: "warn", summary: t("crv.interview_by_head"), life: 4000 });
+    return;
+  }
+  if (status === "rejected" && note === null) {
+    rejecting.value = card;
+    rejectReason.value = "";
+    rejectError.value = "";
     return;
   }
   const before = card.status;
   card.status = status;
   try {
-    await axios.put(`api/candidates/${card.id}/status`, { status });
+    await axios.put(`api/candidates/${card.id}/status`, { status, note });
+    if (filters.value.pool) load();
     toast.add({ severity: "success", summary: t("success_message"), detail: t("cand.moved", { status: t(`cand.col_${status}`) }), life: 2000 });
     if (detail.value?.candidate.id === card.id) openDetail(card.id);
   } catch (error) {
     card.status = before;
-    toast.add({ severity: "error", summary: t("error"), detail: errorText(error), life: 5000 });
+    toast.add({ severity: "error", summary: t("error"), detail: hrError(t, errorText(error)), life: 5000 });
   }
+}
+
+// Rejecting needs the reason (kept in the history).
+const rejecting = ref(null);
+const rejectReason = ref("");
+const rejectError = ref("");
+async function sendReject() {
+  if (rejectReason.value.trim().length < 3) {
+    rejectError.value = t("cand.reason_required");
+    return;
+  }
+  const card = rejecting.value;
+  rejecting.value = null;
+  await moveTo(card, "rejected", rejectReason.value.trim());
+}
+
+// Sending to a department head.
+const assigning = ref(null);
+async function assigned() {
+  const id = assigning.value?.id;
+  assigning.value = null;
+  await load();
+  if (drawer.value && c.value?.id === id) openDetail(id);
 }
 const menu = ref(null);
 const menuCard = ref(null);
@@ -97,8 +154,11 @@ const menuItems = computed(() => [
   ...(menuCard.value?.status === "approved" && can("contracts create")
     ? [{ label: t("ctr.add"), icon: "pi pi-file-edit", command: () => router.push({ name: "contracts", query: { candidate: menuCard.value.id } }) }]
     : []),
+  ...(canEdit.value && ASSIGNABLE.includes(menuCard.value?.status)
+    ? [{ label: menuCard.value?.status === "head_review" || menuCard.value?.status === "interview" ? t("crv.reassign") : t("crv.send_to_head"), icon: "pi pi-send", command: () => (assigning.value = menuCard.value) }]
+    : []),
   ...(canEdit.value
-    ? [{ separator: true }, ...columns.value.filter((c) => c !== menuCard.value?.status).map((c) => ({ label: t("cand.move_to", { status: t(`cand.col_${c}`) }), icon: "pi pi-arrow-right-arrow-left", command: () => moveTo(menuCard.value, c) }))]
+    ? [{ separator: true }, ...movesFrom(menuCard.value?.status).map((c) => ({ label: t("cand.move_to", { status: t(`cand.col_${c}`) }), icon: "pi pi-arrow-right-arrow-left", command: () => moveTo(menuCard.value, c) }))]
     : []),
 ]);
 function openMenu(event, card) {
@@ -109,48 +169,17 @@ function openMenu(event, card) {
 // ---- Details drawer ----
 const detail = ref(null);
 const drawer = ref(false);
-const previews = ref({});
 const note = ref("");
 async function openDetail(id) {
   drawer.value = true;
   detail.value = null;
   const { data } = await axios.get(`api/candidates/${id}`);
   detail.value = data.data;
-  for (const doc of data.data.candidate.documents) {
-    if (!doc.mime?.startsWith("image/") || previews.value[doc.id]) continue;
-    axios.get(`api/candidates/${id}/documents/${doc.id}`, { responseType: "blob" }).then(({ data: blob }) => (previews.value[doc.id] = URL.createObjectURL(blob))).catch(() => {});
-  }
-}
-async function openDoc(doc) {
-  const { data } = await axios.get(`api/candidates/${detail.value.candidate.id}/documents/${doc.id}`, { responseType: "blob" });
-  window.open(URL.createObjectURL(data), "_blank", "noopener");
 }
 const c = computed(() => detail.value?.candidate);
-const facts = computed(() => {
-  if (!c.value) return [];
-  const yes = (v) => (v === null || v === undefined ? "—" : v ? t("careers.yes") : t("careers.no"));
-  const look = (row) => (row ? (ar.value ? row.name_ar : row.name_en || row.name_ar) : "—");
-  return [
-    ["vacancy_id", t("careers.vacancy"), vacancyTitle(c.value.vacancy)],
-    ["name_ar", t("careers.name_ar"), c.value.name_ar],
-    ["citizen", t("careers.citizenship"), c.value.citizen === null ? "—" : c.value.citizen ? (ar.value ? detail.value.profile.citizen_ar : detail.value.profile.citizen_en) : `${t("careers.resident")}${c.value.nationality ? ` (${c.value.nationality})` : ""}`],
-    ["national_id", t("cand.national_id"), c.value.national_id, true],
-    ["birth_date", t("careers.birth_date"), c.value.birth_date, true],
-    ["gender", t("careers.gender"), c.value.gender ? t(`careers.${c.value.gender}`) : "—"],
-    ["marital_status", t("careers.marital_status"), c.value.marital_status ? t(`careers.${c.value.marital_status}`) : "—"],
-    ["has_disability", t("careers.has_disability"), `${yes(c.value.has_disability)}${c.value.disability_details ? ` — ${c.value.disability_details}` : ""}`],
-    ["email", t("careers.email"), c.value.email, true],
-    ["phone", t("careers.phone"), c.value.phone, true],
-    ...(c.value.country === "SA" ? [["national_address", t("careers.national_address"), c.value.national_address, true]] : []),
-    ["address", t("careers.address"), c.value.address],
-    ["bank_id", t("careers.bank_name"), look(c.value.bank)],
-    ["iban", t("careers.iban"), c.value.iban, true],
-    ["qualification_id", t("careers.qualification"), look(c.value.qualification)],
-    ["specialty_id", t("careers.specialty"), look(c.value.specialty)],
-    ["has_experience", t("careers.has_experience"), yes(c.value.has_experience)],
-  ];
-});
-const docsOf = (typeId) => c.value.documents.filter((d) => d.lookup_id === typeId);
+const reviewState = (r) => (r.status === "interviewed" ? t(`crv.outcome_${r.outcome}`) : t(`crv.state_${r.status}`));
+const answerText = (a) => (Array.isArray(a.answer) ? a.answer.join("، ") : a.answer) || "—";
+const openReviews = ref({});
 const typeName = (type) => (ar.value ? type.name_ar : type.name_en || type.name_ar);
 
 async function addNote() {
@@ -163,6 +192,7 @@ async function addNote() {
     toast.add({ severity: "error", summary: t("error"), detail: errorText(error), life: 5000 });
   }
 }
+const statusOptions = computed(() => [c.value?.status, ...movesFrom(c.value?.status)].filter((x) => x && x !== "returned"));
 
 const archiving = ref(false);
 async function archive() {
@@ -210,7 +240,10 @@ async function sendReturn() {
 }
 
 const noteLine = (n) => {
-  if (n.kind === "status") return t("cand.log_status", { from: t(`cand.col_${n.data?.from}`), to: t(`cand.col_${n.data?.to}`) }) + (n.data?.by === "candidate" ? ` · ${t("cand.by_candidate")}` : "");
+  if (n.kind === "status") {
+    const extra = n.data?.reviewer ? ` · ${n.data.reviewer}` : n.data?.scheduled_at ? ` · ${when(n.data.scheduled_at)}` : n.data?.score != null ? ` · ${t("crv.score_pct", { n: n.data.score })}` : "";
+    return t("cand.log_status", { from: t(`cand.col_${n.data?.from}`), to: t(`cand.col_${n.data?.to}`) }) + (n.data?.by === "candidate" ? ` · ${t("cand.by_candidate")}` : "") + extra;
+  }
   if (n.kind === "return") return t("cand.log_return");
   return t("cand.log_note");
 };
@@ -232,15 +265,45 @@ const noteLine = (n) => {
       </IconField>
       <DatePicker v-model="filters.range" selectionMode="range" dateFormat="yy-mm-dd" showButtonBar :placeholder="$t('cand.sent_between')" class="w-14rem" @update:modelValue="load" />
       <Select v-model="filters.vacancy_id" :options="vacancies" optionValue="id" :optionLabel="vacancyTitle" showClear filter :placeholder="$t('cand.all_vacancies')" class="w-14rem" @change="load" />
-      <div class="flex items-center gap-2">
+      <Select v-if="filters.pool || specialties.length" v-model="filters.specialty_id" :options="specialties" optionValue="id" :optionLabel="specialtyName" showClear filter
+        :placeholder="$t('crv.all_specialties')" class="w-14rem" @change="load" />
+      <div v-if="!filters.pool" class="flex items-center gap-2">
         <ToggleSwitch v-model="filters.drafts" inputId="cand-drafts" @update:modelValue="load" />
         <label for="cand-drafts">{{ $t("cand.show_drafts") }}</label>
+      </div>
+      <div class="flex items-center gap-2">
+        <ToggleSwitch v-model="filters.pool" inputId="cand-pool" @update:modelValue="load" />
+        <label for="cand-pool"><i class="pi pi-inbox me-1" />{{ $t("crv.pool") }}</label>
       </div>
       <Button icon="pi pi-search" :label="$t('hrlog.apply')" @click="load" />
       <span class="ms-auto text-color-secondary text-sm">{{ $t("cand.count", { n: rows.length - drafts.length }) }}</span>
     </div>
 
-    <div class="cand-board" :class="{ 'opacity-60': loading }">
+    <!-- The candidate pool: kept by a head, brought back into the cycle from here -->
+    <section v-if="filters.pool" class="sawa-card p-3" :class="{ 'opacity-60': loading }">
+      <p class="m-0 mb-3 text-color-secondary">{{ $t("crv.pool_hint") }}</p>
+      <div v-if="!rows.length" class="cand-empty">{{ $t("crv.pool_empty") }}</div>
+      <div class="cand-pool">
+        <article v-for="card in rows" :key="card.id" class="cand-card">
+          <div class="cand-card__top">
+            <Avatar icon="pi pi-user" shape="circle" class="cand-card__avatar" />
+            <div class="cand-card__who">
+              <strong>{{ card.name_ar || $t("cand.unnamed") }}</strong>
+              <small dir="ltr">{{ card.phone }}</small>
+            </div>
+            <Button icon="pi pi-ellipsis-h" text rounded size="small" :aria-label="$t('cand.actions')" @click="openMenu($event, card)" />
+          </div>
+          <small class="cand-card__job"><i class="pi pi-briefcase" /> {{ vacancyTitle(card.vacancy) }}<template v-if="card.specialty"> · {{ specialtyName(card.specialty) }}</template></small>
+          <small v-if="card.score !== null" class="text-color-secondary"><i class="pi pi-star" /> {{ $t("crv.score_pct", { n: card.score }) }}</small>
+          <footer class="cand-card__foot">
+            <small><i class="pi pi-clock" /> {{ ago(card.status_changed_at || card.updated_at) }}</small>
+            <button type="button" class="cand-card__link" @click="openDetail(card.id)">{{ $t("cand.details") }} <i class="pi pi-arrow-left" /></button>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <div v-else class="cand-board" :class="{ 'opacity-60': loading }">
       <section v-for="col in columns" :key="col" class="cand-col" :class="{ 'is-over': over === col }" :aria-label="$t(`cand.col_${col}`)"
         @dragover.prevent="canEdit && (over = col)" @dragleave="over === col && (over = null)" @drop.prevent="canEdit && onDrop(col)">
         <header class="cand-col__head">
@@ -261,6 +324,9 @@ const noteLine = (n) => {
               <Button icon="pi pi-ellipsis-h" text rounded size="small" :aria-label="$t('cand.actions')" @click="openMenu($event, card)" />
             </div>
             <small class="cand-card__job"><i class="pi pi-briefcase" /> {{ vacancyTitle(card.vacancy) }}</small>
+            <small v-if="card.reviewer" class="cand-card__job"><i class="pi pi-user" /> {{ card.reviewer.name }}</small>
+            <small v-if="card.scheduled_at" class="cand-card__when"><i class="pi pi-calendar-clock" /> {{ when(card.scheduled_at) }}</small>
+            <small v-if="card.score !== null && ['approved', 'contracting', 'rejected'].includes(card.status)" class="cand-card__job"><i class="pi pi-star" /> {{ $t("crv.score_pct", { n: card.score }) }}</small>
             <div class="cand-card__progress">
               <div class="flex justify-between text-xs"><span>{{ $t("cand.completion") }}</span><span>{{ card.completion }}%</span></div>
               <ProgressBar :value="card.completion" :showValue="false" style="height: 6px" />
@@ -292,45 +358,36 @@ const noteLine = (n) => {
           <span v-if="c.submitted_at" class="text-sm text-color-secondary" dir="ltr">{{ moment(c.submitted_at).format("YYYY-MM-DD HH:mm") }}</span>
         </div>
         <div v-if="canEdit && !['draft', 'hired'].includes(c.status)" class="flex flex-wrap gap-2">
-          <Select :modelValue="c.status" :options="columns.filter((x) => x !== 'returned')" :optionLabel="(x) => $t(`cand.col_${x}`)" class="w-12rem"
+          <Select :modelValue="c.status" :options="statusOptions" :optionLabel="(x) => $t(`cand.col_${x}`)" class="w-12rem"
             :aria-label="$t('cand.move')" @update:modelValue="(s) => moveTo(rows.find((r) => r.id === c.id) ?? c, s)" />
+          <Button v-if="['new', 'review', 'head_review', 'interview', 'pool'].includes(c.status)" icon="pi pi-send"
+            :label="['head_review', 'interview'].includes(c.status) ? $t('crv.reassign') : $t('crv.send_to_head')" @click="assigning = rows.find((r) => r.id === c.id) ?? c" />
           <Button icon="pi pi-replay" :label="$t('cand.return')" severity="warn" outlined @click="openReturn(c.id)" />
           <Button v-if="can('candidates delete')" icon="pi pi-box" :label="$t('cand.archive')" severity="danger" text @click="archiving = true" />
         </div>
 
-        <section>
-          <h3 class="cand-h">{{ $t("cand.file") }}</h3>
-          <dl class="cand-facts">
-            <template v-for="[key, label, value, ltr] in facts" :key="key">
-              <dt>{{ label }}</dt>
-              <dd><bdi :dir="ltr ? 'ltr' : undefined">{{ value || "—" }}</bdi></dd>
-            </template>
-          </dl>
-          <div v-if="c.has_experience && c.experience?.length" class="flex flex-column gap-2 mt-2">
-            <div v-for="(job, i) in c.experience" :key="i" class="cand-job">
-              <strong>{{ job.title }}</strong> — {{ job.employer }}
-              <small dir="ltr" class="block text-start">{{ job.from }} → {{ job.current ? $t("careers.current_job") : job.to || "—" }}</small>
-            </div>
-          </div>
-        </section>
+        <CandidateFile :detail="detail" :base="`api/candidates/${c.id}`" />
 
-        <section>
-          <h3 class="cand-h">{{ $t("careers.documents") }}</h3>
+        <section v-if="detail.reviews?.length">
+          <h3 class="cand-h">{{ $t("crv.interviews") }}</h3>
           <div class="flex flex-column gap-2">
-            <div v-for="type in detail.document_types" :key="type.id" class="cand-doc" :class="{ 'is-missing': detail.missing_documents.includes(type.id) }">
-              <div class="flex items-center justify-between gap-2">
-                <strong class="text-sm">{{ typeName(type) }}</strong>
-                <Tag v-if="detail.missing_documents.includes(type.id)" severity="danger" :value="$t('cand.missing')" />
-                <Tag v-else-if="!type.required" severity="secondary" :value="$t('careers.optional')" />
+            <div v-for="r in detail.reviews" :key="r.id" class="cand-review">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <strong>{{ r.reviewer?.name }}<small v-if="r.department" class="text-color-secondary"> — {{ r.department }}</small></strong>
+                <Tag :value="reviewState(r)" severity="secondary" />
               </div>
-              <div class="flex flex-wrap gap-2 mt-1">
-                <button v-for="doc in docsOf(type.id)" :key="doc.id" type="button" class="cand-file" :title="doc.original_name" @click="openDoc(doc)">
-                  <img v-if="previews[doc.id]" :src="previews[doc.id]" alt="" />
-                  <i v-else :class="doc.mime === 'application/pdf' ? 'pi pi-file-pdf' : 'pi pi-file'" />
-                  <span>{{ doc.original_name }}</span>
-                </button>
-                <small v-if="!docsOf(type.id).length" class="text-color-secondary">{{ $t("careers.no_file") }}</small>
-              </div>
+              <small v-if="r.scheduled_at" class="block"><i class="pi pi-calendar-clock" /> {{ when(r.scheduled_at) }}</small>
+              <small v-if="r.max_score" class="block"><i class="pi pi-star" /> {{ r.score }} / {{ r.max_score }} ({{ Math.round((r.score / r.max_score) * 100) }}%)</small>
+              <p v-if="r.outcome_reason || r.reason" class="m-0 text-sm whitespace-pre-line">{{ r.outcome_reason || r.reason }}</p>
+              <template v-if="r.answers?.length && r.status === 'interviewed'">
+                <Button :label="openReviews[r.id] ? $t('crv.hide_answers') : $t('crv.show_answers')" size="small" text class="p-0" @click="openReviews[r.id] = !openReviews[r.id]" />
+                <dl v-if="openReviews[r.id]" class="cand-answers">
+                  <template v-for="a in r.answers" :key="a.id">
+                    <dt>{{ a.title }}</dt>
+                    <dd>{{ answerText(a) }}<small v-if="a.score !== null && a.score !== undefined" class="text-color-secondary"> <bdi dir="ltr">({{ a.score }}/{{ a.max }})</bdi></small></dd>
+                  </template>
+                </dl>
+              </template>
             </div>
           </div>
         </section>
@@ -382,6 +439,20 @@ const noteLine = (n) => {
       </template>
     </Dialog>
 
+    <AssignReviewer :candidate="assigning" @close="assigning = null" @done="assigned" />
+
+    <Dialog :visible="!!rejecting" modal :header="$t('crv.reject_title')" :style="{ width: '480px' }" :breakpoints="{ '640px': '95vw' }" @update:visible="rejecting = null">
+      <div class="flex flex-column gap-1">
+        <label for="rej-reason">{{ $t("cand.reason") }} <span class="text-red-500">*</span></label>
+        <Textarea id="rej-reason" v-model="rejectReason" rows="3" autoResize maxlength="2000" :invalid="!!rejectError" />
+        <small v-if="rejectError" class="text-red-500">{{ rejectError }}</small>
+      </div>
+      <template #footer>
+        <Button :label="$t('cancel')" text severity="secondary" @click="rejecting = null" />
+        <Button icon="pi pi-times" severity="danger" :label="$t('crv.d_reject')" @click="sendReject" />
+      </template>
+    </Dialog>
+
     <Dialog v-model:visible="archiving" modal :header="$t('cand.archive')" :style="{ width: '420px' }">
       <p class="m-0">{{ $t("cand.archive_confirm") }}</p>
       <template #footer>
@@ -415,16 +486,12 @@ const noteLine = (n) => {
 .cand-card__link { background: none; border: 0; cursor: pointer; color: var(--p-primary-color); font-weight: 700; display: inline-flex; gap: 0.3rem; align-items: center; }
 .cand-empty { border: 2px dashed var(--p-content-border-color); border-radius: 14px; padding: 1.5rem 0.5rem; text-align: center; color: var(--p-text-muted-color); font-size: 0.85rem; }
 .cand-h { font-size: 1rem; font-weight: 800; margin: 0 0 0.5rem; }
-.cand-facts { display: grid; grid-template-columns: minmax(110px, 40%) 1fr; gap: 0.35rem 0.75rem; margin: 0; font-size: 0.9rem; }
-.cand-facts dt { color: var(--p-text-muted-color); }
-.cand-facts dd { margin: 0; font-weight: 600; word-break: break-word; }
-.cand-job { background: var(--p-surface-100, #f1f5f9); border-radius: 10px; padding: 0.5rem 0.75rem; font-size: 0.9rem; }
-.cand-doc { border: 1px solid var(--p-content-border-color); border-radius: 12px; padding: 0.6rem; }
-.cand-doc.is-missing { border-color: #fca5a5; background: #fef2f2; }
-.cand-file { display: inline-flex; align-items: center; gap: 0.4rem; max-width: 100%; border: 1px solid var(--p-content-border-color); border-radius: 10px; padding: 0.25rem 0.5rem 0.25rem 0.25rem; background: var(--p-content-background, #fff); cursor: pointer; }
-.cand-file img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
-.cand-file i { font-size: 1.3rem; color: var(--p-primary-color); padding: 0.4rem; }
-.cand-file span { font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+.cand-card__when { font-weight: 700; color: #a21caf; }
+.cand-pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 0.75rem; }
+.cand-review { border: 1px solid var(--p-content-border-color); border-radius: 12px; padding: 0.6rem 0.75rem; display: grid; gap: 0.3rem; }
+.cand-answers { display: grid; grid-template-columns: minmax(110px, 45%) 1fr; gap: 0.3rem 0.6rem; margin: 0.25rem 0 0; font-size: 0.85rem; }
+.cand-answers dt { color: var(--p-text-muted-color); }
+.cand-answers dd { margin: 0; font-weight: 600; }
 .cand-timeline { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
 .cand-timeline li { border-inline-start: 3px solid var(--p-content-border-color); padding-inline-start: 0.75rem; }
 .cand-timeline li.is-return { border-color: #f59e0b; }

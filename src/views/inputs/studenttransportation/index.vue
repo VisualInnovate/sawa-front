@@ -21,31 +21,6 @@ const confir_id=ref('')
 const selectedProducts = ref(null)
 const dt = ref(null)
 const filters = ref({})
-const move=ref(false)
-
- const isStartActive = ref(false);
-    const isMidActive = ref(false);
-    const isEndActive = ref(false);
-
-    const activateStart = () => {
-      isStartActive.value = true;
-      isMidActive.value = false;
-      isEndActive.value = false;
-    };
-
-    const activateMid = () => {
-      isMidActive.value = true;
-      isEndActive.value = false;
-    };
-
-    const activateEnd = () => {
-      isEndActive.value = true;
-      isMidActive.value = true;
-      isStartActive.value = true;
-    };
-const moveing=()=>{
-  move.value=!(move.value)
-}
 onBeforeMount(() => {
   initFilters()
 })
@@ -181,23 +156,29 @@ const initFilters = () => {
         
          
           
-           <Column field="plate_number" :header='$t("area_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="region.name" :header='$t("area_name")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.region.name }}
+              {{ slotProps.data.region?.name ?? '—' }}
             </template>
            </Column>
-           <Column field="plate_number" :header='$t("student_location")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column :header='$t("children")' header-style="min-width:12rem;">
             <template #body="slotProps">
-             <a style="color: blue; " target="_blank" :href="slotProps.data.location_url" >{{ (slotProps.data.location_url).substring(0, 20) }}</a>
+              {{ (slotProps.data.child ?? []).map((child) => child.name).join('، ') || '—' }}
             </template>
            </Column>
-           
-          
-           <Column field="license_exp_date" :header='$t("trip_type")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+           <Column field="price" :header='$t("tr.monthly_price")' :sortable="true" header-style="min-width:7rem;">
+            <template #body="slotProps">{{ Number(slotProps.data.price) }}</template>
+           </Column>
+           <Column field="location_url" :header='$t("student_location")' header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              <p v-if="slotProps.data.trip_type == 0">{{ $t("one_way")}} </p>
-              <p v-if="slotProps.data.trip_type == 1"> {{ $t("tow_way")}}  </p>
-           
+             <a class="text-primary" target="_blank" rel="noopener" :href="slotProps.data.location_url" dir="ltr">{{ (slotProps.data.location_url ?? '').substring(0, 20) }}</a>
+            </template>
+           </Column>
+
+
+           <Column field="trip_type" :header='$t("trip_type")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              {{ $t(Number(slotProps.data.trip_type) === 1 ? "tow_way" : "one_way") }}
             </template>
            </Column>
           
@@ -219,10 +200,6 @@ const initFilters = () => {
 
                 <Button
                 v-can="'student transportation edit'"
-                icon="pi pi-car"
-                @click="moveing(slotProps.data.id)" rounded severity="success" variant="outlined" v-tooltip.top="$t('trip_status')" :aria-label="$t('trip_status')" />
-                <Button
-                v-can="'student transportation edit'"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
@@ -236,16 +213,6 @@ const initFilters = () => {
 
 
         </DataTable>
-
-        <Dialog v-model:visible="move" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
-          <div class="line-container m-auto w-full">
-          <Button :label="$t('trip_start')" class="mr-2" :class="['dot', { active: isStartActive }]" @click="activateStart" rounded severity="success"></Button>
-         
-          <div :class="['line', { endActive: isEndActive }]"></div>
-          <Button :label="$t('trip_end')" class="mr-2" :class="['dot', { active: isEndActive }]" @click="activateEnd" rounded severity="success"></Button>
-        </div>
-         
-        </Dialog>
 
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">

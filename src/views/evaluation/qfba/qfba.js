@@ -42,6 +42,11 @@ const TEXT = {
     intro_plain: "تم تقييم {name} على QFBA وكانت النتائج كما يلي",
     out_of: "من",
     of_questions: "{n} من {total}",
+    plan_title: "خطة تعديل السلوك",
+    plan_goal: "الهدف",
+    plan_empty: "لم تُؤيَّد أي وظيفة، فلا أهداف مقترحة. أضف أهدافاً من إعدادات QFBA أو اكتبها هنا.",
+    plan_hint: "أهداف للسلوك البديل لكل وظيفة مؤيدة، من إعدادات QFBA؛ عدّلها أو أضف أو احذف قبل الحفظ.",
+    behavior_fallback: "السلوك المستهدف",
   },
   en: {
     title: "QFBA — Questions About Behavioral Function",
@@ -78,6 +83,11 @@ const TEXT = {
     intro_plain: "{name} was evaluated on the QFBA with the following results",
     out_of: "of",
     of_questions: "{n} of {total}",
+    plan_title: "Behavior plan",
+    plan_goal: "Goal",
+    plan_empty: "No function was endorsed, so there are no suggested goals. Add goals in the QFBA settings or write them here.",
+    plan_hint: "Replacement-behavior goals for each endorsed function, from the QFBA settings; edit, add or delete them before saving.",
+    behavior_fallback: "the target behavior",
   },
 };
 
@@ -92,6 +102,20 @@ export const functionName = (fn, lang) => pick(lang, fn?.name, fn?.name_en);
 export const functionDescription = (fn, lang) => pick(lang, fn?.description, fn?.description_en);
 export const optionLabel = (option, lang) => pick(lang, option?.label, option?.label_en);
 export const instructionsOf = (data, lang) => pick(lang, data?.instructions, data?.instructions_en);
+
+/**
+ * The goals a QFBA plan starts from: for each endorsed function (in the form's order) the goals set for it, one per line,
+ * in the form's language (a girl's wording when there is one), {{name}} = the child's first name and {{behavior}} = the
+ * target behaviour. [{ score, goals: [text] }]
+ */
+export function planGoalsOf(result, lang, { female = false, name = "" } = {}) {
+  const behavior = result?.target_behavior || qt(lang, "behavior_fallback");
+  const fill = (text) => text.replace(/\{\{\s*name\s*\}\}/g, name).replace(/\{\{\s*behavior\s*\}\}/g, behavior);
+  return (result?.scores ?? []).filter((score) => score.endorsed > 0).map((score) => {
+    const text = lang === "en" ? score.goals_en || score.goals : (female && score.goals_female) || score.goals;
+    return { score, goals: String(text ?? "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map(fill) };
+  });
+}
 
 /** The function's color in the charts and tables. */
 export const FUNCTION_COLORS = { attention: "#2563eb", escape: "#d97706", non_social: "#7c3aed", physical: "#dc2626", tangible: "#059669" };

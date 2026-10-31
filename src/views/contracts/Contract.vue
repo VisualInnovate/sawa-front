@@ -1,6 +1,8 @@
 <script setup>
 // One issued contract. While a draft: fill its values and recipient (live preview beside), or edit this contract's own
 // text without touching the template. Words, totals, the clause count and the number are worked out on saving.
+// The same page serves an employee's document (route meta audience «employee»): HR sends the draft to the general
+// manager, who approves it or returns it with a note; then an authorised employee signs it and sends the link.
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -14,15 +16,22 @@ import VariablesPanel from "@/components/contracts/VariablesPanel.vue";
 import SignaturePad from "@/components/contracts/SignaturePad.vue";
 import { usedVariables } from "@/components/contracts/contractDocument";
 import { contractPage, statusSeverity } from "@/components/contracts/contractStatus";
+import { amendmentLines } from "@/components/hr/employeeContracts";
 
-const { t, locale } = useI18n();
+const { t, te, locale } = useI18n();
 const toast = useToast();
 const confirm = useConfirm();
 const route = useRoute();
 const router = useRouter();
 
-const DATES = ["تاريخ_العقد", "تاريخ_البداية", "تاريخ_النهاية", "تاريخ_ميلاد_الطالب"];
-const NUMBERS = ["القسط_الشهري", "التكلفة_الإجمالية", "تكلفة_الإضافات", "عدد_الجلسات_الشهري", "عدد_الجلسات_الفردية", "عدد_الجلسات_الجماعية"];
+const employee = route.meta.audience === "employee";
+const API = employee ? "api/employee-contracts" : "api/parent-contracts";
+const PERM = employee
+  ? { edit: "contracts edit", sign: "employee contract signing edit", approve: "employee contract approval edit" }
+  : { edit: "parent contracts edit", sign: "parent contract signing edit", approve: null };
+const DATES = ["تاريخ_العقد", "تاريخ_البداية", "تاريخ_النهاية", "تاريخ_ميلاد_الطالب", "تاريخ_المباشرة", "تاريخ_ميلاد_الموظف", "تاريخ_انتهاء_العرض", "تاريخ_سريان_الملحق", "تاريخ_العقد_الأصلي"];
+const NUMBERS = ["القسط_الشهري", "التكلفة_الإجمالية", "تكلفة_الإضافات", "عدد_الجلسات_الشهري", "عدد_الجلسات_الفردية", "عدد_الجلسات_الجماعية",
+  "الراتب_الأساسي", "إجمالي_البدلات", "مدة_التجربة", "الإجازة_السنوية", "ساعات_العمل_اليومية"];
 const TEXT_FIELDS = ["header", "title", "body", "approval_note"];
 const RECIPIENT = ["recipient_name", "recipient_phone", "recipient_email"];
 
@@ -39,7 +48,7 @@ const tab = ref("values");
 const editor = ref(null);
 const previewHtml = ref("");
 
-const editable = computed(() => contract.value?.status === "draft" && can("parent contracts edit"));
+const editable = computed(() => contract.value?.status === "draft" && can(PERM.edit));
 const dirty = computed(() => form.value && JSON.stringify(form.value) !== saved.value);
 const labelOf = (v) => (locale.value === "ar" ? v.label_ar : v.label_en);
 const used = computed(() => (form.value ? usedVariables(TEXT_FIELDS.map((f) => form.value[f]).join("\n")) : []));
@@ -53,6 +62,7 @@ const sections = computed(() =>
 
 const take = (payload) => {
   contract.value = payload.data;
+  if (payload.gm_approval !== undefined) gmApproval.value = payload.gm_approval;
   variables.value = payload.variables;
   groups.value = payload.groups;
   computedNames.value = payload.computed;
@@ -68,7 +78,7 @@ const fail = (e) => {
 
 onMounted(async () => {
   try {
-    take((await axios.get(`api/parent-contracts/${route.params.id}`)).data);
+    take((await axios.get(`${API}/${route.params.id}`)).data);
   } catch (e) {
     fail(e);
   } finally {
@@ -94,7 +104,7 @@ async function save() {
     const textChanged = TEXT_FIELDS.some((f) => form.value[f] !== (contract.value[f] || ""));
     const payload = { values: form.value.values, ...Object.fromEntries(RECIPIENT.map((f) => [f, form.value[f]])) };
     if (textChanged) TEXT_FIELDS.forEach((f) => (payload[f] = form.value[f]));
-    take((await axios.put(`api/parent-contracts/${contract.value.id}`, payload)).data);
+    take((await axios.put(`${API}/${contract.value.id}`, payload)).data);
     toast.add({ severity: "success", summary: t("con.saved"), life: 2500 });
   } catch (e) {
     fail(e);
@@ -110,7 +120,7 @@ function resetText() {
     icon: "pi pi-refresh",
     accept: async () => {
       try {
-        take((await axios.post(`api/parent-contracts/${contract.value.id}/reset-text`)).data);
+        take((await axios.post(`${API}/${contract.value.id}/reset-text`)).data);
         toast.add({ severity: "success", summary: t("con.text_reset"), life: 2500 });
       } catch (e) {
         fail(e);
@@ -127,7 +137,7 @@ function cancelContract() {
     acceptClass: "p-button-danger",
     accept: async () => {
       try {
-        take((await axios.post(`api/parent-contracts/${contract.value.id}/cancel`)).data);
+        take((await axios.post(`${API}/${contract.value.id}/cancel`)).data);
         toast.add({ severity: "success", summary: t("con.cancelled"), life: 2500 });
       } catch (e) {
         fail(e);
@@ -152,7 +162,7 @@ async function openSend() {
   }
   send.value = { open: true, saved: null, useSaved: true, signature: null, keep: true, days: 3, busy: false, loading: true };
   try {
-    send.value.saved = (await axios.get("api/my-signature")).data.data.image;
+    send.value.saved = (await axios.get(employee ? "api/employee-contracts/my-signature" : "api/my-signature")).data.data.image;
   } finally {
     send.value.loading = false;
   }
@@ -168,7 +178,7 @@ async function submitSend() {
   try {
     const drawn = !send.value.saved || !send.value.useSaved;
     const body = { days: send.value.days, ...(drawn ? { signature: send.value.signature, save_signature: send.value.keep } : {}) };
-    showLink((await axios.post(`api/parent-contracts/${contract.value.id}/send`, body)).data);
+    showLink((await axios.post(`${API}/${contract.value.id}/send`, body)).data);
     send.value.open = false;
   } catch (e) {
     fail(e);
@@ -179,7 +189,7 @@ async function submitSend() {
 
 async function renewLink() {
   try {
-    showLink((await axios.post(`api/parent-contracts/${contract.value.id}/renew-link`, { days: extendDays.value })).data);
+    showLink((await axios.post(`${API}/${contract.value.id}/renew-link`, { days: extendDays.value })).data);
   } catch (e) {
     fail(e);
   }
@@ -187,7 +197,7 @@ async function renewLink() {
 
 async function extendLink() {
   try {
-    take((await axios.post(`api/parent-contracts/${contract.value.id}/extend-link`, { days: extendDays.value })).data);
+    take((await axios.post(`${API}/${contract.value.id}/extend-link`, { days: extendDays.value })).data);
     toast.add({ severity: "success", summary: t("con.link_extended"), life: 2500 });
   } catch (e) {
     fail(e);
@@ -217,7 +227,47 @@ function whatsapp() {
 }
 
 const dateTime = (iso) => (iso ? new Date(iso).toLocaleString(locale.value === "ar" ? "ar-JO" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) : "");
-const canSign = computed(() => can("parent contract signing edit"));
+const canSign = computed(() => can(PERM.sign));
+// The status in which the academy signs and sends: a parent's draft, an employee's document once approved («ready»).
+const signable = computed(() => contract.value?.status === (employee ? "ready" : "draft") && canSign.value);
+const cancellable = computed(() => can(PERM.edit) && (employee ? ["draft", "pending_approval", "ready", "sent", "expired"] : ["draft", "sent"]).includes(contract.value?.status));
+const backTo = () => router.push({ name: employee ? "employee-contracts" : "parent-contracts" });
+
+// ---- Employees: to the general manager, and back ----
+const gmApproval = ref(true);
+const changes = computed(() => (employee ? amendmentLines(contract.value?.changes, t) : []));
+async function submitForApproval() {
+  if (dirty.value) await save();
+  if (missing.value.length) {
+    toast.add({ severity: "warn", summary: t("con.complete_first"), life: 3500 });
+    return;
+  }
+  try {
+    take((await axios.post(`${API}/${contract.value.id}/submit`)).data);
+    toast.add({ severity: "success", summary: gmApproval.value ? t("ect.submitted") : t("ect.ready_now"), life: 3000 });
+  } catch (e) {
+    fail(e);
+  }
+}
+const decision = ref({ open: false, approve: true, note: "", busy: false, error: "" });
+const openDecision = (approve) => (decision.value = { open: true, approve, note: "", busy: false, error: "" });
+async function decide() {
+  if (!decision.value.approve && decision.value.note.trim().length < 3) {
+    decision.value.error = t("ect.note_required");
+    return;
+  }
+  decision.value.busy = true;
+  try {
+    const url = `${API}/${contract.value.id}/${decision.value.approve ? "approve" : "return"}`;
+    take((await axios.post(url, { note: decision.value.note.trim() || null })).data);
+    toast.add({ severity: "success", summary: decision.value.approve ? t("ect.approved") : t("ect.returned"), life: 3000 });
+    decision.value.open = false;
+  } catch (e) {
+    fail(e);
+  } finally {
+    decision.value.busy = false;
+  }
+}
 const daysLabel = (n) => (n === 1 ? t("con.days_1") : n === 2 ? t("con.days_2") : n <= 10 ? t("con.days_few", { n }) : t("con.days_many", { n }));
 const inputType = (name) => (DATES.includes(name) ? "date" : "text");
 </script>
@@ -228,22 +278,27 @@ const inputType = (name) => (DATES.includes(name) ? "date" : "text");
     <template v-else-if="contract">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div class="flex items-center gap-2">
-          <Button icon="pi pi-arrow-right" text rounded :aria-label="t('con.back')" @click="router.push({ name: 'parent-contracts' })" />
+          <Button :icon="locale === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'" text rounded :aria-label="t('con.back')" @click="backTo" />
           <div>
             <p class="text-xl text-bp-135c65 font-bold m-0 flex items-center gap-2 flex-wrap">
-              {{ t("con.contract") }} <span dir="ltr">{{ contract.number }}</span>
+              {{ employee ? t("ect.doc_" + contract.doc_type) : t("con.contract") }} <span dir="ltr">{{ contract.number }}</span>
               <Tag :severity="statusSeverity(contract.status)" :value="t('con.status_' + contract.status)" />
               <Tag v-if="contract.customized" severity="warn" :value="t('con.customized')" />
             </p>
-            <p class="text-color-secondary text-sm m-0">{{ contract.child_name }} · {{ contract.template_name }} ({{ t("ct.version_n", { n: contract.template_version }) }})</p>
+            <p class="text-color-secondary text-sm m-0">{{ employee ? contract.recipient_name : contract.child_name }} · {{ contract.template_name }} ({{ t("ct.version_n", { n: contract.template_version }) }})</p>
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <span v-if="dirty && editable" class="text-sm" style="color: #b45309">{{ t("ct.unsaved") }}</span>
           <Button icon="pi pi-print" :label="t('con.print')" severity="secondary" outlined @click="print" />
-          <Button v-if="can('parent contracts edit') && ['draft', 'sent'].includes(contract.status)" icon="pi pi-ban" :label="t('con.cancel')" severity="warn" text @click="cancelContract" />
+          <Button v-if="cancellable" icon="pi pi-ban" :label="t('con.cancel')" severity="warn" text @click="cancelContract" />
           <Button v-if="editable" icon="pi pi-save" :label="t('save')" :loading="saving" :disabled="!dirty" severity="secondary" @click="save" />
-          <Button v-if="contract.status === 'draft' && canSign" icon="pi pi-send" :label="t('con.sign_send')" @click="openSend" />
+          <Button v-if="employee && editable" icon="pi pi-verified" :label="gmApproval ? t('ect.submit') : t('ect.submit_direct')" @click="submitForApproval" />
+          <template v-if="employee && contract.status === 'pending_approval' && can(PERM.approve)">
+            <Button icon="pi pi-replay" :label="t('ect.return')" severity="warn" outlined @click="openDecision(false)" />
+            <Button icon="pi pi-check" :label="t('ect.approve')" severity="success" @click="openDecision(true)" />
+          </template>
+          <Button v-if="signable" icon="pi pi-send" :label="t('con.sign_send')" @click="openSend" />
         </div>
       </div>
 
@@ -253,12 +308,21 @@ const inputType = (name) => (DATES.includes(name) ? "date" : "text");
           <Button size="small" :label="t('con.reset_text')" icon="pi pi-refresh" outlined @click="resetText" />
         </div>
       </Message>
+      <Message v-if="employee && contract.status === 'draft' && contract.gm_note" severity="warn" class="mb-3"><b>{{ t("ect.gm_note") }}:</b> {{ contract.gm_note }}</Message>
+      <Message v-if="employee && contract.status === 'pending_approval'" severity="info" class="mb-3">{{ can(PERM.approve) ? t("ect.waiting_you") : t("ect.waiting_gm") }}</Message>
+      <Message v-if="employee && contract.status === 'ready'" severity="info" class="mb-3">{{ canSign ? t("ect.ready_you") : t("ect.ready_signer") }}</Message>
+      <section v-if="changes.length" class="cv-card mb-3">
+        <p class="cv-title"><i class="pi pi-pencil" aria-hidden="true" /> {{ t("ect.changes") }}</p>
+        <ul class="m-0 ps-4"><li v-for="(line, i) in changes" :key="i">{{ line }}</li></ul>
+      </section>
       <Message v-if="!editable && contract.status === 'draft'" severity="secondary" class="mb-3">{{ t("con.read_only_perm") }}</Message>
       <Message v-else-if="!editable" severity="secondary" class="mb-3">{{ t("con.read_only") }}</Message>
       <Message v-if="missing.length" severity="warn" class="mb-3">{{ t("con.missing", { list: missing.map((n) => labelOf(variables.find((v) => v.name === n))).join("، ") }) }}</Message>
 
-      <section v-if="contract.status !== 'draft'" class="cv-status" :class="contract.status">
+      <section v-if="!['draft', 'pending_approval', 'ready'].includes(contract.status) || (employee && contract.gm_decided_at && contract.status !== 'draft')" class="cv-status" :class="contract.status">
         <div class="cv-status-grid">
+          <div v-if="employee && contract.submitted_at"><span>{{ t("ect.submitted_at") }}</span><b>{{ dateTime(contract.submitted_at) }}</b></div>
+          <div v-if="employee && contract.gm_decided_at && contract.status !== 'draft'"><span>{{ t("ect.gm_approved_at") }}</span><b>{{ dateTime(contract.gm_decided_at) }}</b><small v-if="contract.gm_note">{{ contract.gm_note }}</small></div>
           <div v-if="contract.signatures?.academy"><span>{{ t("con.academy_signed") }}</span><b>{{ contract.signatures.academy.name }}</b><small>{{ dateTime(contract.signatures.academy.at) }}</small></div>
           <div v-if="contract.sent_at"><span>{{ t("con.sent_at") }}</span><b>{{ dateTime(contract.sent_at) }}</b><small dir="ltr">{{ contract.recipient_phone }}</small></div>
           <div v-if="contract.status === 'sent'"><span>{{ t("con.link_expires") }}</span><b>{{ dateTime(contract.link_expires_at) }}</b><small>{{ contract.viewed_at ? t("con.viewed_at", { at: dateTime(contract.viewed_at) }) : t("con.not_viewed") }}</small></div>
@@ -354,7 +418,9 @@ const inputType = (name) => (DATES.includes(name) ? "date" : "text");
           <TabPanel value="log">
             <ol class="cv-log">
               <li v-for="(e, i) in contract.events" :key="i">
-                <b>{{ t("con.ev_" + e.event) }}</b>
+                <b>{{ te("con.ev_" + e.event) ? t("con.ev_" + e.event) : e.event }}</b>
+                <span v-if="e.meta?.note">«{{ e.meta.note }}»</span>
+                <span v-if="e.meta?.error" class="text-red-600">{{ e.meta.error }}</span>
                 <span>{{ dateTime(e.at) }}</span>
                 <span v-if="e.by">{{ e.by }}</span>
                 <span v-if="e.meta?.reason">«{{ e.meta.reason }}»</span>
@@ -417,6 +483,18 @@ const inputType = (name) => (DATES.includes(name) ? "date" : "text");
         </div>
       </Dialog>
     </template>
+    <Dialog v-model:visible="decision.open" modal :header="decision.approve ? t('ect.approve') : t('ect.return')" :style="{ width: '480px', maxWidth: '96vw' }">
+      <div class="grid gap-2">
+        <p class="m-0 text-color-secondary">{{ decision.approve ? t("ect.approve_hint") : t("ect.return_hint") }}</p>
+        <label for="ect-note" class="font-bold">{{ t("ect.note") }} <span v-if="!decision.approve" class="text-red-500">*</span></label>
+        <Textarea id="ect-note" v-model="decision.note" rows="3" auto-resize maxlength="2000" :invalid="!!decision.error" />
+        <small v-if="decision.error" class="p-error">{{ decision.error }}</small>
+      </div>
+      <template #footer>
+        <Button :label="t('cancel')" text severity="secondary" @click="decision.open = false" />
+        <Button :icon="decision.approve ? 'pi pi-check' : 'pi pi-replay'" :severity="decision.approve ? 'success' : 'warn'" :label="decision.approve ? t('ect.approve') : t('ect.return')" :loading="decision.busy" @click="decide" />
+      </template>
+    </Dialog>
     <ConfirmDialog />
     <Toast />
   </div>

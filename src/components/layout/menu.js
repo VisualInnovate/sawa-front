@@ -1,14 +1,15 @@
 // Dashboard navigation. Sections in AdminSidebar group these permitted entries.
 // `label` is an i18n key; `text` is shown as-is (evaluation names stay English).
 // `perm` is one permission or a list (any of them); `to` may depend on the permissions the user has.
-import { can, homeRoute } from "@/utils/permissions";
+import { can, homeRoute, onlyBusSupervisor } from "@/utils/permissions";
 import { approver } from "@/utils/approver";
+import { interviewer } from "@/utils/interviewer";
 
 export const buildMenu = () => [
   {
     key: "home",
     icon: "mdi-home",
-    label: homeRoute().name === "dashbord" ? "dashbored" : "home",
+    label: { dashbord: "dashbored", "bus-trips": "tr.my_trips" }[homeRoute().name] ?? "home",
     to: homeRoute(),
   },
   {
@@ -30,6 +31,7 @@ export const buildMenu = () => [
     children: [
       { label: "parents", to: { name: "Parents" }, perm: "parents list" },
       { label: "meetings", to: { name: "parent-meeting" }, perm: "parent meetings list" },
+      { label: "pfb.menu", to: { name: "admin-parent-feedback" }, perm: "parent feedback list" },
       { label: "children", to: { name: "Children" }, perm: "child list" },
       { label: "con.menu", to: { name: "parent-contracts" }, perm: "parent contracts list" },
       { label: "ct.menu", to: { name: "contract-templates" }, perm: "contract templates list" },
@@ -40,6 +42,16 @@ export const buildMenu = () => [
     icon: "mdi-calendar-account-outline",
     label: "sch.my_title",
     to: { name: "my-schedule" },
+    show: () => !onlyBusSupervisor(),
+  },
+  // «رحلاتي»: the bus supervisor's trips (for him alone it is the home entry instead).
+  {
+    key: "bus-trips",
+    icon: "mdi-bus-school",
+    label: "tr.my_trips",
+    to: { name: "bus-trips" },
+    perm: "bus supervisor list",
+    show: () => !onlyBusSupervisor(),
   },
   // The leaves waiting for a department head / HR (shown only to them).
   {
@@ -49,11 +61,20 @@ export const buildMenu = () => [
     to: { name: "approvals" },
     show: () => approver.is,
   },
+  // The candidates sent to a department head for a decision and an interview (shown to HR and to the heads).
+  {
+    key: "my-interviews",
+    icon: "mdi-account-tie-voice-outline",
+    label: "crv.title",
+    to: { name: "candidate-reviews" },
+    show: () => interviewer.is,
+  },
   {
     key: "my-evaluations",
     icon: "mdi-clipboard-list-outline",
     label: "evaluation_order",
     to: { name: "my-evaluations" },
+    show: () => !onlyBusSupervisor(),
   },
   {
     key: "my-evaluation-results",
@@ -62,6 +83,7 @@ export const buildMenu = () => [
     to: { name: "my-evaluation-results" },
     // My evaluations the management sent back (rejected with a reason).
     badge: "my_rejected_evaluations",
+    show: () => !onlyBusSupervisor(),
   },
   {
     key: "evaluations",
@@ -106,7 +128,7 @@ export const buildMenu = () => [
       // `badge`: the pending count shown beside the entry (utils/pendingCounts.js).
       { label: "ereport.tracking_approvals", to: { name: "tracking-approvals" }, perm: ["tracking approval list", "tracking approval edit"], badge: "tracking_approvals" },
       { label: "gen_requests_title", to: { name: "goal-generalizations" }, perm: ["goal generalization list", "goal generalization edit"], badge: "goal_generalizations" },
-      { label: "gen_inbox_title", to: { name: "my-generalizations" }, badge: "my_generalizations" },
+      { label: "gen_inbox_title", to: { name: "my-generalizations" }, badge: "my_generalizations", show: () => !onlyBusSupervisor() },
       { label: "program_logs", to: { name: "student-program-logs" }, perm: "student program log list" },
       { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
       { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },
@@ -155,18 +177,8 @@ export const buildMenu = () => [
     icon: "mdi-cog-outline",
     label: "Settings",
     children: [
-      { label: "Pages", to: { name: "pages" }, perm: "pages list" },
       { label: "Settings", to: { name: "settings" }, perm: "settings list" },
       { label: "ai.menu", to: { name: "ai-assistant" }, perm: ["ai assistant list", "ai assistant edit"] },
-    ],
-  },
-  {
-    key: "custom-files",
-    icon: "mdi-message-question-outline",
-    label: "custom_files",
-    children: [
-      { label: "custom_files", to: { name: "custom-files" }, perm: "modules create" },
-      { label: "module", to: { name: "module" }, perm: "modules list" },
     ],
   },
   {
@@ -179,6 +191,8 @@ export const buildMenu = () => [
       { label: "veciles", to: { name: "transportation" }, perm: "vehicle list" },
       { label: "student_tans", to: { name: "student-transportation" }, perm: "student transportation list" },
       { label: "transportation_schedule", to: { name: "transportation-schedule" }, perm: "transportation schedule list" },
+      { label: "tr.weekly_title", to: { name: "transport-weekly-trips" }, perm: "transportation schedule list" },
+      { label: "tr.log_title", to: { name: "transport-trip-log" }, perm: ["child list", "parents list", "transportation schedule list"] },
       { label: "Typetreatment", to: { name: "treatments-type" }, perm: "treatment list" },
     ],
   },
@@ -197,7 +211,10 @@ export const buildMenu = () => [
       { label: "hrlog.title", to: { name: "hr-log" }, perm: "hr log list" },
       { label: "vac.title", to: { name: "vacancies" }, perm: ["vacancies list", "vacancies create", "vacancies edit"] },
       { label: "cand.title", to: { name: "candidates" }, perm: "candidates list" },
+      { label: "icr.title", to: { name: "interview-criteria" }, perm: ["hr lists list", "hr lists edit"] },
       { label: "ctr.title", to: { name: "contracts" }, perm: "contracts list" },
+      { label: "ect.menu", to: { name: "employee-contracts" }, perm: ["contracts list", "employee contract approval edit", "employee contract signing edit"] },
+      { label: "ect.templates", to: { name: "employee-contract-templates" }, perm: "contracts list" },
       { label: "onb.title", to: { name: "onboarding" }, perm: ["onboarding list", "onboarding edit"] },
       {
         label: "deductions",

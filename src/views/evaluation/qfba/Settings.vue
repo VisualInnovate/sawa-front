@@ -24,6 +24,8 @@ const dialog = ref(false);
 const form = ref(null);
 const deleteTarget = ref(null);
 const functionForm = ref([]);
+// The placeholders a plan goal may use, shown in the hint as typed.
+const GOAL_PLACEHOLDERS = { name: "{{name}}", behavior: "{{behavior}}" };
 const optionForm = ref([]);
 const general = ref({ instructions: "", instructions_en: "", clear_function_from: 4, from_months: null, to_months: null });
 
@@ -34,7 +36,8 @@ const functionOptions = computed(() => functions.value.map((fn) => ({ value: fn.
 function apply(data) {
   questions.value = data.questions ?? [];
   functions.value = data.functions ?? [];
-  functionForm.value = functions.value.map((fn) => ({ id: fn.id, key: fn.key, name: fn.name, name_en: fn.name_en ?? "", description: fn.description ?? "", description_en: fn.description_en ?? "" }));
+  functionForm.value = functions.value.map((fn) => ({ id: fn.id, key: fn.key, name: fn.name, name_en: fn.name_en ?? "", description: fn.description ?? "", description_en: fn.description_en ?? "",
+    symbol: fn.symbol ?? "", goals: fn.goals ?? "", goals_female: fn.goals_female ?? "", goals_en: fn.goals_en ?? "" }));
   optionForm.value = (data.options ?? []).map((option) => ({ value: option.value, label: option.label, label_en: option.label_en ?? "" }));
   general.value = {
     instructions: data.instructions ?? "",
@@ -194,6 +197,27 @@ onMounted(load);
                   <Textarea :id="'qs-fd-en-' + fn.id" v-model="fn.description_en" rows="3" autoResize dir="ltr" />
                 </div>
               </div>
+              <!-- The plan: the function's code (goals ATT-1 …) and the goals a plan starts from when it is endorsed. -->
+              <h4 class="qs-sub">{{ $t("qfba.plan_goals") }}</h4>
+              <p class="qs-hint">{{ $t("qfba.plan_goals_hint", GOAL_PLACEHOLDERS) }}</p>
+              <div class="qs-field qs-symbol">
+                <label :for="'qs-fs-' + fn.id">{{ $t("qfba.symbol") }}</label>
+                <InputText :id="'qs-fs-' + fn.id" v-model="fn.symbol" maxlength="10" dir="ltr" />
+              </div>
+              <div class="qs-two">
+                <div class="qs-field">
+                  <label :for="'qs-fg-' + fn.id">{{ $t("qfba.goals_male") }}</label>
+                  <Textarea :id="'qs-fg-' + fn.id" v-model="fn.goals" rows="4" autoResize />
+                </div>
+                <div class="qs-field">
+                  <label :for="'qs-fgf-' + fn.id">{{ $t("qfba.goals_female") }}</label>
+                  <Textarea :id="'qs-fgf-' + fn.id" v-model="fn.goals_female" rows="4" autoResize />
+                </div>
+                <div class="qs-field">
+                  <label :for="'qs-fge-' + fn.id">{{ $t("qfba.goals_en") }}</label>
+                  <Textarea :id="'qs-fge-' + fn.id" v-model="fn.goals_en" rows="4" autoResize dir="ltr" />
+                </div>
+              </div>
             </section>
             <div class="qs-actions">
               <Button v-can="'qfba question edit'" type="submit" :label="$t('save')" icon="pi pi-check" :loading="saving" />
@@ -316,6 +340,8 @@ onMounted(load);
 .qs-form { display: grid; gap: 1rem; }
 .qs-box { padding: 1rem 1.15rem; border: 1px solid var(--sawa-border, #e2e8f0); border-inline-start: 6px solid var(--tone); border-radius: 14px; background: #fff; }
 .qs-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .85rem 1rem; }
+.qs-sub { margin: 1rem 0 0; color: var(--tone); font-size: .98rem; font-weight: 800; }
+.qs-symbol { max-width: 10rem; margin: .6rem 0; }
 .qs-row { display: flex; flex-wrap: wrap; gap: 1rem; }
 .qs-field { display: grid; gap: .4rem; align-content: start; }
 .qs-field label { font-weight: 700; }

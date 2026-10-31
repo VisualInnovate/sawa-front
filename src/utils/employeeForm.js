@@ -55,6 +55,7 @@ export const evaluationTypeGroups = (t) => [
       { name: "Transition", id: 6 },
       { name: "Ablls OT", id: 7 },
       { name: "M-CHAT-R", id: 8 },
+      { name: "QFBA", id: 9 },
     ],
   },
   {

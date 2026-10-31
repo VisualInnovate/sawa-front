@@ -4,6 +4,7 @@
 //   kind="parent"     the parent portal (the parent's own children)
 //   kind="dashboard"  the dashboard (the employee's own permissions; sends the pages of their menu)
 //   kind="public"     the public site (no sign-in: a random visitor id kept by the browser)
+// The parent's assistant also talks: a mic for the question, and the answer read aloud (utils/assistantVoice).
 import axios from "axios";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -12,10 +13,11 @@ import { useStorage } from "@vueuse/core";
 import { useParentStore } from "@/stores/ParentStore";
 import { useAuthStore } from "@/stores/Auth";
 import { myMenuPages } from "@/utils/assistantPages";
+import { useAssistantVoice } from "@/utils/assistantVoice";
 
 const props = defineProps({ kind: { type: String, default: "parent" } });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const parentStore = useParentStore();
@@ -56,6 +58,29 @@ const list = ref(null);
 const input = ref(null);
 
 const suggestions = computed(() => copy.value.suggestions);
+
+// Voice (parent only). A question asked by voice is always answered aloud; «قراءة الردود» reads the typed ones too.
+const voice = useAssistantVoice(() => (locale.value === "ar" ? "ar-JO" : "en-US"));
+const voiceOn = props.kind === "parent";
+const readAloud = useStorage("assistantReadAloud", false, localStorage);
+
+function mic() {
+  if (voice.listening.value) return voice.stopListening();
+  voice.unlock();
+  voice.listen({
+    onText: (text) => (draft.value = text),
+    onEnd: (text) => text && send(text, { voice: true }),
+  });
+}
+function toggleReadAloud() {
+  readAloud.value = !readAloud.value;
+  if (readAloud.value) voice.unlock();
+  else voice.stopSpeaking();
+}
+function listenTo(m) {
+  voice.stopSpeaking();
+  voice.say(m.text);
+}
 
 // The answers are plain text; only **bold** is kept, everything else is escaped. Phone numbers read left to right
 // (in Arabic text "+962…" would otherwise show its plus at the end).
@@ -143,10 +168,13 @@ async function stream(body, onEvent) {
   }
 }
 
-async function send(text = draft.value) {
+async function send(text = draft.value, { voice: byVoice = false } = {}) {
   text = text.trim();
   if (!text || sending.value) return;
   draft.value = "";
+  voice.stopSpeaking();
+  if (readAloud.value) voice.unlock();
+  const aloud = voiceOn && (byVoice || readAloud.value) ? voice.reader() : null;
   messages.value.push({ id: `local-${Date.now()}`, role: "user", text });
   messages.value.push({ id: `reply-${Date.now()}`, role: "assistant", text: "", actions: [] });
   // The reactive copy, so the bubble updates as the text arrives.
@@ -162,7 +190,10 @@ async function send(text = draft.value) {
   try {
     await stream(body, (event, data) => {
       if (event === "start") conversationId.value = data.conversation_id;
-      if (event === "delta") reply.text += data.text;
+      if (event === "delta") {
+        reply.text += data.text;
+        aloud?.feed(reply.text);
+      }
       // Take the user to the page as soon as the assistant opens it; the chat stays open there.
       if (event === "action") {
         reply.actions.push(data);
@@ -172,6 +203,7 @@ async function send(text = draft.value) {
       if (event === "done") {
         conversationId.value = data.conversation_id;
         Object.assign(reply, data.message);
+        aloud?.finish(reply.text);
         if (!navigated) go(data.message.actions?.find((a) => a.type === "navigate"));
         finished = true;
       }
@@ -199,11 +231,12 @@ function onKey(event) {
 }
 
 function restart() {
+  voice.stopSpeaking();
   conversationId.value = null;
   messages.value = [];
 }
 
-watch(open, (value) => value && scrollDown());
+watch(open, (value) => (value ? scrollDown() : voice.stopSpeaking()));
 onMounted(load);
 </script>
 
@@ -217,6 +250,16 @@ onMounted(load);
             <p class="sawa-assistant__title">{{ $t("ai.chat_title") }}</p>
             <p class="sawa-assistant__subtitle">{{ copy.subtitle }}</p>
           </div>
+          <template v-if="voiceOn && voice.canSpeak">
+            <button v-if="voice.speaking.value" type="button" class="sawa-assistant__icon" :title="$t('ai.voice_stop')" :aria-label="$t('ai.voice_stop')"
+              @click="voice.stopSpeaking()">
+              <i class="pi pi-stop-circle" />
+            </button>
+            <button type="button" class="sawa-assistant__icon" :class="{ 'is-on': readAloud }" :title="$t(readAloud ? 'ai.voice_read_off' : 'ai.voice_read_on')"
+              :aria-label="$t(readAloud ? 'ai.voice_read_off' : 'ai.voice_read_on')" :aria-pressed="readAloud" @click="toggleReadAloud">
+              <i :class="readAloud ? 'pi pi-volume-up' : 'pi pi-volume-off'" />
+            </button>
+          </template>
           <button type="button" class="sawa-assistant__icon" :title="$t('ai.chat_new')" :aria-label="$t('ai.chat_new')" @click="restart">
             <i class="pi pi-refresh" />
           </button>
@@ -233,6 +276,10 @@ onMounted(load);
           <template v-for="m in messages" :key="m.id">
             <div v-if="m.text" class="sawa-assistant__msg" :class="m.role === 'user' ? 'sawa-assistant__msg--user' : m.error ? 'sawa-assistant__msg--error' : 'sawa-assistant__msg--bot'"
               v-html="format(m.text)" />
+            <button v-if="voiceOn && voice.canSpeak && m.role === 'assistant' && m.text && !m.error && !(sending && m === messages[messages.length - 1])" type="button"
+              class="sawa-assistant__listen" @click="listenTo(m)">
+              <i class="pi pi-volume-up" /> {{ $t("ai.voice_listen") }}
+            </button>
             <div v-if="m.actions?.length" class="sawa-assistant__actions">
               <button v-for="a in m.actions" :key="a.route + JSON.stringify(a.params)" type="button" class="sawa-assistant__go" @click="go(a)">
                 <i class="pi pi-arrow-left" /> {{ $t("ai.chat_go", { page: a.label }) }}
@@ -246,11 +293,18 @@ onMounted(load);
         <form class="sawa-assistant__form" @submit.prevent="send()">
           <textarea ref="input" v-model="draft" rows="1" maxlength="2000" :placeholder="$t('ai.chat_placeholder')" :aria-label="$t('ai.chat_placeholder')"
             @keydown="onKey" />
+          <button v-if="voiceOn && voice.canListen" type="button" class="sawa-assistant__mic" :class="{ 'is-listening': voice.listening.value }" :disabled="sending"
+            :title="$t(voice.listening.value ? 'ai.voice_listening' : 'ai.voice_mic')" :aria-label="$t(voice.listening.value ? 'ai.voice_listening' : 'ai.voice_mic')"
+            :aria-pressed="voice.listening.value" @click="mic">
+            <i :class="voice.listening.value ? 'pi pi-stop' : 'pi pi-microphone'" />
+          </button>
           <button type="submit" class="sawa-assistant__send" :disabled="!draft.trim() || sending" :aria-label="$t('ai.chat_send')">
             <i class="pi pi-send" />
           </button>
         </form>
-        <p class="sawa-assistant__note">{{ copy.note }}</p>
+        <p v-if="voice.error.value" class="sawa-assistant__note sawa-assistant__note--error">{{ $t(`ai.voice_${voice.error.value}`) }}</p>
+        <p v-else-if="voice.listening.value" class="sawa-assistant__note">{{ $t("ai.voice_listening") }}</p>
+        <p v-else class="sawa-assistant__note">{{ copy.note }}</p>
       </section>
     </transition>
 
@@ -441,6 +495,44 @@ onMounted(load);
 }
 .sawa-assistant__send:disabled {
   opacity: 0.45;
+}
+.sawa-assistant__mic {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--sa-main);
+  color: var(--sa-main);
+  background: #fff;
+  flex-shrink: 0;
+}
+.sawa-assistant__mic:disabled {
+  opacity: 0.45;
+}
+.sawa-assistant__mic.is-listening {
+  background: var(--sa-accent);
+  border-color: var(--sa-accent);
+  color: #fff;
+  animation: sa-pulse 1.2s infinite;
+}
+@keyframes sa-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 42, 91, 0.5); }
+  100% { box-shadow: 0 0 0 10px rgba(255, 42, 91, 0); }
+}
+.sawa-assistant__icon.is-on {
+  background: rgba(255, 255, 255, 0.22);
+}
+.sawa-assistant__listen {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: -0.35rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  color: var(--sa-main);
+}
+.sawa-assistant__note--error {
+  color: #b91c1c;
 }
 .sawa-assistant__note {
   font-size: 0.7rem;

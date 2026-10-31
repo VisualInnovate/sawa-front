@@ -116,8 +116,12 @@ async function signOut() {
 // ---- Steps and status ----
 const form = ref(null);
 const editable = computed(() => payload.value?.editable);
-const statusKey = computed(() => payload.value?.candidate.status);
-const statusTone = { new: "info", review: "info", approved: "success", contracting: "success", hired: "success", rejected: "danger" };
+// The department head's stage and the candidate pool are internal: the candidate reads them as «under review».
+const statusKey = computed(() => {
+  const status = payload.value?.candidate.status;
+  return ["head_review", "pool"].includes(status) ? "review" : status;
+});
+const statusTone = { new: "info", review: "info", interview: "success", approved: "success", contracting: "success", hired: "success", rejected: "danger" };
 
 async function goToDocuments() {
   step.value = 2;
@@ -204,6 +208,7 @@ const vacancyName = computed(() => {
         <p class="pp-lead">{{ $t(`careers.status_${statusKey}_body`) }}</p>
         <div class="cr-status__facts">
           <span class="pp-tag" :class="`pp-tag--${statusTone[statusKey] ?? 'info'}`">{{ $t(`careers.status_${statusKey}`) }}</span>
+          <span v-if="payload.interview_at"><i class="pi pi-clock" /> {{ $t("careers.interview_on", { date: `⁦${payload.interview_at}⁩` }) }}</span>
           <span v-if="vacancyName"><i class="pi pi-briefcase" /> {{ vacancyName }}</span>
           <span v-if="payload.candidate.submitted_at"><i class="pi pi-calendar" /> {{ $t("careers.sent_on", { date: `⁦${moment(payload.candidate.submitted_at).format("YYYY-MM-DD")}⁩` }) }}</span>
         </div>

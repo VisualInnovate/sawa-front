@@ -14,6 +14,7 @@ import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
 import { loadCurrency } from "../utils/accounting";
 import { approver, loadApprover } from "../utils/approver";
+import { interviewer, loadInterviewer } from "../utils/interviewer";
 
 const router = useRouter();
 const route = useRoute();
@@ -23,6 +24,7 @@ const authStore = useAuthStore();
 const menu = computed(() => {
   void authStore.userPermissions;
   void approver.is;
+  void interviewer.is;
   return visibleMenu(buildMenu());
 });
 
@@ -47,6 +49,7 @@ watch(() => route.fullPath, closeOnMobile);
 let stopCounts = null;
 onMounted(async () => {
   loadApprover();
+  loadInterviewer();
   desktopQuery.addEventListener("change", onMediaChange);
   stopCounts = watchPendingCounts("staff");
   // Every amount shows the accounting's currency.

@@ -1,5 +1,6 @@
 <script setup>
 // Write a contract template: its details, the text in the editor, and {{variables}} from the panel beside it.
+// With route meta audience «employee»: an employee template (offer, work contract or amendment, per labour system).
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -15,8 +16,11 @@ const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 
-const DEFAULT_HEADER = "أكاديمية سوا للتربية الخاصة\nالإدارة العامة\nعقد مع أهالي الطلبة";
-const blank = () => ({ name: "", kind: null, header: DEFAULT_HEADER, title: "", body: "", approval_note: "", active: true });
+const employee = route.meta.audience === "employee";
+const DEFAULT_HEADER = employee ? "أكاديمية سوا للتربية الخاصة\nإدارة الموارد البشرية" : "أكاديمية سوا للتربية الخاصة\nالإدارة العامة\nعقد مع أهالي الطلبة";
+const blank = () => ({ name: "", kind: employee ? "work" : null, ...(employee ? { audience: "employee", country: null } : {}), header: DEFAULT_HEADER, title: "", body: "", approval_note: "", active: true });
+const listName = employee ? "employee-contract-templates" : "contract-templates";
+const editName = employee ? "employee-contract-template-edit" : "contract-template-edit";
 
 const id = computed(() => route.params.id || null);
 const form = ref(blank());
@@ -37,17 +41,18 @@ const used = computed(() => usedVariables(`${form.value.header}\n${form.value.ti
 const unknown = computed(() => used.value.filter((name) => !known.value.has(name)));
 const clauses = computed(() => clauseCount(form.value.body));
 const dirty = computed(() => JSON.stringify(form.value) !== saved.value);
-const kindOptions = computed(() => kinds.value.map((k) => ({ value: k, label: t("ct.kind_" + k) })));
+const kindOptions = computed(() => kinds.value.map((k) => ({ value: k, label: employee ? t("ect.doc_" + k) : t("ct.kind_" + k) })));
+const countryOptions = computed(() => [{ value: null, label: t("ect.both_systems") }, { value: "SA", label: t("ect.country_SA") }, { value: "JO", label: t("ect.country_JO") }]);
 
 const take = (data) => {
-  form.value = { name: data.name, kind: data.kind, header: data.header || "", title: data.title || "", body: data.body || "", approval_note: data.approval_note || "", active: data.active };
+  form.value = { name: data.name, kind: data.kind, ...(employee ? { audience: "employee", country: data.country ?? null } : {}), header: data.header || "", title: data.title || "", body: data.body || "", approval_note: data.approval_note || "", active: data.active };
   saved.value = JSON.stringify(form.value);
   meta.value = { version: data.version };
 };
 
 onMounted(async () => {
   try {
-    const list = (await axios.get("api/contract-templates")).data;
+    const list = (await axios.get(employee ? "api/contract-templates?audience=employee" : "api/contract-templates")).data;
     variables.value = list.variables;
     groups.value = list.groups;
     kinds.value = list.kinds;
@@ -68,7 +73,7 @@ async function save() {
     const { data } = id.value ? await axios.put(`api/contract-templates/${id.value}`, form.value) : await axios.post("api/contract-templates", form.value);
     take(data.data);
     toast.add({ severity: "success", summary: t("ct.saved"), detail: t("ct.version_n", { n: data.data.version }), life: 2500 });
-    if (!id.value) router.replace({ name: "contract-template-edit", params: { id: data.data.id } });
+    if (!id.value) router.replace({ name: editName, params: { id: data.data.id } });
   } catch (e) {
     errors.value = e.response?.data?.errors || {};
     toast.add({ severity: "error", summary: t("error"), detail: Object.values(errors.value)[0]?.[0] || e.response?.data?.message || t("mission_error"), life: 4000 });
@@ -86,7 +91,7 @@ function openPreview() {
   <div class="sawa-card p-3">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
       <div class="flex items-center gap-2">
-        <Button icon="pi pi-arrow-right" text rounded :aria-label="t('ct.back')" @click="router.push({ name: 'contract-templates' })" />
+        <Button icon="pi pi-arrow-right" text rounded :aria-label="t('ct.back')" @click="router.push({ name: listName })" />
         <div>
           <p class="text-xl text-bp-135c65 font-bold m-0">{{ id ? t("ct.edit_title") : t("ct.new") }}</p>
           <p v-if="meta.version" class="text-color-secondary text-sm m-0">{{ t("ct.version_n", { n: meta.version }) }} · {{ t("ct.version_hint") }}</p>
@@ -109,7 +114,11 @@ function openPreview() {
         </div>
         <div class="te-field">
           <label for="ct-kind">{{ t("ct.kind") }}</label>
-          <Select input-id="ct-kind" v-model="form.kind" :options="kindOptions" option-label="label" option-value="value" show-clear :placeholder="t('ct.kind_any')" />
+          <Select input-id="ct-kind" v-model="form.kind" :options="kindOptions" option-label="label" option-value="value" :show-clear="!employee" :placeholder="t('ct.kind_any')" />
+        </div>
+        <div v-if="employee" class="te-field">
+          <label for="ct-country">{{ t("ect.system") }}</label>
+          <Select input-id="ct-country" v-model="form.country" :options="countryOptions" option-label="label" option-value="value" />
         </div>
         <div class="te-field">
           <label for="ct-title">{{ t("ct.doc_title") }}</label>
