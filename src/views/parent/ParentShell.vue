@@ -29,7 +29,7 @@ const MORE = [
   { name: "parent-mchat", icon: "pi pi-heart", label: "pp.nav_mchat" },
   { name: "parent-feedback", icon: "pi pi-comment", label: "pfb.my_title" },
   { name: "Profile", icon: "pi pi-user", label: "pp.nav_profile" },
-  { name: "contactus", icon: "pi pi-phone", label: "pp.nav_contact" },
+  { name: "parent-contact", icon: "pi pi-phone", label: "pp.nav_contact", also: ["contactus"] },
 ];
 
 const sheetOpen = ref(false);
@@ -123,7 +123,8 @@ watch(() => route.fullPath, () => {
               <div v-if="profileOpen" class="pp-profile__menu" role="menu">
                 <button type="button" role="menuitem" @click="go('Profile')"><i class="pi pi-user" /> {{ $t("pp.nav_profile") }}</button>
                 <button type="button" role="menuitem" @click="go('parent-mchat')"><i class="pi pi-heart" /> {{ $t("pp.nav_mchat") }}</button>
-                <button type="button" role="menuitem" @click="go('contactus')"><i class="pi pi-phone" /> {{ $t("pp.nav_contact") }}</button>
+                <button type="button" role="menuitem" @click="go('parent-feedback')"><i class="pi pi-comment" /> {{ $t("pfb.my_title") }}</button>
+                <button type="button" role="menuitem" @click="go('parent-contact')"><i class="pi pi-phone" /> {{ $t("pp.nav_contact") }}</button>
                 <div class="pp-divider" />
                 <button type="button" role="menuitem" class="is-danger" @click="logout"><i class="pi pi-sign-out" /> {{ $t("pp.logout") }}</button>
               </div>

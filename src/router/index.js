@@ -138,6 +138,7 @@ const routes = [
     path: "/web/contactus",
     name: "contactus",
     component: () => import("../views/parent/Contact.vue"),
+    beforeEnter: (to, from, next) => (useParentStore().isAuthenticated ? next({ name: "parent-contact" }) : next()),
   },
   // A contract's private signing link (no account: a code to the recipient's phone) and the public check of its code.
   {
@@ -164,6 +165,7 @@ const routes = [
       { path: "", name: "webHome", component: () => import("../views/parent/Home.vue") },
       { path: "clidreen_parents", name: "clidreen_parents", component: () => import("../views/parent/Children.vue") },
       { path: "children/:child_id(\\d+)", name: "parent-child", component: () => import("../views/parent/ChildDetails.vue"), props: true },
+      { path: "contact", name: "parent-contact", component: () => import("../views/parent/Contact.vue") },
       { path: "programs", name: "parent-programs", component: () => import("../views/parent/Programs.vue") },
       // «المالية»: the family's and each child's dues, discounts, receipts and compensations (reading only).
       { path: "finances", name: "parent-finances", component: () => import("../views/parent/Finances.vue") },
