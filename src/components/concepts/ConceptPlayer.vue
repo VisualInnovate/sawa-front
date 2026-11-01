@@ -90,6 +90,16 @@ watch(
 );
 watch(lang, stopSound);
 
+// The next and previous words' first picture load in advance, so moving on shows them at once.
+function preload() {
+  for (const step of [1, -1]) {
+    const pictures = (props.concepts[props.index + step]?.media ?? []).filter((m) => ["image", "svg"].includes(m.role) && m.url);
+    const first = pictures.find((m) => m.role === "image" && m.variant === 1) ?? pictures[0];
+    if (first) new Image().src = first.url;
+  }
+}
+watch(() => props.index, preload, { immediate: true });
+
 function onKey(event) {
   if (["INPUT", "TEXTAREA"].includes(event.target?.tagName)) return;
   // Right-to-left: the right arrow goes back.
