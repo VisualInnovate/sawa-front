@@ -313,8 +313,10 @@ export default {
         { name: "carolina", id: 5 },
         { name: "Transition", id: 6 },
         { name: "Ablls OT", id: 7 },
+        { name: "Ablls SP", id: 10 },
         { name: "M-CHAT-R", id: 8 },
         { name: "QFBA", id: 9 },
+        { name: "Sensory Profile", id: 11 },
       ],
 
       show_status: false,

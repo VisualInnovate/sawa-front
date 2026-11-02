@@ -10,6 +10,7 @@ const props = defineProps({
   result: { type: Object, required: true },
   lang: { type: String, default: "ar" },
   meaning: { type: Boolean, default: true },
+  hint: { type: Boolean, default: true },
 });
 
 const scores = computed(() => props.result?.scores ?? []);
@@ -39,7 +40,7 @@ const likely = computed(() => scores.value.filter((score) => primary.value.inclu
         </tr>
       </tbody>
     </table>
-    <p class="qs-hint">{{ qt(lang, "clear_hint", { n: result.clear_function_from ?? 4 }) }}</p>
+    <p v-if="hint" class="qs-hint">{{ qt(lang, "clear_hint", { n: result.clear_function_from ?? 4 }) }}</p>
 
     <div v-if="meaning" class="qs-likely">
       <h3>{{ qt(lang, "likely") }}</h3>

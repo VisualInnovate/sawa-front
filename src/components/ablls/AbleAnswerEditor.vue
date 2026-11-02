@@ -1,6 +1,6 @@
 <script setup>
 // «تعديل الإجابات» of an ABLLS or Ablls OT evaluation that is not approved yet: the evaluation screen again, with the
-// answers given. `api` is the assessment's prefix: "able" or "skills". The screen finds the child from the evaluation.
+// answers given. `api` is the assessment's prefix: "able", "skills" or "sp". The screen finds the child from the evaluation.
 import EditAnswersButton from "@/components/evaluations/EditAnswersButton.vue";
 
 defineProps({
@@ -10,5 +10,5 @@ defineProps({
 </script>
 
 <template>
-  <EditAnswersButton :to="{ name: api === 'skills' ? 'skills-test' : 'mission-test', params: { id: evaluationId }, query: { edit: evaluationId } }" />
+  <EditAnswersButton :to="{ name: { skills: 'skills-test', sp: 'sp-test' }[api] || 'mission-test', params: { id: evaluationId }, query: { edit: evaluationId } }" />
 </template>

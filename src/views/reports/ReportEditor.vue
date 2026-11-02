@@ -31,20 +31,24 @@ import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
+import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
 import { functionColor, functionName, optionLabel, planGoalsOf, qt, questionText } from "@/views/evaluation/qfba/qfba";
+import SensoryGrid from "@/components/reports/SensoryGrid.vue";
+import SensorySummary from "@/components/reports/SensorySummary.vue";
+import { ageText as sensoryAge, formName as sensoryFormName } from "@/views/evaluation/sensory/sensory";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
 import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
-  ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems,
+  ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
   isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -109,6 +113,9 @@ const mchatAnswer = (test, id) => (test.result?.questions ?? []).find((question)
 // QFBA: the language its newest chosen test was filled in (its pages are drawn in it), and one test's answer to a question.
 const qfbaLang = (section) => (section.newest?.result?.language === "en" ? "en" : "ar");
 const qfbaAnswer = (test, id) => (test.result?.questions ?? []).find((question) => question.id === id) ?? null;
+
+// Sensory Profile: its pages follow the screen's language.
+const sensoryLang = computed(() => (locale.value === "en" ? "en" : "ar"));
 const qfbaFunction = (section, functionId) => (section.newest?.result?.scores ?? []).find((score) => score.function_id === functionId) ?? null;
 
 // Barriers: the newest chosen test's answers (barrier, chosen answer, its number) under the chart.
@@ -583,8 +590,8 @@ const planLevels = computed(() => {
     const levelKey = String(goal.level_id ?? "");
     if (!levels.has(levelKey)) levels.set(levelKey, { key: levelKey, title: names.get(levelKey)?.level_name ?? "", age: Number(names.get(levelKey)?.level_age) || 0, groups: new Map() });
     const groups = levels.get(levelKey).groups;
-    const groupKey = String(goal.general_goal_id ?? goal.symbol ?? "");
-    if (!groups.has(groupKey)) groups.set(groupKey, { key: groupKey, general_goal: goal.general_goal, domain: goal.domain, symbol: goal.symbol, goals: [] });
+    const groupKey = planGroupKey(goal);
+    if (!groups.has(groupKey)) groups.set(groupKey, { key: groupKey, legacyKey: String(goal.general_goal_id ?? goal.symbol ?? ""), general_goal: goal.general_goal, domain: goal.domain, symbol: goal.symbol, goals: [] });
     groups.get(groupKey).goals.push(goal);
   }
   // A deleted table (level) or group stays listed on its page to be restored; the server keeps them out of the tracking.
@@ -594,11 +601,13 @@ const planLevels = computed(() => {
     .map((level) => {
       const groups = [...level.groups.values()];
       const levelHidden = hidden.has(`level:${level.key}`);
-      const hiddenGroups = groups.filter((group) => hidden.has(`group:${level.key}|${group.key}`));
+      // A group deleted before groups were split by domain was saved under its general goal alone.
+      const groupHiddenKey = (group) => [group.key, group.legacyKey].map((key) => `group:${level.key}|${key}`).find((key) => hidden.has(key));
+      const hiddenGroups = groups.filter((group) => groupHiddenKey(group));
       return { ...level, hidden: levelHidden, groups: groups.filter((group) => !hiddenGroups.includes(group)),
         deleted: [
           ...(levelHidden ? [{ key: `level:${level.key}`, label: t("ereport.whole_table") }] : []),
-          ...hiddenGroups.map((group) => ({ key: `group:${level.key}|${group.key}`, label: [group.domain, group.symbol && `(${group.symbol})`].filter(Boolean).join(" ") || "—" })),
+          ...hiddenGroups.map((group) => ({ key: groupHiddenKey(group), label: [group.domain, group.symbol && `(${group.symbol})`].filter(Boolean).join(" ") || "—" })),
         ] };
     });
 });
@@ -608,6 +617,12 @@ function setPlanHidden(key, hidden) {
   else list.delete(key);
   plan.value.hidden = [...list];
   touchPlan();
+}
+// A plan group: the goals of one general goal and one domain symbol (math under the mands' general goal is MA, not M);
+// a goal without a general goal (QFBA) goes by its symbol.
+function planGroupKey(goal) {
+  if (goal.general_goal_id == null) return String(goal.symbol ?? "");
+  return goal.symbol ? `${goal.general_goal_id}:${goal.symbol}` : String(goal.general_goal_id);
 }
 // The symbol and the question's number in its domain (M-3); a goal written by hand takes its place in the group.
 const goalCode = (group, index, goal) => [group.symbol, goal?.number || index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-");
@@ -800,11 +815,11 @@ function setTrackingPlans(plans) {
   }
 }
 
-// Each plan's goals by general goal (the centre's form has one table per goal), numbered inside it.
+// Each plan's goals by general goal and domain (the centre's form has one table per goal), numbered inside it.
 const trackingGroups = (item) => {
   const groups = new Map();
   for (const goal of item.goals) {
-    const key = String(goal.general_goal_id ?? goal.symbol ?? "");
+    const key = planGroupKey(goal);
     if (!groups.has(key)) groups.set(key, { key, general_goal: goal.general_goal, domain: goal.domain, domain_symbol: goal.domain_symbol, symbol: goal.symbol, goals: [] });
     groups.get(key).goals.push(goal);
   }
@@ -1430,7 +1445,8 @@ function back() {
 
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
-          <AbllsChart v-else-if="section.type === ABLLS || section.type === ABLLS_SKILLS" :tests="section.tests" />
+          <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
+          <AbllsFlowChart v-else-if="isAbllsFlow(section.type)" :tests="section.tests" />
           <!-- Carolina: the newest chosen evaluation as the paper form (its rounds' colors in each box). -->
           <CarolinaGrid v-else-if="section.type === CAROLINA" :result="section.newest.result" :per-table="5" compact />
           <TransitionChart v-else-if="section.type === TRANSITION" :tests="section.tests" />
@@ -1492,6 +1508,37 @@ function back() {
             </table>
             <QfbaChart :tests="section.tests" :lang="qfbaLang(section)" :child-name="child.name ?? ''" />
             <QfbaSummary v-if="section.newest.result" :result="section.newest.result" :lang="qfbaLang(section)" />
+          </div>
+
+          <!-- Sensory Profile: each chosen test's row (form, who answered, every quadrant's level), then the newest test's
+               quadrants against its age's cut scores and what each means. -->
+          <div v-if="section.type === SENSORY && section.newest.result?.form" class="rx-sensory">
+            <table class="rx-table rx-mchat">
+              <thead>
+                <tr>
+                  <th class="rx-sum-num">#</th>
+                  <th>{{ $t("sensory.test_date") }}</th>
+                  <th>{{ $t("sensory.child_age") }}</th>
+                  <th>{{ $t("sensory.form") }}</th>
+                  <th>{{ $t("sensory.tester") }}</th>
+                  <th>{{ $t("sensory.respondent") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(test, i) in section.tests" :key="test.key">
+                  <td class="rx-sum-num">{{ i + 1 }}</td>
+                  <td><span class="ltr">{{ dmy(test.date) }}</span></td>
+                  <td>{{ sensoryAge(test.result?.child_age, $t) }}</td>
+                  <td>{{ sensoryFormName(test.result?.form, sensoryLang) }}</td>
+                  <td>{{ test.specialist?.name ?? "" }}</td>
+                  <td>{{ test.result?.info?.respondent ?? "" }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <SensoryGrid :scores="(section.newest.result.scores ?? []).filter((s) => s.kind === 'quadrant' || s.kind === 'threshold')"
+              :level-keys="section.newest.result.form.level_keys" :level-labels="section.newest.result.level_labels" :lang="sensoryLang"
+              :title="$t('sensory.quadrant')" numbered />
+            <SensorySummary :result="section.newest.result" :lang="sensoryLang" />
           </div>
 
           <!-- The newest chosen barriers test as a table: barrier, the chosen answer, its number. -->
@@ -1570,6 +1617,27 @@ function back() {
             </tfoot>
           </table>
           <p class="rx-mchat-hint">{{ $t("mchat.points_hint") }}</p>
+
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
+        <!-- Sensory Profile: the newest chosen test's sections (and factors on the 3–10 years form) against its age's cut scores. -->
+        <section v-if="showCharts && section.type === SENSORY && section.newest.result?.form"
+          v-page="{ key: 'sensory-' + section.group, title: $t('sensory.section_summary') + ' · ' + section.label }" class="rx-page">
+          <header class="rx-head">
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+            <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+
+          <h2 class="rx-band">{{ $t("sensory.section_summary") }}</h2>
+          <SensoryGrid :scores="(section.newest.result.scores ?? []).filter((s) => s.kind === 'section')" :level-keys="section.newest.result.form.level_keys"
+            :level-labels="section.newest.result.level_labels" :lang="sensoryLang" :title="$t('sensory.section')" />
+          <template v-if="(section.newest.result.scores ?? []).some((s) => s.kind === 'factor')">
+            <h2 class="rx-band rx-band-soft rx-space">{{ $t("sensory.factor_summary") }}</h2>
+            <SensoryGrid :scores="section.newest.result.scores.filter((s) => s.kind === 'factor')" :level-keys="section.newest.result.form.level_keys"
+              :level-labels="section.newest.result.level_labels" :lang="sensoryLang" :title="$t('sensory.factor')" />
+          </template>
+          <p class="rx-mchat-hint">{{ $t("sensory.score_hint") }}</p>
 
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>

@@ -1,7 +1,7 @@
 <script setup>
 // One QFBA evaluation's result (/qfba-result/:id/:evaluation), drawn as the printed report draws it: the test row
 // (date, age, evaluator, who answered, target behaviour), the severity chart, each function's endorsed questions and
-// severity with the likely function and what it means, then every answer. Shown in the language the form was filled
+// severity, then the notes. Shown in the language the form was filled
 // in; the switch redraws it in the other one (for viewing or printing).
 import ApprovalBanner from "@/components/evaluations/ApprovalBanner.vue";
 import EditAnswersButton from "@/components/evaluations/EditAnswersButton.vue";
@@ -13,7 +13,7 @@ import ResultSheet from "@/components/reports/ResultSheet.vue";
 import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
 import { dmy } from "@/components/reports/reportUtils";
-import { functionColor, functionName, optionLabel, qt, questionText } from "./qfba";
+import { qt } from "./qfba";
 
 const route = useRoute();
 const loading = ref(true);
@@ -22,9 +22,7 @@ const data = ref(null);
 const lang = ref("ar");
 const LANGUAGE_OPTIONS = [{ value: "ar", label: "العربية" }, { value: "en", label: "English" }];
 
-const questions = computed(() => data.value?.questions ?? []);
 const history = computed(() => data.value?.history ?? []);
-const functionByKey = computed(() => Object.fromEntries((data.value?.scores ?? []).map((score) => [score.function_id, score])));
 const tests = computed(() => (data.value ? [{ key: data.value.evaluation.id, date: data.value.evaluation.date, result: data.value }] : []));
 const intro = computed(() => (data.value?.target_behavior
   ? qt(lang.value, "intro", { name: data.value.child?.name ?? "", behavior: data.value.target_behavior })
@@ -104,40 +102,7 @@ watch(() => route.params.evaluation, (value, before) => {
               </tbody>
             </table>
             <QfbaChart :tests="tests" :lang="lang" :child-name="data.child?.name ?? ''" />
-            <QfbaSummary :result="data" :lang="lang" />
-          </div>
-        </ResultSheet>
-
-        <ResultSheet label="QFBA" :date="data.evaluation.date" :band="qt(lang, 'answers')" :intro="false">
-          <div :dir="lang === 'en' ? 'ltr' : 'rtl'" class="qr-sheet">
-            <table class="rx-table qr-answers">
-              <thead>
-                <tr>
-                  <th class="rx-sum-num">#</th>
-                  <th>{{ qt(lang, "question") }}</th>
-                  <th>{{ qt(lang, "function") }}</th>
-                  <th>{{ qt(lang, "response") }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="question in questions" :key="question.id">
-                  <td class="rx-sum-num">{{ question.number }}</td>
-                  <td class="qr-q">{{ questionText(question, lang) }}</td>
-                  <td class="qr-fn" :style="{ color: functionColor(functionByKey[question.function_id]?.key) }">
-                    {{ functionName(functionByKey[question.function_id], lang) }}
-                  </td>
-                  <td :class="{ 'is-endorsed': question.value > 0 }">
-                    <template v-if="question.value === null">{{ question.answered ? qt(lang, "na") : "" }}</template>
-                    <template v-else><b class="ltr">{{ question.value }}</b> {{ optionLabel(question, lang) }}</template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="qr-scale">
-              <b>{{ qt(lang, "scale") }}:</b>
-              <span v-for="option in data.options" :key="option.value"> <span class="ltr">{{ option.value }}</span> = {{ optionLabel(option, lang) }} ·</span>
-              {{ qt(lang, "na") }}
-            </p>
+            <QfbaSummary :result="data" :lang="lang" :meaning="false" :hint="false" />
             <template v-if="data.notes">
               <h2 class="rx-band rx-band-soft rx-space">{{ qt(lang, "notes") }}</h2>
               <p class="qr-notes">{{ data.notes }}</p>
@@ -170,12 +135,6 @@ watch(() => route.params.evaluation, (value, before) => {
 .qr-sheet { display: grid; gap: 5mm; text-align: start; }
 .qr-sheet .rx-intro { margin: 0; }
 .qr-info th, .qr-info td { text-align: center; }
-.qr-answers { font-size: 9pt; line-height: 1.45; }
-.qr-answers th, .qr-answers td { padding: 4px 6px; text-align: center; }
-.qr-answers td.qr-q { text-align: start; }
-.qr-answers td.qr-fn { font-size: 8pt; font-weight: 700; }
-.qr-answers td.is-endorsed { background: #fef3c7; font-weight: 700; }
-.qr-scale { margin: 0; color: #475569; font-size: 8.5pt; }
 .qr-notes { margin: 0; white-space: pre-line; }
 .qr-card { padding: 1.25rem; border: 1px solid var(--sawa-border, #e2e8f0); border-radius: 16px; background: #fff; }
 .qr-card h2 { margin: 0 0 .75rem; font-size: 1.1rem; font-weight: 800; }

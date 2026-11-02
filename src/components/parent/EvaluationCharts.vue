@@ -7,12 +7,15 @@ import { useI18n } from "vue-i18n";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
+import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileChart from "@/components/reports/SideProfileChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
-import { ABLLS, ABLLS_SKILLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SIDE_PROFILE, TRANSITION, groupItems, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
+import SensoryGrid from "@/components/reports/SensoryGrid.vue";
+import SensorySummary from "@/components/reports/SensorySummary.vue";
+import { ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, groupItems, isAbllsFlow, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
 import { fmtDate } from "@/utils/parentPortal";
 
 const props = defineProps({ report: { type: Object, required: true } });
@@ -73,7 +76,8 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
       <div v-else-if="section.type === BARRIER" class="pp-chart-scroll"><BarrierChart :tests="section.tests" /></div>
 
       <!-- ABLLS -->
-      <div v-else-if="section.type === ABLLS || section.type === ABLLS_SKILLS" class="pp-chart-scroll"><AbllsChart :tests="section.tests" /></div>
+      <div v-else-if="section.type === ABLLS" class="pp-chart-scroll"><AbllsChart :tests="section.tests" /></div>
+      <div v-else-if="isAbllsFlow(section.type)" class="pp-chart-scroll"><AbllsFlowChart :tests="section.tests" /></div>
 
       <!-- Carolina -->
       <div v-else-if="section.type === CAROLINA" class="pp-chart-scroll"><CarolinaGrid :result="section.newest?.result" :per-table="5" compact /></div>
@@ -96,6 +100,15 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
       <div v-else-if="section.type === QFBA" class="pp-stack">
         <div class="pp-chart-scroll"><QfbaChart :tests="section.tests" :lang="section.newest?.result?.language === 'en' ? 'en' : 'ar'" /></div>
         <QfbaSummary v-if="section.newest?.result" :result="section.newest.result" :lang="section.newest.result.language === 'en' ? 'en' : 'ar'" />
+      </div>
+
+      <!-- Sensory Profile: the newest test's quadrants against its age's cut scores, and what they mean -->
+      <div v-else-if="section.type === SENSORY && section.newest?.result?.form" class="pp-stack">
+        <div class="pp-chart-scroll">
+          <SensoryGrid :scores="(section.newest.result.scores ?? []).filter((s) => s.kind === 'quadrant')" :level-keys="section.newest.result.form.level_keys"
+            :level-labels="section.newest.result.level_labels" :lang="$i18n.locale === 'en' ? 'en' : 'ar'" :title="$t('sensory.quadrant')" numbered />
+        </div>
+        <SensorySummary :result="section.newest.result" :lang="$i18n.locale === 'en' ? 'en' : 'ar'" />
       </div>
 
       <!-- Side profile -->

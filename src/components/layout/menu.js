@@ -96,9 +96,11 @@ export const buildMenu = () => [
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },
       { text: "ABLLS Academy", to: { name: "ablls" }, perm: "able category list" },
       { text: "Ablls OT", to: { name: "ablls-skills" }, perm: "skills category list" },
+      { text: "Ablls SP", to: { name: "ablls-sp" }, perm: "sp category list" },
       { text: "carolina", to: { name: "carolina-general-goals" }, perm: "carolina general goal list" },
       { label: "mchat.menu", to: { name: "mchat-settings" }, perm: ["mchat question list", "mchat question edit"] },
       { label: "qfba.menu", to: { name: "qfba-settings" }, perm: ["qfba question list", "qfba question edit"] },
+      { label: "sensory.menu", to: { name: "sensory-settings" }, perm: ["sensory question list", "sensory question edit"] },
       {
         key: "vb-mapp",
         text: "VB Mapp",

@@ -12,7 +12,10 @@
     <!-- As in the printed report: a card per category, a row of boxes per mission. -->
     <div class="rxs-pages">
       <ResultSheet :label="label" :date="approval?.date" :child-name="approval?.child?.name">
-        <AbllsChart v-if="mainSquares.length" :tests="[{ result: mainSquares }]" />
+        <template v-if="mainSquares.length">
+          <AbllsFlowChart v-if="isAbllsFlow(assessmentOf($route).evaluationType)" :tests="[{ result: mainSquares }]" />
+          <AbllsChart v-else :tests="[{ result: mainSquares }]" />
+        </template>
         <p v-else class="rx-empty">{{ loading ? $t("loading") : $t("ereport.no_result_data") }}</p>
       </ResultSheet>
     </div>
@@ -26,11 +29,12 @@ import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 import AbleAnswerEditor from "@/components/ablls/AbleAnswerEditor.vue";
 import AbllsChart from "@/components/reports/AbllsChart.vue";
+import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
 import ResultSheet from "@/components/reports/ResultSheet.vue";
-import { ABLLS, ABLLS_SKILLS, typeLabel } from "@/components/reports/reportUtils";
+import { isAbllsFlow, typeLabel } from "@/components/reports/reportUtils";
 export default {
   name: 'SquareGrid',
-  components: { ApprovalBanner, AbleAnswerEditor, AbllsChart, DeleteEvaluationButton, ResultSheet },
+  components: { ApprovalBanner, AbleAnswerEditor, AbllsChart, AbllsFlowChart, DeleteEvaluationButton, ResultSheet },
   data() {
     return {
       mainSquares: [],
@@ -40,11 +44,12 @@ export default {
   },
   computed: {
     label() {
-      return typeLabel(assessmentOf(this.$route).evaluationType === 7 ? ABLLS_SKILLS : ABLLS, this.$t);
+      return typeLabel(assessmentOf(this.$route).evaluationType, this.$t);
     },
   },
   methods: {
     assessmentOf,
+    isAbllsFlow,
     // Edited answers: the result and the approval state are read again.
     answersEdited() {
       this.$refs.approvalBanner?.reload();
