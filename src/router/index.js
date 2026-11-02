@@ -19,6 +19,8 @@ import sideProfileRoutes from "./side-profile.routes";
 import calender from "./calender.routes";
 import accounting from "./accounting.routes";
 import contracts from "./contracts.routes";
+import toilet from "./toilet.routes";
+import feeding from "./feeding.routes";
 import page_403 from "../views/pages/page_403.vue";
 import { useParentStore } from "../stores/ParentStore";
 import { useAuthStore } from "../stores/Auth";
@@ -227,6 +229,8 @@ const routes = [
       ...Object.values(parentsRoutes),
       ...Object.values(accounting),
       ...Object.values(contracts),
+      ...Object.values(toilet),
+      ...Object.values(feeding),
     ],
   },
   {
