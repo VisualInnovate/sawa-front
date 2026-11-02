@@ -156,6 +156,32 @@
         "--strictPort"
       ],
       "port": 3033
+    },
+    {
+      "name": "sawa-local-front-ablls-sp",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3035",
+        "--strictPort"
+      ],
+      "port": 3035
+    },
+    {
+      "name": "sawa-local-front-sensory",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3037",
+        "--strictPort"
+      ],
+      "port": 3037
     }
   ]
 }

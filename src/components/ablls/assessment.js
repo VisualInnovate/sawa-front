@@ -1,5 +1,5 @@
-// The ABLLS pages serve two evaluations on the same tables: ABLLS Academy (four fixed domain types) and Ablls OT
-// (domain types the staff add and delete; every type keeps the long-term goal + sub goals inputs). A route's
+// The ABLLS pages serve three evaluations on the same tables: ABLLS Academy (four fixed domain types), Ablls OT and
+// Ablls SP (the same evaluation under two names: domain types the staff add and delete; every type keeps the long-term goal + sub goals inputs). A route's
 // `meta.assessment` picks one; each has its own API prefix, permissions, route names and evaluation type.
 import { computed, ref } from 'vue'
 import axios from 'axios'
@@ -36,6 +36,23 @@ export const ASSESSMENTS = {
       update: 'skills-mission-update',
       test: 'skills-test',
       result: 'skills-result',
+    },
+  },
+  // Ablls SP: Ablls OT under another name, with its own domain types, skills and answers.
+  sp: {
+    key: 'sp',
+    api: 'sp',
+    perm: 'sp',
+    evaluationType: 10,
+    title: 'ablls_sp',
+    customTypes: true,
+    routes: {
+      categories: 'ablls-sp',
+      missions: 'sp-missions',
+      create: 'sp-mission-create',
+      update: 'sp-mission-update',
+      test: 'sp-test',
+      result: 'sp-result',
     },
   },
 }

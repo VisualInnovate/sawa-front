@@ -45,7 +45,7 @@
           </dl>
           <footer class="evaluation-actions">
             <Button v-can="'evaluations delete'" icon="pi pi-trash" @click="deleteevalution(evalu)" severity="danger" variant="text" v-tooltip.top="$t('delete')" :aria-label="$t('delete')" />
-            <Button v-can="['evaluation results list', 'able answer list', 'skills answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list', 'transition answer list', 'mchat answer list', 'qfba answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
+            <Button v-can="['evaluation results list', 'able answer list', 'skills answer list', 'sp answer list', 'carolina answer list', 'milestone answer list', 'barrier answer list', 'transition answer list', 'mchat answer list', 'qfba answer list', 'sensory answer list']" @click="go_evaluate(evalu.id,evalu.type,evalu.child_id,evalu)" icon="pi pi-chart-bar" :label="$t('evaluation_results')" />
           </footer>
         </article>
       </div>
@@ -138,8 +138,10 @@ export default {
                     { name: 'carolina', id: 5 },
                     { name: 'Transition', id: 6 },
                     { name: 'Ablls OT', id: 7 },
+                    { name: 'Ablls SP', id: 10 },
                     { name: 'M-CHAT-R', id: 8 },
                     { name: 'QFBA', id: 9 },
+                    { name: 'Sensory Profile', id: 11 },
  
                 ]
      
@@ -218,6 +220,9 @@ export default {
       if(type==7){
         this.$router.push({ name: 'skills-result', params:{'id':id}});
       }
+      if(type==10){
+        this.$router.push({ name: 'sp-result', params:{'id':id}});
+      }
       if(type==6){
         this.$router.push({ name: 'transition-result', params:{'id':child_id,'evaluation':id}});
       }
@@ -226,6 +231,9 @@ export default {
       }
       if(type==9){
         this.$router.push({ name: 'qfba-result', params:{'id':child_id,'evaluation':id}});
+      }
+      if(type==11){
+        this.$router.push({ name: 'sensory-result', params:{'id':child_id,'evaluation':id}});
       }
     },
 

@@ -56,12 +56,13 @@
                 'evaluation results list',
                 'able answer list',
                 'skills answer list',
+                'sp answer list',
                 'carolina answer list',
                 'milestone answer list',
                 'barrier answer list',
                 'transition answer list',
                 'mchat answer list',
-                'qfba answer list',
+                'qfba answer list', 'sensory answer list',
               ]"
               @click="go_evaluate(evalu)"
               icon="pi pi-chart-bar"
@@ -304,8 +305,10 @@ export default {
         5: { name: "carolina-resulte", params: { id: evalu.id } },
         6: { name: "transition-result", params: { id: childId, evaluation: evalu.id } },
         7: { name: "skills-result", params: { id: evalu.id } },
+        10: { name: "sp-result", params: { id: evalu.id } },
         8: { name: "mchat-result", params: { id: childId, evaluation: evalu.id } },
         9: { name: "qfba-result", params: { id: childId, evaluation: evalu.id } },
+        11: { name: "sensory-result", params: { id: childId, evaluation: evalu.id } },
       };
       this.$router.push(routes[type] || {
         name: "showChildResult",
@@ -382,7 +385,7 @@ export default {
     },
     // The types the booking calendar books: the evaluations and the side profile dimensions.
     evaluate_types() {
-      return [2, 3, 4, 5, 6, 7, 8, 9, 101, 102, 103, 104, 105].map((id) => ({ id, name: getEvaluationTypeLabel(id, this.$t) }));
+      return [2, 3, 4, 5, 6, 7, 10, 8, 9, 101, 102, 103, 104, 105].map((id) => ({ id, name: getEvaluationTypeLabel(id, this.$t) }));
     },
   },
 

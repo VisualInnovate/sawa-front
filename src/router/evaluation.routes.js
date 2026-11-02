@@ -4,7 +4,7 @@ const Show = () => import("../views/evaluations/Show.vue");
 const Edit = () => import("../views/evaluations/Edit.vue");
 const Create = () => import("../views/evaluations/Create.vue");
 
-// A copy of an ABLLS page for Ablls OT: a different component object, so moving between the two evaluations
+// A copy of an ABLLS page for Ablls OT / Ablls SP: a different component object, so moving between the two evaluations
 // mounts the page again instead of reusing it with the other evaluation's settings.
 const skillsPage = (load) => () => load().then((module) => ({ ...module.default }));
 
@@ -116,6 +116,43 @@ const evaluationRoutes = [
     path: '/ablls-skills/result/:id',
     name: 'skills-result',
     meta: { permission: ["skills answer list"], assessment: 'skills' },
+    component: skillsPage(() => import("../views/ablls/ablls-resulte.vue"))
+  },
+  // Ablls SP: Ablls OT under another name, meta.assessment "sp" (its own API, permissions and domain types).
+  {
+    path: '/ablls-sp',
+    name: 'ablls-sp',
+    meta: { permission: ["sp category list"], assessment: 'sp' },
+    component: skillsPage(() => import("../views/ablls/index.vue"))
+  },
+  {
+    path: '/ablls-sp/missions',
+    name: 'sp-missions',
+    meta: { permission: ["sp mission list"], assessment: 'sp' },
+    component: skillsPage(() => import("../views/ablls/missions.vue"))
+  },
+  {
+    path: '/ablls-sp/mission-create',
+    name: 'sp-mission-create',
+    meta: { permission: ["sp mission create"], assessment: 'sp' },
+    component: skillsPage(() => import("../views/ablls/mission-create.vue"))
+  },
+  {
+    path: '/ablls-sp/mission-update/:id',
+    name: 'sp-mission-update',
+    meta: { permission: ["sp mission edit"], assessment: 'sp' },
+    component: skillsPage(() => import("../views/ablls/mission-update.vue"))
+  },
+  {
+    path: '/ablls-sp/test/:id',
+    name: 'sp-test',
+    meta: { permission: ["sp answer create", "sp answer edit", "evaluation approval edit"], assessment: 'sp' },
+    component: skillsPage(() => import("../views/ablls/mission-test.vue"))
+  },
+  {
+    path: '/ablls-sp/result/:id',
+    name: 'sp-result',
+    meta: { permission: ["sp answer list"], assessment: 'sp' },
     component: skillsPage(() => import("../views/ablls/ablls-resulte.vue"))
   },
   {

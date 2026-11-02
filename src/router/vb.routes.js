@@ -144,6 +144,26 @@ const vb = [
       meta: { permission: ["qfba answer list", "qfba answer create"] },
       component: () => import("../views/evaluation/qfba/result.vue")
     },
+    // Sensory Profile: its settings (the three forms' wording, scales and cut scores), the caregiver form for the child's
+    // age, and the quadrants / sections / factors against the cut scores
+    {
+      path: '/sensory-settings',
+      name: 'sensory-settings',
+      meta: { permission: ["sensory question list", "sensory question edit"] },
+      component: () => import("../views/evaluation/sensory/Settings.vue")
+    },
+    {
+      path: '/sensory-evaluation/:id',
+      name: 'sensory-evaluation',
+      meta: { permission: ["sensory answer create", "sensory answer edit", "evaluation approval edit"] },
+      component: () => import("../views/evaluation/sensory/index.vue")
+    },
+    {
+      path: '/sensory-result/:id/:evaluation',
+      name: 'sensory-result',
+      meta: { permission: ["sensory answer list", "sensory answer create"] },
+      component: () => import("../views/evaluation/sensory/result.vue")
+    },
     //  sesions
     {
       path: '/sessions', 

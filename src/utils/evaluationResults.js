@@ -8,8 +8,10 @@ export function resultRoute({ type, id, childId, sideProfileId = 0, evaluationId
     case 5: return { name: "carolina-resulte", params: { id } };
     case 6: return { name: "transition-result", params: { id: childId, evaluation: id } };
     case 7: return { name: "skills-result", params: { id } };
+    case 10: return { name: "sp-result", params: { id } };
     case 8: return { name: "mchat-result", params: { id: childId, evaluation: id } };
     case 9: return { name: "qfba-result", params: { id: childId, evaluation: id } };
+    case 11: return { name: "sensory-result", params: { id: childId, evaluation: id } };
     default: return null;
   }
 }
