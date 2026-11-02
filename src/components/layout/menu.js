@@ -135,6 +135,9 @@ export const buildMenu = () => [
       { label: "program_fees", to: { name: "program-fees" }, perm: "program fees edit" },
       { label: "program_hours", to: { name: "program-hours" }, perm: "program hours edit" },
       { label: "cl.title", to: { name: "concepts-library" }, perm: "concepts library list" },
+      { label: "toilet.menu", to: { name: "toilet-programs" }, perm: "toilet program list" },
+      { label: "toilet.consults_menu", to: { name: "toilet-consults" }, perm: ["toilet behavior consult edit", "toilet speech consult edit"], badge: "toilet_consults" },
+      { label: "feeding.menu", to: { name: "feeding" }, perm: "feeding list" },
     ],
   },
   {

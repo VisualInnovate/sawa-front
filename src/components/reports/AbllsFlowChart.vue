@@ -1,37 +1,54 @@
 <script setup>
-// Ablls OT / Ablls SP as on the paper "Skills Tracking System" flow chart: a column per domain (its name under it),
-// its skills stacked from the first (bottom) up, each skill one row of boxes (one per score) colored by the answer.
+// Ablls OT / Ablls SP as on the paper "Skills Tracking System" flow chart: a column per domain (its type, the name under it),
+// its skills (B1, B2...) stacked from the first (bottom) up, each skill one row of boxes (one per score) colored by the answer.
 // With several tests, each box takes the color of the first (oldest) test that reached it.
 import { computed } from "vue";
 
 const props = defineProps({
-  // [{ result: [{ category, missions: [{ mission_key, mission_degree, mission_max, answer_score, answer_color }] }] }], oldest first
+  // [{ result: [{ category, symbol, type_id, type_title, missions: [{ mission_key, mission_degree, mission_max, answer_score, answer_color }] }] }], oldest first
   tests: { type: Array, required: true },
 });
 
-const byKey = (a, b) => String(a.mission.mission_key ?? "").localeCompare(String(b.mission.mission_key ?? ""), undefined, { numeric: true });
+const natural = (a, b) => String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true });
 
-// The paper's column order by the domain's letter (B1, B2 count as B); other letters follow in the order they came.
+// The paper's column order by the domain's letter (B1, B2 are skills of B); other letters follow in the order they came.
 const LETTER_ORDER = ["S", "B", "U", "V", "W", "X", "Y", "Z"];
-const letterOf = (category) =>
-  String(category.symbol ?? String(category.category ?? "").split(" - ")[0]).trim().replace(/[\s.\-]*\d+$/u, "").toUpperCase();
+const symbolOf = (category) => String(category.symbol ?? String(category.category ?? "").split(" - ")[0]).trim();
+const letterOf = (category) => symbolOf(category).replace(/[\s.\-]*\d+$/u, "").toUpperCase();
 const rank = (category) => {
   const i = LETTER_ORDER.indexOf(letterOf(category));
   return i < 0 ? LETTER_ORDER.length : i;
 };
 
-// Missions keep their index in the result (to find the same mission in the other tests); the column lists them top-down.
-const columns = computed(() =>
-  (props.tests[0]?.result ?? [])
-    .map((category, c) => ({
-      c,
-      rank: rank(category),
-      title: category.category,
-      rows: (category.missions ?? []).map((mission, m) => ({ mission, m })).sort(byKey).reverse(),
-    }))
-    .filter((column) => column.rows.length)
-    .sort((a, b) => a.rank - b.rank || a.c - b.c)
-);
+// Rows keep the category / mission index in the result (to find the same mission in the other tests); a column lists them top-down.
+const columns = computed(() => {
+  const groups = new Map();
+  (props.tests[0]?.result ?? []).forEach((category, c) => {
+    const missions = (category.missions ?? []).map((mission, m) => ({ mission, m })).sort((a, b) => natural(a.mission.mission_key, b.mission.mission_key));
+    if (!missions.length) return;
+    const key = category.type_id ?? category.type_title ?? letterOf(category);
+    if (!groups.has(key)) groups.set(key, { key, first: c, rank: rank(category), title: category.type_title || letterOf(category), skills: [] });
+    groups.get(key).skills.push({ c, symbol: symbolOf(category), name: category.category, missions });
+  });
+  return [...groups.values()]
+    .sort((a, b) => a.rank - b.rank || a.first - b.first)
+    .map((column) => ({
+      ...column,
+      rows: column.skills
+        .sort((a, b) => natural(a.symbol, b.symbol))
+        // A skill with one goal shows as B1; with several, each goal is its own row (B1.1, B1.2).
+        .flatMap((skill) =>
+          skill.missions.map(({ mission, m }) => ({
+            c: skill.c,
+            m,
+            mission,
+            label: skill.missions.length > 1 ? mission.mission_key : skill.symbol,
+            name: skill.name,
+          }))
+        )
+        .reverse(),
+    }));
+});
 
 const boxes = (mission) => Math.max(1, Number(mission.mission_max) || String(mission.mission_degree ?? "").length - 1);
 
@@ -46,12 +63,12 @@ const boxColor = (categoryIndex, missionIndex, box) => {
 
 <template>
   <div class="af">
-    <section v-for="column in columns" :key="column.c" class="af-col">
+    <section v-for="column in columns" :key="column.key" class="af-col">
       <div class="af-rows">
-        <div v-for="row in column.rows" :key="row.m" class="af-row">
-          <span class="af-key">{{ row.mission.mission_key }}</span>
-          <span class="af-boxes" :title="row.mission.mission_name">
-            <i v-for="box in boxes(row.mission)" :key="box" :style="{ background: boxColor(column.c, row.m, box) }" />
+        <div v-for="row in column.rows" :key="`${row.c}-${row.m}`" class="af-row" :title="row.name">
+          <span class="af-key">{{ row.label }}</span>
+          <span class="af-boxes">
+            <i v-for="box in boxes(row.mission)" :key="box" :style="{ background: boxColor(row.c, row.m, box) }" />
           </span>
         </div>
       </div>
@@ -65,7 +82,8 @@ const boxColor = (categoryIndex, missionIndex, box) => {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 8mm 6mm;
+  justify-content: center;
+  gap: 8mm 3mm;
   padding: 4mm 2mm;
   direction: ltr;
   -webkit-print-color-adjust: exact;
@@ -88,15 +106,15 @@ const boxColor = (categoryIndex, missionIndex, box) => {
   gap: 4px;
 }
 .af-key {
-  min-width: 30px;
+  min-width: 22px;
   color: #1f2937;
-  font-size: 7.5pt;
+  font-size: 6.5pt;
   text-align: right;
 }
 .af-boxes {
   display: flex;
-  width: 52px;
-  height: 17px;
+  width: 44px;
+  height: 13px;
   border: 1px solid #111827;
   border-top-width: 0;
 }
@@ -111,8 +129,11 @@ const boxColor = (categoryIndex, missionIndex, box) => {
   border-inline-start: 0;
 }
 .af-title {
-  max-width: 110px;
-  margin: 6px 0 0 34px;
+  /* As wide as its column (the names wrap) so the 8 columns fit on one line like the paper. */
+  width: 0;
+  min-width: 100%;
+  margin: 6px 0 0;
+  padding-left: 26px;
   color: #111827;
   font-size: 8pt;
   font-weight: 600;

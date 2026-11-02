@@ -67,9 +67,9 @@
                     </header>
 
                     <article v-for="q in que.missions" :key="q.id" class="at-skill" :class="{ 'is-answered': isAnswered(q.id) }">
-                      <div class="at-skill-head">
-                        <span class="ab-key">{{ q.key }}</span>
-                        <!-- Ablls OT / SP: the key and the long-term goal only, without the skill's name -->
+                      <!-- Ablls OT / SP: only the sub goals and the score, without the key, the name or the long-term goal -->
+                      <div v-if="!assessment.customTypes || q.criteria?.length" class="at-skill-head">
+                        <span v-if="!assessment.customTypes" class="ab-key">{{ q.key }}</span>
                         <h4 v-if="!assessment.customTypes">{{ q.name }}</h4>
                         <span v-if="q.criteria?.length" class="at-criteria">
                           {{ $t('ablls_ui.criteria') }}:
@@ -101,7 +101,7 @@
                         </details>
                       </template>
                       <template v-else>
-                        <p v-if="q.long_term_goal" class="at-ltg"><b v-if="!assessment.customTypes">{{ $t('ablls_ui.long_term_goal') }}: </b>{{ childTextOf(q, 'long_term_goal', child) }}</p>
+                        <p v-if="q.long_term_goal && !assessment.customTypes" class="at-ltg"><b>{{ $t('ablls_ui.long_term_goal') }}: </b>{{ childTextOf(q, 'long_term_goal', child) }}</p>
                         <ol class="at-list">
                           <li v-for="(item, i) in childListOf(q, 'sub_goals', null, child)" :key="i">
                             <span class="at-code">{{ q.key }}-{{ i + 1 }}</span>{{ item }}
