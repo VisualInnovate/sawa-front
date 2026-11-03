@@ -152,6 +152,7 @@
 
 <script>
 import { getEvaluationTypeLabel } from "../../utils/evaluationTypes";
+import { toDateOnly } from "@/utils/childAge";
 import { childListOf, childTextOf, isAcademic, listOf, scoreOptions, typeIcon, typeOf, typeOrder } from "@/components/ablls/abllsTypes";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import "@/components/ablls/ablls.css";
@@ -258,7 +259,7 @@ export default {
 
     getanswerscore(e,id,index){
       this.answer.mission_id=id
-      this.answers.answers[id]=({mission_id:id,score:e.value,color:this.answer.color,child_id:this.answer.child_id,date:this.answer.date,child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
+      this.answers.answers[id]=({mission_id:id,score:e.value,color:this.answer.color,child_id:this.answer.child_id,date:toDateOnly(this.answer.date),child_age:this.answer.child_age,evaluation_id:this.answer.evaluation_id})
       console.log(this.answers.answers)
     },
     createevalutae(id){
@@ -270,7 +271,8 @@ export default {
           title: getEvaluationTypeLabel(this.assessment.evaluationType, this.$t, this.$t("evaluation_results")),
           child_id:this.answer.child_id,
           specialist_id:localStorage.getItem("user_id"),
-          date:this.answer.date,
+          // The picked day as it is (a Date would be sent in UTC, one day early in Jordan).
+          date:toDateOnly(this.answer.date),
         
         
         })
@@ -302,7 +304,7 @@ export default {
     getage(){
       axios
         .post("api/milestone-answers/get-age-child",{
-          date:this.answer.date,
+          date:toDateOnly(this.answer.date),
           child_id:this.answer.child_id
         })
         .then((response) => {

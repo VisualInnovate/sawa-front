@@ -3070,6 +3070,7 @@ export default {
     cancelled_hint: "Cancelled because it was not paid before its appointment.",
     free_for_registered: "Free: the child has a confirmed program",
     no_price_closed: "No price: closed for unregistered children",
+    free_evaluation: "Free (opens at once, no accounting step)",
     reassign_evaluation: "Assign again",
     reassign_evaluation_title: "Assign the evaluation a new time and evaluator",
     new_time: "Time",
@@ -3108,7 +3109,7 @@ export default {
     default_price: "Default price",
     add_fee_type: "Add kind",
     evaluation_prices: "Price of each evaluation",
-    evaluation_prices_hint: "Pick the price item of each evaluation type. An evaluation without a price is closed for children without a confirmed program, and always free for those with one. VB-MAPP's parts (milestones, barriers, transition) within 30 days are paid once.",
+    evaluation_prices_hint: "Pick the price item of each evaluation type. An evaluation without a price is closed for children without a confirmed program, a «Free» one opens at once for everyone with no accounting step, and always free for those with one. VB-MAPP's parts (milestones, barriers, transition) within 30 days are paid once.",
     reports: {
       title: "Accounting reports",
       menu: "Reports",

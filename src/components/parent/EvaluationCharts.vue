@@ -6,7 +6,6 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
-import AbllsChart from "@/components/reports/AbllsChart.vue";
 import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileChart from "@/components/reports/SideProfileChart.vue";
@@ -15,7 +14,7 @@ import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
 import SensoryGrid from "@/components/reports/SensoryGrid.vue";
 import SensorySummary from "@/components/reports/SensorySummary.vue";
-import { ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, groupItems, isAbllsFlow, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
+import { BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, groupItems, isAbllsFlow, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
 import { fmtDate } from "@/utils/parentPortal";
 
 const props = defineProps({ report: { type: Object, required: true } });
@@ -75,8 +74,6 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
       <!-- Barriers -->
       <div v-else-if="section.type === BARRIER" class="pp-chart-scroll"><BarrierChart :tests="section.tests" /></div>
 
-      <!-- ABLLS -->
-      <div v-else-if="section.type === ABLLS" class="pp-chart-scroll"><AbllsChart :tests="section.tests" /></div>
       <div v-else-if="isAbllsFlow(section.type)" class="pp-chart-scroll"><AbllsFlowChart :tests="section.tests" /></div>
 
       <!-- Carolina -->

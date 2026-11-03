@@ -1,5 +1,6 @@
 <script setup>
-// Which evaluation item prices each evaluation type of the system (none: closed for children without a confirmed program).
+// Which evaluation item prices each evaluation type of the system (free: open to every child with no accounting step;
+// none: closed for children without a confirmed program).
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -18,7 +19,7 @@ const toast = useToast();
 const TYPES = [1, 101, 102, 103, 104, 105, 2, 3, 6, 4, 7, 10, 5, 8, 9];
 const draft = ref({});
 // "none" (not null): the Select shows nothing for a null value.
-const options = computed(() => [{ id: "none", label: t("acc.no_price") }, ...props.items.map((item) => ({ id: item.id, label: `${item.name} — ${amount(item.price)}` }))]);
+const options = computed(() => [{ id: "none", label: t("acc.no_price") }, { id: "free", label: t("acc.free_evaluation") }, ...props.items.map((item) => ({ id: item.id, label: `${item.name} — ${amount(item.price)}` }))]);
 
 watch(() => props.prices, (prices) => {
   draft.value = Object.fromEntries(TYPES.map((type) => [type, prices?.[type] ?? "none"]));

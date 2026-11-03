@@ -149,12 +149,13 @@ export async function evaluationPricing(childId, date) {
   }
 }
 
-// An evaluation type in a booking form: closed (no price, child not registered), free, or its price.
+// An evaluation type in a booking form: closed (no price, child not registered), free (registered, or the type is free), or its price.
 export function evaluationTypeState(t, pricing, type) {
   if (!pricing) return { disabled: false, note: "" };
   if (pricing.registered) return { disabled: false, note: t("acc.free_for_registered") };
   const price = pricing.prices?.[type];
   if (price == null) return { disabled: true, note: t("acc.no_price_closed") };
+  if (Number(price) === 0) return { disabled: false, note: t("acc.free_evaluation") };
   return { disabled: false, note: amount(price) };
 }
 
