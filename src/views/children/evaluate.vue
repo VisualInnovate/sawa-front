@@ -62,7 +62,7 @@
                 'barrier answer list',
                 'transition answer list',
                 'mchat answer list',
-                'qfba answer list', 'sensory answer list',
+                'qfba answer list', 'sensory answer list', 'elm answer list',
               ]"
               @click="go_evaluate(evalu)"
               icon="pi pi-chart-bar"
@@ -309,6 +309,7 @@ export default {
         8: { name: "mchat-result", params: { id: childId, evaluation: evalu.id } },
         9: { name: "qfba-result", params: { id: childId, evaluation: evalu.id } },
         11: { name: "sensory-result", params: { id: childId, evaluation: evalu.id } },
+        12: { name: "elm-result", params: { id: childId, evaluation: evalu.id } },
       };
       this.$router.push(routes[type] || {
         name: "showChildResult",

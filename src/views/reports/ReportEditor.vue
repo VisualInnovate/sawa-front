@@ -37,13 +37,15 @@ import QfbaSummary from "@/components/reports/QfbaSummary.vue";
 import { functionColor, functionName, optionLabel, planGoalsOf, qt, questionText } from "@/views/evaluation/qfba/qfba";
 import SensoryGrid from "@/components/reports/SensoryGrid.vue";
 import SensorySummary from "@/components/reports/SensorySummary.vue";
+import ElmChart from "@/components/reports/ElmChart.vue";
+import ElmSummary from "@/components/reports/ElmSummary.vue";
 import { ageText as sensoryAge, formName as sensoryFormName } from "@/views/evaluation/sensory/sensory";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
 import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
-  BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
+  BARRIER, CAROLINA, ELM, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
   isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
@@ -1537,6 +1539,12 @@ function back() {
               :level-keys="section.newest.result.form.level_keys" :level-labels="section.newest.result.level_labels" :lang="sensoryLang"
               :title="$t('sensory.quadrant')" numbered />
             <SensorySummary :result="section.newest.result" :lang="sensoryLang" />
+          </div>
+
+          <!-- ELM: «مجموع النتائج» with every chosen test's X in its color, then the newest test's other answers. -->
+          <div v-if="section.type === ELM" class="rx-elm">
+            <ElmChart :tests="section.tests" />
+            <ElmSummary v-if="section.newest.result" :result="section.newest.result" />
           </div>
 
           <!-- The newest chosen barriers test as a table: barrier, the chosen answer, its number. -->

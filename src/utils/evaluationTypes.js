@@ -10,6 +10,7 @@ const evaluationTypes = {
   9: { translationKey: "evaluation_qfba", routeName: "qfba-evaluation" },
   10: { translationKey: "ablls_sp", routeName: "sp-test" },
   11: { translationKey: "evaluation_sensory", routeName: "sensory-evaluation" },
+  12: { translationKey: "evaluation_elm", routeName: "elm-evaluation" },
   101: { translationKey: "side_profile_cognitive", routeName: "SideProfiles", dimensionIndex: 0 },
   102: { translationKey: "side_profile_self_care", routeName: "SideProfiles", dimensionIndex: 1 },
   103: { translationKey: "side_profile_motor", routeName: "SideProfiles", dimensionIndex: 2 },

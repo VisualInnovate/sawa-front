@@ -69,6 +69,7 @@ export const evaluationTypeGroups = (t) => [
       { name: "M-CHAT-R", id: 8 },
       { name: "QFBA", id: 9 },
       { name: "Sensory Profile", id: 11 },
+      { name: "ELM", id: 12 },
     ],
   },
   {

@@ -317,6 +317,7 @@ export default {
         { name: "M-CHAT-R", id: 8 },
         { name: "QFBA", id: 9 },
         { name: "Sensory Profile", id: 11 },
+        { name: "ELM", id: 12 },
       ],
 
       show_status: false,

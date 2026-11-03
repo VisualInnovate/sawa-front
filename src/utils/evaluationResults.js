@@ -12,6 +12,7 @@ export function resultRoute({ type, id, childId, sideProfileId = 0, evaluationId
     case 8: return { name: "mchat-result", params: { id: childId, evaluation: id } };
     case 9: return { name: "qfba-result", params: { id: childId, evaluation: id } };
     case 11: return { name: "sensory-result", params: { id: childId, evaluation: id } };
+    case 12: return { name: "elm-result", params: { id: childId, evaluation: id } };
     default: return null;
   }
 }

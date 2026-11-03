@@ -14,7 +14,9 @@ import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
 import SensoryGrid from "@/components/reports/SensoryGrid.vue";
 import SensorySummary from "@/components/reports/SensorySummary.vue";
-import { BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, groupItems, isAbllsFlow, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
+import ElmChart from "@/components/reports/ElmChart.vue";
+import ElmSummary from "@/components/reports/ElmSummary.vue";
+import { BARRIER, CAROLINA, ELM, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, groupItems, isAbllsFlow, milestoneMarks, typeIcon } from "@/components/reports/reportUtils";
 import { fmtDate } from "@/utils/parentPortal";
 
 const props = defineProps({ report: { type: Object, required: true } });
@@ -106,6 +108,12 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
             :level-labels="section.newest.result.level_labels" :lang="$i18n.locale === 'en' ? 'en' : 'ar'" :title="$t('sensory.quadrant')" numbered />
         </div>
         <SensorySummary :result="section.newest.result" :lang="$i18n.locale === 'en' ? 'en' : 'ar'" />
+      </div>
+
+      <!-- ELM: every chosen test's X per part with the caregiver and the therapist, then the newest test's other answers -->
+      <div v-else-if="section.type === ELM" class="pp-stack">
+        <div class="pp-chart-scroll"><ElmChart :tests="section.tests" /></div>
+        <ElmSummary v-if="section.newest?.result" :result="section.newest.result" :show-notes="false" />
       </div>
 
       <!-- Side profile -->
