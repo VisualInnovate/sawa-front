@@ -15,7 +15,8 @@ export const ABLLS_SP = 10;
 export const SENSORY = 11;
 
 /** Ablls OT and Ablls SP: the same evaluation under two names, drawn as the paper flow chart. */
-export const isAbllsFlow = (type) => [ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
+// ABLLS Academy, Ablls OT and Ablls SP all draw the paper flow chart (a column per domain).
+export const isAbllsFlow = (type) => [ABLLS, ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
 
 /** A report takes at most this many evaluations of one type (the VB-MAPP form has four test columns). */
 export const MAX_PER_GROUP = 4;

@@ -1,5 +1,6 @@
 <script setup>
-// Ablls OT / Ablls SP as on the paper "Skills Tracking System" flow chart: a column per domain (its type, the name under it),
+// ABLLS Academy / Ablls OT / Ablls SP as on the paper "Skills Tracking System" flow chart: a column per domain (OT/SP: its
+// type; ABLLS Academy, whose categories have no type: each category, e.g. C13 or R), the name under it,
 // its skills (B1, B2...) stacked from the first (bottom) up, each skill one row of boxes (one per score) colored by the answer.
 // With several tests, each box takes the color of the first (oldest) test that reached it.
 import { computed } from "vue";
@@ -26,8 +27,10 @@ const columns = computed(() => {
   (props.tests[0]?.result ?? []).forEach((category, c) => {
     const missions = (category.missions ?? []).map((mission, m) => ({ mission, m })).sort((a, b) => natural(a.mission.mission_key, b.mission.mission_key));
     if (!missions.length) return;
-    const key = category.type_id ?? category.type_title ?? letterOf(category);
-    if (!groups.has(key)) groups.set(key, { key, first: c, rank: rank(category), title: category.type_title || letterOf(category), skills: [] });
+    const own = category.type_id == null && !category.type_title;
+    const key = own ? `c${c}` : category.type_id ?? category.type_title;
+    const title = own ? String(category.category ?? "").split(" - ").slice(1).join(" - ") || symbolOf(category) : category.type_title;
+    if (!groups.has(key)) groups.set(key, { key, first: c, rank: rank(category), title, skills: [] });
     groups.get(key).skills.push({ c, symbol: symbolOf(category), name: category.category, missions });
   });
   return [...groups.values()]

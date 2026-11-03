@@ -30,7 +30,6 @@ import EditableText from "@/components/reports/EditableText.vue";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
-import AbllsChart from "@/components/reports/AbllsChart.vue";
 import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import QfbaChart from "@/components/reports/QfbaChart.vue";
@@ -44,7 +43,7 @@ import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
 import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
-  ABLLS, BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
+  BARRIER, CAROLINA, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
   isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
@@ -1445,7 +1444,6 @@ function back() {
 
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
-          <AbllsChart v-else-if="section.type === ABLLS" :tests="section.tests" />
           <AbllsFlowChart v-else-if="isAbllsFlow(section.type)" :tests="section.tests" />
           <!-- Carolina: the newest chosen evaluation as the paper form (its rounds' colors in each box). -->
           <CarolinaGrid v-else-if="section.type === CAROLINA" :result="section.newest.result" :per-table="5" compact />

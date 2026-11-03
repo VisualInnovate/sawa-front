@@ -9,12 +9,11 @@
         :api="assessmentOf($route).api" @saved="answersEdited" />
       <DeleteEvaluationButton :evaluation-id="$route.params.id" />
     </div>
-    <!-- As in the printed report: a card per category, a row of boxes per mission. -->
+    <!-- As in the printed report: the paper flow chart, a column per domain. -->
     <div class="rxs-pages">
       <ResultSheet :label="label" :date="approval?.date" :child-name="approval?.child?.name">
         <template v-if="mainSquares.length">
-          <AbllsFlowChart v-if="isAbllsFlow(assessmentOf($route).evaluationType)" :tests="[{ result: mainSquares }]" />
-          <AbllsChart v-else :tests="[{ result: mainSquares }]" />
+          <AbllsFlowChart :tests="[{ result: mainSquares }]" />
         </template>
         <p v-else class="rx-empty">{{ loading ? $t("loading") : $t("ereport.no_result_data") }}</p>
       </ResultSheet>
@@ -28,13 +27,12 @@ import axios from "axios";
 import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 import AbleAnswerEditor from "@/components/ablls/AbleAnswerEditor.vue";
-import AbllsChart from "@/components/reports/AbllsChart.vue";
 import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
 import ResultSheet from "@/components/reports/ResultSheet.vue";
-import { isAbllsFlow, typeLabel } from "@/components/reports/reportUtils";
+import { typeLabel } from "@/components/reports/reportUtils";
 export default {
   name: 'SquareGrid',
-  components: { ApprovalBanner, AbleAnswerEditor, AbllsChart, AbllsFlowChart, DeleteEvaluationButton, ResultSheet },
+  components: { ApprovalBanner, AbleAnswerEditor, AbllsFlowChart, DeleteEvaluationButton, ResultSheet },
   data() {
     return {
       mainSquares: [],
@@ -49,7 +47,6 @@ export default {
   },
   methods: {
     assessmentOf,
-    isAbllsFlow,
     // Edited answers: the result and the approval state are read again.
     answersEdited() {
       this.$refs.approvalBanner?.reload();
