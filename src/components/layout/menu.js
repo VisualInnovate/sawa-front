@@ -101,6 +101,7 @@ export const buildMenu = () => [
       { label: "mchat.menu", to: { name: "mchat-settings" }, perm: ["mchat question list", "mchat question edit"] },
       { label: "qfba.menu", to: { name: "qfba-settings" }, perm: ["qfba question list", "qfba question edit"] },
       { label: "sensory.menu", to: { name: "sensory-settings" }, perm: ["sensory question list", "sensory question edit"] },
+      { label: "elm.menu", to: { name: "elm-settings" }, perm: ["elm question list", "elm question create", "elm question edit", "elm question delete"] },
       {
         key: "vb-mapp",
         text: "VB Mapp",

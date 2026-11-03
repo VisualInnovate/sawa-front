@@ -13,8 +13,8 @@ export const MCHAT = 8;
 export const QFBA = 9;
 export const ABLLS_SP = 10;
 export const SENSORY = 11;
+export const ELM = 12;
 
-/** Ablls OT and Ablls SP: the same evaluation under two names, drawn as the paper flow chart. */
 // ABLLS Academy, Ablls OT and Ablls SP all draw the paper flow chart (a column per domain).
 export const isAbllsFlow = (type) => [ABLLS, ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
 
@@ -88,7 +88,7 @@ export const typeLabel = (type, t) =>
   Number(type) === SIDE_PROFILE ? t("ereport.side_profile") : Number(type) === MILESTONE ? "VB-MAPP" : getEvaluationTypeLabel(type, t, "");
 
 export const typeIcon = (type) =>
-  ({ 1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap", 6: "pi pi-directions", 7: "pi pi-list-check", 8: "pi pi-check-square", 9: "pi pi-bolt", 10: "pi pi-list-check", 11: "pi pi-sun" })[Number(type)] || "pi pi-file";
+  ({ 1: "pi pi-id-card", 2: "pi pi-flag", 3: "pi pi-shield", 4: "pi pi-list-check", 5: "pi pi-sitemap", 6: "pi pi-directions", 7: "pi pi-list-check", 8: "pi pi-check-square", 9: "pi pi-bolt", 10: "pi pi-list-check", 11: "pi pi-sun", 12: "pi pi-th-large" })[Number(type)] || "pi pi-file";
 
 /**
  * Items in blocks per type — `group` from the API: "t2" for a type, "s8" for one side-profile dimension —

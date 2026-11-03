@@ -182,6 +182,19 @@
         "--strictPort"
       ],
       "port": 3037
+    },
+    {
+      "name": "sawa-local-front-elm",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3039",
+        "--strictPort"
+      ],
+      "port": 3039
     }
   ]
 }

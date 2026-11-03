@@ -164,6 +164,25 @@ const vb = [
       meta: { permission: ["sensory answer list", "sensory answer create"] },
       component: () => import("../views/evaluation/sensory/result.vue")
     },
+    // ELM «تقييم مهارات الاستعداد للتعلم»: its settings (the four parts and their items), the form, and the result.
+    {
+      path: '/elm-settings',
+      name: 'elm-settings',
+      meta: { permission: ["elm question list", "elm question create", "elm question edit", "elm question delete"] },
+      component: () => import("../views/evaluation/elm/Settings.vue")
+    },
+    {
+      path: '/elm-evaluation/:id',
+      name: 'elm-evaluation',
+      meta: { permission: ["elm answer create", "elm answer edit", "evaluation approval edit"] },
+      component: () => import("../views/evaluation/elm/index.vue")
+    },
+    {
+      path: '/elm-result/:id/:evaluation',
+      name: 'elm-result',
+      meta: { permission: ["elm answer list", "elm answer create"] },
+      component: () => import("../views/evaluation/elm/result.vue")
+    },
     //  sesions
     {
       path: '/sessions', 
