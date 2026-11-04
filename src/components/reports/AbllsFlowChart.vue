@@ -4,6 +4,7 @@
 // its skills (B1, B2...) stacked from the first (bottom) up, each skill one row of boxes (one per score) colored by the answer.
 // With several tests, each box takes the color of the first (oldest) test that reached it.
 import { computed } from "vue";
+import { abllsRank, abllsSymbolOf } from "./reportUtils";
 
 const props = defineProps({
   // [{ result: [{ category, symbol, type_id, type_title, missions: [{ mission_key, mission_degree, mission_max, answer_score, answer_color }] }] }], oldest first
@@ -12,14 +13,9 @@ const props = defineProps({
 
 const natural = (a, b) => String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true });
 
-// The paper's column order by the domain's letter (B1, B2 are skills of B); other letters follow in the order they came.
-const LETTER_ORDER = ["S", "B", "U", "V", "W", "X", "Y", "Z"];
-const symbolOf = (category) => String(category.symbol ?? String(category.category ?? "").split(" - ")[0]).trim();
-const letterOf = (category) => symbolOf(category).replace(/[\s.\-]*\d+$/u, "").toUpperCase();
-const rank = (category) => {
-  const i = LETTER_ORDER.indexOf(letterOf(category));
-  return i < 0 ? LETTER_ORDER.length : i;
-};
+// The paper's column order by the domain's letter (shared with the report's strengths/weaknesses).
+const symbolOf = abllsSymbolOf;
+const rank = abllsRank;
 
 // Rows keep the category / mission index in the result (to find the same mission in the other tests); a column lists them top-down.
 const columns = computed(() => {
@@ -29,7 +25,8 @@ const columns = computed(() => {
     if (!missions.length) return;
     const own = category.type_id == null && !category.type_title;
     const key = own ? `c${c}` : category.type_id ?? category.type_title;
-    const title = own ? String(category.category ?? "").split(" - ").slice(1).join(" - ") || symbolOf(category) : category.type_title;
+    // OT / SP: the type's flow-chart name (set in the types dialog), else its title.
+    const title = own ? String(category.category ?? "").split(" - ").slice(1).join(" - ") || symbolOf(category) : category.type_chart_title || category.type_title;
     if (!groups.has(key)) groups.set(key, { key, first: c, rank: rank(category), title, skills: [] });
     groups.get(key).skills.push({ c, symbol: symbolOf(category), name: category.category, missions });
   });

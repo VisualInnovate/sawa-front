@@ -48,6 +48,11 @@ const mission = ref({
   sub_goals: [],
   long_term_goal_female: '',
   sub_goals_female: [],
+  // Ablls OT / SP: the report's strength (answer 3 or 4) and weakness (0, 1, 2), a boy's and a girl's wording.
+  strength_point: '',
+  strength_point_female: '',
+  weakness_point: '',
+  weakness_point_female: '',
 })
 const editors = ref([])
 
@@ -57,7 +62,13 @@ const editors = ref([])
 const gender = ref('male')
 const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male'))
 const gendered = computed(() => academic.value || !!selectedCategory.value)
-const wordingFields = computed(() => (academic.value ? ['strengths', 'goals', 'questions'] : ['long_term_goal', 'sub_goals']))
+// Ablls OT / SP skills also keep the report's strength and weakness texts.
+const points = computed(() => !!assessment.customTypes && !academic.value)
+const POINT_FIELDS = ['strength_point', 'weakness_point']
+const NAME_TOKEN = '{{name}}'
+// Ablls SP keeps the long-term goal on the type (the types dialog), not on the skill.
+const hasLongTermGoal = assessment.key !== 'sp'
+const wordingFields = computed(() => (academic.value ? ['strengths', 'goals', 'questions'] : [...(hasLongTermGoal ? ['long_term_goal'] : []), 'sub_goals', ...(points.value ? POINT_FIELDS : [])]))
 const fieldOf = (field, g = gender.value) => (g === 'male' || !gendered.value ? field : `${field}_female`)
 const genderHasError = (g) => wordingFields.value.some((f) => firstError(fieldOf(f, g)))
 const flushWording = () => editors.value.forEach((ed) => ed?.flush?.())
@@ -146,6 +157,10 @@ onMounted(async () => {
         sub_goals: [...(data.sub_goals || [])],
         long_term_goal_female: data.long_term_goal_female || '',
         sub_goals_female: [...(data.sub_goals_female || [])],
+        strength_point: data.strength_point || '',
+        strength_point_female: data.strength_point_female || '',
+        weakness_point: data.weakness_point || '',
+        weakness_point_female: data.weakness_point_female || '',
       }
     } else {
       const fromQuery = Number(route.query.category)
@@ -177,10 +192,10 @@ const validate = () => {
       else if (count && female !== count) e[`${f}_female`] = [t('ablls_ui.female_count_mismatch', { n: count })]
     }
   }
-  if (!academic.value && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
+  if (!academic.value && hasLongTermGoal && !m.long_term_goal.trim()) e.long_term_goal = [t('ablls_ui.required')]
   if (!academic.value && gendered.value) {
     // The girl's long-term goal and one girl's sub goal for each of the boy's.
-    if (!m.long_term_goal_female.trim()) e.long_term_goal_female = [t('ablls_ui.required')]
+    if (hasLongTermGoal && !m.long_term_goal_female.trim()) e.long_term_goal_female = [t('ablls_ui.required')]
     const count = m.sub_goals.filter((x) => x.trim()).length
     const female = m.sub_goals_female.filter((x) => x.trim()).length
     if (!female) e.sub_goals_female = [t('ablls_ui.list_required')]
@@ -217,9 +232,13 @@ const save = async () => {
           questions_female: clean(m.questions_female),
         }
       : {
-          long_term_goal: m.long_term_goal.trim(),
+          ...(hasLongTermGoal ? { long_term_goal: m.long_term_goal.trim() } : {}),
           sub_goals: clean(m.sub_goals),
-          ...(gendered.value ? { long_term_goal_female: m.long_term_goal_female.trim(), sub_goals_female: clean(m.sub_goals_female) } : {}),
+          ...(gendered.value ? { sub_goals_female: clean(m.sub_goals_female) } : {}),
+          ...(gendered.value && hasLongTermGoal ? { long_term_goal_female: m.long_term_goal_female.trim() } : {}),
+          ...(points.value
+            ? Object.fromEntries(POINT_FIELDS.flatMap((f) => [f, `${f}_female`]).map((f) => [f, m[f].trim() || null]))
+            : {}),
         }),
   }
   try {
@@ -394,10 +413,10 @@ const save = async () => {
           <div v-else class="mf-lists">
             <!-- Ablls OT keeps a boy's and a girl's wording of the long-term goal and sub goals. -->
             <div :class="gendered ? 'mf-wording' : 'mf-lists'">
-              <WordingBar v-if="gendered" :gender="gender" :title="$t('ablls_ui.wording_goals')" :hint="$t('ablls_ui.name_hint_goals')"
+              <WordingBar v-if="gendered" :gender="gender" :title="$t(hasLongTermGoal ? 'ablls_ui.wording_goals' : 'ablls_ui.wording_sub_goals')" :hint="$t('ablls_ui.name_hint_goals')"
                 :has-error="genderHasError" :other-has-text="otherHasText" :undone-gender="undo?.gender"
                 @switch="switchGender" @copy="copyFromOther" @undo="undoCopy" />
-              <div class="ab-field">
+              <div v-if="hasLongTermGoal" class="ab-field">
                 <label for="mf-ltg"><i class="pi pi-flag mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.long_term_goal') }}<template v-if="gendered"> ({{ $t(gender) }})</template><span class="ab-req">*</span></label>
                 <div class="mf-ltg">
                   <span class="mf-ltg-code">{{ codePrefix }}</span>
@@ -419,6 +438,26 @@ const save = async () => {
                 required
                 @change="clearError(fieldOf('sub_goals'))"
               />
+
+              <!-- Ablls OT / SP: the text the report lists as a strength (answer 3 or 4) or a weakness (0, 1, 2). -->
+              <div v-if="points" class="mf-points">
+                <div class="mf-points-head">
+                  <i class="pi pi-chart-line mf-label-icon" aria-hidden="true" />
+                  <b>{{ $t('ablls_ui.points_title') }}</b>
+                </div>
+                <p class="mf-points-hint">{{ $t('ablls_ui.points_hint', { token: NAME_TOKEN }) }}</p>
+                <div v-for="f in POINT_FIELDS" :key="f" class="ab-field" :class="`mf-point is-${f}`">
+                  <label :for="`mf-${f}`">
+                    <i :class="f === 'strength_point' ? 'pi pi-thumbs-up' : 'pi pi-thumbs-down'" class="mf-label-icon" aria-hidden="true" />
+                    {{ $t(`ablls_ui.${f}`) }} ({{ $t(gender) }})
+                    <span class="mf-point-scores ltr">{{ f === 'strength_point' ? '3 · 4' : '0 · 1 · 2' }}</span>
+                  </label>
+                  <Textarea :id="`mf-${f}`" v-model="mission[fieldOf(f)]" rows="2" auto-resize
+                    :placeholder="$t(`ablls_ui.${f}_ph`, { token: NAME_TOKEN })" :invalid="!!firstError(fieldOf(f))" fluid @input="clearError(fieldOf(f))" />
+                  <small v-if="mission[fieldOf(f, otherGender)]" class="mf-ref"><b>{{ $t(otherGender) }}:</b> {{ mission[fieldOf(f, otherGender)] }}</small>
+                  <small v-if="firstError(fieldOf(f))" class="ab-error">{{ firstError(fieldOf(f)) }}</small>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -595,6 +634,38 @@ const save = async () => {
   border: 1px solid var(--sawa-border);
   border-radius: 12px;
   background: #fcfdfd;
+}
+.mf-points {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border: 1px dashed var(--sawa-border);
+  border-radius: 12px;
+  background: #fbfcfd;
+}
+.mf-points-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.mf-points-hint {
+  margin: 0;
+  color: var(--sawa-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.mf-point-scores {
+  margin-inline-start: 0.35rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--sawa-primary-soft);
+  color: var(--sawa-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.mf-point.is-weakness_point .mf-point-scores {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 .mf-ref {
   padding-inline-start: 2.9rem;

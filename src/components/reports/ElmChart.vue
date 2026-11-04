@@ -1,7 +1,8 @@
 <script setup>
 // ELM's «مجموع النتائج» as on the paper form: a grid with the parts RA, NVI, EL, VI with the caregiver, then the same
 // parts with the therapist (a thick line between them), rows 0-100 by tens, and an X where each part's percentage of
-// (+) falls (rounded to the nearest ten). Each chosen test draws its X in its own color, oldest first, side by side.
+// (+) falls (rounded to the nearest ten), with a bar from the bottom of the grid up to it in the part's color (the same part has the
+// same color with the caregiver and the therapist). Each chosen test draws its bar and X (X in the test's color) side by side, oldest first.
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { colorOf, percentOf } from "@/views/evaluation/elm/elm";
@@ -19,6 +20,11 @@ const COL = 62;
 const ROW = 26;
 const HEAD = 58; // the two header rows
 const PEOPLE_ORDER = ["caregiver", "therapist"];
+// Each part's bar color.
+const PART_COLORS = { RA: "#F97316", NVI: "#22C55E", EL: "#EC4899", VI: "#0EA5E9" };
+const EXTRA_COLORS = ["#8B5CF6", "#EAB308", "#14B8A6", "#64748B"];
+const partColor = (code, i) => PART_COLORS[String(code).toUpperCase()] ?? EXTRA_COLORS[i % EXTRA_COLORS.length];
+const BOTTOM = HEAD + ROWS.length * ROW;
 
 // The parts' codes in the form's order (from the newest test, which has every part).
 const codes = computed(() => {
@@ -38,7 +44,12 @@ const marks = computed(() => {
     const percent = percentOf(test.result?.scores, column.code, column.person);
     if (percent === null) return null;
     const offset = count > 1 ? ((t + 0.5) / count - 0.5) * (COL - 18) : 0;
-    return { key: `${test.key ?? t}-${i}`, x: x(i) + COL / 2 + offset, y: yOf(percent), color: colorOf(test.result?.color, t), percent };
+    const barWidth = Math.min(30, (COL - 12) / count - 3);
+    const y = yOf(percent);
+    // The bar reaches the X (its middle); a 0% still shows a short bar.
+    const top = Math.min(y, BOTTOM - 4);
+    return { key: `${test.key ?? t}-${i}`, x: x(i) + COL / 2 + offset, y, color: colorOf(test.result?.color, t), percent,
+      bar: { x: x(i) + COL / 2 + offset - barWidth / 2, y: top, width: barWidth, height: BOTTOM - top, color: partColor(column.code, i % codes.value.length) } };
   })).filter(Boolean);
 });
 
@@ -68,9 +79,10 @@ const personLabel = (person) => t(`elm.with_${person}`);
       <line v-for="i in columns.length - 1" :key="`gc${i}`" :x1="x(i)" :x2="x(i)" :y1="i === codes.length ? 1 : HEAD / 2" :y2="HEAD + ROWS.length * ROW"
         stroke="#111827" :stroke-width="i === codes.length ? 2.4 : .6" />
 
-      <!-- each test's X -->
+      <!-- each test's bar (the part's color) up to its X (the test's color) -->
       <g v-for="mark in marks" :key="mark.key">
         <title>{{ mark.percent }}%</title>
+        <rect :x="mark.bar.x" :y="mark.bar.y" :width="mark.bar.width" :height="mark.bar.height" :fill="mark.bar.color" rx="2" />
         <text :x="mark.x" :y="mark.y + 6" text-anchor="middle" class="ec-x" :fill="mark.color">X</text>
       </g>
     </svg>
@@ -78,6 +90,10 @@ const personLabel = (person) => t(`elm.with_${person}`);
       <li v-for="(test, i) in tests" :key="test.key ?? i">
         <b :style="{ color: colorOf(test.result?.color, i) }">X</b>
         <span class="ltr">{{ dmy(test.date) }}</span>
+      </li>
+      <li v-for="(code, i) in codes" :key="`p-${code}`">
+        <i class="ec-swatch" :style="{ background: partColor(code, i) }" />
+        <span>{{ code }}</span>
       </li>
     </ul>
   </div>
@@ -92,5 +108,6 @@ const personLabel = (person) => t(`elm.with_${person}`);
 .ec-num { font-size: 11px; fill: #111827; }
 .ec-x { font-size: 17px; font-weight: 800; }
 .ec-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem 1rem; margin: 0; padding: 0; list-style: none; font-size: .85rem; direction: rtl; }
+.ec-swatch { display: inline-block; width: .8rem; height: .8rem; border-radius: 2px; }
 .ec-legend li { display: inline-flex; align-items: center; gap: .35rem; }
 </style>

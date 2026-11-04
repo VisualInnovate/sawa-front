@@ -102,7 +102,7 @@ export function useDomainTypes(assessment, t) {
     const i = types.value.findIndex((type) => type.value === key)
     return i < 0 ? types.value.length : i
   }
-  const hintOf = (key) => t(`ablls_ui.types_hint.${assessment.customTypes ? CUSTOM_TYPE : key || 'academic'}`)
+  const hintOf = (key) => t(`ablls_ui.types_hint.${assessment.customTypes ? (assessment.key === 'sp' ? 'custom_sp' : CUSTOM_TYPE) : key || 'academic'}`)
 
   return { types, load, keyOf, labelOf, iconOf, orderOf, hintOf }
 }

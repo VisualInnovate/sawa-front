@@ -213,7 +213,7 @@ const visibleCategories = computed(() =>
   sortedCategories.value.filter((c) => !activeType.value || keyOf(c) === activeType.value)
 )
 
-const summaryOf = (m) => (isAcademic(categoryOf(m)) ? listOf(m, 'goals', 'goal')[0] : m.long_term_goal || m.goal) || ''
+const summaryOf = (m) => (isAcademic(categoryOf(m)) ? listOf(m, 'goals', 'goal')[0] : m.long_term_goal || m.goal || (m.sub_goals || [])[0]) || ''
 const countsOf = (m) =>
   isAcademic(categoryOf(m))
     ? [

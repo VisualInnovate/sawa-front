@@ -7,6 +7,7 @@ import { useI18n } from "vue-i18n";
 import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
+import AbllsSpChart from "@/components/reports/AbllsSpChart.vue";
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileChart from "@/components/reports/SideProfileChart.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
@@ -76,7 +77,11 @@ const score = (test) => (test.form?.score === null || test.form?.score === undef
       <!-- Barriers -->
       <div v-else-if="section.type === BARRIER" class="pp-chart-scroll"><BarrierChart :tests="section.tests" /></div>
 
-      <div v-else-if="isAbllsFlow(section.type)" class="pp-chart-scroll"><AbllsFlowChart :tests="section.tests" /></div>
+      <div v-else-if="isAbllsFlow(section.type)" class="pp-chart-scroll">
+        <!-- Ablls SP is drawn in levels like its paper. -->
+        <AbllsSpChart v-if="Number(section.type) === 10" :tests="section.tests" />
+        <AbllsFlowChart v-else :tests="section.tests" />
+      </div>
 
       <!-- Carolina -->
       <div v-else-if="section.type === CAROLINA" class="pp-chart-scroll"><CarolinaGrid :result="section.newest?.result" :per-table="5" compact /></div>

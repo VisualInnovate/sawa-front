@@ -29,6 +29,16 @@
             icon="pi pi-tags"
             @click="typesDialog = true"
           />
+          <!-- Ablls SP: its levels (bands of the flow chart), each linked to its domains. -->
+          <Button
+            v-if="assessment.key === 'sp'"
+            v-can="[perm('type', 'list'), perm('type', 'create')]"
+            class="ab-hero-action"
+            severity="secondary"
+            :label="$t('ablls_ui.manage_levels')"
+            icon="pi pi-sort-amount-up"
+            @click="levelsDialog = true"
+          />
           <Button
             v-can="perm('category', 'create')"
             class="ab-hero-action"
@@ -215,6 +225,7 @@
 
     <!-- Ablls OT: its domain types -->
     <TypesDialog v-if="assessment.customTypes" v-model:visible="typesDialog" :assessment="assessment" @changed="loadTypes" />
+    <LevelsDialog v-if="assessment.key === 'sp'" v-model:visible="levelsDialog" :assessment="assessment" />
   </div>
 </template>
 
@@ -225,6 +236,7 @@ import { useToast } from 'primevue/usetoast'
 import axios from 'axios'
 import Ablls from '../../components/Ablls.vue'
 import TypesDialog from '@/components/ablls/TypesDialog.vue'
+import LevelsDialog from '@/components/ablls/LevelsDialog.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { can } from '@/utils/permissions'
 import { nextSkillKey } from '@/components/ablls/abllsTypes'
@@ -241,6 +253,7 @@ const assessment = assessmentOf(route)
 const perm = (resource, action) => permOf(assessment, resource, action)
 const { types, load: loadTypes, keyOf, labelOf, iconOf, orderOf, hintOf } = useDomainTypes(assessment, t)
 const typesDialog = ref(false)
+const levelsDialog = ref(false)
 
 const categories = ref([])
 const missionCounts = ref(null)

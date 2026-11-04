@@ -18,6 +18,18 @@ export const ELM = 12;
 // ABLLS Academy, Ablls OT and Ablls SP all draw the paper flow chart (a column per domain).
 export const isAbllsFlow = (type) => [ABLLS, ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
 
+// Ablls OT / SP reports also list the newest test's strengths (answer 3 or 4) and weaknesses (0, 1, 2) after the chart.
+export const hasAbllsPoints = (type) => [ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
+
+// The flow chart's column order by the domain's letter (B1, B2 are skills of B); other letters follow in the order they came.
+export const ABLLS_LETTER_ORDER = ["S", "B", "U", "V", "W", "X", "Y", "Z"];
+export const abllsSymbolOf = (category) => String(category?.symbol ?? String(category?.category ?? "").split(" - ")[0]).trim();
+export const abllsLetterOf = (category) => abllsSymbolOf(category).replace(/[\s.\-]*\d+$/u, "").toUpperCase();
+export const abllsRank = (category) => {
+  const i = ABLLS_LETTER_ORDER.indexOf(abllsLetterOf(category));
+  return i < 0 ? ABLLS_LETTER_ORDER.length : i;
+};
+
 /** A report takes at most this many evaluations of one type (the VB-MAPP form has four test columns). */
 export const MAX_PER_GROUP = 4;
 
