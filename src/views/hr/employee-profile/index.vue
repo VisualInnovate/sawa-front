@@ -107,7 +107,7 @@ const print = () => printSettlement(t, { record: eos.value, employee: employee.v
           </p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Button v-if="!archived && can('employees edit')" icon="pi pi-pencil" :label="$t('prof.edit_data')" outlined
+          <Button v-if="!archived && (can('employees edit') || can('employee specialty edit'))" icon="pi pi-pencil" :label="$t('prof.edit_data')" outlined
             @click="router.push({ name: 'Employee-update', params: { id: employee.user_id } })" />
           <Button v-if="!archived && !eos && can('end of service create')" icon="pi pi-sign-out" :label="$t('eos.title')" severity="danger" outlined @click="ending = true" />
         </div>

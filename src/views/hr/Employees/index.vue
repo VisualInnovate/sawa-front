@@ -372,7 +372,7 @@ const initFilters = () => {
                 </div>
                 <div v-else class="table-actions">
                   <Button icon="pi pi-id-card" @click="openProfile(slotProps.data)" v-tooltip.top="$t('prof.title')" :aria-label="$t('prof.title')" rounded severity="secondary" variant="outlined" />
-                  <Button v-can="'employees edit'" icon="pi pi-pencil"
+                  <Button v-can="['employees edit', 'employee specialty edit']" icon="pi pi-pencil"
                     @click="edit(slotProps.data.user.id)" v-tooltip.top="$t('edit')" rounded severity="info" variant="outlined" />
                   <Button v-can="'employees delete'" icon="pi pi-trash"
                     @click="confirmDelete(slotProps.data.id)" v-tooltip.top="$t('delete')" rounded severity="danger" variant="outlined" />

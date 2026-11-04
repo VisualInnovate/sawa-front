@@ -24,6 +24,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import sawaLogo from "@/assets/img/sawa_logo.svg";
 import { createSummaryTables, newSummaryPoint } from "@/components/reports/summaryDraft";
+import { childListOf, childTextOf } from "@/components/ablls/abllsTypes";
 import { CASE_LEVELS, caseDescription } from "@/components/reports/caseDescriptions";
 import Popover from "primevue/popover";
 import EditableText from "@/components/reports/EditableText.vue";
@@ -31,6 +32,8 @@ import MilestoneLevelChart from "@/components/reports/MilestoneLevelChart.vue";
 import TestTables from "@/components/reports/TestTables.vue";
 import BarrierChart from "@/components/reports/BarrierChart.vue";
 import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
+import AbllsSpChart from "@/components/reports/AbllsSpChart.vue";
+import AbllsTestsHeader from "@/components/reports/AbllsTestsHeader.vue";
 import CarolinaGrid from "@/components/carolina/CarolinaGrid.vue";
 import QfbaChart from "@/components/reports/QfbaChart.vue";
 import QfbaSummary from "@/components/reports/QfbaSummary.vue";
@@ -46,7 +49,7 @@ import TrackingDates from "@/components/reports/TrackingDates.vue";
 import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
   BARRIER, CAROLINA, ELM, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
-  isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
+  ABLLS_SKILLS, ABLLS_SP, abllsLetterOf, abllsRank, abllsSymbolOf, hasAbllsPoints, isBehavioural, isFemale, milestoneMarks, typeIcon, typeLabel,
 } from "@/components/reports/reportUtils";
 
 const { t, locale } = useI18n();
@@ -164,6 +167,8 @@ function defaults(data) {
     hiddenLevels: [],
     // Tracking: the goals left out of the print, by goal id.
     trackingHidden: [],
+    // Ablls OT plan: the opening sentence as edited (empty = built from the types that have weaknesses).
+    otPlanIntro: "",
     behaviors: Object.fromEntries(groupItems(data.items).map((group) => [group.group, Array.from({ length: 3 }, () => ["", "", "", "", ""])])),
     // «وصف التقييمات»: each type's description (from its settings page), printed and edited before its charts.
     descriptions: Object.fromEntries(Object.entries(data.descriptions ?? {}).map(([type, text]) => [type, String(text ?? "")])),
@@ -201,6 +206,7 @@ function applyDraft(base, saved) {
   }
   if (CASE_LEVELS.includes(Number(saved.caseLevel))) base.caseLevel = Number(saved.caseLevel);
   if (typeof saved.caseFree === "string") base.caseFree = saved.caseFree;
+  if (typeof saved.otPlanIntro === "string") base.otPlanIntro = saved.otPlanIntro;
   if (Array.isArray(saved.hiddenLevels)) base.hiddenLevels = saved.hiddenLevels.map(String);
   if (Array.isArray(saved.trackingHidden)) base.trackingHidden = saved.trackingHidden.map(Number);
   for (const key of Object.keys(base.behaviors)) {
@@ -311,10 +317,15 @@ async function load() {
       restoring = false;
     });
     document.title = `${t("ereport.report_title")} - ${data.child?.name ?? ""}`;
-    if (showCharts.value) loadSummary();
+    if (showCharts.value) {
+      loadSummary();
+      loadAbllsSummaries();
+    }
     if (showPlan.value) {
       loadPlan();
       loadQfbaPlan();
+      loadOtPlan();
+      loadCarolinaPlan();
     }
     if (showTracking.value) loadTracking();
   } catch {
@@ -330,8 +341,11 @@ function open() {
   report.value = null;
   edits.value = null;
   summary.value = null;
+  abllsSummaries.value = {};
   plan.value = null;
   qfbaPlan.value = null;
+  otPlan.value = null;
+  carolinaPlan.value = null;
   tracking.value = null;
   if (!keys.value.length) {
     loading.value = false;
@@ -483,32 +497,33 @@ async function loadSummary() {
 
 const reportSummary = computed(() => (summary.value?.tables ?? []).filter((table) => isLevelShown(table.key)));
 
-function touchSummary() {
-  if (summary.value) summary.value.dirty = true;
+// `state`: the VB-MAPP summary (default) or an Ablls OT / SP one.
+function touchSummary(state = summary.value) {
+  if (state) state.dirty = true;
 }
-function addSummaryPoint(row, kind) {
+function addSummaryPoint(row, kind, state) {
   row[kind].push(newSummaryPoint(""));
-  touchSummary();
+  touchSummary(state);
 }
-function removeSummaryPoint(row, kind, point) {
+function removeSummaryPoint(row, kind, point, state) {
   row[kind].splice(row[kind].indexOf(point), 1);
-  touchSummary();
+  touchSummary(state);
 }
 // Deleted rows and tables (per kind: strengths / weaknesses), restorable from their page.
 const isHidden = (item, kind) => (item?.hidden ?? []).includes(kind);
 const summaryRows = (table, kind) => table.rows.filter((row) => !isHidden(row, kind));
-function setHidden(item, kind, hidden) {
+function setHidden(item, kind, hidden, state) {
   const list = new Set(item.hidden ?? []);
   if (hidden) list.add(kind);
   else list.delete(kind);
   item.hidden = [...list];
-  touchSummary();
+  touchSummary(state);
 }
 // What a summary page has deleted: [{ label, restore() }].
-const summaryDeleted = (table) => ["strengths", "weaknesses"].flatMap((kind) => [
-  ...(isHidden(table, kind) ? [{ key: `t-${kind}`, label: t(`ereport.${kind}`), restore: () => setHidden(table, kind, false) }] : []),
+const summaryDeleted = (table, state) => ["strengths", "weaknesses"].flatMap((kind) => [
+  ...(isHidden(table, kind) ? [{ key: `t-${kind}`, label: t(`ereport.${kind}`), restore: () => setHidden(table, kind, false, state) }] : []),
   ...table.rows.filter((row) => isHidden(row, kind))
-    .map((row) => ({ key: `r-${kind}-${row.symbol}`, label: `${row.symbol || "—"} · ${t(`ereport.${kind}`)}`, restore: () => setHidden(row, kind, false) })),
+    .map((row) => ({ key: `r-${kind}-${row.symbol}`, label: `${row.symbol || "—"} · ${t(`ereport.${kind}`)}`, restore: () => setHidden(row, kind, false, state) })),
 ]);
 // A page whose tables are deleted (or left without points) has nothing to print and is left out of the print.
 const summaryPrintable = (table) => ["strengths", "weaknesses"]
@@ -516,12 +531,12 @@ const summaryPrintable = (table) => ["strengths", "weaknesses"]
 // The rows that print for a kind (shown, with points), numbered in order.
 const summaryNumber = (table, kind, row) => summaryRows(table, kind).filter((item) => item[kind].length).indexOf(row) + 1;
 
-async function saveSummary() {
-  if (!summary.value || summary.value.saving) return;
-  summary.value.saving = true;
-  summary.value.error = false;
+async function saveSummary(state = summary.value, test = milestoneSection.value?.newest) {
+  if (!state || state.saving) return;
+  state.saving = true;
+  state.error = false;
   try {
-    const tables = summary.value.tables.map((table) => ({
+    const tables = state.tables.map((table) => ({
       key: table.key, title: table.title, hidden: table.hidden ?? [],
       rows: table.rows.map((row) => ({
         symbol: row.symbol, hidden: row.hidden ?? [],
@@ -531,14 +546,115 @@ async function saveSummary() {
         })),
       })),
     }));
-    const { data } = await axios.put(`api/reports/summaries/${summary.value.evaluationId}`, { tables });
-    summary.value.tables = summaryFromServer(data.summary.tables);
-    summary.value.saved = true;
-    summary.value.dirty = false;
+    const { data } = await axios.put(`api/reports/summaries/${state.evaluationId}`, { tables });
+    state.tables = summaryFromServer(data.summary.tables, test);
+    state.saved = true;
+    state.dirty = false;
   } catch {
-    summary.value.error = true;
+    state.error = true;
   } finally {
-    summary.value.saving = false;
+    state.saving = false;
+  }
+}
+
+// ---- Ablls OT / SP strengths/weaknesses (saved on the server, per evaluation, like VB-MAPP's) ---------------
+
+// By section group: { evaluationId, tables: [one table: rows per domain (type), by its letter], saved, dirty, saving, error, loading }.
+const abllsSummaries = ref({});
+const abllsSections = computed(() => sections.value.filter((section) => hasAbllsPoints(section.type) || section.type === CAROLINA));
+
+// The newest test's answers: each skill's strength text when it scored 3 or 4, its weakness text when 0, 1 or 2
+// (the child's wording and first name); a skill without that text, or not answered, is left out. Rows follow the chart.
+function abllsSummaryTables(test) {
+  const rows = new Map();
+  [...(test?.result ?? [])]
+    .map((category, i) => ({ category, i }))
+    .sort((a, b) => abllsRank(a.category) - abllsRank(b.category) || (a.category.type_id ?? 0) - (b.category.type_id ?? 0) || a.i - b.i)
+    .forEach(({ category }) => {
+      const symbol = abllsLetterOf(category);
+      if (!rows.has(symbol)) rows.set(symbol, { symbol, strengths: [], weaknesses: [] });
+      const row = rows.get(symbol);
+      // B12 -> number 12 (code B-12, like VB-MAPP's M-3); another form has no number.
+      const match = abllsSymbolOf(category).match(/^[^\d]*?(\d+)$/u);
+      const number = match && Number(match[1]) <= 999 ? Number(match[1]) : null;
+      for (const mission of category.missions ?? []) {
+        if (mission.answer_score === null || mission.answer_score === undefined || mission.answer_score === "") continue;
+        const kind = Number(mission.answer_score) >= 3 ? "strengths" : "weaknesses";
+        const text = childTextOf(mission, kind === "strengths" ? "strength_point" : "weakness_point", child.value).trim();
+        if (text) row[kind].push(newSummaryPoint(text, number));
+      }
+    });
+  return [{ key: "ablls", title: "", rows: [...rows.values()].sort((a, b) => abllsRank({ symbol: a.symbol }) - abllsRank({ symbol: b.symbol })) }];
+}
+
+// A row's domain name (the type's flow-chart name) by its letter, from the newest test.
+const abllsRowTitle = (section, symbol) => {
+  const category = (section.newest?.result ?? []).find((item) => abllsLetterOf(item) === symbol);
+  return category?.type_chart_title || category?.type_title || "";
+};
+
+
+// ---- Carolina strengths/weaknesses: one row per general goal (its code, 4C), weaknesses first ------------------
+// The code of a general goal is the part before the dash of its skills' symbols (4C-d -> 4C). A point's number is the
+// skill's place among the skills of the goals with that code, so its code (4C-d) is found again from the result.
+const carolinaCode = (symbol) => {
+  const text = String(symbol ?? "").trim();
+  return text.includes("-") ? text.replace(/-[^-]*$/u, "") : text;
+};
+const carolinaGoalCode = (goal) => carolinaCode((goal?.skills ?? []).find((skill) => skill.symbol)?.symbol) || "";
+const carolinaGoalsOf = (result) => (result?.domains ?? []).flatMap((domain) => (domain.goals ?? []).map((goal) => ({ domain, goal, code: carolinaGoalCode(goal) })));
+const carolinaSkillsByCode = (result) => {
+  const codes = new Map();
+  for (const { goal, code } of carolinaGoalsOf(result)) {
+    if (!codes.has(code)) codes.set(code, { title: goal.title ?? "", skills: [] });
+    codes.get(code).skills.push(...(goal.skills ?? []));
+  }
+  return codes;
+};
+const isCarolinaWeak = (response) => response === "-" || response === "+-";
+
+function carolinaSummaryTables(test) {
+  const rows = [];
+  for (const [code, { skills }] of carolinaSkillsByCode(test?.result)) {
+    const row = { symbol: code, strengths: [], weaknesses: [] };
+    skills.forEach((skill, i) => {
+      const number = i + 1 <= 999 ? i + 1 : null;
+      if (skill.response === "+" && String(skill.strength ?? "").trim()) row.strengths.push(newSummaryPoint(skill.strength.trim(), number));
+      if (isCarolinaWeak(skill.response) && String(skill.weakness ?? "").trim()) row.weaknesses.push(newSummaryPoint(skill.weakness.trim(), number));
+    });
+    rows.push(row);
+  }
+  return [{ key: "carolina", title: "", rows }];
+}
+
+// Sections with strengths/weaknesses pages of their own (Ablls OT / SP, Carolina) and how each reads.
+const hasPoints = (type) => hasAbllsPoints(type) || Number(type) === CAROLINA;
+const pointKinds = (section) => (section.type === CAROLINA ? ["weaknesses", "strengths"] : ["strengths", "weaknesses"]);
+const pointRowTitle = (section, symbol) => (section.type === CAROLINA
+  ? carolinaSkillsByCode(section.newest?.result).get(symbol)?.title ?? "" : abllsRowTitle(section, symbol));
+const sectionPointCode = (section, row, point) => (section.type === CAROLINA
+  ? (point.number ? carolinaSkillsByCode(section.newest?.result).get(row.symbol)?.skills?.[point.number - 1]?.symbol ?? "" : "")
+  : pointCode(row, point));
+const pointTablesOf = (section, test) => (section.type === CAROLINA ? carolinaSummaryTables(test) : abllsSummaryTables(test));
+
+function loadAbllsSummaries() {
+  for (const section of abllsSections.value) {
+    const test = section.newest;
+    if (!test) continue;
+    const state = { evaluationId: test.id, tables: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+    abllsSummaries.value[section.group] = state;
+    axios.get(`api/reports/summaries/${test.id}`)
+      .then(({ data }) => {
+        const current = abllsSummaries.value[section.group];
+        current.tables = data.summary ? summaryFromServer(data.summary.tables, test) : pointTablesOf(section, test);
+        current.saved = Boolean(data.summary);
+      })
+      .catch(() => {
+        abllsSummaries.value[section.group].tables = pointTablesOf(section, test);
+      })
+      .finally(() => {
+        abllsSummaries.value[section.group].loading = false;
+      });
   }
 }
 
@@ -626,7 +742,9 @@ function planGroupKey(goal) {
   return goal.symbol ? `${goal.general_goal_id}:${goal.symbol}` : String(goal.general_goal_id);
 }
 // The symbol and the question's number in its domain (M-3); a goal written by hand takes its place in the group.
-const goalCode = (group, index, goal) => [group.symbol, goal?.number || index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-");
+// A VB-MAPP goal added by hand (no question number) is coded «ADD», not the next number.
+const goalCode = (group, index, goal) => (goal?.level_id != null && !goal?.number ? "ADD"
+  : [group.symbol, goal?.number || index + 1].filter((part) => part !== "" && part !== null && part !== undefined).join("-"));
 
 function touchPlan() {
   if (plan.value) plan.value.dirty = true;
@@ -756,6 +874,237 @@ async function saveQfbaPlan() {
     qfbaPlan.value.error = true;
   } finally {
     qfbaPlan.value.saving = false;
+  }
+}
+
+// ---- Ablls OT plan (saved on the server like VB-MAPP's, on the newest chosen Ablls OT test) ------------------
+// As the centre's paper: the flow chart, «سيتم رفع مستوى أداء <name> في كل من (<types with weaknesses>):», then per type
+// «أهداف مجال <type>:», per weak skill (answer 0, 1, 2) «B7: <its long-term goal>», «(objectives):» and its sub goals
+// not reached yet (score 1 of 4 -> B7-2, B7-3, B7-4). Saved goals: general_goal = the long-term goal, domain = the type,
+// domain_symbol = its letter, symbol = the skill (B7), number = the sub goal's number; no general goal id, so the
+// tracking groups and codes them by the skill (B7-2). A skill can be deleted (hidden "group:|B7") and restored.
+
+// { evaluationId, goals: [planGoal], hidden: [key], saved, dirty, saving, error, loading, savedAt }
+const otSection = computed(() => sections.value.find((section) => section.type === ABLLS_SKILLS) ?? null);
+const otPlan = ref(null);
+
+function otPlanFromResult(test) {
+  return [...(test?.result ?? [])]
+    .map((category, i) => ({ category, i }))
+    .sort((a, b) => abllsRank(a.category) - abllsRank(b.category) || (a.category.type_id ?? 0) - (b.category.type_id ?? 0)
+      || String(abllsSymbolOf(a.category)).localeCompare(String(abllsSymbolOf(b.category)), undefined, { numeric: true }) || a.i - b.i)
+    .flatMap(({ category }) => (category.missions ?? []).flatMap((mission) => {
+      const raw = mission.answer_score;
+      if (raw === null || raw === undefined || raw === "" || Number(raw) >= 3) return [];
+      const score = Number(raw);
+      const symbol = (category.missions.length > 1 ? mission.mission_key : abllsSymbolOf(category)) || abllsSymbolOf(category);
+      const general = childTextOf(mission, "long_term_goal", child.value);
+      return childListOf(mission, "sub_goals", null, child.value)
+        .map((text, index) => ({ text, number: index + 1 }))
+        .filter(({ number }) => number > score)
+        .map(({ text, number }) => planGoal({
+          level_id: null, general_goal_id: null, general_goal: general, domain: category.type_title ?? "",
+          domain_symbol: abllsLetterOf(category), symbol, number, weakness: text, goal: text,
+        }));
+    }));
+}
+
+async function loadOtPlan() {
+  const test = otSection.value?.newest;
+  if (!test) return;
+  otPlan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+  try {
+    const { data } = await axios.get(`api/reports/plans/${test.id}`);
+    otPlan.value.goals = data.plan ? data.plan.goals.map(planGoal) : otPlanFromResult(test);
+    otPlan.value.hidden = [...(data.plan?.hidden ?? [])];
+    otPlan.value.saved = Boolean(data.plan);
+    otPlan.value.savedAt = data.plan?.updated_at ?? null;
+  } catch {
+    otPlan.value.goals = otPlanFromResult(test);
+  } finally {
+    otPlan.value.loading = false;
+  }
+}
+
+// Types (in order) -> skills -> goals; deleted skills are left out and listed to restore.
+const otSkillKey = (symbol) => `group:|${symbol}`;
+const otPlanAllSkills = computed(() => {
+  const skills = new Map();
+  for (const goal of otPlan.value?.goals ?? []) {
+    const key = goal.symbol || "";
+    if (!skills.has(key)) skills.set(key, { key, symbol: key, domain: goal.domain || "", letter: goal.domain_symbol || "", goals: [] });
+    skills.get(key).goals.push(goal);
+  }
+  return [...skills.values()];
+});
+const otSkillHidden = (skill) => (otPlan.value?.hidden ?? []).includes(otSkillKey(skill.key));
+const otPlanDomains = computed(() => {
+  const domains = new Map();
+  for (const skill of otPlanAllSkills.value.filter((item) => !otSkillHidden(item))) {
+    const key = skill.letter || skill.domain;
+    if (!domains.has(key)) domains.set(key, { key, title: skill.domain, skills: [] });
+    domains.get(key).skills.push(skill);
+  }
+  return [...domains.values()];
+});
+const otPlanDeleted = computed(() => otPlanAllSkills.value.filter(otSkillHidden));
+const otIntroDefault = computed(() => t("ereport.ot_plan_intro", {
+  name: shortName.value, types: otPlanDomains.value.map((domain) => domain.title).filter(Boolean).join(" / "),
+}));
+// The opening sentence: as edited in the report, or built from the types.
+const otIntro = computed(() => edits.value?.otPlanIntro || otIntroDefault.value);
+function setOtIntro(value) {
+  if (edits.value) edits.value.otPlanIntro = value === otIntroDefault.value ? "" : value;
+}
+
+function touchOtPlan() {
+  if (otPlan.value) otPlan.value.dirty = true;
+}
+function setOtSkillHidden(skill, hidden) {
+  const list = new Set(otPlan.value.hidden);
+  if (hidden) list.add(otSkillKey(skill.key));
+  else list.delete(otSkillKey(skill.key));
+  otPlan.value.hidden = [...list];
+  touchOtPlan();
+}
+// The skill's long-term goal is kept on each of its goals.
+function setOtGeneralGoal(skill, text) {
+  skill.goals.forEach((goal) => (goal.general_goal = text));
+  touchOtPlan();
+}
+function addOtGoal(skill) {
+  const last = skill.goals[skill.goals.length - 1];
+  const number = Math.max(0, ...skill.goals.map((goal) => Number(goal.number) || 0)) + 1;
+  otPlan.value.goals.splice(otPlan.value.goals.indexOf(last) + 1, 0, planGoal({ ...last, id: undefined, number, weakness: "", goal: "" }));
+  touchOtPlan();
+}
+function removeOtGoal(skill, goal) {
+  // The last goal of a skill holds its long-term goal: delete the skill instead (restorable).
+  if (skill.goals.length === 1) return setOtSkillHidden(skill, true);
+  otPlan.value.goals.splice(otPlan.value.goals.indexOf(goal), 1);
+  touchOtPlan();
+}
+
+async function saveOtPlan() {
+  if (!otPlan.value || otPlan.value.saving) return;
+  otPlan.value.saving = true;
+  otPlan.value.error = false;
+  try {
+    const goals = otPlan.value.goals.filter((goal) => (goal.goal || goal.weakness || "").trim())
+      .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness?.trim() ? goal.weakness : goal.goal }));
+    const { data } = await axios.put(`api/reports/plans/${otPlan.value.evaluationId}`, { goals, hidden: otPlan.value.hidden });
+    otPlan.value.goals = data.plan.goals.map(planGoal);
+    otPlan.value.hidden = [...(data.plan.hidden ?? [])];
+    otPlan.value.saved = true;
+    otPlan.value.dirty = false;
+    otPlan.value.savedAt = data.plan.updated_at;
+  } catch {
+    otPlan.value.error = true;
+  } finally {
+    otPlan.value.saving = false;
+  }
+}
+
+// ---- Carolina plan (saved on the server like VB-MAPP's, on the newest chosen Carolina test) -------------------
+// Per domain «أهداف <domain>:», per general goal «4C : أن يطور <name> مهارات <goal> لديه.» (editable), «(objectives):» and
+// each of its skills answered - or +- with its plan goal: «4C-d: <plan goal>». Saved goals: general_goal_id = the goal,
+// general_goal = the sentence, domain = the domain, domain_symbol = the goal's code (4C), symbol = the skill (4C-d), no
+// number. A general goal can be deleted (hidden "group:|<goal id>") and restored; a skill without a plan goal is left out.
+const carolinaSection = computed(() => sections.value.find((section) => section.type === CAROLINA) ?? null);
+const carolinaPlan = ref(null);
+const carolinaSentence = (goal) => t(female.value ? "ereport.carolina_goal_female" : "ereport.carolina_goal_male", { name: shortName.value, goal: goal.title ?? "" });
+
+function carolinaPlanFromResult(test) {
+  return carolinaGoalsOf(test?.result).flatMap(({ domain, goal, code }) => (goal.skills ?? [])
+    .filter((skill) => isCarolinaWeak(skill.response) && String(skill.plan_goal ?? "").trim())
+    .map((skill) => planGoal({
+      level_id: null, general_goal_id: goal.id ?? null, general_goal: carolinaSentence(goal), domain: domain.title ?? "",
+      domain_symbol: code, symbol: skill.symbol ?? "", number: null, weakness: String(skill.weakness ?? "").trim() || skill.plan_goal.trim(), goal: skill.plan_goal.trim(),
+    })));
+}
+
+async function loadCarolinaPlan() {
+  const test = carolinaSection.value?.newest;
+  if (!test) return;
+  carolinaPlan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+  try {
+    const { data } = await axios.get(`api/reports/plans/${test.id}`);
+    carolinaPlan.value.goals = data.plan ? data.plan.goals.map(planGoal) : carolinaPlanFromResult(test);
+    carolinaPlan.value.hidden = [...(data.plan?.hidden ?? [])];
+    carolinaPlan.value.saved = Boolean(data.plan);
+    carolinaPlan.value.savedAt = data.plan?.updated_at ?? null;
+  } catch {
+    carolinaPlan.value.goals = carolinaPlanFromResult(test);
+  } finally {
+    carolinaPlan.value.loading = false;
+  }
+}
+
+const carolinaGroupKey = (group) => `group:|${group.key}`;
+const carolinaPlanAllGroups = computed(() => {
+  const groups = new Map();
+  for (const goal of carolinaPlan.value?.goals ?? []) {
+    const key = String(goal.general_goal_id ?? goal.domain_symbol ?? "");
+    if (!groups.has(key)) groups.set(key, { key, code: goal.domain_symbol || "", domain: goal.domain || "", goals: [] });
+    groups.get(key).goals.push(goal);
+  }
+  return [...groups.values()];
+});
+const carolinaGroupHidden = (group) => (carolinaPlan.value?.hidden ?? []).includes(carolinaGroupKey(group));
+const carolinaPlanDomains = computed(() => {
+  const domains = new Map();
+  for (const group of carolinaPlanAllGroups.value.filter((item) => !carolinaGroupHidden(item))) {
+    if (!domains.has(group.domain)) domains.set(group.domain, { key: group.domain || "none", title: group.domain, groups: [] });
+    domains.get(group.domain).groups.push(group);
+  }
+  return [...domains.values()];
+});
+const carolinaPlanDeleted = computed(() => carolinaPlanAllGroups.value.filter(carolinaGroupHidden));
+
+function touchCarolinaPlan() {
+  if (carolinaPlan.value) carolinaPlan.value.dirty = true;
+}
+function setCarolinaGroupHidden(group, hidden) {
+  const list = new Set(carolinaPlan.value.hidden);
+  if (hidden) list.add(carolinaGroupKey(group));
+  else list.delete(carolinaGroupKey(group));
+  carolinaPlan.value.hidden = [...list];
+  touchCarolinaPlan();
+}
+function setCarolinaSentence(group, text) {
+  group.goals.forEach((goal) => (goal.general_goal = text));
+  touchCarolinaPlan();
+}
+// A point added by hand has the code «ADD».
+function addCarolinaGoal(group) {
+  const last = group.goals[group.goals.length - 1];
+  carolinaPlan.value.goals.splice(carolinaPlan.value.goals.indexOf(last) + 1, 0, planGoal({ ...last, id: undefined, symbol: "ADD", number: null, weakness: "", goal: "" }));
+  touchCarolinaPlan();
+}
+function removeCarolinaGoal(group, goal) {
+  // The last point of a general goal holds its sentence: delete the general goal instead (restorable).
+  if (group.goals.length === 1) return setCarolinaGroupHidden(group, true);
+  carolinaPlan.value.goals.splice(carolinaPlan.value.goals.indexOf(goal), 1);
+  touchCarolinaPlan();
+}
+
+async function saveCarolinaPlan() {
+  if (!carolinaPlan.value || carolinaPlan.value.saving) return;
+  carolinaPlan.value.saving = true;
+  carolinaPlan.value.error = false;
+  try {
+    const goals = carolinaPlan.value.goals.filter((goal) => (goal.goal || "").trim())
+      .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness?.trim() ? goal.weakness : goal.goal }));
+    const { data } = await axios.put(`api/reports/plans/${carolinaPlan.value.evaluationId}`, { goals, hidden: carolinaPlan.value.hidden });
+    carolinaPlan.value.goals = data.plan.goals.map(planGoal);
+    carolinaPlan.value.hidden = [...(data.plan.hidden ?? [])];
+    carolinaPlan.value.saved = true;
+    carolinaPlan.value.dirty = false;
+    carolinaPlan.value.savedAt = data.plan.updated_at;
+  } catch {
+    carolinaPlan.value.error = true;
+  } finally {
+    carolinaPlan.value.saving = false;
   }
 }
 
@@ -1046,8 +1395,22 @@ function back() {
               <b>{{ $t("ereport.group_summary") }}</b>
               <small>{{ summary.error ? $t("ereport.save_failed") : summary.dirty || !summary.saved ? $t("ereport.summary_unsaved") : $t("ereport.summary_saved") }}</small>
             </div>
-            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="summary.saving" data-no-request-spinner @click="saveSummary" />
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="summary.saving" data-no-request-spinner @click="saveSummary()" />
           </div>
+
+          <!-- Ablls OT / SP: each section's strengths/weaknesses, saved like VB-MAPP's. -->
+          <template v-for="section in abllsSections" :key="'ablls-save-' + section.group">
+            <div v-if="abllsSummaries[section.group] && !abllsSummaries[section.group].loading" class="rx-save-group"
+              :class="abllsSummaries[section.group].error ? 'is-error' : abllsSummaries[section.group].dirty || !abllsSummaries[section.group].saved ? 'is-dirty' : 'is-saved'">
+              <span class="rx-save-dot" aria-hidden="true" />
+              <div class="rx-save-text">
+                <b>{{ $t("ereport.group_summary") }} · {{ section.label }}</b>
+                <small>{{ abllsSummaries[section.group].error ? $t("ereport.save_failed") : abllsSummaries[section.group].dirty || !abllsSummaries[section.group].saved ? $t("ereport.summary_unsaved") : $t("ereport.summary_saved") }}</small>
+              </div>
+              <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="abllsSummaries[section.group].saving" data-no-request-spinner
+                @click="saveSummary(abllsSummaries[section.group], section.newest)" />
+            </div>
+          </template>
 
           <div v-if="plan && !plan.loading" class="rx-save-group" :class="plan.error ? 'is-error' : plan.dirty || !plan.saved ? 'is-dirty' : 'is-saved'">
             <span class="rx-save-dot" aria-hidden="true" />
@@ -1065,6 +1428,24 @@ function back() {
               <small>{{ qfbaPlan.error ? $t("ereport.save_failed") : qfbaPlan.dirty || !qfbaPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="qfbaPlan.saving" data-no-request-spinner @click="saveQfbaPlan" />
+          </div>
+
+          <div v-if="otPlan && !otPlan.loading" class="rx-save-group" :class="otPlan.error ? 'is-error' : otPlan.dirty || !otPlan.saved ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_plan") }} · Ablls OT</b>
+              <small>{{ otPlan.error ? $t("ereport.save_failed") : otPlan.dirty || !otPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="otPlan.saving" data-no-request-spinner @click="saveOtPlan()" />
+          </div>
+
+          <div v-if="carolinaPlan && !carolinaPlan.loading" class="rx-save-group" :class="carolinaPlan.error ? 'is-error' : carolinaPlan.dirty || !carolinaPlan.saved ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_plan") }} · {{ carolinaSection?.label }}</b>
+              <small>{{ carolinaPlan.error ? $t("ereport.save_failed") : carolinaPlan.dirty || !carolinaPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="carolinaPlan.saving" data-no-request-spinner @click="saveCarolinaPlan()" />
           </div>
 
           <div v-if="tracking && !tracking.loading && tracking.plans.length" class="rx-save-group"
@@ -1329,7 +1710,7 @@ function back() {
                         <ul class="rx-plan-points">
                           <li v-for="point in row[kind]" :key="point.id">
                             <b v-if="pointCode(row, point)" class="rx-point-code ltr">{{ pointCode(row, point) }}</b>
-                            <EditableText v-model="point.text" block multiline @update:modelValue="touchSummary" />
+                            <EditableText v-model="point.text" block multiline @update:modelValue="touchSummary()" />
                             <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
                               @click="removeSummaryPoint(row, kind, point)"><i class="pi pi-trash" aria-hidden="true" /></button>
                           </li>
@@ -1446,7 +1827,12 @@ function back() {
 
           <template v-if="showCharts">
           <BarrierChart v-if="section.type === BARRIER" :tests="section.tests" />
-          <AbllsFlowChart v-else-if="isAbllsFlow(section.type)" :tests="section.tests" />
+          <!-- Ablls OT / SP: the paper's table of tests (child, assessor, date, color) above the chart. -->
+          <template v-else-if="isAbllsFlow(section.type)">
+            <AbllsTestsHeader v-if="hasAbllsPoints(section.type)" :variant="section.type === ABLLS_SP ? 'sp' : 'ot'" :tests="section.tests" :child-name="child.name" />
+            <AbllsSpChart v-if="section.type === ABLLS_SP" :tests="section.tests" />
+            <AbllsFlowChart v-else :tests="section.tests" />
+          </template>
           <!-- Carolina: the newest chosen evaluation as the paper form (its rounds' colors in each box). -->
           <CarolinaGrid v-else-if="section.type === CAROLINA" :result="section.newest.result" :per-table="5" compact />
           <TransitionChart v-else-if="section.type === TRANSITION" :tests="section.tests" />
@@ -1587,6 +1973,76 @@ function back() {
 
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
+
+        <!-- Ablls OT / SP: after the flow chart, the newest test's strengths (answer 3 or 4) then weaknesses (0, 1, 2), as VB-MAPP's:
+             edited here and saved on the server; a row or a table can be deleted and restored. -->
+        <template v-if="showCharts && hasPoints(section.type) && abllsSummaries[section.group]">
+          <section v-for="table in abllsSummaries[section.group].tables.length ? abllsSummaries[section.group].tables : [null]" :key="'ablls-summary-' + section.group + (table?.key ?? 'none')"
+            v-page="{ key: 'ablls-summary-' + section.group, title: [$t('ereport.page_summary'), section.label].join(' · ') }" class="rx-page"
+            :class="{ 'rx-print-hidden': !table || !summaryPrintable(table) }" :data-print-note="$t('ereport.page_not_printed')">
+            <header class="rx-head">
+              <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+              <span>{{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+            </header>
+            <template v-if="table">
+              <h2 class="rx-band">{{ $t("ereport.page_summary") }}</h2>
+              <div v-if="summaryDeleted(table, abllsSummaries[section.group]).length" class="rx-deleted rx-screen-only">
+                <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+                <button v-for="item in summaryDeleted(table, abllsSummaries[section.group])" :key="item.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="item.restore()">
+                  <i class="pi pi-undo" aria-hidden="true" /> {{ item.label }}
+                </button>
+              </div>
+              <template v-for="kind in pointKinds(section)" :key="kind">
+                <template v-if="!isHidden(table, kind)">
+                <div class="rx-table-head">
+                  <h3 class="rx-summary-level">{{ $t('ereport.' + kind + '_intro') }}</h3>
+                  <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" @click="setHidden(table, kind, true, abllsSummaries[section.group])">
+                    <i class="pi pi-trash" aria-hidden="true" /> {{ $t("ereport.delete_table") }}
+                  </button>
+                </div>
+                <table class="rx-table rx-summary">
+                  <thead>
+                    <tr>
+                      <th class="rx-sum-num">{{ $t('ereport.number') }}</th>
+                      <th>{{ $t('ereport.' + kind) }}</th>
+                      <th class="rx-sum-symbol">{{ $t("ereport.target_symbol") }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in summaryRows(table, kind)" :key="table.rows.indexOf(row)" :class="{ 'rx-screen-only': !row[kind].length }">
+                      <td class="rx-sum-num">{{ row[kind].length ? summaryNumber(table, kind, row) : "" }}</td>
+                      <td>
+                        <ul class="rx-plan-points">
+                          <li v-for="point in row[kind]" :key="point.id">
+                            <b v-if="sectionPointCode(section, row, point)" class="rx-point-code ltr">{{ sectionPointCode(section, row, point) }}</b>
+                            <EditableText v-model="point.text" block multiline @update:modelValue="touchSummary(abllsSummaries[section.group])" />
+                            <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
+                              @click="removeSummaryPoint(row, kind, point, abllsSummaries[section.group])"><i class="pi pi-trash" aria-hidden="true" /></button>
+                          </li>
+                        </ul>
+                        <button type="button" class="rx-plan-control rx-add-point rx-screen-only" @click="addSummaryPoint(row, kind, abllsSummaries[section.group])">
+                          <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
+                        </button>
+                      </td>
+                      <td class="rx-sum-symbol">
+                        <b>{{ row.symbol }}</b>
+                        <small v-if="pointRowTitle(section, row.symbol)" class="rx-sum-domain">{{ pointRowTitle(section, row.symbol) }}</small>
+                        <button type="button" class="rx-plan-control rx-remove-point rx-row-delete rx-screen-only" :aria-label="$t('ereport.delete_row')"
+                          :title="$t('ereport.delete_row')" @click="setHidden(row, kind, true, abllsSummaries[section.group])"><i class="pi pi-times" aria-hidden="true" /></button>
+                      </td>
+                    </tr>
+                    <tr v-if="!summaryRows(table, kind).some(row => row[kind].length)">
+                      <td colspan="3" class="rx-empty">{{ $t("ereport.no_result_data") }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                </template>
+              </template>
+            </template>
+            <p v-else class="rx-empty">{{ abllsSummaries[section.group].loading ? "…" : $t("ereport.no_result_data") }}</p>
+            <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+          </section>
+        </template>
 
         <!-- M-CHAT-R: the 20 answers of every chosen test side by side (oldest first); a risk point is marked. -->
         <section v-if="showCharts && section.type === MCHAT"
@@ -1744,6 +2200,106 @@ function back() {
               <p v-else-if="!qfbaPlanDeleted.length" class="rx-empty">{{ qt(qfbaPlan.lang, "plan_empty") }}</p>
             </template>
           </div>
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
+        <!-- Ablls OT plan, as the centre's paper: the flow chart, the opening sentence (editable), then per type its weak skills'
+             long-term goals and their sub goals not reached yet (objectives), edited here and saved on the server. -->
+        <section v-if="showPlan && otPlan && section.type === ABLLS_SKILLS && section.group === otSection?.group"
+          v-page="{ key: 'ot-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
+          :class="{ 'rx-print-hidden': !otPlan.loading && !otPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          <header class="rx-head">
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+            <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+          <h2 class="rx-band">{{ $t("ereport.plan_title") }} · {{ section.label }}</h2>
+          <h3 class="rx-ot-flow ltr">FLOW CHART:</h3>
+          <AbllsTestsHeader variant="ot" :tests="section.tests" :child-name="child.name" />
+          <AbllsFlowChart :tests="section.tests" />
+
+          <div v-if="otPlanDeleted.length" class="rx-deleted rx-screen-only">
+            <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+            <button v-for="skill in otPlanDeleted" :key="skill.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="setOtSkillHidden(skill, false)">
+              <i class="pi pi-undo" aria-hidden="true" /> {{ skill.symbol }}
+            </button>
+          </div>
+          <p v-if="otPlan.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+          <template v-else-if="otPlanDomains.length">
+            <div class="rx-ot-intro"><EditableText :model-value="otIntro" block multiline @update:modelValue="setOtIntro" /></div>
+            <div v-for="domain in otPlanDomains" :key="domain.key" class="rx-ot-domain">
+              <h4 class="rx-ot-domain-title">{{ $t("ereport.ot_plan_domain", { type: domain.title }) }}</h4>
+              <div v-for="skill in domain.skills" :key="skill.key" class="rx-ot-skill">
+                <div class="rx-ot-ltg">
+                  <span class="rx-ot-bullet" aria-hidden="true">•</span>
+                  <b class="ltr">{{ skill.symbol }}:</b>
+                  <EditableText :model-value="skill.goals[0]?.general_goal ?? ''" block multiline :placeholder="$t('ablls_ui.long_term_goal')"
+                    @update:modelValue="setOtGeneralGoal(skill, $event)" />
+                  <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.delete_row')" :title="$t('ereport.delete_row')"
+                    @click="setOtSkillHidden(skill, true)"><i class="pi pi-times" aria-hidden="true" /></button>
+                </div>
+                <p class="rx-ot-objectives ltr">(objectives):</p>
+                <ul class="rx-ot-goals">
+                  <li v-for="goal in skill.goals" :key="goal.key">
+                    <b class="ltr">{{ skill.symbol }}-{{ goal.number ?? skill.goals.indexOf(goal) + 1 }}:</b>
+                    <EditableText v-model="goal.goal" block multiline :placeholder="$t('ablls_ui.sub_goals')" @update:modelValue="touchOtPlan()" />
+                    <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
+                      @click="removeOtGoal(skill, goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                  </li>
+                </ul>
+                <button type="button" class="rx-plan-control rx-add-point rx-screen-only" @click="addOtGoal(skill)">
+                  <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
+                </button>
+              </div>
+            </div>
+          </template>
+          <p v-else-if="!otPlanDeleted.length" class="rx-empty">{{ $t("ereport.ot_plan_empty") }}</p>
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
+        <!-- Carolina plan: per domain its general goals' sentences and their skills answered - or +- (plan goals), edited here
+             and saved on the server. -->
+        <section v-if="showPlan && carolinaPlan && section.type === CAROLINA && section.group === carolinaSection?.group"
+          v-page="{ key: 'carolina-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
+          :class="{ 'rx-print-hidden': !carolinaPlan.loading && !carolinaPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          <header class="rx-head">
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+            <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+          <h2 class="rx-band">{{ $t("ereport.plan_title") }} · {{ section.label }}</h2>
+          <div v-if="carolinaPlanDeleted.length" class="rx-deleted rx-screen-only">
+            <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+            <button v-for="group in carolinaPlanDeleted" :key="group.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="setCarolinaGroupHidden(group, false)">
+              <i class="pi pi-undo" aria-hidden="true" /> {{ group.code || group.domain }}
+            </button>
+          </div>
+          <p v-if="carolinaPlan.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+          <template v-else-if="carolinaPlanDomains.length">
+            <div v-for="domain in carolinaPlanDomains" :key="domain.key" class="rx-ot-domain">
+              <h4 class="rx-ot-domain-title">• {{ $t("ereport.carolina_plan_domain", { domain: domain.title }) }}</h4>
+              <div v-for="group in domain.groups" :key="group.key" class="rx-ot-skill">
+                <div class="rx-ot-ltg">
+                  <b class="ltr">{{ group.code }} :</b>
+                  <span />
+                  <EditableText :model-value="group.goals[0]?.general_goal ?? ''" block multiline @update:modelValue="setCarolinaSentence(group, $event)" />
+                  <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.delete_row')" :title="$t('ereport.delete_row')"
+                    @click="setCarolinaGroupHidden(group, true)"><i class="pi pi-times" aria-hidden="true" /></button>
+                </div>
+                <p class="rx-ot-objectives ltr">(objectives):</p>
+                <ul class="rx-ot-goals">
+                  <li v-for="goal in group.goals" :key="goal.key">
+                    <b class="ltr">{{ goal.symbol || "ADD" }}:</b>
+                    <EditableText v-model="goal.goal" block multiline :placeholder="$t('ereport.plan_title')" @update:modelValue="touchCarolinaPlan()" />
+                    <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
+                      @click="removeCarolinaGoal(group, goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                  </li>
+                </ul>
+                <button type="button" class="rx-plan-control rx-add-point rx-screen-only" @click="addCarolinaGoal(group)">
+                  <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
+                </button>
+              </div>
+            </div>
+          </template>
+          <p v-else-if="!carolinaPlanDeleted.length" class="rx-empty">{{ $t("ereport.carolina_plan_empty") }}</p>
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
 
@@ -2600,6 +3156,62 @@ function back() {
 .rx-sum-symbol {
   width: 11%;
   text-align: center !important;
+}
+.rx-ot-flow {
+  margin: 0 0 2mm;
+  font-size: 11pt;
+  font-weight: 800;
+  text-align: left;
+}
+.rx-ot-intro {
+  margin: 4mm 0 3mm;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.rx-ot-domain {
+  margin-top: 4mm;
+  break-inside: auto;
+}
+.rx-ot-domain-title {
+  margin: 0 0 2mm;
+  font-size: 10.5pt;
+  font-weight: 800;
+  text-decoration: underline;
+}
+.rx-ot-skill {
+  margin: 0 0 3mm;
+  padding-inline-start: 4mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.rx-ot-ltg,
+.rx-ot-goals li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5mm;
+  line-height: 1.7;
+}
+.rx-ot-ltg > :nth-child(3),
+.rx-ot-goals li > :nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.rx-ot-objectives {
+  margin: 1mm 0;
+  font-weight: 700;
+  text-align: right;
+}
+.rx-ot-goals {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rx-sum-domain {
+  display: block;
+  margin-top: 2px;
+  color: #475569;
+  font-size: 7.5pt;
+  line-height: 1.3;
 }
 .rx-points {
   margin: 0;

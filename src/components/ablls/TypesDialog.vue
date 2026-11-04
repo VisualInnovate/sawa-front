@@ -1,6 +1,7 @@
 <script setup>
 // Ablls OT: add, rename and delete its domain types. Every type keeps the long-term goal + sub goals inputs.
-// A type that still has domains cannot be deleted (the server refuses too).
+// A type that still has domains cannot be deleted (the server refuses too). Each type has an optional flow-chart name:
+// the name written under its column of the result flow chart (its title when empty).
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
@@ -19,9 +20,16 @@ const perm = (action) => permOf(props.assessment, 'type', action)
 const types = ref([])
 const loading = ref(false)
 const draft = ref('')
+const draftChart = ref('')
+const draftGoal = ref('')
+const draftGoalFemale = ref('')
+// Ablls SP: each type has the long-term goal (a boy's and a girl's wording) its skills used to have; the plan uses it.
+const withGoal = props.assessment.key === 'sp'
+const NAME_TOKEN = '{{name}}'
+const goalOf = (value) => (withGoal ? value.trim() || null : undefined)
 const adding = ref(false)
 const addError = ref('')
-const editing = ref(null) // { id, title, error }
+const editing = ref(null) // { id, title, chart_title, long_term_goal, long_term_goal_female, error }
 const busy = ref(null)
 
 const load = async () => {
@@ -37,7 +45,7 @@ watch(visible, (open) => {
   if (open) load()
 })
 
-const errorOf = (e) => e.response?.data?.errors?.title?.[0] || e.response?.data?.message || e.message
+const errorOf = (e) => e.response?.data?.errors?.title?.[0] || e.response?.data?.errors?.chart_title?.[0] || e.response?.data?.message || e.message
 
 const add = async () => {
   const title = draft.value.trim()
@@ -45,8 +53,14 @@ const add = async () => {
   adding.value = true
   addError.value = ''
   try {
-    await axios.post(url, { title })
+    await axios.post(url, {
+      title, chart_title: draftChart.value.trim() || null,
+      long_term_goal: goalOf(draftGoal.value), long_term_goal_female: goalOf(draftGoalFemale.value),
+    })
     draft.value = ''
+    draftChart.value = ''
+    draftGoal.value = ''
+    draftGoalFemale.value = ''
     await load()
     emit('changed')
   } catch (e) {
@@ -57,14 +71,20 @@ const add = async () => {
 }
 
 const startEdit = (type) => {
-  editing.value = { id: type.id, title: type.title, error: '' }
+  editing.value = {
+    id: type.id, title: type.title, chart_title: type.chart_title || '',
+    long_term_goal: type.long_term_goal || '', long_term_goal_female: type.long_term_goal_female || '', error: '',
+  }
 }
 const saveEdit = async () => {
   const title = editing.value?.title.trim()
   if (!title) return
   busy.value = editing.value.id
   try {
-    await axios.put(`${url}/${editing.value.id}`, { title })
+    await axios.put(`${url}/${editing.value.id}`, {
+      title, chart_title: editing.value.chart_title.trim() || null,
+      long_term_goal: goalOf(editing.value.long_term_goal), long_term_goal_female: goalOf(editing.value.long_term_goal_female),
+    })
     editing.value = null
     await load()
     emit('changed')
@@ -100,10 +120,18 @@ const remove = async (type) => {
     </template>
 
     <div class="td">
-      <p class="td-hint">{{ $t('ablls_ui.types_hint.custom') }}</p>
+      <p class="td-hint">{{ $t(withGoal ? 'ablls_ui.types_hint.custom_sp' : 'ablls_ui.types_hint.custom') }}</p>
+      <p v-if="withGoal" class="td-hint">{{ $t('ablls_ui.type_ltg_hint', { token: NAME_TOKEN }) }}</p>
 
       <form v-if="$can(perm('create'))" class="td-add" @submit.prevent="add">
-        <InputText v-model="draft" :placeholder="$t('ablls_ui.type_title_ph')" :invalid="!!addError" :aria-label="$t('ablls_ui.type')" fluid />
+        <div class="td-fields">
+          <InputText v-model="draft" :placeholder="$t('ablls_ui.type_title_ph')" :invalid="!!addError" :aria-label="$t('ablls_ui.type')" fluid />
+          <InputText v-model="draftChart" :placeholder="$t('ablls_ui.chart_title_ph')" :aria-label="$t('ablls_ui.chart_title')" fluid />
+          <template v-if="withGoal">
+            <Textarea v-model="draftGoal" rows="2" auto-resize :placeholder="$t('ablls_ui.type_ltg_ph', { g: $t('male') })" :aria-label="$t('ablls_ui.type_ltg')" fluid />
+            <Textarea v-model="draftGoalFemale" rows="2" auto-resize :placeholder="$t('ablls_ui.type_ltg_ph', { g: $t('female') })" :aria-label="$t('ablls_ui.type_ltg')" fluid />
+          </template>
+        </div>
         <Button type="submit" icon="pi pi-plus" :label="$t('ablls_ui.add_item')" :disabled="!draft.trim()" :loading="adding" data-no-request-spinner />
       </form>
       <small v-if="addError" class="ab-error">{{ addError }}</small>
@@ -119,7 +147,14 @@ const remove = async (type) => {
         <li v-for="type in types" :key="type.id" class="td-item">
           <template v-if="editing?.id === type.id">
             <form class="td-edit" @submit.prevent="saveEdit">
-              <InputText v-model="editing.title" :invalid="!!editing.error" :aria-label="$t('ablls_ui.type')" fluid autofocus />
+              <div class="td-fields">
+                <InputText v-model="editing.title" :invalid="!!editing.error" :aria-label="$t('ablls_ui.type')" fluid autofocus />
+                <InputText v-model="editing.chart_title" :placeholder="$t('ablls_ui.chart_title_ph')" :aria-label="$t('ablls_ui.chart_title')" fluid />
+                <template v-if="withGoal">
+                  <Textarea v-model="editing.long_term_goal" rows="2" auto-resize :placeholder="$t('ablls_ui.type_ltg_ph', { g: $t('male') })" :aria-label="$t('ablls_ui.type_ltg')" fluid />
+                  <Textarea v-model="editing.long_term_goal_female" rows="2" auto-resize :placeholder="$t('ablls_ui.type_ltg_ph', { g: $t('female') })" :aria-label="$t('ablls_ui.type_ltg')" fluid />
+                </template>
+              </div>
               <Button type="submit" icon="pi pi-check" text rounded :aria-label="$t('save')" :loading="busy === type.id" data-no-request-spinner />
               <Button type="button" icon="pi pi-times" text rounded severity="secondary" :aria-label="$t('cancel')" @click="editing = null" />
             </form>
@@ -127,7 +162,21 @@ const remove = async (type) => {
           </template>
           <template v-else>
             <i class="pi pi-tag td-icon" aria-hidden="true" />
-            <span class="td-title">{{ type.title }}</span>
+            <span class="td-title">
+              {{ type.title }}
+              <small class="td-chart" :class="{ 'is-empty': !type.chart_title }">
+                <i class="pi pi-chart-bar" aria-hidden="true" />
+                {{ $t('ablls_ui.chart_title') }}: {{ type.chart_title || $t('ablls_ui.chart_title_same') }}
+              </small>
+              <small v-if="withGoal" class="td-chart" :class="{ 'is-empty': !type.long_term_goal }">
+                <i class="pi pi-flag" aria-hidden="true" />
+                {{ $t('ablls_ui.type_ltg') }}: {{ type.long_term_goal || $t('ablls_ui.no_ltg') }}
+              </small>
+              <small v-if="withGoal && type.long_term_goal_female" class="td-chart">
+                <i class="pi pi-flag" aria-hidden="true" />
+                {{ $t('female') }}: {{ type.long_term_goal_female }}
+              </small>
+            </span>
             <span class="td-count">{{ $t('ablls_ui.domains_n', { n: type.categories_count ?? 0 }) }}</span>
             <Button v-if="$can(perm('edit'))" icon="pi pi-pencil" text rounded size="small" severity="secondary"
               v-tooltip.top="$t('edit')" :aria-label="$t('edit')" @click="startEdit(type)" />
@@ -168,6 +217,24 @@ const remove = async (type) => {
 }
 .td-edit {
   flex: 1;
+}
+.td-fields {
+  display: grid;
+  flex: 1;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.td-chart {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  color: var(--sawa-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.td-chart.is-empty {
+  font-style: italic;
 }
 .td-list {
   display: grid;

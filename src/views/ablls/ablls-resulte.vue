@@ -13,7 +13,8 @@
     <div class="rxs-pages">
       <ResultSheet :label="label" :date="approval?.date" :child-name="approval?.child?.name">
         <template v-if="mainSquares.length">
-          <AbllsFlowChart :tests="[{ result: mainSquares }]" />
+          <AbllsSpChart v-if="assessmentOf($route).key === 'sp'" :tests="[{ result: mainSquares }]" />
+          <AbllsFlowChart v-else :tests="[{ result: mainSquares }]" />
         </template>
         <p v-else class="rx-empty">{{ loading ? $t("loading") : $t("ereport.no_result_data") }}</p>
       </ResultSheet>
@@ -28,11 +29,12 @@ import { apiOf, assessmentOf } from "@/components/ablls/assessment";
 import DeleteEvaluationButton from "@/components/evaluation/DeleteEvaluationButton.vue";
 import AbleAnswerEditor from "@/components/ablls/AbleAnswerEditor.vue";
 import AbllsFlowChart from "@/components/reports/AbllsFlowChart.vue";
+import AbllsSpChart from "@/components/reports/AbllsSpChart.vue";
 import ResultSheet from "@/components/reports/ResultSheet.vue";
 import { typeLabel } from "@/components/reports/reportUtils";
 export default {
   name: 'SquareGrid',
-  components: { ApprovalBanner, AbleAnswerEditor, AbllsFlowChart, DeleteEvaluationButton, ResultSheet },
+  components: { ApprovalBanner, AbleAnswerEditor, AbllsFlowChart, AbllsSpChart, DeleteEvaluationButton, ResultSheet },
   data() {
     return {
       mainSquares: [],

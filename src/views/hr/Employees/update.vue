@@ -3,7 +3,7 @@
 // together in two requests; leaving with unsaved changes asks first.
 import axios from "axios";
 import moment from "moment";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave, useRoute } from "vue-router";
 import { useToast } from "primevue/usetoast";
@@ -40,6 +40,10 @@ const options = ref({ shifts: [], positions: [], treatments: [], skills: [], dep
 
 // Role, salary and type change only with «employees edit» («doctor edit» keeps them).
 const canEditJob = computed(() => can("employees edit"));
+// The personal info and job details: «employees edit» / «doctor edit»; the «التخصص والتقييمات» tab: «employee specialty edit».
+// The tab the editor may not change is shown read-only (the server keeps it too).
+const canEditMain = computed(() => can("employees edit") || can("doctor edit"));
+const canEditSpecialty = computed(() => can("employee specialty edit"));
 const types = computed(() => employeeTypes(t));
 const evaluationGroups = computed(() => evaluationTypeGroups(t));
 const roles = computed(() => options.value.roles.filter((role) => !role.is_locked || isAdmin()));
@@ -136,17 +140,19 @@ function body() {
   if (e.type) form.append("type", e.type);
   if (e.role) form.append("role", e.role);
   if (canEditJob.value) form.append("extra_roles", extraRolesValue(e));
-  // Always sent: an empty value clears the substitutes.
-  form.append("substitute_ids", e.substitute_ids ?? []);
-  // Always sent too: an empty value clears the work types.
-  form.append("work_types", workTypesValue(e.work_types));
-  if (Number(e.type) === 2) {
-    form.append("age_from_months", e.age_from_months ?? "");
-    form.append("age_to_months", e.age_to_months ?? "");
+  // The specialty tab's fields, only for whoever may change them.
+  if (canEditSpecialty.value) {
+    // Always sent: an empty value clears the substitutes / the work types.
+    form.append("substitute_ids", e.substitute_ids ?? []);
+    form.append("work_types", workTypesValue(e.work_types));
+    if (Number(e.type) === 2) {
+      form.append("age_from_months", e.age_from_months ?? "");
+      form.append("age_to_months", e.age_to_months ?? "");
+    }
+    if (e.evaluation) form.append("evaluations", e.evaluation);
+    if (e.treatments) form.append("treatments", e.treatments);
+    if (e.skills) form.append("skills", e.skills);
   }
-  if (e.evaluation) form.append("evaluations", e.evaluation);
-  if (e.treatments) form.append("treatments", e.treatments);
-  if (e.skills) form.append("skills", e.skills);
   if (e.department) form.append("department_id", e.department);
   if (e.file) form.append("image", e.file);
   return form;
@@ -154,8 +160,8 @@ function body() {
 
 // Which tab holds each field, to open the first one with an error.
 const FIELD_TABS = {
-  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "extra_roles", "department_id", "substitute_ids", "work_types"],
-  therapist: ["skills", "evaluations", "treatments", "age_from_months", "age_to_months"],
+  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "extra_roles", "department_id"],
+  therapist: ["skills", "evaluations", "treatments", "age_from_months", "age_to_months", "substitute_ids", "work_types"],
 };
 const err = (key) => errors.value?.[key];
 const tabOf = (field) => Object.keys(FIELD_TABS).find((name) => FIELD_TABS[name].includes(field.split(".")[0])) ?? "personal";
@@ -189,10 +195,6 @@ function discard() {
   errors.value = {};
 }
 
-// A therapist-only tab is left when the kind changes away from therapist.
-watch(therapist, (value) => {
-  if (!value && tab.value === "therapist") tab.value = "job";
-});
 
 const onBeforeUnload = (event) => {
   if (!dirty.value) return;
@@ -247,7 +249,7 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
     <form v-else @submit.prevent="save">
       <EmployeeHero :name="employee.name" :title="employee.title" :image="employee.image"
         :type-name="employeeTypeName(t, employee.type)" :role-name="nameOf(options.roles, employee.role, 'name')"
-        :facts="facts" :image-error="err('image')" editable @image="setImage" />
+        :facts="facts" :image-error="err('image')" :editable="canEditMain" @image="setImage" />
 
       <div class="sawa-card employee-card">
         <Tabs v-model:value="tab" scrollable>
@@ -260,13 +262,16 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
               <i class="pi pi-briefcase mx-1" />{{ $t("job_details") }}
               <i v-if="tabsWithErrors.has('job')" class="pi pi-exclamation-circle tab-error" />
             </Tab>
-            <Tab v-if="therapist" value="therapist">
+            <!-- Every employee: work types and substitutes; therapists also skills, treatments, evaluations and ages. -->
+            <Tab value="therapist">
               <i class="pi pi-heart mx-1" />{{ $t("emp.therapist_tab") }}
               <i v-if="tabsWithErrors.has('therapist')" class="pi pi-exclamation-circle tab-error" />
             </Tab>
           </TabList>
           <TabPanels>
             <TabPanel value="personal">
+              <Message v-if="!canEditMain" severity="info" :closable="false" class="mb-3">{{ $t("emp.read_only_tab") }}</Message>
+              <fieldset :disabled="!canEditMain" class="employee-lock">
               <div class="employee-grid">
                 <EmployeeField :label="$t('employee_name')" for="emp-name" required :error="err('name')">
                   <InputText id="emp-name" v-model="employee.name" :invalid="Boolean(err('name'))" />
@@ -297,9 +302,12 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                     showButtonBar fluid :maxDate="new Date()" :invalid="Boolean(err('date_of_birth'))" />
                 </EmployeeField>
               </div>
+              </fieldset>
             </TabPanel>
 
             <TabPanel value="job">
+              <Message v-if="!canEditMain" severity="info" :closable="false" class="mb-3">{{ $t("emp.read_only_tab") }}</Message>
+              <fieldset :disabled="!canEditMain" class="employee-lock">
               <div class="employee-grid">
                 <EmployeeField :label="$t('position_name')" for="emp-position" required :error="err('position_id')">
                   <Select v-model="employee.position_id" inputId="emp-position" :options="options.positions" optionLabel="title"
@@ -338,6 +346,14 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                   <MultiSelect v-model="employee.department" inputId="emp-department" :options="options.departments"
                     optionLabel="title" optionValue="id" filter display="chip" :invalid="Boolean(err('department_id'))" />
                 </EmployeeField>
+              </div>
+              </fieldset>
+            </TabPanel>
+
+            <TabPanel value="therapist">
+              <Message v-if="!canEditSpecialty" severity="info" :closable="false" class="mb-3">{{ $t("emp.read_only_tab") }}</Message>
+              <fieldset :disabled="!canEditSpecialty" class="employee-lock">
+              <div class="employee-grid">
                 <!-- Optional: inclusion, day and/or clinics (evening); inclusion and day exclude each other. -->
                 <EmployeeField :label="$t('work_types')" for="work-types" :error="err('work_types')">
                   <WorkTypeSelect v-model="employee.work_types" />
@@ -346,11 +362,7 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                 <EmployeeField :label="$t('substitute_employee')" for="substitute-employee" :error="err('substitute_ids')" wide>
                   <SubstituteSelect v-model="employee.substitute_ids" :exclude="employee.user_id" />
                 </EmployeeField>
-              </div>
-            </TabPanel>
-
-            <TabPanel v-if="therapist" value="therapist">
-              <div class="employee-grid">
+                <template v-if="therapist">
                 <EmployeeField :label="$t('skill_name')" for="emp-skills" :error="err('skills')">
                   <MultiSelect v-model="employee.skills" inputId="emp-skills" :options="options.skills" optionLabel="name"
                     optionValue="id" filter display="chip" :invalid="Boolean(err('skills'))" />
@@ -372,7 +384,9 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                     {{ (err('age_from_months') || err('age_to_months'))[0] }}
                   </small>
                 </div>
+                </template>
               </div>
+              </fieldset>
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -498,5 +512,16 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
   .employee-actions :deep(.p-button) {
     flex: 1;
   }
+}
+/* A tab the editor may not change: shown, not editable (PrimeVue fields ignore a disabled fieldset). */
+.employee-lock {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.employee-lock:disabled {
+  opacity: 0.7;
+  pointer-events: none;
 }
 </style>
