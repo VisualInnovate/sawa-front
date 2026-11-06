@@ -30,11 +30,17 @@ const evaluationRoutes = [
     meta: { permission: ["evaluations edit"] },
     component: Edit,
   },
+  // «توزيع التقييمات»: the department's head / deputy gives the evaluations asked without an appointment.
+  {
+    path: 'evaluation-distribution',
+    name: 'evaluation-distribution',
+    component: () => import("../views/evaluations/Distribution.vue")
+  },
   // «طلبات اعتماد التقييمات»: every evaluation's result waits for the management.
   {
     path: 'evaluation-approvals',
     name: 'evaluation-approvals',
-    meta: { permission: ["evaluation approval list", "evaluation approval edit"] },
+    // The approval flow's approvers (a head, who asked) reach it without these: the list shows what waits for them.
     component: () => import("../views/evaluations/Approvals.vue")
   },
   // Evaluation reports: children with finished evaluations -> choose evaluations -> report editor (full page, outside the layout).

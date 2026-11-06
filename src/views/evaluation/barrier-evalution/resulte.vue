@@ -5,7 +5,7 @@
     <ApprovalBanner ref="approvalBanner" :child-id="$route.params.id" :type="3" @loaded="approval = $event" />
     <div class="flex flex-wrap justify-end gap-2 print:hidden">
       <!-- Before approval the answers can still be edited (pending or rejected). -->
-      <BarrierAnswerEditor v-if="approval && approval.status !== 'approved'" :evaluation-id="approval.key.slice(1)" @saved="answersEdited" />
+      <BarrierAnswerEditor v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" :evaluation-id="approval.key.slice(1)" @saved="answersEdited" />
       <!-- Deletes the child's latest barriers evaluation (the table's); the chart then shows the others. -->
       <DeleteEvaluationButton v-if="answersTable.evaluation?.id" :evaluation-id="answersTable.evaluation.id" @deleted="reload" />
     </div>

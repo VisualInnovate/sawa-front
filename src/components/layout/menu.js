@@ -22,6 +22,9 @@ export const buildMenu = () => [
       { label: "doctors", to: { name: "doctors" }, perm: "doctor list" },
       { label: "permissions", to: { name: "permissions" }, perm: "permissions list" },
       { label: "roles", to: { name: "Roles" }, perm: "roles list" },
+      { label: "org.menu", to: { name: "org-structure" }, perm: ["org structure list", "org structure edit"] },
+      { label: "org.log_menu", to: { name: "structure-log" }, perm: "structure log list" },
+      { label: "apf.flows_title", to: { name: "approval-flows" }, perm: ["approval flows list", "approval flows edit", "org working hours edit"] },
     ],
   },
   {
@@ -29,6 +32,8 @@ export const buildMenu = () => [
     icon: "mdi-human-male-boy",
     label: "parents",
     children: [
+      { label: "rcp.menu", to: { name: "reception" }, perm: ["parents create", "parent registration review edit"] },
+      { label: "adm.menu", to: { name: "admissions" }, perm: ["admissions list", "parent contracts create"] },
       { label: "parents", to: { name: "Parents" }, perm: "parents list" },
       { label: "meetings", to: { name: "parent-meeting" }, perm: "parent meetings list" },
       { label: "pfb.menu", to: { name: "admin-parent-feedback" }, perm: "parent feedback list" },
@@ -61,6 +66,14 @@ export const buildMenu = () => [
     to: { name: "approvals" },
     show: () => approver.is,
   },
+  // «معاملاتي المعلّقة»: what waits for my approval in the approval flows, and my delegations.
+  {
+    key: "approvals-inbox",
+    icon: "mdi-inbox-arrow-down-outline",
+    label: "apf.inbox",
+    to: { name: "approvals-inbox" },
+    show: () => !onlyBusSupervisor(),
+  },
   // The candidates sent to a department head for a decision and an interview (shown to HR and to the heads).
   {
     key: "my-interviews",
@@ -91,6 +104,7 @@ export const buildMenu = () => [
     label: "evaluations",
     children: [
       { label: "ea_title", to: { name: "evaluation-approvals" }, perm: ["evaluation approval list", "evaluation approval edit"], badge: "evaluation_approvals" },
+      { label: "ewf.distribution", to: { name: "evaluation-distribution" }, perm: ["evaluation approval edit", "evaluation approval list"] },
       { label: "age_ranges.evaluation_page", to: { name: "evaluation-age-ranges" }, perm: "evaluation age ranges edit" },
       { label: "eval_desc.page", to: { name: "evaluation-descriptions" }, perm: "evaluation descriptions edit" },
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },
@@ -197,6 +211,7 @@ export const buildMenu = () => [
       { label: "area", to: { name: "regin" }, perm: "region list" },
       { label: "veciles", to: { name: "transportation" }, perm: "vehicle list" },
       { label: "student_tans", to: { name: "student-transportation" }, perm: "student transportation list" },
+      { label: "trq.menu", to: { name: "transport-requests" }, perm: ["transport requests list", "transport requests create"] },
       { label: "transportation_schedule", to: { name: "transportation-schedule" }, perm: "transportation schedule list" },
       { label: "tr.weekly_title", to: { name: "transport-weekly-trips" }, perm: "transportation schedule list" },
       { label: "tr.log_title", to: { name: "transport-trip-log" }, perm: ["child list", "parents list", "transportation schedule list"] },

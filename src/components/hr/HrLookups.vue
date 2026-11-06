@@ -40,6 +40,18 @@ async function loadReviewers() {
   }
 }
 
+// The departments a specialty may belong to: their head reviews its candidates by default.
+const departments = ref([]);
+const departmentName = (id) => departments.value.find((d) => d.id === id)?.title ?? "—";
+async function loadDepartments() {
+  if (departments.value.length) return;
+  try {
+    departments.value = (await axios.get("api/department")).data.data ?? [];
+  } catch {
+    departments.value = [];
+  }
+}
+
 const ar = computed(() => locale.value === "ar");
 const typeOptions = computed(() => TYPES.map((value) => ({ value, label: t(`hrset.list_${value}`) })));
 const scopeOptions = computed(() => [
@@ -73,7 +85,7 @@ async function load() {
 function openNew() {
   form.value = {
     type: type.value, country: type.value === "bank" ? props.country : null, name_ar: "", name_en: "", is_active: true,
-    meta: type.value === "document" ? { required: true, for: "all", accept: "any", multiple: false } : type.value === "specialty" ? { specialist: false, reviewer_id: null }
+    meta: type.value === "document" ? { required: true, for: "all", accept: "any", multiple: false } : type.value === "specialty" ? { specialist: false, reviewer_id: null, department_id: null }
       : type.value === "onboarding" ? { days: 0 } : type.value === "bank" ? { code: "" } : null,
   };
   dialog.value = true;
@@ -82,7 +94,7 @@ function openNew() {
 function openEdit(row) {
   form.value = JSON.parse(JSON.stringify(row));
   if (row.type === "document") form.value.meta = { required: false, for: "all", accept: "any", multiple: false, ...(row.meta ?? {}) };
-  if (row.type === "specialty") form.value.meta = { specialist: false, reviewer_id: null, ...(row.meta ?? {}) };
+  if (row.type === "specialty") form.value.meta = { specialist: false, reviewer_id: null, department_id: null, ...(row.meta ?? {}) };
   if (row.type === "onboarding") form.value.meta = { days: 0, ...(row.meta ?? {}) };
   if (row.type === "bank") form.value.meta = { code: "", ...(row.meta ?? {}) };
   dialog.value = true;
@@ -130,6 +142,7 @@ async function remove() {
 onMounted(() => {
   load();
   loadReviewers();
+  loadDepartments();
 });
 </script>
 
@@ -157,6 +170,9 @@ onMounted(() => {
       </Column>
       <Column v-if="type === 'specialty'" :header="$t('hrset.specialist')">
         <template #body="{ data }"><i :class="data.meta?.specialist ? 'pi pi-check text-green-600' : 'pi pi-minus text-color-secondary'" /></template>
+      </Column>
+      <Column v-if="type === 'specialty'" :header="$t('org.department')">
+        <template #body="{ data }">{{ data.meta?.department_id ? departmentName(data.meta.department_id) : "—" }}</template>
       </Column>
       <Column v-if="type === 'specialty'" :header="$t('crv.default_head')">
         <template #body="{ data }">{{ data.meta?.reviewer_id ? reviewerName(data.meta.reviewer_id) : "—" }}</template>
@@ -211,6 +227,12 @@ onMounted(() => {
         <div v-if="form.type === 'specialty'" class="flex items-center gap-2">
           <Checkbox v-model="form.meta.specialist" inputId="lk-specialist" binary />
           <label for="lk-specialist">{{ $t("hrset.specialist_hint") }}</label>
+        </div>
+        <div v-if="form.type === 'specialty'" class="flex flex-column gap-1">
+          <label for="lk-department">{{ $t("org.department") }}</label>
+          <Select inputId="lk-department" v-model="form.meta.department_id" :options="departments" optionValue="id" optionLabel="title" filter showClear
+            :placeholder="$t('org.pick_department')" />
+          <small class="text-color-secondary">{{ $t("org.specialty_department_hint") }}</small>
         </div>
         <div v-if="form.type === 'specialty'" class="flex flex-column gap-1">
           <label for="lk-reviewer">{{ $t("crv.default_head") }}</label>

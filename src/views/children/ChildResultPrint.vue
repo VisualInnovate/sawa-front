@@ -4,12 +4,14 @@ import Chart from 'chart.js/auto';
 import moment from "moment";
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
+import ApprovalBanner from '@/components/evaluations/ApprovalBanner.vue';
 
 
 export default {
 
   data() {
     return {
+      printLocked: false,
       search: '',
       headers: [],
       result: [],
@@ -44,7 +46,23 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
+    // Nothing is printed before the management approves the result (EvaluationApproval on the server).
+    async isApproved() {
+      try {
+        const { data } = await axios.get('api/evaluation-approvals/lookup', {
+          params: { child: this.$route.params.child_id, side_evaluation: this.$route.params.evaluation_id },
+        });
+        // Printing is allowed from the first approval on (the approval flow says when: printable).
+        return data.data?.printable ?? data.data?.status === 'approved';
+      } catch {
+        return false;
+      }
+    },
     async print() {
+      if (!(await this.isApproved())) {
+        this.printLocked = true;
+        return;
+      }
       // await axios.post("/api/child/results",{
       //     sideprofile_id:this.$route.params.sideProfile_id,child_id:this.$route.params.child_id
       //   }).then(res => {
@@ -81,7 +99,8 @@ export default {
   },
   components: {
     Dialog,
-    Button
+    Button,
+    ApprovalBanner
   },
 
   beforeMount() {
@@ -120,7 +139,12 @@ export default {
 
 <template>
   <Message v-if="alert_text != null" severity="success" class="no-print">{{ alert_text }}</Message>
-  <div class="back-back">
+  <div class="no-print"><ApprovalBanner :child-id="$route.params.child_id" :side-evaluation-id="$route.params.evaluation_id" /></div>
+  <div v-if="printLocked" class="no-print p-6 text-center">
+    <Message severity="warn">{{ $t('ea_print_locked') }} — {{ $t('ea_print_locked_hint') }}</Message>
+    <Button class="mt-4" :label="$t('back')" icon="pi pi-arrow-right" text @click="goBack" />
+  </div>
+  <div v-else class="back-back">
     <div class="back">
       <div class="text-center"><img :src="$siteLogo()" style="width:130px; "></div>
       <div><p class="w-[100%] text-h4 text-center ma-4">{{ print_results[0]?.evaluation_title }}</p></div>

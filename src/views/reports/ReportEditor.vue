@@ -46,6 +46,8 @@ import { ageText as sensoryAge, formName as sensoryFormName } from "@/views/eval
 import TransitionChart from "@/components/reports/TransitionChart.vue";
 import SideProfileTable from "@/components/reports/SideProfileTable.vue";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
+import CombinedReportSend from "@/components/reports/CombinedReportSend.vue";
+import PlanApproval from "@/components/reports/PlanApproval.vue";
 import { TRACKING_COLUMNS, columnDate, isDate, showDate } from "@/utils/trackingColumns";
 import {
   BARRIER, CAROLINA, ELM, MAX_PER_GROUP, MCHAT, MILESTONE, QFBA, SENSORY, SIDE_PROFILE, TRANSITION, ageOn, ageWords, dateParts, dmy, firstName, groupItems, isAbllsFlow,
@@ -260,6 +262,12 @@ function touchReport() {
   if (!savedReport.value.id) return;
   clearTimeout(autosaveTimer);
   autosaveTimer = setTimeout(() => saveReport(), 1500);
+}
+
+// «إرسال للأهل»: the report is saved first (a new one gets its id), then its departments are offered.
+async function savedIdForSending() {
+  if (!savedReport.value.id || savedReport.value.dirty) await saveReport();
+  return savedReport.value.id;
 }
 
 // One save at a time, so a new report is created once.
@@ -691,6 +699,7 @@ async function loadPlan() {
     plan.value.hidden = [...(data.plan?.hidden ?? [])];
     plan.value.saved = Boolean(data.plan);
     plan.value.savedAt = data.plan?.updated_at ?? null;
+    plan.value.approval = data.plan?.approval ?? null;
   } catch {
     plan.value.goals = planFromSummary(test);
   } finally {
@@ -774,6 +783,7 @@ async function savePlan() {
     plan.value.saved = true;
     plan.value.dirty = false;
     plan.value.savedAt = data.plan.updated_at;
+    plan.value.approval = data.plan.approval ?? null;
     // The tracking reads the saved plans.
     if (showTracking.value) loadTracking();
   } catch {
@@ -810,6 +820,7 @@ async function loadQfbaPlan() {
     qfbaPlan.value.hidden = [...(data.plan?.hidden ?? [])];
     qfbaPlan.value.saved = Boolean(data.plan);
     qfbaPlan.value.savedAt = data.plan?.updated_at ?? null;
+    qfbaPlan.value.approval = data.plan?.approval ?? null;
   } catch {
     qfbaPlan.value.goals = qfbaPlanFromResult(test, lang);
   } finally {
@@ -869,6 +880,7 @@ async function saveQfbaPlan() {
     qfbaPlan.value.saved = true;
     qfbaPlan.value.dirty = false;
     qfbaPlan.value.savedAt = data.plan.updated_at;
+    qfbaPlan.value.approval = data.plan.approval ?? null;
     if (showTracking.value) loadTracking();
   } catch {
     qfbaPlan.value.error = true;
@@ -919,6 +931,7 @@ async function loadOtPlan() {
     otPlan.value.hidden = [...(data.plan?.hidden ?? [])];
     otPlan.value.saved = Boolean(data.plan);
     otPlan.value.savedAt = data.plan?.updated_at ?? null;
+    otPlan.value.approval = data.plan?.approval ?? null;
   } catch {
     otPlan.value.goals = otPlanFromResult(test);
   } finally {
@@ -998,6 +1011,7 @@ async function saveOtPlan() {
     otPlan.value.saved = true;
     otPlan.value.dirty = false;
     otPlan.value.savedAt = data.plan.updated_at;
+    otPlan.value.approval = data.plan.approval ?? null;
   } catch {
     otPlan.value.error = true;
   } finally {
@@ -1033,6 +1047,7 @@ async function loadCarolinaPlan() {
     carolinaPlan.value.hidden = [...(data.plan?.hidden ?? [])];
     carolinaPlan.value.saved = Boolean(data.plan);
     carolinaPlan.value.savedAt = data.plan?.updated_at ?? null;
+    carolinaPlan.value.approval = data.plan?.approval ?? null;
   } catch {
     carolinaPlan.value.goals = carolinaPlanFromResult(test);
   } finally {
@@ -1101,6 +1116,7 @@ async function saveCarolinaPlan() {
     carolinaPlan.value.saved = true;
     carolinaPlan.value.dirty = false;
     carolinaPlan.value.savedAt = data.plan.updated_at;
+    carolinaPlan.value.approval = data.plan.approval ?? null;
   } catch {
     carolinaPlan.value.error = true;
   } finally {
@@ -1364,6 +1380,7 @@ function back() {
             </div>
           </Popover>
           <Button v-if="report" :label="$t('ereport.reset')" icon="pi pi-refresh" severity="secondary" variant="text" @click="resetEdits" />
+          <CombinedReportSend v-if="report" :report-id="savedReport.id" :before-open="savedIdForSending" />
           <Button :label="$t('ereport.print')" icon="pi pi-print" :disabled="!report" data-no-request-spinner @click="print" />
         </div>
       </div>
@@ -1419,6 +1436,7 @@ function back() {
               <small>{{ plan.error ? $t("ereport.save_failed") : plan.dirty || !plan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="plan.saving" data-no-request-spinner @click="savePlan" />
+            <PlanApproval v-if="plan.approval" v-model:approval="plan.approval" :evaluationId="plan.evaluationId" :dirty="plan.dirty || !plan.saved" />
           </div>
 
           <div v-if="qfbaPlan && !qfbaPlan.loading" class="rx-save-group" :class="qfbaPlan.error ? 'is-error' : qfbaPlan.dirty || !qfbaPlan.saved ? 'is-dirty' : 'is-saved'">
@@ -1428,6 +1446,7 @@ function back() {
               <small>{{ qfbaPlan.error ? $t("ereport.save_failed") : qfbaPlan.dirty || !qfbaPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="qfbaPlan.saving" data-no-request-spinner @click="saveQfbaPlan" />
+            <PlanApproval v-if="qfbaPlan.approval" v-model:approval="qfbaPlan.approval" :evaluationId="qfbaPlan.evaluationId" :dirty="qfbaPlan.dirty || !qfbaPlan.saved" />
           </div>
 
           <div v-if="otPlan && !otPlan.loading" class="rx-save-group" :class="otPlan.error ? 'is-error' : otPlan.dirty || !otPlan.saved ? 'is-dirty' : 'is-saved'">
@@ -1437,6 +1456,7 @@ function back() {
               <small>{{ otPlan.error ? $t("ereport.save_failed") : otPlan.dirty || !otPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="otPlan.saving" data-no-request-spinner @click="saveOtPlan()" />
+            <PlanApproval v-if="otPlan.approval" v-model:approval="otPlan.approval" :evaluationId="otPlan.evaluationId" :dirty="otPlan.dirty || !otPlan.saved" />
           </div>
 
           <div v-if="carolinaPlan && !carolinaPlan.loading" class="rx-save-group" :class="carolinaPlan.error ? 'is-error' : carolinaPlan.dirty || !carolinaPlan.saved ? 'is-dirty' : 'is-saved'">
@@ -1446,6 +1466,7 @@ function back() {
               <small>{{ carolinaPlan.error ? $t("ereport.save_failed") : carolinaPlan.dirty || !carolinaPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="carolinaPlan.saving" data-no-request-spinner @click="saveCarolinaPlan()" />
+            <PlanApproval v-if="carolinaPlan.approval" v-model:approval="carolinaPlan.approval" :evaluationId="carolinaPlan.evaluationId" :dirty="carolinaPlan.dirty || !carolinaPlan.saved" />
           </div>
 
           <div v-if="tracking && !tracking.loading && tracking.plans.length" class="rx-save-group"

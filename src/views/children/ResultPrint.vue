@@ -1,5 +1,6 @@
 <template>
     
+    <Message v-if="skipped" severity="warn" class="no-print m-4">{{ $t('ea_print_skipped', { count: skipped }) }}</Message>
     <div class="back-back">
       <div  class="back">
         <div class="text-center"><img :src="$siteLogo()" style="width:130px; "></div>
@@ -50,6 +51,7 @@ import axios from 'axios'
         child_Name:'',
         birth_date:'',
         title:'',
+        skipped: 0,
       }
     },
     computed: {
@@ -95,11 +97,13 @@ import axios from 'axios'
           sideprofile_id:this.$route.params.sideProfile_id,child_id:this.$route.params.child_id
         }).then(res => {
           
-       this.desserts=res.data.evaluation_results
-       this.title=res.data.evaluation_results[0].side_profile_title
-       console.log(res)
-      
+       // Only results the management approved are printed (EvaluationApproval on the server).
+       const all = res.data.evaluation_results || []
+       this.desserts = all.filter((row) => row.approval_status === 'approved')
+       this.skipped = all.length - this.desserts.length
+       this.title = all[0]?.side_profile_title ?? ''
       })
+      if (!this.desserts.length) return
       setTimeout(() => {
         window.print();
       }, 500)

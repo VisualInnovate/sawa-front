@@ -4,7 +4,7 @@
     <Toast />
     <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.id" @loaded="approval = $event" />
     <!-- Before approval the answers can still be edited (pending or rejected). -->
-    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+    <div v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" class="flex justify-end mb-3 print:hidden">
       <CarolinaAnswerEditor :evaluation-id="$route.params.id" @saved="answersEdited" />
     </div>
     <div class="flex justify-between items-center mb-6 print:hidden">

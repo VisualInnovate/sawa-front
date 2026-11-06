@@ -7,6 +7,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import { loadApprover } from "../../../utils/approver";
+import FlowDeadline from "@/components/approvals/FlowDeadline.vue";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -85,6 +86,7 @@ const confirmReject = () => {
             <Tag v-for="b in row.badges" :key="b" :value="$t(`lflow.badge_${b}`)" severity="danger" />
             <Tag v-if="row.leave_setup?.deduct_from === 'salary'" :value="$t('lflow.unpaid')" severity="secondary" />
           </span>
+          <FlowDeadline v-if="row.approval && tab === 'waiting'" :state="row.approval" compact />
         </span>
         <Tag :value="$t(`lflow.stage_${row.stage}`)" :severity="stageSeverity(row.stage)" />
         <template v-if="row.type !== 'leave' && tab === 'waiting'">

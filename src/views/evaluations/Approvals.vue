@@ -1,6 +1,7 @@
 <script setup>
-// «طلبات اعتماد التقييمات»: every evaluation whose result waits for the management, pending first. Its result page
-// opens in a new tab (with the same answer box on it); approve it, or reject it with the reason for the therapist.
+// «طلبات اعتماد التقييمات»: every evaluation whose result waits for approval, pending first. With the approval flow
+// (phase 4) each row shows its status of the nine; «بانتظاري» shows only what the flow waits from me. Its result page
+// opens in a new tab (with the same answer box on it); approve it, or reject it with the reason; send it to the parents.
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -21,11 +22,26 @@ const status = ref("pending");
 const search = ref("");
 const answering = ref(null);
 const deciding = ref(false);
-const statuses = computed(() => [null, "pending", "approved", "rejected"].map((value) => ({ value, label: value ? t(`ea_status_${value}`) : t("sp_all") })));
+const statuses = computed(() => [null, "mine", "pending", "approved", "rejected"].map((value) => ({ value, label: value ? (value === "mine" ? t("ewf.waiting_me") : t(`ea_status_${value}`)) : t("sp_all") })));
 const shown = computed(() => {
   const q = search.value.trim().toLowerCase();
-  return q ? rows.value.filter((row) => [row.child?.name, row.specialist, row.title].some((value) => String(value ?? "").toLowerCase().includes(q))) : rows.value;
+  const list = status.value === "mine" ? rows.value.filter((row) => row.can_act) : rows.value;
+  return q ? list.filter((row) => [row.child?.name, row.specialist, row.title].some((value) => String(value ?? "").toLowerCase().includes(q))) : list;
 });
+const WF_SEVERITY = { pending_first: "warn", first_rejected: "danger", first_approved: "info", second_rejected: "danger", final_approved: "success", sent: "success", auto_sent: "success" };
+const sending = ref(null);
+async function send(row) {
+  sending.value = row.key;
+  try {
+    await axios.post(`api/evaluation-approvals/${row.key}/send`);
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("ewf.sent_done"), life: 2500 });
+    await load();
+  } catch (e) {
+    toast.add({ severity: "error", summary: t("error"), detail: e.response?.data?.message ?? t("mission_error"), life: 3000 });
+  } finally {
+    sending.value = null;
+  }
+}
 const typeName = (row) => (row.type === 1 ? row.title || "Side profile" : typeLabel(row.type, t));
 
 function openResult(row) {
@@ -36,7 +52,7 @@ function openResult(row) {
 async function load() {
   loading.value = true;
   try {
-    const { data } = await axios.get("api/evaluation-approvals", { params: { status: status.value || undefined } });
+    const { data } = await axios.get("api/evaluation-approvals", { params: { status: status.value === "mine" ? "pending" : status.value || undefined } });
     rows.value = data.data;
     canDecide.value = data.can_decide;
   } finally {
@@ -88,7 +104,8 @@ onMounted(load);
       <Column :header="$t('evaluation_date')"><template #body="{ data }"><span class="ltr">{{ data.date }}</span></template></Column>
       <Column :header="$t('status')">
         <template #body="{ data }">
-          <Tag :severity="APPROVAL_SEVERITY[data.status]" :value="$t(`ea_status_${data.status}`)" />
+          <Tag v-if="data.workflow_status" :severity="WF_SEVERITY[data.workflow_status] ?? 'secondary'" :value="$t(`ewf.status_${data.workflow_status}`)" />
+          <Tag v-else :severity="APPROVAL_SEVERITY[data.status]" :value="$t(`ea_status_${data.status}`)" />
           <small v-if="data.status === 'rejected' && data.note" class="block text-red-700 mt-1">{{ data.note }}</small>
           <small v-else-if="data.requested_at" class="block text-slate-500 mt-1 ltr">{{ data.requested_at }}</small>
         </template>
@@ -97,7 +114,9 @@ onMounted(load);
         <template #body="{ data }">
           <div class="flex gap-2">
             <Button size="small" icon="pi pi-external-link" :label="$t('ea_open_result')" variant="outlined" @click="openResult(data)" />
-            <Button v-if="canDecide && data.status === 'pending'" size="small" icon="pi pi-check-square" :label="$t('decision_answer')" @click="answering = data" />
+            <Button v-if="data.can_act ?? (canDecide && data.status === 'pending')" size="small" icon="pi pi-check-square" :label="$t('decision_answer')" @click="answering = data" />
+            <Button v-if="data.workflow_status === 'final_approved'" size="small" icon="pi pi-send" severity="success" :label="$t('ewf.send')"
+              :loading="sending === data.key" @click="send(data)" />
           </div>
         </template>
       </Column>

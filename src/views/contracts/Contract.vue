@@ -226,6 +226,44 @@ function whatsapp() {
   window.open(`https://wa.me/${waPhone(contract.value.recipient_phone)}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
 }
 
+// The signing code: random per contract, sent to the recipient in a message apart from the link (no SMS / WhatsApp
+// service yet). Shown here while it works; a new one replaces it.
+const otp = ref({ data: null, loading: false, busy: false });
+async function loadOtp() {
+  if (contract.value?.status !== "sent" || !canSign.value) return (otp.value.data = null);
+  otp.value.loading = true;
+  try {
+    otp.value.data = (await axios.get(`${API}/${contract.value.id}/code`)).data.data;
+  } catch {
+    otp.value.data = null;
+  } finally {
+    otp.value.loading = false;
+  }
+}
+async function newOtp() {
+  otp.value.busy = true;
+  try {
+    otp.value.data = (await axios.post(`${API}/${contract.value.id}/code`)).data.data;
+  } catch (e) {
+    fail(e);
+  } finally {
+    otp.value.busy = false;
+  }
+}
+async function copyOtp() {
+  try {
+    await navigator.clipboard.writeText(otp.value.data.code);
+    toast.add({ severity: "success", summary: t("con.otp_copied"), life: 2000 });
+  } catch {
+    toast.add({ severity: "warn", summary: t("con.copy_manually"), life: 3000 });
+  }
+}
+function whatsappOtp() {
+  const text = t("con.otp_wa_message", { number: contract.value.number, code: otp.value.data.code, date: dateTime(otp.value.data.expires_at) });
+  window.open(`https://wa.me/${waPhone(contract.value.recipient_phone)}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+}
+watch(() => [contract.value?.id, contract.value?.status], loadOtp);
+
 const dateTime = (iso) => (iso ? new Date(iso).toLocaleString(locale.value === "ar" ? "ar-JO" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) : "");
 const canSign = computed(() => can(PERM.sign));
 // The status in which the academy signs and sends: a parent's draft, an employee's document once approved («ready»).
@@ -339,6 +377,18 @@ const inputType = (name) => (DATES.includes(name) ? "date" : "text");
           <Button size="small" icon="pi pi-link" :label="t('con.new_link')" outlined @click="renewLink" />
           <Button v-if="contract.status === 'sent'" size="small" icon="pi pi-clock" :label="t('con.extend')" text @click="extendLink" />
           <small class="text-color-secondary">{{ t("con.link_once") }}</small>
+        </div>
+        <div v-if="canSign && contract.status === 'sent'" class="cv-otp">
+          <span class="font-bold">{{ t("con.otp_title") }}</span>
+          <template v-if="otp.data">
+            <b class="cv-otp-code" dir="ltr">{{ otp.data.code }}</b>
+            <small>{{ t("con.otp_meta", { date: dateTime(otp.data.expires_at), left: otp.data.attempts_left }) }}</small>
+            <Button size="small" icon="pi pi-copy" :label="t('con.otp_copy')" text @click="copyOtp" />
+            <Button size="small" icon="pi pi-whatsapp" :label="t('con.otp_wa')" severity="success" outlined :disabled="!contract.recipient_phone" @click="whatsappOtp" />
+          </template>
+          <small v-else-if="!otp.loading">{{ t("con.otp_none") }}</small>
+          <Button size="small" icon="pi pi-refresh" :label="t('con.otp_new')" :loading="otp.busy" outlined @click="newOtp" />
+          <small class="w-full text-color-secondary">{{ t("con.otp_hint") }}</small>
         </div>
       </section>
 
@@ -524,6 +574,8 @@ const inputType = (name) => (DATES.includes(name) ? "date" : "text");
 .cv-status-grid small { color: #64748b; }
 .cv-reason { margin: .75rem 0 0; }
 .cv-link-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .9rem; padding-top: .75rem; border-top: 1px solid #e2e8f0; }
+.cv-otp { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .9rem; padding-top: .75rem; border-top: 1px solid #e2e8f0; }
+.cv-otp-code { font-size: 1.4rem; letter-spacing: .3em; padding: .15rem .6rem; border-radius: 8px; background: #f1f5f9; }
 .cv-log { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
 .cv-log li { display: flex; flex-wrap: wrap; gap: .25rem 1rem; padding: .55rem .8rem; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; font-size: .88rem; }
 .cv-saved img { max-height: 70px; max-width: 260px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; padding: 4px; }

@@ -9,6 +9,8 @@ import { useToast } from "primevue/usetoast";
 import DecisionDialog from "@/components/sessions/DecisionDialog.vue";
 import { refreshPendingCounts } from "@/utils/pendingCounts";
 import TrackingDates from "@/components/reports/TrackingDates.vue";
+import FlowDeadline from "@/components/approvals/FlowDeadline.vue";
+import { useRoute } from "vue-router";
 import { TRACKING_COLUMNS, columnDate } from "@/utils/trackingColumns";
 
 const { t } = useI18n();
@@ -39,6 +41,9 @@ async function load() {
     const { data } = await axios.get("api/tracking-approvals", { params: { status: status.value || undefined } });
     rows.value = data.data;
     canDecide.value = data.can_decide;
+  } catch {
+    // Opened from «معاملاتي المعلّقة» without the list's permission: only the tracking it points to.
+    rows.value = [];
   } finally {
     loading.value = false;
   }
@@ -66,7 +71,11 @@ async function decide(answer) {
     deciding.value = false;
   }
 }
-onMounted(load);
+const route = useRoute();
+onMounted(async () => {
+  await load();
+  if (route.query.open) open({ id: Number(route.query.open) });
+});
 </script>
 
 <template>
@@ -89,6 +98,7 @@ onMounted(load);
         <template #body="{ data }">
           <Tag :severity="SEVERITY[data.status]" :value="$t(`ereport.tracking_status_${data.status}`)" />
           <small v-if="data.status === 'rejected' && data.note" class="block text-red-700 mt-1">{{ data.note }}</small>
+          <FlowDeadline v-if="data.status === 'pending' && data.flow" :state="data.flow" compact class="mt-1" />
           <small v-if="data.approver && data.status !== 'pending'" class="block text-slate-500 mt-1">{{ data.approver }} · <span class="ltr">{{ data.decided_at }}</span></small>
         </template>
       </Column>
@@ -103,6 +113,7 @@ onMounted(load);
     <Dialog :visible="!!viewing" modal :header="viewing ? `${$t('ereport.tracking_title')} · ${viewing.child?.name}` : ''" :style="{ width: '76rem' }"
       :breakpoints="{ '1100px': '96vw' }" @update:visible="viewing = null">
       <template v-if="viewing">
+        <FlowDeadline v-if="viewing.flow" :state="viewing.flow" class="mb-3" />
         <p v-if="viewing.status === 'rejected'" class="ta-state is-rejected"><i class="pi pi-times-circle" /> {{ $t("ereport.tracking_rejected_note", { note: viewing.note || "—" }) }}</p>
         <table v-for="group in viewing.groups" :key="group.key" class="ta-table">
           <thead>
@@ -128,7 +139,7 @@ onMounted(load);
       </template>
       <template #footer>
         <Button :label="$t('close')" variant="text" severity="secondary" @click="viewing = null" />
-        <Button v-if="canDecide && viewing?.status === 'pending'" icon="pi pi-check-square" :label="$t('decision_answer')" @click="answering = true" />
+        <Button v-if="viewing?.can_decide && viewing?.status === 'pending'" icon="pi pi-check-square" :label="$t('decision_answer')" @click="answering = true" />
       </template>
     </Dialog>
 

@@ -28,6 +28,8 @@ const MORE = [
   { name: "New", icon: "pi pi-bell", label: "pp.nav_notifications", badge: "unread" },
   { name: "parent-mchat", icon: "pi pi-heart", label: "pp.nav_mchat" },
   { name: "parent-feedback", icon: "pi pi-comment", label: "pfb.my_title" },
+  { name: "parent-contracts-list", icon: "pi pi-file-edit", label: "pcon.title" },
+  { name: "parent-transport", icon: "pi pi-car", label: "trq.p_title" },
   { name: "Profile", icon: "pi pi-user", label: "pp.nav_profile" },
   { name: "parent-contact", icon: "pi pi-phone", label: "pp.nav_contact", also: ["contactus"] },
 ];
@@ -124,6 +126,8 @@ watch(() => route.fullPath, () => {
                 <button type="button" role="menuitem" @click="go('Profile')"><i class="pi pi-user" /> {{ $t("pp.nav_profile") }}</button>
                 <button type="button" role="menuitem" @click="go('parent-mchat')"><i class="pi pi-heart" /> {{ $t("pp.nav_mchat") }}</button>
                 <button type="button" role="menuitem" @click="go('parent-feedback')"><i class="pi pi-comment" /> {{ $t("pfb.my_title") }}</button>
+                <button type="button" role="menuitem" @click="go('parent-contracts-list')"><i class="pi pi-file-edit" /> {{ $t("pcon.title") }}</button>
+                <button type="button" role="menuitem" @click="go('parent-transport')"><i class="pi pi-car" /> {{ $t("trq.p_title") }}</button>
                 <button type="button" role="menuitem" @click="go('parent-contact')"><i class="pi pi-phone" /> {{ $t("pp.nav_contact") }}</button>
                 <div class="pp-divider" />
                 <button type="button" role="menuitem" class="is-danger" @click="logout"><i class="pi pi-sign-out" /> {{ $t("pp.logout") }}</button>

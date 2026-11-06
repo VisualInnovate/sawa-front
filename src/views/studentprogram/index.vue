@@ -18,11 +18,14 @@ const programs = ref([]);
 const loading = ref(true);
 const filters = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } });
 const removing = ref(null);
+// «بدون مدير حالة»: the programs made before the case manager field.
+const withoutCaseManager = ref(false);
 
-const rows = computed(() => programs.value.map((program) => ({
+const rows = computed(() => programs.value.filter((program) => !withoutCaseManager.value || !program.case_manager_id).map((program) => ({
   ...program,
   student_name: program.student?.name,
   therapist_name: program.therapist?.name,
+  case_manager_name: program.case_manager?.name,
   program_name: programName(t, program),
 })));
 
@@ -48,6 +51,10 @@ onMounted(load);
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <p class="text-xl text-bp-135c65 font-bold">{{ $t("student_programe") }}</p>
       <div class="flex flex-wrap gap-2">
+        <label class="flex items-center gap-2 text-sm">
+          <ToggleSwitch v-model="withoutCaseManager" inputId="sp-without-cm" />
+          <span>{{ $t("org.without_case_manager") }}</span>
+        </label>
         <IconField>
           <InputIcon class="pi pi-search" />
           <InputText v-model="filters.global.value" :placeholder="$t('search')" />
@@ -55,13 +62,19 @@ onMounted(load);
         <Button v-can="'student program create'" icon="pi pi-plus" :label="$t('add_sp')" @click="router.push({ name: 'create-studentprograme' })" />
       </div>
     </div>
-    <DataTable :value="rows" :loading="loading" dataKey="id" v-model:filters="filters" :globalFilterFields="['student_name', 'therapist_name', 'program_name']"
+    <DataTable :value="rows" :loading="loading" dataKey="id" v-model:filters="filters" :globalFilterFields="['student_name', 'therapist_name', 'case_manager_name', 'program_name']"
       paginator :rows="10" stripedRows>
       <Column field="student_name" :header="$t('sp_student')" sortable />
       <Column field="program_name" :header="$t('sp_program')" sortable>
         <template #body="{ data }"><Tag :value="data.program_name" severity="secondary" /></template>
       </Column>
       <Column field="therapist_name" :header="$t('sp_therapist')" sortable />
+      <Column field="case_manager_name" :header="$t('org.case_manager')" sortable>
+        <template #body="{ data }">
+          <span v-if="data.case_manager_name">{{ data.case_manager_name }}</span>
+          <Tag v-else :value="$t('org.no_case_manager')" severity="warn" />
+        </template>
+      </Column>
       <Column :header="$t('sp_period')">
         <template #body="{ data }"><span class="whitespace-nowrap">{{ data.start_date }} → {{ data.end_date }}</span></template>
       </Column>

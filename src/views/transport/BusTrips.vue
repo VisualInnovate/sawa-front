@@ -165,6 +165,7 @@ const statusTime = (stop) => {
             </div>
             <div class="text-end">
               <Tag :severity="STOP_SEVERITY[stop.status]" :value="stopLabel(stop.status)" />
+              <Tag v-if="stop.skipped" severity="info" icon="pi pi-calendar-times" :value="$t('trq.skipped')" />
               <div v-if="statusTime(stop)" class="text-xs text-color-secondary mt-1" dir="ltr">{{ statusTime(stop) }}</div>
             </div>
           </div>

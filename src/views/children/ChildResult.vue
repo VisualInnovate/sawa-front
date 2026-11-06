@@ -7,7 +7,7 @@
     <Toast />
     <ApprovalBanner ref="approvalBanner" :child-id="$route.params.child_id" :side-evaluation-id="$route.params.evaluation_id" @loaded="approval = $event" />
     <!-- Before approval the answers can still be edited (pending or rejected). -->
-    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+    <div v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" class="flex justify-end mb-3 print:hidden">
       <SideProfileAnswerEditor :result-id="approval.key.slice(1)" @saved="answersEdited" />
     </div>
     <!-- Header Section -->
@@ -107,6 +107,8 @@
             <Button
               severity="success"
               @click="print"
+              :disabled="!!approval?.status && !(approval.printable ?? approval.status === 'approved')"
+              :title="approval?.status && !(approval.printable ?? approval.status === 'approved') ? $t('ea_print_locked') : undefined"
               outlined
               rounded
               class="w-full justify-center md:w-auto">

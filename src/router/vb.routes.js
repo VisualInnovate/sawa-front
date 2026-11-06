@@ -221,7 +221,7 @@ const vb = [
     {
       path: '/tracking-approvals',
       name: 'tracking-approvals',
-      meta: { permission: ["tracking approval list", "tracking approval edit"] },
+      // No page permission: whom a tracking's approval flow names opens it from «معاملاتي المعلّقة» (the API checks).
       component: () => import("../views/reports/TrackingApprovals.vue")
     },
     // «سجل الجلسات»: what ran, was missed (and what was done) or was postponed.

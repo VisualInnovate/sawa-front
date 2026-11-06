@@ -8,6 +8,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import Timeline from "primevue/timeline";
+import FlowDeadline from "@/components/approvals/FlowDeadline.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -312,6 +313,7 @@ const openProfile = () => router.push({ name: "employee-profile", params: { id: 
             </template>
           </Timeline>
           <p v-if="leave.rejected_reason && leave.stage === 'rejected'" class="text-red-600 text-sm m-0">{{ leave.rejected_reason }}</p>
+          <FlowDeadline v-if="leave.approval" :state="leave.approval" />
         </section>
 
         <section v-if="pending" class="card review-card">

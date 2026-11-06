@@ -32,7 +32,9 @@ const currency = computed(() => (run.value?.currency === "SAR" ? t("vac.sar") : 
 const draft = computed(() => (run.value?.status ?? "draft") === "draft");
 const rows = computed(() => run.value?.rows ?? []);
 const money = (v) => Number(v ?? 0).toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const STATUS_SEVERITY = { draft: "warn", approved: "info", paid: "success" };
+const STATUS_SEVERITY = { draft: "warn", pending: "help", approved: "info", paid: "success" };
+// The approval flow (phase 6a): HR sends the month, the general manager approves or returns it.
+const approval = computed(() => run.value?.approval ?? {});
 // Months and dates stay left-to-right inside Arabic sentences.
 const ltr = (s) => String.fromCharCode(0x2066) + s + String.fromCharCode(0x2069);
 
@@ -125,15 +127,16 @@ async function start() {
 
 // Approve / take back / paid / extras paid.
 const action = ref(null); // { kind, date }
-const ACTIONS = { approve: "approve", unapprove: "unapprove", pay: "pay", extras: "pay-extras" };
+const ACTIONS = { approve: "approve", unapprove: "unapprove", pay: "pay", extras: "pay-extras", submit: "submit", return: "return" };
 function ask(kind) {
-  action.value = { kind, date: new Date() };
+  action.value = { kind, date: new Date(), note: "" };
 }
 async function confirmAction() {
-  const { kind, date } = action.value;
+  const { kind, date, note } = action.value;
   busy.value = true;
   try {
-    await axios.post(`api/payroll/runs/${month.value}/${ACTIONS[kind]}`, ["pay", "extras"].includes(kind) ? { date: moment(date).format("YYYY-MM-DD") } : {});
+    const body = ["pay", "extras"].includes(kind) ? { date: moment(date).format("YYYY-MM-DD") } : kind === "return" ? { note } : {};
+    await axios.post(`api/payroll/runs/${month.value}/${ACTIONS[kind]}`, body);
     toast.add({ severity: "success", summary: t(`run.done_${kind}`), life: 3000 });
     action.value = null;
     await Promise.all([load(), loadMonths()]);
@@ -296,16 +299,29 @@ const statusOf = (m) => months.value.find((x) => x.month === m)?.status;
         <small v-if="run?.paid_on" class="text-color-secondary">{{ $t("run.paid_on", { date: ltr(run.paid_on) }) }}</small>
         <small v-if="run?.extras_paid_on" class="text-color-secondary">· {{ $t("run.extras_paid_on", { date: ltr(run.extras_paid_on) }) }}</small>
         <small v-if="draft && rows.length" class="text-color-secondary">{{ $t("run.draft_hint") }}</small>
+        <small v-if="run?.status === 'pending' && approval.submitted_by" class="text-color-secondary">{{ $t("run.sent_by", { name: approval.submitted_by, date: ltr(approval.submitted_at) }) }}</small>
+        <small v-if="run?.status === 'pending' && approval.approvers?.length" class="text-color-secondary">· {{ $t("run.waits_for", { names: approval.approvers.join("، ") }) }}</small>
       </div>
       <div class="flex flex-wrap gap-2">
         <Button v-if="draft && can('payroll create')" icon="pi pi-users" :label="rows.length ? $t('run.complete') : $t('run.start')" :outlined="!!rows.length" :loading="busy" @click="start" />
-        <Button v-if="draft && rows.length && can('payroll approval edit')" icon="pi pi-check-circle" :label="$t('run.approve')" severity="success" @click="ask('approve')" />
+        <Button v-if="draft && rows.length && approval.can_submit" icon="pi pi-send" :label="$t('run.submit')" severity="success" @click="ask('submit')" />
+        <Button v-if="rows.length && approval.can_decide && ['draft', 'pending'].includes(run?.status ?? 'draft')" icon="pi pi-check-circle" :label="$t('run.approve')" severity="success"
+          :outlined="draft && approval.can_submit" @click="ask('approve')" />
+        <Button v-if="run?.status === 'pending' && approval.can_decide" icon="pi pi-replay" :label="$t('run.return')" severity="warn" outlined @click="ask('return')" />
         <Button v-if="run?.status === 'approved' && can('payroll approval edit')" icon="pi pi-wallet" :label="$t('run.pay')" @click="ask('pay')" />
         <Button v-if="['approved', 'paid'].includes(run?.status) && !run?.extras_paid_on && extraRows.length && can('payroll approval edit')" icon="pi pi-plus-circle"
           :label="$t('run.pay_extras')" outlined @click="ask('extras')" />
         <Button v-if="run?.status === 'approved' && !run?.extras_paid_on && can('payroll approval edit')" icon="pi pi-undo" :label="$t('run.unapprove')" text severity="secondary" @click="ask('unapprove')" />
       </div>
     </div>
+
+    <Message v-if="draft && approval.return_note" severity="warn" class="mb-3">{{ $t("run.returned_with", { note: approval.return_note }) }}</Message>
+    <details v-if="approval.history?.length" class="run-history mb-3">
+      <summary>{{ $t("run.history") }}</summary>
+      <ul class="m-0 ps-4">
+        <li v-for="(h, i) in approval.history" :key="i"><bdi dir="ltr" class="text-color-secondary">{{ h.at }}</bdi> — {{ $t(`apf.action_${h.action}`) }}<template v-if="h.user"> · {{ h.user }}</template><template v-if="h.note"> · {{ h.note }}</template></li>
+      </ul>
+    </details>
 
     <div v-if="rows.length" class="run-kpis mb-3">
       <div><span>{{ $t("run.k_employees") }}</span><b>{{ rows.length }}</b></div>
@@ -431,6 +447,10 @@ const statusOf = (m) => months.value.find((x) => x.month === m)?.status;
     <Dialog :visible="!!action" modal :header="action && $t(`run.${action.kind === 'extras' ? 'pay_extras' : action.kind}`)" :style="{ width: '460px' }" @update:visible="action = null">
       <template v-if="action">
         <p class="mt-0">{{ $t(`run.confirm_${action.kind}`, { month: ltr(month) }) }}</p>
+        <div v-if="action.kind === 'return'" class="flex flex-column gap-1">
+          <label for="act-note" class="text-sm">{{ $t("run.return_note") }}</label>
+          <Textarea id="act-note" v-model="action.note" rows="3" autoResize />
+        </div>
         <div v-if="['pay', 'extras'].includes(action.kind)" class="flex flex-column gap-1">
           <label for="act-date" class="text-sm">{{ $t("run.pay_date") }}</label>
           <DatePicker v-model="action.date" inputId="act-date" dateFormat="yy-mm-dd" showIcon />
@@ -438,7 +458,7 @@ const statusOf = (m) => months.value.find((x) => x.month === m)?.status;
       </template>
       <template #footer>
         <Button :label="$t('cancel')" text severity="secondary" @click="action = null" />
-        <Button icon="pi pi-check" :label="$t('confirm')" :loading="busy" @click="confirmAction" />
+        <Button icon="pi pi-check" :label="$t('confirm')" :loading="busy" :disabled="action?.kind === 'return' && !action.note.trim()" @click="confirmAction" />
       </template>
     </Dialog>
 

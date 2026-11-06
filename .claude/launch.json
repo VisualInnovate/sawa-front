@@ -195,6 +195,33 @@
         "--strictPort"
       ],
       "port": 3039
+    },
+    {
+      "name": "sawa-local-back",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "-S",
+        "127.0.0.1:8000",
+        "-t",
+        "../sys-sawa/public",
+        "C:/Users/User/AppData/Local/Temp/claude/223d0f88ea2f5126/c4cf864a-8201-444c-9401-95ed5db4dbbe/scratchpad/laravel_router.php"
+      ],
+      "port": 8000,
+      "url": "http://127.0.0.1:8000",
+      "autoPort": false
+    },
+    {
+      "name": "sawa-local-front-org",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--config",
+        "node_modules/.sawa-verify/vite.config.mjs",
+        "--port",
+        "3041",
+        "--strictPort"
+      ],
+      "port": 3041
     }
   ]
 }

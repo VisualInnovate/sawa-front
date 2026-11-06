@@ -96,7 +96,10 @@ const deleteAction = () => {
       fetchData()
       toast.add({severity: 'success', summary: t('successful'), detail: t('successful'), life: 3000})
     })
-    .catch(() => {})
+    .catch((e) => {
+      deleteDialog.value = false
+      toast.add({severity: 'error', summary: t('error'), detail: e.response?.data?.message || t('mission_error'), life: 4000})
+    })
 }
 
 const copyrole = (id) => {
@@ -251,6 +254,8 @@ const initFilters = () => {
             <Column field="name" :header='$t("Name")' :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name }}
+                <Tag v-if="slotProps.data.org_key" :value="$t('org.structure_role')" severity="info" class="ms-2 text-xs" v-tooltip.top="$t('org.structure_role_hint')" />
+                <Tag v-if="Object.keys(slotProps.data.conditions ?? {}).length" :value="$t('org.has_conditions')" severity="warn" class="ms-1 text-xs" />
               </template>
             </Column>
             <Column field="created_at" :header='$t("Created_At")' :sortable="true">
@@ -274,7 +279,7 @@ const initFilters = () => {
                     @click="edit(slotProps.data.id)"
                     v-tooltip.top="$t('edit')" rounded variant="outlined" severity="info" />
                   <Button 
-                    v-if="!slotProps.data.is_locked"
+                    v-if="!slotProps.data.is_locked && !slotProps.data.org_key"
                     v-can="'roles delete'"
                     icon="pi pi-trash" 
                     @click="confirmDelete(slotProps.data.id)"
