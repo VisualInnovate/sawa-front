@@ -34,6 +34,20 @@
         </button>
       </form>
 
+      <!-- Conditions on some permissions: «حالاتي فقط», «بعد الاعتماد الأول». -->
+      <div v-if="!locked && conditionRows.length" class="conditions-box">
+        <p class="conditions-title"><i class="pi pi-filter"></i> {{ $t("org.conditions_title") }}</p>
+        <small class="text-color-secondary">{{ $t("org.conditions_hint") }}</small>
+        <div v-for="row in conditionRows" :key="`${row.permission}-${row.condition}`" class="condition-row">
+          <Checkbox :inputId="`cond-${row.permission}-${row.condition}`" binary
+            :modelValue="hasCondition(row.permission, row.condition)" @update:modelValue="toggleCondition(row.permission, row.condition, $event)" />
+          <label :for="`cond-${row.permission}-${row.condition}`">
+            <b>{{ $t(`org.cond_${row.condition}`) }}</b> — {{ row.label }}
+            <small class="text-color-secondary d-block">{{ $t(`org.cond_${row.condition}_hint`) }}</small>
+          </label>
+        </div>
+      </div>
+
       <p v-if="loading" class="loading">{{ $t("loading") }}</p>
       <PermissionCards
         v-else
@@ -86,6 +100,29 @@ const submitted = ref(false);
 const search = ref("");
 const descriptionVisible = ref(false);
 const description = ref("");
+// The conditions a permission may take (the server sends its list; this is the same list for a new role).
+const conditionOptions = ref({ own_cases: ["child list"], after_first_approval: ["evaluation approval edit", "tracking approval edit"] });
+const conditions = ref({});
+const orgKey = ref(null);
+
+const permissionById = computed(() => {
+  const map = {};
+  for (const card of modules.value) for (const p of card.permissions) map[p.id] = { ...p, card: card.label_ar };
+  return map;
+});
+const selectedNames = computed(() => selected.value.map((id) => permissionById.value[id]?.name).filter(Boolean));
+// Only the conditions of permissions the role holds.
+const conditionRows = computed(() => Object.entries(conditionOptions.value).flatMap(([condition, names]) =>
+  names.filter((name) => selectedNames.value.includes(name)).map((name) => {
+    const p = Object.values(permissionById.value).find((row) => row.name === name);
+    return { condition, permission: name, label: p ? `${p.card} · ${p.label_ar ?? name}` : name };
+  })));
+const hasCondition = (permission, condition) => (conditions.value[permission] ?? []).includes(condition);
+function toggleCondition(permission, condition, on) {
+  const list = new Set(conditions.value[permission] ?? []);
+  on ? list.add(condition) : list.delete(condition);
+  conditions.value = { ...conditions.value, [permission]: [...list] };
+}
 
 // Filtering happens in the page so the checked state survives a search.
 const filteredModules = computed(() => {
@@ -116,6 +153,9 @@ const load = async () => {
       name.value = role.name;
       locked.value = Boolean(role.is_locked);
       selected.value = role.permissions.map((p) => p.id);
+      conditions.value = Array.isArray(role.conditions) ? {} : { ...(role.conditions ?? {}) };
+      orgKey.value = role.org_key ?? null;
+      if (roleRes.data.condition_options) conditionOptions.value = roleRes.data.condition_options;
     }
   } finally {
     loading.value = false;
@@ -126,7 +166,9 @@ const submit = async () => {
   submitted.value = true;
   if (!name.value || locked.value) return;
   saving.value = true;
-  const body = { name: name.value, permissions: selected.value };
+  // Conditions of permissions no longer held are dropped.
+  const held = Object.fromEntries(Object.entries(conditions.value).filter(([permission, list]) => selectedNames.value.includes(permission) && list.length));
+  const body = { name: name.value, permissions: selected.value, conditions: held };
   try {
     if (props.roleId) {
       await axios.put(`/api/roles/${props.roleId}/edit`, body);
@@ -280,6 +322,36 @@ onMounted(load);
 
 .loading {
   color: #64748b;
+}
+
+.conditions-box {
+  border: 1px dashed rgb(var(--bp-b6dde0));
+  background: rgb(var(--bp-f0f9fa));
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  .conditions-title {
+    margin: 0;
+    font-weight: 600;
+    color: rgb(var(--bp-135c65));
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .condition-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .d-block {
+    display: block;
+  }
 }
 
 .description-text {

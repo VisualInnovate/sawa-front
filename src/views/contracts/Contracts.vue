@@ -45,7 +45,17 @@ async function load() {
     loading.value = false;
   }
 }
-onMounted(load);
+onMounted(async () => {
+  await load();
+  // From «مقترحات الإدخال»: the proposal's child and first program, the contract linked to the proposal.
+  if (route.query.admission && route.query.child) {
+    await openIssue();
+    const id = Number(route.query.child);
+    if (!children.value.some((c) => c.id === id)) children.value = [{ id, label: String(route.query.child_name || id) }, ...children.value];
+    issue.value.admission = Number(route.query.admission);
+    issue.value.child = id;
+  }
+});
 watch(status, () => {
   page.value = 1;
   load();
@@ -59,14 +69,14 @@ watch(search, () => {
 });
 
 // «إصدار عقد»: child → (program) → template.
-const issue = ref({ open: false, child: null, program: null, template: null, saving: false });
+const issue = ref({ open: false, child: null, program: null, template: null, admission: null, saving: false });
 const children = ref([]);
 const programs = ref([]);
 const templates = ref([]);
 let childTimer = null;
 
 async function openIssue() {
-  issue.value = { open: true, child: null, program: null, template: null, saving: false };
+  issue.value = { open: true, child: null, program: null, template: null, admission: null, saving: false };
   programs.value = [];
   const [opt] = await Promise.all([axios.get("api/parent-contracts/options"), findChildren("")]);
   templates.value = opt.data.templates;
@@ -88,6 +98,7 @@ watch(() => issue.value.child, async (id) => {
   if (!id) return;
   const { data } = await axios.get(`api/parent-contracts/children/${id}/programs`);
   programs.value = data.data.map((p) => ({ ...p, label: `${t("ct.kind_" + p.template_kind)} · ${ltr(p.start_date || "")} – ${ltr(p.end_date || "")}` }));
+  if (issue.value.admission && route.query.program) issue.value.program = Number(route.query.program);
 });
 // A program suggests the template made for its kind.
 watch(() => issue.value.program, (id) => {
@@ -99,7 +110,8 @@ watch(() => issue.value.program, (id) => {
 async function createDraft() {
   issue.value.saving = true;
   try {
-    const { data } = await axios.post("api/parent-contracts", { template_id: issue.value.template, child_id: issue.value.child, student_program_id: issue.value.program || null });
+    const { data } = await axios.post("api/parent-contracts", { template_id: issue.value.template, child_id: issue.value.child, student_program_id: issue.value.program || null,
+      admission_id: issue.value.admission && issue.value.child === Number(route.query.child) ? issue.value.admission : null });
     issue.value.open = false;
     router.push({ name: "parent-contract", params: { id: data.data.id } });
   } catch (e) {

@@ -49,6 +49,12 @@ const inputs = [
     },
 
 
+    // «طلبات النقل» (phase 6b): no page permission — whom a request waits for opens it (the API checks).
+    {
+      path: '/transport-requests',
+      name: 'transport-requests',
+      component: () => import("../views/transport/TransportRequests.vue")
+    },
     ////// student transportation
     {
       path: '/student-transportation', 

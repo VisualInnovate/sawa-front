@@ -47,10 +47,24 @@ onMounted(() => {
   fetchData()
 })
 
+const kindOptions = [
+  { value: 'clinical', label: 'org.kind_clinical' },
+  { value: 'administrative', label: 'org.kind_administrative' },
+]
+// The deputy is a therapist of the department: its employees first.
+const deputyOptions = () => {
+  const list = Array.isArray(allemployee.value) ? allemployee.value : []
+  const mine = list.filter((e) => Number(e.department_id) === Number(confir_id.value))
+  return mine.length ? mine : list
+}
+
 const edit=(id)=>{
+  error.value = ''
   axios.get(`/api/department/${id}`).then((res)=>{
     const item = res.data.data ?? {}
-    department.value = { title: item.title, description: item.description, head_ids: (item.heads ?? []).map((h) => h.id) }
+    department.value = { title: item.title, description: item.description, kind: item.kind ?? 'administrative',
+      head_employee_id: item.head_employee_id ?? null, deputy_employee_id: item.deputy_employee_id ?? null,
+      head_ids: (item.heads ?? []).map((h) => h.id) }
   });
   confir_id.value=id
   updatedialog.value=!(updatedialog.value)
@@ -72,7 +86,8 @@ const update=()=>{
 
 const openNew = () => {
   createdialog.value=!(createdialog.value)
-  department.value={}
+  error.value = ''
+  department.value={ kind: 'clinical' }
 }
 
 const confirmDelete = (id) => {
@@ -237,7 +252,25 @@ const initFilters = () => {
               </template>
             </Column>
 
-            <Column :header="$t('lflow.heads')">
+            <Column :header="$t('org.kind')">
+              <template #body="slotProps">
+                <Tag :value="$t(slotProps.data.kind === 'clinical' ? 'org.kind_clinical' : 'org.kind_administrative')"
+                  :severity="slotProps.data.kind === 'clinical' ? 'success' : 'secondary'" />
+              </template>
+            </Column>
+
+            <Column :header="$t('org.head')">
+              <template #body="slotProps">
+                <span v-if="slotProps.data.head">{{ slotProps.data.head.name }}</span>
+                <Tag v-else :value="$t('org.no_head')" severity="warn" v-tooltip.top="$t('org.no_head_hint')" />
+              </template>
+            </Column>
+
+            <Column :header="$t('org.deputy')">
+              <template #body="slotProps">{{ slotProps.data.deputy?.name ?? '--' }}</template>
+            </Column>
+
+            <Column :header="$t('org.old_heads')">
               <template #body="slotProps">
                 <div class="flex flex-wrap gap-1">
                   <Tag v-for="h in slotProps.data.heads ?? []" :key="h.id" :value="h.name" severity="info" />
@@ -305,10 +338,18 @@ const initFilters = () => {
           </div>
 
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-start" for="department-heads-new">{{ $t('lflow.heads') }}</label>
-            <MultiSelect inputId="department-heads-new" v-model="department.head_ids" :options="allemployee" optionLabel="name" optionValue="id" filter display="chip" class="w-full" />
-            <small class="text-muted-color">{{ $t('lflow.heads_hint') }}</small>
-            <div class="mt-1 text-red-500" v-if="error?.head_ids">{{ error.head_ids[0] }}</div>
+            <label class="w-full text-start" for="department-kind-new">{{ $t('org.kind') }}</label>
+            <Select inputId="department-kind-new" v-model="department.kind" :options="kindOptions" optionValue="value" class="w-full">
+              <template #value="{ value }">{{ value ? $t(kindOptions.find((k) => k.value === value)?.label) : '' }}</template>
+              <template #option="{ option }">{{ $t(option.label) }}</template>
+            </Select>
+          </div>
+
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-start" for="department-head-new">{{ $t('org.head') }}</label>
+            <Select inputId="department-head-new" v-model="department.head_employee_id" :options="allemployee" optionLabel="name" optionValue="id" filter showClear class="w-full" />
+            <small class="text-muted-color">{{ $t('org.head_hint') }}</small>
+            <div class="mt-1 text-red-500" v-if="error?.head_employee_id">{{ error.head_employee_id[0] }}</div>
           </div>
           
           <div class="w-full text-center mt-4">
@@ -332,9 +373,31 @@ const initFilters = () => {
           </div>
 
           <div class="flex flex-column gap-2 mt-3">
-            <label class="w-full text-start" for="department-heads">{{ $t('lflow.heads') }}</label>
+            <label class="w-full text-start" for="department-kind">{{ $t('org.kind') }}</label>
+            <Select inputId="department-kind" v-model="department.kind" :options="kindOptions" optionValue="value" class="w-full">
+              <template #value="{ value }">{{ value ? $t(kindOptions.find((k) => k.value === value)?.label) : '' }}</template>
+              <template #option="{ option }">{{ $t(option.label) }}</template>
+            </Select>
+          </div>
+
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-start" for="department-head">{{ $t('org.head') }}</label>
+            <Select inputId="department-head" v-model="department.head_employee_id" :options="allemployee" optionLabel="name" optionValue="id" filter showClear class="w-full" />
+            <small class="text-muted-color">{{ $t('org.head_hint') }}</small>
+            <div class="mt-1 text-red-500" v-if="error?.head_employee_id">{{ error.head_employee_id[0] }}</div>
+          </div>
+
+          <div class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-start" for="department-deputy">{{ $t('org.deputy') }}</label>
+            <Select inputId="department-deputy" v-model="department.deputy_employee_id" :options="deputyOptions()" optionLabel="name" optionValue="id" filter showClear class="w-full" />
+            <small class="text-muted-color">{{ $t('org.deputy_hint') }}</small>
+            <div class="mt-1 text-red-500" v-if="error?.deputy_employee_id">{{ error.deputy_employee_id[0] }}</div>
+          </div>
+
+          <div v-if="department.head_ids?.length" class="flex flex-column gap-2 mt-3">
+            <label class="w-full text-start" for="department-heads">{{ $t('org.old_heads') }}</label>
             <MultiSelect inputId="department-heads" v-model="department.head_ids" :options="allemployee" optionLabel="name" optionValue="id" filter display="chip" class="w-full" />
-            <small class="text-muted-color">{{ $t('lflow.heads_hint') }}</small>
+            <small class="text-muted-color">{{ $t('org.old_heads_hint') }}</small>
             <div class="mt-1 text-red-500" v-if="error?.head_ids">{{ error.head_ids[0] }}</div>
           </div>
           

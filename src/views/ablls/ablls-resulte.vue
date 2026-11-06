@@ -5,7 +5,7 @@
     <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.id" @loaded="approval = $event" />
     <div class="flex justify-end gap-2 print:hidden">
       <!-- Before approval the answers can still be edited (pending or rejected). -->
-      <AbleAnswerEditor v-if="approval && approval.status !== 'approved'" :evaluation-id="$route.params.id"
+      <AbleAnswerEditor v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" :evaluation-id="$route.params.id"
         :api="assessmentOf($route).api" @saved="answersEdited" />
       <DeleteEvaluationButton :evaluation-id="$route.params.id" />
     </div>

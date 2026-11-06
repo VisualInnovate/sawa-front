@@ -37,6 +37,7 @@ const attention = computed(() => {
   const rows = [];
   const pending = home.value?.pending ?? {};
   const finance = home.value?.finance ?? {};
+  if (pending.contracts) rows.push({ key: "contracts", icon: "pi pi-file-edit", cls: "pp-item__icon--warn", title: t("pcon.att", { n: pending.contracts }), meta: t("pcon.att_hint"), to: { name: "parent-contracts-list" } });
   if (pending.generalizations) rows.push({ key: "gen", icon: "pi pi-home", cls: "pp-item__icon--magenta", title: t("pp.att_generalizations", { n: pending.generalizations }), meta: t("pp.att_generalizations_hint"), to: { name: "parent-generalizations" } });
   if (finance.late > 0) rows.push({ key: "late", icon: "pi pi-exclamation-triangle", cls: "pp-item__icon--warn", title: t("pp.att_late", { amount: money(finance.late, finance.currency) }), meta: t("pp.att_late_hint"), to: { name: "parent-finances" } });
   if (pending.consultations_waiting) rows.push({ key: "cons", icon: "pi pi-comments", cls: "pp-item__icon--info", title: t("pp.att_consultations", { n: pending.consultations_waiting }), meta: t("pp.att_consultations_hint"), to: { name: "Booking" } });

@@ -149,12 +149,18 @@
             </template>
           </Select>
         </div>
+        <!-- The department asked: without an evaluator its head distributes it («مطلوب»). -->
         <div class="flex flex-column gap-2">
-          <label for="unscheduled-specialist">{{ $t("Name_evaluator") }}</label>
+          <label for="unscheduled-department">{{ $t("ewf.department") }}</label>
+          <Select v-model="unscheduled.department_id" inputId="unscheduled-department" :options="departments" optionLabel="title" optionValue="id"
+            filter showClear :placeholder="$t('ewf.pick_department')" :invalid="unscheduled.submitted && !unscheduled.employee_id && !unscheduled.department_id" />
+        </div>
+        <div class="flex flex-column gap-2">
+          <label for="unscheduled-specialist">{{ $t("Name_evaluator") }} <small class="text-color-secondary">({{ $t("ewf.optional_with_department") }})</small></label>
           <Select v-model="unscheduled.employee_id" inputId="unscheduled-specialist" :options="specialists" optionLabel="name" optionValue="id"
             filter :disabled="!unscheduled.evaluation_type" :loading="unscheduled.loading"
             :placeholder="unscheduled.evaluation_type && !unscheduled.loading && !specialists.length ? $t('no_evaluators_for_type') : ''"
-            :invalid="unscheduled.submitted && !unscheduled.employee_id">
+            showClear :invalid="unscheduled.submitted && !unscheduled.employee_id && !unscheduled.department_id">
             <template #option="{ option }">
               <span>{{ option.name }}</span>
               <i v-if="!fitsAge(option.age_from_months, option.age_to_months, childAgeMonths)" class="pi pi-exclamation-triangle text-orange-500 ms-2"
@@ -168,7 +174,7 @@
           <label for="unscheduled-notes">{{ $t("notes") }}</label>
           <Textarea id="unscheduled-notes" v-model="unscheduled.notes" rows="3" autoResize />
         </div>
-        <small class="text-color-secondary">{{ $t("evaluation_without_appointment_hint") }}</small>
+        <small class="text-color-secondary">{{ unscheduled.employee_id || !unscheduled.department_id ? $t("evaluation_without_appointment_hint") : $t("ewf.to_head_hint") }}</small>
         <Button type="submit" icon="pi pi-check" :label="$t('submit')" :loading="unscheduled.saving" class="w-full" />
       </form>
     </Dialog>
@@ -199,6 +205,7 @@ export default {
       delete_id: 0,
       specialists: [],
       unscheduled: { visible: false },
+      departments: [],
       typeAges: [],
       deleteDialog: false,
       loading: true,
@@ -216,7 +223,8 @@ export default {
     openUnscheduled() {
       if (!this.typeAges.length) axios.get("api/evaluation-type-ages").then(({ data }) => { this.typeAges = data.data ?? []; }).catch(() => {});
       this.specialists = [];
-      this.unscheduled = { visible: true, evaluation_type: null, employee_id: null, notes: "", submitted: false, loading: false, saving: false };
+      this.unscheduled = { visible: true, evaluation_type: null, employee_id: null, department_id: null, notes: "", submitted: false, loading: false, saving: false };
+      if (!this.departments.length) axios.get("api/department").then(({ data }) => { this.departments = data.data ?? []; }).catch(() => {});
       evaluationPricing(this.child_id).then((pricing) => { this.pricing = pricing; });
     },
 
@@ -241,12 +249,13 @@ export default {
 
     async createUnscheduled() {
       this.unscheduled.submitted = true;
-      if (!this.unscheduled.evaluation_type || !this.unscheduled.employee_id) return;
+      if (!this.unscheduled.evaluation_type || (!this.unscheduled.employee_id && !this.unscheduled.department_id)) return;
       this.unscheduled.saving = true;
       try {
         await axios.post("api/evaluation-request/unscheduled", {
           child_id: this.child_id,
-          employee_id: this.unscheduled.employee_id,
+          employee_id: this.unscheduled.employee_id || null,
+          department_id: this.unscheduled.department_id || null,
           evaluation_type: this.unscheduled.evaluation_type,
           notes: this.unscheduled.notes?.trim() || null,
         });

@@ -11,7 +11,7 @@
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { WORK_TYPES, workTypeLabel } from "@/utils/employeeWorkTypes";
 import { GROUP_KINDS, SCHEDULING_CRITERIA, dayLabel, isoDate, sessionKindLabel, timeRange, windowHours } from "@/utils/studentPrograms";
@@ -29,6 +29,9 @@ const props = defineProps({
 const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
+const route = useRoute();
+// A new program of an admission proposal («مقترحات الإدخال»): its child and case manager come from the proposal.
+const admissionId = computed(() => (!props.programId && route.query.admission ? Number(route.query.admission) : null));
 
 const children = ref([]);
 const treatments = ref([]);
@@ -41,6 +44,8 @@ const loading = ref(true);
 const form = ref({
   // The end date starts at the end of the year; it follows the start date's year until changed by hand.
   child_id: null, kind: null, therapist_id: null, start_date: null, end_date: endOfYear(new Date()),
+  // Who supervises the case (consultant, programs manager or head); the therapist runs it.
+  case_manager_id: null,
   // Clinics: the substitute therapists, in the user's order.
   substitute_ids: [],
   weekly_sessions: null, individual_rows: [], group_sessions: 0, days: [],
@@ -91,6 +96,8 @@ watch(() => [form.value.kind, form.value.weekly_sessions, individualTotal.value]
 const treatmentOptions = (row) => treatments.value.filter((treatment) => treatment.id === row.treatment_id
   || !form.value.individual_rows.some((other) => other.treatment_id === treatment.id));
 
+// Who may manage the case (empty until someone holds such a role: then the field is not required).
+const caseManagers = ref([]);
 const basicsReady = computed(() => form.value.child_id && form.value.kind && form.value.therapist_id && form.value.start_date && form.value.end_date);
 const quotaReady = computed(() => form.value.weekly_sessions > 0 && remaining.value === 0 && form.value.days.length > 0
   && form.value.individual_rows.every((row) => row.treatment_id && row.sessions > 0));
@@ -131,6 +138,8 @@ function body(extra = {}) {
     start_date: isoDate(form.value.start_date), end_date: isoDate(form.value.end_date),
     program_id: props.programId ?? undefined, scheduling: scheduling.value,
   };
+  if (form.value.case_manager_id) base.case_manager_id = form.value.case_manager_id;
+  if (admissionId.value) base.admission_id = admissionId.value;
   if (isClinics.value) base.substitute_ids = form.value.substitute_ids;
   if (isInclusion.value) {
     return { ...base, inclusion_type: form.value.inclusion_type, inclusion_english: form.value.inclusion_type === "inclusion" && form.value.inclusion_english, hours: inclusionHours.value };
@@ -326,7 +335,8 @@ async function save() {
       ? await axios.put(`api/student-program/${props.programId}`, payload)
       : await axios.post("api/student-program", payload);
     toast.add({ severity: "success", summary: t("success_message"), detail: t("sp_saved"), life: 2500 });
-    router.push({ name: "show-studentprograme", params: { id: data.data.id } });
+    if (admissionId.value) router.push({ name: "admissions", query: { open: admissionId.value } });
+    else router.push({ name: "show-studentprograme", params: { id: data.data.id } });
   } catch (e) {
     fail(e);
   } finally {
@@ -344,6 +354,7 @@ async function loadProgram() {
 
   Object.assign(form.value, {
     child_id: program.student_id, kind: program.kind, therapist_id: program.therapist_id,
+    case_manager_id: program.case_manager_id ?? null,
     substitute_ids: (program.substitute_ids ?? []).map(Number),
     start_date: new Date(program.start_date), end_date: new Date(program.end_date),
     weekly_sessions: program.weekly_sessions,
@@ -387,6 +398,7 @@ onMounted(async () => {
   const [childRes, treatmentRes, hoursRes] = await Promise.all([
     axios.get("api/child"), axios.get("api/treatment/all"), axios.get("api/student-program/hours"),
   ]);
+  axios.get("api/student-program/case-managers").then(({ data }) => { caseManagers.value = data.data ?? []; }).catch(() => { caseManagers.value = []; });
   children.value = childRes.data.children ?? [];
   treatments.value = treatmentRes.data.data ?? [];
   programHours.value = hoursRes.data.data ?? [];
@@ -408,7 +420,14 @@ onMounted(async () => {
       await runPreview({ plan: planFromWeek(week), slots: week });
     }
   } else {
+    if (admissionId.value) {
+      form.value.child_id = Number(route.query.child) || null;
+      form.value.case_manager_id = Number(route.query.case_manager) || null;
+    }
     loading.value = false;
+    if (admissionId.value && form.value.child_id) {
+      axios.get(`api/student-program/child/${form.value.child_id}/skills`).then(({ data }) => { form.value.skills = data.data; }).catch(() => {});
+    }
   }
 });
 
@@ -429,6 +448,7 @@ function slotStatus(slot) {
     <p class="text-xl p-4 text-bp-135c65 font-bold">{{ programId ? $t("sp_edit_title") : $t("sp_add_title") }}</p>
   </div>
   <Message v-if="accountingStatus === 'unconfirmed'" severity="warn" class="mb-3">{{ $t("acc.unconfirmed_hint") }}</Message>
+  <Message v-if="admissionId" severity="info" class="mb-3">{{ $t("adm.program_hint") }}</Message>
   <div v-if="loading" class="flex justify-center p-5"><i class="pi pi-spin pi-spinner text-2xl" /></div>
   <div v-else class="flex flex-column gap-3">
     <!-- 1. Kind, student, therapist, dates -->
@@ -439,7 +459,7 @@ function slotStatus(slot) {
       </div>
       <div class="flex flex-column gap-2">
         <label for="sp-child">{{ $t("sp_student") }}</label>
-        <Select v-model="form.child_id" inputId="sp-child" :options="children" optionLabel="name" optionValue="id" filter :disabled="!!programId"
+        <Select v-model="form.child_id" inputId="sp-child" :options="children" optionLabel="name" optionValue="id" filter :disabled="!!programId || !!admissionId"
           :invalid="!!errors.child_id" />
       </div>
       <div class="flex flex-column gap-2">
@@ -465,6 +485,14 @@ function slotStatus(slot) {
         </small>
         <small v-if="chosenTherapistAgeWarning" class="text-orange-600"><i class="pi pi-exclamation-triangle" /> {{ $t("age_ranges.therapist_short") }}</small>
         <small v-if="isInclusion" class="text-color-secondary">{{ $t("sp_inclusion_therapist_hint") }}</small>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="sp-case-manager">{{ $t("org.case_manager") }}<span v-if="caseManagers.length" class="text-red-500"> *</span></label>
+        <Select v-model="form.case_manager_id" inputId="sp-case-manager" :options="caseManagers" optionLabel="name" optionValue="id" filter showClear
+          :placeholder="caseManagers.length ? $t('org.pick_case_manager') : $t('org.no_case_managers')" :disabled="!caseManagers.length"
+          :invalid="!!errors.case_manager_id" />
+        <small v-if="errors.case_manager_id" class="text-red-600">{{ [errors.case_manager_id].flat()[0] }}</small>
+        <small v-else class="text-color-secondary">{{ $t(caseManagers.length ? "org.case_manager_hint" : "org.no_case_managers_hint") }}</small>
       </div>
       <div v-if="isClinics" class="flex flex-column gap-2 lg:col-span-2">
         <label for="sp-substitute-add">{{ $t("sp_substitutes") }}</label>

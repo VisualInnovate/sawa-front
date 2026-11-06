@@ -67,7 +67,7 @@ watch(() => route.params.evaluation, (value, before) => {
   <div class="er-page">
     <Toast />
     <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.evaluation" @loaded="approval = $event" />
-    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+    <div v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" class="flex justify-end mb-3 print:hidden">
       <ElmAnswerEditor :evaluation-id="$route.params.evaluation" @saved="answersEdited" />
     </div>
     <div v-if="loading" class="er-state"><ProgressSpinner style="width: 40px; height: 40px" /></div>

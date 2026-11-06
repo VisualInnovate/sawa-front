@@ -18,7 +18,8 @@ async function load() {
   const { data } = await axios.get("api/accounting/settings");
   const settings = data.data.settings;
   form.value = { currency_symbol: settings.currency_symbol, currency_name: settings.currency_name,
-    consultation_paid: settings.consultation_paid === "1", consultation_price: Number(settings.consultation_price || 0) };
+    consultation_paid: settings.consultation_paid === "1", consultation_price: Number(settings.consultation_price || 0),
+    admission_hold_days: Number(settings.admission_hold_days || 2) };
   types.value = data.data.fee_types.map((row) => ({ ...row }));
 }
 
@@ -69,6 +70,10 @@ onMounted(load);
             :aria-label="$t('acc.consultation_price')" class="w-10rem" />
         </div>
         <small class="text-color-secondary">{{ $t("acc.consultation_price_hint") }}</small>
+
+        <label for="adm-hold" class="font-semibold mt-2">{{ $t("adm.hold_days") }}</label>
+        <InputNumber v-model="form.admission_hold_days" inputId="adm-hold" :min="1" :max="60" showButtons class="w-10rem" />
+        <small class="text-color-secondary">{{ $t("adm.hold_days_hint") }}</small>
         <div class="flex justify-end">
           <Button icon="pi pi-check" :label="$t('acc.save')" :disabled="!form.currency_symbol?.trim() || !form.currency_name?.trim() || (form.consultation_paid && !(form.consultation_price > 0))"
             @click="saveSettings" />

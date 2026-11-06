@@ -4,7 +4,7 @@
     <Toast />
     <ApprovalBanner ref="approvalBanner" :evaluation-id="$route.params.evla_id" @loaded="approval = $event" />
     <!-- Before approval the answers can still be edited (pending or rejected). -->
-    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+    <div v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" class="flex justify-end mb-3 print:hidden">
       <MilestoneAnswerEditor :evaluation-id="$route.params.evla_id" @saved="answersEdited" />
     </div>
     <!-- Header with Print Button -->

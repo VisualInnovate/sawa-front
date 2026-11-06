@@ -53,7 +53,7 @@ watch(() => route.params.evaluation, (value, before) => {
   <div class="sr-page">
     <Toast />
     <ApprovalBanner :evaluation-id="$route.params.evaluation" @loaded="approval = $event" />
-    <div v-if="approval && approval.status !== 'approved'" class="flex justify-end mb-3 print:hidden">
+    <div v-if="approval && approval.status !== 'approved' && approval.workflow_status !== 'first_approved'" class="flex justify-end mb-3 print:hidden">
       <EditAnswersButton :to="{ name: 'sensory-evaluation', params: { id: $route.params.id }, query: { edit: $route.params.evaluation } }" />
     </div>
     <div v-if="loading" class="sr-state"><ProgressSpinner style="width: 40px; height: 40px" /></div>

@@ -83,7 +83,8 @@ export default {
   mounted() {
     this.getlang()
     this.getSkills()
-    console.log(moment(new Date()).format(" YYYY-MM-DD"));
+    // From «الاستقبال»: the parent's account just made.
+    if (this.$route.query.parent_id) this.child.parent_id = Number(this.$route.query.parent_id);
   },
 };
 </script>
