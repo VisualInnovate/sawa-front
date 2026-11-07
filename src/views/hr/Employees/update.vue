@@ -12,13 +12,14 @@ import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
 import AgeRangeField from "@/components/common/AgeRangeField.vue";
 import EmployeeField from "@/components/employees/EmployeeField.vue";
 import EmployeeHero from "@/components/employees/EmployeeHero.vue";
+import EmployeeStructureFields from "@/components/employees/EmployeeStructureFields.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
 import { can, isAdmin } from "@/utils/permissions";
 import {
+  applyPosition,
+  departmentsValue,
   employeeTypeName,
-  employeeTypes,
   evaluationTypeGroups,
-  extraRoleOptions,
   extraRolesValue,
   fetchEmployeeFormOptions,
   hasTherapistFields,
@@ -44,10 +45,8 @@ const canEditJob = computed(() => can("employees edit"));
 // The tab the editor may not change is shown read-only (the server keeps it too).
 const canEditMain = computed(() => can("employees edit") || can("doctor edit"));
 const canEditSpecialty = computed(() => can("employee specialty edit"));
-const types = computed(() => employeeTypes(t));
 const evaluationGroups = computed(() => evaluationTypeGroups(t));
 const roles = computed(() => options.value.roles.filter((role) => !role.is_locked || isAdmin()));
-const extraRoles = computed(() => extraRoleOptions(roles.value, employee.value.role));
 const therapist = computed(() => hasTherapistFields(employee.value.type));
 
 const snapshot = () => JSON.stringify(employee.value);
@@ -67,7 +66,12 @@ const ids = (list) => (list ?? []).map((item) => Number(typeof item === "object"
 
 function fill(data) {
   const user = data.user ?? {};
+  const departments = ids(user.departments);
+  // The main department (employees.department_id) when it is one of theirs, else the first; the rest are extra.
+  const main = departments.includes(Number(data.department_id)) ? Number(data.department_id) : departments[0] ?? null;
+  const roles = splitRoles(user.roles, options.value.roles);
   employee.value = {
+    employee_id: data.id,
     name: data.name,
     email: data.email,
     password: "",
@@ -85,8 +89,12 @@ function fill(data) {
     contract_period: data.contract_period,
     date_of_enrollment: toDate(data.date_of_enrollment),
     type: user.type,
-    ...splitRoles(user.roles, options.value.roles),
-    department: ids(user.departments),
+    ...roles,
+    // The role held now: when the job title fixes another one, the form says it will change.
+    role_before: roles.role,
+    main_department: main,
+    department: departments.filter((id) => id !== main),
+    replace_leader: false,
     skills: ids(user.skills),
     treatments: ids(user.treatments),
     evaluation: ids(user.evaluations),
@@ -95,6 +103,8 @@ function fill(data) {
     age_from_months: user.age_from_months ?? null,
     age_to_months: user.age_to_months ?? null,
   };
+  // What is shown is what the job title will save (role, type, department).
+  applyPosition(employee.value, options.value.positions);
   original.value = snapshot();
 }
 
@@ -153,14 +163,17 @@ function body() {
     if (e.treatments) form.append("treatments", e.treatments);
     if (e.skills) form.append("skills", e.skills);
   }
-  if (e.department) form.append("department_id", e.department);
+  // The main department first, then the extra ones.
+  form.append("department_id", departmentsValue(e));
+  if (e.main_department) form.append("main_department_id", e.main_department);
+  if (e.replace_leader) form.append("replace_leader", 1);
   if (e.file) form.append("image", e.file);
   return form;
 }
 
 // Which tab holds each field, to open the first one with an error.
 const FIELD_TABS = {
-  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "extra_roles", "department_id"],
+  job: ["position_id", "shift_id", "basic_salary", "spotter", "contract_period", "date_of_enrollment", "type", "role", "extra_roles", "department_id", "main_department_id", "replace_leader"],
   therapist: ["skills", "evaluations", "treatments", "age_from_months", "age_to_months", "substitute_ids", "work_types"],
 };
 const err = (key) => errors.value?.[key];
@@ -175,7 +188,11 @@ async function save() {
     await axios.post(`/api/employees/${route.params.id}`, body());
     employee.value.password = "";
     employee.value.file = null;
+    employee.value.role_before = employee.value.role;
+    employee.value.replace_leader = false;
     original.value = snapshot();
+    // The departments' heads may have changed with this save.
+    fetchEmployeeFormOptions({ refresh: true }).then((lookups) => (options.value = { ...options.value, ...lookups })).catch(() => {});
     toast.add({ severity: "success", summary: t("success_message"), detail: t("emp.saved"), life: 3000 });
   } catch (error) {
     errors.value = error.response?.data?.errors ?? {};
@@ -309,10 +326,9 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
               <Message v-if="!canEditMain" severity="info" :closable="false" class="mb-3">{{ $t("emp.read_only_tab") }}</Message>
               <fieldset :disabled="!canEditMain" class="employee-lock">
               <div class="employee-grid">
-                <EmployeeField :label="$t('position_name')" for="emp-position" required :error="err('position_id')">
-                  <Select v-model="employee.position_id" inputId="emp-position" :options="options.positions" optionLabel="title"
-                    optionValue="id" filter :placeholder="$t('position_name')" :invalid="Boolean(err('position_id'))" />
-                </EmployeeField>
+                <!-- Job title, type, role, departments and leadership: one structure (the title decides). -->
+                <EmployeeStructureFields :employee="employee" :positions="options.positions" :departments="options.departments"
+                  :roles="roles" :errors="errors" :canEditJob="canEditJob" :employeeId="employee.employee_id" />
                 <EmployeeField :label="$t('shift_name')" for="emp-shift" required :error="err('shift_id')">
                   <Select v-model="employee.shift_id" inputId="emp-shift" :options="options.shifts" optionLabel="title"
                     optionValue="id" filter :placeholder="$t('shift_name')" :invalid="Boolean(err('shift_id'))" />
@@ -330,21 +346,6 @@ onBeforeRouteLeave(() => !dirty.value || window.confirm(t("هل أنت متاك�
                 <EmployeeField :label="$t('date_of_enrollment')" for="emp-enrollment" required :error="err('date_of_enrollment')">
                   <DatePicker v-model="employee.date_of_enrollment" inputId="emp-enrollment" dateFormat="yy-mm-dd" showIcon
                     showButtonBar fluid :invalid="Boolean(err('date_of_enrollment'))" />
-                </EmployeeField>
-                <EmployeeField :label="$t('type')" for="emp-type" required :error="err('type')">
-                  <Select v-model="employee.type" inputId="emp-type" :options="types" optionLabel="name" optionValue="id"
-                    :disabled="!canEditJob" :invalid="Boolean(err('type'))" />
-                </EmployeeField>
-                <EmployeeField :label="$t('roles')" for="emp-role" required :error="err('role')">
-                  <Select v-model="employee.role" inputId="emp-role" :options="roles" optionLabel="name" optionValue="id"
-                    filter :disabled="!canEditJob" :invalid="Boolean(err('role'))" />
-                </EmployeeField>
-                <EmployeeField v-if="extraRoles.length" :label="$t('extra_roles')" for="emp-extra-roles" :hint="$t('extra_roles_hint')">
-                  <MultiSelect v-model="employee.extra_roles" inputId="emp-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" :disabled="!canEditJob" />
-                </EmployeeField>
-                <EmployeeField :label="$t('department')" for="emp-department" required :error="err('department_id')">
-                  <MultiSelect v-model="employee.department" inputId="emp-department" :options="options.departments"
-                    optionLabel="title" optionValue="id" filter display="chip" :invalid="Boolean(err('department_id'))" />
                 </EmployeeField>
               </div>
               </fieldset>

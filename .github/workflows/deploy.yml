@@ -24,7 +24,9 @@ jobs:
       - name: Build Vue App
         run: npm run build
 
-      - name: Delete old dist folder on server
+      # The old files are kept (not deleted before the upload): a page opened before the deploy still finds its JS
+      # files, and the site is never empty while uploading. Built files older than 14 days are pruned.
+      - name: Prepare dist folder on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -32,9 +34,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT || '22' }}
           script: |
-            rm -rf /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
-            mkdir -p /home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
-            echo "✅ Old dist deleted and recreated"
+            DIST=/home/${{ secrets.USERNAME }}/public_html/repositories/sawa-front.test/dist
+            mkdir -p "$DIST/assets"
+            find "$DIST/assets" -type f -mtime +14 -delete || true
+            echo "✅ dist ready (old assets kept, older than 14 days pruned)"
 
       - name: Install rsync
         run: sudo apt-get update && sudo apt-get install -y rsync

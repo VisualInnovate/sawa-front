@@ -8,6 +8,20 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      // A page kept from before a deploy asks for files that are gone and stays blank: reload it once from the server.
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          var app = document.getElementById("app");
+          if (app && !app.hasChildNodes() && !sessionStorage.getItem("blank-reload")) {
+            sessionStorage.setItem("blank-reload", "1");
+            location.reload();
+          } else if (app && app.hasChildNodes()) {
+            sessionStorage.removeItem("blank-reload");
+          }
+        }, 4000);
+      });
+    </script>
     <script type="module" src="/src/main.js"></script>
     <!--    <script src="fullcalendar/lang-all.js"></script>-->
   </body>

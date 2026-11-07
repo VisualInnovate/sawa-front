@@ -27,8 +27,11 @@ async function centreChart() {
   if (el) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
 }
 
+// How many employees do not match their job title («تعارضات الهيكل»).
+const conflicts = ref(0);
 async function load() {
   loading.value = true;
+  axios.get("api/org-structure/conflicts").then(({ data: res }) => (conflicts.value = res.data.employees.length + res.data.roles_outside.length)).catch(() => {});
   try {
     data.value = (await axios.get("api/org-structure")).data.data;
     leaders.value = Object.fromEntries(data.value.departments.map((d) => [d.id, { head: d.head?.id ?? null, deputy: d.deputy?.id ?? null }]));
@@ -127,6 +130,8 @@ onMounted(load);
         <small class="text-color-secondary">{{ $t("org.subtitle") }}</small>
       </div>
       <div class="flex gap-2">
+        <Button icon="pi pi-exclamation-circle" :label="$t('stc.menu')" :severity="conflicts ? 'warn' : 'secondary'" variant="outlined"
+          :badge="conflicts ? String(conflicts) : undefined" badgeSeverity="warn" @click="$router.push({ name: 'structure-conflicts' })" />
         <Button v-can="'structure log list'" icon="pi pi-history" :label="$t('org.log_menu')" severity="secondary" variant="outlined"
           @click="$router.push({ name: 'structure-log' })" />
         <Button icon="pi pi-refresh" variant="text" :loading="loading" @click="load" v-tooltip.top="$t('refresh_data')" :aria-label="$t('refresh_data')" />
@@ -162,6 +167,13 @@ onMounted(load);
             filter showClear :placeholder="$t('org.pick_deputy')" class="w-full" />
           <span v-else>{{ d.deputy?.name ?? "—" }}</span>
 
+          <!-- Its people (main department here) with their job title. -->
+          <details v-if="d.members?.length" class="org-members">
+            <summary class="text-sm cursor-pointer">{{ $t("stc.members", { n: d.members.length }) }}</summary>
+            <ul class="m-0 ps-3 text-sm">
+              <li v-for="m in d.members" :key="m.id">{{ m.name }} <small class="text-color-secondary">— {{ m.position ?? $t("stc.no_position") }}</small></li>
+            </ul>
+          </details>
           <small v-if="d.old_heads && !d.head" class="text-color-secondary"><i class="pi pi-info-circle" /> {{ $t("org.old_heads_active", { n: d.old_heads }) }}</small>
           <Button v-if="editable && changed(d)" :label="$t('save')" icon="pi pi-check" size="small" class="self-end"
             :loading="saving === `d${d.id}`" @click="saveLeaders(d)" />
@@ -181,6 +193,10 @@ onMounted(load);
           <template #position="{ node }">
             <div class="flex flex-column items-center gap-1 org-node" :dir="ar ? 'rtl' : 'ltr'">
               <b>{{ node.data.title }}</b>
+              <!-- What the title gives whoever holds it. -->
+              <Tag v-if="node.data.role" :value="node.data.role" severity="info" class="text-xs" />
+              <Tag v-else :value="$t('stc.no_role')" severity="warn" class="text-xs" />
+              <small v-if="node.data.department" class="text-color-secondary">{{ node.data.department }}</small>
               <small v-if="node.data.employees.length" class="text-color-secondary">{{ node.data.employees.map((e) => e.name).slice(0, 3).join("، ") }}<template v-if="node.data.employees.length > 3"> +{{ node.data.employees.length - 3 }}</template></small>
               <small v-else class="text-color-secondary">{{ $t("org.empty_position") }}</small>
               <Button v-if="editable" icon="pi pi-arrows-alt" size="small" variant="text" :label="$t('org.move')" @click="openMove(node.data)" />
@@ -242,6 +258,9 @@ onMounted(load);
   border-radius: 10px;
   padding: 0.75rem;
   background: rgb(var(--bp-f0f9fa));
+}
+.org-members summary {
+  color: rgb(var(--bp-135c65));
 }
 .org-chart-wrap {
   overflow-x: auto;

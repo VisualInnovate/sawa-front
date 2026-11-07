@@ -23,6 +23,7 @@ export const buildMenu = () => [
       { label: "permissions", to: { name: "permissions" }, perm: "permissions list" },
       { label: "roles", to: { name: "Roles" }, perm: "roles list" },
       { label: "org.menu", to: { name: "org-structure" }, perm: ["org structure list", "org structure edit"] },
+      { label: "stc.menu", to: { name: "structure-conflicts" }, perm: ["org structure list", "org structure edit"] },
       { label: "org.log_menu", to: { name: "structure-log" }, perm: "structure log list" },
       { label: "apf.flows_title", to: { name: "approval-flows" }, perm: ["approval flows list", "approval flows edit", "org working hours edit"] },
     ],

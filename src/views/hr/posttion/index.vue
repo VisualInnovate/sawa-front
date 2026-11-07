@@ -7,6 +7,7 @@ import {useToast} from 'primevue/usetoast'
 import axios from "axios";
 import {useRouter} from "vue-router";
 import { useI18n } from 'vue-i18n';
+import { employeeTypeName, employeeTypes, fetchEmployeeFormOptions } from "@/utils/employeeForm";
 const toast = useToast()
 const router = useRouter()
 const { t } = useI18n();
@@ -27,6 +28,13 @@ const updatedialog=ref(false)
 // Where the position sits in the approvals: the department head first, then HR (the general manager may do either).
 const levels = ['general_manager', 'hr_manager', 'department_head', 'staff']
 const levelOptions = computed(() => levels.map((value) => ({ value, label: t(`lflow.level_${value}`) })))
+// What the position fixes for whoever holds it (org structure): role, employee type, department. Empty = left to the employee form.
+const lookups = ref({ roles: [], departments: [] })
+const typeOptions = computed(() => employeeTypes(t))
+const nameOf = (list, id, key = 'name') => list.find((item) => Number(item.id) === Number(id))?.[key] ?? ''
+const loadLookups = () => fetchEmployeeFormOptions().then((data) => {
+  lookups.value = { roles: (data.roles ?? []).filter((role) => !role.is_locked && !role.is_extra), departments: data.departments ?? [] }
+}).catch(() => {})
 
 onBeforeMount(() => {
   initFilters()
@@ -50,13 +58,15 @@ onBeforeMount(() => {
 onMounted(() => {
   // productService.getProducts().then((data) => (products.value = data));
 fetchData()
+loadLookups()
 
 })
 const edit=(id)=>{
     axios.get(`/api/position/${id}`).then((res)=>{
 
     const item = res.data.data ?? {}
-    position.value = { parent_id: item.parent_id, org_level: item.org_level ?? 'staff', title: item.title, description: item.description }
+    position.value = { parent_id: item.parent_id, org_level: item.org_level ?? 'staff', title: item.title, description: item.description,
+      role_id: item.role_id ?? null, employee_type: item.employee_type ?? null, department_id: item.department_id ?? null }
     
 
   });
@@ -71,10 +81,11 @@ const updateitem=()=>{
     axios
     .put(`/api/position/${confir_id.value}`,position.value)
     .then((res) => {
-      console.log(res.data)
       fetchData()
       updatedialog.value=!(updatedialog.value)
-      toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
+      // Everyone holding the position got its new role / type / department.
+      const synced = res.data?.data?.synced_employees ?? 0
+      toast.add({severity: 'success', summary: t('success_message'), detail: synced ? t('stc.position_synced', { n: synced }) : t('successful'), life: 4000})
       position.value = {}
     })
     .catch((el)=>{
@@ -118,7 +129,11 @@ const deleteAction = () => {
       fetchData()
       toast.add({severity: 'success', summary: t('success_message'), detail: t('successful'), life: 3000})
     })
-    .catch(() => {})
+    .catch((e) => {
+      deleteDialog.value=false
+      const held = e.response?.data?.data?.employees
+      toast.add({severity: 'error', summary: t('error'), detail: held ? t('stc.position_held', { n: held }) : t('request_failed_retry'), life: 5000})
+    })
 
 }
 
@@ -218,6 +233,18 @@ const initFilters = () => {
 
 
         
+           <Column :header="$t('roles')" header-style="min-width:9rem;">
+            <template #body="slotProps">
+              <span v-if="slotProps.data.role_id">{{ nameOf(lookups.roles, slotProps.data.role_id) || '—' }}</span>
+              <Tag v-else :value="$t('stc.no_role')" severity="warn" />
+            </template>
+           </Column>
+           <Column :header="$t('type')" header-style="min-width:7rem;">
+            <template #body="slotProps">{{ slotProps.data.employee_type ? employeeTypeName(t, slotProps.data.employee_type) : '—' }}</template>
+           </Column>
+           <Column :header="$t('department')" header-style="min-width:8rem;">
+            <template #body="slotProps">{{ slotProps.data.department_id ? nameOf(lookups.departments, slotProps.data.department_id, 'title') : '—' }}</template>
+           </Column>
            <Column field="org_level" :header="$t('lflow.org_level')" :sortable="true" header-style="min-width:10rem;">
             <template #body="slotProps">
               <Tag :value="$t(`lflow.level_${slotProps.data.org_level ?? 'staff'}`)" :severity="(slotProps.data.org_level ?? 'staff') === 'staff' ? 'secondary' : 'info'" />
@@ -272,6 +299,22 @@ const initFilters = () => {
                   <Select inputId="position-level-new" v-model="position.org_level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
                   <small class="text-muted-color mb-3">{{ $t('lflow.org_level_hint') }}</small>
             </div>
+            <!-- What the position fixes for whoever holds it (org structure). -->
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-role-new">{{ $t('roles') }}</label>
+                  <Select inputId="position-role-new" v-model="position.role_id" :options="lookups.roles" optionLabel="name" optionValue="id" filter showClear class="w-full" :placeholder="$t('stc.role_open')" />
+                  <small class="text-muted-color">{{ $t('stc.position_role_hint') }}</small>
+                  <div class="text-red-500" v-if="error?.role_id">{{ error.role_id[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-type-new">{{ $t('type') }}</label>
+                  <Select inputId="position-type-new" v-model="position.employee_type" :options="typeOptions" optionLabel="name" optionValue="id" showClear class="w-full" :placeholder="$t('stc.type_open')" />
+            </div>
+            <div class="flex flex-column gap-2 mb-3">
+                  <label class="w-full text-start" for="position-department-new">{{ $t('department') }}</label>
+                  <Select inputId="position-department-new" v-model="position.department_id" :options="lookups.departments" optionLabel="title" optionValue="id" filter showClear class="w-full" :placeholder="$t('stc.department_open')" />
+                  <small class="text-muted-color">{{ $t('stc.position_department_hint') }}</small>
+            </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('posttion_description') }}</label>
                   <Textarea rows="3" v-model="position.description" autoResize fluid /> 
@@ -297,6 +340,22 @@ const initFilters = () => {
                   <label class="w-full text-start" for="position-level">{{ $t('lflow.org_level') }}</label>
                   <Select inputId="position-level" v-model="position.org_level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
                   <small class="text-muted-color mb-3">{{ $t('lflow.org_level_hint') }}</small>
+            </div>
+            <!-- What the position fixes for whoever holds it (org structure). -->
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-role">{{ $t('roles') }}</label>
+                  <Select inputId="position-role" v-model="position.role_id" :options="lookups.roles" optionLabel="name" optionValue="id" filter showClear class="w-full" :placeholder="$t('stc.role_open')" />
+                  <small class="text-muted-color">{{ $t('stc.position_role_hint') }}</small>
+                  <div class="text-red-500" v-if="error?.role_id">{{ error.role_id[0] }}</div>
+            </div>
+            <div class="flex flex-column gap-2">
+                  <label class="w-full text-start" for="position-type">{{ $t('type') }}</label>
+                  <Select inputId="position-type" v-model="position.employee_type" :options="typeOptions" optionLabel="name" optionValue="id" showClear class="w-full" :placeholder="$t('stc.type_open')" />
+            </div>
+            <div class="flex flex-column gap-2 mb-3">
+                  <label class="w-full text-start" for="position-department">{{ $t('department') }}</label>
+                  <Select inputId="position-department" v-model="position.department_id" :options="lookups.departments" optionLabel="title" optionValue="id" filter showClear class="w-full" :placeholder="$t('stc.department_open')" />
+                  <small class="text-muted-color">{{ $t('stc.position_department_hint') }}</small>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="position-description">{{ $t('posttion_description') }}</label>
