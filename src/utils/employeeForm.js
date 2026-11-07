@@ -39,6 +39,25 @@ export const extraRoleOptions = (roles, main) => roles.filter((role) => role.is_
 // Always sent: "" removes the extra roles.
 export const extraRolesValue = (employee) => (employee.extra_roles ?? []).filter((id) => Number(id) !== Number(employee.role)).join(",");
 
+/**
+ * The org structure: the job title fixes the role, the type and (when it has one) the main department. Applied to
+ * the form's employee when a title is chosen, and on opening an employee (so what is shown is what will be saved).
+ */
+export function applyPosition(employee, positions) {
+  const p = (positions ?? []).find((item) => Number(item.id) === Number(employee.position_id));
+  if (!p) return;
+  if (p.role_id) employee.role = p.role_id;
+  if (p.employee_type) employee.type = p.employee_type;
+  if (p.department_id) {
+    employee.main_department = p.department_id;
+    employee.department = (employee.department ?? []).filter((id) => Number(id) !== Number(p.department_id));
+  }
+}
+
+/** The departments the form sends: the main one first, then the extra ones ("1,2"). */
+export const departmentsValue = (employee) =>
+  [employee.main_department, ...(employee.department ?? [])].filter((id, i, all) => id != null && all.indexOf(id) === i).join(",");
+
 export const hasTherapistFields = (type) => Number(type) === 0 || Number(type) === 2;
 
 /** «الجلسات» in the employee's evaluation types (saved in users.evaluations with them). */

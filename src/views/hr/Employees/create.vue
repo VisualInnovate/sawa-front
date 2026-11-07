@@ -216,35 +216,9 @@
           {{ $t("job_details") }}
         </h3>
         <div class="p-[2%] bg-[#FDFDFD] grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("position_name") }}</label>
-              <svg
-                class="my-auto mx-1"
-                width="7"
-                height="5"
-                viewBox="0 0 6 5"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414"
-                />
-              </svg>
-            </div>
-            <Select
-              required
-              v-model="employee.position_id"
-              option-value="id"
-              :options="positions"
-              optionLabel="title"
-              :placeholder="$t('position_name')"
-              class="w-full"
-              :class="{ 'p-invalid': submitted && !employee.position_id }"
-            />
-          </div>
+          <!-- Job title, type, role, departments and leadership: one structure (the title decides). -->
+          <EmployeeStructureFields :employee="employee" :positions="positions" :departments="departments" :roles="roles"
+            :errors="errors" />
           <div class="flex flex-column gap-2">
             <div class="flex">
               <label class="text-start">{{ $t("shift_name") }}</label>
@@ -373,33 +347,6 @@
               :class="{ 'p-invalid': submitted && !employee.date_of_enrollment, }"
             />
           </div>
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("type") }}</label>
-              <svg
-                class="my-auto mx-1"
-                width="7"
-                height="5"
-                viewBox="0 0 6 5"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414"
-                />
-              </svg>
-            </div>
-            <Select
-              v-model="employee.type"
-              option-value="id"
-              filter
-              :options="tpes()"
-              optionLabel="name"
-              :class="{ 'p-invalid': submitted && !employee.type }"
-            />
-          </div>
           <div
             v-if="employee.type == 0 || employee.type == 2"
             class="flex flex-column gap-2"
@@ -492,67 +439,8 @@
               :class="{ 'p-invalid': submitted && !employee.treatments }"
             />
           </div>
-          <div class="flex flex-column gap-2">
-            <div class="flex">
-              <label class="text-start">{{ $t("department") }}</label>
-              <svg
-                class="my-auto mx-1"
-                width="7"
-                height="5"
-                viewBox="0 0 6 5"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414"
-                />
-              </svg>
-            </div>
-            <MultiSelect
-              v-model="employee.department"
-              filter
-              option-value="id"
-              :options="departments"
-              optionLabel="title"
-              :class="{ 'p-invalid': submitted && !employee.department }"
-            />
-          </div>
 
-          <div class="flex flex-column gap-2 py-1">
-            <div class="flex">
-              <label class="text-start">{{ $t("roles") }}</label>
-              <svg
-                class="my-auto mx-1"
-                width="7"
-                height="5"
-                viewBox="0 0 6 5"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.8"
-                  d="M1.859 5.008L1.196 4.527L1.95 3.253L0.624 2.668L0.871 1.888L2.288 2.213L2.431 0.744H3.25L3.393 2.213L4.823 1.888L5.07 2.668L3.731 3.253L4.485 4.527L3.822 5.008L2.847 3.877L1.859 5.008Z"
-                  fill="#DA1414"
-                />
-              </svg>
-            </div>
-            <Select
-              v-model="employee.role"
-              option-value="id"
-              filter
-              :options="roles"
-              optionLabel="name"
-              :class="{ 'p-invalid': submitted && !employee.role }"
-            />
-          </div>
           <!-- Extra roles on top of the main one («مشرف باص»). -->
-          <div v-if="extraRoles.length" class="flex flex-column gap-2 py-1">
-            <label class="text-start" for="extra-roles">{{ $t("extra_roles") }}</label>
-            <MultiSelect v-model="employee.extra_roles" inputId="extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" />
-            <small class="text-color-secondary">{{ $t("extra_roles_hint") }}</small>
-          </div>
           <!-- The employees who stand in for this one (information only); every employee, searchable. -->
           <div class="flex flex-column gap-2 py-1">
             <label class="text-start" for="substitute-employee">{{ $t("substitute_employee") }}</label>
@@ -590,10 +478,11 @@ import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
 import AgeRangeField from "@/components/common/AgeRangeField.vue";
 import { workTypesValue } from "@/utils/employeeWorkTypes";
-import { evaluationTypeGroups, extraRoleOptions, extraRolesValue } from "@/utils/employeeForm";
+import EmployeeStructureFields from "@/components/employees/EmployeeStructureFields.vue";
+import { departmentsValue, evaluationTypeGroups, extraRolesValue, fetchEmployeeFormOptions } from "@/utils/employeeForm";
 import moment from "moment";
 export default {
-  components: { SubstituteSelect, WorkTypeSelect, AgeRangeField },
+  components: { SubstituteSelect, WorkTypeSelect, AgeRangeField, EmployeeStructureFields },
   data() {
     return {
       evaluate_types: evaluationTypeGroups(this.$t),
@@ -604,17 +493,14 @@ export default {
         { label: "Additional Details" },
       ],
       submitted: false,
-      employee: { extra_roles: [] },
+      employee: { extra_roles: [], department: [], main_department: null, replace_leader: false },
+      errors: {},
+      departments: [],
       roles: [],
       shifts: [],
       positions: [],
       treatments: [],
     };
-  },
-  computed: {
-    extraRoles() {
-      return extraRoleOptions(this.roles, this.employee.role);
-    },
   },
   methods: {
     tpes() {
@@ -657,21 +543,18 @@ export default {
       axios.get("api/shifts").then((response) => {
         this.shifts = response.data.data;
       });
-      axios.get("api/position").then((response) => {
-        this.positions = response.data.data;
+      // Job titles (with what each fixes), departments (with their heads) and roles: the form's shared lists.
+      fetchEmployeeFormOptions().then((options) => {
+        this.positions = options.positions;
+        this.departments = options.departments;
+        this.roles = options.roles.filter((role) => !role.is_locked || this.$isAdmin());
       });
       axios.get("api/treatment/all").then((response) => {
         this.treatments = response.data.data;
       });
 
-      axios.post("/api/roles").then((res) => {
-        this.roles = res.data.roles.data.filter((role) => !role.is_locked || this.$isAdmin());
-      });
       axios.get("/api/skills").then((res) => {
         this.skills = res.data.data;
-      });
-      axios.get("api/department").then((response) => {
-        this.departments = response.data.data;
       });
       axios
         .get(`/api/countries/${localStorage.getItem("appLang")}`)
@@ -723,8 +606,10 @@ export default {
       if (this.employee.treatments)
         body.append("treatments", this.employee.treatments);
       if (this.employee.skills) body.append("skills", this.employee.skills);
-      if (this.employee.department)
-        body.append("department_id", this.employee.department);
+      // The main department first, then the extra ones.
+      body.append("department_id", departmentsValue(this.employee));
+      if (this.employee.main_department) body.append("main_department_id", this.employee.main_department);
+      if (this.employee.replace_leader) body.append("replace_leader", 1);
       if (this.employee.file) body.append("image", this.employee.file);
       axios
         .post(`/api/employees`, body)
@@ -739,6 +624,7 @@ export default {
           this.$router.push({ name: "Employees" });
         })
         .catch((el) => {
+          this.errors = el.response?.data?.errors ?? {};
           this.$toast.add({
             severity: "error",
             summary: this.$t("error"),

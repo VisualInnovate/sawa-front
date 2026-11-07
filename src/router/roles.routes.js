@@ -5,6 +5,7 @@ const Show = () => import("@/views/roles/Show.vue");
 const Create = () => import("@/views/roles/Create.vue");
 const OrgStructure = () => import("@/views/org/OrgStructure.vue");
 const StructureLog = () => import("@/views/org/StructureLog.vue");
+const StructureConflicts = () => import("@/views/org/StructureConflicts.vue");
 const ApprovalFlows = () => import("@/views/approvals/ApprovalFlows.vue");
 const ApprovalsInbox = () => import("@/views/approvals/ApprovalsInbox.vue");
 
@@ -35,6 +36,13 @@ const rolesRoutes = [
     name: "org-structure",
     meta: { permission: ["org structure list", "org structure edit"] },
     component: OrgStructure,
+  },
+  // Where job titles, roles, departments and heads disagree (fixing them, merging old roles).
+  {
+    path: "structure-conflicts",
+    name: "structure-conflicts",
+    meta: { permission: ["org structure list", "org structure edit"] },
+    component: StructureConflicts,
   },
   {
     path: "structure-log",

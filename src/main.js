@@ -28,6 +28,15 @@ import App from "@/App.vue";
 import BackButton from "@/components/common/BackButton.vue";
 import { applySiteBrand, loadSiteBrand, siteBrand, siteLogo } from "@/utils/siteBrand";
 
+// A page opened before a deploy asks for a chunk the deploy replaced: reload once to get the new files.
+window.addEventListener("vite:preloadError", (event) => {
+  if (sessionStorage.getItem("chunk-reload")) return;
+  event.preventDefault();
+  sessionStorage.setItem("chunk-reload", "1");
+  window.location.reload();
+});
+window.addEventListener("load", () => setTimeout(() => sessionStorage.removeItem("chunk-reload"), 10000));
+
 installButtonLoading();
 // «إعدادات الموقع»: last visit's colours and logo at once, then the current ones from the server.
 applySiteBrand();
