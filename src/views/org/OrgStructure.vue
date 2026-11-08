@@ -208,10 +208,16 @@ function collapseAll() {
 
 // Find a position (by its title, department or one of its employees): opens its branch and brings it into view.
 const found = ref(null);
-const findOptions = computed(() => data.value.positions.map((p) => ({
-  id: p.id,
-  label: [p.title, p.department, ...(p.employees ?? []).map((e) => e.name)].filter(Boolean).join(" — "),
-})));
+// The title shows; the department and its people show small under it and are searched too.
+const findOptions = computed(() => data.value.positions.map((p) => {
+  const people = (p.employees ?? []).map((e) => e.name);
+  return {
+    id: p.id,
+    title: p.title,
+    sub: [p.department, people.slice(0, 3).join("، ") + (people.length > 3 ? ` +${people.length - 3}` : "")].filter(Boolean).join(" — "),
+    search: [p.title, p.department, ...people].filter(Boolean).join(" "),
+  };
+}));
 async function findPosition(id) {
   if (!id) return (found.value = null);
   const byId = Object.fromEntries(data.value.positions.map((p) => [p.id, p]));
@@ -225,7 +231,8 @@ async function findPosition(id) {
   chartWrap.value?.querySelector(`[data-position="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
 }
 
-// Print: the tree alone, fitted to a landscape page, with the page's own styles.
+// Print: the tree alone at its real size (100%), on one page as big as the tree (a wide structure is not shrunk onto
+// A4), with the page's own styles. Saved as PDF it keeps that size; a paper printer fits it to its paper.
 function printTree() {
   const inner = chartInner.value;
   if (!inner) return;
@@ -234,18 +241,23 @@ function printTree() {
   document.body.appendChild(frame);
   const doc = frame.contentDocument;
   const styles = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((node) => node.outerHTML).join("");
-  const naturalWidth = inner.scrollWidth / zoom.value;
-  const scale = Math.min(1, 1050 / naturalWidth);
   doc.open();
   doc.write(`<!doctype html><html dir="${ar.value ? "rtl" : "ltr"}"><head><meta charset="utf-8"><title>${t("org.positions_tree")}</title>${styles}
-    <style>@page{size:A4 landscape;margin:10mm}body{background:#fff!important;margin:0;font-family:inherit}
+    <style>html,body{background:#fff!important;margin:0;font-family:inherit}
     .print-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;border-bottom:1px solid #ccc;padding-bottom:6px}
-    .print-tree{zoom:${scale}}.org-no-print{display:none!important}.org-node-found{outline:none!important}
+    .print-tree{width:max-content;margin:0 auto}.org-no-print{display:none!important}.org-node-found{outline:none!important}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>
     <body><div class="print-head"><b style="font-size:18px">${t("org.positions_tree")}</b><small>${t("org.tree_print_date")}: ${new Date().toLocaleDateString(ar.value ? "ar" : "en")}</small></div>
     <div class="print-tree" dir="ltr">${inner.innerHTML}</div></body></html>`);
   doc.close();
   const go = () => {
+    // The page is as big as the printed tree (never smaller than A4 landscape).
+    const printed = doc.querySelector(".print-tree");
+    const width = Math.max(1050, Math.ceil(printed.scrollWidth) + 40);
+    const height = Math.max(700, Math.ceil(printed.scrollHeight) + 110);
+    const page = doc.createElement("style");
+    page.textContent = `@page{size:${width}px ${height}px;margin:16px}`;
+    doc.head.appendChild(page);
     frame.contentWindow.focus();
     frame.contentWindow.print();
     setTimeout(() => frame.remove(), 1000);
@@ -345,8 +357,16 @@ onBeforeUnmount(() => {
           <Button icon="pi pi-minus-circle" severity="secondary" variant="text" size="small" @click="collapseAll"
             v-tooltip.top="$t('org.tree_collapse_all')" :aria-label="$t('org.tree_collapse_all')" />
         </div>
-        <Select :modelValue="found" @update:modelValue="findPosition" :options="findOptions" optionLabel="label" optionValue="id" filter showClear
-          :placeholder="$t('org.tree_find')" size="small" class="org-tree-find" />
+        <Select :modelValue="found" @update:modelValue="findPosition" :options="findOptions" optionLabel="title" optionValue="id"
+          filter :filterFields="['search']" showClear :placeholder="$t('org.tree_find')" size="small" class="org-tree-find"
+          :overlayStyle="{ width: '22rem', maxWidth: '90vw' }">
+          <template #option="{ option }">
+            <div class="flex flex-column org-find-option">
+              <span>{{ option.title }}</span>
+              <small v-if="option.sub" class="text-color-secondary">{{ option.sub }}</small>
+            </div>
+          </template>
+        </Select>
         <div class="flex items-center gap-1 ms-auto">
           <Button icon="pi pi-print" :label="$t('print')" severity="secondary" variant="outlined" size="small" @click="printTree"
             v-tooltip.top="$t('org.tree_print')" />
@@ -477,6 +497,10 @@ onBeforeUnmount(() => {
 .org-tree-full .org-chart-wrap {
   flex: 1;
   height: auto;
+}
+.org-find-option {
+  white-space: normal;
+  min-width: 0;
 }
 .org-node-found {
   outline: 3px solid rgb(var(--bp-135c65));
