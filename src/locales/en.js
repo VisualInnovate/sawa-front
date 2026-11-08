@@ -3140,6 +3140,8 @@ export default {
     conditions_hint: "A condition applies when every role that gives the user the permission has it.",
     cond_own_cases: "Own cases only",
     cond_own_cases_hint: "Sees only the children they manage, run, evaluate or consulted.",
+    cond_own_department: "Own department only",
+    cond_own_department_hint: "Sees only the department they lead or belong to: its children, programs, sessions, approvals, and its staff's leaves and schedules.",
     cond_after_first_approval: "After the first approval",
     cond_after_first_approval_hint: "Saved now; applied with the evaluation approval flow (phase 4).",
     case_manager: "Case manager",
