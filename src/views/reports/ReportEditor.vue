@@ -465,6 +465,9 @@ const caseParagraphs = (level) => caseDescription(level, { female: female.value,
 
 // ---- strengths/weaknesses (saved on the server, per VB-MAPP evaluation) ----------------------------
 
+// The kinds of points a summary row holds; practices only in Ablls OT (its third table, after the weaknesses).
+const SUMMARY_KINDS = ["strengths", "weaknesses", "practices"];
+
 // The newest VB-MAPP test's strengths/weaknesses: as edited and saved for it, or else as the evaluation gave them.
 // { evaluationId, tables: [{ key, title, rows: [{ symbol, strengths: [point], weaknesses: [point] }] }], saved, dirty, saving, error, loading }
 const summary = ref(null);
@@ -482,6 +485,7 @@ const summaryFromServer = (tables, test = milestoneSection.value?.newest) => {
       symbol: row.symbol ?? "", hidden: [...(row.hidden ?? [])],
       strengths: points(table, row, "strengths"),
       weaknesses: points(table, row, "weaknesses"),
+      practices: points(table, row, "practices"),
     })),
   }));
 };
@@ -528,14 +532,14 @@ function setHidden(item, kind, hidden, state) {
   touchSummary(state);
 }
 // What a summary page has deleted: [{ label, restore() }].
-const summaryDeleted = (table, state) => ["strengths", "weaknesses"].flatMap((kind) => [
+const summaryDeleted = (table, state) => SUMMARY_KINDS.flatMap((kind) => [
   ...(isHidden(table, kind) ? [{ key: `t-${kind}`, label: t(`ereport.${kind}`), restore: () => setHidden(table, kind, false, state) }] : []),
   ...table.rows.filter((row) => isHidden(row, kind))
     .map((row) => ({ key: `r-${kind}-${row.symbol}`, label: `${row.symbol || "—"} · ${t(`ereport.${kind}`)}`, restore: () => setHidden(row, kind, false, state) })),
 ]);
 // A page whose tables are deleted (or left without points) has nothing to print and is left out of the print.
-const summaryPrintable = (table) => ["strengths", "weaknesses"]
-  .some((kind) => !isHidden(table, kind) && summaryRows(table, kind).some((row) => row[kind].length));
+const summaryPrintable = (table) => SUMMARY_KINDS
+  .some((kind) => !isHidden(table, kind) && summaryRows(table, kind).some((row) => row[kind]?.length));
 // The rows that print for a kind (shown, with points), numbered in order.
 const summaryNumber = (table, kind, row) => summaryRows(table, kind).filter((item) => item[kind].length).indexOf(row) + 1;
 
@@ -548,8 +552,8 @@ async function saveSummary(state = summary.value, test = milestoneSection.value?
       key: table.key, title: table.title, hidden: table.hidden ?? [],
       rows: table.rows.map((row) => ({
         symbol: row.symbol, hidden: row.hidden ?? [],
-        ...Object.fromEntries(["strengths", "weaknesses"].flatMap((kind) => {
-          const kept = row[kind].filter((point) => point.text.trim());
+        ...Object.fromEntries(SUMMARY_KINDS.flatMap((kind) => {
+          const kept = (row[kind] ?? []).filter((point) => point.text.trim());
           return [[kind, kept.map((point) => point.text)], [`${kind}_numbers`, kept.map((point) => point.number ?? null)]];
         })),
       })),
@@ -580,7 +584,7 @@ function abllsSummaryTables(test) {
     .sort((a, b) => abllsRank(a.category) - abllsRank(b.category) || (a.category.type_id ?? 0) - (b.category.type_id ?? 0) || a.i - b.i)
     .forEach(({ category }) => {
       const symbol = abllsLetterOf(category);
-      if (!rows.has(symbol)) rows.set(symbol, { symbol, strengths: [], weaknesses: [] });
+      if (!rows.has(symbol)) rows.set(symbol, { symbol, strengths: [], weaknesses: [], practices: [] });
       const row = rows.get(symbol);
       // B12 -> number 12 (code B-12, like VB-MAPP's M-3); another form has no number.
       const match = abllsSymbolOf(category).match(/^[^\d]*?(\d+)$/u);
@@ -590,6 +594,9 @@ function abllsSummaryTables(test) {
         const kind = Number(mission.answer_score) >= 3 ? "strengths" : "weaknesses";
         const text = childTextOf(mission, kind === "strengths" ? "strength_point" : "weakness_point", child.value).trim();
         if (text) row[kind].push(newSummaryPoint(text, number));
+        // Ablls OT: a weak skill's practices text goes to the practices table (same code as its weakness).
+        const practice = kind === "weaknesses" ? childTextOf(mission, "practice", child.value).trim() : "";
+        if (practice) row.practices.push(newSummaryPoint(practice, number));
       }
     });
   return [{ key: "ablls", title: "", rows: [...rows.values()].sort((a, b) => abllsRank({ symbol: a.symbol }) - abllsRank({ symbol: b.symbol })) }];
@@ -624,7 +631,7 @@ const isCarolinaWeak = (response) => response === "-" || response === "+-";
 function carolinaSummaryTables(test) {
   const rows = [];
   for (const [code, { skills }] of carolinaSkillsByCode(test?.result)) {
-    const row = { symbol: code, strengths: [], weaknesses: [] };
+    const row = { symbol: code, strengths: [], weaknesses: [], practices: [] };
     skills.forEach((skill, i) => {
       const number = i + 1 <= 999 ? i + 1 : null;
       if (skill.response === "+" && String(skill.strength ?? "").trim()) row.strengths.push(newSummaryPoint(skill.strength.trim(), number));
@@ -637,7 +644,15 @@ function carolinaSummaryTables(test) {
 
 // Sections with strengths/weaknesses pages of their own (Ablls OT / SP, Carolina) and how each reads.
 const hasPoints = (type) => hasAbllsPoints(type) || Number(type) === CAROLINA;
-const pointKinds = (section) => (section.type === CAROLINA ? ["weaknesses", "strengths"] : ["strengths", "weaknesses"]);
+const pointKinds = (section) => (section.type === CAROLINA ? ["weaknesses", "strengths"]
+  : section.type === ABLLS_SKILLS ? ["strengths", "weaknesses", "practices"] : ["strengths", "weaknesses"]);
+// A summary saved before practices existed has none: they are taken from the test (the rest stays as edited).
+function withPractices(section, saved, test) {
+  if (section.type !== ABLLS_SKILLS || saved.some((table) => table.rows.some((row) => row.practices.length))) return saved;
+  const fresh = new Map(abllsSummaryTables(test).flatMap((table) => table.rows).map((row) => [row.symbol, row.practices]));
+  saved.forEach((table) => table.rows.forEach((row) => { row.practices = fresh.get(row.symbol) ?? []; }));
+  return saved;
+}
 const pointRowTitle = (section, symbol) => (section.type === CAROLINA
   ? carolinaSkillsByCode(section.newest?.result).get(symbol)?.title ?? "" : abllsRowTitle(section, symbol));
 const sectionPointCode = (section, row, point) => (section.type === CAROLINA
@@ -654,7 +669,7 @@ function loadAbllsSummaries() {
     axios.get(`api/reports/summaries/${test.id}`)
       .then(({ data }) => {
         const current = abllsSummaries.value[section.group];
-        current.tables = data.summary ? summaryFromServer(data.summary.tables, test) : pointTablesOf(section, test);
+        current.tables = data.summary ? withPractices(section, summaryFromServer(data.summary.tables, test), test) : pointTablesOf(section, test);
         current.saved = Boolean(data.summary);
       })
       .catch(() => {

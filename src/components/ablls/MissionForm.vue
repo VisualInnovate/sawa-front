@@ -53,6 +53,8 @@ const mission = ref({
   strength_point_female: '',
   weakness_point: '',
   weakness_point_female: '',
+  practice: '',
+  practice_female: '',
 })
 const editors = ref([])
 
@@ -64,7 +66,10 @@ const otherGender = computed(() => (gender.value === 'male' ? 'female' : 'male')
 const gendered = computed(() => academic.value || !!selectedCategory.value)
 // Ablls OT / SP skills also keep the report's strength and weakness texts.
 const points = computed(() => !!assessment.customTypes && !academic.value)
-const POINT_FIELDS = ['strength_point', 'weakness_point']
+// Ablls OT also keeps the practices (shown in the report for a weak skill, answer 0, 1 or 2).
+const POINT_FIELDS = assessment.key === 'skills' ? ['strength_point', 'weakness_point', 'practice'] : ['strength_point', 'weakness_point']
+const POINT_ICONS = { strength_point: 'pi pi-thumbs-up', weakness_point: 'pi pi-thumbs-down', practice: 'pi pi-check-square' }
+const POINT_SCORES = { strength_point: '3 · 4', weakness_point: '0 · 1 · 2', practice: '0 · 1 · 2' }
 const NAME_TOKEN = '{{name}}'
 // Ablls SP keeps the long-term goal on the type (the types dialog), not on the skill.
 const hasLongTermGoal = assessment.key !== 'sp'
@@ -161,6 +166,8 @@ onMounted(async () => {
         strength_point_female: data.strength_point_female || '',
         weakness_point: data.weakness_point || '',
         weakness_point_female: data.weakness_point_female || '',
+        practice: data.practice || '',
+        practice_female: data.practice_female || '',
       }
     } else {
       const fromQuery = Number(route.query.category)
@@ -445,12 +452,12 @@ const save = async () => {
                   <i class="pi pi-chart-line mf-label-icon" aria-hidden="true" />
                   <b>{{ $t('ablls_ui.points_title') }}</b>
                 </div>
-                <p class="mf-points-hint">{{ $t('ablls_ui.points_hint', { token: NAME_TOKEN }) }}</p>
+                <p class="mf-points-hint">{{ $t('ablls_ui.points_hint', { token: NAME_TOKEN }) }}<template v-if="POINT_FIELDS.includes('practice')"> {{ $t('ablls_ui.practice_hint') }}</template></p>
                 <div v-for="f in POINT_FIELDS" :key="f" class="ab-field" :class="`mf-point is-${f}`">
                   <label :for="`mf-${f}`">
-                    <i :class="f === 'strength_point' ? 'pi pi-thumbs-up' : 'pi pi-thumbs-down'" class="mf-label-icon" aria-hidden="true" />
+                    <i :class="POINT_ICONS[f]" class="mf-label-icon" aria-hidden="true" />
                     {{ $t(`ablls_ui.${f}`) }} ({{ $t(gender) }})
-                    <span class="mf-point-scores ltr">{{ f === 'strength_point' ? '3 · 4' : '0 · 1 · 2' }}</span>
+                    <span class="mf-point-scores ltr">{{ POINT_SCORES[f] }}</span>
                   </label>
                   <Textarea :id="`mf-${f}`" v-model="mission[fieldOf(f)]" rows="2" auto-resize
                     :placeholder="$t(`ablls_ui.${f}_ph`, { token: NAME_TOKEN })" :invalid="!!firstError(fieldOf(f))" fluid @input="clearError(fieldOf(f))" />
@@ -663,7 +670,8 @@ const save = async () => {
   font-size: 0.7rem;
   font-weight: 700;
 }
-.mf-point.is-weakness_point .mf-point-scores {
+.mf-point.is-weakness_point .mf-point-scores,
+.mf-point.is-practice .mf-point-scores {
   background: #fef2f2;
   color: #b91c1c;
 }

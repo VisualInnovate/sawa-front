@@ -132,6 +132,10 @@ const boxColor = (categoryIndex, missionIndex, box) => {
   /* As wide as its column (the names wrap) so the 8 columns fit on one line like the paper. */
   width: 0;
   min-width: 100%;
+  /* The same height under every column (up to 3 lines), so all the columns' boxes end on one line, as the paper. */
+  height: 3.9em;
+  line-height: 1.3;
+  overflow: visible;
   margin: 6px 0 0;
   padding-left: 26px;
   color: #111827;

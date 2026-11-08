@@ -2,13 +2,13 @@
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import { FilterMatchMode } from '@primevue/core/api';
-import { ref, onMounted, onBeforeMount } from "vue";
+import { ref, computed, onMounted, onBeforeMount } from "vue";
 // import ProductService from '@/service/ProductService';
 import { useToast } from "primevue/usetoast";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import printPlugin from "vue3-print-nb";
-import { workTypeLabel } from "@/utils/employeeWorkTypes";
+import { workTypeLabel, WORK_TYPES } from "@/utils/employeeWorkTypes";
 import { formatAgeRange } from "@/utils/ageRange";
 import { can } from "@/utils/permissions";
 const toast = useToast();
@@ -233,6 +233,61 @@ const deleteAction = () => {
 const roleNames = (row) => (row.user?.roles ?? []).map((role) => role.name).join("، ");
 const ageRange = (row) => (Number(row.user?.type) === 2 ? formatAgeRange(t, row.user?.age_from_months, row.user?.age_to_months) : "—");
 
+// The filters above the table: built from the loaded employees, so each list holds only what is there.
+// A department matches the main one or a linked one; "none" picks the employees with no value.
+const NONE = "none";
+const emptyPick = () => ({ department: null, position: null, role: null, workType: null, treatment: null, skill: null, shift: null, type: null, age: null });
+const pick = ref(emptyPick());
+const departmentsOf = (row) => {
+  const list = [row.department, ...(row.user?.departments ?? [])].filter(Boolean);
+  return [...new Map(list.map((d) => [d.id, d])).values()];
+};
+const distinct = (rows, get) => {
+  const map = new Map();
+  rows.forEach((row) => get(row).forEach((item) => item && map.set(item.id, item.title ?? item.name)));
+  return [...map].map(([value, label]) => ({ value, label })).sort((a, b) => String(a.label).localeCompare(String(b.label), "ar"));
+};
+const withNone = (options) => [{ value: NONE, label: t("hremp.none") }, ...options];
+const filterOptions = computed(() => {
+  const rows = users.value ?? [];
+  return {
+    department: withNone(distinct(rows, departmentsOf)),
+    position: withNone(distinct(rows, (r) => [r.position])),
+    role: withNone(distinct(rows, (r) => r.user?.roles ?? [])),
+    workType: withNone(WORK_TYPES.map((type) => ({ value: type, label: workTypeLabel(t, type) }))),
+    treatment: withNone(distinct(rows, (r) => r.user?.treatments ?? [])),
+    skill: withNone(distinct(rows, (r) => r.user?.skills ?? [])),
+    shift: withNone(distinct(rows, (r) => [r.shift])),
+    type: [{ value: "therapist", label: t("hremp.type_therapist") }, { value: "staff", label: t("hremp.type_staff") }],
+  };
+});
+// Whether the row's ids match the picked value ("none": it has none).
+const matches = (picked, ids) => picked === null || (picked === NONE ? ids.length === 0 : ids.includes(picked));
+const coversAge = (row, years) => {
+  if (Number(row.user?.type) !== 2) return false;
+  const months = years * 12;
+  const from = row.user?.age_from_months, to = row.user?.age_to_months;
+  return (from == null || months >= from) && (to == null || months <= to);
+};
+const filteredUsers = computed(() => {
+  const p = pick.value;
+  return (users.value ?? []).filter((row) =>
+    matches(p.department, departmentsOf(row).map((d) => d.id))
+    && matches(p.position, row.position ? [row.position.id] : [])
+    && matches(p.role, (row.user?.roles ?? []).map((r) => r.id))
+    && matches(p.workType, row.work_types ?? [])
+    && matches(p.treatment, (row.user?.treatments ?? []).map((r) => r.id))
+    && matches(p.skill, (row.user?.skills ?? []).map((r) => r.id))
+    && matches(p.shift, row.shift ? [row.shift.id] : [])
+    && (p.type === null || (p.type === "therapist") === (Number(row.user?.type) === 2))
+    && (p.age === null || coversAge(row, p.age)));
+});
+const activeFilters = computed(() => Object.values(pick.value).filter((v) => v !== null).length);
+const clearFilters = () => {
+  pick.value = emptyPick();
+};
+const departmentNames = (row) => departmentsOf(row).map((d) => d.title).join("، ");
+
 const exportCSV = () => {
   dt.value.exportCSV();
 };
@@ -293,7 +348,7 @@ const initFilters = () => {
         </Dialog>
 
         <div class="card shadow-1 surface-0">
-          <DataTable ref="dt" v-model:selection="selectedProducts" :value="users" :loading="loading" data-key="id"
+          <DataTable ref="dt" v-model:selection="selectedProducts" :value="filteredUsers" :loading="loading" data-key="id"
             :paginator="true" :rows="10" :filters="filters"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50, 100]"
@@ -315,6 +370,16 @@ const initFilters = () => {
                   </div>
                 </div>
               </div>
+              <div class="emp-filters no-print">
+                <Select v-for="key in ['department', 'position', 'role', 'workType', 'treatment', 'skill', 'shift', 'type']" :key="key"
+                  v-model="pick[key]" :options="filterOptions[key]" optionLabel="label" optionValue="value"
+                  :placeholder="$t(`hremp.f_${key === 'workType' ? 'work_type' : key}`)" showClear
+                  :filter="filterOptions[key].length > 8" size="small" class="emp-filter" />
+                <InputNumber v-model="pick.age" :min="0" :max="18" :maxFractionDigits="1" :placeholder="$t('hremp.f_age')"
+                  showButtons size="small" class="emp-filter" inputClass="w-full" />
+                <Button v-if="activeFilters" :label="$t('hremp.clear')" icon="pi pi-filter-slash" size="small" text @click="clearFilters" />
+                <span class="text-sm text-color-secondary ms-auto">{{ $t('hremp.count', { n: filteredUsers.length, total: users?.length ?? 0 }) }}</span>
+              </div>
             </template>
 
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
@@ -331,6 +396,19 @@ const initFilters = () => {
               </template>
             </Column>
 
+
+            <Column :field="departmentNames" :header="$t('hremp.f_department')" :sortable="true">
+              <template #body="{ data }">
+                <div class="flex flex-wrap gap-1">
+                  <Tag v-for="d in departmentsOf(data)" :key="d.id" :value="d.title" :severity="d.id === data.department?.id ? 'success' : 'secondary'" class="whitespace-nowrap" />
+                  <span v-if="!departmentsOf(data).length" class="text-color-secondary">—</span>
+                </div>
+              </template>
+            </Column>
+
+            <Column field="position.title" :header="$t('hremp.f_position')" :sortable="true">
+              <template #body="{ data }">{{ data.position?.title || "—" }}</template>
+            </Column>
 
             <Column field="shift.title" :header="$t('shift_title')" :sortable="true">
               <template #body="slotProps">
@@ -496,6 +574,18 @@ const initFilters = () => {
 </template>
 
 <style scoped>
+.emp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.emp-filter {
+  width: 11rem;
+  max-width: 100%;
+}
+
 /* Custom styles for better table display */
 :deep(.p-datatable) {
   font-size: 0.9rem;
