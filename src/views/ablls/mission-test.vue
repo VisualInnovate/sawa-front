@@ -291,16 +291,6 @@ export default {
     getcolor(id){
       this.answer.color=id.target.value
     },
-    getquation(id){
-      axios
-        .get(`api/able-mission/1`)
-        .then((response) => {
-          console.log(response.data.data)
-          this.allquestion = response.data.data
-         
-         
-        })
-    },
     getage(){
       axios
         .post("api/milestone-answers/get-age-child",{
@@ -424,7 +414,6 @@ export default {
      return
    }
    this.getusers()
-   this.getquation()
   },
 };
 </script>
