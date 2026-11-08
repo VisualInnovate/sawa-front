@@ -3,7 +3,7 @@
 // and the structure's roles with how many people hold them. Built without people: a department whose head is not set
 // keeps its old leave approvers until one is.
 import axios from "axios";
-import { computed, nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import { errorText } from "@/utils/accounting";
@@ -118,7 +118,150 @@ const roleLabel = (key) => {
 };
 const withoutHead = computed(() => data.value.departments.filter((d) => !d.head).length);
 
-onMounted(load);
+// ---- Tree controls: zoom, fit, full screen, print, expand/collapse, find, drag to move. ----
+const chartBox = ref(null); // the section that goes full screen
+const chartInner = ref(null); // the zoomed content
+const zoom = ref(1);
+const ZOOM_MIN = 0.2;
+const ZOOM_MAX = 2;
+const zoomPercent = computed(() => `${Math.round(zoom.value * 100)}%`);
+// Zooms keeping the point under (x, y) of the visible area in place (its centre by default).
+async function setZoom(value, x = null, y = null) {
+  const el = chartWrap.value;
+  const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value * 100) / 100));
+  if (!el || next === zoom.value) return (zoom.value = next);
+  const px = x ?? el.clientWidth / 2;
+  const py = y ?? el.clientHeight / 2;
+  const ratio = next / zoom.value;
+  const left = (el.scrollLeft + px) * ratio - px;
+  const top = (el.scrollTop + py) * ratio - py;
+  zoom.value = next;
+  await nextTick();
+  el.scrollLeft = left;
+  el.scrollTop = top;
+}
+const zoomIn = () => setZoom(zoom.value + 0.1);
+const zoomOut = () => setZoom(zoom.value - 0.1);
+async function resetZoom() {
+  await setZoom(1);
+  centreChart();
+}
+// The whole tree in the visible area.
+async function fitChart() {
+  const el = chartWrap.value;
+  const inner = chartInner.value;
+  if (!el || !inner) return;
+  zoom.value = 1;
+  await nextTick();
+  const width = inner.scrollWidth;
+  const height = inner.scrollHeight;
+  zoom.value = Math.max(ZOOM_MIN, Math.floor(Math.min(1, (el.clientWidth - 16) / width, (el.clientHeight - 16) / height) * 100) / 100);
+  await nextTick();
+  el.scrollTop = 0;
+  centreChart();
+}
+// Ctrl + wheel zooms at the mouse.
+function onWheel(event) {
+  if (!event.ctrlKey && !event.metaKey) return;
+  event.preventDefault();
+  const rect = chartWrap.value.getBoundingClientRect();
+  setZoom(zoom.value * (event.deltaY < 0 ? 1.1 : 0.9), event.clientX - rect.left, event.clientY - rect.top);
+}
+// Dragging the background moves the tree.
+const dragging = ref(null);
+function onPointerDown(event) {
+  if (event.button !== 0 || event.target.closest("button, a, input, .p-organizationchart-node-toggle-button")) return;
+  const el = chartWrap.value;
+  dragging.value = { x: event.clientX, y: event.clientY, left: el.scrollLeft, top: el.scrollTop };
+}
+function onPointerMove(event) {
+  if (!dragging.value) return;
+  const el = chartWrap.value;
+  el.scrollLeft = dragging.value.left - (event.clientX - dragging.value.x);
+  el.scrollTop = dragging.value.top - (event.clientY - dragging.value.y);
+}
+const stopDrag = () => (dragging.value = null);
+
+// Full screen of the tree box only.
+const fullscreen = ref(false);
+function toggleFullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else chartBox.value?.requestFullscreen?.();
+}
+function onFullscreenChange() {
+  fullscreen.value = document.fullscreenElement === chartBox.value && !!chartBox.value;
+  setTimeout(fitChart, 150);
+}
+
+// Expand / collapse: the top and its direct branches stay open when collapsing.
+const collapsedKeys = ref({});
+const expandAll = () => (collapsedKeys.value = {});
+function collapseAll() {
+  const keys = {};
+  const walk = (node, depth) => {
+    if (node.children?.length && depth >= 1) keys[node.key] = true;
+    node.children?.forEach((child) => walk(child, depth + 1));
+  };
+  walk(tree.value, tree.value.key === "academy" ? -1 : 0);
+  collapsedKeys.value = keys;
+}
+
+// Find a position (by its title, department or one of its employees): opens its branch and brings it into view.
+const found = ref(null);
+const findOptions = computed(() => data.value.positions.map((p) => ({
+  id: p.id,
+  label: [p.title, p.department, ...(p.employees ?? []).map((e) => e.name)].filter(Boolean).join(" — "),
+})));
+async function findPosition(id) {
+  if (!id) return (found.value = null);
+  const byId = Object.fromEntries(data.value.positions.map((p) => [p.id, p]));
+  const keys = { ...collapsedKeys.value };
+  for (let p = byId[byId[id]?.parent_id]; p; p = byId[p.parent_id]) delete keys[String(p.id)];
+  delete keys.academy;
+  collapsedKeys.value = keys;
+  found.value = id;
+  if (zoom.value < 0.6) zoom.value = 0.8;
+  await nextTick();
+  chartWrap.value?.querySelector(`[data-position="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+}
+
+// Print: the tree alone, fitted to a landscape page, with the page's own styles.
+function printTree() {
+  const inner = chartInner.value;
+  if (!inner) return;
+  const frame = document.createElement("iframe");
+  frame.style.cssText = "position:fixed;width:0;height:0;border:0;right:0;bottom:0";
+  document.body.appendChild(frame);
+  const doc = frame.contentDocument;
+  const styles = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((node) => node.outerHTML).join("");
+  const naturalWidth = inner.scrollWidth / zoom.value;
+  const scale = Math.min(1, 1050 / naturalWidth);
+  doc.open();
+  doc.write(`<!doctype html><html dir="${ar.value ? "rtl" : "ltr"}"><head><meta charset="utf-8"><title>${t("org.positions_tree")}</title>${styles}
+    <style>@page{size:A4 landscape;margin:10mm}body{background:#fff!important;margin:0;font-family:inherit}
+    .print-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;border-bottom:1px solid #ccc;padding-bottom:6px}
+    .print-tree{zoom:${scale}}.org-no-print{display:none!important}.org-node-found{outline:none!important}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>
+    <body><div class="print-head"><b style="font-size:18px">${t("org.positions_tree")}</b><small>${t("org.tree_print_date")}: ${new Date().toLocaleDateString(ar.value ? "ar" : "en")}</small></div>
+    <div class="print-tree" dir="ltr">${inner.innerHTML}</div></body></html>`);
+  doc.close();
+  const go = () => {
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+    setTimeout(() => frame.remove(), 1000);
+  };
+  setTimeout(go, 400);
+}
+
+onMounted(() => {
+  load();
+  document.addEventListener("fullscreenchange", onFullscreenChange);
+  window.addEventListener("pointerup", stopDrag);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("fullscreenchange", onFullscreenChange);
+  window.removeEventListener("pointerup", stopDrag);
+});
 </script>
 
 <template>
@@ -182,16 +325,45 @@ onMounted(load);
     </section>
 
     <!-- Positions tree -->
-    <section>
+    <section ref="chartBox" class="org-tree-box" :class="{ 'org-tree-full': fullscreen }">
       <p class="font-bold text-lg mb-1">{{ $t("org.positions_tree") }}</p>
       <small class="text-color-secondary block mb-2">{{ $t("org.positions_hint") }}</small>
-      <div v-if="!loading && data.positions.length" ref="chartWrap" class="org-chart-wrap" dir="ltr">
-        <OrganizationChart :value="tree" collapsible>
+      <!-- Tree controls -->
+      <div v-if="!loading && data.positions.length" class="org-tree-tools">
+        <div class="flex items-center gap-1">
+          <Button icon="pi pi-search-minus" severity="secondary" variant="outlined" size="small" :disabled="zoom <= ZOOM_MIN" @click="zoomOut"
+            v-tooltip.top="$t('org.tree_zoom_out')" :aria-label="$t('org.tree_zoom_out')" />
+          <Button :label="zoomPercent" severity="secondary" variant="text" size="small" class="org-zoom-label" @click="resetZoom"
+            v-tooltip.top="$t('org.tree_reset')" :aria-label="$t('org.tree_reset')" />
+          <Button icon="pi pi-search-plus" severity="secondary" variant="outlined" size="small" :disabled="zoom >= ZOOM_MAX" @click="zoomIn"
+            v-tooltip.top="$t('org.tree_zoom_in')" :aria-label="$t('org.tree_zoom_in')" />
+          <Button icon="pi pi-expand" :label="$t('org.tree_fit')" severity="secondary" variant="outlined" size="small" @click="fitChart" />
+        </div>
+        <div class="flex items-center gap-1">
+          <Button icon="pi pi-plus-circle" severity="secondary" variant="text" size="small" @click="expandAll"
+            v-tooltip.top="$t('org.tree_expand_all')" :aria-label="$t('org.tree_expand_all')" />
+          <Button icon="pi pi-minus-circle" severity="secondary" variant="text" size="small" @click="collapseAll"
+            v-tooltip.top="$t('org.tree_collapse_all')" :aria-label="$t('org.tree_collapse_all')" />
+        </div>
+        <Select :modelValue="found" @update:modelValue="findPosition" :options="findOptions" optionLabel="label" optionValue="id" filter showClear
+          :placeholder="$t('org.tree_find')" size="small" class="org-tree-find" />
+        <div class="flex items-center gap-1 ms-auto">
+          <Button icon="pi pi-print" :label="$t('print')" severity="secondary" variant="outlined" size="small" @click="printTree"
+            v-tooltip.top="$t('org.tree_print')" />
+          <Button :icon="fullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" :label="$t(fullscreen ? 'org.tree_exit_fullscreen' : 'org.tree_fullscreen')"
+            size="small" @click="toggleFullscreen" />
+        </div>
+      </div>
+      <small v-if="!loading && data.positions.length" class="text-color-secondary block mb-1"><i class="pi pi-info-circle text-xs" /> {{ $t("org.tree_hint") }}</small>
+      <div v-if="!loading && data.positions.length" ref="chartWrap" class="org-chart-wrap" :class="{ 'org-dragging': dragging }" dir="ltr"
+        @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove">
+        <div ref="chartInner" class="org-chart-inner" :style="{ zoom }">
+        <OrganizationChart :value="tree" collapsible v-model:collapsedKeys="collapsedKeys">
           <template #academy="{ node }">
             <b>{{ node.data.title }}</b>
           </template>
           <template #position="{ node }">
-            <div class="flex flex-column items-center gap-1 org-node" :dir="ar ? 'rtl' : 'ltr'">
+            <div class="flex flex-column items-center gap-1 org-node" :class="{ 'org-node-found': found === node.data.id }" :data-position="node.data.id" :dir="ar ? 'rtl' : 'ltr'">
               <b>{{ node.data.title }}</b>
               <!-- What the title gives whoever holds it. -->
               <Tag v-if="node.data.role" :value="node.data.role" severity="info" class="text-xs" />
@@ -199,10 +371,11 @@ onMounted(load);
               <small v-if="node.data.department" class="text-color-secondary">{{ node.data.department }}</small>
               <small v-if="node.data.employees.length" class="text-color-secondary">{{ node.data.employees.map((e) => e.name).slice(0, 3).join("، ") }}<template v-if="node.data.employees.length > 3"> +{{ node.data.employees.length - 3 }}</template></small>
               <small v-else class="text-color-secondary">{{ $t("org.empty_position") }}</small>
-              <Button v-if="editable" icon="pi pi-arrows-alt" size="small" variant="text" :label="$t('org.move')" @click="openMove(node.data)" />
+              <Button v-if="editable" icon="pi pi-arrows-alt" size="small" variant="text" class="org-no-print" :label="$t('org.move')" @click="openMove(node.data)" />
             </div>
           </template>
         </OrganizationChart>
+        </div>
       </div>
       <p v-else-if="!loading" class="text-color-secondary">{{ $t("org.no_positions") }}</p>
     </section>
@@ -263,8 +436,52 @@ onMounted(load);
   color: rgb(var(--bp-135c65));
 }
 .org-chart-wrap {
-  overflow-x: auto;
+  overflow: auto;
+  height: 70vh;
+  min-height: 320px;
   padding-bottom: 0.5rem;
+  border: 1px solid rgb(var(--bp-b6dde0));
+  border-radius: 10px;
+  background: rgb(var(--bp-f0f9fa) / 0.4);
+  cursor: grab;
+  user-select: none;
+}
+.org-chart-wrap.org-dragging {
+  cursor: grabbing;
+}
+.org-chart-inner {
+  width: max-content;
+  margin: 0 auto;
+  padding: 0.75rem;
+}
+.org-tree-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.org-zoom-label {
+  min-width: 4rem;
+}
+.org-tree-find {
+  width: 16rem;
+  max-width: 100%;
+}
+.org-tree-box.org-tree-full {
+  background: var(--p-content-background, #fff);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.org-tree-full .org-chart-wrap {
+  flex: 1;
+  height: auto;
+}
+.org-node-found {
+  outline: 3px solid rgb(var(--bp-135c65));
+  outline-offset: 6px;
+  border-radius: 6px;
 }
 .org-node {
   min-width: 9rem;
