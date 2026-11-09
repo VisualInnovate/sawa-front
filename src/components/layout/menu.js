@@ -11,6 +11,8 @@ export const buildMenu = () => [
     icon: "mdi-home",
     label: { dashbord: "dashbored", "bus-trips": "tr.my_trips" }[homeRoute().name] ?? "home",
     to: homeRoute(),
+    // «ما ينتظرك» (on the welcome page and on top of the dashboard): everything waiting for me.
+    badge: "my_tasks",
   },
   {
     key: "admin",

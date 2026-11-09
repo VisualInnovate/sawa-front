@@ -2,8 +2,8 @@
 // Ablls SP as on the centre's paper: a column per type (its flow-chart name under it), its skills numbered upwards from
 // the bottom, and the rows split into horizontal bands, one per level the staff added (each linked to its domains, the
 // first level at the bottom) that line up across the columns; domains in no level form a band above them. Each skill is one
-// row of boxes, one per score 0..max with the score written in it; the boxes up to the answer take the answer's color
-// (so 0 colors the 0 box; an unanswered skill stays white). With several tests a box takes the color of the first
+// row of boxes, one per score 0..max with the score written in it (also on a colored box, as the paper; the 0 box is the
+// narrow one); the boxes up to the answer take the answer's color (so 0 colors the 0 box; an unanswered skill stays white). With several tests a box takes the color of the first
 // (oldest) test that reached it.
 import { computed } from "vue";
 import { abllsSymbolOf } from "./reportUtils";
@@ -82,9 +82,7 @@ const bandRows = (column, l) => [...column.levels[l]].reverse();
         <div v-for="row in bandRows(column, band.l)" :key="`${row.c}-${row.m}`" class="asp-row" :title="row.name">
           <span class="asp-key">{{ row.label }}</span>
           <span class="asp-boxes">
-            <i v-for="n in boxes(row.mission)" :key="n" :style="boxColor(row.c, row.m, n - 1) ? { background: boxColor(row.c, row.m, n - 1) } : null">
-              <template v-if="!boxColor(row.c, row.m, n - 1)">{{ n - 1 }}</template>
-            </i>
+            <i v-for="n in boxes(row.mission)" :key="n" :style="boxColor(row.c, row.m, n - 1) ? { background: boxColor(row.c, row.m, n - 1) } : null">{{ n - 1 }}</i>
           </span>
         </div>
       </div>
@@ -158,7 +156,7 @@ const bandRows = (column, l) => [...column.levels[l]].reverse();
 }
 .asp-boxes {
   display: flex;
-  width: 56px;
+  width: 62px;
   height: 100%;
   border: 1px solid #111827;
   border-top-width: 0;
@@ -178,6 +176,8 @@ const bandRows = (column, l) => [...column.levels[l]].reverse();
   font-weight: 700;
 }
 .asp-boxes i:first-child {
+  /* The 0 box is narrow; the scores share the rest. */
+  flex: 0 0 11px;
   border-inline-start: 0;
 }
 .asp-title {

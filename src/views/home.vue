@@ -5,6 +5,7 @@
 // GET api/dashboard/overview; a part the user may not open comes back null and its block is left out. The page reads
 // again every minute while it is visible.
 import axios from "axios";
+import MyTasks from "@/components/tasks/MyTasks.vue";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -305,6 +306,9 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
         </button>
       </div>
     </header>
+
+    <!-- «ما ينتظرك»: what waits for this account, before the statistics. -->
+    <MyTasks class="dsh-tasks" />
 
     <div v-if="upcoming.holiday_today" class="dsh-banner" role="status">
       <i class="pi pi-sun" aria-hidden="true" /> {{ $t("dash.holiday_today", { title: upcoming.holiday_today.title }) }}
@@ -1263,4 +1267,5 @@ a.dsh-row__title:hover { color: var(--teal); text-decoration: underline; }
   .dsh-kpi { padding: 0.85rem 0.8rem; }
   .dsh-kpi__label { white-space: normal; }
 }
+.dsh-tasks { margin-bottom: 1.25rem; }
 </style>

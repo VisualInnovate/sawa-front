@@ -162,6 +162,10 @@ import { getEvaluationTypeLabel } from "@/utils/evaluationTypes";
 import { toDateOnly } from "@/utils/childAge";
 import { carolinaText } from "@/utils/carolina";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
+
+// Leaving before saving asks first (the answers are sent only at the end).
+useEvaluationLeaveGuard();
 
 const CAROLINA = 5;
 // The colors every evaluation screen offers.

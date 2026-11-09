@@ -4,6 +4,8 @@
 import { nextTick, ref } from 'vue'
 
 const items = defineModel({ type: Array, default: () => [] })
+// Optional: a second text kept beside each item (an academic strength's practice), moved and removed with it.
+const extra = defineModel('extra', { type: Array, default: null })
 const props = defineProps({
   label: { type: String, required: true },
   icon: { type: String, default: 'pi pi-list' },
@@ -14,7 +16,14 @@ const props = defineProps({
   // The matching item of another wording (the boy's text under the girl's), shown under each item.
   reference: { type: Array, default: () => [] },
   referenceLabel: { type: String, default: '' },
+  extraLabel: { type: String, default: '' },
+  extraPlaceholder: { type: String, default: '' },
+  // The other wording's text beside each item.
+  extraReference: { type: Array, default: () => [] },
 })
+const hasExtra = () => Array.isArray(extra.value)
+// The extra list as long as the items (missing ones empty).
+const extraList = () => items.value.map((_, i) => extra.value?.[i] ?? '')
 const emit = defineEmits(['change'])
 
 const draft = ref('')
@@ -23,12 +32,14 @@ const input = ref(null)
 const add = () => {
   const text = draft.value.trim()
   if (!text) return
+  if (hasExtra()) extra.value = [...extraList(), '']
   items.value = [...items.value, text]
   draft.value = ''
   emit('change')
   nextTick(() => input.value?.$el?.focus?.())
 }
 const remove = (i) => {
+  if (hasExtra()) extra.value = extraList().filter((_, j) => j !== i)
   items.value = items.value.filter((_, j) => j !== i)
   emit('change')
 }
@@ -37,7 +48,17 @@ const move = (i, dir) => {
   if (j < 0 || j >= items.value.length) return
   const list = [...items.value]
   ;[list[i], list[j]] = [list[j], list[i]]
+  if (hasExtra()) {
+    const more = extraList()
+    ;[more[i], more[j]] = [more[j], more[i]]
+    extra.value = more
+  }
   items.value = list
+}
+const updateExtra = (i, value) => {
+  const more = extraList()
+  more[i] = value
+  extra.value = more
 }
 const update = (i, value) => {
   const list = [...items.value]
@@ -80,6 +101,12 @@ defineExpose({ flush })
         <div class="le-body">
           <Textarea :model-value="item" rows="1" auto-resize class="le-input" :aria-label="`${label} ${i + 1}`" @update:model-value="update(i, $event)" />
           <small v-if="reference[i]" class="le-ref"><b>{{ referenceLabel }}:</b> {{ reference[i] }}</small>
+          <div v-if="extra" class="le-extra">
+            <span class="le-extra-label"><i class="pi pi-check-square" aria-hidden="true" /> {{ extraLabel }}</span>
+            <Textarea :model-value="extra[i] ?? ''" rows="1" auto-resize class="le-input" :placeholder="extraPlaceholder" :aria-label="`${extraLabel} ${i + 1}`"
+              @update:model-value="updateExtra(i, $event)" />
+            <small v-if="extraReference[i]" class="le-ref"><b>{{ referenceLabel }}:</b> {{ extraReference[i] }}</small>
+          </div>
         </div>
         <div class="le-actions">
           <Button type="button" icon="pi pi-chevron-up" text rounded size="small" severity="secondary" :disabled="i === 0" :aria-label="$t('ablls_ui.move_up')" @click="move(i, -1)" />
@@ -93,6 +120,25 @@ defineExpose({ flush })
 </template>
 
 <style scoped>
+.le-extra {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--sawa-border);
+}
+.le-extra :deep(.le-input),
+.le-extra .le-input {
+  width: 100%;
+}
+.le-extra-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--sawa-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
 .le {
   display: grid;
   gap: 0.55rem;

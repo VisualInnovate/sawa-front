@@ -47,12 +47,21 @@ export const listOf = (mission, field, legacy) => {
 
 // A goal / question list as the child reads it: the girl's wording for a girl ('1' is a girl) when the skill has
 // one, else the boy's, with the child's first name in place of {{name}}.
-const withName = (text, child) => String(text).replace(/\{\{.*?\}\}/g, String(child?.name ?? '').trim().split(/\s+/)[0] || '')
+// {{text}} is kept as written: a variable for a text given later (an Ablls SP practice).
+const withName = (text, child) => String(text).replace(/\{\{(?!\s*text\s*\}\})[^{}]*?\}\}/g, String(child?.name ?? '').trim().split(/\s+/)[0] || '')
 
 export const childListOf = (mission, field, legacy, child = {}) => {
   const female = String(child?.gender) === '1' ? listOf(mission, `${field}_female`) : []
   const list = female.length ? female : listOf(mission, field, legacy)
   return list.map((text) => withName(text, child))
+}
+
+// The item at `index` of a list kept beside another (a practice beside its strength / sub goal): the girl's wording when
+// the child is a girl and the skill has a girl's `listField`, else the boy's, with the child's first name.
+export const childItemAt = (mission, field, listField, index, child = {}) => {
+  const girl = String(child?.gender) === '1' && listOf(mission, `${listField}_female`).length
+  const text = (girl ? mission?.[`${field}_female`]?.[index] : '') || mission?.[field]?.[index] || ''
+  return withName(String(text).trim(), child)
 }
 
 // One text (the long-term goal) as the child reads it, the same way.

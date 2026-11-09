@@ -55,6 +55,9 @@ const mission = ref({
   weakness_point_female: '',
   practice: '',
   practice_female: '',
+  // ABLLS Academy, academic: a practice beside each strength item (same order), boy's and girl's wording.
+  practices: [],
+  practices_female: [],
 })
 const editors = ref([])
 
@@ -67,13 +70,28 @@ const gendered = computed(() => academic.value || !!selectedCategory.value)
 // Ablls OT / SP skills also keep the report's strength and weakness texts.
 const points = computed(() => !!assessment.customTypes && !academic.value)
 // Ablls OT also keeps the practices (shown in the report for a weak skill, answer 0, 1 or 2).
-const POINT_FIELDS = assessment.key === 'skills' ? ['strength_point', 'weakness_point', 'practice'] : ['strength_point', 'weakness_point']
+// Ablls OT and Ablls SP also keep the practices (OT: the report's practices table; SP: one per skill, may hold {{text}}).
+const POINT_FIELDS = ['skills', 'sp'].includes(assessment.key) ? ['strength_point', 'weakness_point', 'practice'] : ['strength_point', 'weakness_point']
+const TEXT_TOKEN = '{{text}}'
 const POINT_ICONS = { strength_point: 'pi pi-thumbs-up', weakness_point: 'pi pi-thumbs-down', practice: 'pi pi-check-square' }
-const POINT_SCORES = { strength_point: '3 · 4', weakness_point: '0 · 1 · 2', practice: '0 · 1 · 2' }
+// The answers that show each text, by the skill's scale (0..top): a strength is 3 or more, or the top of a shorter scale.
+const POINT_SCORES = computed(() => {
+  const top = Math.max(1, autoCriteria.value.length || 4)
+  // Ablls SP: only the top score is a strength.
+  const from = assessment.key === 'sp' ? top : Math.min(3, top)
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i).join(' · ')
+  return { strength_point: range(from, top), weakness_point: range(0, from - 1), practice: range(0, from - 1) }
+})
 const NAME_TOKEN = '{{name}}'
 // Ablls SP keeps the long-term goal on the type (the types dialog), not on the skill.
 const hasLongTermGoal = assessment.key !== 'sp'
-const wordingFields = computed(() => (academic.value ? ['strengths', 'goals', 'questions'] : [...(hasLongTermGoal ? ['long_term_goal'] : []), 'sub_goals', ...(points.value ? POINT_FIELDS : [])]))
+// ABLLS Academy's math / reading / spelling skills keep a practice for the long-term goal (boy's and girl's wording).
+const ltgPractice = computed(() => assessment.key === 'ablls' && !academic.value)
+// Ablls OT keeps a practice beside each sub goal (boy's and girl's wording).
+const subGoalPractices = computed(() => assessment.key === 'skills' && !academic.value)
+const wordingFields = computed(() => (academic.value ? ['strengths', 'practices', 'goals', 'questions']
+  : [...(hasLongTermGoal ? ['long_term_goal'] : []), ...(ltgPractice.value ? ['practice'] : []), 'sub_goals',
+    ...(subGoalPractices.value ? ['practices'] : []), ...(points.value ? POINT_FIELDS : [])]))
 const fieldOf = (field, g = gender.value) => (g === 'male' || !gendered.value ? field : `${field}_female`)
 const genderHasError = (g) => wordingFields.value.some((f) => firstError(fieldOf(f, g)))
 const flushWording = () => editors.value.forEach((ed) => ed?.flush?.())
@@ -168,6 +186,9 @@ onMounted(async () => {
         weakness_point_female: data.weakness_point_female || '',
         practice: data.practice || '',
         practice_female: data.practice_female || '',
+        // Beside the academic strengths (ABLLS Academy) or the sub goals (Ablls OT).
+        practices: (data.strengths?.length ? data.strengths : data.sub_goals || []).map((_, i) => data.practices?.[i] || ''),
+        practices_female: (data.strengths_female?.length ? data.strengths_female : data.sub_goals_female || []).map((_, i) => data.practices_female?.[i] || ''),
       }
     } else {
       const fromQuery = Number(route.query.category)
@@ -231,10 +252,13 @@ const save = async () => {
     criteria: autoCriteria.value,
     ...(academic.value
       ? {
-          strengths: clean(m.strengths),
+          // Each strength with its practice (an empty strength drops its practice too).
+          ...Object.fromEntries(['', '_female'].flatMap((suffix) => {
+            const kept = m[`strengths${suffix}`].map((text, i) => [text.trim(), String(m[`practices${suffix}`][i] ?? '').trim()]).filter(([text]) => text)
+            return [[`strengths${suffix}`, kept.map(([text]) => text)], [`practices${suffix}`, kept.map(([, practice]) => practice)]]
+          })),
           goals: clean(m.goals),
           questions: clean(m.questions),
-          strengths_female: clean(m.strengths_female),
           goals_female: clean(m.goals_female),
           questions_female: clean(m.questions_female),
         }
@@ -242,7 +266,13 @@ const save = async () => {
           ...(hasLongTermGoal ? { long_term_goal: m.long_term_goal.trim() } : {}),
           sub_goals: clean(m.sub_goals),
           ...(gendered.value ? { sub_goals_female: clean(m.sub_goals_female) } : {}),
+          // Ablls OT: each sub goal's practice, kept with it (an empty sub goal drops its practice too).
+          ...(subGoalPractices.value
+            ? Object.fromEntries(['', '_female'].map((suffix) => [`practices${suffix}`, m[`sub_goals${suffix}`]
+              .map((text, i) => [text.trim(), String(m[`practices${suffix}`][i] ?? '').trim()]).filter(([text]) => text).map(([, practice]) => practice)]))
+            : {}),
           ...(gendered.value && hasLongTermGoal ? { long_term_goal_female: m.long_term_goal_female.trim() } : {}),
+          ...(ltgPractice.value ? { practice: m.practice.trim() || null, practice_female: m.practice_female.trim() || null } : {}),
           ...(points.value
             ? Object.fromEntries(POINT_FIELDS.flatMap((f) => [f, `${f}_female`]).map((f) => [f, m[f].trim() || null]))
             : {}),
@@ -384,6 +414,10 @@ const save = async () => {
                 :error="firstError(fieldOf('strengths'))"
                 :reference="mission[fieldOf('strengths', otherGender)]"
                 :reference-label="$t(otherGender)"
+                v-model:extra="mission[fieldOf('practices')]"
+                :extra-label="`${$t('ablls_ui.practice')} (${$t(gender)})`"
+                :extra-placeholder="$t('ablls_ui.practice_item_ph')"
+                :extra-reference="mission[fieldOf('practices', otherGender)]"
                 required
                 @change="clearError(fieldOf('strengths'))"
               />
@@ -432,6 +466,11 @@ const save = async () => {
                 <small v-if="gendered && mission[fieldOf('long_term_goal', otherGender)]" class="mf-ref"><b>{{ $t(otherGender) }}:</b> {{ mission[fieldOf('long_term_goal', otherGender)] }}</small>
                 <small v-if="firstError(fieldOf('long_term_goal'))" class="ab-error">{{ firstError(fieldOf('long_term_goal')) }}</small>
               </div>
+              <div v-if="ltgPractice" class="ab-field">
+                <label for="mf-ltg-practice"><i class="pi pi-check-square mf-label-icon" aria-hidden="true" />{{ $t('ablls_ui.practice') }}<template v-if="gendered"> ({{ $t(gender) }})</template></label>
+                <Textarea id="mf-ltg-practice" v-model="mission[fieldOf('practice')]" rows="2" auto-resize :placeholder="$t('ablls_ui.practice_ltg_ph')" fluid />
+                <small v-if="gendered && mission[fieldOf('practice', otherGender)]" class="mf-ref"><b>{{ $t(otherGender) }}:</b> {{ mission[fieldOf('practice', otherGender)] }}</small>
+              </div>
               <ListEditor
                 :ref="(el) => (editors[0] = el)"
                 v-model="mission[fieldOf('sub_goals')]"
@@ -442,6 +481,13 @@ const save = async () => {
                 :error="firstError(fieldOf('sub_goals'))"
                 :reference="gendered ? mission[fieldOf('sub_goals', otherGender)] : []"
                 :reference-label="$t(otherGender)"
+                v-bind="subGoalPractices ? {
+                  extra: mission[fieldOf('practices')],
+                  'onUpdate:extra': (value) => (mission[fieldOf('practices')] = value),
+                  extraLabel: `${$t('ablls_ui.practice')} (${$t(gender)})`,
+                  extraPlaceholder: $t('ablls_ui.practice_sub_goal_ph'),
+                  extraReference: mission[fieldOf('practices', otherGender)],
+                } : {}"
                 required
                 @change="clearError(fieldOf('sub_goals'))"
               />
@@ -452,15 +498,15 @@ const save = async () => {
                   <i class="pi pi-chart-line mf-label-icon" aria-hidden="true" />
                   <b>{{ $t('ablls_ui.points_title') }}</b>
                 </div>
-                <p class="mf-points-hint">{{ $t('ablls_ui.points_hint', { token: NAME_TOKEN }) }}<template v-if="POINT_FIELDS.includes('practice')"> {{ $t('ablls_ui.practice_hint') }}</template></p>
+                <p class="mf-points-hint">{{ $t(assessment.key === 'sp' ? 'ablls_ui.points_hint_sp' : 'ablls_ui.points_hint', { token: NAME_TOKEN }) }}<template v-if="assessment.key === 'skills'"> {{ $t('ablls_ui.practice_hint') }}</template><template v-else-if="assessment.key === 'sp'"> {{ $t('ablls_ui.practice_sp_hint', { token: TEXT_TOKEN }) }}</template></p>
                 <div v-for="f in POINT_FIELDS" :key="f" class="ab-field" :class="`mf-point is-${f}`">
                   <label :for="`mf-${f}`">
                     <i :class="POINT_ICONS[f]" class="mf-label-icon" aria-hidden="true" />
                     {{ $t(`ablls_ui.${f}`) }} ({{ $t(gender) }})
-                    <span class="mf-point-scores ltr">{{ POINT_SCORES[f] }}</span>
+                    <span v-if="!(f === 'practice' && assessment.key === 'sp')" class="mf-point-scores ltr">{{ POINT_SCORES[f] }}</span>
                   </label>
                   <Textarea :id="`mf-${f}`" v-model="mission[fieldOf(f)]" rows="2" auto-resize
-                    :placeholder="$t(`ablls_ui.${f}_ph`, { token: NAME_TOKEN })" :invalid="!!firstError(fieldOf(f))" fluid @input="clearError(fieldOf(f))" />
+                    :placeholder="f === 'practice' && assessment.key === 'sp' ? $t('ablls_ui.practice_sp_ph', { token: NAME_TOKEN, text: TEXT_TOKEN }) : $t(`ablls_ui.${f}_ph`, { token: NAME_TOKEN })" :invalid="!!firstError(fieldOf(f))" fluid @input="clearError(fieldOf(f))" />
                   <small v-if="mission[fieldOf(f, otherGender)]" class="mf-ref"><b>{{ $t(otherGender) }}:</b> {{ mission[fieldOf(f, otherGender)] }}</small>
                   <small v-if="firstError(fieldOf(f))" class="ab-error">{{ firstError(fieldOf(f)) }}</small>
                 </div>

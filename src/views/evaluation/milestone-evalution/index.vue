@@ -275,7 +275,11 @@ import EesaForm from "../../../components/milestone/EesaForm.vue";
 import EditModeBanner from "../../../components/evaluations/EditModeBanner.vue";
 import { eesaInvalidKeys, eesaScores } from "../../../utils/eesa";
 import { useToast } from "primevue/usetoast";
+import { evaluationLeaveGuard, leaveEvaluation } from "@/utils/evaluationLeaveGuard";
 export default {
+  // Leaving before saving asks first (the answers are sent only at the end).
+  mixins: [evaluationLeaveGuard],
+  beforeRouteLeave: leaveEvaluation,
   components: { EvaluationType, EesaForm, EditModeBanner },
 
   data() {

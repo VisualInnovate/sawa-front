@@ -12,6 +12,10 @@ import { toDateOnly } from "@/utils/childAge";
 import { childMonths, fitsAge, formatAgeRange } from "@/utils/ageRange";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 import { COLORS, PEOPLE, itemText, liveScore } from "./elm";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
+
+// Leaving before saving asks first (the answers are sent only at the end).
+useEvaluationLeaveGuard();
 
 const { t } = useI18n();
 const route = useRoute();

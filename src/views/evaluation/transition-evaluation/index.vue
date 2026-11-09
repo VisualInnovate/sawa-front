@@ -9,6 +9,10 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { toDateOnly } from "@/utils/childAge";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
+
+// Leaving before saving asks first (the answers are sent only at the end).
+useEvaluationLeaveGuard();
 
 const { t } = useI18n();
 const route = useRoute();

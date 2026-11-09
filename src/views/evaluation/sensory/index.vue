@@ -12,6 +12,10 @@ import { toDateOnly } from "@/utils/childAge";
 import { childMonths } from "@/utils/ageRange";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 import { QUADRANT_COLOR, ageText, formName, itemText, optionLabel, quadrantsOfItem, scaleName, sectionLetter } from "./sensory";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
+
+// Leaving before saving asks first (the answers are sent only at the end).
+useEvaluationLeaveGuard();
 
 const { t, locale } = useI18n();
 const route = useRoute();
