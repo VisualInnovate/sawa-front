@@ -3043,6 +3043,7 @@ export default {
     skip_skip: "تُتخطّى المرحلة",
     skip_direct_manager: "تذهب لمسؤوله المباشر",
     skip_approved_by_requester: "تُتخطّى إذا اعتمدها الطالب في مرحلة سابقة",
+    skip_owner_head: "تُتخطّى إذا كان رئيس القسم هو صاحب العمل (مثلاً أجرى التقييم بنفسه)",
     reject_note_required: "سبب الرفض إلزامي",
     who_requester: "طالب المعاملة",
     who_department_head: "رئيس القسم المعني",

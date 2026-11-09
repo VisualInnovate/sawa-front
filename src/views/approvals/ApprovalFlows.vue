@@ -59,6 +59,7 @@ function toForm(stage) {
     remind_every_hours: stage.remind_every_hours ?? null, on_timeout: stage.on_timeout ?? "none", on_reject: stage.on_reject ?? "end",
     on_reject_stage: stage.on_reject_stage ?? null, reject_note_required: stage.reject_note_required ?? true,
     skip_requester: stage.skip_rules?.requester_is_approver ?? null, skip_approved_by_requester: stage.skip_rules?.approved_by_requester === "skip",
+    skip_owner_head: stage.skip_rules?.owner_is_head === "skip",
     // Kept as it is (set by the system: a stage only some transactions need).
     only_if_meta: stage.skip_rules?.only_if_meta ?? null,
   };
@@ -67,6 +68,7 @@ function toBody(stage) {
   const skip = {};
   if (stage.skip_requester) skip.requester_is_approver = stage.skip_requester;
   if (stage.skip_approved_by_requester) skip.approved_by_requester = "skip";
+  if (stage.skip_owner_head) skip.owner_is_head = "skip";
   if (stage.only_if_meta) skip.only_if_meta = stage.only_if_meta;
   return {
     key: stage.key, name: stage.name, approvers: stage.approvers.map(toToken), fallback: stage.fallback.map(toToken),
@@ -285,6 +287,7 @@ onMounted(() => {
             </div>
             <div class="field checks">
               <label class="flex items-center gap-2"><Checkbox v-model="s.skip_approved_by_requester" binary />{{ $t("apf.skip_approved_by_requester") }}</label>
+              <label class="flex items-center gap-2"><Checkbox v-model="s.skip_owner_head" binary />{{ $t("apf.skip_owner_head") }}</label>
               <label class="flex items-center gap-2"><Checkbox v-model="s.reject_note_required" binary />{{ $t("apf.reject_note_required") }}</label>
             </div>
           </fieldset>
