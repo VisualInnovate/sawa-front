@@ -6,13 +6,14 @@ import { ref, computed, onMounted, onBeforeMount } from "vue";
 // import ProductService from '@/service/ProductService';
 import { useToast } from "primevue/usetoast";
 import axios from "axios";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import printPlugin from "vue3-print-nb";
 import { workTypeLabel, WORK_TYPES } from "@/utils/employeeWorkTypes";
 import { formatAgeRange } from "@/utils/ageRange";
 import { can } from "@/utils/permissions";
 const toast = useToast();
 const router = useRouter();
+const route = useRoute();
 const allusers = ref([]);
 const loading = ref(true);
 const user = ref({});
@@ -71,6 +72,11 @@ const restore = (row) => {
 };
 
 onMounted(() => {
+  // Back from editing an employee: say it was saved, then drop the flag so a refresh does not repeat it.
+  if (route.query.saved) {
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("emp.saved"), life: 3000 });
+    router.replace({ query: { ...route.query, saved: undefined } });
+  }
   // productService.getProducts().then((data) => (products.value = data));
   fetchData();
   getallusers();

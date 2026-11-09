@@ -43,6 +43,8 @@
       <template #end> </template>
     </Toolbar>
 <h2 class="text-xl text-center">{{ childreen.find(child => child.id === event.child_id)?.name }}</h2>
+<!-- «أقسام التقييمات»: the employees offered are those of the type's departments. -->
+<p v-if="employeeDepartments.length" class="text-center text-sm text-slate-500 mt-1">{{ $t('calendar_type_departments', { names: employeeDepartments.join('، ') }) }}</p>
     <!-- Age ranges only warn: the booking goes on. -->
     <Message v-for="warning in ageWarnings" :key="warning" severity="warn" :closable="false" class="age-warning">{{ warning }}</Message>
     <!-- Opened for a consultation: what it asked for and what is already booked. -->
@@ -223,6 +225,7 @@ export default {
       slotEmployeeId: null,
       booked: [],
       employees: [],
+      employeeDepartments: [],
       avalible_day: [],
       days: [0, 1, 2, 3, 4, 5, 6],
       doctorshow: "",
@@ -355,6 +358,7 @@ export default {
       ++this.calendarRequest;
       this.event.employee_id = null;
       this.employees = [];
+      this.employeeDepartments = [];
       this.employeesLoading = true;
       this.calendarLoading = false;
       this.clearCalendar();
@@ -362,6 +366,7 @@ export default {
         const { data } = await axios.get(`api/employees/get/with/${evaluationType}`);
         if (request !== this.employeesRequest) return;
         this.employees = this.asList(data.data?.employees).map(employee => ({ ...employee, id: Number(employee.id) }));
+        this.employeeDepartments = this.asList(data.data?.departments);
       } catch (error) {
         if (request !== this.employeesRequest) return;
         if (error.response?.status !== 404) this.calendarError = this.$t('request_failed_retry');

@@ -8,6 +8,7 @@ import { useToast } from "primevue/usetoast";
 import { errorText } from "@/utils/accounting";
 import { can } from "@/utils/permissions";
 import { useRouter } from "vue-router";
+import { openAppLink } from "@/utils/appLink";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -15,7 +16,7 @@ const router = useRouter();
 function openPage(row) {
   if (!row?.url) return;
   open.value = null;
-  router.push(row.url);
+  openAppLink(router, row.url);
 }
 const toast = useToast();
 const ar = computed(() => locale.value === "ar");

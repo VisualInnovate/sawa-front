@@ -4,7 +4,7 @@
 // opens in a new tab (with the same answer box on it); approve it, or reject it with the reason; send it to the parents.
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import DecisionDialog from "@/components/sessions/DecisionDialog.vue";
@@ -15,6 +15,7 @@ import { typeLabel } from "@/components/reports/reportUtils";
 const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
+const route = useRoute();
 const rows = ref([]);
 const canDecide = ref(false);
 const loading = ref(false);
@@ -73,7 +74,26 @@ async function decide(answer) {
     deciding.value = false;
   }
 }
-onMounted(load);
+// «ما ينتظرك» and the notifications link here with ?key=e12 / s3: open that evaluation's result page (its approval box
+// is there). The list stays behind it without the key, so going back does not open it again.
+async function openFromLink() {
+  const key = String(route.query.key ?? "");
+  if (!key) return;
+  let row = rows.value.find((r) => r.key === key);
+  if (!row && status.value) {
+    status.value = null;
+    await load();
+    row = rows.value.find((r) => r.key === key);
+  }
+  await router.replace({ query: {} });
+  const target = row && resultRoute({ type: row.type, id: row.id, childId: row.child?.id, sideProfileId: row.side_profile_id, evaluationId: row.evaluation_id });
+  if (target) router.push(target);
+  else toast.add({ severity: "warn", summary: t("ea_title"), detail: t("ea_link_missing"), life: 4000 });
+}
+onMounted(async () => {
+  await load();
+  await openFromLink();
+});
 </script>
 
 <template>
