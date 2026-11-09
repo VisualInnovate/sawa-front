@@ -5,7 +5,7 @@ import axios from "axios";
 import moment from "moment";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { onBeforeRouteLeave, useRoute } from "vue-router";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import SubstituteSelect from "@/components/SubstituteSelect.vue";
 import WorkTypeSelect from "@/components/WorkTypeSelect.vue";
@@ -28,6 +28,7 @@ import {
 
 const { t } = useI18n();
 const toast = useToast();
+const router = useRouter();
 const route = useRoute();
 
 const loading = ref(true);
@@ -193,7 +194,12 @@ async function save() {
     original.value = snapshot();
     // The departments' heads may have changed with this save.
     fetchEmployeeFormOptions({ refresh: true }).then((lookups) => (options.value = { ...options.value, ...lookups })).catch(() => {});
-    toast.add({ severity: "success", summary: t("success_message"), detail: t("emp.saved"), life: 3000 });
+    // Back to the employees list, which shows the «saved» notice (who only edits therapists goes back where they came from).
+    if (can("employees list")) await router.push({ name: "Employees", query: { saved: 1 } });
+    else {
+      toast.add({ severity: "success", summary: t("success_message"), detail: t("emp.saved"), life: 3000 });
+      if (window.history.state?.back) router.back();
+    }
   } catch (error) {
     errors.value = error.response?.data?.errors ?? {};
     const first = ["personal", "job", "therapist"].find((name) => tabsWithErrors.value.has(name));

@@ -6,6 +6,7 @@ import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import { openAppLink } from "@/utils/appLink";
 import { useToast } from "primevue/usetoast";
 import { getEvaluationTypeLabel } from "@/utils/evaluationTypes";
 import { refreshPendingCounts } from "@/utils/pendingCounts";
@@ -63,7 +64,7 @@ function deadline(row) {
 }
 
 function open(row) {
-  if (row.url) router.push(row.url);
+  if (row.url) openAppLink(router, row.url);
 }
 
 async function decide(row, decision, note = null) {

@@ -3,6 +3,7 @@ import axios from "axios";
 import Popover from "primevue/popover";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { openAppLink } from "@/utils/appLink";
 import { useI18n } from "vue-i18n";
 
 // The signed-in user's dashboard notifications (new required evaluations, evaluations booked with them).
@@ -42,7 +43,7 @@ const toggle = async (event) => {
 const open = (item) => {
   const url = payload(item).url;
   panel.value.hide();
-  if (url) router.push(url);
+  if (url) openAppLink(router, url);
 };
 
 const formatDate = (value) =>
