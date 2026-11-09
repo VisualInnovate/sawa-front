@@ -391,7 +391,7 @@ const mergedLevels = (tests) => {
       const target = levels.get(level.level_id);
       for (const subtest of level.subtests ?? []) {
         let domain = target.subtests.find((item) => item.subtest_name === subtest.subtest_name);
-        if (!domain) target.subtests.push((domain = { subtest_name: subtest.subtest_name, subtest_symbol: subtest.subtest_symbol, questions: [] }));
+        if (!domain) target.subtests.push((domain = { subtest_name: subtest.subtest_name, subtest_chart_name: subtest.subtest_chart_name, subtest_symbol: subtest.subtest_symbol, questions: [] }));
         (subtest.questions ?? []).forEach((question, q) => {
           domain.questions[q] ??= { question: question.question, marks: [] };
           domain.questions[q].marks.push(...milestoneMarks(question, index + 1));

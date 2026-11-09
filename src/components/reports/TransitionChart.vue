@@ -5,7 +5,7 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  // [{ result: [{ id, title, display_order, score }], form: { colors: [] } }], oldest first
+  // [{ result: [{ id, title, chart_title, display_order, score }], form: { colors: [] } }], oldest first
   tests: { type: Array, required: true },
 });
 
@@ -26,7 +26,7 @@ const zero = (column, question) => Boolean(props.tests[column]) && score(column,
 <template>
   <div class="trc">
     <section v-for="question in questions" :key="question.id" class="trc-item">
-      <h5>{{ question.title }}</h5>
+      <h5 :title="question.title">{{ question.chart_title || question.title }}</h5>
       <div class="trc-grid">
         <template v-for="level in LEVELS" :key="level">
           <span class="trc-level">{{ level }}</span>

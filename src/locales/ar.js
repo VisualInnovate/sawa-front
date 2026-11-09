@@ -439,6 +439,8 @@ export default {
   forgetpass: "? نسيت كلمة المرور",
   levels: "المستويات",
   sympol: "رمز",
+  chart_name: "الاسم في الرسم البياني",
+  chart_name_ph: "اسم قصير على الرسم البياني (اختياري، يظهر الاسم الكامل إن تُرك فارغاً)",
   custom_files: "النماذج",
   department: "الاقسام",
   questions: "الاسئلة",

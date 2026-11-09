@@ -26,7 +26,7 @@ const answerText = (question) => question.answers?.find((answer) => answer.score
 const columnScore = (question, column) => columns.value[column]?.scores?.[question.id] ?? columns.value[column]?.scores?.[String(question.id)] ?? "";
 // The chart's tests as the report gives them: [{ result: [{ id, title, display_order, score }], form: { colors } }].
 const tests = computed(() => columns.value.map((column, i) => ({
-  result: questions.value.map((question) => ({ id: question.id, title: question.title, display_order: question.display_order, score: columnScore(question, i) || 0 })),
+  result: questions.value.map((question) => ({ id: question.id, title: question.title, chart_title: question.chart_title, display_order: question.display_order, score: columnScore(question, i) || 0 })),
   form: { colors: [column.color].filter(Boolean) },
 })));
 // The report's «تفسير النقاط»: "حصل في السؤال: الإجابة" for every answered question.

@@ -58,7 +58,7 @@ const legendItems = computed(() => {
       </div>
       <div v-for="(subtest, i) in subtests" :key="i" class="mc-column">
         <span class="mc-symbol" :class="{ 'is-empty': !subtest.subtest_symbol }">{{ subtest.subtest_symbol || " " }}</span>
-        <span class="mc-domain">{{ subtest.subtest_name }}</span>
+        <span class="mc-domain" :title="subtest.subtest_name">{{ subtest.subtest_chart_name || subtest.subtest_name }}</span>
         <!-- Milestone 1 at the bottom: the strip grows upwards. -->
         <div class="mc-strip">
           <span v-for="(question, q) in subtest.questions ?? []" :key="q" class="mc-box" :title="(rowOffset + q + 1) + ' - ' + (question.question ?? '')">

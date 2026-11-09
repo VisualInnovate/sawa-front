@@ -19,6 +19,20 @@ const saving = ref(false);
 const form = ref(null);
 const errors = ref({});
 const deleteTarget = ref(null);
+// The automatic questions change only their name on the charts.
+const chartEdit = ref(null);
+async function saveChartTitle() {
+  chartEdit.value.saving = true;
+  try {
+    await axios.patch(`/api/transition-questions/${chartEdit.value.id}/chart-title`, { chart_title: chartEdit.value.chart_title?.trim() || null });
+    chartEdit.value = null;
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("successful"), life: 3000 });
+    load();
+  } catch (error) {
+    toast.add({ severity: "error", summary: t("error"), detail: error.response?.data?.message || t("request_failed_retry"), life: 5000 });
+    if (chartEdit.value) chartEdit.value.saving = false;
+  }
+}
 
 const titleHasError = computed(() => !!(errors.value.wording || errors.value["wording.male"] || errors.value["wording.female"]));
 const titleError = computed(() => (errors.value.wording || errors.value["wording.male"] || errors.value["wording.female"])?.[0]);
@@ -27,7 +41,7 @@ const answersError = computed(() => (errors.value.answers
   || Object.entries(errors.value).find(([key]) => key.startsWith("answers."))?.[1])?.[0]);
 
 const blankAnswer = () => ({ male: "", female: "" });
-const blank = () => ({ id: null, title: blankAnswer(), display_order: nextOrder(), answers: [1, 2, 3, 4, 5].map(blankAnswer) });
+const blank = () => ({ id: null, title: blankAnswer(), chart_title: "", display_order: nextOrder(), answers: [1, 2, 3, 4, 5].map(blankAnswer) });
 // A title or answer saved before the boy/girl wording has only its text: both start from it.
 const answerWording = (answer) => ({ male: answer?.wording?.male ?? answer?.text ?? "", female: answer?.wording?.female ?? answer?.text ?? "" });
 const nextOrder = () => Math.max(0, ...questions.value.map((q) => Number(q.display_order) || 0)) + 1;
@@ -53,6 +67,7 @@ function openEdit(question) {
   form.value = {
     id: question.id,
     title: { male: question.wording?.male ?? question.title ?? "", female: question.wording?.female ?? question.title ?? "" },
+    chart_title: question.chart_title ?? "",
     display_order: question.display_order,
     answers: [1, 2, 3, 4, 5].map((score) => answerWording(question.answers?.find((answer) => answer.score === score))),
   };
@@ -62,7 +77,7 @@ function openEdit(question) {
 async function save() {
   saving.value = true;
   errors.value = {};
-  const payload = { wording: form.value.title, display_order: form.value.display_order, answers: form.value.answers };
+  const payload = { wording: form.value.title, chart_title: form.value.chart_title?.trim() || null, display_order: form.value.display_order, answers: form.value.answers };
   try {
     if (form.value.id) await axios.put(`/api/transition-questions/${form.value.id}`, payload);
     else await axios.post("/api/transition-questions", payload);
@@ -118,11 +133,17 @@ onMounted(load);
           </span>
           <span v-else class="tq-title">{{ data.title }}</span>
           <Tag v-if="data.is_auto" class="tq-auto" icon="pi pi-lock" severity="secondary" :value="$t('transition.auto')" />
+          <small v-if="data.chart_title" class="tq-chart"><i class="pi pi-chart-bar" aria-hidden="true" /> {{ data.chart_title }}</small>
         </template>
       </Column>
       <Column style="width: 8rem">
         <template #body="{ data }">
-          <div v-if="!data.is_auto" class="table-actions">
+          <div v-if="data.is_auto" class="table-actions">
+            <Button v-can="'transition question edit'" icon="pi pi-chart-bar" rounded severity="info" variant="outlined"
+              v-tooltip.top="$t('chart_name')" :aria-label="$t('chart_name')"
+              @click="chartEdit = { id: data.id, title: data.title, chart_title: data.chart_title ?? '', saving: false }" />
+          </div>
+          <div v-else class="table-actions">
             <Button v-can="'transition question edit'" icon="pi pi-pencil" rounded severity="info" variant="outlined"
               v-tooltip.top="$t('edit')" :aria-label="$t('edit')" @click="openEdit(data)" />
             <Button v-can="'transition question delete'" icon="pi pi-trash" rounded severity="danger" variant="outlined"
@@ -144,6 +165,16 @@ onMounted(load);
       </template>
     </DataTable>
 
+    <Dialog :visible="!!chartEdit" @update:visible="(v) => { if (!v) chartEdit = null; }" :header="$t('chart_name')" modal :style="{ width: '28rem' }" :breakpoints="{ '600px': '95vw' }">
+      <form v-if="chartEdit" class="tq-form" @submit.prevent="saveChartTitle">
+        <p class="m-0"><b>{{ chartEdit.title }}</b></p>
+        <div class="tq-field">
+          <label for="tq-auto-chart">{{ $t("chart_name") }}</label>
+          <InputText id="tq-auto-chart" v-model="chartEdit.chart_title" :placeholder="$t('chart_name_ph')" maxlength="120" autofocus />
+        </div>
+        <Button type="submit" icon="pi pi-check" :label="$t('save')" :loading="chartEdit.saving" />
+      </form>
+    </Dialog>
     <Dialog v-model:visible="dialog" :header="form?.id ? $t('transition.edit') : $t('transition.add')" modal :style="{ width: '640px' }" :breakpoints="{ '700px': '95vw' }">
       <form v-if="form" class="tq-form" @submit.prevent="save">
         <NameTokenHint :text="$t('barrier_wording.name_hint')" />
@@ -158,6 +189,11 @@ onMounted(load);
             <InputNumber inputId="tq-order" v-model="form.display_order" :min="0" :useGrouping="false" required />
             <small v-if="errors.display_order" class="tq-error">{{ errors.display_order[0] }}</small>
           </div>
+        </div>
+        <div class="tq-field">
+          <label for="tq-chart-title">{{ $t("chart_name") }}</label>
+          <InputText id="tq-chart-title" v-model="form.chart_title" :placeholder="$t('chart_name_ph')" maxlength="120" />
+          <small v-if="errors.chart_title" class="tq-error">{{ errors.chart_title[0] }}</small>
         </div>
         <fieldset class="tq-field">
           <legend>{{ $t("transition.answers") }}</legend>
@@ -211,4 +247,5 @@ onMounted(load);
 .tq-score { display: grid; place-items: center; flex: none; width: 2rem; height: 2.4rem; border-radius: 8px; background: var(--sawa-primary, rgb(var(--bp-135c65))); color: #fff; font-weight: 800; }
 .tq-error { color: #dc2626; }
 .tq-actions { display: flex; justify-content: flex-end; gap: .5rem; }
+.tq-chart { display: block; margin-top: .25rem; color: #64748b; }
 </style>
