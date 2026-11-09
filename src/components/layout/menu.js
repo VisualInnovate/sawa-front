@@ -106,6 +106,7 @@ export const buildMenu = () => [
     children: [
       { label: "ea_title", to: { name: "evaluation-approvals" }, perm: ["evaluation approval list", "evaluation approval edit"], badge: "evaluation_approvals" },
       { label: "ewf.distribution", to: { name: "evaluation-distribution" }, perm: ["evaluation approval edit", "evaluation approval list"] },
+      { label: "eval_dept.page", to: { name: "evaluation-departments" }, perm: "evaluation departments edit" },
       { label: "age_ranges.evaluation_page", to: { name: "evaluation-age-ranges" }, perm: "evaluation age ranges edit" },
       { label: "eval_desc.page", to: { name: "evaluation-descriptions" }, perm: "evaluation descriptions edit" },
       { text: "Side profile", to: { name: "SideProfiles" }, perm: "side profiles list" },

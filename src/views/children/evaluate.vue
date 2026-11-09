@@ -152,7 +152,7 @@
         <!-- The department asked: without an evaluator its head distributes it («مطلوب»). -->
         <div class="flex flex-column gap-2">
           <label for="unscheduled-department">{{ $t("ewf.department") }}</label>
-          <Select v-model="unscheduled.department_id" inputId="unscheduled-department" :options="departments" optionLabel="title" optionValue="id"
+          <Select v-model="unscheduled.department_id" inputId="unscheduled-department" :options="departmentOptions" optionLabel="title" optionValue="id"
             filter showClear :placeholder="$t('ewf.pick_department')" :invalid="unscheduled.submitted && !unscheduled.employee_id && !unscheduled.department_id" />
         </div>
         <div class="flex flex-column gap-2">
@@ -206,6 +206,8 @@ export default {
       specialists: [],
       unscheduled: { visible: false },
       departments: [],
+      // «أقسام التقييمات»: each type's departments (empty: any department).
+      typeDepartments: [],
       typeAges: [],
       deleteDialog: false,
       loading: true,
@@ -225,12 +227,16 @@ export default {
       this.specialists = [];
       this.unscheduled = { visible: true, evaluation_type: null, employee_id: null, department_id: null, notes: "", submitted: false, loading: false, saving: false };
       if (!this.departments.length) axios.get("api/department").then(({ data }) => { this.departments = data.data ?? []; }).catch(() => {});
+      axios.get("api/evaluation-type-departments").then(({ data }) => { this.typeDepartments = data.data ?? []; }).catch(() => {});
       evaluationPricing(this.child_id).then((pricing) => { this.pricing = pricing; });
     },
 
     // The specialists who do this evaluation (as the booking calendar lists them).
     async loadSpecialists(type) {
       this.unscheduled.employee_id = null;
+      // The evaluation's default department (kept when the chosen one is among its departments).
+      const row = this.typeDepartments.find((r) => r.type === type);
+      if (row?.department_ids?.length && !row.department_ids.includes(this.unscheduled.department_id)) this.unscheduled.department_id = row.default_id;
       this.specialists = [];
       if (!type) return;
       this.unscheduled.loading = true;
@@ -375,6 +381,11 @@ export default {
   },
 
   computed: {
+    // The departments the chosen evaluation belongs to; all of them when it has none set.
+    departmentOptions() {
+      const ids = this.typeDepartments.find((row) => row.type === this.unscheduled.evaluation_type)?.department_ids ?? [];
+      return ids.length ? this.departments.filter((d) => ids.includes(d.id)) : this.departments;
+    },
     childAgeMonths() {
       return childMonths(this.details?.birth_date);
     },
