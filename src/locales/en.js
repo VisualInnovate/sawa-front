@@ -413,6 +413,8 @@ export default {
   forgetpass: "Forgotten password?",
   levels: "Levels",
   sympol: "sympol",
+  chart_name: "Name on the chart",
+  chart_name_ph: "A short name on the chart (optional; the full name shows when empty)",
   department: "departments",
   questions: "Questions",
   notes: "notes",

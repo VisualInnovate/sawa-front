@@ -228,6 +228,8 @@ const initFilters = () => {
                   <label class="w-full text-start" for="username">{{ $t('title') }}</label>
                 <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+                <label class="w-full text-start" for="subtest-chart-title">{{ $t('chart_name') }}</label>
+                <InputText id="subtest-chart-title" class="text-center" v-model="levels.chart_title" :placeholder='$t("chart_name_ph")' maxlength="120" />
             </div>
            
           
@@ -241,6 +243,8 @@ const initFilters = () => {
                   <label class="w-full text-start" for="username">{{ $t('title') }}</label>
                 <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+                <label class="w-full text-start" for="subtest-chart-title">{{ $t('chart_name') }}</label>
+                <InputText id="subtest-chart-title" class="text-center" v-model="levels.chart_title" :placeholder='$t("chart_name_ph")' maxlength="120" />
             </div>
          
            <div class="w-full text-center">

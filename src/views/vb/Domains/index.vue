@@ -236,6 +236,9 @@ const initFilters = () => {
                   <label class="w-full text-start" for="username">{{ $t('title') }}</label>
                 <InputText required class="text-center" v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+                <label class="w-full text-start" for="domain-chart-title">{{ $t('chart_name') }}</label>
+                <InputText id="domain-chart-title" class="text-center" v-model="levels.chart_title" :placeholder='$t("chart_name_ph")' maxlength="120" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.chart_title">{{ error.chart_title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>
@@ -261,6 +264,9 @@ const initFilters = () => {
                   <label class="w-full text-start" for="username">{{ $t('title') }}</label>
                 <InputText required class="text-center"  v-model="levels.title" :placeholder='$t("title")' />
                 <div class="mt-1 mb-5 text-red-500" v-if="error?.title">{{ error.title[0] }}</div>
+                <label class="w-full text-start" for="domain-chart-title">{{ $t('chart_name') }}</label>
+                <InputText id="domain-chart-title" class="text-center" v-model="levels.chart_title" :placeholder='$t("chart_name_ph")' maxlength="120" />
+                <div class="mt-1 mb-5 text-red-500" v-if="error?.chart_title">{{ error.chart_title[0] }}</div>
             </div>
             <div class="flex flex-column gap-2">
                   <label class="w-full text-start" for="username">{{ $t('sympol') }}</label>

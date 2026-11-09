@@ -4,7 +4,7 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  // [{ result: [{ subtest, score, color }] }], oldest first
+  // [{ result: [{ subtest, subtest_chart, score, color }] }], oldest first
   tests: { type: Array, required: true },
 });
 
@@ -19,6 +19,14 @@ const barriers = computed(() => {
   }
   return names;
 });
+// The barrier's short chart name when set (its full name otherwise), from the newest test that has it.
+const chartName = (barrier) => {
+  for (const test of [...props.tests].reverse()) {
+    const row = (test.result ?? []).find((r) => r.subtest === barrier && r.subtest_chart);
+    if (row) return row.subtest_chart;
+  }
+  return barrier;
+};
 
 const answer = (column, barrier) => (props.tests[column]?.result ?? []).find((row) => row.subtest === barrier) ?? null;
 const color = (column, row) => `#${String(row?.color || props.tests[column]?.form?.colors?.[0] || "135c65").replace("#", "")}`;
@@ -36,7 +44,7 @@ const fill = (column, barrier, level) => {
 <template>
   <div class="bc">
     <section v-for="barrier in barriers" :key="barrier" class="bc-item">
-      <h5>{{ barrier }}</h5>
+      <h5 :title="barrier">{{ chartName(barrier) }}</h5>
       <div class="bc-grid">
         <template v-for="level in LEVELS" :key="level">
           <span class="bc-level">{{ level }}</span>
