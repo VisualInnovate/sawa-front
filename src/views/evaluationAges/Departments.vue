@@ -64,7 +64,8 @@ async function save() {
         <div class="flex flex-column gap-1">
           <label :for="`ed-deps-${row.type}`" class="text-sm text-color-secondary">{{ $t("eval_dept.departments") }}</label>
           <MultiSelect v-model="row.department_ids" :inputId="`ed-deps-${row.type}`" :options="departments" optionLabel="title" optionValue="id"
-            filter display="chip" :placeholder="$t('eval_dept.none')" class="w-full" @change="departmentsChanged(row)" />
+            filter display="chip" :placeholder="$t('eval_dept.none')" class="w-full" :overlayStyle="{ maxWidth: 'min(24rem, 90vw)' }"
+            @change="departmentsChanged(row)" />
         </div>
         <div class="flex flex-column gap-1">
           <label :for="`ed-default-${row.type}`" class="text-sm text-color-secondary">{{ $t("eval_dept.default") }}</label>
@@ -81,5 +82,12 @@ async function save() {
 .ed-grid { display: grid; gap: .75rem; }
 .ed-row { display: grid; grid-template-columns: minmax(10rem, 14rem) 2fr 1fr; align-items: end; gap: 1rem; padding: .75rem 1rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
 .ed-row > strong { align-self: center; }
+/* Many departments: the chips wrap onto more lines inside the field instead of widening the page. */
+.ed-row > * { min-width: 0; }
+.ed-row :deep(.p-multiselect) { width: 100%; max-width: 100%; }
+.ed-row :deep(.p-multiselect-label-container) { min-width: 0; overflow: visible; }
+.ed-row :deep(.p-multiselect-label) { display: flex; flex-wrap: wrap; gap: .35rem; white-space: normal; }
+.ed-row :deep(.p-multiselect-chip-item) { max-width: 100%; }
+.ed-row :deep(.p-multiselect-chip) { max-width: 100%; }
 @media (max-width: 768px) { .ed-row { grid-template-columns: 1fr; } }
 </style>

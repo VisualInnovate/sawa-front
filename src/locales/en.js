@@ -3006,6 +3006,7 @@ export default {
     skip_skip: "Skip the stage",
     skip_direct_manager: "Goes to their direct manager",
     skip_approved_by_requester: "Skipped if the requester approved an earlier stage",
+    skip_owner_head: "Skipped if the department head did the work (e.g. ran the evaluation)",
     reject_note_required: "A reason is required to reject",
     who_requester: "The requester",
     who_department_head: "The department's head",
