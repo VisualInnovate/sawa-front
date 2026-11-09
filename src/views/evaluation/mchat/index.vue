@@ -11,6 +11,10 @@ import { toDateOnly } from "@/utils/childAge";
 import { childMonths, fitsAge, formatAgeRange } from "@/utils/ageRange";
 import { RISK_SEVERITY, mchatPoint, mchatRisk } from "./mchat";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
+
+// Leaving before saving asks first (the answers are sent only at the end).
+useEvaluationLeaveGuard();
 
 const { t } = useI18n();
 const route = useRoute();

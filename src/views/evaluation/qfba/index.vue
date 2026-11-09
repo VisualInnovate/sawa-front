@@ -13,6 +13,10 @@ import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 import {
   instructionsOf, optionLabel, qt, questionText,
 } from "./qfba";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
+
+// Leaving before saving asks first (the answers are sent only at the end).
+useEvaluationLeaveGuard();
 
 const { t, locale } = useI18n();
 const route = useRoute();

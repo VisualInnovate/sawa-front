@@ -7,8 +7,12 @@ import moment from "moment";
 import InputText from 'primevue/inputtext';
 import DatePicker from 'primevue/datepicker';
 import EditModeBanner from "../../components/evaluations/EditModeBanner.vue";
+import { evaluationLeaveGuard, leaveEvaluation } from "@/utils/evaluationLeaveGuard";
 
 export default {
+  // Leaving before saving asks first (the answers are sent only at the end).
+  mixins: [evaluationLeaveGuard],
+  beforeRouteLeave: leaveEvaluation,
   components: { InputText, DatePicker, EditModeBanner },
   data: () => ({
     valu: "",
@@ -63,6 +67,10 @@ export default {
     },
   },
   methods: {
+    // Once the evaluation is saved (submitted, or finished early at the basal age) leaving no longer asks.
+    leaveGuardActive() {
+      return !this.saved
+    },
     // The question in the child's gender; the yes/no wording is picked and kept by the server.
     titleForChild,
     fomate() {

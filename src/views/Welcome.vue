@@ -3,8 +3,10 @@
     <div class="welcome-card">
       <img :src="$siteLogo(sawaLogo)" alt="Sawa" class="welcome-logo" />
       <h1 class="welcome-title">{{ $t("welcome_title", { name: userName }) }}</h1>
-      <p class="welcome-hint">{{ $t("welcome_hint") }}</p>
     </div>
+
+    <!-- «ما ينتظرك»: what waits for this account now (my evaluation requests are listed below with their start button). -->
+    <MyTasks hide-my-evaluations />
 
     <!-- Evaluation coordinators start from the evaluations waiting for an appointment. -->
     <div v-if="seesRequiredEvaluations" class="pending-card">
@@ -72,6 +74,7 @@ import { useI18n } from "vue-i18n";
 import sawaLogo from "../assets/img/sawa_logo.svg";
 import EvaluationRequestsBoard from "../components/EvaluationRequestsBoard.vue";
 import RequiredEvaluationsBoard from "../components/RequiredEvaluationsBoard.vue";
+import MyTasks from "../components/tasks/MyTasks.vue";
 import { useAuthStore } from "../stores/Auth";
 import { getEvaluationStartRoute } from "../utils/evaluationTypes";
 import { isRequestOpen, startEvaluationRequest } from "../utils/evaluationRequestStatus";
@@ -182,15 +185,15 @@ onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
 
 .welcome-card {
   width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-top: 4px solid rgb(var(--bp-135c65));
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
-  padding: 2.5rem 1.5rem;
+  padding: 1rem 1.5rem;
 }
 
 .pending-card {
@@ -220,14 +223,13 @@ onActivated(() => Promise.all([loadPendingRequests(), loadPendingBookings()]));
 }
 
 .welcome-logo {
-  width: 140px;
-  max-width: 60%;
-  margin: 0 auto 1.5rem;
+  width: 72px;
+  flex: none;
 }
 
 .welcome-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.6rem;
+  margin: 0;
+  font-size: 1.35rem;
   font-weight: 700;
   color: rgb(var(--bp-135c65));
 }

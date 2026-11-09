@@ -1,10 +1,14 @@
 <script setup>
-// ABLLS Academy / Ablls OT / Ablls SP as on the paper "Skills Tracking System" flow chart: a column per domain (OT/SP: its
-// type; ABLLS Academy, whose categories have no type: each category, e.g. C13 or R), the name under it,
+// ABLLS Academy / Ablls OT / Ablls SP as on the paper "Skills Tracking System" flow chart: a column per domain type (OT/SP: its
+// type; ABLLS Academy: its four fixed types, التمهيد الأكاديمي / الرياضيات / القراءة / التهجئة), the name under it,
 // its skills (B1, B2...) stacked from the first (bottom) up, each skill one row of boxes (one per score) colored by the answer.
 // With several tests, each box takes the color of the first (oldest) test that reached it.
 import { computed } from "vue";
-import { abllsRank, abllsSymbolOf } from "./reportUtils";
+import { useI18n } from "vue-i18n";
+import { abllsIsStrength, abllsRank, abllsSymbolOf, abllsTop } from "./reportUtils";
+import { ABLLS_TYPES, typeOrder } from "@/components/ablls/abllsTypes";
+
+const { t } = useI18n();
 
 const props = defineProps({
   // [{ result: [{ category, symbol, type_id, type_title, missions: [{ mission_key, mission_degree, mission_max, answer_score, answer_color }] }] }], oldest first
@@ -24,11 +28,17 @@ const columns = computed(() => {
     const missions = (category.missions ?? []).map((mission, m) => ({ mission, m })).sort((a, b) => natural(a.mission.mission_key, b.mission.mission_key));
     if (!missions.length) return;
     const own = category.type_id == null && !category.type_title;
-    const key = own ? `c${c}` : category.type_id ?? category.type_title;
+    // ABLLS Academy: one column per fixed type (all its domains' skills in it); an older domain with no known type keeps its own.
+    const fixed = own && ABLLS_TYPES.some((type) => type.value === (category.type || "academic"));
+    const key = fixed ? `t-${category.type || "academic"}` : own ? `c${c}` : category.type_id ?? category.type_title;
     // OT / SP: the type's flow-chart name (set in the types dialog), else its title.
-    const title = own ? String(category.category ?? "").split(" - ").slice(1).join(" - ") || symbolOf(category) : category.type_chart_title || category.type_title;
-    if (!groups.has(key)) groups.set(key, { key, first: c, rank: rank(category), title, skills: [] });
-    groups.get(key).skills.push({ c, symbol: symbolOf(category), name: category.category, missions });
+    const title = fixed
+      ? t(`ablls_ui.types.${category.type || "academic"}`)
+      : own ? String(category.category ?? "").split(" - ").slice(1).join(" - ") || symbolOf(category) : category.type_chart_title || category.type_title;
+    const order = fixed ? typeOrder(category.type || "academic") : rank(category);
+    if (!groups.has(key)) groups.set(key, { key, first: c, rank: order, title, skills: [] });
+    // Ablls OT (a skill of a type): only a strength is colored; a weakness stays white.
+    groups.get(key).skills.push({ c, symbol: symbolOf(category), name: category.category, missions, strengthsOnly: !own });
   });
   return [...groups.values()]
     .sort((a, b) => a.rank - b.rank || a.first - b.first)
@@ -43,6 +53,7 @@ const columns = computed(() => {
             m,
             mission,
             label: skill.missions.length > 1 ? mission.mission_key : skill.symbol,
+            strengthsOnly: skill.strengthsOnly,
             name: skill.name,
           }))
         )
@@ -50,11 +61,12 @@ const columns = computed(() => {
     }));
 });
 
-const boxes = (mission) => Math.max(1, Number(mission.mission_max) || String(mission.mission_degree ?? "").length - 1);
+const boxes = abllsTop;
 
-const boxColor = (categoryIndex, missionIndex, box) => {
+const boxColor = (categoryIndex, missionIndex, box, strengthsOnly = false) => {
   for (const test of props.tests) {
     const mission = test.result?.[categoryIndex]?.missions?.[missionIndex];
+    if (strengthsOnly && !abllsIsStrength(mission)) continue;
     if (mission?.answer_color && Number(mission.answer_score) >= box) return `#${mission.answer_color}`;
   }
   return "#fff";
@@ -68,7 +80,7 @@ const boxColor = (categoryIndex, missionIndex, box) => {
         <div v-for="row in column.rows" :key="`${row.c}-${row.m}`" class="af-row" :title="row.name">
           <span class="af-key">{{ row.label }}</span>
           <span class="af-boxes">
-            <i v-for="box in boxes(row.mission)" :key="box" :style="{ background: boxColor(row.c, row.m, box) }" />
+            <i v-for="box in boxes(row.mission)" :key="box" :style="{ background: boxColor(row.c, row.m, box, row.strengthsOnly) }" />
           </span>
         </div>
       </div>

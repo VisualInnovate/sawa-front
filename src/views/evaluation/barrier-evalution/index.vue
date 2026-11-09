@@ -178,6 +178,7 @@ import axios from "axios";
 import { getEvaluationTypeLabel } from "../../../utils/evaluationTypes";
 import { formatChildAge, toDateOnly } from "../../../utils/childAge";
 import EditModeBanner from "../../../components/evaluations/EditModeBanner.vue";
+import { evaluationLeaveGuard, leaveEvaluation } from "@/utils/evaluationLeaveGuard";
 
 // As the backend's BarrierAnswers: a barrier whose answers carry the {{example}} token takes the evaluator's example.
 const EXAMPLE_TOKEN = "{{example}}";
@@ -193,6 +194,9 @@ function withExample(text, example) {
 const COLOR_OPTIONS = ["00B8D9", "36B37E", "FFAB00", "FF5630", "6554C0"];
 
 export default {
+  // Leaving before saving asks first (the answers are sent only at the end).
+  mixins: [evaluationLeaveGuard],
+  beforeRouteLeave: leaveEvaluation,
   components: { EditModeBanner },
   data() {
     return {

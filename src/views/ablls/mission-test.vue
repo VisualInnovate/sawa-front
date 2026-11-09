@@ -159,8 +159,12 @@ import "@/components/ablls/ablls.css";
 import EditModeBanner from "@/components/evaluations/EditModeBanner.vue";
 import axios from "axios";
 import InputNumber from "primevue/inputnumber";
+import { evaluationLeaveGuard, leaveEvaluation } from "@/utils/evaluationLeaveGuard";
 
 export default {
+  // Leaving before saving asks first (the answers are sent only at the end).
+  mixins: [evaluationLeaveGuard],
+  beforeRouteLeave: leaveEvaluation,
   components:{ EditModeBanner },
 
 

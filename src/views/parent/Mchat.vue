@@ -106,6 +106,7 @@ import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
 import PageHead from "@/components/parent/PageHead.vue";
 import { formatChildAge } from "@/utils/childAge";
+import { useEvaluationLeaveGuard } from "@/utils/evaluationLeaveGuard";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -122,6 +123,8 @@ const saving = ref(false);
 const result = ref(null);
 const showAnswers = ref(false);
 const booking = ref(false);
+// Leaving in the middle of the questions (answers not sent yet) asks first.
+useEvaluationLeaveGuard(() => step.value === "questions" && Object.keys(answers.value).length > 0 && !saving.value);
 
 const question = computed(() => data.value.questions[index.value]);
 const complete = computed(() => data.value.questions.every((q) => answers.value[q.id] !== undefined));

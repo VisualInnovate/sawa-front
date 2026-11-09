@@ -18,7 +18,12 @@ export const ELM = 12;
 // ABLLS Academy, Ablls OT and Ablls SP all draw the paper flow chart (a column per domain).
 export const isAbllsFlow = (type) => [ABLLS, ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
 
-// Ablls OT / SP reports also list the newest test's strengths (answer 3 or 4) and weaknesses (0, 1, 2) after the chart.
+// An Ablls skill's top score (its scale 0..top), and whether an answer is a strength. Ablls OT: 3 or more, or the top when
+// the scale is shorter (0-2: 2; 0-1: 1). Ablls SP (`topOnly`): only the top score (0-4: 4; 0-2: 2). Below it is a weakness.
+export const abllsTop = (mission) => Math.max(1, Number(mission?.mission_max) || String(mission?.mission_degree ?? "").length - 1);
+export const abllsIsStrength = (mission, topOnly = false) => Number(mission?.answer_score) >= (topOnly ? abllsTop(mission) : Math.min(3, abllsTop(mission)));
+
+// Ablls OT / SP reports also list the newest test's strengths and weaknesses (see abllsIsStrength) after the chart.
 export const hasAbllsPoints = (type) => [ABLLS_SKILLS, ABLLS_SP].includes(Number(type));
 
 // The flow chart's column order by the domain's letter (B1, B2 are skills of B); other letters follow in the order they came.
