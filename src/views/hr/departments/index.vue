@@ -118,10 +118,10 @@ const deleteAction = () => {
       toast.add({severity: 'success', summary: t('success_message'), detail: t('department_deleted_successfully'), life: 3000})
     })
     .catch((e) => {
-      // A department with employees or therapists stays until they move to another one.
+      // The main department of some employees stays until they move to another one (the message names them).
       const data = e.response?.data?.data
-      const detail = data?.employees !== undefined
-        ? t('hremp.department_in_use', { employees: data.employees, therapists: data.therapists })
+      const detail = data?.names?.length
+        ? t('hremp.department_main_of', { names: data.names.join('، ') })
         : e.response?.data?.message || t('mission_error')
       deleteDialog.value = false
       toast.add({severity: 'error', summary: t('error'), detail, life: 6000})

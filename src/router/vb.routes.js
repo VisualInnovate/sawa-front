@@ -190,6 +190,13 @@ const vb = [
       meta: { permission: ["sessions list"] },
       component: () => import("../views/evaluation/sessions/index.vue")
     },
+    // «أقسام التقييمات»: the departments each evaluation type belongs to.
+    {
+      path: '/evaluation-departments',
+      name: 'evaluation-departments',
+      meta: { permission: ["evaluation departments edit"] },
+      component: () => import("../views/evaluationAges/Departments.vue")
+    },
     // «الفئات العمرية للتقييمات»: one age range per evaluation type.
     {
       path: '/evaluation-age-ranges',
