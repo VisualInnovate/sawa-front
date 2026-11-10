@@ -308,7 +308,7 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
     </header>
 
     <!-- «ما ينتظرك»: what waits for this account, before the statistics. -->
-    <MyTasks class="dsh-tasks" />
+    <MyTasks class="dsh-tasks" collapsed />
 
     <div v-if="upcoming.holiday_today" class="dsh-banner" role="status">
       <i class="pi pi-sun" aria-hidden="true" /> {{ $t("dash.holiday_today", { title: upcoming.holiday_today.title }) }}

@@ -171,6 +171,8 @@ function defaults(data) {
     trackingHidden: [],
     // Ablls OT plan: the opening sentence as edited (empty = built from the types that have weaknesses).
     otPlanIntro: "",
+    // Ablls SP plan: the same.
+    spPlanIntro: "",
     // ABLLS Academy plan: the opening paragraph as edited (empty = built from the child and the evaluation's date).
     academyPlanIntro: "",
     // Ablls OT strengths/weaknesses page: the opening sentence as edited (empty = built from the child's name).
@@ -213,6 +215,7 @@ function applyDraft(base, saved) {
   if (CASE_LEVELS.includes(Number(saved.caseLevel))) base.caseLevel = Number(saved.caseLevel);
   if (typeof saved.caseFree === "string") base.caseFree = saved.caseFree;
   if (typeof saved.otPlanIntro === "string") base.otPlanIntro = saved.otPlanIntro;
+  if (typeof saved.spPlanIntro === "string") base.spPlanIntro = saved.spPlanIntro;
   if (typeof saved.academyPlanIntro === "string") base.academyPlanIntro = saved.academyPlanIntro;
   if (typeof saved.otSummaryIntro === "string") base.otSummaryIntro = saved.otSummaryIntro;
   if (Array.isArray(saved.hiddenLevels)) base.hiddenLevels = saved.hiddenLevels.map(String);
@@ -339,6 +342,7 @@ async function load() {
       loadPlan();
       loadQfbaPlan();
       loadOtPlan();
+      loadSpPlan();
       loadAcademyPlan();
       loadCarolinaPlan();
     }
@@ -360,6 +364,7 @@ function open() {
   plan.value = null;
   qfbaPlan.value = null;
   otPlan.value = null;
+  spPlan.value = null;
   academyPlan.value = null;
   carolinaPlan.value = null;
   tracking.value = null;
@@ -634,17 +639,22 @@ function academySummaryTables(test) {
     const row = { symbol, strengths: [], weaknesses: [], practices: [] };
     items.forEach((text, i) => {
       const number = i + 1 <= 999 ? i + 1 : null;
-      if (String(text).trim()) row[i < score ? "strengths" : "weaknesses"].push(newSummaryPoint(String(text).trim(), number));
+      const reached = i < score;
+      // Math / reading / spelling: the sub goal's own strength or weakness text (the sub goal itself while it has none).
+      const point = academic ? "" : childItemAt(mission, reached ? "sub_strengths" : "sub_weaknesses", "sub_goals", i, child.value);
+      const shown = point || String(text).trim();
+      if (shown) row[reached ? "strengths" : "weaknesses"].push(newSummaryPoint(shown, number));
     });
     rows.push(row);
   }
   return [{ key: "ablls-academy", title: "", rows }];
 }
 
-// A row's domain name (the type's flow-chart name) by its letter, from the newest test.
+// A row's domain name by its letter, from the newest test: the type's full name (the short chart name is only for
+// under the flow chart).
 const abllsRowTitle = (section, symbol) => {
   const category = (section.newest?.result ?? []).find((item) => abllsLetterOf(item) === symbol);
-  return category?.type_chart_title || category?.type_title || "";
+  return category?.type_title || category?.type_chart_title || "";
 };
 
 
@@ -986,8 +996,6 @@ async function saveQfbaPlan() {
 // tracking groups and codes them by the skill (B7-2). A skill can be deleted (hidden "group:|B7") and restored.
 
 // { evaluationId, goals: [planGoal], hidden: [key], saved, dirty, saving, error, loading, savedAt }
-const otSection = computed(() => sections.value.find((section) => section.type === ABLLS_SKILLS) ?? null);
-const otPlan = ref(null);
 
 function otPlanFromResult(test) {
   return [...(test?.result ?? [])]
@@ -1011,103 +1019,160 @@ function otPlanFromResult(test) {
     }));
 }
 
-async function loadOtPlan() {
-  const test = otSection.value?.newest;
-  if (!test) return;
-  otPlan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
-  try {
-    const { data } = await axios.get(`api/reports/plans/${test.id}`);
-    otPlan.value.goals = data.plan ? withPlanPractices(data.plan.goals.map(planGoal), otPlanFromResult(test)) : otPlanFromResult(test);
-    otPlan.value.hidden = [...(data.plan?.hidden ?? [])];
-    otPlan.value.saved = Boolean(data.plan);
-    otPlan.value.savedAt = data.plan?.updated_at ?? null;
-    otPlan.value.approval = data.plan?.approval ?? null;
-  } catch {
-    otPlan.value.goals = otPlanFromResult(test);
-  } finally {
-    otPlan.value.loading = false;
-  }
+// Ablls SP («خطة النطق»): per type «أهداف مجال <type>:» and the type's long-term goal, then each weak skill (below the
+// top score) with its weakness point and the sub goals not reached yet. A goal row: general_goal = the type's long-term
+// goal, weakness = the skill's weakness point, goal = the sub goal (empty for a skill without sub goals left).
+function spPlanFromResult(test) {
+  return [...(test?.result ?? [])]
+    .map((category, i) => ({ category, i }))
+    .sort((a, b) => abllsRank(a.category) - abllsRank(b.category) || (a.category.type_id ?? 0) - (b.category.type_id ?? 0)
+      || String(abllsSymbolOf(a.category)).localeCompare(String(abllsSymbolOf(b.category)), undefined, { numeric: true }) || a.i - b.i)
+    .flatMap(({ category }) => (category.missions ?? []).flatMap((mission) => {
+      const raw = mission.answer_score;
+      if (raw === null || raw === undefined || raw === "" || abllsIsStrength(mission, true)) return [];
+      const score = Number(raw);
+      const symbol = (category.missions.length > 1 ? mission.mission_key : abllsSymbolOf(category)) || abllsSymbolOf(category);
+      const weakness = childTextOf(mission, "weakness_point", child.value).trim();
+      const row = (text, number) => planGoal({
+        level_id: null, general_goal_id: null, general_goal: childTextOf(category, "type_long_term_goal", child.value).trim(), domain: category.type_title ?? "",
+        domain_symbol: abllsLetterOf(category), symbol, number, weakness: weakness || text, goal: text,
+        practice: childTextOf(mission, "practice", child.value).trim(),
+      });
+      const goals = childListOf(mission, "sub_goals", null, child.value)
+        .map((text, index) => ({ text: String(text).trim(), number: index + 1 }))
+        .filter(({ text, number }) => text && number > score)
+        .map(({ text, number }) => row(text, number));
+      return goals.length ? goals : weakness ? [row("", null)] : [];
+    }));
 }
 
 // Types (in order) -> skills -> goals; deleted skills are left out and listed to restore.
 const otSkillKey = (symbol) => `group:|${symbol}`;
-const otPlanAllSkills = computed(() => {
-  const skills = new Map();
-  for (const goal of otPlan.value?.goals ?? []) {
-    const key = goal.symbol || "";
-    if (!skills.has(key)) skills.set(key, { key, symbol: key, domain: goal.domain || "", letter: goal.domain_symbol || "", goals: [] });
-    skills.get(key).goals.push(goal);
+
+// A plan by skill (Ablls OT, Ablls SP), saved on the server on the newest chosen test of its type.
+function makeSkillPlan(type, fromResult, introEdit, introText) {
+  const section = computed(() => sections.value.find((item) => item.type === type) ?? null);
+  const plan = ref(null);
+
+  async function load() {
+    const test = section.value?.newest;
+    if (!test) return;
+    plan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
+    try {
+      const { data } = await axios.get(`api/reports/plans/${test.id}`);
+      plan.value.goals = data.plan ? withPlanPractices(data.plan.goals.map(planGoal), fromResult(test)) : fromResult(test);
+      plan.value.hidden = [...(data.plan?.hidden ?? [])];
+      plan.value.saved = Boolean(data.plan);
+      plan.value.savedAt = data.plan?.updated_at ?? null;
+      plan.value.approval = data.plan?.approval ?? null;
+    } catch {
+      plan.value.goals = fromResult(test);
+    } finally {
+      plan.value.loading = false;
+    }
   }
-  return [...skills.values()];
-});
-const otSkillHidden = (skill) => (otPlan.value?.hidden ?? []).includes(otSkillKey(skill.key));
-const otPlanDomains = computed(() => {
-  const domains = new Map();
-  for (const skill of otPlanAllSkills.value.filter((item) => !otSkillHidden(item))) {
-    const key = skill.letter || skill.domain;
-    if (!domains.has(key)) domains.set(key, { key, title: skill.domain, skills: [] });
-    domains.get(key).skills.push(skill);
+
+  const allSkills = computed(() => {
+    const skills = new Map();
+    for (const goal of plan.value?.goals ?? []) {
+      const key = goal.symbol || "";
+      if (!skills.has(key)) skills.set(key, { key, symbol: key, domain: goal.domain || "", letter: goal.domain_symbol || "", goals: [] });
+      skills.get(key).goals.push(goal);
+    }
+    return [...skills.values()];
+  });
+  const skillHidden = (skill) => (plan.value?.hidden ?? []).includes(otSkillKey(skill.key));
+  const domains = computed(() => {
+    const found = new Map();
+    for (const skill of allSkills.value.filter((item) => !skillHidden(item))) {
+      const key = skill.letter || skill.domain;
+      if (!found.has(key)) found.set(key, { key, title: skill.domain, skills: [] });
+      found.get(key).skills.push(skill);
+    }
+    return [...found.values()];
+  });
+  const deleted = computed(() => allSkills.value.filter(skillHidden));
+  const introDefault = computed(() => t(introText, {
+    name: shortName.value, types: domains.value.map((domain) => domain.title).filter(Boolean).join(" / "),
+  }));
+  // The opening sentence: as edited in the report, or built from the types.
+  const intro = computed(() => edits.value?.[introEdit] || introDefault.value);
+  function setIntro(value) {
+    if (edits.value) edits.value[introEdit] = value === introDefault.value ? "" : value;
   }
-  return [...domains.values()];
-});
-const otPlanDeleted = computed(() => otPlanAllSkills.value.filter(otSkillHidden));
-const otIntroDefault = computed(() => t("ereport.ot_plan_intro", {
-  name: shortName.value, types: otPlanDomains.value.map((domain) => domain.title).filter(Boolean).join(" / "),
-}));
-// The opening sentence: as edited in the report, or built from the types.
-const otIntro = computed(() => edits.value?.otPlanIntro || otIntroDefault.value);
-function setOtIntro(value) {
-  if (edits.value) edits.value.otPlanIntro = value === otIntroDefault.value ? "" : value;
+
+  function touch() {
+    if (plan.value) plan.value.dirty = true;
+  }
+  function setSkillHidden(skill, hidden) {
+    const list = new Set(plan.value.hidden);
+    if (hidden) list.add(otSkillKey(skill.key));
+    else list.delete(otSkillKey(skill.key));
+    plan.value.hidden = [...list];
+    touch();
+  }
+  // A text kept on each goal of the skill (its long-term goal; Ablls SP: its weakness point).
+  function setSkillField(skill, field, text) {
+    skill.goals.forEach((goal) => (goal[field] = text));
+    touch();
+  }
+  const setGeneralGoal = (skill, text) => setSkillField(skill, "general_goal", text);
+  // Ablls SP: the type's long-term goal, kept on every goal of the type.
+  function setDomainGoal(domain, text) {
+    domain.skills.forEach((skill) => skill.goals.forEach((goal) => (goal.general_goal = text)));
+    touch();
+  }
+  function addGoal(skill) {
+    const last = skill.goals[skill.goals.length - 1];
+    // A skill listed for its weakness alone (no sub goal yet): its empty row becomes the first goal.
+    if (skill.goals.length === 1 && !(last.goal ?? "").trim() && last.number == null) {
+      last.number = 1;
+      return touch();
+    }
+    const number = Math.max(0, ...skill.goals.map((goal) => Number(goal.number) || 0)) + 1;
+    plan.value.goals.splice(plan.value.goals.indexOf(last) + 1, 0, planGoal({ ...last, id: undefined, number, goal: "", practice: "",
+      weakness: type === ABLLS_SP ? last.weakness : "" }));
+    touch();
+  }
+  function removeGoal(skill, goal) {
+    // The last goal of a skill holds its long-term goal: delete the skill instead (restorable).
+    if (skill.goals.length === 1) return setSkillHidden(skill, true);
+    plan.value.goals.splice(plan.value.goals.indexOf(goal), 1);
+    touch();
+  }
+
+  async function save() {
+    if (!plan.value || plan.value.saving) return;
+    plan.value.saving = true;
+    plan.value.error = false;
+    try {
+      const goals = plan.value.goals.filter((goal) => (goal.goal || goal.weakness || "").trim())
+        .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness?.trim() ? goal.weakness : goal.goal }));
+      const { data } = await axios.put(`api/reports/plans/${plan.value.evaluationId}`, { goals, hidden: plan.value.hidden });
+      plan.value.goals = data.plan.goals.map(planGoal);
+      plan.value.hidden = [...(data.plan.hidden ?? [])];
+      plan.value.saved = true;
+      plan.value.dirty = false;
+      plan.value.savedAt = data.plan.updated_at;
+      plan.value.approval = data.plan.approval ?? null;
+    } catch {
+      plan.value.error = true;
+    } finally {
+      plan.value.saving = false;
+    }
+  }
+
+  return { section, plan, load, domains, deleted, intro, setIntro, touch, setSkillHidden, setSkillField, setGeneralGoal, setDomainGoal, addGoal, removeGoal, save };
 }
 
-function touchOtPlan() {
-  if (otPlan.value) otPlan.value.dirty = true;
-}
-function setOtSkillHidden(skill, hidden) {
-  const list = new Set(otPlan.value.hidden);
-  if (hidden) list.add(otSkillKey(skill.key));
-  else list.delete(otSkillKey(skill.key));
-  otPlan.value.hidden = [...list];
-  touchOtPlan();
-}
-// The skill's long-term goal is kept on each of its goals.
-function setOtGeneralGoal(skill, text) {
-  skill.goals.forEach((goal) => (goal.general_goal = text));
-  touchOtPlan();
-}
-function addOtGoal(skill) {
-  const last = skill.goals[skill.goals.length - 1];
-  const number = Math.max(0, ...skill.goals.map((goal) => Number(goal.number) || 0)) + 1;
-  otPlan.value.goals.splice(otPlan.value.goals.indexOf(last) + 1, 0, planGoal({ ...last, id: undefined, number, weakness: "", goal: "", practice: "" }));
-  touchOtPlan();
-}
-function removeOtGoal(skill, goal) {
-  // The last goal of a skill holds its long-term goal: delete the skill instead (restorable).
-  if (skill.goals.length === 1) return setOtSkillHidden(skill, true);
-  otPlan.value.goals.splice(otPlan.value.goals.indexOf(goal), 1);
-  touchOtPlan();
-}
-
-async function saveOtPlan() {
-  if (!otPlan.value || otPlan.value.saving) return;
-  otPlan.value.saving = true;
-  otPlan.value.error = false;
-  try {
-    const goals = otPlan.value.goals.filter((goal) => (goal.goal || goal.weakness || "").trim())
-      .map(({ key, code, attempts, cells, achieved_at, ...goal }) => ({ ...goal, weakness: goal.weakness?.trim() ? goal.weakness : goal.goal }));
-    const { data } = await axios.put(`api/reports/plans/${otPlan.value.evaluationId}`, { goals, hidden: otPlan.value.hidden });
-    otPlan.value.goals = data.plan.goals.map(planGoal);
-    otPlan.value.hidden = [...(data.plan.hidden ?? [])];
-    otPlan.value.saved = true;
-    otPlan.value.dirty = false;
-    otPlan.value.savedAt = data.plan.updated_at;
-    otPlan.value.approval = data.plan.approval ?? null;
-  } catch {
-    otPlan.value.error = true;
-  } finally {
-    otPlan.value.saving = false;
-  }
-}
+const { section: otSection, plan: otPlan, load: loadOtPlan, domains: otPlanDomains, deleted: otPlanDeleted, intro: otIntro, setIntro: setOtIntro,
+  touch: touchOtPlan, setSkillHidden: setOtSkillHidden, setGeneralGoal: setOtGeneralGoal, addGoal: addOtGoal, removeGoal: removeOtGoal,
+  save: saveOtPlan } = makeSkillPlan(ABLLS_SKILLS, otPlanFromResult, "otPlanIntro", "ereport.ot_plan_intro");
+const { section: spSection, plan: spPlan, load: loadSpPlan, domains: spPlanDomains, deleted: spPlanDeleted, intro: spIntro, setIntro: setSpIntro,
+  touch: touchSpPlan, setSkillHidden: setSpSkillHidden, setSkillField: setSpSkillField, setDomainGoal: setSpDomainGoal, addGoal: addSpGoal,
+  removeGoal: removeSpGoal, save: saveSpPlan } = makeSkillPlan(ABLLS_SP, spPlanFromResult, "spPlanIntro", "ereport.sp_plan_intro");
+// A skill's sub goals to list: a skill kept for its weakness alone has none yet.
+const spSkillGoals = (skill) => skill.goals.filter((goal) => (goal.goal ?? "").trim() || goal.number != null);
 
 // ---- ABLLS Academy plan (saved on the server like the others, on the newest chosen ABLLS Academy test) ---------------
 // As the centre's paper: an opening paragraph (editable), then one table «المجال | المهارة | الهدف | ملاحظات | حالة الهدف»:
@@ -1132,9 +1197,14 @@ function academyPlanFromResult(test) {
       .filter(({ text, number }) => text && number > score && number <= 999)
       .map(({ text, number }) => planGoal({
         level_id: null, general_goal_id: null, general_goal: general || symbol, domain: t(`ablls_ui.types.${type}`),
-        domain_symbol: type, symbol, number, weakness: text, goal: text, note: "", status: "",
-        // Academic: the practice of the same «نقاط القوة والضعف» item; the others: the long-term goal's practice (on each goal).
-        practice: academic ? childItemAt(mission, "practices", "strengths", number - 1, child.value) : childTextOf(mission, "practice", child.value).trim(),
+        // Math / reading / spelling: the sub goal's weakness text (the goal itself while it has none; then it is not shown).
+        domain_symbol: type, symbol, number, weakness: (academic ? "" : childItemAt(mission, "sub_weaknesses", "sub_goals", number - 1, child.value)) || text,
+        goal: text, note: "", status: "",
+        // Academic: the practice of the same «نقاط القوة والضعف» item; the others: the sub goal's own practice, or (a
+        // skill without them) the long-term goal's practice on each goal.
+        practice: academic ? childItemAt(mission, "practices", "strengths", number - 1, child.value)
+          : (mission.practices ?? []).some((value) => String(value ?? "").trim()) || (mission.practices_female ?? []).some((value) => String(value ?? "").trim())
+            ? childItemAt(mission, "practices", "sub_goals", number - 1, child.value) : childTextOf(mission, "practice", child.value).trim(),
       }));
   });
 }
@@ -1145,7 +1215,8 @@ async function loadAcademyPlan() {
   academyPlan.value = { evaluationId: test.id, goals: [], hidden: [], saved: false, dirty: false, saving: false, error: false, loading: true };
   try {
     const { data } = await axios.get(`api/reports/plans/${test.id}`);
-    academyPlan.value.goals = data.plan ? withPlanPractices(data.plan.goals.map(planGoal), academyPlanFromResult(test)) : academyPlanFromResult(test);
+    academyPlan.value.goals = data.plan ? withPlanWeaknesses(withPlanPractices(data.plan.goals.map(planGoal), academyPlanFromResult(test)), academyPlanFromResult(test))
+      : academyPlanFromResult(test);
     academyPlan.value.hidden = [...(data.plan?.hidden ?? [])];
     academyPlan.value.saved = Boolean(data.plan);
     academyPlan.value.savedAt = data.plan?.updated_at ?? null;
@@ -1157,6 +1228,10 @@ async function loadAcademyPlan() {
   }
 }
 
+// The practices are not part of the plan (the centre's decision, 2026-11-10): they will come out on their own as home
+// practices once the goal itself is achieved. The goals still keep them (saved with the plan) for that.
+const PLAN_PRACTICES = false;
+
 // A plan saved before goals kept a practice gets them from the newest test (skill and goal number); once any goal has
 // one, the plan's practices are as edited.
 function withPlanPractices(goals, fresh) {
@@ -1164,6 +1239,18 @@ function withPlanPractices(goals, fresh) {
   const practices = new Map(fresh.map((goal) => [`${goal.symbol}|${goal.number}`, goal.practice]));
   return goals.map((goal) => ({ ...goal, practice: practices.get(`${goal.symbol}|${goal.number}`) ?? "" }));
 }
+
+// A plan saved before the sub goals kept a weakness text (its weakness is the goal itself) gets it from the newest test.
+function withPlanWeaknesses(goals, fresh) {
+  const weaknesses = new Map(fresh.map((goal) => [`${goal.symbol}|${goal.number}`, goal.weakness]));
+  return goals.map((goal) => ((goal.weakness ?? "").trim() && goal.weakness !== goal.goal ? goal
+    : { ...goal, weakness: weaknesses.get(`${goal.symbol}|${goal.number}`) || goal.weakness }));
+}
+// The goal's weakness text, when it has one of its own (not the goal repeated).
+const academyWeakness = (goal) => ((goal.weakness ?? "").trim() && goal.weakness !== goal.goal ? goal.weakness : "");
+// Math / reading / spelling: one practice for the whole skill (the long-term goal's) is shown under the skill; a
+// practice per goal is shown under each goal.
+const academySharedPractice = (skill) => skill.type !== "academic" && skill.goals.every((goal) => (goal.practice ?? "") === (skill.goals[0]?.practice ?? ""));
 
 // Types (in order) -> skills -> goals; deleted skills are left out and listed to restore.
 const academyPlanAllSkills = computed(() => {
@@ -1696,6 +1783,16 @@ function back() {
             </div>
             <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="otPlan.saving" data-no-request-spinner @click="saveOtPlan()" />
             <PlanApproval v-if="otPlan.approval" v-model:approval="otPlan.approval" :evaluationId="otPlan.evaluationId" :dirty="otPlan.dirty || !otPlan.saved" />
+          </div>
+
+          <div v-if="spPlan && !spPlan.loading" class="rx-save-group" :class="spPlan.error ? 'is-error' : spPlan.dirty || !spPlan.saved ? 'is-dirty' : 'is-saved'">
+            <span class="rx-save-dot" aria-hidden="true" />
+            <div class="rx-save-text">
+              <b>{{ $t("ereport.group_plan") }} · Ablls SP</b>
+              <small>{{ spPlan.error ? $t("ereport.save_failed") : spPlan.dirty || !spPlan.saved ? $t("ereport.plan_unsaved") : $t("ereport.plan_saved") }}</small>
+            </div>
+            <Button size="small" icon="pi pi-save" :label="$t('save')" :loading="spPlan.saving" data-no-request-spinner @click="saveSpPlan()" />
+            <PlanApproval v-if="spPlan.approval" v-model:approval="spPlan.approval" :evaluationId="spPlan.evaluationId" :dirty="spPlan.dirty || !spPlan.saved" />
           </div>
 
           <div v-if="academyPlan && !academyPlan.loading" class="rx-save-group" :class="academyPlan.error ? 'is-error' : academyPlan.dirty || !academyPlan.saved ? 'is-dirty' : 'is-saved'">
@@ -2561,7 +2658,7 @@ function back() {
                     <b class="ltr">{{ skill.symbol }}-{{ goal.number ?? skill.goals.indexOf(goal) + 1 }}:</b>
                     <div>
                       <EditableText v-model="goal.goal" block multiline :placeholder="$t('ablls_ui.sub_goals')" @update:modelValue="touchOtPlan()" />
-                      <div class="rx-practice" :class="{ 'rx-screen-only': !(goal.practice ?? '').trim() }">
+                      <div v-if="PLAN_PRACTICES" class="rx-practice" :class="{ 'rx-screen-only': !(goal.practice ?? '').trim() }">
                         <b>{{ $t("ereport.practice_label") }}</b>
                         <EditableText v-model="goal.practice" block multiline :placeholder="$t('ablls_ui.practice')" @update:modelValue="touchOtPlan()" />
                       </div>
@@ -2577,6 +2674,65 @@ function back() {
             </div>
           </template>
           <p v-else-if="!otPlanDeleted.length" class="rx-empty">{{ $t("ereport.ot_plan_empty") }}</p>
+          <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
+        </section>
+
+        <!-- Ablls SP plan («خطة النطق»): the chart, then per type its long-term goal and each weak skill with its weakness
+             point and the sub goals not reached yet; saved on the server like the others. -->
+        <section v-if="showPlan && spPlan && section.type === ABLLS_SP && section.group === spSection?.group"
+          v-page="{ key: 'sp-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
+          :class="{ 'rx-print-hidden': !spPlan.loading && !spPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          <header class="rx-head">
+            <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
+            <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
+          </header>
+          <h2 class="rx-band">{{ $t("ereport.plan_title") }} · {{ section.label }}</h2>
+          <AbllsTestsHeader variant="sp" :tests="section.tests" :child-name="child.name" />
+          <AbllsSpChart :tests="section.tests" />
+
+          <div v-if="spPlanDeleted.length" class="rx-deleted rx-screen-only">
+            <span><i class="pi pi-eye-slash" aria-hidden="true" /> {{ $t("ereport.deleted_items") }}</span>
+            <button v-for="skill in spPlanDeleted" :key="skill.key" type="button" class="rx-restore" :title="$t('ereport.restore')" @click="setSpSkillHidden(skill, false)">
+              <i class="pi pi-undo" aria-hidden="true" /> {{ skill.symbol }}
+            </button>
+          </div>
+          <p v-if="spPlan.loading" class="rx-empty">{{ $t("ereport.loading") }}</p>
+          <template v-else-if="spPlanDomains.length">
+            <div class="rx-ot-intro"><EditableText :model-value="spIntro" block multiline @update:modelValue="setSpIntro" /></div>
+            <div v-for="domain in spPlanDomains" :key="domain.key" class="rx-ot-domain">
+              <h4 class="rx-ot-domain-title">{{ $t("ereport.ot_plan_domain", { type: domain.title }) }}</h4>
+              <!-- The type's long-term goal. -->
+              <div class="rx-sp-ltg" :class="{ 'rx-screen-only': !(domain.skills[0]?.goals[0]?.general_goal ?? '').trim() }">
+                <EditableText :model-value="domain.skills[0]?.goals[0]?.general_goal ?? ''" block multiline :placeholder="$t('ablls_ui.long_term_goal')"
+                  @update:modelValue="setSpDomainGoal(domain, $event)" />
+              </div>
+              <div v-for="skill in domain.skills" :key="skill.key" class="rx-ot-skill">
+                <div class="rx-ot-ltg">
+                  <span class="rx-ot-bullet" aria-hidden="true">•</span>
+                  <b class="ltr">{{ skill.symbol }}:</b>
+                  <EditableText :model-value="skill.goals[0]?.weakness ?? ''" block multiline :placeholder="$t('ablls_ui.weakness_point')"
+                    @update:modelValue="setSpSkillField(skill, 'weakness', $event)" />
+                  <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.delete_row')" :title="$t('ereport.delete_row')"
+                    @click="setSpSkillHidden(skill, true)"><i class="pi pi-times" aria-hidden="true" /></button>
+                </div>
+                <template v-if="spSkillGoals(skill).length">
+                  <p class="rx-ot-objectives ltr">(objectives):</p>
+                  <ul class="rx-ot-goals">
+                    <li v-for="goal in spSkillGoals(skill)" :key="goal.key">
+                      <b class="ltr">{{ skill.symbol }}-{{ goal.number ?? skill.goals.indexOf(goal) + 1 }}:</b>
+                      <div><EditableText v-model="goal.goal" block multiline :placeholder="$t('ablls_ui.sub_goals')" @update:modelValue="touchSpPlan()" /></div>
+                      <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.remove_point')" :title="$t('ereport.remove_point')"
+                        @click="removeSpGoal(skill, goal)"><i class="pi pi-trash" aria-hidden="true" /></button>
+                    </li>
+                  </ul>
+                </template>
+                <button type="button" class="rx-plan-control rx-add-point rx-screen-only" @click="addSpGoal(skill)">
+                  <i class="pi pi-plus" aria-hidden="true" /> {{ $t("ereport.add_point") }}
+                </button>
+              </div>
+            </div>
+          </template>
+          <p v-else-if="!spPlanDeleted.length" class="rx-empty">{{ $t("ereport.sp_plan_empty") }}</p>
           <footer class="rx-foot"><span>{{ $t("ereport.academy") }}</span><span class="rx-page-num" /></footer>
         </section>
 
@@ -2619,7 +2775,7 @@ function back() {
                       <button type="button" class="rx-plan-control rx-remove-point rx-screen-only" :aria-label="$t('ereport.delete_row')" :title="$t('ereport.delete_row')"
                         @click="setAcademySkillHidden(skill, true)"><i class="pi pi-times" aria-hidden="true" /></button>
                     </div>
-                    <div v-if="skill.type !== 'academic'" class="rx-practice" :class="{ 'rx-screen-only': !(skill.goals[0]?.practice ?? '').trim() }">
+                    <div v-if="PLAN_PRACTICES && academySharedPractice(skill)" class="rx-practice" :class="{ 'rx-screen-only': !(skill.goals[0]?.practice ?? '').trim() }">
                       <b>{{ $t("ereport.practice_label") }}</b>
                       <EditableText :model-value="skill.goals[0]?.practice ?? ''" block multiline :placeholder="$t('ablls_ui.practice')"
                         @update:modelValue="setAcademySkillField(skill, 'practice', $event)" />
@@ -2630,7 +2786,12 @@ function back() {
                       <b class="ltr">{{ academyGoalCode(skill, goal) }}:</b>
                       <div>
                         <EditableText v-model="goal.goal" block multiline @update:modelValue="touchAcademyPlan()" />
-                        <div v-if="skill.type === 'academic'" class="rx-practice" :class="{ 'rx-screen-only': !(goal.practice ?? '').trim() }">
+                        <div v-if="skill.type !== 'academic'" class="rx-practice rx-weakness" :class="{ 'rx-screen-only': !academyWeakness(goal) }">
+                          <b>{{ $t("ereport.weakness_label") }}</b>
+                          <EditableText :model-value="academyWeakness(goal)" block multiline :placeholder="$t('ablls_ui.sub_weaknesses')"
+                            @update:modelValue="goal.weakness = $event; touchAcademyPlan()" />
+                        </div>
+                        <div v-if="PLAN_PRACTICES && !academySharedPractice(skill)" class="rx-practice" :class="{ 'rx-screen-only': !(goal.practice ?? '').trim() }">
                           <b>{{ $t("ereport.practice_label") }}</b>
                           <EditableText v-model="goal.practice" block multiline :placeholder="$t('ablls_ui.practice')" @update:modelValue="touchAcademyPlan()" />
                         </div>
@@ -3632,11 +3793,16 @@ function back() {
   font-size: 0.92em;
   line-height: 1.6;
 }
-.rx-ac-skill .rx-practice {
+.rx-weakness > b {
+  color: #b45309;
+}
+.rx-ac-skill .rx-practice,
+.rx-ac-goal .rx-practice {
   flex-direction: column;
   gap: 0.5mm;
 }
-.rx-ac-skill .rx-practice > :not(b) {
+.rx-ac-skill .rx-practice > :not(b),
+.rx-ac-goal .rx-practice > :not(b) {
   width: 100%;
 }
 .rx-practice > b {
@@ -3702,6 +3868,11 @@ function back() {
 }
 .rx-ac-goal + .rx-ac-goal {
   margin-top: 1.5mm;
+}
+.rx-sp-ltg {
+  margin: 1mm 0 2mm;
+  font-weight: 700;
+  line-height: 1.8;
 }
 .rx-ot-intro {
   margin: 4mm 0 3mm;

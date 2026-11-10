@@ -14,6 +14,8 @@ import { refreshPendingCounts } from "@/utils/pendingCounts";
 const props = defineProps({
   // The welcome page lists my evaluation requests with their «start» button itself.
   hideMyEvaluations: { type: Boolean, default: false },
+  // The statistics dashboard: the lists start closed (a title with its count; the arrow opens it).
+  collapsed: { type: Boolean, default: false },
 });
 
 const { t, locale } = useI18n();
@@ -24,6 +26,25 @@ const loading = ref(true);
 const deciding = ref(null);
 const rejecting = ref(null); // { row, note }
 const showRequests = ref(false);
+// Each list folds under its title; what the user opened or closed is kept for the next visit.
+const FOLD_KEY = "my-tasks-folds";
+const readFolds = () => {
+  try {
+    return JSON.parse(localStorage.getItem(FOLD_KEY) || "{}") || {};
+  } catch {
+    return {};
+  }
+};
+const folds = ref(readFolds());
+const isOpen = (key) => folds.value[key] ?? !props.collapsed;
+function toggle(key) {
+  folds.value = { ...folds.value, [key]: !isOpen(key) };
+  try {
+    localStorage.setItem(FOLD_KEY, JSON.stringify(folds.value));
+  } catch {
+    // Private mode: the choice lasts for this visit only.
+  }
+}
 
 // Decided here: a yes / no on a request. The rest (an evaluation, a plan, a leave with its items…) is read on its page first.
 const QUICK = ["departure", "advance", "overtime", "transport", "refund"];
@@ -113,8 +134,13 @@ async function decide(row, decision, note = null) {
 
       <!-- Approvals in the flows, the oldest deadline first (late at the top). -->
       <div v-if="data.approvals.length" class="mt-block">
-        <h3>{{ $t("tasks.s_approvals") }} <Tag :value="data.approvals.length" rounded /></h3>
-        <ul class="mt-list">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('approvals')" @click="toggle('approvals')">
+            <i :class="isOpen('approvals') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_approvals") }} <Tag :value="data.approvals.length" rounded />
+          </button>
+        </h3>
+        <ul v-show="isOpen('approvals')" class="mt-list">
           <li v-for="row in [...data.approvals].sort((a, b) => (a.minutes_left ?? 1e9) - (b.minutes_left ?? 1e9))" :key="row.id" class="mt-row">
             <div class="mt-main">
               <Tag :value="flowName(row.flow)" severity="secondary" />
@@ -142,8 +168,13 @@ async function decide(row, decision, note = null) {
 
       <!-- Evaluations on the old one-step approval (a department without a head). -->
       <div v-if="data.old_evaluations.count" class="mt-block">
-        <h3>{{ $t("tasks.s_old_evaluations") }} <Tag :value="data.old_evaluations.count" rounded /></h3>
-        <ul class="mt-list">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('old')" @click="toggle('old')">
+            <i :class="isOpen('old') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_old_evaluations") }} <Tag :value="data.old_evaluations.count" rounded />
+          </button>
+        </h3>
+        <ul v-show="isOpen('old')" class="mt-list">
           <li v-for="row in data.old_evaluations.items" :key="row.key" class="mt-row">
             <div class="mt-main">
               <Tag v-if="row.evaluation_type" :value="typeName(row.evaluation_type)" severity="secondary" />
@@ -153,14 +184,19 @@ async function decide(row, decision, note = null) {
             <div class="mt-actions"><Button icon="pi pi-external-link" :label="$t('tasks.open')" size="small" outlined @click="open(row)" /></div>
           </li>
         </ul>
-        <Button v-if="data.old_evaluations.count > data.old_evaluations.items.length" :label="$t('tasks.all', { n: data.old_evaluations.count })" text size="small"
+        <Button v-if="isOpen('old') && data.old_evaluations.count > data.old_evaluations.items.length" :label="$t('tasks.all', { n: data.old_evaluations.count })" text size="small"
           @click="router.push({ name: 'evaluation-approvals' })" />
       </div>
 
       <!-- «مطلوب»: evaluations my department was asked for, to give to someone. -->
       <div v-if="data.distribute.length" class="mt-block">
-        <h3>{{ $t("tasks.s_distribute") }} <Tag :value="data.distribute.length" rounded /></h3>
-        <ul class="mt-list">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('distribute')" @click="toggle('distribute')">
+            <i :class="isOpen('distribute') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_distribute") }} <Tag :value="data.distribute.length" rounded />
+          </button>
+        </h3>
+        <ul v-show="isOpen('distribute')" class="mt-list">
           <li v-for="row in data.distribute" :key="row.id" class="mt-row">
             <div class="mt-main">
               <Tag :value="typeName(row.evaluation_type)" severity="secondary" />
@@ -174,8 +210,13 @@ async function decide(row, decision, note = null) {
       </div>
 
       <div v-if="myEvaluations.length" class="mt-block">
-        <h3>{{ $t("tasks.s_my_evaluations") }} <Tag :value="myEvaluations.length" rounded /></h3>
-        <ul class="mt-list">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('mine')" @click="toggle('mine')">
+            <i :class="isOpen('mine') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_my_evaluations") }} <Tag :value="myEvaluations.length" rounded />
+          </button>
+        </h3>
+        <ul v-show="isOpen('mine')" class="mt-list">
           <li v-for="row in myEvaluations" :key="row.id" class="mt-row">
             <div class="mt-main">
               <Tag :value="typeName(row.evaluation_type)" severity="secondary" />
@@ -190,8 +231,13 @@ async function decide(row, decision, note = null) {
 
       <!-- My work sent back to me, with why. -->
       <div v-if="data.returned.length" class="mt-block">
-        <h3>{{ $t("tasks.s_returned") }} <Tag :value="data.returned.length" severity="warn" rounded /></h3>
-        <ul class="mt-list">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('returned')" @click="toggle('returned')">
+            <i :class="isOpen('returned') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_returned") }} <Tag :value="data.returned.length" severity="warn" rounded />
+          </button>
+        </h3>
+        <ul v-show="isOpen('returned')" class="mt-list">
           <li v-for="(row, i) in data.returned" :key="row.id ?? 'r' + i" class="mt-row">
             <div class="mt-main">
               <Tag :value="row.evaluation_type ? typeName(row.evaluation_type) : flowName(row.flow)" severity="warn" />
@@ -269,6 +315,9 @@ async function decide(row, decision, note = null) {
 .mt-others { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.1rem; }
 .mt-other { display: flex; align-items: center; gap: .5rem; padding: .6rem .9rem; border-radius: 12px; border: 1px solid rgb(var(--bp-135c65) / 0.2); background: #fff; cursor: pointer; color: #1f2937; }
 .mt-other b { color: rgb(var(--bp-135c65)); font-size: 1.1rem; }
+.mt-fold { display: flex; align-items: center; gap: .5rem; width: 100%; background: none; border: 0; padding: .35rem 0; font: inherit; color: inherit; cursor: pointer; text-align: start; }
+.mt-fold:hover { color: rgb(var(--bp-135c65)); }
+.mt-fold > .pi { font-size: .8rem; color: #64748b; }
 .mt-toggle { display: flex; align-items: center; gap: .5rem; background: none; border: 0; padding: 0; font-weight: 700; color: #475569; cursor: pointer; margin-bottom: .5rem; }
 @media (max-width: 640px) {
   .mt { padding: 1rem; }
