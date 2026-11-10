@@ -37,7 +37,7 @@ export default {
   close: "Close",
   roles: "Roles",
   extra_roles: "Extra roles",
-  extra_roles_hint: "Given on top of the main role, e.g. «Bus supervisor» for an employee who also rides the bus.",
+  extra_roles_hint: "Any other roles given on top of the main role: their permissions are added to its own. The main role still comes from the job title.",
   'نوع التقييم': 'Evaluation type',
   Nationality_choose: "Choose the nationality name",
   your_booking_was_successfully_submitted:

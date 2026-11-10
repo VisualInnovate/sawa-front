@@ -28,14 +28,16 @@ export const employeeTypeName = (t, type) =>
   employeeTypes(t).find((item) => Number(item.id) === Number(type))?.name?.trim() ?? "";
 
 /** Skills, evaluation types and treatments belong to therapists (and the old type 0). */
-// One main role per employee, plus the extra roles the roles list marks is_extra («مشرف باص») on top of it.
+// One main role per employee (the server names it: main_role_id), plus any other roles on top of it as extra roles.
+// The admin role is never an extra. is_extra marks the add-on roles («مشرف باص») that no job title carries.
 const isExtraRole = (roles, id) => roles.some((role) => Number(role.id) === Number(id) && role.is_extra);
-export function splitRoles(userRoles, roles) {
+const isLockedRole = (roles, id) => roles.some((role) => Number(role.id) === Number(id) && role.is_locked);
+export function splitRoles(userRoles, roles, mainId = null) {
   const ids = (userRoles ?? []).map((role) => Number(role.id));
-  const main = ids.find((id) => !isExtraRole(roles, id)) ?? ids[0] ?? null;
-  return { role: main, extra_roles: ids.filter((id) => id !== main && isExtraRole(roles, id)) };
+  const main = ids.find((id) => id === Number(mainId)) ?? ids.find((id) => !isExtraRole(roles, id)) ?? ids[0] ?? null;
+  return { role: main, extra_roles: ids.filter((id) => id !== main && !isLockedRole(roles, id)) };
 }
-export const extraRoleOptions = (roles, main) => roles.filter((role) => role.is_extra && Number(role.id) !== Number(main));
+export const extraRoleOptions = (roles, main) => roles.filter((role) => !role.is_locked && Number(role.id) !== Number(main));
 // Always sent: "" removes the extra roles.
 export const extraRolesValue = (employee) => (employee.extra_roles ?? []).filter((id) => Number(id) !== Number(employee.role)).join(",");
 
