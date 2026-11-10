@@ -70,7 +70,7 @@ function fill(data) {
   const departments = ids(user.departments);
   // The main department (employees.department_id) when it is one of theirs, else the first; the rest are extra.
   const main = departments.includes(Number(data.department_id)) ? Number(data.department_id) : departments[0] ?? null;
-  const roles = splitRoles(user.roles, options.value.roles);
+  const roles = splitRoles(user.roles, options.value.roles, user.main_role_id);
   employee.value = {
     employee_id: data.id,
     name: data.name,

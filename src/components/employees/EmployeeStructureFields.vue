@@ -79,7 +79,7 @@ const leaderText = computed(() => {
       filter :disabled="!canEditJob || roleLocked" :invalid="Boolean(err('role'))" />
   </EmployeeField>
   <EmployeeField v-if="extraRoles.length" :label="$t('extra_roles')" for="emp-extra-roles" :hint="$t('extra_roles_hint')">
-    <MultiSelect v-model="e.extra_roles" inputId="emp-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" :disabled="!canEditJob" />
+    <MultiSelect v-model="e.extra_roles" inputId="emp-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" filter display="chip" :disabled="!canEditJob" />
   </EmployeeField>
   <EmployeeField :label="$t('stc.main_department')" for="emp-main-department" required :error="err('main_department_id') || err('department_id')"
     :hint="departmentLocked ? $t('stc.from_position') : ''">

@@ -101,7 +101,7 @@ function fill(user) {
     contract_period: user.contract_period,
     date_of_enrollment: toDate(user.date_of_enrollment),
     type: user.type,
-    ...splitRoles(user.roles, options.value.roles),
+    ...splitRoles(user.roles, options.value.roles, user.main_role_id),
     skills: ids(user.skills),
     treatments: ids(user.treatments),
     department: ids(user.departments),
@@ -329,7 +329,7 @@ onMounted(load);
                   <Select v-model="employee.role" inputId="profile-role" :options="roles" optionLabel="name" optionValue="id" filter />
                 </EmployeeField>
                 <EmployeeField v-if="extraRoles.length" :label="$t('extra_roles')" for="profile-extra-roles" :hint="$t('extra_roles_hint')">
-                  <MultiSelect v-model="employee.extra_roles" inputId="profile-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" display="chip" />
+                  <MultiSelect v-model="employee.extra_roles" inputId="profile-extra-roles" :options="extraRoles" optionLabel="name" optionValue="id" filter display="chip" />
                 </EmployeeField>
                 <EmployeeField :label="$t('department')" for="profile-department" :error="err('department_id')">
                   <MultiSelect v-model="employee.department" inputId="profile-department" :options="options.departments" optionLabel="title" optionValue="id" filter display="chip" />
