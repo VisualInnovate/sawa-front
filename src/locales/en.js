@@ -1586,6 +1586,7 @@ export default {
     pages_deleted: "Pages ({n} deleted)",
     pages_hint: "Untick a page (or press the trash on it) to leave it out of the print. Deleted pages are kept with the saved report.",
     page_not_printed: "Empty page — not printed",
+    plan_not_printed: "No goals in the plan — this page is not printed",
     save_report: "Save report",
     report_unsaved: "Report not saved",
     report_saving: "Saving changes…",

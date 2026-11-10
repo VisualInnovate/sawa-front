@@ -2109,7 +2109,7 @@ function back() {
           <template v-if="showPlan && plan">
           <section v-for="level in planLevels.length ? planLevels : [null]" :key="'plan-' + (level?.key ?? 'none')"
             v-page="{ key: 'plan-' + (level?.key ?? 'none'), title: [$t('ereport.plan_title'), level?.title].filter(Boolean).join(' · ') }" class="rx-page"
-            :class="{ 'rx-print-hidden': level && (level.hidden || !level.groups.length) }" :data-print-note="$t('ereport.page_not_printed')">
+            :class="{ 'rx-print-hidden': level && (level.hidden || !level.groups.length) }" :data-print-note="$t('ereport.plan_not_printed')">
             <header class="rx-head">
               <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
               <span>{{ $t("ereport.plan_title") }} · VB-MAPP · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -2564,7 +2564,7 @@ function back() {
         <!-- QFBA plan (in the form's language): goals for each endorsed function, edited here and saved on the server. -->
         <section v-if="showPlan && qfbaPlan && section.type === QFBA && section.group === qfbaSection?.group"
           v-page="{ key: 'qfba-plan', title: qt(qfbaPlan.lang, 'plan_title') + ' · QFBA' }" class="rx-page"
-          :class="{ 'rx-print-hidden': !qfbaPlan.loading && !qfbaPlanGroups.some((group) => group.goals.length) }" :data-print-note="$t('ereport.page_not_printed')">
+          :class="{ 'rx-print-hidden': !qfbaPlan.loading && !qfbaPlanGroups.some((group) => group.goals.length) }" :data-print-note="$t('ereport.plan_not_printed')">
           <header class="rx-head">
             <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ qt(qfbaPlan.lang, "plan_title") }} · QFBA · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -2622,7 +2622,7 @@ function back() {
              long-term goals and their sub goals not reached yet (objectives), edited here and saved on the server. -->
         <section v-if="showPlan && otPlan && section.type === ABLLS_SKILLS && section.group === otSection?.group"
           v-page="{ key: 'ot-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
-          :class="{ 'rx-print-hidden': !otPlan.loading && !otPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          :class="{ 'rx-print-hidden': !otPlan.loading && !otPlanDomains.length }" :data-print-note="$t('ereport.plan_not_printed')">
           <header class="rx-head">
             <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -2681,7 +2681,7 @@ function back() {
              point and the sub goals not reached yet; saved on the server like the others. -->
         <section v-if="showPlan && spPlan && section.type === ABLLS_SP && section.group === spSection?.group"
           v-page="{ key: 'sp-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
-          :class="{ 'rx-print-hidden': !spPlan.loading && !spPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          :class="{ 'rx-print-hidden': !spPlan.loading && !spPlanDomains.length }" :data-print-note="$t('ereport.plan_not_printed')">
           <header class="rx-head">
             <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -2740,7 +2740,7 @@ function back() {
              skills), the skill, its goals not reached yet, notes and the goal's status («مستهدف» when empty), saved on the server. -->
         <section v-if="showPlan && academyPlan && section.type === ABLLS && section.group === academySection?.group"
           v-page="{ key: 'academy-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
-          :class="{ 'rx-print-hidden': !academyPlan.loading && !academyPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          :class="{ 'rx-print-hidden': !academyPlan.loading && !academyPlanDomains.length }" :data-print-note="$t('ereport.plan_not_printed')">
           <header class="rx-head">
             <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
@@ -2822,7 +2822,7 @@ function back() {
              and saved on the server. -->
         <section v-if="showPlan && carolinaPlan && section.type === CAROLINA && section.group === carolinaSection?.group"
           v-page="{ key: 'carolina-plan', title: $t('ereport.plan_title') + ' · ' + section.label }" class="rx-page"
-          :class="{ 'rx-print-hidden': !carolinaPlan.loading && !carolinaPlanDomains.length }" :data-print-note="$t('ereport.page_not_printed')">
+          :class="{ 'rx-print-hidden': !carolinaPlan.loading && !carolinaPlanDomains.length }" :data-print-note="$t('ereport.plan_not_printed')">
           <header class="rx-head">
             <img :src="$siteLogo(sawaLogo)" alt="Sawa" />
             <span>{{ $t("ereport.plan_title") }} · {{ section.label }} · <span class="ltr">{{ dmy(section.newest.date) }}</span></span>
