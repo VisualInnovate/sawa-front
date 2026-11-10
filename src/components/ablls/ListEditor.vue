@@ -20,7 +20,22 @@ const props = defineProps({
   extraPlaceholder: { type: String, default: '' },
   // The other wording's text beside each item.
   extraReference: { type: Array, default: () => [] },
+  moreFields: { type: Array, default: () => [] },
 })
+// Optional: several more texts beside each item ({ key: [texts] }), each described in `moreFields`
+// ([{ key, label, icon, placeholder, reference }]): a sub goal's strength, weakness and practice.
+const more = defineModel('more', { type: Object, default: null })
+const moreList = (key) => items.value.map((_, i) => more.value?.[key]?.[i] ?? '')
+// Every list of `more` after `change(list)` (so they stay as long as the items and in their order).
+const changeMore = (change) => {
+  if (!more.value) return
+  more.value = Object.fromEntries(props.moreFields.map((field) => [field.key, change(moreList(field.key))]))
+}
+const updateMore = (key, i, value) => {
+  const list = moreList(key)
+  list[i] = value
+  more.value = { ...Object.fromEntries(props.moreFields.map((field) => [field.key, moreList(field.key)])), [key]: list }
+}
 const hasExtra = () => Array.isArray(extra.value)
 // The extra list as long as the items (missing ones empty).
 const extraList = () => items.value.map((_, i) => extra.value?.[i] ?? '')
@@ -33,6 +48,7 @@ const add = () => {
   const text = draft.value.trim()
   if (!text) return
   if (hasExtra()) extra.value = [...extraList(), '']
+  changeMore((list) => [...list, ''])
   items.value = [...items.value, text]
   draft.value = ''
   emit('change')
@@ -40,6 +56,7 @@ const add = () => {
 }
 const remove = (i) => {
   if (hasExtra()) extra.value = extraList().filter((_, j) => j !== i)
+  changeMore((list) => list.filter((_, j) => j !== i))
   items.value = items.value.filter((_, j) => j !== i)
   emit('change')
 }
@@ -49,10 +66,14 @@ const move = (i, dir) => {
   const list = [...items.value]
   ;[list[i], list[j]] = [list[j], list[i]]
   if (hasExtra()) {
-    const more = extraList()
-    ;[more[i], more[j]] = [more[j], more[i]]
-    extra.value = more
+    const extras = extraList()
+    ;[extras[i], extras[j]] = [extras[j], extras[i]]
+    extra.value = extras
   }
+  changeMore((texts) => {
+    ;[texts[i], texts[j]] = [texts[j], texts[i]]
+    return texts
+  })
   items.value = list
 }
 const updateExtra = (i, value) => {
@@ -107,6 +128,14 @@ defineExpose({ flush })
               @update:model-value="updateExtra(i, $event)" />
             <small v-if="extraReference[i]" class="le-ref"><b>{{ referenceLabel }}:</b> {{ extraReference[i] }}</small>
           </div>
+          <template v-if="more">
+            <div v-for="field in moreFields" :key="field.key" class="le-extra" :class="`is-${field.key}`">
+              <span class="le-extra-label"><i :class="field.icon || 'pi pi-check-square'" aria-hidden="true" /> {{ field.label }}</span>
+              <Textarea :model-value="more[field.key]?.[i] ?? ''" rows="1" auto-resize class="le-input" :placeholder="field.placeholder" :aria-label="`${field.label} ${i + 1}`"
+                @update:model-value="updateMore(field.key, i, $event)" />
+              <small v-if="field.reference?.[i]" class="le-ref"><b>{{ referenceLabel }}:</b> {{ field.reference[i] }}</small>
+            </div>
+          </template>
         </div>
         <div class="le-actions">
           <Button type="button" icon="pi pi-chevron-up" text rounded size="small" severity="secondary" :disabled="i === 0" :aria-label="$t('ablls_ui.move_up')" @click="move(i, -1)" />
@@ -120,6 +149,8 @@ defineExpose({ flush })
 </template>
 
 <style scoped>
+.le-extra.is-sub_strengths .le-extra-label { color: #15803d; }
+.le-extra.is-sub_weaknesses .le-extra-label { color: #b45309; }
 .le-extra {
   display: grid;
   gap: 0.25rem;

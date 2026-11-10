@@ -166,6 +166,13 @@ const hr = [
         meta: { permission: ["deduction list"] },
         component: () => import("../views/hr/deductions/deduction.vue")
       },
+      // «قواعد الخصومات والعقوبات»: the violations and their steps by repeat.
+      {
+        path: '/deduction-rules',
+        name: 'deduction-rules',
+        meta: { permission: ["deduction rules list"] },
+        component: () => import("../views/hr/deductions/PenaltyRules.vue")
+      },
       // What employees object to from the «دوامي» app, and HR's answer.
       {
         path: '/deduction-objections',

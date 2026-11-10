@@ -176,6 +176,9 @@
             :style="{ '--level-color': '#' + color }">
             <header class="milestone-level-header">
               <h2>{{ level.title }}</h2>
+              <!-- A child who has none of this level's skills: every question of the level answered 0 in one press. -->
+              <Button v-if="levelQuestions(level).length" type="button" size="small" severity="secondary" icon="pi pi-times-circle"
+                class="milestone-zero-all" :label="$t('milestone_zero_level')" :disabled="saving" @click="zeroLevel(level)" />
             </header>
             <p v-if="!level.blocks.length" class="milestone-all-carried">{{ $t("milestone_level_all_carried") }}</p>
             <template v-for="block in level.blocks" :key="block.key">
@@ -508,9 +511,25 @@ export default {
         child_age: this.answer.child_age,
         evaluation_id: this.answer.evaluation_id,
       };
-      console.log(this.answers.answers);
     },
 
+    // The level's questions that can still be answered (the EESA form and locked answers are not among them).
+    levelQuestions(level) {
+      return (level.blocks ?? []).filter((block) => !block.eesa)
+        .flatMap((block) => (block.goals ?? []).flatMap((goal) => goal.questions ?? []))
+        .filter((question) => !question.locked);
+    },
+    // «الإجابة على الكل بـ 0»: every question of the level gets 0; asks first when some are answered otherwise.
+    zeroLevel(level) {
+      const questions = this.levelQuestions(level);
+      const answered = questions.filter((question) => {
+        const picked = this.answers.answers[question.id]?.score;
+        return picked !== undefined && picked !== null && Number(picked) !== 0;
+      });
+      if (answered.length && !window.confirm(this.$t("milestone_zero_level_confirm", { count: answered.length, level: level.title }))) return;
+      for (const question of questions) this.collectanswer({ target: { value: 0 } }, question.id);
+      this.$toast.add({ severity: "success", summary: level.title, detail: this.$t("milestone_zero_level_done", { count: questions.length }), life: 2500 });
+    },
     isPicked(question, score) {
       const picked = this.answers.answers[question.id]?.score;
       return picked !== undefined && picked !== null && Number(picked) === Number(score);

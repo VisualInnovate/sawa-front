@@ -183,6 +183,43 @@ const exportCSV = () => {
 }
 
 
+// «قواعد الخصومات والعقوبات»: HR records a violation on an employee; the row waits here to be confirmed like any other.
+const rules = ref([])
+const violation = ref(null) // { employee_id, rule_id, date, measure, reason }
+const violationPreview = ref(null)
+const recording = ref(false)
+const loadRules = () => axios.get('/api/penalty-rules').then((res) => { rules.value = (res.data.data ?? []).filter((rule) => rule.active && rule.steps.length) }).catch(() => {})
+onMounted(loadRules)
+const ruleOf = (id) => rules.value.find((rule) => rule.id === id)
+// A rule with a step priced by the violation's own time asks for the hours; an absence for its days.
+const measureKind = (rule) => !rule ? null : rule.trigger === 'absence' ? 'days' : rule.steps.some((step) => step.method === 'actual_hours') ? 'hours' : null
+const openViolation = () => {
+  violationPreview.value = null
+  violation.value = { employee_id: null, rule_id: null, date: new Date(), measure: null, reason: '' }
+}
+const violationBody = () => ({ employee_id: violation.value.employee_id, date: moment(violation.value.date).format('YYYY-MM-DD'),
+  measure: measureKind(ruleOf(violation.value.rule_id)) ? violation.value.measure ?? (ruleOf(violation.value.rule_id).trigger === 'absence' ? 1 : 0) : null,
+  reason: violation.value.reason?.trim() || null })
+// What the employee would get today (the confirmed ones of the rule's period decide the step).
+const previewViolation = () => {
+  violationPreview.value = null
+  const v = violation.value
+  if (!v?.employee_id || !v.rule_id || !v.date) return
+  const { reason, ...params } = violationBody()
+  axios.get(`/api/penalty-rules/${v.rule_id}/preview`, { params }).then((res) => { violationPreview.value = res.data.data }).catch(() => {})
+}
+const recordViolation = () => {
+  if (recording.value) return
+  recording.value = true
+  axios.post(`/api/penalty-rules/${violation.value.rule_id}/record`, violationBody()).then(() => {
+    violation.value = null
+    fetchData()
+    toast.add({severity: 'success', summary: t('success_message'), detail: t('pen.recorded'), life: 3000})
+  }).catch((e) => {
+    toast.add({severity: 'error', summary: t('error'), detail: Object.values(e.response?.data?.errors ?? {})[0]?.[0] ?? e.response?.data?.message ?? t('mission_error'), life: 5000})
+  }).finally(() => { recording.value = false })
+}
+
 const initFilters = () => {
   filters.value = {
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -198,6 +235,8 @@ const initFilters = () => {
           <Deduction ></Deduction>
           <Button  v-can="'deduction create'" :label='$t("deduction_add")' icon="pi pi-plus" class="mr-2 absolute top-3" @click="openNew"></Button>
           <Button v-can="'deduction list'" :label='$t("export")' icon="pi pi-upload" class="absolute top-3 ltr:left-[15%] rtl:right-[15%]" @click="exportCSV($event)" severity="secondary" variant="outlined" />
+          <Button v-if="$can('deduction create') && rules.length" :label="$t('pen.record')" icon="pi pi-exclamation-triangle" severity="warn" variant="outlined"
+            class="absolute top-3 ltr:left-[27%] rtl:right-[27%]" @click="openViolation" />
 
         </div>
         
@@ -251,9 +290,23 @@ const initFilters = () => {
               {{ slotProps.data.deduction_type?.title }}
             </template>
            </Column>
+           <!-- «قواعد الخصومات والعقوبات»: the violation and its repeat (fixed when confirmed; expected while pending). -->
+           <Column field="penalty_rule.title" :header="$t('pen.col_violation')" :sortable="true" header-style="min-width:11rem;" class="ltr:text-justify">
+            <template #body="slotProps">
+              <template v-if="slotProps.data.penalty_rule_id">
+                <b>{{ slotProps.data.penalty_rule?.title || $t('pen.rule_deleted') }}</b>
+                <small class="block text-gray-500">{{ $t(slotProps.data.status == 1 ? 'pen.repeat_fixed' : 'pen.repeat_expected', { n: slotProps.data.penalty_step }) }}</small>
+              </template>
+              <span v-else class="text-gray-400">—</span>
+            </template>
+           </Column>
            <Column field="amount" :header='$t("deduction_mount")' :sortable="true" header-style="width:14%; min-width:10rem;" class="ltr:text-justify">
             <template #body="slotProps">
-              {{ slotProps.data.amount }}
+              <Tag v-if="slotProps.data.kind === 'action'" severity="warn" icon="pi pi-megaphone" :value="slotProps.data.action_text || $t('pen.kind_action')" class="pen-action-tag" />
+              <template v-else>
+                {{ slotProps.data.amount }}
+                <small v-if="slotProps.data.penalty_rule_id && slotProps.data.amount === null && slotProps.data.notes" class="block text-orange-600">{{ $t('pen.no_salary') }}</small>
+              </template>
             </template>
            </Column>
           
@@ -270,7 +323,7 @@ const initFilters = () => {
             <template #body="slotProps">
               <div class="table-actions">
                 <Button
-                v-if="!slotProps.data.payroll_id" v-can="'deduction edit'"
+                v-if="!slotProps.data.payroll_id && !slotProps.data.penalty_rule_id" v-can="'deduction edit'"
                 icon="pi pi-pencil"
                 @click="edit(slotProps.data.id)" rounded severity="info" variant="outlined" v-tooltip.top="$t('edit')" :aria-label="$t('edit')" />
                 <Button
@@ -284,6 +337,42 @@ const initFilters = () => {
 
 
         </DataTable>
+        <Dialog :visible="!!violation" modal :header="$t('pen.record')" :style="{ width: '32rem' }" :breakpoints="{ '640px': '96vw' }" @update:visible="(v) => { if (!v) violation = null }">
+          <form v-if="violation" class="flex flex-column gap-3" @submit.prevent="recordViolation">
+            <div class="flex flex-column gap-2">
+              <label>{{ $t('employee_name') }}</label>
+              <Select v-model="violation.employee_id" :options="employees" optionLabel="name" optionValue="id" filter required :placeholder="$t('employee_name')" @change="previewViolation" />
+            </div>
+            <div class="flex flex-column gap-2">
+              <label>{{ $t('pen.col_violation') }}</label>
+              <Select v-model="violation.rule_id" :options="rules" optionLabel="title" optionValue="id" filter required :placeholder="$t('pen.pick_rule')" @change="previewViolation" />
+            </div>
+            <div class="flex flex-column gap-2">
+              <label>{{ $t('date') }}</label>
+              <DatePicker v-model="violation.date" showIcon dateFormat="yy-mm-dd" required @update:modelValue="previewViolation" />
+            </div>
+            <div v-if="measureKind(ruleOf(violation.rule_id))" class="flex flex-column gap-2">
+              <label>{{ $t(measureKind(ruleOf(violation.rule_id)) === 'days' ? 'pen.measure_days' : 'pen.measure_hours') }}</label>
+              <InputNumber v-model="violation.measure" :min="0" :maxFractionDigits="2" fluid @update:modelValue="previewViolation" />
+            </div>
+            <div class="flex flex-column gap-2">
+              <label>{{ $t('notes') }}</label>
+              <InputText v-model="violation.reason" maxlength="255" />
+            </div>
+            <Message v-if="violationPreview" :severity="violationPreview.kind === 'action' ? 'warn' : 'info'" :closable="false">
+              <b>{{ $t('pen.preview_repeat', { n: violationPreview.repeat, confirmed: violationPreview.confirmed }) }}</b>
+              <span class="block mt-1">
+                {{ violationPreview.kind === 'action' ? $t('pen.preview_action', { text: violationPreview.action_text })
+                  : violationPreview.amount === null ? $t('pen.no_salary') : $t('pen.preview_amount', { amount: violationPreview.amount }) }}
+              </span>
+              <small class="block mt-1">{{ $t('pen.preview_note') }}</small>
+            </Message>
+            <div class="flex justify-content-end gap-2">
+              <Button type="button" :label="$t('cancel')" variant="text" severity="secondary" @click="violation = null" />
+              <Button type="submit" :label="$t('pen.record')" icon="pi pi-check" :loading="recording" :disabled="!violation.employee_id || !violation.rule_id" />
+            </div>
+          </form>
+        </Dialog>
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("submit")' :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>

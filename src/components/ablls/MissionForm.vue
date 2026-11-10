@@ -58,6 +58,11 @@ const mission = ref({
   // ABLLS Academy, academic: a practice beside each strength item (same order), boy's and girl's wording.
   practices: [],
   practices_female: [],
+  // ABLLS Academy, math / reading / spelling: a strength and a weakness beside each sub goal (same order).
+  sub_strengths: [],
+  sub_strengths_female: [],
+  sub_weaknesses: [],
+  sub_weaknesses_female: [],
 })
 const editors = ref([])
 
@@ -89,9 +94,25 @@ const hasLongTermGoal = assessment.key !== 'sp'
 const ltgPractice = computed(() => assessment.key === 'ablls' && !academic.value)
 // Ablls OT keeps a practice beside each sub goal (boy's and girl's wording).
 const subGoalPractices = computed(() => assessment.key === 'skills' && !academic.value)
+// ABLLS Academy's math / reading / spelling skills keep, beside each sub goal, the report's strength (the sub goal is
+// reached) and weakness (not reached yet) and its practice (boy's and girl's wording).
+const subGoalPoints = computed(() => assessment.key === 'ablls' && !academic.value)
+const SUB_POINT_FIELDS = ['sub_strengths', 'sub_weaknesses', 'practices']
+const SUB_POINT_ICONS = { sub_strengths: 'pi pi-thumbs-up', sub_weaknesses: 'pi pi-thumbs-down', practices: 'pi pi-check-square' }
+const subPointFields = computed(() => SUB_POINT_FIELDS.map((key) => ({
+  key,
+  label: `${t(`ablls_ui.${key}`)} (${t(gender.value)})`,
+  icon: SUB_POINT_ICONS[key],
+  placeholder: t(`ablls_ui.${key}_ph`, { token: NAME_TOKEN }),
+  reference: mission.value[fieldOf(key, otherGender.value)],
+})))
+const subPoints = computed({
+  get: () => Object.fromEntries(SUB_POINT_FIELDS.map((key) => [key, mission.value[fieldOf(key)]])),
+  set: (value) => SUB_POINT_FIELDS.forEach((key) => (mission.value[fieldOf(key)] = value[key] ?? [])),
+})
 const wordingFields = computed(() => (academic.value ? ['strengths', 'practices', 'goals', 'questions']
   : [...(hasLongTermGoal ? ['long_term_goal'] : []), ...(ltgPractice.value ? ['practice'] : []), 'sub_goals',
-    ...(subGoalPractices.value ? ['practices'] : []), ...(points.value ? POINT_FIELDS : [])]))
+    ...(subGoalPractices.value ? ['practices'] : []), ...(subGoalPoints.value ? SUB_POINT_FIELDS : []), ...(points.value ? POINT_FIELDS : [])]))
 const fieldOf = (field, g = gender.value) => (g === 'male' || !gendered.value ? field : `${field}_female`)
 const genderHasError = (g) => wordingFields.value.some((f) => firstError(fieldOf(f, g)))
 const flushWording = () => editors.value.forEach((ed) => ed?.flush?.())
@@ -189,6 +210,10 @@ onMounted(async () => {
         // Beside the academic strengths (ABLLS Academy) or the sub goals (Ablls OT).
         practices: (data.strengths?.length ? data.strengths : data.sub_goals || []).map((_, i) => data.practices?.[i] || ''),
         practices_female: (data.strengths_female?.length ? data.strengths_female : data.sub_goals_female || []).map((_, i) => data.practices_female?.[i] || ''),
+        sub_strengths: (data.sub_goals || []).map((_, i) => data.sub_strengths?.[i] || ''),
+        sub_strengths_female: (data.sub_goals_female || []).map((_, i) => data.sub_strengths_female?.[i] || ''),
+        sub_weaknesses: (data.sub_goals || []).map((_, i) => data.sub_weaknesses?.[i] || ''),
+        sub_weaknesses_female: (data.sub_goals_female || []).map((_, i) => data.sub_weaknesses_female?.[i] || ''),
       }
     } else {
       const fromQuery = Number(route.query.category)
@@ -270,6 +295,11 @@ const save = async () => {
           ...(subGoalPractices.value
             ? Object.fromEntries(['', '_female'].map((suffix) => [`practices${suffix}`, m[`sub_goals${suffix}`]
               .map((text, i) => [text.trim(), String(m[`practices${suffix}`][i] ?? '').trim()]).filter(([text]) => text).map(([, practice]) => practice)]))
+            : {}),
+          // ABLLS Academy: each sub goal's strength, weakness and practice, kept with it.
+          ...(subGoalPoints.value
+            ? Object.fromEntries(SUB_POINT_FIELDS.flatMap((field) => ['', '_female'].map((suffix) => [`${field}${suffix}`, m[`sub_goals${suffix}`]
+              .map((text, i) => [text.trim(), String(m[`${field}${suffix}`][i] ?? '').trim()]).filter(([text]) => text).map(([, value]) => value)])))
             : {}),
           ...(gendered.value && hasLongTermGoal ? { long_term_goal_female: m.long_term_goal_female.trim() } : {}),
           ...(ltgPractice.value ? { practice: m.practice.trim() || null, practice_female: m.practice_female.trim() || null } : {}),
@@ -487,6 +517,10 @@ const save = async () => {
                   extraLabel: `${$t('ablls_ui.practice')} (${$t(gender)})`,
                   extraPlaceholder: $t('ablls_ui.practice_sub_goal_ph'),
                   extraReference: mission[fieldOf('practices', otherGender)],
+                } : subGoalPoints ? {
+                  more: subPoints,
+                  'onUpdate:more': (value) => (subPoints = value),
+                  moreFields: subPointFields,
                 } : {}"
                 required
                 @change="clearError(fieldOf('sub_goals'))"

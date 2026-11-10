@@ -244,8 +244,8 @@ export const buildMenu = () => [
       { label: "onb.title", to: { name: "onboarding" }, perm: ["onboarding list", "onboarding edit"] },
       {
         label: "deductions",
-        perm: ["deduction list", "deduction type list"],
-        to: () => ({ name: can("deduction list") ? "deduction" : "deduction-types" }),
+        perm: ["deduction list", "deduction type list", "deduction rules list"],
+        to: () => ({ name: can("deduction list") ? "deduction" : can("deduction type list") ? "deduction-types" : "deduction-rules" }),
       },
       { label: "dobj.title", to: { name: "deduction-objections" }, perm: "deduction edit" },
       { label: "holidays", to: { name: "holidays" }, perm: "holidays list" },
