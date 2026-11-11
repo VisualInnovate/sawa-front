@@ -348,7 +348,7 @@ const initFilters = () => {
               <Select v-model="violation.rule_id" :options="rules" optionLabel="title" optionValue="id" filter required :placeholder="$t('pen.pick_rule')" @change="previewViolation" />
             </div>
             <div class="flex flex-column gap-2">
-              <label>{{ $t('date') }}</label>
+              <label>{{ $t('pen.violation_date') }}</label>
               <DatePicker v-model="violation.date" showIcon dateFormat="yy-mm-dd" required @update:modelValue="previewViolation" />
             </div>
             <div v-if="measureKind(ruleOf(violation.rule_id))" class="flex flex-column gap-2">
