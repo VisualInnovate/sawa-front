@@ -1194,6 +1194,7 @@ export default {
   "additional_notes": "Additional notes",
   "pre_appointments_hint": "From this list, you can add the required assessments for the child.",
   pen: {
+    violation_date: "Violation date",
     title: "Deduction and penalty rules",
     subtitle: "For each violation set what happens the first time, the second and after: a deduction you price, or an action you write.",
     how: "Each violation lands «pending» on the deductions page. Confirming it fixes its step by the confirmed violations before it in the counting period; rejected ones do not count. Past the last step, the last step repeats.",
