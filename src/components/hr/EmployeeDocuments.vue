@@ -15,6 +15,8 @@ import { amendmentLines } from "@/components/hr/employeeContracts";
 const props = defineProps({
   contract: { type: Object, default: null },
   options: { type: Object, required: true },
+  // Opened from «عقد جديد» with a template chosen: { kind, template_id } — that document is issued at once.
+  start: { type: Object, default: null },
 });
 const emit = defineEmits(["close"]);
 
@@ -34,6 +36,18 @@ async function load() {
   } finally {
     loading.value = false;
   }
+  autoStart();
+}
+// From «عقد جديد»: the offer letter needs nothing more, so its draft is made and opened; the work contract first asks
+// the hiring choices (role, shift), with the chosen template already picked.
+let started = null;
+function autoStart() {
+  const start = props.start;
+  if (!start || !state.value || started === props.contract?.id || !state.value.can?.[start.kind]) return;
+  started = props.contract.id;
+  startIssue(start.kind);
+  if (templatesOf(start.kind).some((x) => x.id === start.template_id)) form.value.template_id = start.template_id;
+  if (start.kind === "offer") issue();
 }
 watch(() => props.contract?.id, (id) => {
   state.value = null;
