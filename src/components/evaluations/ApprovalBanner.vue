@@ -1,4 +1,5 @@
 <script setup>
+import { blockedText } from "@/utils/approvalReason";
 // An evaluation's approval on its result page. With the approval flow (phase 4): its status of the nine (waiting for
 // the head, approved by the head, rejected…), who acts now and the time left, the decision for whoever the flow
 // names, sending it to the parents, and its history. A department with no head yet: the old one-step approval.
@@ -108,8 +109,10 @@ defineExpose({ reload: load });
           <span>{{ $t("ewf.waiting_for", { stage: state.stage.name, names: (state.approvers || []).join("، ") || "—" }) }}</span>
           <span v-if="state.due_at">{{ $t("ewf.due", { date: state.due_at }) }}</span>
           <span v-if="state.on_behalf_of">{{ $t("apf.for", { name: state.on_behalf_of }) }}</span>
+          <span v-if="state.optional_stage">{{ $t("ewf.optional_hint", { stage: state.optional_stage }) }}</span>
         </template>
         <span v-else-if="state.status === 'pending'">{{ state.extension ? $t("ea_pending_extension") : $t("ea_pending_hint") }}</span>
+        <span v-if="state.blocked" class="ab-blocked"><i class="pi pi-exclamation-circle" aria-hidden="true" /> {{ blockedText($t, state.blocked) }}</span>
         <span v-if="state.note && tone === 'rejected' && wf !== 'second_rejected'">{{ $t("ea_rejected_hint", { note: state.note }) }}</span>
         <span v-else-if="state.note && wf === 'second_rejected'">{{ $t("ewf.note", { note: state.note }) }}</span>
         <span v-if="wf === 'final_approved'">{{ $t("ewf.final_hint") }}</span>

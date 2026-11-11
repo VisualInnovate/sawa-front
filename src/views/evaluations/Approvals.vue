@@ -1,4 +1,5 @@
 <script setup>
+import { blockedText } from "@/utils/approvalReason";
 // «طلبات اعتماد التقييمات»: every evaluation whose result waits for approval, pending first. With the approval flow
 // (phase 4) each row shows its status of the nine; «بانتظاري» shows only what the flow waits from me. Its result page
 // opens in a new tab (with the same answer box on it); approve it, or reject it with the reason; send it to the parents.
@@ -126,6 +127,7 @@ onMounted(async () => {
         <template #body="{ data }">
           <Tag v-if="data.workflow_status" :severity="WF_SEVERITY[data.workflow_status] ?? 'secondary'" :value="$t(`ewf.status_${data.workflow_status}`)" />
           <Tag v-else :severity="APPROVAL_SEVERITY[data.status]" :value="$t(`ea_status_${data.status}`)" />
+          <Tag v-if="data.optional_stage" severity="secondary" class="ms-1" :value="$t('ewf.optional_stage', { stage: data.optional_stage })" />
           <small v-if="data.status === 'rejected' && data.note" class="block text-red-700 mt-1">{{ data.note }}</small>
           <small v-else-if="data.requested_at" class="block text-slate-500 mt-1 ltr">{{ data.requested_at }}</small>
         </template>
@@ -135,6 +137,11 @@ onMounted(async () => {
           <div class="flex gap-2">
             <Button size="small" icon="pi pi-external-link" :label="$t('ea_open_result')" variant="outlined" @click="openResult(data)" />
             <Button v-if="data.can_act ?? (canDecide && data.status === 'pending')" size="small" icon="pi pi-check-square" :label="$t('decision_answer')" @click="answering = data" />
+            <!-- A waiting evaluation the user cannot approve: why, on hover (and for the keyboard / a tap). -->
+            <span v-else-if="data.blocked" class="ea-blocked" tabindex="0" role="img" :aria-label="blockedText($t, data.blocked)"
+              v-tooltip.top="{ value: blockedText($t, data.blocked), pt: { root: { style: 'max-width: 22rem' } } }">
+              <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            </span>
             <Button v-if="data.workflow_status === 'final_approved'" size="small" icon="pi pi-send" severity="success" :label="$t('ewf.send')"
               :loading="sending === data.key" @click="send(data)" />
           </div>
@@ -147,3 +154,21 @@ onMounted(async () => {
     </DecisionDialog>
   </div>
 </template>
+
+<style scoped>
+.ea-blocked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: #b45309;
+  background: #fef3c7;
+  cursor: help;
+}
+.ea-blocked:focus-visible {
+  outline: 2px solid #b45309;
+  outline-offset: 2px;
+}
+</style>
