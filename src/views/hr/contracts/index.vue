@@ -89,11 +89,21 @@ const vacancyOptions = computed(() => {
   if (form.value.vacancy && !list.some((v) => v.id === form.value.vacancy.id)) list.unshift(form.value.vacancy);
   return list;
 });
+// The first document of a new contract: the offer letter when HR requires one, else the work contract.
+const firstKind = computed(() => (options.value.offer_required ? "offer" : "work"));
+const firstTemplates = computed(() => (options.value.templates ?? []).filter((x) => x.kind === firstKind.value));
+const MODES = computed(() => [
+  { value: "template", label: t("ctr.mode_template"), icon: "pi pi-file-edit" },
+  { value: "file", label: t("ctr.mode_file"), icon: "pi pi-upload" },
+]);
+// The drawer opened right after saving, to issue the chosen template's document.
+const documentsStart = ref(null);
 function openNew(candidateId = null) {
   const candidate = options.value.candidates.find((c) => c.id === candidateId);
   const vacancy = options.value.vacancies.find((v) => v.id === candidate?.vacancy_id);
   form.value = { id: null, status: "draft", candidate_id: candidate?.id ?? null, vacancy_id: vacancy?.id ?? null, start_date: null, end_date: null,
-    basic_salary: vacancy?.expected_salary ?? null, probation_days: options.value.probation_days, notes: "", file: null, file_name: null };
+    basic_salary: vacancy?.expected_salary ?? null, probation_days: options.value.probation_days, notes: "", file: null, file_name: null,
+    mode: firstTemplates.value.length ? "template" : "file", template_id: firstTemplates.value[0]?.id ?? null };
   errors.value = {};
   dialog.value = true;
 }
@@ -129,6 +139,7 @@ function check() {
   if (draft && !form.value.start_date) e.start_date = t("ctr.err.required");
   if (form.value.end_date && form.value.start_date && moment(form.value.end_date).isBefore(form.value.start_date, "day")) e.end_date = t("ctr.err.end_before_start");
   if (draft && form.value.basic_salary != null && form.value.basic_salary < 0) e.basic_salary = t("vac.err_salary");
+  if (!form.value.id && form.value.mode === "template" && !form.value.template_id) e.template_id = t("ctr.err.pick_template");
   errors.value = { ...e, ...(errors.value.file ? { file: errors.value.file } : {}) };
   return !Object.keys(errors.value).length;
 }
@@ -146,11 +157,17 @@ async function save() {
   }
   put("end_date", form.value.end_date ? moment(form.value.end_date).format("YYYY-MM-DD") : null);
   put("notes", form.value.notes?.trim());
-  put("file", form.value.file);
+  const fromTemplate = !form.value.id && form.value.mode === "template";
+  if (!fromTemplate) put("file", form.value.file);
   try {
-    await axios.post(form.value.id ? `api/contracts/${form.value.id}` : "api/contracts", body);
+    const { data } = await axios.post(form.value.id ? `api/contracts/${form.value.id}` : "api/contracts", body);
     dialog.value = false;
     toast.add({ severity: "success", summary: t("success_message"), detail: t("ctr.saved"), life: 2500 });
+    if (fromTemplate) {
+      // Straight to the template's document: its drawer opens on issuing it (the work contract asks the hiring choices first).
+      documentsStart.value = { kind: firstKind.value, template_id: form.value.template_id };
+      documentsOf.value = data.data;
+    }
     await Promise.all([load(), loadOptions()]);
   } catch (error) {
     errors.value = Object.fromEntries(Object.entries(error.response?.data?.errors ?? {}).map(([k, v]) => [k, te(`ctr.err.${String(v[0]).slice(3)}`) ? t(`ctr.err.${String(v[0]).slice(3)}`) : v[0]]));
@@ -389,7 +406,21 @@ const cards = computed(() => [
           <label for="ctr-notes">{{ $t("ctr.notes") }}</label>
           <Textarea id="ctr-notes" v-model="form.notes" rows="3" autoResize maxlength="5000" />
         </div>
-        <div class="flex flex-column gap-1 sm:col-span-2">
+        <div v-if="!form.id" class="flex flex-column gap-2 sm:col-span-2 ctr-mode">
+          <span class="font-medium">{{ $t("ctr.mode") }}</span>
+          <SelectButton v-model="form.mode" :options="MODES" optionLabel="label" optionValue="value" :allowEmpty="false" :aria-label="$t('ctr.mode')">
+            <template #option="{ option }"><i :class="option.icon" class="me-2" aria-hidden="true" />{{ option.label }}</template>
+          </SelectButton>
+          <template v-if="form.mode === 'template'">
+            <label for="ctr-template">{{ $t(firstKind === "offer" ? "ctr.template_offer" : "ctr.template_work") }} <span class="text-red-500">*</span></label>
+            <Select inputId="ctr-template" v-model="form.template_id" :options="firstTemplates" optionLabel="name" optionValue="id" :invalid="!!errors.template_id" :placeholder="$t('con.pick_template')">
+              <template #empty>{{ $t("ctr.no_templates") }}</template>
+            </Select>
+            <small v-if="errors.template_id" class="text-red-500">{{ errors.template_id }}</small>
+            <small class="text-color-secondary">{{ $t(firstKind === "offer" ? "ctr.template_hint_offer" : "ctr.template_hint_work") }}</small>
+          </template>
+        </div>
+        <div v-if="form.id || form.mode === 'file'" class="flex flex-column gap-1 sm:col-span-2">
           <span class="font-medium">{{ $t("ctr.file") }}</span>
           <div class="flex flex-wrap items-center gap-2">
             <label class="p-button p-component p-button-outlined p-button-sm cursor-pointer">
@@ -511,7 +542,7 @@ const cards = computed(() => [
       </template>
     </Dialog>
 
-    <EmployeeDocuments :contract="documentsOf" :options="options" @close="documentsOf = null; load()" />
+    <EmployeeDocuments :contract="documentsOf" :options="options" :start="documentsStart" @close="documentsOf = null; documentsStart = null; load()" />
 
     <Dialog :visible="!!removing" modal :header="$t('ctr.archive')" :style="{ width: '420px' }" @update:visible="removing = null">
       <p class="m-0">{{ $t("ctr.archive_confirm") }}</p>

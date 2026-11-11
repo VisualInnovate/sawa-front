@@ -5613,6 +5613,14 @@ export default {
   },
   // HR contracts.
   ctr: {
+    mode: "How the contract is made",
+    mode_template: "From a template (e-signature)",
+    mode_file: "Upload a signed file",
+    template_offer: "Offer letter template",
+    template_work: "Work contract template",
+    template_hint_offer: "After saving, the offer letter opens from this template to fill, sign and send to the candidate by link. Once the candidate signs it, issue the work contract from «Documents».",
+    template_hint_work: "After saving you choose the hiring details, then the work contract opens from this template to fill, sign and send to the candidate by link. The candidate's signature hires them.",
+    no_templates: "No active templates for this document. Add one in «Employee contract templates».",
     title: "Contracts",
     add: "New contract",
     edit: "Edit contract",
@@ -5688,6 +5696,7 @@ export default {
     archive: "Archive the contract",
     archive_confirm: "Archive this contract? It leaves the list and stays in the operations log.",
     err: {
+      pick_template: "Pick the template",
       required: "This field is required",
       pick_vacancy: "Choose the job",
       pick_candidate: "Choose the candidate",
