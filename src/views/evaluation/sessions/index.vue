@@ -15,6 +15,7 @@ import { useAuthStore } from "@/stores/Auth";
 import { SESSION_STATUS_SEVERITY, isoDate, reasonText, sessionKindLabel, timeRange } from "@/utils/studentPrograms";
 import SessionRescheduleDialog from "@/components/sessions/SessionRescheduleDialog.vue";
 import moment from "moment";
+import { isAdmin } from "@/utils/permissions";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -54,9 +55,12 @@ async function load() {
 }
 
 const isMine = (session) => Number(session.therapist_id) === Number(auth.user_id);
+// Test period: the system admin may start and run any session (warned first).
+const asAdmin = (session) => !isMine(session) && isAdmin();
+const runs = (session) => isMine(session) || isAdmin();
 const beforeStart = (session) => ["closed", "waiting", "late"].includes(session.status);
-const canStart = (session) => isMine(session) && ["waiting", "late"].includes(session.status);
-const canEnter = (session) => isMine(session) && session.status === "ongoing";
+const canStart = (session) => runs(session) && ["waiting", "late"].includes(session.status);
+const canEnter = (session) => runs(session) && session.status === "ongoing";
 const hasResults = (session) => ["ongoing", "finished"].includes(session.status);
 const openMissed = (session) => session.status === "missed" && !session.resolution;
 const dateTime = (value) => moment(value).format("YYYY-MM-DD HH:mm");
@@ -71,7 +75,13 @@ async function rescheduled() {
 
 // Starting: when the child has an earlier session, the therapist chooses a new one or continuing it.
 const startDialog = ref(null);
-async function askStart(session) {
+const adminConfirm = ref(null);
+async function askStart(session, confirmed = false) {
+  if (asAdmin(session) && !confirmed) {
+    adminConfirm.value = session;
+    return;
+  }
+  adminConfirm.value = null;
   busy.value = session.id;
   try {
     const { data } = await axios.get(`api/program-sessions/${session.id}/start-options`);
@@ -236,6 +246,15 @@ onBeforeUnmount(() => clearInterval(timer));
       </Column>
     </DataTable>
 
+    <Dialog :visible="!!adminConfirm" modal :header="$t('session_admin_title')" :style="{ width: '30rem' }" :breakpoints="{ '600px': '95vw' }"
+      @update:visible="adminConfirm = null">
+      <Message severity="warn" :closable="false" class="mb-3">{{ $t("session_admin_warn", { therapist: adminConfirm?.therapist?.name ?? "—" }) }}</Message>
+      <p class="m-0 text-color-secondary">{{ $t("session_admin_note") }}</p>
+      <template #footer>
+        <Button :label="$t('cancel')" text severity="secondary" @click="adminConfirm = null" />
+        <Button :label="$t('session_admin_go')" icon="pi pi-play" severity="warn" @click="askStart(adminConfirm, true)" />
+      </template>
+    </Dialog>
     <Dialog :visible="!!startDialog" modal :header="$t('session_start')" :style="{ width: '28rem' }" :breakpoints="{ '640px': '94vw' }"
       @update:visible="startDialog = null">
       <p v-if="startDialog" class="mb-4 text-color-secondary">{{ $t("session_previous_found", { date: startDialog.previous.starts_at }) }}</p>
