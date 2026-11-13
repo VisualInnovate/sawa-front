@@ -19,7 +19,7 @@ npx vite --config demo/vite.config.js
 npx vite build --config demo/vite.config.js
 npx vite preview --config demo/vite.config.js --port 5181
 ```
-ثم `http://localhost:5181/demo/` (في `.claude/launch.json`: `enable360-demo-dist`). الناتج `demo-dist/` (~21 MB) يُستضاف ثابتاً مع تحويل كل المسارات إلى `index.html`. أبقِ نافذة المتصفح ظاهرة أثناء العرض: المتصفح يبطّئ مؤقتات الصفحة المخفية.
+ثم `http://localhost:5181/demo/`. الناتج `demo-dist/` (~21 MB) يُستضاف ثابتاً مع تحويل كل المسارات إلى `index.html`. أبقِ نافذة المتصفح ظاهرة أثناء العرض: المتصفح يبطّئ مؤقتات الصفحة المخفية.
 
 ## البنية
 - `demo/scenario.ts` السيناريو (يوسف والأهل والموظفون والتواريخ النسبية).
