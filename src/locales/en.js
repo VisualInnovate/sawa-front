@@ -1,4 +1,7 @@
 export default {
+  sidebar_mine: "My work",
+  sidebar_children: "Children & programs",
+  sidebar_management: "Management",
   barrier_wording: { paragraph: "Paragraph", name_hint: "in the paragraph to display the child's first name; the wording follows the child's gender.", example_hint: "where the example goes in the paragraph: during the evaluation the answers show the evaluator's example there in parentheses." },
   change_password: "Change password",
   current_password: "Current password",
@@ -7145,5 +7148,20 @@ export default {
     max_mb_hint: "In megabytes.",
     mimes: "Allowed file types",
     mimes_hint: "Tap a type to turn it on or off.",
+  },
+  mnu: {
+    parents: "Reception & parents",
+    programs: "Programs & sessions",
+    rooms: "Rooms & activities",
+    transport: "Transport",
+    eval_tools: "Evaluation tools",
+    eval_settings: "Evaluation settings",
+    program_settings: "Program settings",
+    hr_attendance: "Attendance & leaves",
+    hr_pay: "Pay & dues",
+    hr_hiring: "Hiring",
+    hr_contracts: "Contracts",
+    structure: "Structure & permissions",
+    site_settings: "Site settings",
   },
 };
