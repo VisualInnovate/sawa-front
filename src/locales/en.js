@@ -3537,6 +3537,10 @@ export default {
   },
   eval_leave: { confirm: "Leave the evaluation? The answers not saved yet will be lost." },
   tasks: {
+    s_consultations: "Your confirmed consultations",
+    c_result_missing: "Result not written",
+    today: "Today",
+    upcoming: "Coming",
     title_admin: "Work in progress",
     hint_admin: "You are the system admin: no transactions are assigned to you. This is the academy's open work and whom it waits for.",
     hint_gm: "As the general manager: what waits for your decision first, then the departments' work.",
