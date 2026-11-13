@@ -4,11 +4,15 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import Button from "primevue/button";
 import axios from "axios";
-import { comm, acceptCall, declineCall, callAction, renewCallToken, tokenOf } from "@/utils/communication";
+import { useRoute, useRouter } from "vue-router";
+import { comm, acceptCall, declineCall, callAction, renewCallToken, tokenOf, loadRinging } from "@/utils/communication";
+import { push, initPush, enablePush, dismissPush, closeCallNotification } from "@/utils/push";
 import { session, joinCall, leaveCall, toggleMic, toggleCam, localVideoTrack } from "@/utils/agoraCall";
 import VideoTile from "./VideoTile.vue";
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const RING_SECONDS = 45;
 
 const incoming = computed(() => (comm.call ? null : comm.incoming[0] ?? null));
@@ -26,27 +30,44 @@ let ringLoop = null;
 function ring(on) {
   clearInterval(ringLoop);
   if (!on) return;
+  // A phone's ring: two tones together, twice, then a pause; and the phone vibrates.
   const beep = () => {
     try {
       audio ??= new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audio.createOscillator();
-      const gain = audio.createGain();
-      osc.frequency.value = 520;
-      gain.gain.value = 0.06;
-      osc.connect(gain).connect(audio.destination);
-      osc.start();
-      osc.stop(audio.currentTime + 0.35);
+      if (audio.state === "suspended") audio.resume();
+      for (const start of [0, 0.5]) {
+        const gain = audio.createGain();
+        gain.gain.setValueAtTime(0.0001, audio.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.18, audio.currentTime + start + 0.03);
+        gain.gain.setValueAtTime(0.18, audio.currentTime + start + 0.38);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + start + 0.42);
+        gain.connect(audio.destination);
+        for (const f of [440, 480]) {
+          const osc = audio.createOscillator();
+          osc.frequency.value = f;
+          osc.connect(gain);
+          osc.start(audio.currentTime + start);
+          osc.stop(audio.currentTime + start + 0.42);
+        }
+      }
     } catch {
       // no sound allowed yet
     }
+    navigator.vibrate?.([400, 200, 400]);
   };
   beep();
-  ringLoop = setInterval(beep, 1500);
+  ringLoop = setInterval(beep, 2500);
 }
 
 watch(incoming, (call, old) => {
   ring(Boolean(call));
-  if (call && call.id !== old?.id && document.visibilityState !== "visible" && "Notification" in window && Notification.permission === "granted") {
+  // Opened from the notification's «رد»: answered at once.
+  if (call && pendingAnswer === call.id) {
+    pendingAnswer = null;
+    answer();
+    return;
+  }
+  if (call && call.id !== old?.id && document.visibilityState !== "visible" && !push.subscribed && "Notification" in window && Notification.permission === "granted") {
     new Notification(t("comm.incoming_title"), { body: `${call.initiator?.name ?? ""} — ${t(call.type === "video" ? "comm.video_call" : "comm.voice_call")}` });
   }
 });
@@ -91,6 +112,12 @@ watch(
       setTimeout(close, 1800);
     }
   },
+);
+
+// The ring notification on this device goes when the call is answered or ends.
+watch(
+  () => current.value?.id,
+  (id) => id && closeCallNotification(id),
 );
 
 async function close() {
@@ -144,9 +171,42 @@ const onUnload = () => {
     headers: { Authorization: `Bearer ${tokenOf(comm.side)}`, Accept: "application/json" },
   }).catch(() => {});
 };
-onMounted(() => window.addEventListener("beforeunload", onUnload));
+// ---------- push notifications ----------
+// ?call=ID (&answer=1): opened from a call's notification.
+let pendingAnswer = null;
+const showPushPrompt = computed(() => !push.dismissed && !comm.call && !incoming.value
+  && ((push.supported && push.permission === "default") || (!push.supported && push.needsInstall)));
+async function turnOnPush() {
+  await enablePush();
+  if (push.permission !== "default") dismissPush();
+}
+function onWorkerMessage(event) {
+  const { type, action, data } = event.data || {};
+  if (type !== "comm-notification" || !data) return;
+  if (data.kind === "call" && data.call_id) {
+    if (action === "answer") pendingAnswer = Number(data.call_id);
+    loadRinging();
+  } else if (data.url) {
+    router.push(data.url);
+  }
+}
+function fromNotification() {
+  const id = Number(route.query.call);
+  if (!id) return;
+  if (route.query.answer) pendingAnswer = id;
+  loadRinging();
+  router.replace({ query: { ...route.query, call: undefined, answer: undefined } });
+}
+watch(() => comm.side, (side) => side && initPush(), { immediate: true });
+
+onMounted(() => {
+  window.addEventListener("beforeunload", onUnload);
+  navigator.serviceWorker?.addEventListener("message", onWorkerMessage);
+  fromNotification();
+});
 onBeforeUnmount(() => {
   window.removeEventListener("beforeunload", onUnload);
+  navigator.serviceWorker?.removeEventListener("message", onWorkerMessage);
   ring(false);
 });
 </script>
@@ -155,18 +215,33 @@ onBeforeUnmount(() => {
   <!-- A call ringing for me -->
   <Transition name="cm-pop">
     <div v-if="incoming" class="cm-ring" role="alertdialog" :aria-label="$t('comm.incoming_title')">
-      <div class="cm-ring__pulse"><i :class="incoming.type === 'video' ? 'pi pi-video' : 'pi pi-phone'" /></div>
+      <span class="cm-ring__kind">{{ $t(incoming.type === "video" ? "comm.video_call" : "comm.voice_call") }}</span>
+      <div class="cm-ring__pulse">{{ (incoming.initiator?.name || "?").charAt(0) }}</div>
       <div class="cm-ring__text">
         <strong>{{ incoming.initiator?.name }}</strong>
-        <span>{{ $t(incoming.type === "video" ? "comm.incoming_video" : "comm.incoming_voice") }}</span>
         <small v-if="incoming.initiator?.subtitle">{{ incoming.initiator.subtitle }}</small>
+        <span>{{ $t("comm.incoming_title") }}…</span>
       </div>
       <div class="cm-ring__actions">
-        <Button icon="pi pi-times" rounded severity="danger" :aria-label="$t('comm.decline')" @click="declineCall(incoming)" />
-        <Button :icon="incoming.type === 'video' ? 'pi pi-video' : 'pi pi-phone'" rounded severity="success" :aria-label="$t('comm.answer')" @click="answer" />
+        <div>
+          <button type="button" class="cm-ring__btn is-decline" :aria-label="$t('comm.decline')" @click="declineCall(incoming)"><i class="pi pi-phone" /></button>
+          <span>{{ $t("comm.decline") }}</span>
+        </div>
+        <div>
+          <button type="button" class="cm-ring__btn is-answer" :aria-label="$t('comm.answer')" @click="answer"><i :class="incoming.type === 'video' ? 'pi pi-video' : 'pi pi-phone'" /></button>
+          <span>{{ $t("comm.answer") }}</span>
+        </div>
       </div>
     </div>
   </Transition>
+
+  <!-- Turn on the notifications, so calls and messages arrive with the page in the background or closed -->
+  <div v-if="showPushPrompt" class="cm-push" role="dialog">
+    <i class="pi pi-bell" aria-hidden="true" />
+    <span>{{ push.supported ? $t("comm.push_ask") : $t("comm.push_install_ios") }}</span>
+    <Button v-if="push.supported" size="small" :label="$t('comm.push_on')" @click="turnOnPush" />
+    <Button size="small" text severity="secondary" :label="$t('comm.push_later')" @click="dismissPush" />
+  </div>
 
   <!-- The call I am in -->
   <div v-if="comm.call" class="cm-call" :class="{ 'is-min': minimized, 'is-video': session.video }">
@@ -198,12 +273,28 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.cm-ring { position: fixed; z-index: 1300; top: 18px; inset-inline-end: 18px; width: min(360px, calc(100vw - 24px)); background: #fff; border-radius: 18px; box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22); padding: 14px; display: flex; align-items: center; gap: 12px; }
-.cm-ring__pulse { width: 52px; height: 52px; border-radius: 50%; background: #135c65; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; animation: cm-pulse 1.4s infinite; flex: none; }
-.cm-ring__text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.cm-ring__text small { color: #64748b; }
-.cm-ring__actions { display: flex; gap: 8px; }
-@keyframes cm-pulse { 0% { box-shadow: 0 0 0 0 rgba(19, 92, 101, 0.5); } 70% { box-shadow: 0 0 0 14px rgba(19, 92, 101, 0); } 100% { box-shadow: 0 0 0 0 rgba(19, 92, 101, 0); } }
+/* The incoming call takes the whole screen, like a phone's. */
+.cm-ring { position: fixed; z-index: 1300; inset: 0; background: radial-gradient(circle at 50% 30%, #1d6f79, #0f171b 70%); color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 12vh 24px 10vh; text-align: center; }
+.cm-ring__kind { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 0.02em; }
+.cm-ring__pulse { width: 128px; height: 128px; border-radius: 50%; background: #135c65; color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; font-weight: 700; animation: cm-pulse 1.6s infinite; flex: none; border: 3px solid rgba(255, 255, 255, 0.25); }
+.cm-ring__text { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.cm-ring__text strong { font-size: 1.8rem; }
+.cm-ring__text small { color: #cbd5e1; }
+.cm-ring__text span { color: #94a3b8; }
+.cm-ring__actions { display: flex; gap: 72px; }
+.cm-ring__actions > div { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #e2e8f0; }
+.cm-ring__btn { width: 72px; height: 72px; border-radius: 50%; color: #fff; font-size: 1.7rem; display: flex; align-items: center; justify-content: center; }
+.cm-ring__btn.is-decline { background: #dc2626; }
+.cm-ring__btn.is-decline i { transform: rotate(135deg); }
+.cm-ring__btn.is-answer { background: #16a34a; animation: cm-shake 1.2s infinite; }
+@keyframes cm-shake { 0%, 60%, 100% { transform: rotate(0); } 70% { transform: rotate(-12deg); } 80% { transform: rotate(12deg); } 90% { transform: rotate(-8deg); } }
+.cm-push { position: fixed; z-index: 1200; bottom: 90px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 24px)); background: #fff;
+  border-radius: 16px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.cm-push > i { color: #b21553; font-size: 1.3rem; }
+.cm-push > span { flex: 1; font-size: 0.9rem; }
+@keyframes cm-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35); } 70% { box-shadow: 0 0 0 28px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
 .cm-call { position: fixed; z-index: 1250; inset: 0; background: #0f171b; color: #fff; display: flex; flex-direction: column; }
 .cm-call.is-min { inset: auto; bottom: 16px; inset-inline-end: 16px; width: min(320px, calc(100vw - 24px)); border-radius: 18px; box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35); }

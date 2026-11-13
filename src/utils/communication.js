@@ -56,6 +56,7 @@ export async function startCommunication(side) {
     echo
       .private(`${side}.${comm.myId}`)
       .listen(".message.sent", onMessage)
+      .listen(".message.read", onRead)
       .listen(".conversation.updated", () => loadConversations())
       .listen(".call.invited", onCallInvited)
       .listen(".call.updated", onCallUpdated);
@@ -208,6 +209,26 @@ function addMessage(message) {
     c.last_message_at = message.created_at;
     comm.conversations.sort((a, b) => (b.last_message_at ?? "").localeCompare(a.last_message_at ?? ""));
   }
+}
+
+/** Someone read a conversation up to a message: the ticks of my messages before it turn read. */
+function onRead({ conversation_id, member, message_id }) {
+  if (member === myKey()) return;
+  const c = comm.conversations.find((x) => x.id === conversation_id);
+  if (!c) return;
+  const reads = { ...(c.reads ?? {}) };
+  reads[member] = Math.max(Number(reads[member] ?? 0), Number(message_id));
+  c.reads = reads;
+}
+
+/**
+ * The state of my message: "sent" (✓) or "read" (✓✓, read by everyone in the conversation; in a group, by all).
+ * null for others' messages.
+ */
+export function receipt(message, conversation) {
+  if (!isMine(message) || !conversation) return null;
+  const reads = Object.values(conversation.reads ?? {});
+  return reads.length && reads.every((id) => Number(id) >= Number(message.id)) ? "read" : "sent";
 }
 
 function onMessage(message) {

@@ -7018,6 +7018,13 @@ export default {
     import_result: "{created} days added, {replaced} replaced, {skipped} left as they were, for {children} students.",
   },
   comm: {
+    push_ask: "Turn on notifications so calls and messages reach you even with the page closed or in the background.",
+    push_install_ios: "On iPhone: tap Share → «Add to Home Screen» and open the system from there to receive calls and messages.",
+    push_on: "Turn on",
+    push_later: "Later",
+    receipt_sent: "Sent",
+    receipt_read: "Read",
+    open_chat: "Messages",
     menu: "Communication",
     parent_menu: "Messages",
     title: "Communication",
