@@ -14,6 +14,13 @@ const rolesRoutes = [
     meta: { permission: ["ai assistant list", "ai assistant edit"] },
     component: () => import("@/views/assistant/Settings.vue"),
   },
+  // «إعدادات التواصل»: the chat's and the calls' settings, the services' state and the month's use.
+  {
+    path: "communication-settings",
+    name: "communication-settings",
+    meta: { permission: ["communication settings list", "communication settings edit"] },
+    component: () => import("@/views/communication/CommunicationSettings.vue"),
+  },
 ];
 
 export default {

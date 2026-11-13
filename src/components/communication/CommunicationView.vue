@@ -33,6 +33,8 @@ const conversations = computed(() => {
   return q ? comm.conversations.filter((c) => (c.title + " " + (c.subtitle ?? "")).includes(q)) : comm.conversations;
 });
 const active = computed(() => comm.conversations.find((c) => c.id === comm.activeId) ?? null);
+// «إعدادات التواصل»: calls on, and a group call only when group calls are on.
+const canCall = computed(() => comm.features.calls && (active.value?.type !== "group" || comm.features.group_calls));
 const thread = computed(() => (comm.activeId ? comm.threads[comm.activeId] : null));
 const typing = computed(() => {
   const x = comm.typing[comm.activeId];
@@ -272,8 +274,8 @@ onBeforeUnmount(() => closeConversation());
       <div class="cm-list__head">
         <h1>{{ $t("comm.title") }}</h1>
         <div class="cm-list__actions">
-          <Button icon="pi pi-pencil" rounded text :aria-label="$t('comm.new_chat')" v-tooltip.bottom="$t('comm.new_chat')" @click="openNew('direct')" />
-          <Button v-if="side === 'staff'" icon="pi pi-users" rounded text :aria-label="$t('comm.new_group')" v-tooltip.bottom="$t('comm.new_group')" @click="openNew('group')" />
+          <Button v-if="comm.features.can_start" icon="pi pi-pencil" rounded text :aria-label="$t('comm.new_chat')" v-tooltip.bottom="$t('comm.new_chat')" @click="openNew('direct')" />
+          <Button v-if="side === 'staff' && comm.features.groups" icon="pi pi-users" rounded text :aria-label="$t('comm.new_group')" v-tooltip.bottom="$t('comm.new_group')" @click="openNew('group')" />
         </div>
       </div>
       <div class="cm-tabs">
@@ -304,7 +306,7 @@ onBeforeUnmount(() => closeConversation());
           <li v-if="comm.loaded && !conversations.length" class="cm-empty">
             <i class="pi pi-comments" />
             <span>{{ $t("comm.empty") }}</span>
-            <Button :label="$t('comm.new_chat')" size="small" @click="openNew('direct')" />
+            <Button v-if="comm.features.can_start" :label="$t('comm.new_chat')" size="small" @click="openNew('direct')" />
           </li>
         </ul>
       </template>
@@ -332,8 +334,8 @@ onBeforeUnmount(() => closeConversation());
             <strong>{{ active.title }}</strong>
             <small>{{ typing ? $t("comm.typing", { name: typing }) : active.subtitle }}<template v-if="active.child"> · {{ active.child.name }}</template></small>
           </button>
-          <Button icon="pi pi-phone" text rounded :aria-label="$t('comm.voice_call')" v-tooltip.bottom="$t('comm.voice_call')" :disabled="!!comm.call" @click="call('audio')" />
-          <Button icon="pi pi-video" text rounded :aria-label="$t('comm.video_call')" v-tooltip.bottom="$t('comm.video_call')" :disabled="!!comm.call" @click="call('video')" />
+          <Button v-if="canCall" icon="pi pi-phone" text rounded :aria-label="$t('comm.voice_call')" v-tooltip.bottom="$t('comm.voice_call')" :disabled="!!comm.call" @click="call('audio')" />
+          <Button v-if="canCall && comm.features.video" icon="pi pi-video" text rounded :aria-label="$t('comm.video_call')" v-tooltip.bottom="$t('comm.video_call')" :disabled="!!comm.call" @click="call('video')" />
         </header>
 
         <div ref="scroller" class="cm-messages" @scroll.passive="onScroll">
@@ -361,7 +363,7 @@ onBeforeUnmount(() => closeConversation());
                   <span v-if="receipt(m, active)" class="cm-ticks" :class="receipt(m, active)" :title="$t(`comm.receipt_${receipt(m, active)}`)">
                     <i class="pi pi-check" /><i v-if="receipt(m, active) === 'read'" class="pi pi-check" />
                   </span>
-                  <button v-if="isMine(m) && !m.deleted" class="cm-del" :aria-label="$t('comm.delete')" @click="deleteMessage(comm.activeId, m.id)"><i class="pi pi-trash" /></button>
+                  <button v-if="isMine(m) && !m.deleted && comm.features.delete" class="cm-del" :aria-label="$t('comm.delete')" @click="deleteMessage(comm.activeId, m.id)"><i class="pi pi-trash" /></button>
                 </span>
               </div>
             </div>
@@ -371,7 +373,7 @@ onBeforeUnmount(() => closeConversation());
         <p v-if="error" class="cm-error">{{ error }}</p>
         <footer class="cm-composer">
           <input ref="fileInput" type="file" hidden @change="pickFile" />
-          <Button icon="pi pi-paperclip" text rounded :aria-label="$t('comm.attach')" @click="fileInput.click()" />
+          <Button v-if="comm.features.attachments" icon="pi pi-paperclip" text rounded :aria-label="$t('comm.attach')" @click="fileInput.click()" />
           <div class="cm-composer__box">
             <span v-if="file" class="cm-chip">{{ file.name }} <i class="pi pi-times" @click="file = null" /></span>
             <Textarea v-model="draft" autoResize rows="1" :placeholder="$t('comm.write')" @keydown="onKey" @input="onInput" />
