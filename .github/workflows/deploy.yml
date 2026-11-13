@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  # Run again by hand (e.g. after a server change) without a new commit.
+  workflow_dispatch:
 
 jobs:
   deploy:
