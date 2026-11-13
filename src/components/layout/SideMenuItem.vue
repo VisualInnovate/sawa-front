@@ -36,7 +36,8 @@ const matches = (item) => {
 const active = computed(() => matches(props.item));
 // What waits behind this entry (a group: everything inside it).
 const count = computed(() => menuCount(props.item));
-const open = ref(active.value);
+// A group opens on its page, or at start when it is the person's main group (utils/menuFocus.js).
+const open = ref(active.value || Boolean(props.item.startOpen));
 watch(active, (value) => {
   if (value) open.value = true;
 });

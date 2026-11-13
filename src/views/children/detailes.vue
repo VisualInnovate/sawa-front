@@ -47,6 +47,7 @@
         </div>
       </div>
     </div>
+    <ClinicalProfileCard v-if="child_id" :key="`cp-${child_id}`" :child-id="child_id" />
     <CaseStudyCard v-if="child_id" :key="child_id" :child-id="child_id" />
   </div>
 </template>
@@ -56,10 +57,11 @@ import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from '../../components/ChildTaps.vue'
 import CaseStudyCard from '../../components/caseStudy/CaseStudyCard.vue'
+import ClinicalProfileCard from '../../components/analytics/ClinicalProfileCard.vue'
 import { useToast } from 'primevue/usetoast'
 
 export default {
-  components: { ChildTaps, CaseStudyCard },
+  components: { ChildTaps, CaseStudyCard, ClinicalProfileCard },
   data() {
     return {
       child_id: useStorage("child_id", Number),
