@@ -16,7 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 
-const TABS = [
+const ALL_TABS = [
   { key: "overview", icon: "pi pi-th-large", label: "pp.tab_overview", component: defineAsyncComponent(() => import("./child/OverviewTab.vue")) },
   { key: "evaluations", icon: "pi pi-clipboard", label: "pp.tab_evaluations", component: defineAsyncComponent(() => import("./child/EvaluationsTab.vue")) },
   { key: "reports", icon: "pi pi-chart-bar", label: "pp.tab_reports", component: defineAsyncComponent(() => import("./child/ReportsTab.vue")) },
@@ -24,18 +24,22 @@ const TABS = [
   { key: "program", icon: "pi pi-book", label: "pp.tab_program", component: defineAsyncComponent(() => import("./child/ProgramTab.vue")) },
   { key: "finance", icon: "pi pi-wallet", label: "pp.tab_finance", component: defineAsyncComponent(() => import("./child/FinanceTab.vue")) },
   { key: "consultations", icon: "pi pi-comments", label: "pp.tab_consultations", component: defineAsyncComponent(() => import("./child/ConsultationsTab.vue")) },
+  // «دراسة حالة الطالب»: only once the academy has sent the form for this child.
+  { key: "case", icon: "pi pi-file-edit", label: "cs.title", needs: "case_study", component: defineAsyncComponent(() => import("./child/CaseStudyTab.vue")) },
 ];
 
 const overview = ref(null);
 const loading = ref(true);
 const missing = ref(false);
-const tab = computed(() => (TABS.some((item) => item.key === route.query.tab) ? route.query.tab : "overview"));
-const current = computed(() => TABS.find((item) => item.key === tab.value));
 const child = computed(() => overview.value?.child ?? null);
+const TABS = computed(() => ALL_TABS.filter((item) => !item.needs || child.value?.[item.needs]));
+const tab = computed(() => (TABS.value.some((item) => item.key === route.query.tab) ? route.query.tab : "overview"));
+const current = computed(() => TABS.value.find((item) => item.key === tab.value));
 const counts = computed(() => ({
   evaluations: child.value?.evaluations?.approved ?? 0,
   plan: child.value?.pending_generalizations ?? 0,
   consultations: child.value?.consultations?.waiting ?? 0,
+  case: child.value?.case_study === "sent" ? 1 : 0,
 }));
 
 const setTab = (key) => router.replace({ query: { ...route.query, tab: key } });
@@ -102,6 +106,12 @@ const finance = computed(() => overview.value?.finance ?? null);
         </div>
       </section>
 
+      <button v-if="child.case_study === 'sent' && tab !== 'case'" type="button" class="pp-case-call pp-in" :style="{ '--i': 2 }" @click="setTab('case')">
+        <span class="pp-case-call__icon"><i class="pi pi-file-edit" /></span>
+        <span class="pp-case-call__body"><b>{{ $t("cs.call_title") }}</b><span>{{ $t("cs.call_text") }}</span></span>
+        <span class="pp-btn pp-btn--magenta pp-btn--sm">{{ $t("cs.call_button") }}</span>
+      </button>
+
       <!-- Tabs -->
       <nav class="pp-tabs pp-in pp-no-print" :style="{ '--i': 2 }" role="tablist">
         <button v-for="item in TABS" :key="item.key" type="button" role="tab" class="pp-tab" :class="{ 'is-active': tab === item.key }" :aria-selected="tab === item.key" @click="setTab(item.key)">
@@ -127,5 +137,44 @@ const finance = computed(() => overview.value?.finance ?? null);
 .pp-who__body {
   flex: 1;
   min-width: 0;
+}
+.pp-case-call {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border: 1.5px solid var(--pp-magenta-100);
+  border-radius: var(--pp-radius);
+  background: var(--pp-magenta-50);
+  color: var(--pp-ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pp-case-call:focus-visible {
+  outline: 3px solid var(--pp-magenta-100);
+  outline-offset: 2px;
+}
+.pp-case-call__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--pp-magenta);
+  font-size: 1.15rem;
+}
+.pp-case-call__body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+.pp-case-call__body span {
+  font-size: 0.88rem;
+  color: var(--pp-muted);
 }
 </style>

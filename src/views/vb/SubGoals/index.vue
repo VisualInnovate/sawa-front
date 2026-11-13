@@ -14,6 +14,8 @@ import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Toast from 'primevue/toast';
+import Checkbox from 'primevue/checkbox';
+import { can } from '@/utils/permissions';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -70,6 +72,26 @@ async function save() {
     else notifyError();
   } finally { saving.value = false; }
 }
+// «أهداف فرعية أخرى»: kept on the sub-goal as soon as it is ticked (nothing else reads it yet).
+const canEdit = computed(() => can('milestone sub goal edit'));
+const ticking = ref(new Set());
+async function setOther(row, value) {
+  if (ticking.value.has(row.id)) return;
+  const before = Boolean(row.other_sub_goals);
+  row.other_sub_goals = value;
+  ticking.value = new Set(ticking.value).add(row.id);
+  try {
+    const { data } = await axios.patch(`/api/milestone-sub-goals/${row.id}/other-sub-goals`, { other_sub_goals: value });
+    row.other_sub_goals = Boolean(data.data.other_sub_goals);
+  } catch {
+    row.other_sub_goals = before;
+    notifyError();
+  } finally {
+    const next = new Set(ticking.value);
+    next.delete(row.id);
+    ticking.value = next;
+  }
+}
 async function remove() {
   if (saving.value || !deleting.value) return;
   saving.value = true;
@@ -112,6 +134,15 @@ onMounted(async () => {
       <Column field="subtest.title" :header="$t('milestone_general_goal')" sortable />
       <Column field="subtest.level.title" :header="$t('level_id')" sortable />
       <Column field="display_order" :header="$t('display_order')" sortable />
+      <Column field="other_sub_goals" :header="$t('milestone_other_sub_goals')" sortable>
+        <template #body="{ data }">
+          <label class="other-goals">
+            <Checkbox :modelValue="Boolean(data.other_sub_goals)" binary :inputId="`other-${data.id}`" :ariaLabel="$t('milestone_other_sub_goals')" :disabled="!canEdit || ticking.has(data.id)"
+              @update:modelValue="setOther(data, $event)" />
+            <span>{{ $t('milestone_other_sub_goals') }}</span>
+          </label>
+        </template>
+      </Column>
       <Column>
         <template #body="{ data }">
           <div class="table-actions">
@@ -134,3 +165,14 @@ onMounted(async () => {
     </Dialog>
   </section>
 </template>
+
+<style scoped>
+.other-goals {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+</style>
