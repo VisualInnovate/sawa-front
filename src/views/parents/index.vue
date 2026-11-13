@@ -29,7 +29,8 @@ const fetchData = () => {
   axios.get('/api/admin-parents')
     .then((res) => {
       loading.value = false;
-      users.value = res.data.parents;
+      // full_name: the first and the family name together, so «محمد الخطيب» finds the parent.
+      users.value = (res.data.parents ?? []).map((p) => ({ ...p, full_name: `${p.fname ?? ''} ${p.lname ?? ''}` }));
     })
     .catch((error) => {
       loading.value = false;
@@ -177,6 +178,7 @@ const initFilters = () => {
             :paginator="true"
             :rows="10"
             :filters="filters"
+            :globalFilterFields="['full_name', 'email', 'phone', 'id']"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows-per-page-options="[5, 10, 25, 50]"
             :current-page-report-template="`${$t('Showing')} {first} ${$t('to')} {last} ${$t('of')} {totalRecords} ${$t('records')}`"
