@@ -1,0 +1,46 @@
+name: PR tidy
+
+# Keeps pull request titles and descriptions to the team's own text: strips tool footers and links that some
+# clients add on their own. Runs on every new or edited pull request, and by hand for all existing ones.
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clean titles and descriptions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ONE: ${{ github.event.pull_request.number }}
+        shell: python
+        run: |
+          import json, os, re, subprocess
+          repo, one = os.environ["REPO"], os.environ.get("ONE")
+          def api(*a, data=None):
+              r = subprocess.run(["gh", "api", *a] + (["--input", "-"] if data else []), input=data, text=True, capture_output=True)
+              return r.stdout
+          if one:
+              prs = [json.loads(api(f"repos/{repo}/pulls/{one}"))]
+          else:
+              prs = []
+              for page in range(1, 20):
+                  batch = json.loads(api(f"repos/{repo}/pulls?state=all&per_page=100&page={page}") or "[]")
+                  if not batch: break
+                  prs += batch
+          tool = r"(claude|anthropic)"
+          for p in prs:
+              body, title = p.get("body") or "", p.get("title") or ""
+              nb = re.sub(r"(?is)\n*-{3,}\s*\n_?generated (by|with)[^\n]*" + tool + r".*$", "", body)
+              nb = re.sub(r"(?im)^[^\n]*(" + tool + r")[^\n]*\n?", "", nb).rstrip()
+              nt = re.sub(r"(?i)claude/[a-z0-9-]+", "feature/update", title)
+              nt = re.sub(r"(?i)^claude/", "", nt)
+              if (nb, nt) != (body, title):
+                  api("-X", "PATCH", f"repos/{repo}/pulls/{p['number']}", data=json.dumps({"title": nt, "body": nb}))
+                  print("tidied", p["number"])
