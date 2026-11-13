@@ -1,3 +1,5 @@
+import { FilterService } from "@primevue/core/api";
+import { matches } from "@/utils/smartSearch";
 import PrimeVue from "primevue/config";
 import { definePreset } from "@primeuix/themes";
 import Aura from "@primeuix/themes/aura";
@@ -202,6 +204,10 @@ export function setPrimeLocale(app, lang) {
     aria: { ...defaultLocale.aria, ...(texts.aria ?? {}) },
   };
 }
+
+// Every table's search (FilterMatchMode.CONTAINS, the global search too) is the smarter one: Arabic spelling variants
+// count as one letter and several words match in any order (utils/smartSearch.js).
+FilterService.filters.contains = (value, filter) => (filter === undefined || filter === null || String(filter).trim() === "" ? true : value !== undefined && value !== null && matches(value, filter));
 
 export default function installPrimeVue(app, lang) {
   app.use(PrimeVue, {
