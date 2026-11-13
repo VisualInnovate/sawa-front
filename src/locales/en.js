@@ -3188,6 +3188,8 @@ export default {
   },
   // The org structure held together: the job title decides role, type, department and leadership.
   stc: {
+    accounts_title: "Accounts with permissions and no employee record",
+    accounts_hint: "Login accounts holding roles with no employee in the structure: add the employee record for those who work here, or disable the account of those who left.",
     menu: "Structure conflicts",
     title: "Structure conflicts",
     subtitle: "Employees who do not match their job title, department or leadership, and old duplicate roles.",
@@ -3535,6 +3537,19 @@ export default {
   },
   eval_leave: { confirm: "Leave the evaluation? The answers not saved yet will be lost." },
   tasks: {
+    title_admin: "Work in progress",
+    hint_admin: "You are the system admin: no transactions are assigned to you. This is the academy's open work and whom it waits for.",
+    hint_gm: "As the general manager: what waits for your decision first, then the departments' work.",
+    hint_head: "As head of {departments}: what waits for you, the oldest and late first.",
+    hint_deputy: "As deputy head of {departments}: what waits for you, the oldest and late first.",
+    hint_role_dept: "As {role} in {department}: what waits for you, the oldest and late first.",
+    hint_role: "As {role}: what waits for you, the oldest and late first.",
+    s_oversight: "Work across the academy",
+    ov_nothing: "No open work in the academy now.",
+    ov_distribute: "Evaluations to distribute — {department}",
+    ov_old_evaluations: "Evaluations on the old approval (departments without a head)",
+    ov_late: "{n} late",
+    ov_nobody: "Nobody can approve these: check the flow's stages or the department's head",
     title: "Waiting for you",
     hint: "What needs your action now, the oldest and late first.",
     refresh: "Refresh",

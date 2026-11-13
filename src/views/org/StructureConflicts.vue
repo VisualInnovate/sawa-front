@@ -16,7 +16,7 @@ const { t } = useI18n();
 const toast = useToast();
 const confirm = useConfirm();
 
-const data = ref({ employees: [], positions_without_role: [], roles_outside: [], roles: [] });
+const data = ref({ employees: [], positions_without_role: [], roles_outside: [], roles: [], accounts_without_employee: [] });
 const loading = ref(true);
 const busy = ref(null);
 const editable = computed(() => can("org structure edit"));
@@ -83,7 +83,7 @@ async function merge() {
   }
 }
 
-const clean = computed(() => !loading.value && !data.value.employees.length && !data.value.positions_without_role.length && !data.value.roles_outside.length);
+const clean = computed(() => !loading.value && !data.value.employees.length && !data.value.positions_without_role.length && !data.value.roles_outside.length && !(data.value.accounts_without_employee ?? []).length);
 
 onMounted(load);
 </script>
@@ -162,6 +162,17 @@ onMounted(load);
             <Button v-can="'positions edit'" size="small" icon="pi pi-pencil" :label="$t('stc.set_role')" variant="outlined" @click="$router.push({ name: 'posttion' })" />
           </template>
         </Column>
+      </DataTable>
+    </section>
+
+    <!-- Accounts with permissions and no employee record -->
+    <section v-if="!loading && data.accounts_without_employee?.length">
+      <p class="font-bold text-lg mb-1">{{ $t("stc.accounts_title") }}</p>
+      <small class="text-color-secondary block mb-2">{{ $t("stc.accounts_hint") }}</small>
+      <DataTable :value="data.accounts_without_employee" dataKey="id" size="small" stripedRows>
+        <Column :header="$t('name')" field="name" />
+        <Column :header="$t('email')" field="email" />
+        <Column :header="$t('roles')"><template #body="{ data: row }"><Tag v-for="r in row.roles" :key="r" :value="r" severity="secondary" class="me-1" /></template></Column>
       </DataTable>
     </section>
 
