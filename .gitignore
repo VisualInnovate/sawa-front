@@ -32,3 +32,4 @@ node_modules
 # Enable 360 demo build
 demo-dist
 demo-dist.zip
+vite.config.js.timestamp-*
