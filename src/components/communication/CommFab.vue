@@ -9,7 +9,7 @@ const props = defineProps({ side: { type: String, required: true } });
 const route = useRoute();
 const target = computed(() => ({ name: props.side === "parent" ? "parent-messages" : "communication" }));
 const unread = computed(() => comm.conversations.reduce((n, c) => n + (Number(c.unread) || 0), 0));
-const hidden = computed(() => route.name === target.value.name || !!comm.call);
+const hidden = computed(() => comm.off || route.name === target.value.name || !!comm.call);
 </script>
 
 <template>

@@ -19,6 +19,9 @@ export const comm = reactive({
   incoming: [], // calls ringing for me
   call: null, // the call I am in: { call, token, outgoing }
   callsEnabled: true,
+  // What «إعدادات التواصل» allows this member (api/communication/features); off: the whole service is switched off.
+  features: { calls: true, video: true, group_calls: true, groups: true, can_start: true, attachments: true, delete: true, push: true },
+  off: false,
   realtime: false,
 });
 
@@ -60,6 +63,16 @@ export async function startCommunication(side) {
       .listen(".conversation.updated", () => loadConversations())
       .listen(".call.invited", onCallInvited)
       .listen(".call.updated", onCallUpdated);
+  }
+  try {
+    comm.features = { ...comm.features, ...(await api("get", "features")).data };
+    comm.off = false;
+  } catch (e) {
+    // 404 / 403: «التواصل» is switched off (for everyone, or for the parents).
+    if ([403, 404].includes(e?.response?.status)) {
+      comm.off = true;
+      return;
+    }
   }
   await Promise.allSettled([loadConversations(), loadRinging()]);
   timer = setInterval(() => {
