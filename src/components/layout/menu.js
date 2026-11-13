@@ -213,6 +213,7 @@ export const buildMenu = () => [
     children: [
       { label: "Settings", to: { name: "settings" }, perm: "settings list" },
       { label: "ai.menu", to: { name: "ai-assistant" }, perm: ["ai assistant list", "ai assistant edit"] },
+      { label: "cset.menu", to: { name: "communication-settings" }, perm: ["communication settings list", "communication settings edit"] },
     ],
   },
   {
