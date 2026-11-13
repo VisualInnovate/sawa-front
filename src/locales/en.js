@@ -1,4 +1,6 @@
 export default {
+  sessions_none_period: "No sessions in this period (it may be the weekend).",
+  sessions_show_next: "Show the next sessions: {day}",
   sidebar_frequent: "Most used",
   sidebar_mine: "My work",
   sidebar_children: "Children & programs",
