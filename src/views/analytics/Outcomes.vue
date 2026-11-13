@@ -33,6 +33,8 @@ const levels = computed(() => {
   for (const d of ms.value?.domains ?? []) (by[d.level] ??= { title: d.level_title, items: [] }).items.push(d);
   return Object.values(by);
 });
+// The server may send 1.8000000000000000444: shown with one decimal at most.
+const n1 = (v) => (v === null || v === undefined || v === "" ? "—" : Math.round(Number(v) * 10) / 10);
 const bar = (v, max) => `${Math.max(0, Math.min(100, (Number(v) / max) * 100))}%`;
 const tone = (v, max) => (v / max >= 0.7 ? "good" : v / max >= 0.4 ? "mid" : "low");
 const STAGES = ["not_started", "mt", "exp", "rr", "ef", "mf", "achieved"];
@@ -78,10 +80,10 @@ const quality = computed(() => {
       <div class="oa-kpis">
         <div class="oa-kpi"><b>{{ data.children }}</b><span>{{ $t("oa.k_children") }}</span></div>
         <div class="oa-kpi"><b>{{ ms.children }}</b><span>{{ $t("oa.k_vbmapp") }}</span></div>
-        <div class="oa-kpi"><b>{{ ms.total.median ?? "—" }}<small>/170</small></b><span>{{ $t("oa.k_median") }}</span></div>
-        <div class="oa-kpi"><b>{{ ms.progress.per_month ?? "—" }}</b><span>{{ $t("oa.k_per_month", { n: ms.progress.children }) }}</span></div>
-        <div class="oa-kpi"><b>{{ data.side_profile.delay ?? "—" }}%</b><span>{{ $t("oa.k_delay", { m: data.side_profile.gap_months ?? "—" }) }}</span></div>
-        <div class="oa-kpi"><b>{{ data.barriers.median ?? "—" }}<small>/96</small></b><span>{{ $t("oa.k_barriers") }}</span></div>
+        <div class="oa-kpi"><b>{{ n1(ms.total.median) }}<small>/170</small></b><span>{{ $t("oa.k_median") }}</span></div>
+        <div class="oa-kpi"><b>{{ n1(ms.progress.per_month) }}</b><span>{{ $t("oa.k_per_month", { n: ms.progress.children }) }}</span></div>
+        <div class="oa-kpi"><b>{{ n1(data.side_profile.delay) }}%</b><span>{{ $t("oa.k_delay", { m: n1(data.side_profile.gap_months) }) }}</span></div>
+        <div class="oa-kpi"><b>{{ n1(data.barriers.median) }}<small>/96</small></b><span>{{ $t("oa.k_barriers") }}</span></div>
       </div>
 
       <!-- VB-MAPP domains -->
@@ -94,8 +96,8 @@ const quality = computed(() => {
             <span class="oa-sym">{{ d.symbol }}</span>
             <span class="oa-dtitle">{{ d.title }}</span>
             <div class="oa-bar"><i :class="tone(d.mean, d.max)" :style="{ width: bar(d.mean, d.max) }" /></div>
-            <b>{{ d.mean }}</b>
-            <span class="oa-gain" :class="{ up: d.gain > 0.9, flat: d.gain !== null && d.gain <= 0.3 }">{{ d.gain === null ? "" : `+${d.gain}` }}</span>
+            <b>{{ n1(d.mean) }}</b>
+            <span class="oa-gain" :class="{ up: d.gain > 0.9, flat: d.gain !== null && d.gain <= 0.3 }">{{ d.gain === null ? "" : `+${n1(d.gain)}` }}</span>
           </div>
         </div>
       </section>
@@ -103,7 +105,7 @@ const quality = computed(() => {
       <div class="oa-grid">
         <section class="oa-card">
           <h2>{{ $t("oa.progress") }}</h2>
-          <p class="oa-hint">{{ $t("oa.progress_hint", { n: ms.progress.children, m: ms.progress.months ?? "—", g: ms.progress.gain ?? "—" }) }}</p>
+          <p class="oa-hint">{{ $t("oa.progress_hint", { n: ms.progress.children, m: n1(ms.progress.months), g: n1(ms.progress.gain) }) }}</p>
           <div v-for="k in ['none', 'small', 'medium', 'large']" :key="k" class="oa-q">
             <span>{{ $t(`oa.spread_${k}`) }}</span>
             <div class="oa-bar"><i :class="k === 'none' ? 'low' : k === 'small' ? 'mid' : 'good'" :style="{ width: bar(ms.progress.spread[k], Math.max(1, ms.progress.children)) }" /></div>
@@ -113,7 +115,7 @@ const quality = computed(() => {
           <div v-for="a in ms.by_age" :key="a.band" class="oa-q">
             <span>{{ $t(`oa.age_${a.band}`) }} ({{ a.children }})</span>
             <div class="oa-bar"><i class="mid" :style="{ width: bar(a.median ?? 0, 170) }" /></div>
-            <b>{{ a.median ?? "—" }}</b>
+            <b>{{ n1(a.median) }}</b>
           </div>
         </section>
 
@@ -123,13 +125,13 @@ const quality = computed(() => {
           <div v-for="b in data.barriers.top" :key="b.title" class="oa-q">
             <span class="oa-long">{{ b.title }}</span>
             <div class="oa-bar"><i class="low" :style="{ width: bar(b.mean, 4) }" /></div>
-            <b>{{ b.mean }}</b>
+            <b>{{ n1(b.mean) }}</b>
           </div>
         </section>
 
         <section class="oa-card">
           <h2>{{ $t("oa.goals") }}</h2>
-          <p class="oa-hint">{{ $t("oa.goals_hint", { p: data.goals.plans, g: data.goals.goals, m: data.goals.per_plan ?? "—", o: data.goals.plans_over_20 }) }}</p>
+          <p class="oa-hint">{{ $t("oa.goals_hint", { p: data.goals.plans, g: data.goals.goals, m: n1(data.goals.per_plan), o: data.goals.plans_over_20 }) }}</p>
           <div v-for="s in goalStages" :key="s.key" class="oa-q">
             <span>{{ $t(`oa.stage_${s.key}`) }}</span>
             <div class="oa-bar"><i :class="s.key === 'not_started' ? 'low' : s.key === 'achieved' ? 'good' : 'mid'" :style="{ width: bar(s.n, Math.max(1, data.goals.goals)) }" /></div>
