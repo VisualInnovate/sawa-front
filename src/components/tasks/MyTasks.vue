@@ -94,9 +94,10 @@ function oversightLabel(row) {
 }
 
 const summary = computed(() => data.value?.summary ?? { late: 0, approvals: 0, to_do: 0, returned: 0 });
+const consultations = computed(() => [...(data.value?.consultations ?? [])].sort((a, b) => Number(b.late) - Number(a.late)));
 const myEvaluations = computed(() => (props.hideMyEvaluations ? [] : data.value?.my_evaluations ?? []));
 const nothing = computed(() => data.value && !isAdmin.value && !summary.value.approvals && !summary.value.returned && !data.value.distribute.length
-  && !myEvaluations.value.length && !data.value.others.length);
+  && !myEvaluations.value.length && !data.value.others.length && !consultations.value.length);
 
 // The deadline: «متبقي 5 س» or «متأخر 2 س».
 function deadline(row) {
@@ -246,6 +247,26 @@ async function decide(row, decision, note = null) {
               <small><span v-if="row.date" dir="ltr">{{ row.date }} {{ row.time || "" }}</span><span v-if="row.started"> · {{ $t("tasks.started") }}</span></small>
             </div>
             <span v-if="row.late" class="mt-deadline is-late">{{ $t("tasks.not_started") }}</span>
+            <div class="mt-actions"><Button icon="pi pi-external-link" :label="$t('tasks.open')" size="small" outlined @click="open(row)" /></div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- The consultant's confirmed consultations: late ones (result not written) first, then today and the coming days. -->
+      <div v-if="consultations.length" class="mt-block">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('consultations')" @click="toggle('consultations')">
+            <i :class="isOpen('consultations') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_consultations") }} <Tag :value="consultations.length" rounded />
+          </button>
+        </h3>
+        <ul v-show="isOpen('consultations')" class="mt-list">
+          <li v-for="row in consultations" :key="row.id" class="mt-row">
+            <div class="mt-main">
+              <Tag :value="row.late ? $t('tasks.c_result_missing') : row.today ? $t('tasks.today') : $t('tasks.upcoming')" :severity="row.late ? 'danger' : row.today ? 'success' : 'secondary'" />
+              <b>{{ row.child }}</b>
+              <small><span dir="ltr">{{ row.date }} {{ row.time }}</span></small>
+            </div>
             <div class="mt-actions"><Button icon="pi pi-external-link" :label="$t('tasks.open')" size="small" outlined @click="open(row)" /></div>
           </li>
         </ul>
