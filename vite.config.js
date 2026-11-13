@@ -1,8 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
-import { fileURLToPath } from "node:url";
-import { resolve, dirname } from "node:path";
+import { resolve } from "node:path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,17 +11,13 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    // added this vueI18nPlugin to define locales
-    VueI18nPlugin({
-      // The locale files are plain JS objects that this plugin version does not precompile, so the
-      // production build must keep vue-i18n's message compiler (otherwise "{name}" is never filled in).
-      runtimeOnly: false,
-      include: resolve(
-        dirname(fileURLToPath(import.meta.url)),
-        "./src/locales/*.js"
-      ),
-    }),
   ],
+  // vue-i18n 11 compiles the locale messages in the browser (no eval), so no build plugin is needed.
+  define: {
+    __VUE_I18N_FULL_INSTALL__: true,
+    __VUE_I18N_LEGACY_API__: false,
+    __INTLIFY_PROD_DEVTOOLS__: false,
+  },
   css: {
     preprocessorOptions: {
       scss: { api: "modern-compiler" },
