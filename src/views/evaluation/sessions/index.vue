@@ -26,6 +26,8 @@ const sessions = ref([]);
 const canManage = ref(false);
 const canReschedule = ref(false);
 const loading = ref(false);
+// The period has no sessions (a weekend, a holiday): the next day that has some.
+const nextDay = ref(null);
 const status = ref(null);
 const busy = ref(null);
 
@@ -43,6 +45,7 @@ async function load() {
   try {
     const { data } = await axios.get("api/program-sessions", { params: { from: isoDate(from), to: isoDate(to ?? from) } });
     sessions.value = data.data;
+    nextDay.value = data.next_day ?? null;
     canManage.value = !!data.can_manage;
     canReschedule.value = !!data.can_reschedule;
   } finally {
@@ -152,7 +155,13 @@ onBeforeUnmount(() => clearInterval(timer));
       <Button v-for="option in statuses" :key="String(option.value)" size="small" :variant="status === option.value ? undefined : 'outlined'"
         :label="option.value ? `${option.label} (${counts[option.value] ?? 0})` : `${option.label} (${sessions.length})`" @click="status = option.value" />
     </div>
-    <DataTable :value="shown" :loading="loading" dataKey="id" paginator :rows="20" stripedRows>
+    <div v-if="!loading && !sessions.length" class="sessions-empty">
+      <i class="pi pi-calendar-times" aria-hidden="true" />
+      <p>{{ $t("sessions_none_period") }}</p>
+      <Button v-if="nextDay" :label="$t('sessions_show_next', { day: new Date(`${nextDay}T00:00:00`).toLocaleDateString($i18n.locale === 'ar' ? 'ar' : 'en', { weekday: 'long', day: 'numeric', month: 'long' }) })" icon="pi pi-arrow-left"
+        @click="range = [new Date(`${nextDay}T00:00:00`), new Date(`${nextDay}T00:00:00`)]" />
+    </div>
+    <DataTable v-else :value="shown" :loading="loading" dataKey="id" paginator :rows="20" stripedRows>
       <Column :header="$t('sp_date')">
         <template #body="{ data }"><span class="whitespace-nowrap">{{ moment(data.starts_at).format("YYYY-MM-DD") }}</span></template>
       </Column>
@@ -258,3 +267,8 @@ onBeforeUnmount(() => clearInterval(timer));
     <Toast />
   </div>
 </template>
+
+<style scoped>
+.sessions-empty { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 3rem 1rem; color: #64748b; text-align: center; }
+.sessions-empty .pi { font-size: 2.5rem; color: #94a3b8; }
+</style>
