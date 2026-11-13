@@ -10,6 +10,8 @@ import UserProfileMenu from "./UserProfileMenu.vue";
 import AdminSidebar from "./layout/AdminSidebar.vue";
 import NotificationBell from "./layout/NotificationBell.vue";
 import AssistantChat from "./assistant/AssistantChat.vue";
+import CallLayer from "./communication/CallLayer.vue";
+import { startCommunication, stopCommunication } from "../utils/communication";
 import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
 import { loadCurrency } from "../utils/accounting";
@@ -55,6 +57,8 @@ onMounted(async () => {
   // Every amount shows the accounting's currency.
   loadCurrency();
   await authStore.getUser();
+  // Calls ring on every page of the dashboard.
+  startCommunication("staff").catch(() => {});
   // The role may have changed since sign-in; leave a page it no longer allows.
   const current = router.currentRoute.value;
   if (!current.matched.every((record) => canVisit(record))) {
@@ -64,6 +68,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   desktopQuery.removeEventListener("change", onMediaChange);
   stopCounts?.();
+  stopCommunication();
 });
 </script>
 
@@ -105,6 +110,7 @@ onBeforeUnmount(() => {
     </main>
     <!-- «مساعد سوا» for employees: within their own permissions, opens the pages of their menu. -->
     <AssistantChat v-if="authStore.authenticated" kind="dashboard" />
+    <CallLayer v-if="authStore.authenticated" />
   </div>
 </template>
 

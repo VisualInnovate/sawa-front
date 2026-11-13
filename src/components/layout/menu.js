@@ -45,6 +45,15 @@ export const buildMenu = () => [
       { label: "ct.menu", to: { name: "contract-templates" }, perm: "contract templates list" },
     ],
   },
+  // «التواصل»: chats, groups, voice and video calls.
+  {
+    key: "communication",
+    icon: "mdi-forum-outline",
+    label: "comm.menu",
+    to: { name: "communication" },
+    badge: "unread_messages",
+    show: () => !onlyBusSupervisor(),
+  },
   {
     key: "my-schedule",
     icon: "mdi-calendar-account-outline",

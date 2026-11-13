@@ -193,6 +193,8 @@ const routes = [
       { path: "profile", name: "Profile", component: () => import("../views/parent/Profile.vue") },
       // The weekly schedule of the parent's children (sessions, inclusion, evaluations, consultations).
       { path: "schedule", name: "parent-schedule", component: () => import("../views/parent/Schedule.vue") },
+      // «الرسائل»: chats and calls with the child's team.
+      { path: "messages", name: "parent-messages", component: () => import("../components/communication/CommunicationView.vue"), props: { side: "parent" } },
     ],
   },
   ///////////////End Front End Users Routes //////////////////
@@ -235,6 +237,13 @@ const routes = [
       ...Object.values(contracts),
       ...Object.values(toilet),
       ...Object.values(feeding),
+      // «التواصل»: chats, groups and calls (staff with staff and with the parents of their cases).
+      {
+        path: "communication",
+        name: "communication",
+        component: () => import("../components/communication/CommunicationView.vue"),
+        props: { side: "staff" },
+      },
     ],
   },
   {

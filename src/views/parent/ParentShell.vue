@@ -8,6 +8,8 @@ import { useParentStore } from "@/stores/ParentStore";
 import { useParentPortalStore } from "@/stores/ParentPortal";
 import { pendingCounts, watchPendingCounts } from "@/utils/pendingCounts";
 import LocaleSelect from "@/components/LocaleSelect.vue";
+import CallLayer from "@/components/communication/CallLayer.vue";
+import { startCommunication, stopCommunication } from "@/utils/communication";
 import logo from "@/views/frontend/views/main/images/logo.png";
 
 const route = useRoute();
@@ -22,6 +24,7 @@ const NAV = [
   { name: "parent-finances", icon: "pi pi-wallet", label: "pp.nav_finances", also: ["parent-receipt"] },
   { name: "Booking", icon: "pi pi-comments", label: "pp.nav_consultations", also: ["BookingTime", "more", "request-meeting", "Edit"] },
   { name: "parent-schedule", icon: "pi pi-calendar", label: "pp.nav_schedule" },
+  { name: "parent-messages", icon: "pi pi-comment", label: "comm.parent_menu", badge: "messages" },
 ];
 const MORE = [
   { name: "parent-generalizations", icon: "pi pi-home", label: "pp.nav_generalizations", badge: "generalizations" },
@@ -49,9 +52,10 @@ const moreActive = computed(() => sheetItems.value.some(isActive));
 const counts = computed(() => ({
   generalizations: Number(pendingCounts.parent.generalizations ?? portal.pending.generalizations ?? 0),
   unread: portal.unread,
+  messages: Number(pendingCounts.parent.unread_messages ?? 0),
 }));
 const badgeOf = (item) => (item.badge ? counts.value[item.badge] : 0);
-const moreBadge = computed(() => MORE.reduce((sum, item) => sum + badgeOf(item), 0));
+const moreBadge = computed(() => sheetItems.value.reduce((sum, item) => sum + badgeOf(item), 0));
 
 const firstName = computed(() => parentStore.user?.fname || portal.home?.parent?.fname || "");
 const avatar = computed(() => parentStore.user?.image || portal.home?.parent?.image || null);
@@ -74,10 +78,13 @@ onMounted(() => {
   stopCounts = watchPendingCounts("parent");
   portal.load();
   parentStore.getUser().catch(() => {});
+  // Calls ring on every page of the portal.
+  startCommunication("parent").catch(() => {});
 });
 onBeforeUnmount(() => {
   document.body.classList.remove("pp-has-tabbar");
   stopCounts?.();
+  stopCommunication();
 });
 // A new page starts at its top; the counters are read again (a page may have changed them).
 watch(() => route.fullPath, () => {
@@ -99,6 +106,7 @@ watch(() => route.fullPath, () => {
           <router-link v-for="item in NAV" :key="item.name" :to="{ name: item.name }" class="pp-nav-link" :class="{ 'is-active': isActive(item) }">
             <i :class="item.icon" aria-hidden="true" />
             <span>{{ $t(item.label) }}</span>
+            <span v-if="badgeOf(item)" class="pp-badge">{{ badgeOf(item) }}</span>
           </router-link>
           <router-link :to="{ name: 'parent-generalizations' }" class="pp-nav-link" :class="{ 'is-active': route.name === 'parent-generalizations' }">
             <i class="pi pi-home" aria-hidden="true" />
@@ -190,6 +198,7 @@ watch(() => route.fullPath, () => {
         </button>
       </div>
     </Drawer>
+    <CallLayer />
   </div>
 </template>
 
