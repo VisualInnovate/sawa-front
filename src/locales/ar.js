@@ -141,7 +141,7 @@ export default {
   manage_user_roles: "تحكم ادوار المستخدم",
   bookings: "الحجوزات",
   selectgender: " الجنس",
-  home: "الرئيسيه",
+  home: "الرئيسية",
   Profile_personly: "الملف الشخصي",
   latest_developments: "اخر المستجدات ",
   bookings: "الحجوزات",
