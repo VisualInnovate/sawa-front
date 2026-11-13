@@ -1,4 +1,7 @@
 export default {
+  sidebar_mine: "مساحتي",
+  sidebar_children: "الأطفال والبرامج",
+  sidebar_management: "الإدارة",
   barrier_wording: { paragraph: "الفقرة", name_hint: "داخل الفقرة ليظهر الاسم الأول للطفل، وتُعرض صيغة الذكر أو الأنثى بحسب جنس الطفل.", example_hint: "في مكان المثال داخل الفقرة: أثناء التقييم يُستبدل في الإجابات بقوسين بداخلهما المثال الذي يكتبه المقيّم." },
   change_password: "تغيير كلمة المرور",
   current_password: "كلمة المرور الحالية",
@@ -7210,5 +7213,20 @@ export default {
     max_mb_hint: "بالميغابايت.",
     mimes: "أنواع الملفات المسموحة",
     mimes_hint: "اضغط على النوع لتشغيله أو إيقافه.",
+  },
+  mnu: {
+    parents: "الاستقبال والأهل",
+    programs: "البرامج والجلسات",
+    rooms: "القاعات والنشاطات",
+    transport: "النقل",
+    eval_tools: "أدوات التقييم",
+    eval_settings: "إعدادات التقييمات",
+    program_settings: "إعدادات البرامج",
+    hr_attendance: "الدوام والإجازات",
+    hr_pay: "الرواتب والمستحقات",
+    hr_hiring: "التوظيف",
+    hr_contracts: "العقود",
+    structure: "الهيكل والصلاحيات",
+    site_settings: "إعدادات الموقع",
   },
 };

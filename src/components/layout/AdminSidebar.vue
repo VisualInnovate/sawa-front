@@ -14,19 +14,19 @@ const home = computed(() => props.items.find((item) => item.key === "home"));
 const sections = computed(() =>
   [
     {
-      key: "team",
-      label: "sidebar_team",
-      keys: ["admin", "parents", "therapeutic", "accounting", "consulting"],
+      key: "mine",
+      label: "sidebar_mine",
+      keys: ["communication", "my-schedule", "approvals-inbox", "approvals", "my-evaluations", "my-evaluation-results", "my-generalizations", "my-interviews", "bus-trips"],
     },
     {
       key: "care",
-      label: "sidebar_care",
-      keys: ["my-schedule", "bus-trips", "approvals", "approvals-inbox", "my-interviews", "my-evaluations", "my-evaluation-results", "evaluations", "evaluation-reports", "inputs", "rooms"],
+      label: "sidebar_children",
+      keys: ["parents", "consulting", "evaluations", "therapeutic", "rooms", "transport"],
     },
     {
       key: "system",
-      label: "sidebar_system",
-      keys: ["hr", "notifications", "site"],
+      label: "sidebar_management",
+      keys: ["accounting", "hr", "admin", "notifications", "site"],
     },
   ]
     .map((section) => ({
