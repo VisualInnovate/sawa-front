@@ -91,6 +91,7 @@ const testWa = () => call("watest", async () => {
 
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString(lang.value === "en" ? "en-GB" : "ar-JO-u-nu-latn", { dateStyle: "short", timeStyle: "short" }) : "—");
 const everyLabel = (n) => (n < 60 ? t("sysset.every_min", { n }) : t("sysset.every_hour", { n: n / 60 }));
+const intervalOptions = computed(() => (data.value?.intervals ?? []).map((n) => ({ value: n, label: everyLabel(n) })));
 const schedulerOk = computed(() => data.value?.scheduler?.heartbeat && Date.now() - new Date(data.value.scheduler.heartbeat).getTime() < 10 * 60 * 1000);
 const audienceTag = { parents: "warn", staff: "info", system: "secondary", management: "success" };
 onMounted(load);
@@ -148,7 +149,7 @@ onMounted(load);
             </small>
           </div>
           <div class="sa-task-when">
-            <Select v-if="task.kind === 'interval'" v-model="task.every" :options="data.intervals" :optionLabel="(n) => everyLabel(n)" :disabled="!canEdit" class="sa-select" />
+            <Select v-if="task.kind === 'interval'" v-model="task.every" :options="intervalOptions" optionLabel="label" optionValue="value" :disabled="!canEdit" class="sa-select" />
             <InputText v-else v-model="task.at" type="time" :disabled="!canEdit" class="sa-time" />
             <Button v-if="canEdit" v-tooltip.top="$t('sysset.run_now')" icon="pi pi-play" text rounded :loading="busy === 'run:' + task.key" :aria-label="$t('sysset.run_now')" @click="runTask(task)" />
           </div>
