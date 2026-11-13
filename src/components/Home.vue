@@ -13,6 +13,7 @@ import AssistantChat from "./assistant/AssistantChat.vue";
 import CallLayer from "./communication/CallLayer.vue";
 import CommFab from "./communication/CommFab.vue";
 import { startCommunication, stopCommunication } from "../utils/communication";
+import { recordVisit } from "../utils/menuFocus";
 import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
 import { loadCurrency } from "../utils/accounting";
@@ -48,6 +49,8 @@ const closeOnMobile = () => {
   if (!isDesktop.value) sidebarOpen.value = false;
 };
 watch(() => route.fullPath, closeOnMobile);
+// Counted for «الأكثر استخداماً» in the sidebar.
+watch(() => route.name, (name) => recordVisit(name), { immediate: true });
 
 let stopCounts = null;
 onMounted(async () => {

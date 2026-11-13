@@ -1,4 +1,5 @@
 <script setup>
+import { menuFocus, frequentPages } from "@/utils/menuFocus";
 import { computed, nextTick, ref, watch } from "vue";
 import SideMenuItem from "./SideMenuItem.vue";
 
@@ -11,32 +12,31 @@ const props = defineProps({
 const emit = defineEmits(["toggle", "close", "expand", "navigate"]);
 const sidebar = ref(null);
 const home = computed(() => props.items.find((item) => item.key === "home"));
-const sections = computed(() =>
-  [
-    {
-      key: "mine",
-      label: "sidebar_mine",
-      keys: ["communication", "my-schedule", "approvals-inbox", "approvals", "my-evaluations", "my-evaluation-results", "my-generalizations", "my-interviews", "bus-trips"],
-    },
-    {
-      key: "care",
-      label: "sidebar_children",
-      keys: ["parents", "consulting", "evaluations", "therapeutic", "rooms", "transport"],
-    },
-    {
-      key: "system",
-      label: "sidebar_management",
-      keys: ["accounting", "hr", "admin", "notifications", "site"],
-    },
-  ]
-    .map((section) => ({
-      ...section,
-      items: section.keys.flatMap((key) =>
-        props.items.filter((item) => item.key === key),
-      ),
-    }))
-    .filter((section) => section.items.length),
-);
+const SECTIONS = {
+  mine: { label: "sidebar_mine", keys: ["communication", "my-schedule", "approvals-inbox", "approvals", "my-evaluations", "my-evaluation-results", "my-generalizations", "my-interviews", "bus-trips"] },
+  care: { label: "sidebar_children", keys: ["parents", "consulting", "evaluations", "therapeutic", "rooms", "transport"] },
+  system: { label: "sidebar_management", keys: ["accounting", "hr", "admin", "notifications", "site"] },
+};
+// The person's role orders the sections and the groups (its main group opens at start); their most used pages come first.
+const sections = computed(() => {
+  const focus = menuFocus();
+  const rank = (key) => {
+    const i = focus.groups.indexOf(key);
+    return i === -1 ? 100 : i;
+  };
+  const built = focus.sections.map((key) => {
+    const section = SECTIONS[key];
+    const items = section.keys
+      .flatMap((k) => props.items.filter((item) => item.key === k))
+      .map((item, index) => ({ item: item.key === focus.open ? { ...item, startOpen: true } : item, index }))
+      .sort((a, b) => rank(a.item.key) - rank(b.item.key) || a.index - b.index)
+      .map((x) => x.item);
+    return { key, label: section.label, items };
+  });
+  const frequent = frequentPages(props.items);
+  if (frequent.length) built.unshift({ key: "frequent", label: "sidebar_frequent", items: frequent });
+  return built.filter((section) => section.items.length);
+});
 
 watch(
   () => props.visible,

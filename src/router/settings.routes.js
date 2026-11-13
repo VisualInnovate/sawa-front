@@ -14,6 +14,13 @@ const rolesRoutes = [
     meta: { permission: ["ai assistant list", "ai assistant edit"] },
     component: () => import("@/views/assistant/Settings.vue"),
   },
+  // «تحليل النتائج»: the evaluations' outcomes across the academy (aggregates only).
+  {
+    path: "outcomes-analysis",
+    name: "outcomes-analysis",
+    meta: { permission: ["outcomes analysis list"] },
+    component: () => import("@/views/analytics/Outcomes.vue"),
+  },
   // «إعدادات التواصل»: the chat's and the calls' settings, the services' state and the month's use.
   {
     path: "communication-settings",

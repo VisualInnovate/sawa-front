@@ -68,6 +68,7 @@ export const buildMenu = () => [
       { label: "ea_title", to: { name: "evaluation-approvals" }, perm: ["evaluation approval list", "evaluation approval edit"], badge: "evaluation_approvals" },
       { label: "ewf.distribution", to: { name: "evaluation-distribution" }, perm: ["evaluation approval edit", "evaluation approval list"] },
       { label: "ereport.menu", to: { name: "evaluation-reports" }, perm: "evaluation reports list" },
+      { label: "oa.title", to: { name: "outcomes-analysis" }, perm: "outcomes analysis list" },
       {
         key: "evaluation-tools",
         label: "mnu.eval_tools",
