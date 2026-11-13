@@ -71,9 +71,31 @@ onMounted(() => {
 });
 onBeforeUnmount(() => clearInterval(timer));
 
+// Who the page speaks to: the system admin (an overview, nothing is theirs), the general manager, a head / deputy, staff.
+const context = computed(() => data.value?.context ?? { kind: "staff" });
+const isAdmin = computed(() => context.value.kind === "admin");
+const title = computed(() => (isAdmin.value ? t("tasks.title_admin") : t("tasks.title")));
+const hint = computed(() => {
+  const c = context.value;
+  if (c.kind === "admin") return t("tasks.hint_admin");
+  if (c.kind === "general_manager") return t("tasks.hint_gm");
+  if (c.kind === "head") return t("tasks.hint_head", { departments: c.heads.join("، ") });
+  if (c.kind === "deputy") return t("tasks.hint_deputy", { departments: c.deputy_of.join("، ") });
+  if (c.role) return c.department ? t("tasks.hint_role_dept", { role: c.role, department: c.department }) : t("tasks.hint_role", { role: c.role });
+  return t("tasks.hint");
+});
+const oversight = computed(() => data.value?.oversight ?? []);
+function oversightLabel(row) {
+  if (row.key === "flow") return [flowName(row.flow), row.stage].filter(Boolean).join(" — ");
+  if (row.key === "distribute") return t("tasks.ov_distribute", { department: row.department ?? "—" });
+  if (row.key === "old_evaluations") return t("tasks.ov_old_evaluations");
+  if (row.key === "toilet_consults") return `${t("tasks.o_toilet_consults")} — ${t(`toilet.dept_${row.department}`)}`;
+  return t(`tasks.o_${row.key}`);
+}
+
 const summary = computed(() => data.value?.summary ?? { late: 0, approvals: 0, to_do: 0, returned: 0 });
 const myEvaluations = computed(() => (props.hideMyEvaluations ? [] : data.value?.my_evaluations ?? []));
-const nothing = computed(() => data.value && !summary.value.approvals && !summary.value.returned && !data.value.distribute.length
+const nothing = computed(() => data.value && !isAdmin.value && !summary.value.approvals && !summary.value.returned && !data.value.distribute.length
   && !myEvaluations.value.length && !data.value.others.length);
 
 // The deadline: «متبقي 5 س» or «متأخر 2 س».
@@ -108,15 +130,15 @@ async function decide(row, decision, note = null) {
   <section class="mt">
     <header class="mt-head">
       <div>
-        <h2><i class="pi pi-inbox" aria-hidden="true" /> {{ $t("tasks.title") }}</h2>
-        <p>{{ $t("tasks.hint") }}</p>
+        <h2><i :class="isAdmin ? 'pi pi-chart-bar' : 'pi pi-inbox'" aria-hidden="true" /> {{ title }}</h2>
+        <p>{{ hint }}</p>
       </div>
       <Button icon="pi pi-refresh" text rounded :loading="loading" :aria-label="$t('tasks.refresh')" v-tooltip.top="$t('tasks.refresh')" @click="load" />
     </header>
 
     <div v-if="loading && !data" class="mt-loading"><i class="pi pi-spin pi-spinner" /></div>
     <template v-else-if="data">
-      <div class="mt-counters">
+      <div v-if="!isAdmin || summary.approvals || summary.returned || summary.to_do" class="mt-counters">
         <div class="mt-counter is-late" :class="{ 'is-zero': !summary.late }"><b>{{ summary.late }}</b><span>{{ $t("tasks.c_late") }}</span></div>
         <div class="mt-counter" :class="{ 'is-zero': !summary.approvals }"><b>{{ summary.approvals }}</b><span>{{ $t("tasks.c_approvals") }}</span></div>
         <div class="mt-counter" :class="{ 'is-zero': !summary.to_do }"><b>{{ summary.to_do }}</b><span>{{ $t("tasks.c_to_do") }}</span></div>
@@ -275,6 +297,34 @@ async function decide(row, decision, note = null) {
           </li>
         </ul>
       </div>
+
+      <!-- The academy's open work and whom it waits for (the system admin first, the general manager after their own). -->
+      <div v-if="data.oversight" class="mt-block mt-oversight" :class="{ 'is-first': isAdmin }">
+        <h3>
+          <button type="button" class="mt-fold" :aria-expanded="isOpen('oversight')" @click="toggle('oversight')">
+            <i :class="isOpen('oversight') ? 'pi pi-chevron-down' : 'pi pi-chevron-left'" aria-hidden="true" />
+            {{ $t("tasks.s_oversight") }} <Tag :value="oversight.reduce((n, r) => n + r.count, 0)" severity="secondary" rounded />
+          </button>
+        </h3>
+        <template v-if="isOpen('oversight')">
+          <p v-if="!oversight.length" class="mt-empty"><i class="pi pi-check-circle" aria-hidden="true" /> {{ $t("tasks.ov_nothing") }}</p>
+          <ul v-else class="mt-list">
+            <li v-for="(row, i) in oversight" :key="i" class="mt-row">
+              <div class="mt-main">
+                <b>{{ oversightLabel(row) }}</b>
+                <small>
+                  <Tag :value="String(row.count)" rounded />
+                  <Tag v-if="row.late" :value="$t('tasks.ov_late', { n: row.late })" severity="danger" rounded class="ms-1" />
+                  <span v-if="row.waiting_for.length"> {{ $t("tasks.waiting_for", { names: row.waiting_for.join("، ") }) }}</span>
+                  <span v-else-if="row.nobody" class="text-red-600"> {{ $t("tasks.ov_nobody") }}</span>
+                  <span v-if="row.since"> · {{ $t("tasks.since", { at: row.since }) }}</span>
+                </small>
+              </div>
+              <div class="mt-actions"><Button v-if="row.url" icon="pi pi-external-link" :label="$t('tasks.open')" size="small" text @click="open(row)" /></div>
+            </li>
+          </ul>
+        </template>
+      </div>
     </template>
 
     <Dialog :visible="!!rejecting" @update:visible="(v) => { if (!v) rejecting = null; }" modal :header="$t('tasks.reject')" :style="{ width: '28rem' }" :breakpoints="{ '600px': '95vw' }">
@@ -290,6 +340,9 @@ async function decide(row, decision, note = null) {
 
 <style scoped>
 .mt { width: 100%; background: #fff; border: 1px solid rgb(var(--bp-135c65) / 0.14); border-radius: 18px; box-shadow: 0 8px 24px rgb(var(--bp-135c65) / 0.07); padding: 1.25rem 1.5rem; }
+.mt { display: flex; flex-direction: column; }
+.mt-head { order: -2; }
+.mt-oversight.is-first { order: -1; margin-top: 1rem; }
 .mt-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
 .mt-head h2 { margin: 0 0 .25rem; font-size: 1.2rem; font-weight: 700; color: rgb(var(--bp-135c65)); }
 .mt-head p { margin: 0; color: #6b7280; font-size: .9rem; }
