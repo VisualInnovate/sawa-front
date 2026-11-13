@@ -1,4 +1,6 @@
 export default {
+  sessions_none_period: "لا توجد جلسات في هذه الفترة (قد تكون عطلة نهاية الأسبوع).",
+  sessions_show_next: "عرض أقرب جلسات: {day}",
   sidebar_frequent: "الأكثر استخداماً",
   sidebar_mine: "مساحتي",
   sidebar_children: "الأطفال والبرامج",
