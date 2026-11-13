@@ -1,0 +1,21 @@
+name: Prune branches
+
+# Run by hand: deletes every branch except main (merged work lives on main).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete branches other than main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/$REPO/branches" --paginate --jq '.[].name' | grep -vx main | while read -r b; do
+            gh api -X DELETE "repos/$REPO/git/refs/heads/$b" && echo "deleted $b"
+          done
