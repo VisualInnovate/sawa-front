@@ -6,6 +6,7 @@
 // again every minute while it is visible.
 import axios from "axios";
 import MyTasks from "@/components/tasks/MyTasks.vue";
+import DashboardPeriod from "@/components/dashboard/DashboardPeriod.vue";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -309,6 +310,9 @@ const hasUpcoming = computed(() => (upcoming.value.holidays?.length || upcoming.
 
     <!-- «ما ينتظرك»: what waits for this account, before the statistics. -->
     <MyTasks class="dsh-tasks" collapsed />
+
+    <!-- The period filter: what happened between two dates, against the period before. -->
+    <DashboardPeriod />
 
     <div v-if="upcoming.holiday_today" class="dsh-banner" role="status">
       <i class="pi pi-sun" aria-hidden="true" /> {{ $t("dash.holiday_today", { title: upcoming.holiday_today.title }) }}
