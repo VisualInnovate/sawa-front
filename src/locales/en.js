@@ -1,4 +1,8 @@
 export default {
+  session_admin_title: "Start as system admin",
+  session_admin_warn: "You are entering with the system admin's rights: this session belongs to «{therapist}», not to you.",
+  session_admin_note: "The session is recorded as started, and its log says the admin started it. Use it for testing only.",
+  session_admin_go: "Start as admin",
   sessions_none_period: "No sessions in this period (it may be the weekend).",
   sessions_show_next: "Show the next sessions: {day}",
   sidebar_frequent: "Most used",

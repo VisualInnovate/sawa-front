@@ -1,4 +1,8 @@
 export default {
+  session_admin_title: "بدء الجلسة كمدير نظام",
+  session_admin_warn: "أنت تدخل بصلاحية مدير النظام (أدمن): هذه الجلسة للمعالج «{therapist}» وليست جلستك.",
+  session_admin_note: "ستُسجَّل الجلسة كأنها بدأت، ويُكتب في سجلها أن المدير هو من بدأها. استخدمها للاختبار فقط.",
+  session_admin_go: "ابدأ كمدير نظام",
   sessions_none_period: "لا توجد جلسات في هذه الفترة (قد تكون عطلة نهاية الأسبوع).",
   sessions_show_next: "عرض أقرب جلسات: {day}",
   sidebar_frequent: "الأكثر استخداماً",
