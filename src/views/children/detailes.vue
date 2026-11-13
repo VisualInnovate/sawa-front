@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen">
     <ChildTaps></ChildTaps>
-    <div class="sawa-card max-w-4xl mx-auto rounded-lg shadow-lg overflow-hidden">
+    <div class="sawa-card max-w-4xl mx-auto rounded-lg shadow-lg overflow-hidden cs-details-info">
       <div class="p-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
         <h2 class="text-3xl font-bold">{{ $t("معلومات الطفل") }}</h2>
       </div>
@@ -47,6 +47,7 @@
         </div>
       </div>
     </div>
+    <CaseStudyCard v-if="child_id" :key="child_id" :child-id="child_id" />
   </div>
 </template>
 
@@ -54,10 +55,11 @@
 import axios from "axios";
 import { useStorage } from "@vueuse/core";
 import ChildTaps from '../../components/ChildTaps.vue'
+import CaseStudyCard from '../../components/caseStudy/CaseStudyCard.vue'
 import { useToast } from 'primevue/usetoast'
 
 export default {
-  components: { ChildTaps },
+  components: { ChildTaps, CaseStudyCard },
   data() {
     return {
       child_id: useStorage("child_id", Number),
@@ -86,5 +88,11 @@ export default {
 </script>
 
 <style scoped>
-/* Add any custom styles here if needed */
+/* Printing the case study: only its answers leave the page. */
+@media print {
+  .cs-details-info,
+  :deep(.nav-tabs) {
+    display: none !important;
+  }
+}
 </style>
