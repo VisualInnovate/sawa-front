@@ -28,6 +28,13 @@ const rolesRoutes = [
     meta: { permission: ["communication settings list", "communication settings edit"] },
     component: () => import("@/views/communication/CommunicationSettings.vue"),
   },
+  // «المهام التلقائية والتنبيهات»: the automatic tasks, the alerts, the WhatsApp connection and the system's health.
+  {
+    path: "system-automation",
+    name: "system-automation",
+    meta: { permission: ["system settings list", "system settings edit"] },
+    component: () => import("@/views/system/SystemAutomation.vue"),
+  },
 ];
 
 export default {

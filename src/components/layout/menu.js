@@ -256,6 +256,7 @@ export const buildMenu = () => [
       { label: "mnu.site_settings", to: { name: "settings" }, perm: "settings list" },
       { label: "ai.menu", to: { name: "ai-assistant" }, perm: ["ai assistant list", "ai assistant edit"] },
       { label: "cset.menu", to: { name: "communication-settings" }, perm: ["communication settings list", "communication settings edit"] },
+      { label: "sysset.menu", to: { name: "system-automation" }, perm: ["system settings list", "system settings edit"] },
     ],
   },
 ];
