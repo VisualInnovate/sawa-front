@@ -9,6 +9,7 @@ import { useParentPortalStore } from "@/stores/ParentPortal";
 import { pendingCounts, watchPendingCounts } from "@/utils/pendingCounts";
 import LocaleSelect from "@/components/LocaleSelect.vue";
 import CallLayer from "@/components/communication/CallLayer.vue";
+import CommFab from "@/components/communication/CommFab.vue";
 import { startCommunication, stopCommunication } from "@/utils/communication";
 import logo from "@/views/frontend/views/main/images/logo.png";
 
@@ -75,6 +76,8 @@ const logout = async () => {
 let stopCounts = null;
 onMounted(() => {
   document.body.classList.add("pp-has-tabbar");
+  // «Add to Home Screen» from the portal opens the portal.
+  document.querySelector('link[rel="manifest"]')?.setAttribute("href", "/manifest-parent.webmanifest");
   stopCounts = watchPendingCounts("parent");
   portal.load();
   parentStore.getUser().catch(() => {});
@@ -199,6 +202,7 @@ watch(() => route.fullPath, () => {
       </div>
     </Drawer>
     <CallLayer />
+    <CommFab side="parent" />
   </div>
 </template>
 
