@@ -29,3 +29,17 @@
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/x-javascript application/json application/manifest+json image/svg+xml font/ttf font/otf application/vnd.ms-fontobject
 </IfModule>
+
+# Protective headers: HTTPS only, no MIME guessing, no framing by other sites, and a careful referrer.
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(self), microphone=(self), geolocation=(self), payment=()"
+</IfModule>
+
+# Source and config files are never served (only the built app is).
+<FilesMatch "^(package(-lock)?\.json|vite\.config\.js|\.env.*|composer\.(json|lock))$">
+  Require all denied
+</FilesMatch>
