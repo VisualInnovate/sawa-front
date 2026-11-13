@@ -11,7 +11,7 @@ import Textarea from "primevue/textarea";
 import {
   comm, startCommunication, openConversation, closeConversation, loadOlder, sendMessage, deleteMessage, isMine,
   createDirect, createGroup, addMembers, removeMember, contacts, whisperTyping, startCall, downloadAttachment,
-  attachmentUrl, callHistory, myKey,
+  attachmentUrl, callHistory, myKey, receipt,
 } from "@/utils/communication";
 
 const props = defineProps({ side: { type: String, required: true } });
@@ -260,6 +260,8 @@ onMounted(async () => {
   }
   if (route.query.c) open(Number(route.query.c));
 });
+// Opened again from a notification while on this page.
+watch(() => route.query.c, (c) => c && Number(c) !== comm.activeId && open(Number(c)));
 onBeforeUnmount(() => closeConversation());
 </script>
 
@@ -290,7 +292,10 @@ onBeforeUnmount(() => closeConversation());
               <span class="cm-item__body">
                 <span class="cm-item__top"><strong>{{ c.title }}</strong><small>{{ fmtDay(c.last_message_at) }}</small></span>
                 <span class="cm-item__bottom">
-                  <span class="cm-item__preview">{{ preview(c.last_message) || c.subtitle }}</span>
+                  <span class="cm-item__preview">
+                    <span v-if="receipt(c.last_message, c)" class="cm-ticks" :class="receipt(c.last_message, c)"><i class="pi pi-check" /><i v-if="receipt(c.last_message, c) === 'read'" class="pi pi-check" /></span>
+                    {{ preview(c.last_message) || c.subtitle }}
+                  </span>
                   <span v-if="c.unread" class="cm-badge">{{ c.unread }}</span>
                 </span>
               </span>
@@ -353,6 +358,9 @@ onBeforeUnmount(() => closeConversation());
                 </template>
                 <span class="cm-meta">
                   {{ fmtTime(m.created_at) }}
+                  <span v-if="receipt(m, active)" class="cm-ticks" :class="receipt(m, active)" :title="$t(`comm.receipt_${receipt(m, active)}`)">
+                    <i class="pi pi-check" /><i v-if="receipt(m, active) === 'read'" class="pi pi-check" />
+                  </span>
                   <button v-if="isMine(m) && !m.deleted" class="cm-del" :aria-label="$t('comm.delete')" @click="deleteMessage(comm.activeId, m.id)"><i class="pi pi-trash" /></button>
                 </span>
               </div>
@@ -457,6 +465,10 @@ onBeforeUnmount(() => closeConversation());
 .cm-sender { color: #135c65; font-weight: 700; display: block; }
 .cm-text { white-space: pre-wrap; word-break: break-word; margin: 0; }
 .cm-meta { display: flex; justify-content: flex-end; gap: 6px; font-size: 0.72rem; color: #94a3b8; align-items: center; }
+.cm-ticks { display: inline-flex; color: #94a3b8; }
+.cm-ticks i { font-size: 0.7rem; font-weight: 700; }
+.cm-ticks i + i { margin-inline-start: -0.35rem; }
+.cm-ticks.read { color: #0ea5e9; }
 .cm-del { opacity: 0; transition: opacity 0.15s; }
 .cm-bubble:hover .cm-del { opacity: 1; }
 .cm-deleted { color: #94a3b8; }

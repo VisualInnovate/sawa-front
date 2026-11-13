@@ -66,6 +66,8 @@ export const useAuthStore = defineStore("Auth", {
       }
     },
      handleLogout() {
+      // This browser stops ringing for the account (a shared device).
+      import("@/utils/push").then((m) => m.unsubscribePush());
       this.resetAuthStore();
       this.router.push({ name: "Login" });
        axios.post("/api/logout");

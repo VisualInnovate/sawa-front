@@ -11,6 +11,7 @@ import AdminSidebar from "./layout/AdminSidebar.vue";
 import NotificationBell from "./layout/NotificationBell.vue";
 import AssistantChat from "./assistant/AssistantChat.vue";
 import CallLayer from "./communication/CallLayer.vue";
+import CommFab from "./communication/CommFab.vue";
 import { startCommunication, stopCommunication } from "../utils/communication";
 import { buildMenu, visibleMenu } from "./layout/menu";
 import { watchPendingCounts } from "../utils/pendingCounts";
@@ -111,6 +112,7 @@ onBeforeUnmount(() => {
     <!-- «مساعد سوا» for employees: within their own permissions, opens the pages of their menu. -->
     <AssistantChat v-if="authStore.authenticated" kind="dashboard" />
     <CallLayer v-if="authStore.authenticated" />
+    <CommFab v-if="authStore.authenticated" side="staff" />
   </div>
 </template>
 

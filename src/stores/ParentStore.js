@@ -160,6 +160,7 @@ export const useParentStore = defineStore("parentStore", {
     },
 
     async logout() {
+      import("@/utils/push").then((m) => m.unsubscribePush());
       try {
         await axios.post("/api/parent/logout");
       } finally {
