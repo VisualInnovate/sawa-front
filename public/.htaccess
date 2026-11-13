@@ -4,6 +4,9 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+  # The old test address of this build is closed: only the dashboard's own domain serves it.
+  RewriteCond %{HTTP_HOST} ^attendance\.test\.sawa\.academy$ [NC]
+  RewriteRule ^ - [F,L]
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
