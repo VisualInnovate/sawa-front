@@ -413,6 +413,8 @@ export default {
       });
     },
     updateEvents() {
+      // Without an employee the server would send every event of every employee (8 MB, 8 seconds).
+      if (!this.event.employee_id) return;
       axios
         .get(
           `/api/event-calendar?employee_id=${this.event.employee_id}&type=${this.event.type}`
