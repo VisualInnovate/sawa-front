@@ -4020,7 +4020,7 @@ export default {
     welcome_message: "Welcome message",
     knowledge: "What the assistant knows about the academy",
     knowledge_hint: "The assistant reads this in every new conversation: services, how to register and book, opening hours, contact…",
-    no_api_key: "The Claude key is not set on the server (ANTHROPIC_API_KEY in .env); the assistant will not answer until it is.",
+    no_api_key: "The assistant service key is not set on the server (ASSISTANT_API_KEY in .env); the assistant will not answer until it is.",
     applies_new: "Changes to the text, questions and tools apply to new conversations; switching a tool or page off applies to every conversation at once.",
     spent_month: "This assistant this month",
     spent_all: "All assistants this month",
