@@ -326,10 +326,6 @@ onBeforeUnmount(() => {
 @keyframes run-down { from { transform: translateY(-100%); } to { transform: none; } }
 @keyframes run-pulse { 50% { box-shadow: 0 0 0 8px rgb(239 68 68 / .15); } }
 @media (max-width: 1100px) { .run-step-label, .run-who small { display: none; } .run-steps { gap: 1.2rem; } }
-</style>
-
-<style>
-html.run-no-scroll, html.run-no-scroll body { overflow: hidden; }
 /* Phones and tablets: the bar on two rows (who + actions, then the steps), the page scrolls, panels stack in one
    column, and the break tables scroll sideways instead of squeezing. */
 @media (max-width: 1024px) {
@@ -345,7 +341,9 @@ html.run-no-scroll, html.run-no-scroll body { overflow: hidden; }
   .run-panel { height: auto; }
   .run-breaks { display: flex; flex-direction: column; }
   :deep(.run-panel-head) { flex-wrap: wrap; align-items: flex-start; }
-  .run-break-tables { grid-template-rows: none; }
+  .run-break-tables { grid-template-rows: none; grid-template-columns: minmax(0, 1fr); min-width: 0; }
+  .run-breaks > * { min-width: 0; }
+  .run-break-tables :deep(.bt-table-card) { min-width: 0; max-width: 100%; }
   .run-break-tables :deep(.bt-grid-wrap) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .run-break-tables :deep(.bt-grid) { min-width: 680px; height: auto; font-size: .8rem; }
   .run-break-tables :deep(.bt-grid td) { height: 2.1rem; }
@@ -369,4 +367,8 @@ html.run-no-scroll, html.run-no-scroll body { overflow: hidden; }
   .run-steps { gap: 1.6rem; }
   .run-step-dot { width: 2rem; height: 2rem; }
 }
+</style>
+
+<style>
+html.run-no-scroll, html.run-no-scroll body { overflow: hidden; }
 </style>
