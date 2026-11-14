@@ -1,6 +1,6 @@
 <script setup>
 // «دراسة حالة الطالب» as it was answered: every section with its questions and the parent's answers (reading only).
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import { answerText, isAnswered, isVisible, visibleAnswers } from "@/utils/caseStudy";
 
@@ -11,6 +11,9 @@ const props = defineProps({
   answeredOnly: { type: Boolean, default: false },
 });
 const { t } = useI18n();
+// id => { word_ar, thumb }: the library words picked in the answers (a child's reinforcers), given by the page.
+const cards = inject("caseStudyConcepts", null);
+const cardOf = (item) => (item.concept_id ? cards?.[item.concept_id] ?? null : null);
 
 const view = computed(() => {
   const kept = visibleAnswers(props.sections, props.answers);
@@ -37,7 +40,15 @@ const cell = (column, row) => answerText(column, row[column.key], t("cs.not_yet"
           <dd v-if="row.question.type !== 'rows'" :class="{ 'is-empty': !row.text }">{{ row.text || $t("cs.no_answer") }}</dd>
           <dd v-else-if="!isAnswered(row.value)" class="is-empty">{{ $t("cs.no_answer") }}</dd>
           <dd v-else-if="row.question.columns.length === 1">
-            <ol class="cs-answers__ordered"><li v-for="(item, index) in row.value" :key="index">{{ cell(row.question.columns[0], item) }}</li></ol>
+            <ol class="cs-answers__ordered" :class="{ 'has-pictures': row.value.some((item) => item.concept_id) }">
+              <li v-for="(item, index) in row.value" :key="index">
+                <span class="cs-answers__concept">
+                  <img v-if="cardOf(item)?.thumb" :src="cardOf(item).thumb" alt="" loading="lazy">
+                  <span v-else-if="row.value.some((other) => other.concept_id)" class="cs-answers__written" :title="$t('cs.concept_written')"><i class="pi pi-pencil" aria-hidden="true" /></span>
+                  {{ cell(row.question.columns[0], item) }}
+                </span>
+              </li>
+            </ol>
           </dd>
           <dd v-else class="cs-answers__table-wrap">
             <table class="cs-answers__table">
@@ -116,6 +127,30 @@ const cell = (column, row) => answerText(column, row[column.key], t("cs.not_yet"
 .cs-answers__ordered {
   margin: 0;
   padding-inline-start: 1.25rem;
+}
+.cs-answers__ordered.has-pictures li {
+  margin-bottom: 0.4rem;
+}
+.cs-answers__concept {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  vertical-align: middle;
+}
+.cs-answers__concept img,
+.cs-answers__written {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--cs-soft, #f6f3f2);
+}
+.cs-answers__written {
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.85rem;
+  color: var(--cs-muted, #9a9295);
 }
 .cs-answers__table-wrap {
   overflow-x: auto;

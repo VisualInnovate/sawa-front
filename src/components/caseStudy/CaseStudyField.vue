@@ -2,6 +2,7 @@
 // One question of «دراسة حالة الطالب», answered the way its type says: a choice (radio / list / several), a number,
 // an age in months, a time, writing, or a small table of lines the parent adds.
 import { computed } from "vue";
+import ConceptPicker from "./ConceptPicker.vue";
 import { isVisible, NOT_YET } from "@/utils/caseStudy";
 
 const props = defineProps({
@@ -36,6 +37,15 @@ function setCell(index, key, value) {
   const next = rows.value.map((row) => ({ ...row }));
   if (value === null) delete next[index][key];
   else next[index][key] = value;
+  set(next);
+}
+// Several cells of a line at once (a library word is its text and its concept).
+function patchRow(index, patch) {
+  const next = rows.value.map((row) => ({ ...row }));
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null || value === undefined) delete next[index][key];
+    else next[index][key] = value;
+  }
   set(next);
 }
 function move(index, by) {
@@ -94,8 +104,12 @@ function move(index, by) {
       <div v-for="(row, index) in rows" :key="index" class="cs-row">
         <span v-if="question.numbered" class="cs-row__n">{{ index + 1 }}</span>
         <div class="cs-row__cells" :class="{ 'cs-row__cells--one': question.columns.length === 1 }">
-          <CaseStudyField v-for="column in question.columns.filter((item) => isVisible(item, row))" :key="column.key" :question="column" :name="`${question.key}-${index}-${column.key}`" compact
-            :model-value="row[column.key] ?? null" @update:model-value="setCell(index, column.key, $event)" />
+          <template v-for="column in question.columns.filter((item) => isVisible(item, row))" :key="column.key">
+            <ConceptPicker v-if="column.type === 'concept'" :row="row" :field="column.key" :label="`${column.label} ${index + 1}`"
+              :input-id="`cs-${question.key}-${index}-${column.key}`" @update="patchRow(index, $event)" />
+            <CaseStudyField v-else :question="column" :name="`${question.key}-${index}-${column.key}`" compact
+              :model-value="row[column.key] ?? null" @update:model-value="setCell(index, column.key, $event)" />
+          </template>
         </div>
         <div class="cs-row__tools">
           <template v-if="question.numbered">

@@ -1,7 +1,7 @@
 <script setup>
 // «دراسة حالة الطالب» on the child's details: send the form to the parents' portal, follow whether they filled it in,
 // and read (and print) what they answered — right where it was sent from.
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, provide, reactive, ref } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
@@ -22,6 +22,9 @@ const child = ref(null);
 const hasParent = ref(true);
 const openId = ref(null);
 const confirm = ref(null); // { kind: 'delete' | 'reopen', row }
+// The library words the parent picked as reinforcers, with their pictures (CaseStudyAnswers reads them).
+const concepts = reactive({});
+provide("caseStudyConcepts", concepts);
 
 const canSend = computed(() => can("child edit"));
 const waiting = computed(() => rows.value.find((row) => row.status === "sent") ?? null);
@@ -37,6 +40,7 @@ async function load() {
     rows.value = data.data ?? [];
     child.value = data.child;
     hasParent.value = data.has_parent;
+    Object.assign(concepts, data.concepts ?? {});
     // The newest filled-in form is open straight away.
     openId.value = rows.value.find((row) => row.status === "submitted")?.id ?? null;
   } catch {

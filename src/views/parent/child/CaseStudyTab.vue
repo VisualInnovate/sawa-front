@@ -1,7 +1,7 @@
 <script setup>
 // «دراسة حالة الطالب» in the parents' portal: the form the academy sent for this child, one part at a time. What is
 // filled in is saved as a draft on every step; handing it in closes it and shows it on the child's file at the academy.
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, provide, reactive, ref } from "vue";
 import axios from "axios";
 import { useToast } from "primevue/usetoast";
 import { useI18n } from "vue-i18n";
@@ -26,6 +26,9 @@ const saving = ref(false);
 const dirty = ref(false);
 const confirming = ref(false);
 const top = ref(null);
+// The library words picked as reinforcers, with their pictures (ConceptPicker / CaseStudyAnswers read them).
+const concepts = reactive({});
+provide("caseStudyConcepts", concepts);
 
 const open = computed(() => study.value?.status === "sent");
 const section = computed(() => sections.value[step.value] ?? null);
@@ -46,6 +49,7 @@ async function load() {
     sections.value = data.form ?? [];
     study.value = data.data;
     answers.value = { ...(data.data?.answers ?? {}) };
+    Object.assign(concepts, data.concepts ?? {});
     dirty.value = false;
   } catch {
     failed.value = true;
@@ -68,6 +72,7 @@ async function save(submit = false) {
   try {
     const { data } = await axios.put(`/api/parent/child/${props.childId}/case-study/${study.value.id}`, { answers: kept.value, submit });
     study.value = data.data;
+    Object.assign(concepts, data.concepts ?? {});
     answers.value = { ...data.data.answers };
     dirty.value = false;
     if (submit) {
