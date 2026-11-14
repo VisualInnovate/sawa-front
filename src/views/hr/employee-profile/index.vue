@@ -96,7 +96,8 @@ const print = () => printSettlement(t, { record: eos.value, employee: employee.v
         <div class="flex-1 min-w-0">
           <div class="flex flex-wrap items-center gap-2">
             <h1 class="m-0 text-xl font-bold">{{ employee.name }}</h1>
-            <Tag v-if="archived" severity="secondary" icon="pi pi-box" :value="$t('prof.archived')" />
+            <Tag v-if="archived && eos?.status === 'done'" severity="warn" icon="pi pi-sign-out" :value="$t('hremp.former', { date: date(eos.last_day) })" />
+            <Tag v-else-if="archived" severity="secondary" icon="pi pi-box" :value="$t('prof.archived')" />
             <Tag v-else-if="eos?.status === 'scheduled'" severity="danger" icon="pi pi-sign-out" :value="$t('prof.leaving_on', { date: date(eos.last_day) })" />
             <Tag v-if="summary.onboarding && !employee.onboarded_at && !archived" severity="info" icon="pi pi-list-check"
               :value="$t('prof.onboarding_tag', { done: summary.onboarding.done, total: summary.onboarding.total })" />

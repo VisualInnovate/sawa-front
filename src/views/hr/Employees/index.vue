@@ -393,6 +393,10 @@ const initFilters = () => {
             <Column field="name" :header="$t('name')" :sortable="true">
               <template #body="slotProps">
                 <span class="font-medium">{{ slotProps.data.name }}</span>
+                <!-- An archived employee whose service ended is a former employee. -->
+                <Tag v-if="slotProps.data.deleted_at" :severity="slotProps.data.service_end ? 'warn' : 'secondary'" class="ms-2"
+                  :icon="slotProps.data.service_end ? 'pi pi-sign-out' : 'pi pi-box'"
+                  :value="slotProps.data.service_end ? $t('hremp.former', { date: slotProps.data.service_end.last_day }) : $t('prof.archived')" />
               </template>
             </Column>
 

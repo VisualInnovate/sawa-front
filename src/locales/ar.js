@@ -5249,6 +5249,7 @@ export default {
   },
   // Employees: archive instead of delete.
   hremp: {
+    former: "موظف سابق · آخر يوم {date}",
     show_archived: "عرض المؤرشفين",
     restore: "استعادة",
     restored: "تمت استعادة {name} مع كل سجلاته",

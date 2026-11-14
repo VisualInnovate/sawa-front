@@ -5192,6 +5192,7 @@ export default {
   },
   // Employees: archive instead of delete.
   hremp: {
+    former: "Former employee · last day {date}",
     show_archived: "Show archived",
     restore: "Restore",
     restored: "{name} restored with all their records",
