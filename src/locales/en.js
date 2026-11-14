@@ -3260,6 +3260,9 @@ export default {
     position_held: "{n} employees hold this title. Move them to another one first.",
   },
   org: {
+    name_only: "Name only",
+    name_only_hint: "Groups people under its name, with no head, deputy or approval path, and receives no evaluations.",
+    name_only_switch: "Name only (no head or deputy)",
     menu: "Org structure",
     log_menu: "Structure & permissions log",
     title: "Org structure",

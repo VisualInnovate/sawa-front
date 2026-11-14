@@ -69,6 +69,20 @@ async function saveLeaders(department) {
   }
 }
 
+// «اسم فقط»: the department keeps its people, without a head, deputy or approval path.
+async function setNameOnly(department, on) {
+  saving.value = `n${department.id}`;
+  try {
+    data.value = (await axios.put(`api/org-structure/departments/${department.id}/name-only`, { name_only: on })).data.data;
+    leaders.value = Object.fromEntries(data.value.departments.map((d) => [d.id, { head: d.head?.id ?? null, deputy: d.deputy?.id ?? null }]));
+    toast.add({ severity: "success", summary: t("success_message"), detail: t("org.saved"), life: 2500 });
+  } catch (e) {
+    toast.add({ severity: "error", summary: t("error"), detail: errorText(e), life: 5000 });
+  } finally {
+    saving.value = null;
+  }
+}
+
 // The positions as a tree; several tops hang under the academy.
 const tree = computed(() => {
   const byParent = {};
@@ -310,17 +324,20 @@ onBeforeUnmount(() => {
           <small class="text-color-secondary">
             {{ $t("org.counts", { employees: d.employees, therapists: d.therapists }) }}
           </small>
-          <Tag v-if="!d.head" :value="$t('org.flow_inactive')" severity="warn" class="self-start" v-tooltip.top="$t('org.no_head_hint')" />
+          <Tag v-if="d.name_only" :value="$t('org.name_only')" severity="info" class="self-start" v-tooltip.top="$t('org.name_only_hint')" />
+          <Tag v-else-if="!d.head" :value="$t('org.flow_inactive')" severity="warn" class="self-start" v-tooltip.top="$t('org.no_head_hint')" />
 
-          <label :for="`head-${d.id}`" class="text-sm">{{ $t("org.head") }}</label>
-          <Select v-if="editable" :inputId="`head-${d.id}`" v-model="leaders[d.id].head" :options="data.employees" optionLabel="name" optionValue="id"
-            filter showClear :placeholder="$t('org.pick_head')" class="w-full" />
-          <span v-else>{{ d.head?.name ?? "—" }}</span>
+          <template v-if="!d.name_only">
+            <label :for="`head-${d.id}`" class="text-sm">{{ $t("org.head") }}</label>
+            <Select v-if="editable" :inputId="`head-${d.id}`" v-model="leaders[d.id].head" :options="data.employees" optionLabel="name" optionValue="id"
+              filter showClear :placeholder="$t('org.pick_head')" class="w-full" />
+            <span v-else>{{ d.head?.name ?? "—" }}</span>
 
-          <label :for="`deputy-${d.id}`" class="text-sm">{{ $t("org.deputy") }}</label>
-          <Select v-if="editable" :inputId="`deputy-${d.id}`" v-model="leaders[d.id].deputy" :options="deputyOptions(d)" optionLabel="name" optionValue="id"
-            filter showClear :placeholder="$t('org.pick_deputy')" class="w-full" />
-          <span v-else>{{ d.deputy?.name ?? "—" }}</span>
+            <label :for="`deputy-${d.id}`" class="text-sm">{{ $t("org.deputy") }}</label>
+            <Select v-if="editable" :inputId="`deputy-${d.id}`" v-model="leaders[d.id].deputy" :options="deputyOptions(d)" optionLabel="name" optionValue="id"
+              filter showClear :placeholder="$t('org.pick_deputy')" class="w-full" />
+            <span v-else>{{ d.deputy?.name ?? "—" }}</span>
+          </template>
 
           <!-- Its people (main department here) with their job title. -->
           <details v-if="d.members?.length" class="org-members">
@@ -330,8 +347,12 @@ onBeforeUnmount(() => {
             </ul>
           </details>
           <small v-if="d.old_heads && !d.head" class="text-color-secondary"><i class="pi pi-info-circle" /> {{ $t("org.old_heads_active", { n: d.old_heads }) }}</small>
-          <Button v-if="editable && changed(d)" :label="$t('save')" icon="pi pi-check" size="small" class="self-end"
+          <Button v-if="editable && !d.name_only && changed(d)" :label="$t('save')" icon="pi pi-check" size="small" class="self-end"
             :loading="saving === `d${d.id}`" @click="saveLeaders(d)" />
+          <label v-if="editable" class="org-name-only">
+            <ToggleSwitch :modelValue="d.name_only" :disabled="saving === `n${d.id}`" @update:modelValue="(v) => setNameOnly(d, v)" />
+            <small>{{ $t("org.name_only_switch") }}</small>
+          </label>
         </div>
       </div>
     </section>
@@ -510,4 +531,5 @@ onBeforeUnmount(() => {
 .org-node {
   min-width: 9rem;
 }
+.org-name-only { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem; color: var(--p-text-muted-color, #64748b); }
 </style>
